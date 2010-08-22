@@ -193,7 +193,7 @@ if [ -z $CMD ]; then
     exit 0
 fi
 
-act "command: $CMD for file $FILE"
+func "command: $CMD for file $FILE"
 
 tombdir=${HOME}/.tomb
 tombtab=${tombdir}/fstab
@@ -205,7 +205,7 @@ if ! [ -r ${tombtab} ]; then
     echo "# <file system> <mount point> <type> <options> <key>" >>    ${tombtab}
 fi
 
-format_crypto() {
+format_tomb() {
     notice "Formatting partition $FILE as an encrypted storage"
     act "give it a name:"
     read -s fsname
@@ -261,7 +261,7 @@ format_crypto() {
 	"${FILE} ${tombdir}/`basename ${FILE}` aes-cbc-essiv:sha256 none ${tombdir}/${key}.gpg"
 }
     
-create_crypto() {
+create_tomb() {
 
     if [ -z $SIZE ]; then
 	error "size is not specified, please use -s option when creating a storage file"
@@ -335,23 +335,23 @@ create_crypto() {
     notice "done creating $FILE encrypted storage (using Luks dm-crypt AES/SHA256)"
 }
 
-mount_crypto() {
-    if ! [ -r $FILE ]; then
-	error "file or partition $FILE does not exists"
-	exit 0
-    fi
-    # check if its a file or partition
-    file ${FILE} | grep block > /dev/null
-    if [ $? = 0 ]; then
-	act "$FILE is a partition"
-	mount_crypto_partition
-    else
-	act "$FILE is a loopback file"
-	mount_crypto_file
-    fi
-}
+# mount_crypto() {
+#     if ! [ -r $FILE ]; then
+# 	error "file or partition $FILE does not exists"
+# 	exit 0
+#     fi
+#     # check if its a file or partition
+#     file ${FILE} | grep block > /dev/null
+#     if [ $? = 0 ]; then
+# 	act "$FILE is a partition"
+# 	mount_crypto_partition
+#     else
+# 	act "$FILE is a loopback file"
+# 	mount_crypto_file
+#     fi
+# }
 
-mount_crypto_file() {
+mount_tomb() {
 
     if [ -z $KEY ]; then
 	enc_key="~/.tomb/`basename $FILE`"
@@ -369,7 +369,6 @@ mount_crypto_file() {
 	exit 0
     fi
 
-    act "mounting $FILE on mountpoint $MOUNT over loopback device"
     nstloop=`losetup -f`
     losetup -f ${FILE}
     
@@ -389,7 +388,11 @@ mount_crypto_file() {
 	modprobe dm-crypt
 	modprobe aes-i586
 	
-	mapper="tomb.`date +%s`"
+	# save date of mount in minutes since 1970
+	mapdate="`date +%s`"
+	mapdate="`echo ${mapdate}/60 | bc -l | cut -d. -f1`"
+
+	mapper="tomb.`basename $FILE | cut -d. -f1`.$mapdate.`basename $nstloop`"
 	
 	notice "Password is required for key ${enc_key}"
 	for c in 1 2 3; do
@@ -431,109 +434,24 @@ mount_crypto_file() {
     fi
 }
 
-mount_crypto_partition() {
-
-    if [ -z $KEY ]; then
-	key=`basename $FILE`
-	grep -e "^${FILE}" ${tombtab}
-	if [ $? = 1 ]; then
-	    error "entombed partition $file is not found in ${tombtab}"
-	    error "aborting operation."
-	    exit 1
-	fi
-	if [ -r ${tombdir}/${key}.gpg ]; then
-	    enc_key=${tombdir}/${key}.gpg
-	else
-	    error "secret encryption key for partition ${FILE} not found in ${tombdir}/${key}.gpg"
-	    error "we cannot decrypt files from partition ${FILE}. sorry."
-	    exit 0
-	fi
-    else
-	enc_key=${KEY}
-	act "using key $KEY to unlock"
-    fi
-
-
-    if [ -z $MOUNT ]; then
-	mount=`grep "^${FILE}" ${tombtab} | awk '{print $2}'`
-	if ! [ -x $mount ]; then
-	    error "you need to specify a MOUNTPOINT for the mount command"
-	    exit 1
-	else
-	    MOUNT=$mount
-	fi
-    fi
-
-    notice "mounting entombed partition $FILE on mountpoint $MOUNT"
-
-    if ! [ -x $MOUNT ]; then
-	error "mountpoint $MOUNT does not exist"
-	exit 1
-    fi
-
-    act "check if nest is a an encrypted Luks device"
-    cryptsetup isLuks ${FILE}
-
-    if [ $? = 0 ]; then
-	
-	act "secret encryption key found in ${enc_key}"
-
-	modprobe dm-crypt
-	modprobe aes-i586
-	
-	mapper="tomb.${key}.`date +%s`"
-	
-	notice "Password is required to unlock the encryption key"
-	for c in 1 2 3 4 5; do
-	    
-	    ask_password $c
-	    
-	    cat /var/run/.scolopendro \
-		| gpg --passphrase-fd 0 --no-tty --no-options \
-		      -d ${enc_key} 2>/dev/null \
-		| cryptsetup --key-file - luksOpen ${FILE} ${mapper}
-	    
-	    rm -f /var/run/.scolopendro
-	    
-	    if [ -r /dev/mapper/${mapper} ]; then
-		break;  # password was correct
-	    else 
-	    	dialog --sleep 3 --infobox \
-		"password invalid, `expr 5 - $attempt` attempts left" 10 30
-	    fi
-	
-	done
-	
-	if ! [ -r /dev/mapper/${mapper} ]; then
-	    error "failure mounting the encrypted file"
-	    return # this exits
-	fi
-	
-	act "encrypted storage filesystem check"
-	fsck.ext3 -p -C0 /dev/mapper/${mapper}
-        
-	mount -t ext3 /dev/mapper/${mapper} ${MOUNT}
-
-	notice "encrypted partition $FILE succesfully mounted on $MOUNT"
-	touch ${tombdir}/mtab
-	echo "${FILE} ${MOUNT} ${mapper}" >> ${tombdir}/mtab
-
-    else
-	
-	error "$FILE is not a valid Luks encrypted partition"
-
-    fi
-}
-
-umount_crypto() {
+umount_tomb() {
 
     if [ -z $FILE ]; then
-	# TODO: if only one tomb is mounted, unmount that
-	error "must specify the mountpoint to be unmounted"
-	exit 0
-    fi
 
-    mapper=`mount | grep $FILE | awk '{print $1}'`
+	how_many_tombs="`ls /dev/mapper/tomb* 2>/dev/null | wc -w`"
+	if [ $how_many_tombs = 0 ]; then
+	    error "there is no tomb found to be mounted"
+	    return
+	elif [ $how_many_tombs = 1 ]; then
+	    mapper=`ls /dev/mapper/tomb* 2>/dev/null`
+	    FILE=`mount | grep $mapper | awk '{print $3}'`
+	fi
+
+    else
+
+	mapper=`mount | grep $FILE | awk '{print $1}'`
+
+    fi
 
     if [ "$mapper" = "" ]; then
 	error "$FILE is not mounted"
@@ -560,6 +478,8 @@ umount_crypto() {
 	exit 0
     fi
 
+    losetup -d "`echo $mapper | cut -d. -f4`"
+
     # echo ${nstloop} | grep loop 1>/dev/null 2>/dev/null
     # # if it's a loopback then we need to do losetup -d
     # if [ $? = 0 ]; then
@@ -577,11 +497,11 @@ umount_crypto() {
 	
 
 case "$CMD" in
-    create)   create_crypto ;;
-    format)   format_crypto ;;
-    mount)    mount_crypto  ;;
-    umount)   umount_crypto ;;
-    unmount)  umount_crypto ;;
+    create)   create_tomb ;;
+    format)   format_tomb ;;
+    mount)    mount_tomb  ;;
+    umount)   umount_tomb ;;
+    unmount)  umount_tomb ;;
     *) error "command \"$CMD\" not recognized"
 	act "try -h for help"
 	;;
