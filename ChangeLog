@@ -1,0 +1,29 @@
+
+August 2010
+
+	The first public version of Tomb is released to the public
+
+
+During the year 2009
+
+	Tomb has been extensively tested, perfectioned and documented
+	after being used by its author
+
+Sometime in 2007
+
+	mknest was refactored to work on the Debian distribution and since
+	then renamed to Tomb. dyne:bolic specific dependencies where
+	removed, keeping Zsh as the shell script it is written with.
+
+
+
+Back in 2005
+
+	The "nesting" feature of dyne:bolic GNU/Linux lets users encrypt
+	their home in a file, using a shell script and a graphical
+	interface called Taschino.
+
+	Taschino included a shell script wrapping cryptsetup to encrypt
+	loopback mounted partitions with the algo AES-256 (cbc-essiv
+	mode): this script was called 'mkNest' and its the ancestor of
+	Tomb.
