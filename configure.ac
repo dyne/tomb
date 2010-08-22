@@ -2,7 +2,6 @@ dnl ==============================================================
 dnl Process this file with autoconf to produce a configure script.
 dnl ==============================================================
 
-dnl require autoconf 2.62 (AS_ECHO/AS_ECHO_N)
 AC_PREREQ([2.60])
 
 AC_INIT([Tomb],[0.8.0],[jaromil@dyne.org],[tomb])
@@ -48,7 +47,7 @@ case "$host_os" in
   *)
     AC_MSG_RESULT([$host_os?!])
     AC_MSG_ERROR([[
-[!] Your system architecture is not supported by AutOrg.
+[!] Your system architecture is not supported by Tomb.
 ]], 0)
   ;;
 esac
@@ -63,23 +62,12 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AC_CONFIG_SRCDIR([src/tomb])
 
-dnl Checks for programs.
+dnl Checks for reguired programs.
 AC_PROG_INSTALL
-AC_PROG_LN_S
-AC_PROG_MAKE_SET
 
-dnl compatibility with older libtool
-dnl m4_ifndef([LT_INIT], [AC_PROG_RANLIB])
+AC_CHECK_PROG(have_zsh,zsh,yes,no)
+AC_CHECK_PROG(have_cryptsetup,cryptsetup,yes,no)
 
-
-dnl versioning info for libtool
-DYNE_CURRENT=0
-DYNE_REVISION=0
-DYNE_AGE=0
-DYNE_VERSION_INFO="$DYNE_CURRENT:$DYNE_REVISION:$DYNE_AGE"
-dnl Note this is the ABI version which is not the same as our actual
-dnl library version
-AC_SUBST(DYNE_VERSION_INFO)
 
 
 dnl ###########################################################################
@@ -99,9 +87,12 @@ AC_CONFIG_FILES([
 Makefile
 src/Makefile
 ])
-
 AC_OUTPUT
 
+dnl function to print verbose configure options only if V=1 is passed to
+dnl configure
+AC_DEFUN([VRB],
+         AS_IF([test x"$V" == x1], INFO([$1])))
 
 dnl autoconf < 2.63 compatibility
 m4_ifndef([AS_VAR_APPEND],
@@ -109,6 +100,11 @@ m4_ifndef([AS_VAR_APPEND],
 
 dnl convenience function so that INFO messages go to config.log and to stdout,
 dnl useful when debugging user problems only config.log is needed
+AC_DEFUN([INFO],
+         AS_ECHO(["$1"]) >&AS_MESSAGE_LOG_FD
+         AS_ECHO(["$1"]) >&AS_MESSAGE_FD)
 
 dnl as above, but no newline at the end
-
+AC_DEFUN([INFO_N],
+         AS_ECHO_N(["$1"]) >&AS_MESSAGE_LOG_FD
+         AS_ECHO_N(["$1"]) >&AS_MESSAGE_FD)
