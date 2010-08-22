@@ -63,22 +63,11 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_SRCDIR([src/tomb])
 
 dnl Checks for reguired programs.
+AC_PROG_CC
 AC_PROG_INSTALL
 
 AC_CHECK_PROG(have_zsh,zsh,yes,no)
 AC_CHECK_PROG(have_cryptsetup,cryptsetup,yes,no)
-
-
-
-dnl ###########################################################################
-dnl ###### now about compile time paths
-AC_MSG_CHECKING([which installation prefix to use])
-if test "x${prefix}" = "xNONE"; then
-   prefix=`pwd`
-fi
-AC_MSG_RESULT([${prefix}])
-TOMB_PATH="${prefix}"
-AC_SUBST(TOMB_PATH)
 
 
 
