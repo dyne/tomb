@@ -12,7 +12,84 @@ X~     `?888888hx~  ...ue888b   .888: x888  x888.   8888   .
 '    "*88888888*      'Y"         `~    "    `"`    `%888*%"
         ^"***"`                                        "`
 
-     a simple commandline tool to manage encrypted storage
-                                                    by Jaromil
+  a simple commandline tool to manage encrypted storage  v.0.8
+            http://crypto.dyne.org                  by Jaromil
 
+Tomb aims to be a free and open source system for easy encryption and
+backup of personal files, written in code that is easy to review and
+links shared OS components.
 
+At present time, Tomb consists of a simple shell script (Zsh) that
+uses using standard filesystem tools (GNU) and and the cryptographic
+API of the Linux kernel (cryptsetup and LUKS).
+
+In future Tomb will grow to facilitate proper use of encryption by
+unexperienced users, probably also prividing a graphical user
+interface, as well a porting to Apple/OSX.
+
+** Who needs Tomb
+
+Our target community are desktop users with no time to click around,
+sometimes using old or borrowed computers, operating in places
+endangered by conflict where a leak of personal data can be a threat.
+
+If you don't own a laptop then it's possible to go around with a USB
+stick and borrow computers, still leaving no trace and keeping your
+data safe during transports. Tomb aims to facilitate all this and to
+be interoperable across popular GNU/Linux operating systems.
+
+** How does it works
+
+Tomb generates 'key files' and protects them with a password choosen
+by the user; the key files are then used to encrypt loop-back mounted
+partitions, like single files containing a filesystem inside: this way
+keys can be separated from data for safer transports when
+required.
+
+** Stage of development
+
+Tomb is an evolution of the 'mknest' tool developed for the dyne:bolic
+GNU/Linux distribution, which is used by its 'nesting' mechanism to
+encrypt the Home directory of users.
+
+As such, it uses well tested and reviewed routines and its shell code
+is pretty readable. The name transition from 'mknest' to 'tomb' is
+marked by the adaptation of mknest to work on the Debian operating
+system, used by its author in the past 3 years.
+
+** How can you help
+
+Code is pretty short and readable: start looking around it and the
+materials found in doc/ which are good pointers at security measures
+to be further implemented.
+
+Best of all at this stage would be if you like to code a Graphical
+Interface, possibly in QT4, that would use the script to make simple
+operations: something pretty easy and intuitive, with a few big
+buttons, for unexperienced users, can be a good start.
+
+** Aren't there enough encryption tools already?
+
+I've felt the urgency of publishing Tomb for other operating systems
+than dyne:bolic since the current situation with TrueCrypt[1] is far
+from optimal.  TrueCrypt makes use of statically linked libraries, its
+code is not hosted on CVS nor considered free[2] by GNU/Linux
+distributions because of liability reasons, see Debian[3], Ubuntu[4],
+Suse[5], Gentoo[6] and Fedora[7].
+
+Seen from this perspective, Tomb is intended as a rewrite of most
+functionalities offered by TrueCrypt in a new application, confident
+it won't take much relying on previous experience and aiming at:
+ 
+ - short and readable code, linking shared libs and common components 
+ - easy graphical interface, simple for ad-hoc (DIY-deniable)
+ - transparent and distributed development hosted using GIT
+ - GNU General Public License v3
+
+[1] [http://en.wikipedia.org/wiki/TrueCrypt]
+[2] [http://lists.freedesktop.org/archives/distributions/2008-October/000276.html]
+[3] [http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=364034]
+[4] [https://bugs.edge.launchpad.net/ubuntu/+bug/109701]
+[5] [http://lists.opensuse.org/opensuse-buildservice/2008-10/msg00055.html]
+[6] [http://bugs.gentoo.org/show\_bug.cgi?id=241650]
+[7] [https://fedoraproject.org/wiki/ForbiddenItems#TrueCrypt]
