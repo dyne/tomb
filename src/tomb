@@ -136,51 +136,39 @@ PATH=/usr/bin:/usr/sbin:/bin:/sbin
 
 notice "Tomb  -  simple commandline tool for encrypted storage"
 act "version $VERSION ($DATE) by Denis J. Roio <jaromil@dyne.org>"
-#act "invoked with args \"$*\" "
-#act "running on `date`"
+act ""
+func "invoked with args \"$*\" "
+func "running on `date`"
 
 OPTS=`getopt -o hvs:k: -n 'tomb' -- "$@"`
 
 while true; do
     case "$1" in
 	-h)
-	    notice "SYNOPSIS: tomb [options] COMMAND [FILE|PARTITION] [MOUNTPOINT|NAME]"
-            notice "OPTIONS:"
+	    notice "Syntax: tomb [options] command [file] [mountpoint]"
+	    act ""
+            notice "Options:"
 	    act "-h     print this help"
 	    act "-v     print out the version information for this tool"
 	    act "-s     size of the storage file when creating one (in MBytes)"
 	    act "-k     path key to be used for decryption (defaults in ~/.tomb)"
-            notice "COMMANDS:"
+	    act ""
+            notice "Commands:"
             act "format     format a PARTITION with NAME and generate keys"
 	    act "create     create a new encrypted storage FILE and keys"
 	    act "mount      mount an existing storage FILE on MOUNTPOINT"
             act "umount     unmounts a mounted storage MOUNTPOINT"
 	    echo; exit 2 ;;
 	-v)
-	    act "(c)2007 by Denis Rojo <jaromil@dyne.org> as part of dyne:bolic"
-	    act "thanks to Gabriele \"Asbesto Molesto\" Zaverio"
-	    act "for suggesting the perfect name for this tool"
-	    echo
-	    act " TOMB"
-	    echo
-	    act "This source code is free software; you can redistribute it and/or"
-	    act "modify it under the terms of the GNU Public License as published"
-	    act "by the Free Software Foundation; either version 3 of the License,"
-	    act "or (at your option) any later version."
-	    echo
-	    act "This source code is distributed in the hope that it will be useful,"
-	    act "but WITHOUT ANY WARRANTY; without even the implied warranty of"
-	    act "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
-	    act "Please refer to the GNU Public License for more details."
-	    echo
-	    act "You should have received a copy of the GNU Public License along with"
-	    act "this source code; if not, write to:"
-	    act "Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA."
-	    echo
-	    act "in case you like to port this tool to any other operating system"
-	    act "please notice us if you succeed, or if you have difficulties you"
-	    act "cannot overcome: http://dyne.org"
-	    echo; exit 2 ;;
+	    # print out the GPL license in this file
+	    cat $0 | awk '
+BEGIN { license=0 }
+/^# This source/  { license=1 }
+{ if(license==1) print " " $0 }
+/MA 02139, USA.$/ { license=0 }
+'
+	    act ""
+	    exit 0 ;;
         -s) SIZE=$2; shift 2 ;;
 	-k) KEY=$2; shift 2 ;;
 	--) shift; break ;;
@@ -495,9 +483,7 @@ umount_tomb() {
     # 	fi
     # fi
 
-    if [ $? = 1 ]; then
-       notice "crypt storage ${mapper} unmounted from $FILE"
-    fi
+    notice "crypt storage ${mapper} unmounted"
 }
 	
 
