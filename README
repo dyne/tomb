@@ -23,9 +23,9 @@ Tomb aims to be a free and open source system for easy encryption and
 backup of personal files, written in code that is easy to review and
 links shared OS components.
 
-At present time, Tomb consists of a simple shell script (Zsh) that
-uses using standard filesystem tools (GNU) and and the cryptographic
-API of the Linux kernel (cryptsetup and LUKS).
+At present time, Tomb consists of a simple shell script (Zsh) using
+standard filesystem tools (GNU) and the cryptographic API of the Linux
+kernel (cryptsetup and LUKS).
 
 In future Tomb will grow to facilitate proper use of encryption by
 unexperienced users, probably also prividing a graphical user
