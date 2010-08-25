@@ -442,11 +442,22 @@ umount_tomb() {
 	elif [ $how_many_tombs = 1 ]; then
 	    mapper=`ls /dev/mapper/tomb* 2>/dev/null`
 	    FILE=`mount | grep $mapper | awk '{print $3}'`
+	else
+	    error "too many tombs mounted, please specify which to unmount:"
+	    ls -l /dev/mapper/tomb*
+	    echo
+	    return
 	fi
 
     else
 
-	mapper=`mount | grep $FILE | awk '{print $1}'`
+	if ! [ -r $FILE ]; then
+	    error "tomb not found: $FILE"
+	    error "please specify the full /dev/mapper/tomb* path"
+	    return
+	fi
+	mapper=$FILE
+	FILE=`mount | grep $mapper | awk '{print $3}'`
 
     fi
 
