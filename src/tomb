@@ -30,12 +30,22 @@
 VERSION=0.8
 DATE=Aug/2010
 
+PATH=/usr/bin:/usr/sbin:/bin:/sbin   
+
 # standard output message routines
 # it's always useful to wrap them, in case we change behaviour later
 notice() { echo "[*] $1"; }
 act() { echo " .  $1"; }
 error() { echo "[!] $1"; }
 func() { if [ $DEBUG ]; then echo "[D] $1"; fi }
+
+# which dd command to use
+which dcfldd > /dev/null
+if [ $? = 0 ]; then
+    DD="dcfldd"
+else
+    DD=dd
+fi
 
 # user interface (just to ask the password)
 ask_password() {
@@ -63,76 +73,7 @@ ask_password() {
 	    
 }
 
-# checks if a file is writable
-# differs from -w coz returns true if does not exist but can be created
-is_writable() { # arg: filename
 
-  file=$1
-  writable=false
-
-  if [ -r $file ]; then # file exists
-
-    if [ -w $file ]; then writable=true; fi
-
-  else # file does not exist
-
-    touch $file 1>/dev/null 2>/dev/null
-    if [ $? = 0 ]; then
-      writable=true
-      rm $file
-    fi 
-
-  fi
-
-  if [ x$writable = xtrue ]; then
-    echo "true"
-  else
-    echo "false"
-  fi
-}
-
-# appends a new line to a text file, if not duplicate
-# it sorts alphabetically the original order of line entries
-# defines the APPEND_FILE_CHANGED variable if file changes
-append_line() { # args:   file    new-line
-
-    # first check if the file is writable
-    # this also creates the file if doesn't exists
-    if [ `is_writable $1` = false ]; then
-      error "file $1 is not writable"
-      error "can't insert line: $2"
-      return
-    fi
-
-    tempfile="`basename $1`.append.tmp"
-
-    # create a temporary file and add the line there
-    cp $1 /tmp/$tempfile
-    echo "$2" >> /tmp/$tempfile
-
-    # sort and uniq the temp file to temp.2
-    cat /tmp/$tempfile | sort | uniq > /tmp/${tempfile}.2
-
-    SIZE1="`ls -l /tmp/$tempfile | awk '{print $5}'`"
-    SIZE2="`ls -l /tmp/${tempfile}.2 | awk '{print $5}'`"
-    if [ $SIZE != $SIZE ]; then
-      # delete the original
-      rm -f $1
-      # replace it
-      cp -f /tmp/${tempfile}.2 $1
-      # signal the change
-      APPEND_FILE_CHANGED=true
-    fi
-
-    # remove the temporary files
-    rm -f /tmp/$tempfile
-    rm -f /tmp/${tempfile}.2
-     
-    # and we are done
-}
-
-
-PATH=/usr/bin:/usr/sbin:/bin:/sbin   
 
 ############################
 ### main()
@@ -144,12 +85,18 @@ act ""
 func "invoked with args \"$*\" "
 func "running on `date`"
 
+id | grep root > /dev/null
+if [ $? != 0 ]; then
+    error "This program must be run as root to produce results"
+    exit 1
+fi
+
 OPTS=`getopt -o hvs:k: -n 'tomb' -- "$@"`
 
 while true; do
     case "$1" in
 	-h)
-	    notice "Syntax: tomb [options] command [file] [mountpoint]"
+	    notice "Syntax: tomb [options] command [file] [mountpoint | size]"
 	    act ""
             notice "Options:"
 	    act "-h     print this help"
@@ -158,7 +105,6 @@ while true; do
 	    act "-k     path key to be used for decryption (defaults in ~/.tomb)"
 	    act ""
             notice "Commands:"
-            act "format     format a PARTITION with NAME and generate keys"
 	    act "create     create a new encrypted storage FILE and keys"
 	    act "mount      mount an existing storage FILE on MOUNTPOINT"
             act "umount     unmounts a mounted storage MOUNTPOINT"
@@ -196,80 +142,27 @@ if ! [ -r ${tombtab} ]; then
     echo "# format here is similar to the system wide fstab" >>       ${tombtab}
     echo "# <file system> <mount point> <type> <options> <key>" >>    ${tombtab}
 fi
-
-format_tomb() {
-    notice "Formatting partition $FILE as an encrypted storage"
-    act "give it a name:"
-    read -s fsname
-
-    act "  `fdisk -l | grep ${FILE}`"
-    mkdir -p /tmp/tomb
-
-    modprobe dm-crypt
-    modprobe aes-i586
-
-    act "Generating secret key..."
-    key="`basename ${FILE}`"
-    mkdir -p ${HOME}/.tomb
-    
-    cat /dev/urandom | strings | dd bs=1 count=256 of=/tmp/tomb/secret
-    notice "Setup your secret key file ${key}.gpg"
-	# here user is prompted for password
-    gpg -o "${HOME}/.tomb/${key}.gpg" --no-options --openpgp -c -a /tmp/tomb/secret
-    while [ $? = 2 ]; do
-	gpg -o "${HOME}/.tomb/${key}.gpg" --no-options --openpgp -c -a /tmp/tomb/secret
-    done
-    
-    act "formatting Luks partition"
-        # dm-crypt only supports sha1
-        # but we can use aes-cbc-essiv with sha256 for better security
-        # see http://clemens.endorphin.org/LinuxHDEncSettings
-    cryptsetup --cipher aes-cbc-essiv:sha256 --key-size 256 luksFormat ${FILE} /tmp/tomb/secret
-    if ! [ $? = 0 ]; then
-	act "operation aborted."
-	exit 0
-    fi
-   
-    
-    cryptsetup --key-file /tmp/tomb/secret --batch-mode --cipher aes luksOpen ${FILE} tomb.tmp
-
-    rm -f /tmp/tomb/secret
-
-    cryptsetup luksDump ${FILE}
-
-    mkfs.ext3 -F -L "${fsname}" -j /dev/mapper/tomb.tmp
-
-    if [ $? = 0 ]; then
-	act "OK, encrypted partition succesfully formatted with Ext3 filesystem"
-    else
-	act "error formatting ${FILE} Ext3 filesystem"
-    fi
-
-    cryptsetup luksClose tomb.tmp
-
-    notice "done formatting $FILE encrypted partition (using Luks dm-crypt AES/SHA256)"
-    act "encrypted key stored in file ${tombdir}/${key}.gpg"
-    append_line ${tombtab} \
-	"${FILE} ${tombdir}/`basename ${FILE}` aes-cbc-essiv:sha256 none ${tombdir}/${key}.gpg"
-}
     
 create_tomb() {
 
+    notice "Creating a new tomb in ${FILE}"
     if [ -z $SIZE ]; then
-	error "size is not specified, please use -s option when creating a storage file"
-	exit 0
-    else
-	act "size set to $SIZE MB"
+	if [ $MOUNT ]; then
+	    SIZE=$MOUNT
+	else
+	    error "size is not specified, please use -s option when creating a tomb"
+	    exit 0
+	fi
     fi
     
     SIZE_4k=`expr \( $SIZE \* 1000 \) / 4`
-    notice "generating file of ${SIZE}Mb (${SIZE_4k} blocks of 4Kb)"
-    act "dd if=/dev/zero of=${FILE} bs=4k count=$SIZE_4k"
-#   now with progress bar!
-    dd if=/dev/zero bs=4k count=${SIZE_4k} of=${FILE}
+    act "Generating file of ${SIZE}Mb (${SIZE_4k} blocks of 4Kb)"
+#   TODO: use dd_rescue and/or dcfldd
+    $DD if=/dev/urandom bs=4k count=${SIZE_4k} of=${FILE}
+#    dd if=/dev/urandom bs=4k count=${SIZE_4k} of=${FILE}
     
     if [ $? = 0 -a -e ${FILE} ]; then
-	act "OK: `ls -l ${FILE}`"
+	act "OK: `ls -lh ${FILE}`"
     else
 	error "Error creating the nest file ${FILE} : (dd if=/dev/zero of=${FILE} bs=4k count=$SIZE_4k)"
 	sleep 4
@@ -283,23 +176,26 @@ create_tomb() {
 
     nstloop=`losetup -f` # get the number for next loopback device
     losetup -f ${FILE}   # allocates the next loopback for our file
-
+    keytmp=`tempfile`
     act "Generating secret key..."
-    
-    cat /dev/urandom | strings | dd bs=1 count=256 of=/tmp/tomb/secret
-    clear
+    act "this operation takes time, computer use helps to gather more entropy."
+    cat /dev/random | dd bs=1 count=256 of=${keytmp}
+
     notice "Setup your secret key file ${FILE}.gpg"
-	# here user is prompted for password
-    gpg -o "${FILE}.gpg" --no-options --openpgp -c -a /tmp/tomb/secret
+    # here user is prompted for key password
+    gpg -o "${FILE}.gpg" --no-options --openpgp -c -a ${keytmp}
     while [ $? = 2 ]; do
-	gpg -o "${FILE}.gpg" --no-options --openpgp -c -a /tmp/tomb/secret
+	gpg -o "${FILE}.gpg" --no-options --openpgp -c -a ${keytmp}
     done
     
     act "formatting Luks mapped device"
         # dm-crypt only supports sha1
         # but we can use aes-cbc-essiv with sha256 for better security
         # see http://clemens.endorphin.org/LinuxHDEncSettings
-    cryptsetup --cipher aes-cbc-essiv:sha256 --key-size 256 luksFormat ${nstloop} /tmp/tomb/secret
+    cryptsetup --batch-mode \
+	--cipher aes-cbc-essiv:sha256 --key-size 256 \
+	luksFormat ${nstloop} ${keytmp}
+
     if ! [ $? = 0 ]; then
 	act "operation aborted."
 	exit 0
@@ -307,19 +203,21 @@ create_tomb() {
  
     act "formatting Ext3 filesystem"
     
-    cryptsetup --key-file /tmp/tomb/secret --batch-mode --cipher aes luksOpen ${nstloop} tomb.tmp
+    cryptsetup --key-file ${keytmp} --cipher aes luksOpen ${nstloop} tomb.tmp
 
-    rm -f /tmp/tomb/secret
+    rm -f ${keytmp}
 
-    cryptsetup luksDump ${nstloop}
+#    cryptsetup luksDump ${nstloop}
 
-    mkfs.ext3 -F -j -L "dyne:nest" /dev/mapper/tomb.tmp
+    mkfs.ext3 -q -F -j -L "`hostname`-`date +%s`" /dev/mapper/tomb.tmp
 
     if [ $? = 0 ]; then
 	act "OK, encrypted storage succesfully formatted with Ext3 filesystem"
     else
 	act "error formatting storage file with Ext3 filesystem"
     fi
+
+    sync
 
     cryptsetup luksClose tomb.tmp
     losetup -d ${nstloop}
@@ -346,7 +244,7 @@ create_tomb() {
 mount_tomb() {
 
     if [ -z $KEY ]; then
-	enc_key="~/.tomb/`basename $FILE`"
+	enc_key="`basename ${FILE}.gpg`"
     else
 	enc_key="$KEY"
     fi
@@ -422,7 +320,6 @@ mount_tomb() {
 #  -o rw,noatime,nodev
 
 	notice "encrypted storage $FILE succesfully mounted on $MOUNT"
-	append_line /var/run/tombs "${MOUNT} ${mapper} ${nstloop}"
 
     else
 	
@@ -444,7 +341,7 @@ umount_tomb() {
 	    FILE=`mount | grep $mapper | awk '{print $3}'`
 	else
 	    error "too many tombs mounted, please specify which to unmount:"
-	    ls -l /dev/mapper/tomb*
+	    ls /dev/mapper/tomb*
 	    echo
 	    return
 	fi
