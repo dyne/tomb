@@ -1,0 +1,5 @@
+
+- graphical interface with icon for status in tray
+- system to store part of the key on usb key (use 'ssss')
+- debian package
+- gtk dialog
