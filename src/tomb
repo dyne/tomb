@@ -47,6 +47,60 @@ else
     DD=dd
 fi
 
+# usb auto detect
+# tested on ubuntu 10.04 - please test and patch on other systems if you can
+ask_usbkey() {
+    echo "looking for key $1 on usb"
+    echo -n "please insert your usb key "
+
+    plugged=false
+    while [ "$plugged" != "true" ]; do
+	dmesg | tail -n 12 | grep -q 'new.*USB device'
+	if [ $? = 0 ]; then plugged=true; fi
+	echo -n "."
+	sleep .5
+    done
+
+    echo
+    echo -n "usb key inserted, attaching "
+    
+    attached=false
+    while [ "$attached" != "true" ]; do
+	dmesg | tail -n 3| grep -q 'Attached.*removable disk'
+	if [ $? = 0 ]; then attached=true; fi
+	echo -n "."
+	sleep  .5
+    done
+
+    # get the first partition
+    usbpart=`dmesg |tail -n 4 |awk '/  sd.:/ { print $3 }'`
+
+    echo
+    echo -n "usb key attached, mounting "
+    # what that it is mounted
+    mounted=false
+    while [ "$mounted" != "true" ]; do
+	cat /proc/mounts | tail -n2 | grep -q "^/dev/$usbpart"
+	if [ $? = 0 ]; then mounted=true; fi
+	echo -n "."
+	sleep .5
+    done
+
+    # check where it is mounted
+    usbmount=`cat /proc/mounts | awk -v p=$usbpart '{ if( $1 == "/dev/" p) print $2 }'`
+    echo
+    echo "usb key mounted on $usbmount"
+    # check if the key is there
+    if [ -r ${usbmount}/$1 ]; then
+	echo "key found!"
+	export enc_key="${usbmount}/${1}"
+	return 0
+    else
+	echo "key not found on usb"
+    fi
+    return 1
+}
+
 # user interface (just to ask the password)
 ask_password() {
 
@@ -270,11 +324,15 @@ mount_tomb() {
 	
         # check if key file is present
 	if ! [ -r "${enc_key}" ]; then
-	    error "encryption key ${enc_key} not found"
+	    error "encryption key ${enc_key} not found on disk"
 	    error "use -k option to specify which key to use"
-	    losetup -d ${nstloop}
-	    sleep 5
-	    return
+	    error "or provide a usb key, or press ctrl-c to abort"
+	    ask_usbkey ".tomb/$enc_key"
+	    if ! [ -r "${enc_key}" ]; then
+		losetup -d ${nstloop}
+		sleep 5
+		return
+	    fi
 	fi
 	
 	modprobe dm-crypt
