@@ -50,8 +50,8 @@ fi
 # usb auto detect
 # tested on ubuntu 10.04 - please test and patch on other systems if you can
 ask_usbkey() {
-    echo "looking for key $1 on usb"
-    echo -n "please insert your usb key "
+    notice "looking for key $1 on usb"
+    echo -n " .  please insert your usb key "
 
     plugged=false
     while [ "$plugged" != "true" ]; do
@@ -62,7 +62,7 @@ ask_usbkey() {
     done
 
     echo
-    echo -n "usb key inserted, attaching "
+    echo -n " .  usb key inserted, opening "
     
     attached=false
     while [ "$attached" != "true" ]; do
@@ -75,8 +75,7 @@ ask_usbkey() {
     # get the first partition
     usbpart=`dmesg |tail -n 8 | grep '  sd.:' |cut -d: -f2`
     usbpart=`expr substr $usbpart 1 4`
-    echo
-    echo -n "usb key attached, mounting $usbpart "
+
     # what that it is mounted
     mounted=false
     while [ "$mounted" != "true" ]; do
@@ -89,8 +88,8 @@ ask_usbkey() {
     # check where it is mounted
     usbmount=`cat /proc/mounts | awk -v p=$usbpart '{ if( $1 == "/dev/" p) print $2 }'`
     echo
-    echo "usb key mounted on $usbmount"
-    export usbkey_mount
+    act "usb key mounted on $usbmount"
+    export usbkey_mount=$usbmount
     return 0
 }
 
@@ -127,7 +126,7 @@ ask_password() {
 ###
 
 notice "Tomb  -  simple commandline tool for encrypted storage"
-act "version $VERSION ($DATE) by Denis J. Roio <jaromil@dyne.org>"
+act "version $VERSION ($DATE) by Jaromil @ dyne.org"
 act ""
 func "invoked with args \"$*\" "
 func "running on `date`"
@@ -262,7 +261,7 @@ create_tomb() {
     else
 	mkdir -p ${usbkey_mount}/.tomb
 	cp -v ${FILE}.gpg ${usbkey_mount}/.tomb/
-	chown -R go-rwx ${usbkey_mount}/.tomb
+	chmod -R go-rwx ${usbkey_mount}/.tomb
 	rm -rf ${FILE}.gpg
     fi
 
@@ -328,7 +327,8 @@ mount_tomb() {
 	ask_usbkey
         # returns usbkey_mount, now check if the key is there
 	if [ -r ${usbkey_mount}/.tomb/${enc_key} ]; then
-	    notice "key found on ${usbkey_mount}/.tomb/${enc_key}"
+	    enc_key=${usbkey_mount}/.tomb/${enc_key}
+	    notice "key found on ${enc_key}"
 	else
 	    error "key is missing."
 	    exit 1
