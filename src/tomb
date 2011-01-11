@@ -4,7 +4,7 @@
 #
 # a simple commandline tool to create and operate encrypted storage
 #
-# Copyleft (C) 2007-2010 Denis Roio <jaromil@dyne.org>
+# Copyleft (C) 2007-2011 Denis Roio <jaromil@dyne.org>
 #
 # Tomb development is supported by: NOONE.
 # Would you like to support it and engrave your name on this software?
@@ -27,8 +27,8 @@
 # this source code; if not, write to:
 # Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-VERSION=0.8
-DATE=Aug/2010
+VERSION=0.9
+DATE=Jan/2011
 
 PATH=/usr/bin:/usr/sbin:/bin:/sbin   
 
