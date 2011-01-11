@@ -47,6 +47,14 @@ else
     DD=dd
 fi
 
+# which wipe command to use
+which wipe > /dev/null
+if [ $? = 0 ]; then
+    WIPE="wipe -f -s -q"
+else
+    WIPE="rm -f"
+fi
+
 # usb auto detect
 # tested on ubuntu 10.04 - please test and patch on other systems if you can
 ask_usbkey() {
@@ -250,7 +258,7 @@ create_tomb() {
  
     
     cryptsetup --key-file ${keytmp} --cipher aes luksOpen ${nstloop} tomb.tmp
-    rm -f ${keytmp}
+    $WIPE ${keytmp}
 
     notice "Your tomb is read on ${FILE} and secured with key ${FILE}.gpg"
     act "now plug an external usb device to save the key separately:"
