@@ -292,21 +292,6 @@ create_tomb() {
     notice "done creating $FILE encrypted storage (using Luks dm-crypt AES/SHA256)"
 }
 
-# mount_crypto() {
-#     if ! [ -r $FILE ]; then
-# 	error "file or partition $FILE does not exists"
-# 	exit 0
-#     fi
-#     # check if its a file or partition
-#     file ${FILE} | grep block > /dev/null
-#     if [ $? = 0 ]; then
-# 	act "$FILE is a partition"
-# 	mount_crypto_partition
-#     else
-# 	act "$FILE is a loopback file"
-# 	mount_crypto_file
-#     fi
-# }
 
 mount_tomb() {
 
@@ -392,9 +377,6 @@ mount_tomb() {
     fsck.ext4 -p -C0 /dev/mapper/${mapper}
     
     mount -t ext4 -o rw,noatime,nodev /dev/mapper/${mapper} ${MOUNT}
-# TODO: possible mount options to try out:
-#  -o rw,noatime,nodev,data=writeback,commit=30
-#  -o rw,noatime,nodev
     
     notice "encrypted storage $FILE succesfully mounted on $MOUNT"
     
