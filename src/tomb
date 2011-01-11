@@ -90,15 +90,8 @@ ask_usbkey() {
     usbmount=`cat /proc/mounts | awk -v p=$usbpart '{ if( $1 == "/dev/" p) print $2 }'`
     echo
     echo "usb key mounted on $usbmount"
-    # check if the key is there
-    if [ -r ${usbmount}/$1 ]; then
-	echo "key found!"
-	export enc_key="${usbmount}/${1}"
-	return 0
-    else
-	echo "key not found on usb"
-    fi
-    return 1
+    export usbkey_mount
+    return 0
 }
 
 # user interface (just to ask the password)
@@ -257,20 +250,32 @@ create_tomb() {
 	exit 0
     fi
  
-    act "formatting Ext3 filesystem"
     
     cryptsetup --key-file ${keytmp} --cipher aes luksOpen ${nstloop} tomb.tmp
-
     rm -f ${keytmp}
+
+    notice "Your tomb is read on ${FILE} and secured with key ${FILE}.gpg"
+    act "now plug an external usb device to save the key separately:"
+    ask_usbkey
+    if ! [ -w ${usbkey_mount} ]; then
+	error "cannot save the key in a separate place, move it yourself later."
+    else
+	mkdir -p ${usbkey_mount}/.tomb
+	cp -v ${FILE}.gpg ${usbkey_mount}/.tomb/
+	chown -R go-rwx ${usbkey_mount}/.tomb
+	rm -rf ${FILE}.gpg
+    fi
 
 #    cryptsetup luksDump ${nstloop}
 
-    mkfs.ext3 -q -F -j -L "`hostname`-`date +%s`" /dev/mapper/tomb.tmp
+    act "formatting your Tomb with Ext4 filesystem"
+ 
+    mkfs.ext4 -q -F -j -L "`hostname`-`date +%s`" /dev/mapper/tomb.tmp
 
     if [ $? = 0 ]; then
-	act "OK, encrypted storage succesfully formatted with Ext3 filesystem"
+	act "OK, encrypted storage succesfully formatted"
     else
-	act "error formatting storage file with Ext3 filesystem"
+	act "error formatting Tomb"
     fi
 
     sync
@@ -320,10 +325,13 @@ mount_tomb() {
 	error "encryption key ${enc_key} not found on disk"
 	error "use -k option to specify which key to use"
 	error "or provide a usb key, or press ctrl-c to abort"
-	ask_usbkey ".tomb/$enc_key"
-	if ! [ -r "${enc_key}" ]; then
+	ask_usbkey
+        # returns usbkey_mount, now check if the key is there
+	if [ -r ${usbkey_mount}/.tomb/${enc_key} ]; then
+	    notice "key found on ${usbkey_mount}/.tomb/${enc_key}"
+	else
 	    error "key is missing."
-	    exit 0
+	    exit 1
 	fi
     fi
     
@@ -374,11 +382,9 @@ mount_tomb() {
     fi
     
     act "encrypted storage filesystem check"
-    fsck.ext3 -p -C0 /dev/mapper/${mapper}
+    fsck.ext4 -p -C0 /dev/mapper/${mapper}
     
-    
-    
-    mount -t ext3 /dev/mapper/${mapper} ${MOUNT}
+    mount -t ext4 -o rw,noatime,nodev /dev/mapper/${mapper} ${MOUNT}
 # TODO: possible mount options to try out:
 #  -o rw,noatime,nodev,data=writeback,commit=30
 #  -o rw,noatime,nodev
