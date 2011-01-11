@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 #
 # Tomb
 #
@@ -73,14 +73,14 @@ ask_usbkey() {
     done
 
     # get the first partition
-    usbpart=`dmesg |tail -n 4 |awk '/  sd.:/ { print $3 }'`
-
+    usbpart=`dmesg |tail -n 8 | grep '  sd.:' |cut -d: -f2`
+    usbpart=`expr substr $usbpart 1 4`
     echo
-    echo -n "usb key attached, mounting "
+    echo -n "usb key attached, mounting $usbpart "
     # what that it is mounted
     mounted=false
     while [ "$mounted" != "true" ]; do
-	cat /proc/mounts | tail -n2 | grep -q "^/dev/$usbpart"
+	cat /proc/mounts | tail -n 2 | grep -q $usbpart
 	if [ $? = 0 ]; then mounted=true; fi
 	echo -n "."
 	sleep .5
@@ -315,77 +315,76 @@ mount_tomb() {
 	exit 0
     fi
 
+    # check if key file is present
+    if ! [ -r "${enc_key}" ]; then
+	error "encryption key ${enc_key} not found on disk"
+	error "use -k option to specify which key to use"
+	error "or provide a usb key, or press ctrl-c to abort"
+	ask_usbkey ".tomb/$enc_key"
+	if ! [ -r "${enc_key}" ]; then
+	    error "key is missing."
+	    exit 0
+	fi
+    fi
+    
     nstloop=`losetup -f`
     losetup -f ${FILE}
     
     act "check for a valid LUKS encrypted device"
     cryptsetup isLuks ${nstloop}
-    if [ $? = 0 ]; then # it's a LUKS encrypted nest, see cryptsetup(1)
+    if [ $? != 0 ]; then
+ # is it a LUKS encrypted nest? see cryptsetup(1)
+	error "$FILE is not a valid Luks encrypted storage file"
+	exit 0
+    fi
 	
-        # check if key file is present
-	if ! [ -r "${enc_key}" ]; then
-	    error "encryption key ${enc_key} not found on disk"
-	    error "use -k option to specify which key to use"
-	    error "or provide a usb key, or press ctrl-c to abort"
-	    ask_usbkey ".tomb/$enc_key"
-	    if ! [ -r "${enc_key}" ]; then
-		losetup -d ${nstloop}
-		sleep 5
-		return
-	    fi
+	
+    modprobe dm-crypt
+    modprobe aes-i586
+    
+    # save date of mount in minutes since 1970
+    mapdate="`date +%s`"
+    mapdate="`echo ${mapdate}/60 | bc -l | cut -d. -f1`"
+    
+    mapper="tomb.`basename $FILE | cut -d. -f1`.$mapdate.`basename $nstloop`"
+    
+    notice "Password is required for key ${enc_key}"
+    for c in 1 2 3; do
+	
+	ask_password
+	
+	echo "${scolopendro}" \
+	    | gpg --passphrase-fd 0 --no-tty --no-options \
+	    -d "${enc_key}" 2>/dev/null \
+	    | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+	
+	unset scolopendro
+	
+	if [ -r /dev/mapper/${mapper} ]; then
+	    break;  # password was correct
 	fi
 	
-	modprobe dm-crypt
-	modprobe aes-i586
-	
-	# save date of mount in minutes since 1970
-	mapdate="`date +%s`"
-	mapdate="`echo ${mapdate}/60 | bc -l | cut -d. -f1`"
-
-	mapper="tomb.`basename $FILE | cut -d. -f1`.$mapdate.`basename $nstloop`"
-	
-	notice "Password is required for key ${enc_key}"
-	for c in 1 2 3; do
-	    
-	    ask_password
-
-	    echo "${scolopendro}" \
-		| gpg --passphrase-fd 0 --no-tty --no-options \
-		      -d "${enc_key}" 2>/dev/null \
-		| cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
-	    
-	    unset scolopendro
-	    
-	    if [ -r /dev/mapper/${mapper} ]; then
-		break;  # password was correct
-	    fi
-	    
-	done
-	
-	if ! [ -r /dev/mapper/${mapper} ]; then
-	    error "failure mounting the encrypted file"
-	    tail /var/log/messages
-	    losetup -d ${nstloop}
-	    return
-	fi
-	
-	act "encrypted storage filesystem check"
-	fsck.ext3 -p -C0 /dev/mapper/${mapper}
-
-
-
-	mount -t ext3 /dev/mapper/${mapper} ${MOUNT}
+    done
+    
+    if ! [ -r /dev/mapper/${mapper} ]; then
+	error "failure mounting the encrypted file"
+	tail /var/log/messages
+	losetup -d ${nstloop}
+	return
+    fi
+    
+    act "encrypted storage filesystem check"
+    fsck.ext3 -p -C0 /dev/mapper/${mapper}
+    
+    
+    
+    mount -t ext3 /dev/mapper/${mapper} ${MOUNT}
 # TODO: possible mount options to try out:
 #  -o rw,noatime,nodev,data=writeback,commit=30
 #  -o rw,noatime,nodev
-
-	notice "encrypted storage $FILE succesfully mounted on $MOUNT"
-
-    else
-	
-	error "$FILE is not a valid Luks encrypted storage file"
-
-    fi
+    
+    notice "encrypted storage $FILE succesfully mounted on $MOUNT"
+    
 }
 
 umount_tomb() {
