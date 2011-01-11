@@ -64,12 +64,16 @@ AC_CONFIG_SRCDIR([src/tomb])
 
 dnl Checks for reguired programs.
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_INSTALL
 
 AC_CHECK_PROG(have_zsh,zsh,yes,no)
 AC_CHECK_PROG(have_cryptsetup,cryptsetup,yes,no)
 
-
+PKG_CHECK_MODULES(GTK2, gtk+-2.0 >= 2.16, :,
+  AC_MSG_ERROR([*** Gtk+2 >=2.16 development files not found!]))
+AC_SUBST([GTK2_CFLAGS])
+AC_SUBST([GTK2_LIBS])
 
 dnl alphabetic order on dir/subdir, but Makefile sorts before everything
 AC_CONFIG_FILES([
