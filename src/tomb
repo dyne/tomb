@@ -73,8 +73,7 @@ ask_usbkey() {
     done
 
     # get the first partition
-    usbpart=`dmesg |tail -n 8 | grep '  sd.:' |cut -d: -f2`
-    usbpart=`expr substr $usbpart 1 4`
+    usbpart=`dmesg |tail -n 8 | grep '  sd.:' |cut -d: -f2 |tr -d ' '`
 
     # what that it is mounted
     mounted=false
