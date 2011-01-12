@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 #
 # Tomb
 #
@@ -30,7 +30,7 @@
 VERSION=0.9
 DATE=Jan/2011
 
-PATH=/usr/bin:/usr/sbin:/bin:/sbin   
+# PATH=/usr/bin:/usr/sbin:/bin:/sbin   
 
 # standard output message routines
 # it's always useful to wrap them, in case we change behaviour later
@@ -126,6 +126,11 @@ ask_password() {
 	    
 }
 
+# drop privileges
+exec_as_user() {
+    func "executing as user '$SUDO_USER': ${(f)@}"
+    sudo -u $SUDO_USER ${@} &
+}
 
 
 ############################
@@ -134,16 +139,15 @@ ask_password() {
 
 notice "Tomb  -  simple commandline tool for encrypted storage"
 act "version $VERSION ($DATE) by Jaromil @ dyne.org"
-act ""
-func "invoked with args \"$*\" "
+func "invoked with args \"${(f)@}\" "
 func "running on `date`"
 
 
-OPTS=`getopt -o hvs:k: -n 'tomb' -- "$@"`
-
+OPTS=`getopt -o hvs:k:S -n 'tomb' -- "$@"`
 while true; do
     case "$1" in
 	-h)
+	    act ""
 	    notice "Syntax: tomb [options] command [file] [mountpoint | size]"
 	    act ""
             notice "Options:"
@@ -151,6 +155,7 @@ while true; do
 	    act "-v     print out the version information for this tool"
 	    act "-s     size of the storage file when creating one (in MBytes)"
 	    act "-k     path to the key to use for decryption"
+	    act "-S     acquire super user rights if possible"
 	    act ""
             notice "Commands:"
 	    act "create     create a new encrypted storage FILE and keys"
@@ -159,6 +164,7 @@ while true; do
 	    echo; exit 2 ;;
 	-v)
 	    # print out the GPL license in this file
+	    act ""
 	    cat $0 | awk '
 BEGIN { license=0 }
 /^# This source/  { license=1 }
@@ -167,6 +173,37 @@ BEGIN { license=0 }
 '
 	    act ""
 	    exit 0 ;;
+	-S) GETPRIV=true; shift 1 ;;
+	*)  break ;;
+    esac
+done
+
+id | grep root > /dev/null
+if [ $? != 0 ]; then
+    error "This program must be run as root to produce results"
+    if [ "$GETPRIV" = "true" ]; then
+	which gksu > /dev/null
+	if [ $? = 0 ]; then
+	    act "Using gksu for root execution of 'tomb ${(f)@}'"
+	    gksu "tomb ${(f)@}"
+	    exit $?
+	fi
+	which sudo > /dev/null
+	if [ $? = 0 ]; then
+	    act "Using sudo for root execution of 'tomb ${(f)@}'"
+	    sudo "tomb ${(f)@}"
+	    exit $?
+	fi
+	exit 1
+    else
+	exit 1
+    fi
+fi
+
+# now process the real options
+OPTS=`getopt -o hvs:k:S -n 'tomb' -- "$@"`
+while true; do
+    case "$1" in
         -s) SIZE=$2; shift 2 ;;
 	-k) KEY=$2; shift 2 ;;
 	--) shift; break ;;
@@ -180,11 +217,7 @@ if [ -z $CMD ]; then
     exit 0
 fi
 
-id | grep root > /dev/null
-if [ $? != 0 ]; then
-    error "This program must be run as root to produce results"
-    exit 1
-fi
+
 
 func "command: $CMD for file $FILE"
 
@@ -193,7 +226,7 @@ tombtab=${tombdir}/fstab
 if ! [ -r ${tombtab} ]; then
     act "creating tomb filesystem tab in your home"
     mkdir -p ${HOME}/.tomb
-    echo "# entombed filesystem information, see man tomb" >          ${tombtab}
+    echo "# entombed filesystem information, see man tomb (TODO)" >          ${tombtab}
     echo "# format here is similar to the system wide fstab" >>       ${tombtab}
     echo "# <file system> <mount point> <type> <options> <key>" >>    ${tombtab}
 fi
@@ -379,7 +412,9 @@ mount_tomb() {
     mount -t ext4 -o rw,noatime,nodev /dev/mapper/${mapper} ${MOUNT}
     
     notice "encrypted storage $FILE succesfully mounted on $MOUNT"
-    
+    if [ $DISPLAY ]; then 
+	exec_as_user tomb-gtk ${FILE} ${MOUNT}
+    fi
 }
 
 umount_tomb() {
@@ -388,7 +423,7 @@ umount_tomb() {
 
 	how_many_tombs="`ls /dev/mapper/tomb* 2>/dev/null | wc -w`"
 	if [ $how_many_tombs = 0 ]; then
-	    error "there is no tomb found to be mounted"
+	    error "there is no open tomb to be closed"
 	    return
 	elif [ $how_many_tombs = 1 ]; then
 	    mapper=`ls /dev/mapper/tomb* 2>/dev/null`
@@ -450,6 +485,8 @@ umount_tomb() {
     # fi
 
     notice "crypt storage ${mapper} unmounted"
+    exec_as_user tomb-notify "Tomb closed:" "${FILE}
+Rest In Peace."
 }
 	
 
@@ -457,8 +494,10 @@ case "$CMD" in
     create)   create_tomb ;;
     format)   format_tomb ;;
     mount)    mount_tomb  ;;
+    open)     mount_tomb  ;;
     umount)   umount_tomb ;;
     unmount)  umount_tomb ;;
+    close)    umount_tomb ;;
     *) error "command \"$CMD\" not recognized"
 	act "try -h for help"
 	;;
