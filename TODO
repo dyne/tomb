@@ -1,5 +1,13 @@
 
-- graphical interface with icon for status in tray
-- system to store part of the key on usb key (use 'ssss')
-- debian package
-- gtk dialog
+- debian packaging and mime-type installation
+- system to split keys in parts (ssss)
+- transport keys on qrcodes
+- gtk dialogs and configuration? should keep it minimal!
+- use inotify on /media to watch usb key plug events
+- analyse and show tomb entropy using libdisorder
+- sign and verify tomb script integrity (executed as root)
+- indeep security analysis of possible vulnerabilities
+- bomb the VXXXXXX
+
+to contribute, contact: jaromil@dyne.org
+         ( GPG key on http://pgp.mit.edu )
