@@ -1,0 +1,12 @@
+#!/bin/sh
+# startup wrapper to open tombs
+
+# got a tomb as argument
+if [ $@ ]; then
+    tomb -S open $@
+    exit $?
+fi
+
+tomb -h
+
+sleep 10

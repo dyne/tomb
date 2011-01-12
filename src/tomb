@@ -55,10 +55,11 @@ else
     WIPE="rm -f"
 fi
 
-# usb auto detect
+# usb auto detect using dmesg
 # tested on ubuntu 10.04 - please test and patch on other systems if you can
 ask_usbkey() {
     notice "looking for key $1 on usb"
+    exec_as_user tomb-notify "Tomb needs a key." "Plug your usb key in the computer to open $1" 
     echo -n " .  please insert your usb key "
 
     plugged=false
@@ -83,7 +84,7 @@ ask_usbkey() {
     # get the first partition
     usbpart=`dmesg |tail -n 8 | grep '  sd.:' |cut -d: -f2 |tr -d ' '`
 
-    # what that it is mounted
+    # wait that is mounted
     mounted=false
     while [ "$mounted" != "true" ]; do
 	cat /proc/mounts | tail -n 2 | grep -q $usbpart
@@ -336,10 +337,10 @@ mount_tomb() {
 
     notice "mounting $FILE on mountpoint $MOUNT"
     if [ -z $MOUNT ]; then
-	error "you need to specify a MOUNTPOINT for the mount command"
-	exit 0
-    fi
-    if ! [ -x $MOUNT ]; then
+	act "mountpoint not specified, using default: /media/$FILE"
+	MOUNT=/media/${FILE}
+	mkdir -p $MOUNT
+    elif ! [ -x $MOUNT ]; then
 	error "mountpoint $MOUNT doesn't exist"
 	exit 0
     fi
@@ -413,7 +414,7 @@ mount_tomb() {
     
     notice "encrypted storage $FILE succesfully mounted on $MOUNT"
     if [ $DISPLAY ]; then 
-	exec_as_user tomb-gtk ${FILE} ${MOUNT}
+	exec_as_user tomb-status ${FILE} ${MOUNT}
     fi
 }
 
@@ -488,16 +489,110 @@ umount_tomb() {
     exec_as_user tomb-notify "Tomb closed:" "${FILE}
 Rest In Peace."
 }
+
+# install mime-types, bells and whistles for the desktop
+# see http://developers.sun.com/solaris/articles/integrating_gnome.html
+# and freedesktop specs
+install() {
+    notice "Installing Tomb on your desktop"
+
+    act "updating mimetypes..." 
+    cat <<EOF > /tmp/dyne-tomb.xml
+<?xml version="1.0"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+  <mime-type type="application/x-tomb-volume">
+    <comment>Tomb encrypted volume</comment>
+    <glob pattern="*.tomb"/>
+  </mime-type>
+  <mime-type type="application/x-tomb-key">
+    <comment>Tomb crypto key</comment>
+    <glob pattern="*.tomb.gpg"/>
+  </mime-type>
+</mime-info>
+EOF
+    xdg-mime install /tmp/dyne-tomb.xml
+    xdg-icon-resource install --context mimetypes --size 32 monmort.xpm monmort
+    xdg-icon-resource install --size 32 monmort.xpm dyne-monmort
+
+    rm /tmp/dyne-tomb.xml
+
+    act "updating desktop..."
+    cat <<EOF > /usr/share/applications/tomb.desktop
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Tomb crypto undertaker
+GenericName=Crypto undertaker
+Comment=Keep your bones safe
+Exec=tomb-open %U
+TryExec=tomb-open
+Icon=monmort.xpm
+Terminal=true
+Categories=Utility;Security;Archiving;Filesystem;
+MimeType=application/x-tomb-volume;
+EOF
+    update-desktop-database
+
+    act "updating menus..."
+    cat <<EOF > /etc/menu/tomb
+?package(tomb):command="tomb" icon="/usr/share/pixmaps/monmort.xpm" needs="cryptsetup" \
+	section="Applications/Accessories" title="Tomb" hints="Crypto" \
+	hotkey="Tomb"
+EOF
+    update-menus
+    
+    act "updating mime info..."
+    cat <<EOF > /usr/share/mime-info/tomb.keys
+# actions for encrypted tomb storage
+application/x-tomb-volume:
+	open=tomb-open %f
+	view=tomb-open %f
+	icon-filename=monmort.xpm
+        short_list_application_ids_for_novice_user_level=tomb
+EOF
+    cat <<EOF > /usr/share/mime-info/tomb.mime
+# mime type for encrypted tomb storage
+application/x-tomb-volume
+	ext: tomb
+
+application/x-tomb-key
+        ext: tomb.gpg
+EOF
+    cat <<EOF > /usr/lib/mime/packages/tomb
+application/x-tomb-volume; tomb '%s'; needsterminal; priority=8
+EOF
+    update-mime
+
+    act "updating application entry..."
+
+    cat <<EOF > /usr/share/application-registry/tomb.applications
+tomb
+         command=tomb-open
+         name=Tomb - Crypto Undertaker
+         can_open_multiple_files=false
+         expects_uris=false
+         requires_terminal=true
+         mime-types=application/x-tomb-volume,application/x-tomb-key
+EOF
+    
+}
 	
 
 case "$CMD" in
     create)   create_tomb ;;
-    format)   format_tomb ;;
+
     mount)    mount_tomb  ;;
     open)     mount_tomb  ;;
+
     umount)   umount_tomb ;;
     unmount)  umount_tomb ;;
     close)    umount_tomb ;;
+
+    install)  install     ;;
+
+    status)   tomb-status ;;
+    notify)   tomb-notify ;;
+
     *) error "command \"$CMD\" not recognized"
 	act "try -h for help"
 	;;

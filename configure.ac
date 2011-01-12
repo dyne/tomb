@@ -4,14 +4,14 @@ dnl ==============================================================
 
 AC_PREREQ([2.60])
 
-AC_INIT([Tomb],[0.8.0],[jaromil@dyne.org],[tomb])
+AC_INIT([Tomb],[0.9.0],[jaromil@dyne.org],[Tomb])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_CANONICAL_HOST
 
 dnl backwards compatibility for autoconf >= 2.64
 dnl PACKAGE_URL should be the fifth argument of AC_INIT
-m4_define([AC_PACKAGE_URL], [http://crypto.dyne.org])
+m4_define([AC_PACKAGE_URL], [http://tomb.dyne.org])
 AC_DEFINE(PACKAGE_URL, "AC_PACKAGE_URL", [Package URL])
 AC_SUBST(PACKAGE_URL, AC_PACKAGE_URL)
 
@@ -69,6 +69,10 @@ AC_PROG_INSTALL
 
 AC_CHECK_PROG(have_zsh,zsh,yes,no)
 AC_CHECK_PROG(have_cryptsetup,cryptsetup,yes,no)
+AC_CHECK_PROG(have_wipe,wipe,yes,no)
+AC_CHECK_PROG(have_dcfldd,dcfldd,yes,no)
+AC_CHECK_PROG(have_gksu,gksu,yes,no)
+AC_CHECK_PROG(have_sudo,gksu,yes,no)
 
 PKG_CHECK_MODULES(GTK2, gtk+-2.0 >= 2.16, :,
   AC_MSG_ERROR([*** Gtk+2 >=2.16 development files not found!]))
@@ -79,6 +83,12 @@ PKG_CHECK_MODULES(NOTIFY, libnotify, :,
   AC_MSG_ERROR([*** libnotify development files not found!]))
 AC_SUBST([NOTIFY_CFLAGS])
 AC_SUBST([NOTIFY_LIBS])
+
+PACKAGE_DATA_DIR='${prefix}/share/tomb'
+AC_SUBST(PACKAGE_DATA_DIR)
+# mime TODO see http://www.freedesktop.org/wiki/Specifications/AddingMIMETutor
+XDG_DATA_DIR='${prefix}/share/mime/packages'
+AC_SUBST(XDG_DATA_DIR)
 
 dnl alphabetic order on dir/subdir, but Makefile sorts before everything
 AC_CONFIG_FILES([

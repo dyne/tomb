@@ -63,8 +63,6 @@ int main(int argc, char **argv) {
 
   notify_uninit();
 
-  usleep(.5);
-
   exit(0);
   
 }
