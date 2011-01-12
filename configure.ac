@@ -75,6 +75,11 @@ PKG_CHECK_MODULES(GTK2, gtk+-2.0 >= 2.16, :,
 AC_SUBST([GTK2_CFLAGS])
 AC_SUBST([GTK2_LIBS])
 
+PKG_CHECK_MODULES(NOTIFY, libnotify, :,
+  AC_MSG_ERROR([*** libnotify development files not found!]))
+AC_SUBST([NOTIFY_CFLAGS])
+AC_SUBST([NOTIFY_LIBS])
+
 dnl alphabetic order on dir/subdir, but Makefile sorts before everything
 AC_CONFIG_FILES([
 Makefile
