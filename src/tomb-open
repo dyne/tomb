@@ -30,28 +30,32 @@ explore() {
     fi
 }
 
+try() {
+    which ${1} > /dev/null
+    if [ $? = 0 ]; then return 0;
+    else return -1; fi
+}
+	
 # if no arguments are given, run in terminal 
 if [ -z $1 ]; then
-    explore gnome-terminal -e "tomb-open create"
-    explore lxterm -bg black -fg white -e "tomb-open create"
-    explore urxvt -bg black -fg white -e "tomb-open create"
-    explore uxterm -bg black -fg white -e "tomb-open create"
-    explore xterm -bg black -fg white -e "tomb-open create"
+    try gnome-terminal; if [ $? = 0 ]; then gnome-terminal -e "tomb-open create"; exit 0; fi
+    try lxterm; if [ $? = 0 ]; then lxterm -bg black -fg white -e "tomb-open create"; exit 0; fi
+    try urxvt; if [ $? = 0 ]; then urxvt -bg black -fg white -e "tomb-open create"; exit 0; fi
+    try uxterm; if [ $? = 0 ]; then uxterm -bg black -fg white -e "tomb-open create"; exit 0; fi
+    try xterm; if [ $? = 0 ]; then xterm -bg black -fg white -e "tomb-open create"; exit 0; fi
+    exit 1
 fi
 
 
 # got a directory as argument
 if [ -d $1 ]; then
-
 # FIXME: somehow xdg-open loses mailcap mimes when executed by tomb-status
-# explore xdg-open ${1}
-
-    # try known file managers
-    explore gnome-open ${1}
-    explore thunar ${1}
-    explore rox ${1}
-    explore fsviewer ${1}
-    explore xnc ${1}
+#   try xdg-open; if [ $? = 0 ]; then xdg-open ${1}; exit 0; fi
+    try gnome-open; if [ $? = 0 ]; then gnome-open ${1}; exit 0; fi
+    try thunar; if [ $? = 0 ]; then thunar ${1}; exit 0; fi
+    try rox; if [ $? = 0 ]; then rox ${1}; exit 0; fi
+    try fsviewer; if [ $? = 0 ]; then fsviewer ${1}; exit 0; fi
+    try xnc; if [ $? = 0 ]; then xnc ${1}; exit 0; fi
     tomb-notify "File manager not found." "Tomb cannot guess which filemanager you are using"
     exit 1
 fi
