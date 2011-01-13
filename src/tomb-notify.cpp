@@ -25,7 +25,7 @@
 
 #include <libnotify/notify.h>
 
-/* The Tomb icon is an artwork by Jordi aka MonMort
+/* The Tomb icon is an artwork by Jordi aka Món Mort
    a nomadic graffiti artist from Barcelona */
 #include <monmort.xpm>
 
@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
   notify_init(PACKAGE);
 
   if(argc<3)
-    snprintf(body,511, "I'm the crypto undertaker.\nLet's start digging out bones.");
+    snprintf(body,511, "Hi, I'm the Undertaker.\nLet's start setting your Crypt?");
   else
     snprintf(body,511, "%s", argv[2]);
 

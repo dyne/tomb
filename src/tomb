@@ -1,17 +1,10 @@
 #!/bin/zsh
 #
-# Tomb
+# Tomb, the Crypto Undertaker
 #
-# a simple commandline tool to create and operate encrypted storage
+# a tool to easily operate file encryption of private and secret data
 #
 # Copyleft (C) 2007-2011 Denis Roio <jaromil@dyne.org>
-#
-# Tomb development is supported by: NOONE.
-# Would you like to support it and engrave your name on this software?
-# Contact me!
-#
-# thanks to Gabriele "Asbesto Molesto" Zaverio
-# for suggesting the perfect name for this tool.
 #
 # This source  code is free  software; you can redistribute  it and/or
 # modify it under the terms of  the GNU Public License as published by
@@ -58,8 +51,7 @@ fi
 # usb auto detect using dmesg
 # tested on ubuntu 10.04 - please test and patch on other systems if you can
 ask_usbkey() {
-    notice "looking for key $1 on usb"
-    exec_as_user tomb-notify "Tomb needs a key." "Plug your usb key in the computer to open $1" 
+    notice "looking for usb key"
     echo -n " .  please insert your usb key "
 
     plugged=false
@@ -131,6 +123,7 @@ ask_password() {
 exec_as_user() {
     func "executing as user '$SUDO_USER': ${(f)@}"
     sudo -u $SUDO_USER ${@} &
+    disown
 }
 
 
@@ -231,7 +224,7 @@ if ! [ -r ${tombtab} ]; then
     echo "# format here is similar to the system wide fstab" >>       ${tombtab}
     echo "# <file system> <mount point> <type> <options> <key>" >>    ${tombtab}
 fi
-    
+
 create_tomb() {
 
     notice "Creating a new tomb in ${FILE}"
@@ -239,8 +232,9 @@ create_tomb() {
 	if [ $MOUNT ]; then
 	    SIZE=$MOUNT
 	else
-	    error "size is not specified, please use -s option when creating a tomb"
-	    exit 0
+	    create_tomb_guided
+#	    error "size is not specified, please use -s option when creating a tomb"
+#	    exit 0
 	fi
     fi
     
@@ -267,10 +261,12 @@ create_tomb() {
     losetup -f ${FILE}   # allocates the next loopback for our file
     keytmp=`tempfile`
     act "Generating secret key..."
-    act "this operation takes time, computer use helps to gather more entropy."
-    cat /dev/random | dd bs=1 count=256 of=${keytmp}
+    act "this operation takes time, keep using this computer on other tasks,"
+    act "once done you will be asked to choose a password for your tomb."
+    cat /dev/urandom | dd bs=1 count=256 of=${keytmp}
 
     notice "Setup your secret key file ${FILE}.gpg"
+    exec_as_user tomb-notify "The Tomb key is being forged:" "please set your password."
     # here user is prompted for key password
     gpg -o "${FILE}.gpg" --no-options --openpgp -c -a ${keytmp}
     while [ $? = 2 ]; do
@@ -292,20 +288,27 @@ create_tomb() {
  
     
     cryptsetup --key-file ${keytmp} --cipher aes luksOpen ${nstloop} tomb.tmp
-    $WIPE ${keytmp}
+    ${WIPE} ${keytmp}
 
-    notice "Your tomb is read on ${FILE} and secured with key ${FILE}.gpg"
-    act "now plug an external usb device to save the key separately:"
-    ask_usbkey
-    if ! [ -w ${usbkey_mount} ]; then
-	error "cannot save the key in a separate place, move it yourself later."
-    else
-	mkdir -p ${usbkey_mount}/.tomb
-	cp -v ${FILE}.gpg ${usbkey_mount}/.tomb/
-	chmod -R go-rwx ${usbkey_mount}/.tomb
-	rm -rf ${FILE}.gpg
+    notice "Your tomb is ready on ${FILE} and secured with key ${FILE}.gpg"
+    act "Would you like to save the key on  an external usb device?"
+    act "This is recommended for safety:"
+    act "always keep the key in a different place than the door!"
+    act "If you answer yes, you'll need a USB KEY now: (yes/no)"
+    exec_as_user tomb-notify "Tomb has forged a key." "Would you like to save it on USB?" 
+    echo -n " >  "
+    read -q
+    if [ $? = 0 ]; then
+	ask_usbkey
+	if ! [ -w ${usbkey_mount} ]; then
+	    error "cannot save the key in a separate place, move it yourself later."
+	else
+	    mkdir -p ${usbkey_mount}/.tomb
+	    cp -v ${FILE}.gpg ${usbkey_mount}/.tomb/
+	    chmod -R go-rwx ${usbkey_mount}/.tomb
+	    rm -rf ${FILE}.gpg
+	fi
     fi
-
 #    cryptsetup luksDump ${nstloop}
 
     act "formatting your Tomb with Ext4 filesystem"
@@ -324,6 +327,8 @@ create_tomb() {
     losetup -d ${nstloop}
 
     notice "done creating $FILE encrypted storage (using Luks dm-crypt AES/SHA256)"
+    exec_as_user tomb-notify "The Tomb is ready!" "We will now open your new Tomb for the first time."
+    tomb mount $FILE
 }
 
 
@@ -337,12 +342,12 @@ mount_tomb() {
 
     notice "mounting $FILE on mountpoint $MOUNT"
     if [ -z $MOUNT ]; then
-	act "mountpoint not specified, using default: /media/$FILE"
-	MOUNT=/media/${FILE}
+	MOUNT=/media/`basename ${FILE}`
+	act "mountpoint not specified, using default: $MOUNT"
 	mkdir -p $MOUNT
     elif ! [ -x $MOUNT ]; then
 	error "mountpoint $MOUNT doesn't exist"
-	exit 0
+	exit 1
     fi
 
     # check if key file is present
@@ -369,7 +374,7 @@ mount_tomb() {
     if [ $? != 0 ]; then
  # is it a LUKS encrypted nest? see cryptsetup(1)
 	error "$FILE is not a valid Luks encrypted storage file"
-	exit 0
+	exit 1
     fi
 	
 	
@@ -413,9 +418,7 @@ mount_tomb() {
     mount -t ext4 -o rw,noatime,nodev /dev/mapper/${mapper} ${MOUNT}
     
     notice "encrypted storage $FILE succesfully mounted on $MOUNT"
-    if [ $DISPLAY ]; then 
-	exec_as_user tomb-status ${FILE} ${MOUNT}
-    fi
+    exec_as_user tomb-status ${mapper} ${FILE} ${MOUNT}
 }
 
 umount_tomb() {
@@ -425,55 +428,58 @@ umount_tomb() {
 	how_many_tombs="`ls /dev/mapper/tomb* 2>/dev/null | wc -w`"
 	if [ $how_many_tombs = 0 ]; then
 	    error "there is no open tomb to be closed"
-	    return
+	    exit 0
 	elif [ $how_many_tombs = 1 ]; then
 	    mapper=`ls /dev/mapper/tomb* 2>/dev/null`
 	    FILE=`mount | grep $mapper | awk '{print $3}'`
 	else
 	    error "too many tombs mounted, please specify which to unmount:"
 	    ls /dev/mapper/tomb*
-	    echo
-	    return
+	    exit 1
 	fi
 
     else
 
-	if ! [ -r $FILE ]; then
+	if [ -r $FILE ]; then
+	    mapper=$FILE
+	elif [ -r /dev/mapper/${FILE} ]; then
+	    mapper=/dev/mapper/${FILE}
+	else
 	    error "tomb not found: $FILE"
-	    error "please specify the full /dev/mapper/tomb* path"
-	    return
+	    error "please specify an existing /dev/mapper/tomb*"
+	    exit 1
 	fi
-	mapper=$FILE
-	FILE=`mount | grep $mapper | awk '{print $3}'`
+#	FILE=`mount | grep $mapper | awk '{print $3}'`
 
     fi
 
-    if [ "$mapper" = "" ]; then
-	error "$FILE is not mounted"
-	return
-    fi
+    # if [ "$mapper" = "" ]; then
+    # 	error "$FILE is not mounted"
+    # 	return
+    # fi
 
-    mapper=`basename $mapper`
+    # mapper=`basename $mapper`
 
-    if ! [ -r /dev/mapper/${mapper} ]; then
-	error "tomb doesn't seems to be mounted:"
-	error "${mapper} is not present in /dev/mapper"
-	exit 1
-    fi
+    # if ! [ -r /dev/mapper/${mapper} ]; then
+    # 	error "tomb doesn't seems to be mounted:"
+    # 	error "${mapper} is not present in /dev/mapper"
+    # 	exit 1
+    # fi
 
-    umount ${FILE}
+    umount ${mapper}
+    # if ! [ $? = 0 ]; then
+    # 	error "error occurred in umount ${mapper}"
+    # fi
+
+    basemap=`basename $mapper`
+
+    cryptsetup luksClose $basemap
     if ! [ $? = 0 ]; then
-	error "error occurred in umount ${FILE}"
+	error "error occurred in cryptsetup luksClose ${basemap}"
 	exit 0
     fi
 
-    cryptsetup luksClose ${mapper}
-    if ! [ $? = 0 ]; then
-	error "error occurred in cryptsetup luksClose ${mapper}"
-	exit 0
-    fi
-
-    losetup -d "/dev/`echo $mapper | cut -d. -f4`"
+    losetup -d "/dev/`echo $basemap | cut -d. -f4`"
 
     # echo ${nstloop} | grep loop 1>/dev/null 2>/dev/null
     # # if it's a loopback then we need to do losetup -d
@@ -486,16 +492,13 @@ umount_tomb() {
     # fi
 
     notice "crypt storage ${mapper} unmounted"
-    exec_as_user tomb-notify "Tomb closed:" "${FILE}
-Rest In Peace."
+    exec_as_user tomb-notify "Tomb closed: `echo ${basemap} | cut -d. -f2`" "Your bones will Rest In Peace."
 }
 
 # install mime-types, bells and whistles for the desktop
 # see http://developers.sun.com/solaris/articles/integrating_gnome.html
 # and freedesktop specs
 install() {
-    notice "Installing Tomb on your desktop"
-
     act "updating mimetypes..." 
     cat <<EOF > /tmp/dyne-tomb.xml
 <?xml version="1.0"?>
@@ -513,9 +516,9 @@ EOF
     xdg-mime install /tmp/dyne-tomb.xml
     xdg-icon-resource install --context mimetypes --size 32 monmort.xpm monmort
     xdg-icon-resource install --size 32 monmort.xpm dyne-monmort
-
+    
     rm /tmp/dyne-tomb.xml
-
+    
     act "updating desktop..."
     cat <<EOF > /usr/share/applications/tomb.desktop
 [Desktop Entry]
@@ -527,11 +530,11 @@ Comment=Keep your bones safe
 Exec=tomb-open %U
 TryExec=tomb-open
 Icon=monmort.xpm
-Terminal=true
+Terminal=false
 Categories=Utility;Security;Archiving;Filesystem;
 MimeType=application/x-tomb-volume;
 EOF
-    update-desktop-database
+	update-desktop-database
 
     act "updating menus..."
     cat <<EOF > /etc/menu/tomb
@@ -559,7 +562,7 @@ application/x-tomb-key
         ext: tomb.gpg
 EOF
     cat <<EOF > /usr/lib/mime/packages/tomb
-application/x-tomb-volume; tomb '%s'; needsterminal; priority=8
+application/x-tomb-volume; tomb-open '%s'; priority=8
 EOF
     update-mime
 
@@ -571,13 +574,12 @@ tomb
          name=Tomb - Crypto Undertaker
          can_open_multiple_files=false
          expects_uris=false
-         requires_terminal=true
+         requires_terminal=false
          mime-types=application/x-tomb-volume,application/x-tomb-key
 EOF
-    
+    act "Tomb is now installed."
 }
 	
-
 case "$CMD" in
     create)   create_tomb ;;
 
@@ -595,5 +597,8 @@ case "$CMD" in
 
     *) error "command \"$CMD\" not recognized"
 	act "try -h for help"
+	break
 	;;
 esac
+
+exit 1

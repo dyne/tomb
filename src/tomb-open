@@ -1,12 +1,139 @@
-#!/bin/sh
+#!/bin/zsh
+#
+# Tomb, the Crypto Undertaker
+#
+# a tool to easily operate file encryption of private and secret data
+#
+# Copyleft (C) 2007-2011 Denis Roio <jaromil@dyne.org>
+#
+# This source  code is free  software; you can redistribute  it and/or
+# modify it under the terms of  the GNU Public License as published by
+# the Free  Software Foundation; either  version 3 of the  License, or
+# (at your option) any later version.
+#
+# This source code is distributed in  the hope that it will be useful,
+# but  WITHOUT ANY  WARRANTY;  without even  the  implied warranty  of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# Please refer to the GNU Public License for more details.
+#
+# You should have received a copy of the GNU Public License along with
+# this source code; if not, write to:
+# Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 # startup wrapper to open tombs
 
-# got a tomb as argument
-if [ $@ ]; then
-    tomb -S open $@
-    exit $?
+explore() {
+    which ${1} > /dev/null
+    if [ $? = 0 ]; then
+	${1} ${2}
+	exit 0
+    fi
+}
+
+# if no arguments are given, run in terminal 
+if [ -z $1 ]; then
+    explore gnome-terminal -e "tomb-open create"
+    explore lxterm -bg black -fg white -e "tomb-open create"
+    explore urxvt -bg black -fg white -e "tomb-open create"
+    explore uxterm -bg black -fg white -e "tomb-open create"
+    explore xterm -bg black -fg white -e "tomb-open create"
 fi
 
-tomb -h
 
-sleep 10
+# got a directory as argument
+if [ -d $1 ]; then
+
+# FIXME: somehow xdg-open loses mailcap mimes when executed by tomb-status
+# explore xdg-open ${1}
+
+    # try known file managers
+    explore gnome-open ${1}
+    explore thunar ${1}
+    explore rox ${1}
+    explore fsviewer ${1}
+    explore xnc ${1}
+    tomb-notify "File manager not found." "Tomb cannot guess which filemanager you are using"
+    exit 1
+fi
+
+# got a tomb as argument?
+if [ -f $1 ]; then
+    file $1 | grep LUKS
+    if [ $? = 0 ]; then
+	tomb -S mount $1
+	exit $?
+    else
+	tomb-notify "Not a real Tomb." "We found no real bones in there."
+	exit 1
+    fi
+fi
+
+# no argument but on graphical display: creation dialog
+if [ -z $DISPLAY ]; then
+    echo "[!] tomb-open is a wrapper for the command 'tomb'"
+    tomb -h
+    exit 1
+fi
+
+if [ "$1" != "create" ]; then
+    exit 0
+fi
+
+# start guided tomb creation
+tomb-notify
+cat <<EOF
+Create a new Tomb
+=================
+
+  A Tomb is  a special folder that keeps files  safe using a password:
+  it makes use  of strong encryption and helps you keep  the keys on a
+  separate USB storage for safer transports.
+
+  Inside a Tomb  you can store private informations  without fear that
+  other people  possessing it will discover your  secrets, unless they
+  have your USB key and your password.
+
+  If you choose  to proceed now, we'll guide  you through the creation
+  of a new Tomb, You will also need the super-user (sudo) password for
+  the computer you are using.
+
+  If you will, I'll be your Crypto Undertaker.
+  Do you want to proceed, Master? (yes/no)"
+EOF
+echo -n "> "
+read -q
+if [ $? != 0 ]; then
+    echo "Operation aborted."
+    exit 1
+fi
+    # let's proceed
+echo "  Please type in the name for your new tomb file:"
+echo -n "> "
+read filename
+echo "  How big you want the Tomb to be?"
+echo "  Type a size number in Megabytes:"
+echo -n "> "
+read size
+echo "  You have commanded the creation of this Tomb:"
+echo "    $filename ( $size MBytes )";
+echo
+echo "  Please confirm if you want to proceed now,"
+echo "  digging will take quite some time! (yes/no)"
+echo -n "> "
+read -q
+if [ $? != 0 ]; then
+    echo "Operation aborted."
+    exit 1
+fi
+cat <<EOF
+  Operation confirmed!  we will  now call the  undertaker to  do its
+  job, but  in order  to do so  you will  need to provide  your sudo
+  password:
+EOF
+sudo tomb -S create ${filename}.tomb $size
+if ! [ -r /usr/share/applications/tomb.desktop ]; then
+    echo "  Well done!"
+    echo "  Now the last thing to do is to install Tomb on your desktop:"
+    sudo tomb install
+fi
+

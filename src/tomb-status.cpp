@@ -35,6 +35,7 @@ GtkMenu *menu_left, *menu_right;
 NotifyNotification *notice;
 GError *error;
 
+char mapper[256];
 char filename[256];
 char mountpoint[256];
 
@@ -48,7 +49,6 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e);
 
 
 int main(int argc, char **argv) {
-  GObject *tray;
   GtkWidget *item_close, *item_view, *item_about;
   gint menu_x, menu_y;
   gboolean push_in = true;
@@ -59,11 +59,19 @@ int main(int argc, char **argv) {
   gtk_init(&argc, &argv);
 
   // get the information from commandline
-  if(argc<3) sprintf(mountpoint,"unknown");
-  else snprintf(mountpoint,255, "%s", argv[2]);
+  if(argc<2) {
+    fprintf(stderr, "error: need at least one argument, the path to a dm-crypt device mapper\n");
+    exit(1);
+  } else {
+    // TODO: check if mapper really exists
+    snprintf(mapper,255, "%s", argv[1]);
+  }
 
-  if(argc<2) sprintf(filename, "unknown");
-  else snprintf(filename,255, "%s", argv[1]);
+  if(argc<3) sprintf(filename, "unknown");
+  else snprintf(filename,255, "%s", argv[2]);
+
+  if(argc<4) sprintf(mountpoint,"unknown");
+  else snprintf(mountpoint,255, "%s", argv[3]);
 
   // libnotify
   notify_init(PACKAGE);
@@ -78,7 +86,7 @@ int main(int argc, char **argv) {
   // LEFT click menu
   menu_left = (GtkMenu*) gtk_menu_new();
   // view
-  item_view = gtk_menu_item_new_with_label("View");
+  item_view = gtk_menu_item_new_with_label("Explore");
   gtk_menu_attach(menu_left, item_view, 0, 1, 0, 1);
   g_signal_connect_swapped(item_view, "activate", G_CALLBACK(cb_view), NULL);
   gtk_widget_show(item_view);
@@ -127,19 +135,37 @@ gboolean left_click(GtkWidget *w, GdkEvent *e) {
 		 1, gtk_get_current_event_time());
 } 
 gboolean cb_view(GtkWidget *w, GdkEvent *e) { 
-  GtkWidget *dialog = 
-    gtk_message_dialog_new (NULL,
-			    GTK_DIALOG_DESTROY_WITH_PARENT,
-			    GTK_MESSAGE_INFO,
-			    GTK_BUTTONS_CLOSE,
-			    "Tomb '%s' open on '%s'", filename, mountpoint);
-  gtk_dialog_run (GTK_DIALOG (dialog));
-  gtk_widget_destroy (dialog);
-  
+  // GtkWidget *dialog = 
+  //   gtk_message_dialog_new (NULL,
+  // 			    GTK_DIALOG_DESTROY_WITH_PARENT,
+  // 			    GTK_MESSAGE_INFO,
+  // 			    GTK_BUTTONS_CLOSE,
+  // 			    "Tomb '%s' open on '%s'\n"
+  // 			    "device mapper: %s", filename, mountpoint, mapper);
+  // gtk_dialog_run (GTK_DIALOG (dialog));
+  // gtk_widget_destroy (dialog);
+  pid_t cpid = fork();
+  if (cpid == -1) {
+    fprintf(stderr,"error: problem forking process\n");
+    return false;
+  }
+  if (cpid == 0) {    // Child
+    execlp("tomb-open", "tomb-open", mountpoint ,(char*)NULL);
+    exit(1);
+  }
+  return true;
 }
 
 gboolean cb_close(GtkWidget *w, GdkEvent *e) { 
-  execlp("tomb","tomb","-S","umount",NULL);
+  pid_t cpid = fork();
+  if (cpid == -1) {
+    fprintf(stderr,"error: problem forking process\n");
+    return false;
+  }
+  if (cpid == 0) {    // Child
+    execlp("tomb","tomb","-S","umount",mapper,(char*)NULL);
+    exit(1);
+  }
   gtk_main_quit();
 }
 
@@ -151,8 +177,8 @@ gboolean right_click(GtkWidget *w, GdkEvent *e) {
 } 
 gboolean cb_about(GtkWidget *w, GdkEvent *e) {
   const gchar *authors[] = {"Denis Roio aka Jaromil - http://jaromil.dyne.org",NULL};
-  const gchar *artists[] = {"Jordi aka MonMort - http://monmort.blogspot.org",
-			    "Gabriele Zaverio aka Asbesto - http://freaknet.org/asbesto",
+  const gchar *artists[] = {"Jordi aka Món Mort - http://monmort.blogspot.org",
+			    "Asbesto Molesto - http://freaknet.org/asbesto",
 			    NULL};
   GtkWidget *dialog = gtk_about_dialog_new();
   gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(dialog), PACKAGE);
