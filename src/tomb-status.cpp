@@ -20,6 +20,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+#include <libgen.h>
+
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <gtk/gtk.h>
 #include <libnotify/notify.h>
@@ -54,7 +59,8 @@ int main(int argc, char **argv) {
   gboolean push_in = true;
 
   char tomb_file[512];
-  
+  char tooltip[256];
+
   gtk_set_locale();
   gtk_init(&argc, &argv);
 
@@ -81,7 +87,9 @@ int main(int argc, char **argv) {
   status_tomb = gtk_status_icon_new_from_pixbuf(pb_monmort);
   //  gtk_status_icon_set_name(status_tomb, "tomb");
   gtk_status_icon_set_title(status_tomb, "Tomb");
-  gtk_status_icon_set_tooltip_text (status_tomb, "Tomb - crypto undertaker");
+
+  snprintf(tooltip,255,"Tomb in %s",mountpoint);
+  gtk_status_icon_set_tooltip_text (status_tomb, tooltip);
 
   // LEFT click menu
   menu_left = (GtkMenu*) gtk_menu_new();
@@ -158,6 +166,7 @@ gboolean cb_view(GtkWidget *w, GdkEvent *e) {
 
 gboolean cb_close(GtkWidget *w, GdkEvent *e) { 
   pid_t cpid = fork();
+  int res;
   if (cpid == -1) {
     fprintf(stderr,"error: problem forking process\n");
     return false;
@@ -166,7 +175,12 @@ gboolean cb_close(GtkWidget *w, GdkEvent *e) {
     execlp("tomb","tomb","-S","umount",mapper,(char*)NULL);
     exit(1);
   }
-  gtk_main_quit();
+  waitpid(cpid, &res, 0);
+  if(res==0) {
+    gtk_main_quit();
+    notify_uninit();
+    exit(0);
+  }
 }
 
 // callbacks right click

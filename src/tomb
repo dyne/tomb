@@ -413,9 +413,9 @@ mount_tomb() {
     fi
     
     act "encrypted storage filesystem check"
-    fsck.ext4 -p -C0 /dev/mapper/${mapper}
+    fsck -p -C0 /dev/mapper/${mapper}
     
-    mount -t ext4 -o rw,noatime,nodev /dev/mapper/${mapper} ${MOUNT}
+    mount -o rw,noatime,nodev /dev/mapper/${mapper} ${MOUNT}
     
     notice "encrypted storage $FILE succesfully mounted on $MOUNT"
     exec_as_user tomb-status ${mapper} ${FILE} ${MOUNT}
@@ -466,17 +466,20 @@ umount_tomb() {
     # 	exit 1
     # fi
 
-    umount ${mapper}
-    # if ! [ $? = 0 ]; then
-    # 	error "error occurred in umount ${mapper}"
-    # fi
-
     basemap=`basename $mapper`
+    tombname=`echo ${basemap} | cut -d. -f2`
+
+    errno=`umount ${mapper}`
+    if ! [ $? = 0 ]; then
+	exec_as_user tomb-notify "Tomb '$tombname' is too busy." \
+	    "Close all applications and file managers, then try again."
+	exit 1
+    fi
 
     cryptsetup luksClose $basemap
     if ! [ $? = 0 ]; then
 	error "error occurred in cryptsetup luksClose ${basemap}"
-	exit 0
+	exit 1
     fi
 
     losetup -d "/dev/`echo $basemap | cut -d. -f4`"
@@ -492,7 +495,8 @@ umount_tomb() {
     # fi
 
     notice "crypt storage ${mapper} unmounted"
-    exec_as_user tomb-notify "Tomb closed: `echo ${basemap} | cut -d. -f2`" "Your bones will Rest In Peace."
+    exec_as_user tomb-notify "Tomb closed: $tombname" "Your bones will Rest In Peace."
+    exit 0
 }
 
 # install mime-types, bells and whistles for the desktop
