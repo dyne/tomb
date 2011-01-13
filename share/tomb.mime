@@ -1,4 +1,0 @@
-# mime type for encrypted tomb storage
-
-application/x-tomb
-	ext: tomb

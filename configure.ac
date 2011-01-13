@@ -94,6 +94,7 @@ dnl alphabetic order on dir/subdir, but Makefile sorts before everything
 AC_CONFIG_FILES([
 Makefile
 src/Makefile
+share/Makefile
 ])
 AC_OUTPUT
 

@@ -10,3 +10,7 @@ tomb_status_CXXFLAGS = @GTK2_CFLAGS@ @NOTIFY_CFLAGS@
 tomb_notify_SOURCES = tomb-notify.cpp
 tomb_notify_LDADD = @NOTIFY_LIBS@
 tomb_notify_CXXFLAGS = @NOTIFY_CFLAGS@
+
+EXTRA_DIST = monmort.xpm
+pixmapdir = $(prefix)/share/pixmaps
+pixmap_DATA = monmort.xpm

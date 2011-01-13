@@ -1,6 +1,0 @@
-# actions for encrypted tomb storage
-
-application/x-tomb:
-	open=tomb auto %f
-	view=tomb auto %f
-	icon-filename=${prefix}/share/icons/tomb.png
