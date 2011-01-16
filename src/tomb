@@ -43,9 +43,9 @@ fi
 # which wipe command to use
 which wipe > /dev/null
 if [ $? = 0 ]; then
-    WIPE="wipe -f -s -q"
+    WIPE=(wipe -f -s -q)
 else
-    WIPE="rm -f"
+    WIPE=(rm -f)
 fi
 
 # usb auto detect using dmesg
@@ -96,14 +96,19 @@ ask_usbkey() {
 # user interface (just to ask the password)
 ask_password() {
 
-    xhost 2>/dev/null
+    exec_as_user xhost 2>/dev/null
     if [ $? = 0 ]; then # we have access to the X display
 	
-	if [ -x /usr/bin/ssh-askpass ]; then # debian has this
-	    export scolopendro="`ssh-askpass "Tomb: provide the password to unlock"`"
+	exec_as_user which tomb-askpass
+	if [ $? = 0 ]; then
+	    keyname=`echo $enc_key | cut -d. -f1`
+	    export scolopendro="`exec_as_user tomb-askpass $keyname`"
+	    return
+	elif [ -x /usr/bin/ssh-askpass ]; then # debian has this
+	    export scolopendro="`exec_as_user ssh-askpass "Tomb: provide the password to unlock"`"
 	    return
 	fi
-
+	
     else # we'll collect the password from commandline
 	
 	act "Tomb: provide the password to unlock"
@@ -122,8 +127,7 @@ ask_password() {
 # drop privileges
 exec_as_user() {
     func "executing as user '$SUDO_USER': ${(f)@}"
-    sudo -u $SUDO_USER ${@} &
-    disown
+    sudo -u $SUDO_USER ${@}
 }
 
 
@@ -288,7 +292,7 @@ create_tomb() {
  
     
     cryptsetup --key-file ${keytmp} --cipher aes luksOpen ${nstloop} tomb.tmp
-    ${WIPE} ${keytmp}
+    ${WIPE[@]} ${keytmp}
 
     notice "Your tomb is ready on ${FILE} and secured with key ${FILE}.gpg"
     act "Would you like to save the key on  an external usb device?"
@@ -306,7 +310,7 @@ create_tomb() {
 	    mkdir -p ${usbkey_mount}/.tomb
 	    cp -v ${FILE}.gpg ${usbkey_mount}/.tomb/
 	    chmod -R go-rwx ${usbkey_mount}/.tomb
-	    rm -rf ${FILE}.gpg
+	    ${WIPE[@]} ${FILE}.gpg
 	fi
     fi
 #    cryptsetup luksDump ${nstloop}
@@ -418,7 +422,8 @@ mount_tomb() {
     mount -o rw,noatime,nodev /dev/mapper/${mapper} ${MOUNT}
     
     notice "encrypted storage $FILE succesfully mounted on $MOUNT"
-    exec_as_user tomb-status ${mapper} ${FILE} ${MOUNT}
+    exec_as_user tomb-status ${mapper} ${FILE} ${MOUNT} &
+    disown
 }
 
 umount_tomb() {

@@ -56,7 +56,7 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e);
 int main(int argc, char **argv) {
   GtkWidget *item_close, *item_view, *item_about;
   gint menu_x, menu_y;
-  gboolean push_in = true;
+  gboolean push_in = TRUE;
 
   char tomb_file[512];
   char tooltip[256];
@@ -155,13 +155,13 @@ gboolean cb_view(GtkWidget *w, GdkEvent *e) {
   pid_t cpid = fork();
   if (cpid == -1) {
     fprintf(stderr,"error: problem forking process\n");
-    return false;
+    return FALSE;
   }
   if (cpid == 0) {    // Child
     execlp("tomb-open", "tomb-open", mountpoint ,(char*)NULL);
     exit(1);
   }
-  return true;
+  return TRUE;
 }
 
 gboolean cb_close(GtkWidget *w, GdkEvent *e) { 
@@ -169,7 +169,7 @@ gboolean cb_close(GtkWidget *w, GdkEvent *e) {
   int res;
   if (cpid == -1) {
     fprintf(stderr,"error: problem forking process\n");
-    return false;
+    return FALSE;
   }
   if (cpid == 0) {    // Child
     execlp("tomb","tomb","-S","umount",mapper,(char*)NULL);
@@ -181,6 +181,7 @@ gboolean cb_close(GtkWidget *w, GdkEvent *e) {
     notify_uninit();
     exit(0);
   }
+  return TRUE;
 }
 
 // callbacks right click

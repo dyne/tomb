@@ -22,13 +22,6 @@
 
 # startup wrapper to open tombs
 
-explore() {
-    which ${1} > /dev/null
-    if [ $? = 0 ]; then
-	${1} ${2}
-	exit 0
-    fi
-}
 
 try() {
     which ${1} > /dev/null
@@ -102,7 +95,7 @@ Create a new Tomb
   the computer you are using.
 
   If you will, I'll be your Crypto Undertaker.
-  Do you want to proceed, Master? (yes/no)"
+  Do you want to proceed, Master? (y/n)"
 EOF
 echo -n "> "
 read -q
@@ -122,7 +115,7 @@ echo "  You have commanded the creation of this Tomb:"
 echo "    $filename ( $size MBytes )";
 echo
 echo "  Please confirm if you want to proceed now,"
-echo "  digging will take quite some time! (yes/no)"
+echo "  digging will take quite some time! (y/n)"
 echo -n "> "
 read -q
 if [ $? != 0 ]; then
@@ -141,3 +134,4 @@ if ! [ -r /usr/share/applications/tomb.desktop ]; then
     sudo tomb install
 fi
 
+exit 0

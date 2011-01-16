@@ -64,7 +64,6 @@ AC_CONFIG_SRCDIR([src/tomb])
 
 dnl Checks for reguired programs.
 AC_PROG_CC
-AC_PROG_CXX
 AC_PROG_INSTALL
 
 AC_CHECK_PROG(have_zsh,zsh,yes,no)
