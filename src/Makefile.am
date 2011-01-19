@@ -12,5 +12,5 @@ tomb_askpass_LDADD = @GTK2_LIBS@
 tomb_askpass_CFLAGS = @GTK2_CFLAGS@
 
 EXTRA_DIST = monmort.xpm
-pixmapdir = $(prefix)/share/pixmaps
+pixmapdir = $(datadir)/pixmaps
 pixmap_DATA = monmort.xpm

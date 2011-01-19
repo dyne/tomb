@@ -1,0 +1,6 @@
+# actions for encrypted tomb storage
+application/x-tomb-volume:
+	open=tomb-open %f
+	view=tomb-open %f
+	icon-filename=monmort.xpm
+        short_list_application_ids_for_novice_user_level=tomb

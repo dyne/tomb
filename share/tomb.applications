@@ -1,0 +1,7 @@
+tomb
+         command=tomb-open
+         name=Tomb - Crypto Undertaker
+         can_open_multiple_files=false
+         expects_uris=false
+         requires_terminal=false
+         mime-types=application/x-tomb-volume,application/x-tomb-key
