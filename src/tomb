@@ -101,7 +101,7 @@ ask_password() {
 	
 	exec_as_user which tomb-askpass
 	if [ $? = 0 ]; then
-	    keyname=`echo $enc_key | cut -d. -f1`
+	    keyname=`basename $enc_key | cut -d. -f1`
 	    export scolopendro="`exec_as_user tomb-askpass $keyname`"
 	    return
 	elif [ -x /usr/bin/ssh-askpass ]; then # debian has this
@@ -122,6 +122,20 @@ ask_password() {
     # 		--title "Security check" --insecure \
     # 		--passwordbox "Enter password:" 10 30 2> /var/run/.scolopendro
 	    
+}
+
+# popup notification
+tomb-notify() {
+    if [ -z $1 ]; then
+	exec_as_user notify-send -i monmort \
+	    -u low -h string:App:Tomb \
+	    -h double:Version:${VERSION} \
+	    "Tomb version $VERSION" \
+	    "Hi, I'm the Undertaker.
+Let's start setting your Crypt?"
+    else
+	exec_as_user notify-send -i monmort ${@}
+    fi
 }
 
 # drop privileges
@@ -270,7 +284,7 @@ create_tomb() {
     cat /dev/urandom | dd bs=1 count=256 of=${keytmp}
 
     notice "Setup your secret key file ${FILE}.gpg"
-    exec_as_user tomb-notify "The Tomb key is being forged:" "please set your password."
+    tomb-notify "The Tomb key is being forged:" "please set your password."
     # here user is prompted for key password
     gpg -o "${FILE}.gpg" --no-options --openpgp -c -a ${keytmp}
     while [ $? = 2 ]; do
@@ -299,7 +313,7 @@ create_tomb() {
     act "This is recommended for safety:"
     act "always keep the key in a different place than the door!"
     act "If you answer yes, you'll need a USB KEY now: (yes/no)"
-    exec_as_user tomb-notify "Tomb has forged a key." "Would you like to save it on USB?" 
+    tomb-notify "Tomb has forged a key." "Would you like to save it on USB?" 
     echo -n " >  "
     read -q
     if [ $? = 0 ]; then
@@ -331,7 +345,7 @@ create_tomb() {
     losetup -d ${nstloop}
 
     notice "done creating $FILE encrypted storage (using Luks dm-crypt AES/SHA256)"
-    exec_as_user tomb-notify "The Tomb is ready!" "We will now open your new Tomb for the first time."
+    tomb-notify "The Tomb is ready!" "We will now open your new Tomb for the first time."
     tomb mount $FILE
 }
 
@@ -411,9 +425,8 @@ mount_tomb() {
     
     if ! [ -r /dev/mapper/${mapper} ]; then
 	error "failure mounting the encrypted file"
-	tail /var/log/messages
 	losetup -d ${nstloop}
-	return
+	exit 1
     fi
     
     act "encrypted storage filesystem check"
@@ -422,8 +435,9 @@ mount_tomb() {
     mount -o rw,noatime,nodev /dev/mapper/${mapper} ${MOUNT}
     
     notice "encrypted storage $FILE succesfully mounted on $MOUNT"
-    exec_as_user tomb-status ${mapper} ${FILE} ${MOUNT} &
+    ( exec_as_user tomb-status ${mapper} ${FILE} ${MOUNT} ) &
     disown
+    exit 0
 }
 
 umount_tomb() {
@@ -476,7 +490,7 @@ umount_tomb() {
 
     errno=`umount ${mapper}`
     if ! [ $? = 0 ]; then
-	exec_as_user tomb-notify "Tomb '$tombname' is too busy." \
+	tomb-notify "Tomb '$tombname' is too busy." \
 	    "Close all applications and file managers, then try again."
 	exit 1
     fi
@@ -500,7 +514,7 @@ umount_tomb() {
     # fi
 
     notice "crypt storage ${mapper} unmounted"
-    exec_as_user tomb-notify "Tomb closed: $tombname" "Your bones will Rest In Peace."
+    tomb-notify "Tomb closed: $tombname" "Your bones will Rest In Peace."
     exit 0
 }
 
@@ -508,6 +522,9 @@ umount_tomb() {
 # see http://developers.sun.com/solaris/articles/integrating_gnome.html
 # and freedesktop specs
 install() {
+
+# TODO: distro package deps (for binary)
+# debian: zsh, cryptsetup, libgtk2.0-0, libnotify-bin
     act "updating mimetypes..." 
     cat <<EOF > /tmp/dyne-tomb.xml
 <?xml version="1.0"?>
@@ -610,4 +627,4 @@ case "$CMD" in
 	;;
 esac
 
-exit 1
+exit 0

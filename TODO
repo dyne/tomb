@@ -1,8 +1,8 @@
 
-- debian packaging and mime-type installation
+- fix operation without DISPLAY (over SSH)
 - system to split keys in parts (ssss)
 - transport keys on qrcodes
-- gtk dialogs and configuration? should keep it minimal!
+- more gtk dialogs and configuration? should keep it minimal!
 - use inotify on /media to watch usb key plug events
 - analyse and show tomb entropy using libdisorder
 - sign and verify tomb script integrity (executed as root)

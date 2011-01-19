@@ -1,8 +1,7 @@
 
 August 2010
 
-	The first public version of Tomb is released to the public
-
+	The first version of Tomb ever released to the public
 
 During the year 2009
 
@@ -14,8 +13,6 @@ Sometime in 2007
 	mknest was refactored to work on the Debian distribution and since
 	then renamed to Tomb. dyne:bolic specific dependencies where
 	removed, keeping Zsh as the shell script it is written with.
-
-
 
 Back in 2005
 
