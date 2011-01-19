@@ -219,13 +219,16 @@ while true; do
         -s) SIZE=$2; shift 2 ;;
 	-k) KEY=$2; shift 2 ;;
 	--) shift; break ;;
-	*)  CMD=$1; FILE=$2; MOUNT=$3; break ;;
+	*)  CMD=$1;
+	    FILE=$2; MOUNT=$3; # compat with old args
+	    CMD2=${2}; CMD3=${3}; break ;;
     esac
 done
 
 
 if [ -z $CMD ]; then
     error "first argument missing, use -h for help"
+    tomb-notify
     exit 0
 fi
 
@@ -619,7 +622,7 @@ case "$CMD" in
     install)  install     ;;
 
     status)   tomb-status ;;
-    notify)   tomb-notify ;;
+    notify)   tomb-notify $CMD2 $CMD3 ;;
 
     *) error "command \"$CMD\" not recognized"
 	act "try -h for help"
