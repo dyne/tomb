@@ -1,5 +1,5 @@
 ; simple website settings
-(provide 'dyne-web-config)
+(provide 'dyne-config)
 
 (set 'name "Tomb")
 
