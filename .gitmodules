@@ -1,3 +1,0 @@
-[submodule "doc/web"]
-	path = doc/web
-	url = git://code.dyne.org/dyne-web-tmpl-muse.git
