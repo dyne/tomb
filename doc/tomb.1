@@ -4,7 +4,14 @@
 Tomb \- the Crypto Undertaker
 
 .SH SYNOPSIS
-.B tomb [options] command [file] [mountpoint]
+.B
+.IP "tomb [options] command [file] [mountpoint]"
+.B
+.IP "tomb-open [file]"
+.B
+.IP "tomb-status mountpoint"
+.B
+.IP "tomb-askpass [file]"
 
 .SH DESCRIPTION
 
@@ -12,17 +19,49 @@ Tomb is a  simple commandline tool for encrypted  storage and it comes
 complete with programs to facilitate its operation by desktop users.
 
 Tomb generates encrypted  storage files to be opened  and closed using
-their associated key  files, which are also protected  with a password
-choosen by the user. A tomb is like a locked folder that can be safely
-transported and hidden in a filesystem; its keys can be kept separate,
-for instance keeping  the tomb file on your  computer harddisk and the
-key files on a USB stick.
+their associated  keyfiles, which are  also protected with  a password
+choosen by the user.
+
+A tomb  is like  a locked  folder that can  be safely  transported and
+hidden in  a filesystem; its keys  can be kept  separate, for instance
+keeping the tomb file on your computer harddisk and the key files on a
+USB stick.
+
+When specified,  \fIfile\fR is the name  of the tomb to  be created or
+opened,  while \fImountpoint\fR  is  an existing  directory where  its
+contents should be made accessible.
+
+For simplified use, the command \fItomb-open\fR can be used to start a
+wizard that guides users in the creation of a new tomb or, if the
+\fIfile\fR argument is specified, to open a tomb and make it
+accessible in a default location under the /media folder.
+
+The other commands \fItomb-status\fR and \fItomb-askpass\fR are mostly
+for internal  use (they are called  by tomb with  the right arguments)
+and serve the purpose of communicating with the user via the graphical
+interface.
+
+The auxiliary programs \fI
 
 
+.SH COMMANDS
+.B
+.IP "create"
+Create a new encrypted storage \fIfile\fR and its keys
+.B
+.IP "open"
+Opens an existing tomb \fIfile\fR. The \fImountpoint\fR where the tomb
+will be  made accessible can  be specified, if  not the default  is to
+create a directory named like the tomb inside /media.
+.B
+.IP "close"
+Closes a currently open tomb.  When \fIfile\fR is specified, it should
+point to the /dev/mapper name used to mount the tomb; if \fIfile\fR is
+not specified  and only one tomb is  open, then it will  be closed; if
+multiple tombs are open, the command will list them on the terminal.
 
 .SH OPTIONS
 .B
-
 .B
 .IP "-s \fI<MBytes>\fR" 
 When creating a tomb, this option  must be used to specify the size of
@@ -48,29 +87,8 @@ Display a help text and quit
 Display version and quit
 
 
-.SH COMMANDS
-
-.B
-.IP "create"
-Create a new encrypted storage \fIfile\fR and its keys
-
-.B
-.IP "open"
-Opens an existing tomb \fIfile\fR. The \fImountpoint\fR where the tomb
-will be  made accessible can  be specified, if  not the default  is to
-create a directory named like the tomb inside /media.
-
-.B
-.IP "close"
-Closes a currently open tomb.  When \fIfile\fR is specified, it should
-point to the /dev/mapper name used to mount the tomb; if \fIfile\fR is
-not specified  and only one tomb is  open, then it will  be closed; if
-multiple tombs are open, the command will list them on the terminal.
-
 .SH BUGS
-Everyone is encouraged to test this software and report bugs!
-
-Please use the web page http://bugs.dyne.org
+Please report bugs on the tracker at http://bugs.dyne.org
 
 Get in touch with developers via mail using this web page
 http://dyne.org/contact or via chat on http://irc.dyne.org
