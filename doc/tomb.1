@@ -1,0 +1,106 @@
+.TH tomb 1 "January 25, 2011" "tomb"
+
+.SH NAME
+Tomb \- the Crypto Undertaker
+
+.SH SYNOPSIS
+.B tomb [options] command [file] [mountpoint]
+
+.SH DESCRIPTION
+
+Tomb is a  simple commandline tool for encrypted  storage and it comes
+complete with programs to facilitate its operation by desktop users.
+
+Tomb generates encrypted  storage files to be opened  and closed using
+their associated key  files, which are also protected  with a password
+choosen by the user. A tomb is like a locked folder that can be safely
+transported and hidden in a filesystem; its keys can be kept separate,
+for instance keeping  the tomb file on your  computer harddisk and the
+key files on a USB stick.
+
+
+
+.SH OPTIONS
+.B
+
+.B
+.IP "-s \fI<MBytes>\fR" 
+When creating a tomb, this option  must be used to specify the size of
+the new \fIfile\fR to be created, in megabytes.
+.B
+.IP "-k \fI<keyfile>\fR"
+When opening a  tomb, this option can be used  to specify the location
+of the  key to use. Keys  are created with  the same name of  the tomb
+file adding a '.gpg' suffix,  but can be later renamed and transported
+on other media. When a key is  not found, the program asks to insert a
+USB storage device and it will look for the key file inside it.
+.B
+.IP "-S"
+The  tomb commandline  tool needs  to  acquire super  user rights  (to
+become root) for  most of its operations. When  used, this option will
+tell the tomb program to use 'sudo'  or 'gksu' to ask the user for the
+password or use the one already in cache.
+.B
+.IP "-h"
+Display a help text and quit
+.B
+.IP "-v"
+Display version and quit
+
+
+.SH COMMANDS
+
+.B
+.IP "create"
+Create a new encrypted storage \fIfile\fR and its keys
+
+.B
+.IP "open"
+Opens an existing tomb \fIfile\fR. The \fImountpoint\fR where the tomb
+will be  made accessible can  be specified, if  not the default  is to
+create a directory named like the tomb inside /media.
+
+.B
+.IP "close"
+Closes a currently open tomb.  When \fIfile\fR is specified, it should
+point to the /dev/mapper name used to mount the tomb; if \fIfile\fR is
+not specified  and only one tomb is  open, then it will  be closed; if
+multiple tombs are open, the command will list them on the terminal.
+
+.SH BUGS
+Everyone is encouraged to test this software and report bugs!
+
+Please use the web page http://bugs.dyne.org
+
+Get in touch with developers via mail using this web page
+http://dyne.org/contact or via chat on http://irc.dyne.org
+
+.SH AUTHORS
+
+.SH COPYING
+
+This manual is Copyleft (c) 2011 Denis Roio <\fIjaromil@dyne.org\fR>
+
+Permission is  granted to copy,  distribute and/or modify  this manual
+under the terms of the  GNU Free Documentation License, Version 1.1 or
+any  later   version  published  by  the   Free  Software  Foundation.
+Permission is granted  to make and distribute verbatim  copies of this
+manual page  provided the above  copyright notice and  this permission
+notice are preserved on all copies.
+
+.SH AVAILABILITY
+
+The  most   recent  version  of   Tomb  sourcecode  and  up   to  date
+documentation    should    be     available    for    download    from
+\fIhttp://tomb.dyne.org\fR.
+
+.SH SEE ALSO
+
+.B
+.IP cryptsetup(8)
+
+GnuPG website on http://www.gnupg.org
+
+DM-Crypt website on http://www.saout.de/misc/dm-crypt
+
+LUKS website, http://code.google.com/p/cryptsetup
