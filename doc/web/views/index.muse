@@ -25,18 +25,24 @@
                 ^"***"`                                        "`
 
           a simple commandline tool to manage encrypted storage  v.0.9
-                                                 by Jaromil @ dyne.org
+                        (from the hashes of dyne:bolic nesting)
 </example>
 
-** Introduction
 
 Tomb aims to be an 100% free and open source system for easy
 encryption and backup of personal files, written in code that is easy
 to review and links commonly shared components.
 
-At present time Tomb is easy to install and use, it mainly consists of
-a Shell script and some auxiliary C code for desktop integration,
-making use of GNU tools and the cryptographic API of the Linux kernel.
+Tomb generates encrypted storage files to be opened and closed using
+their associated keyfiles, which are also protected with a password
+chosen by the user.
+
+A tomb  is like  a locked  folder that can  be safely  transported and
+hidden in  a filesystem; its keys  can be kept  separate, for instance
+keeping the tomb file on your computer harddisk and the key files on a
+USB stick.
+
+** Documentation 
 
 *** Who needs Tomb
 
@@ -80,15 +86,10 @@ To open a tomb is sufficient to click on it, or use the command **tomb-open**
 When a tomb is open your panel will have a little icon in the tray
 reminding you that a tomb is open, offering to explore it or close it.
 
-Tomb generates 'key files' and protects them with a password choosen
-by the user; the key files are then used to encrypt loop-back mounted
-partitions, like single files containing a filesystem inside: this way
-keys can be separated from data for safer transports when
-required.
+See the [[manual][manpage]] for more information on how to operate Tomb from the
+commandline, also the back-end tool **tomb** comes complete with a brief
+--help.
 
-For more information on how to operate Tomb from the commandline, the
-backend tool **tomb** comes complete with a brief --help and a
-[[manual][manual page]].
 
 ** Downloads
 
@@ -100,7 +101,7 @@ build your own application and as source code you can study.
 
 *** Code repository
 
-Latest stable release is 0.9 (25 January 2011) more about it in the
+Latest stable release is 0.9 (28 January 2011) more about it in the
 [[ftp://ftp.dyne.org/tomb/NEWS][NEWS]] and [[ftp://ftp.dyne.org/tomb/ChangeLog][ChangeLog]]
 
 Source releases are checked and signed by [[http://jaromil.dyne.org][Jaromil]] using [[http://www.gnupg.org][GnuPG]].
@@ -122,14 +123,30 @@ The bleeding edge version is developed on our [[http://code.dyne.org][code repos
 
 *** Stage of development
 
-Tomb is an evolution of the 'mknest' tool developed for the dyne:bolic
+Tomb is an evolution of the 'mknest' tool developed for the [[http://dynebolic.org][dyne:bolic]]
 GNU/Linux distribution, which is used by its 'nesting' mechanism to
 encrypt the Home directory of users.
 
 As such, it uses well tested and reviewed routines and its shell code
 is pretty readable. The name transition from 'mknest' to 'tomb' is
-marked by the adaptation of mknest to work on the Debian operating
-system, used by its author in the past 3 years.
+marked by the adaptation of mknest to work on Debian based operating
+systems.
+
+At present time Tomb is easy to install and use, it mainly consists of
+a Shell script and some auxiliary C code for desktop integration
+(GTK), making use of GNU tools and the cryptographic API of the Linux
+kernel.
+
+*** People involved
+
+Tomb is designed and written by [[http://jaromil.dyne.org][Jaromil]]
+
+Tomb's artwork is contributed by [[http://monmort.blogspot.org][Món Mort]]
+
+Testing and fixes are contributed by Dreamer and Hellekin O. Wolf.
+
+Tomb relies on Cryptsetup(8) and LUKS, big up to the developers involved  \o/
+
 
 *** How can you help
 
@@ -142,3 +159,8 @@ Have a look in the TODO file to see what our plans are.
 At the moment we can use some good help in porting this tool on
 M$/Windows and Apple/OSX, still keeping the minimal approach we all
 love.
+
+Please report bugs on the tracker at http://bugs.dyne.org
+
+Get in touch with developers via mail using this web page
+http://dyne.org/contact or via chat on http://irc.dyne.org

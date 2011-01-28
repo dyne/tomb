@@ -1,0 +1,404 @@
+
+Linux hard disk encryption settings
+
+   This page intends to educate the reader about the existing weaknesses
+   of the public-IV on-disk format commonly used with cryptoloop and
+   dm-crypt (used in IV-plain mode). This page aims to facilitate risk
+   calculation when utilising Linux hard disk encryption. The attacks
+   presented on this page may pose a thread to you, but at the same time
+   may be totally irrelevant for others. At the end of this document, the
+   reader should be able to make a good choice according to his security
+   needs.
+
+   A good quote with respect to this topic is ''All security involves
+   trade-offs'' from Beyond Fear (Bruce Schneier). You should keep in mind
+   that perfect security is unachievable and by all means shouldn't be
+   your goal. For instance, when using pass phrase based cryptography, you
+   have to trust in that the underlying system is secure, the computer
+   system has not been tampered with, and nobody is watching you. The most
+   obvious weakness is the last one, but even if you make sure nobody nor
+   any camera is around, how about the keyboard you're typing on? Has it
+   been manipulated while you have been getting your lunch?
+
+   So security comes for a price, and the price when designing
+   cryptography security algorithms is performance. You will be introduced
+   to the fastest of all setups available, the "public-IV", which
+   sacrifices security properties for speed. After that we will talk about
+   ESSIV, the newest of IV modes implemented. It comes for a small price,
+   but it can deal with watermarking for a relatively small price. Then
+   you'll be introduced to the draft specifications of the Security in
+   Storage Working Group ([18]SISWG). Currently SISWG is considering EME
+   and LRW for standardisation. EME along with it's cousin CMC seems to
+   provide the best security level, but imposes additional encryption
+   steps. Plumb-IV is discussed only for reference, because it has the
+   same performance penalty as CMC, but in constrast suffers from
+   weaknesses of CBC encryption.
+
+   As convention, this document will use the term "blocks", when it
+   referes to a single block of plain or cipher text (usually 16 byte),
+   and will use the term "sectors", when it refers to a 512-byte wide hard
+   disk block.
+
+CBC Mode: The basic level
+
+   Most hard disk encryption systems utilise CBC to encrypt bulk data.
+   Good descriptions on CBC and other common cipher modes are available at
+     * [19]Wikipedia
+     * [20]Connected: An Internet Encyclopedia
+     * [21]NIST: Recommendation for Block Cipher Modes of Operation (CBC
+       is at PDF Page 17)
+
+   Please make sure you're familiar with CBC before proceeding.
+
+   Since CBC encryption is a recursive algorithm, the encryption of the
+   n-th block requires the encryption of all preceding blocks, 0 till n-1.
+   Thus, if we would run the whole hard disk encryption in CBC mode, one
+   would have to re-encrypt the whole hard disk, if the first computation
+   step changed, this is, when the first plain text block changed. Of
+   course, this is an undesired property, therefore the CBC chaining is
+   cut every sector and restarted with a new initialisation vector (IV),
+   so we can encrypt sectors individually. The choice of the sector as
+   smallest unit matches with the smallest unit of hard disks, where a
+   sector is also atomic in terms of access.
+
+   For reference, I will give a formal definition of CBC encryption and
+   decryption. Note, that decryption is not recursive, in contrast to
+   encryption, since it's a function only of C[n-1] and C[n].
+   Encryption:
+   C[-1] = IV
+   C[n] = E(P[n] ⊕ C[n-1])
+   Decryption:
+   C[-1] = IV
+   P[n] = C[n-1] ⊕ D(C[n])
+   The next sections will deal with how this IV is chosen.
+
+The IV Modes
+
+The "public-IV"
+
+   The IV for sector n is simply the 32-bit version of the number n
+   encoded in little-endian padded with zeros to the block-size of the
+   cipher used, if necessary. This is the most simple IV mode, but at the
+   same the most vulnerable.
+
+ESSIV
+
+   E(Sector|Salt) IV, short ESSIV, derives the IV from key material via
+   encryption of the sector number with a hashed version of the key
+   material, the salt. ESSIV does not specify a particular hash algorithm,
+   but the digest size of the hash must be an accepted key size for the
+   block cipher in use. As the IV depends on a none public piece of
+   information, the key, the sequence of IV is not known, and the attacks
+   based on this can't be launched.
+
+plumb IV
+
+   The IV is computed by hashing (or MAC-ing) the plain text from the
+   second block till the last. Additionally, the sector number and the key
+   are used as input as well. If a byte changes in the plain text of the
+   blocks 2 till n, the first block is influenced by the change of the IV.
+   As the first encryption effects all subsequent encryption steps due to
+   the nature of CBC, the whole sector is changed.
+
+   Decryption is possible because CBC is not recursive for decryption. The
+   prerequisites for a successful CBC decryption are two subsequent cipher
+   blocks. The former one is decrypted and the first one is XOR-ed into
+   the decryption result yielding the original plain text. Therefore
+   independent of the IV scheme, decryption is possible from the 2nd to
+   the last block. After the recovery of these plain text blocks, the IV
+   can be computed, and finally the first block can be decrypted as well.
+
+   The only weakness of this scheme is it's performance. It has to process
+   data twice: first for obtaining the IV, and then to produce the CBC
+   encryption with this IV. With the same performance penalty CMC is able
+   to achieve better security properties (CMC is discussed later), thus
+   plumb-IV will remain unimplemented.
+
+The attack arsenal
+
+Content leaks
+
+   This attack can be mounted against any system operating in CBC Mode. It
+   rests on the property, that in CBC decryption, the preceding cipher
+   block's influence is simple, that is, it's XORed into the plain text.
+   The preceding cipher block, C[n-1], is readily available on disk (for n
+   > 0) or may be deduced from the IV (for n = 0). If an attacker finds
+   two blocks with identical cipher text, he knows that both cipher texts
+   have been formed according to:
+   C[m] = E(P[m] ⊕ C[m-1] )
+   C[n] = E(P[n] ⊕ C[n-1] )
+   Since he found that C[m] = C[n], it holds
+   P[m] ⊕ C[m-1] = P[n] ⊕ C[n-1]
+   which can be rewritten as
+   C[m-1] ⊕ C[n-1] = P[n] ⊕ P[m]
+   The left hand side is known to the attacker by reading the preceding
+   cipher text from disk. If one of the blocks is the first block of a
+   sector, the IV must be examined instead (when it's available as it is
+   in public-IV). The attacker is now able to deduce the difference
+   between the plain texts by examining the difference of C[m-1] and
+   C[n-1]. If one of the plain text blocks happens to be zero, the
+   difference yields the original content of the other related plain text
+   block.
+
+   Another information is available to the attacker. Any succeeding
+   identical pair of cipher text, that follows the initial identical
+   cipher pair, is equal. No information about the content of those pairs
+   can be extracted, since the information is extracted from the
+   respective preceding cipher blocks, but those are all required to be
+   equal.
+
+   Let's have a look at the chance of succeeding with this attack.
+   Assuming the output of a cipher forms an uniform distribution, the
+   chance, p, of finding an identical block is 2^-blocksize. For instance,
+   p = 1/2^128 for a 128-bit cipher. Because the number of possible pairs
+   develops as an arithmetic series in n, the number of sectors, the
+   chance of not finding two identical blocks is given by
+   (1-p)^n(n-1)/2
+   As p is very small, but in contrast the power is very big, we apply the
+   logarithm to get meaningful answers, that is
+   n(n-1)/2 ln (1-p)
+   An example: The number of cipher blocks available on 200GB disk with
+   known C[n-1] is 200GB × 1024^2 KB/GB × 64/1KB ^1. Or in other words, a
+   128-bit block is 16 bytes, so the number of 16-byte blocks in a 200GB
+   hard disk is 13.4 billion. Therefore, n = 1.342e10. For a 128-bit
+   cipher, p = 2^-128. Hence,
+   ln(1-p) = -2.939e-39
+   n(n-1)/2 = 9.007e19
+
+   n(n-1)/2 ln (1-p) = -2.647e-19
+   1-e^-2.776e-13 = 2.647e-19
+   The last term is the chance of finding at least one pair of identical
+   cipher blocks. But how does this number grow in n? Obviously
+   exponentially. Plotting a few a decimal powers shows that the chance
+   for finding at least on identical cipher pair flips to 1 around n =
+   10^20 (n = 10^40 for a 256-bit cipher). This inflexion point is reached
+   for a 146 million TB storage (or a hundered thousand trillion trillions
+   TB storage for a 256-bit cipher).
+
+   ^1The blocks with available preceding cipher blocks is 62/1KB for all
+   non-public IV schemes, i.e. ESSIV/plumb IV
+
+Data existence leak: The Watermark
+
+   No IV format discussed on this page allows the user to deny the
+   existence of encrypted data. Neither cryptoloop nor dm-crypt is an
+   implementation of a deniable cryptography system. But the problem is
+   more serious with public-IV.
+
+   With public IV and the predicable difference it introduces in the first
+   blocks of a sequence of plain text, data can be watermarked, which
+   means, the watermarked data is detectable even when the key has not
+   been recovered. As shown in the paragraph above, the existence of two
+   blocks with identical cipher text is very unlikely and coincidence can
+   be excluded, which is relevant when somebody tries to demonstrate
+   before the law that certain data is in an encrypted partition.
+
+   As the IV progresses with a foreseeable pattern and is guaranteed to
+   change the least significant bit ever step, we can build identical pair
+   of cipher text by writing three consecutive sectors each with a flipped
+   LSB relative to the previous. (The reason it's three instead of two is,
+   that the second least significant bit might change as well.) This
+   "public-IV"-driven CBC encryption will output exactly the same cipher
+   text for two consecutive sectors. An attacker can search the disk for
+   identical consecutive blocks to find the watermark. This can be done in
+   a single pass, and is much more feasible than finding to identical
+   blocks, that are scattered on the disk, as in the previous attack. A
+   few bits of information can be encoded into the watermarks, which might
+   serve as tag to prove the existence copyright infringing material.
+
+   A complete description of watermarking can be found in [22]Encrypted
+   Watermarks and Linux Laptop Security. The attack can be defeated by
+   using ESSIV.
+
+Data modification leak
+
+   CBC encryption is recursive, so the n-th block depends on all previous
+   blocks. But the other way round would also be nice. Why? The weakness
+   becomes visible, if storage on a remote computer is used, or more
+   likely, the hard disk exhibits good forensic properties. The point is,
+   the attacker has to have access to preceding (in time) cipher text of a
+   sector, either by recording it from the network, or by using forensic
+   methods.
+
+   An attacker can now guess data modification patterns by examining the
+   historic data. If a sector is overwritten with a partial changed plain
+   text, there is an amount of bytes at the beginning, which are
+   unchanged. This point of change^2 is directly reflected in the cipher
+   text. So an attacker can deduce the point of the change in plain text
+   by finding the point where the cipher text starts to differ.
+
+   This weakness is present in public-IV and ESSIV.
+
+   ^2aligned to the cipher block size boundaries
+
+Malleable plain text
+
+   The decryption structure of CBC is the source of this weakness.
+   Malleability (with respect to cryptography) is defined as a
+   modification of the cipher text that will resulting in a predictable
+   change in plain text. To put it formally, there is a function f(C),
+   that, if applied to the cipher text, C' = f(C), will result in a known
+   function f', which will predict the resulting plain text, P' = D(C'),
+   correctly assuming P is known, that is P' = f'(P).
+
+   As we can see in it's definition, CBC decryption depends on C[n-1]. An
+   attacker can flip arbitrary bits in the plain text by flipping bit in
+   C[n-1]. More formally^3, if
+   P = P[1] || P[2] || ... || P[i] || ... || P[n]
+   C = E[CBC](P)
+   C = C[1] || C[2] || ... || C[i-1] || ... || C[n]
+   the function
+   f(C[1] || ... || C[n]) = C[1] || ... || C[i-1] XOR M || ... || C[n]
+   follows the function f', which predicts the resulting plain text
+   correctly as,
+   f'(P[1] || ... || P[n]) = P[1] || ... || P[i] XOR M || ... || P[n]
+   The first block of the CBC cipher text stream is not malleable, because
+   it depends on the IV, which is not modifiable for an attacker.
+
+   ^3The IV parameter for E[CBC] has been intentionally omitted.
+
+Movable
+
+   On the expense of one block decrypting to garbage, an attacker can move
+   around plain text as he likes. CBC decryption depends on two variables,
+   C[n-1] and C[n]. Both can be modified at free will. To make meaningful
+   modifications, an attacker has to replace the pair C[n-1] and C[n] with
+   other cipher text pair from disk. The first block C[n-1] will decrypt
+   to garbage, but the second block C[n] will yield a copy of the plain
+   text of the copied cipher block. This attack is also known as
+   copy&paste attack. This attack is mountable against any CBC setup. The
+   only limitation is, the first block, C[0], can't be replaced with
+   something meaningful, as C[-1] can't be modified, because it's the IV.
+
+CMC and EME: Tweakable wide block cipher modes
+
+   CMC is a new chaining mode. It stands for ''CBC-Mask-CBC''. It works by
+   processing the data in three steps, first CBC, then masking the cipher
+   text, and then another CBC step, but this time backwards. The last step
+   introduces a dependency from the last block to the first block. The
+   authors of the CMC paper provide a prove for the security of this mode,
+   making a secure 128-bit cipher a secure 4096-bit cipher (sector size).
+   As in normal CBC, this scheme also takes an IV, but the authors call it
+   tweak.
+
+   EME is CMC's cousin. EME has also been authored by Haveli and Rogaway
+   as well been authored for the same purpose. The difference to CMC is,
+   that EME is parallelizable, that is, all operations of the underlying
+   cipher can be evaluated in parallel. To introduce an interdependency
+   among the resulting cipher blocks, the encryption happens in two
+   stages. Between these stages a mask is computed from all intermediate
+   blocks and applied to each intermediate block. This step causes an
+   interdependency among the cipher blocks. After applying the mask,
+   another encryption step diffuses the mask.
+
+   The interdependency among the resulting blocks allow CMC and EME to be
+   nonmovable, nonmalleable, to prevent content leaks and in-sector data
+   modification patterns. The tweaks are encrypted by both cipher modes,
+   thus both are nonwatermarkable.
+
+   For simplicity, the EME description above omitted the pre- and post-
+   whitening steps as well as the multiplications in GF(2^128). An
+   in-depth specification can be found at the [23]Cryptology ePrint
+   Archive. An applicable draft specification for EME-32-AES can be found
+   at [24]SISWG. I have written an EME-32-AES test implementation for
+   Linux 2.6. It's available [25]here. The CMC paper is available from the
+   [26]Cryptology ePrint Archive as well.
+
+LRW: A tweakable narrow block cipher mode
+
+   EME as well as CMC are comparatively secure cipher modes, but heavy in
+   terms of performance. LRW tries to cope with most of security
+   requirements, and at the same time provide a good performance. LRW is a
+   narrow block cipher mode, that is, it operates only on one block,
+   instead of a whole sector. To make a cipher block tied to a location on
+   disk (to make it unmovable), a logical index is included in the
+   computation. For LRW you have to provide two keys, one for the cipher
+   and one for the cipher mode. The second key is multiplied with a
+   logical index under GF(2^128) and used as pre- and post- whitening for
+   encryption. With those whitening steps the block is effectively tied to
+   a logical index. The logical index is usually the absolute position on
+   disk measured with the block size of the cipher algorithm. The
+   different choice of the measuring unit is the only different between
+   the logical index and the public-IV.
+
+   The LRW draft is available from the [27]SISWG mailing list archive.
+
+Summarising
+
+   The following table shows a comparison between the security properties
+   of different encryption setups and their computational costs. The
+   number of cipher calls, XOR operations and additional operations are
+   stated in terms of encryption blocks, n.
+   IV mode cipher mode content leaks watermarkable malleable movable
+   modification detection^5 cipher calls XOR ops additional op.
+   public-IV CBC Yes Yes Yes Yes Yes n n None
+   ESSIV CBC Yes No Yes Yes Yes n+1 n None
+   Plumb-IV1^4 CBC Yes No Yes Yes No 2n-1 2n None
+   public-IV CMC No No No No No 2n+1 2n+1 1 LW GF ⊗
+   public-IV EME No No No No No 2n+1 5n 3n-1 LW GF ⊗
+   public-IV LRW No No No No Yes n 2n n HW GF ⊗
+
+   Legend:
+     * LW GF ⊗: light-weight Galois field multiplication, that is, a
+       multiplication with a constant x^2^i, which can be computed in
+       θ(1).
+     * HW GF ⊗: heavy-weight Galois field multiplication, that is, a
+       multiplication with an arbitrary constant, which can be computed in
+       θ(bits).
+
+   ^4plumb-IV1 uses CBC-MAC instead of hashing, so we can make a good
+   comparison with other ciphers in terms of cipher/XOR calls.
+   ^5detectable partial in-sector modification
+     __________________________________________________________________
+
+   Clemens Fruhwirth, , also author of LUKS and ESSIV, porter of
+   cryptoloop, aes-i586 for 2.6., twofish-i586, and implementor of
+   EME-32-AES. This text is an excerpt of my diploma thesis.
+
+This page has been reviewed by
+
+   Dr. Ernst Molitor
+   Arno Wagner
+   James Hughes , "Security in Storage Working Group" chair
+
+   Additional thanks to Pascal Brisset, for pointing out an error in the
+   Bernoulli estimation in an earlier version of this document, further
+   Adam J. Richter for pointing out an error in the KB/GB ratio.
+
+   Content and design, Copyright © 2004-2008 Clemens Fruhwirth, unless
+   stated otherwise
+   Original design by [28]haran | Additional art by [29]LinuxArt | | Blog
+   by [30]NanoBlogger
+
+References
+
+   1. http://clemens.endorphin.org/
+   2. http://clemens.endorphin.org/credits
+   3. http://clemens.endorphin.org/aboutme
+   4. http://clemens.endorphin.org/cryptography
+   5. http://blog.clemens.endorphin.org/
+   6. http://clemens.endorphin.org/patches
+   7. http://clemens.endorphin.org/archive
+   8. http://clemens.endorphin.org/Cryptoloop_Migration_Guide
+   9. http://clemens.endorphin.org/LUKS
+  10. http://clemens.endorphin.org/AFsplitter
+  11. http://clemens.endorphin.org/lo-tracker
+  12. http://blog.clemens.endorphin.org/2008/12/luks-on-disk-format-revision-111.html
+  13. http://blog.clemens.endorphin.org/2008/11/xmonad-gridselect.html
+  14. http://blog.clemens.endorphin.org/2008/11/workaround-for-bittorrent-traffic.html
+  15. http://blog.clemens.endorphin.org/2008/09/i-love-lolcat-meme.html
+  16. http://blog.clemens.endorphin.org/2008/09/counter-steganography-research.html
+  17. http://clemens.endorphin.org/cryptography
+  18. http://www.siswg.org/
+  19. http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation
+  20. http://www.freesoft.org/CIE/Topics/143.htm
+  21. http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf
+  22. http://www.tcs.hut.fi/~mjos/doc/wisa2004.pdf
+  23. http://eprint.iacr.org/2003/147/
+  24. http://grouper.ieee.org/groups/1619/email/pdf00011.pdf
+  25. http://article.gmane.org/gmane.linux.kernel.device-mapper.dm-crypt/544
+  26. http://eprint.iacr.org/2003/148/
+  27. http://grouper.ieee.org/groups/1619/email/msg00160.html
+  28. http://www.oswd.org/user/profile/id/3013
+  29. http://www.linuxart.com/
+  30. http://nanoblogger.sourceforge.net/

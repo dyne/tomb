@@ -51,38 +51,69 @@ fi
 # usb auto detect using dmesg
 # tested on ubuntu 10.04 - please test and patch on other systems if you can
 ask_usbkey() {
-    notice "looking for usb key"
+    notice "Waiting 1 minute for a usb key to connect"
     echo -n " .  please insert your usb key "
+    
+    exec_as_user notify-send -i monmort \
+	-u normal -h string:App:Tomb \
+	-h double:Version:${VERSION} \
+	-t 60 \
+	"Insert your USB KEY" \
+	"Tomb is waiting 1 minute for you to insert an external key."
 
     plugged=false
+    c=0
     while [ "$plugged" != "true" ]; do
 	dmesg | tail -n 12 | grep -q 'new.*USB device'
 	if [ $? = 0 ]; then plugged=true; fi
 	echo -n "."
-	sleep .5
+	sleep 1
+	c=`expr $c + 1`
+	if [ $c -gt 60 ]; then
+	    echo
+	    error "timeout."
+	    export usbkey_mount=none
+	    return 1;
+	fi
     done
 
     echo
     echo -n " .  usb key inserted, opening "
     
+    c=0
     attached=false
     while [ "$attached" != "true" ]; do
 	dmesg | tail -n 3| grep -q 'Attached.*removable disk'
 	if [ $? = 0 ]; then attached=true; fi
 	echo -n "."
-	sleep  .5
+	sleep  1
+	c=`expr $c + 1`
+	if [ $c -gt 15 ]; then
+	    echo
+	    error "timeout."
+	    export usbkey_mount=none
+	    return 1;
+	fi
     done
 
     # get the first partition
     usbpart=`dmesg |tail -n 8 | grep '  sd.:' |cut -d: -f2 |tr -d ' '`
 
     # wait that is mounted
+    c=0
     mounted=false
     while [ "$mounted" != "true" ]; do
 	cat /proc/mounts | tail -n 2 | grep -q $usbpart
 	if [ $? = 0 ]; then mounted=true; fi
 	echo -n "."
 	sleep .5
+	c=`expr $c + 1`
+	if [ $c -gt 30 ]; then
+	    echo
+	    error "timeout."
+	    export usbkey_mount=none
+	    return 1;
+	fi
     done
 
     # check where it is mounted
@@ -171,8 +202,8 @@ while true; do
 	    act ""
             notice "Commands:"
 	    act "create     create a new encrypted storage FILE and keys"
-	    act "mount      mount an existing storage FILE on MOUNTPOINT"
-            act "umount     unmounts a mounted storage MOUNTPOINT"
+	    act "open       open an existing tomb FILE on MOUNTPOINT"
+            act "close      closes the tomb on MOUNTPOINT"
 	    echo; exit 2 ;;
 	-v)
 	    # print out the GPL license in this file
@@ -248,29 +279,31 @@ fi
 
 create_tomb() {
 
-    notice "Creating a new tomb in ${FILE}"
+    notice "Creating a new tomb"
     if [ -z $SIZE ]; then
 	if [ $MOUNT ]; then
 	    SIZE=$MOUNT
 	else
-	    create_tomb_guided
-#	    error "size is not specified, please use -s option when creating a tomb"
-#	    exit 0
+	    act "No size specified, summoning the Tomb Undertaker to guide us in the creation."
+	    tomb-open &
+	    disown
+	    exit 0
 	fi
     fi
-    
+
+# make sure the file has a .tomb extension
+    FILE="${FILE%\.*}.tomb"
+
     SIZE_4k=`expr \( $SIZE \* 1000 \) / 4`
-    act "Generating file of ${SIZE}Mb (${SIZE_4k} blocks of 4Kb)"
-#   TODO: use dd_rescue and/or dcfldd
+    act "Generating ${FILE} of ${SIZE}Mb (${SIZE_4k} blocks of 4Kb)"
+#   TODO: use dd_rescue 
     $DD if=/dev/urandom bs=4k count=${SIZE_4k} of=${FILE}
-#    dd if=/dev/urandom bs=4k count=${SIZE_4k} of=${FILE}
     
     if [ $? = 0 -a -e ${FILE} ]; then
 	act "OK: `ls -lh ${FILE}`"
     else
-	error "Error creating the nest file ${FILE} : (dd if=/dev/zero of=${FILE} bs=4k count=$SIZE_4k)"
-	sleep 4
-	exit 0
+	error "Error creating the tomb ${FILE}, operation aborted."
+	exit 1
     fi
 
     mkdir -p /tmp/tomb
@@ -321,7 +354,7 @@ create_tomb() {
     read -q
     if [ $? = 0 ]; then
 	ask_usbkey
-	if ! [ -w ${usbkey_mount} ]; then
+	if ! [ -e ${usbkey_mount} ]; then
 	    error "cannot save the key in a separate place, move it yourself later."
 	else
 	    mkdir -p ${usbkey_mount}/.tomb
@@ -334,7 +367,7 @@ create_tomb() {
 
     act "formatting your Tomb with Ext4 filesystem"
  
-    mkfs.ext4 -q -F -j -L "`hostname`-`date +%s`" /dev/mapper/tomb.tmp
+    mkfs.ext4 -q -F -j -L "${FILE%\.*}-`hostname`" /dev/mapper/tomb.tmp
 
     if [ $? = 0 ]; then
 	act "OK, encrypted storage succesfully formatted"

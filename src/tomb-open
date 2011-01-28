@@ -95,7 +95,7 @@ Create a new Tomb
   the computer you are using.
 
   If you will, I'll be your Crypto Undertaker.
-  Do you want to proceed, Master? (y/n)"
+  Do you want to proceed, Master? (y/n)
 EOF
 echo -n "> "
 read -q
