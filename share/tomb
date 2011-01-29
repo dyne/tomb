@@ -1,1 +1,4 @@
-application/x-tomb-volume; tomb-open '%s'; priority=8
+?package(tomb):command="tomb" icon="/usr/share/pixmaps/monmort.xpm" needs="cryptsetup" \
+	section="Applications/Accessories" title="Tomb" hints="Crypto" \
+	hotkey="Tomb"
+

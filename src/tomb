@@ -595,6 +595,7 @@ Icon=monmort.xpm
 Terminal=false
 Categories=Utility;Security;Archiving;Filesystem;
 MimeType=application/x-tomb-volume;
+X-AppInstall-Package=tomb
 EOF
 	update-desktop-database
 
