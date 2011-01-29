@@ -7,6 +7,16 @@ AppReg_DATA = tomb.applications
 MimeInfodir = $(datadir)/mime-info
 MimeInfo_DATA = tomb.keys tomb.mime
 
+Mimedir = $(prefix)/lib/mime/packages
+Mime_DATA = tomb
+
 Iconsdir = $(datadir)/icons $(datadir)/app-install/icons
 Icons_DATA = monmort.png
 
+install-data-hook:
+	xdg-mime install dyne-tomb.xml
+	xdg-icon-resource install --context mimetypes --size 32 ../src/monmort.xpm monmort
+	xdg-icon-resource install --size 32 ../src/monmort.xpm dyne-monmort
+	update-desktop-database
+	update-menus
+	update-mime

@@ -9,27 +9,10 @@
 [[images/tomb_n_bats.png]]
 </class>
 
+Tomb is a simple tool to manage **encrypted storage** on GNU/Linux, from
+the hashes of the [[http://dynebolic.org][dyne:bolic]] nesting mechanism.
 
-<example>
-            .....                                                ..
-         .H8888888h.  ~-.                                  . uW8"
-         888888888888x  `>        u.      ..    .     :    `t888
-        X~     `?888888hx~  ...ue888b   .888: x888  x888.   8888   .
-        '      x8.^"*88*"   888R Y888r ~`8888~'888X`?888f`  9888.z88N
-         `-:- X8888x        888R I888>   X888  888X '888>   9888  888E
-              488888>       888R I888>   X888  888X '888>   9888  888E
-            .. `"88*        888R I888>   X888  888X '888>   9888  888E
-          x88888nX"      . u8888cJ888    X888  888X '888>   9888  888E
-         !"*8888888n..  :   "*888*P"    "*88%""*88" '888!` .8888  888"
-        '    "*88888888*      'Y"         `~    "    `"`    `%888*%"
-                ^"***"`                                        "`
-
-          a simple commandline tool to manage encrypted storage  v.0.9
-                        (from the hashes of dyne:bolic nesting)
-</example>
-
-
-Tomb aims to be an 100% free and open source system for easy
+Tomb aims to be an **100% free** and open source system for easy
 encryption and backup of personal files, written in code that is easy
 to review and links commonly shared components.
 
@@ -43,6 +26,15 @@ keeping the tomb file on your computer harddisk and the key files on a
 USB stick.
 
 ** Documentation 
+
+First of all the usual info you'd expect a software to provide: 
+
+ - [[README]]
+ - [[ChangeLog]]
+ - [[TODO]]
+ - [[AUTHORS]]
+
+And more below, read on...
 
 *** Who needs Tomb
 
@@ -58,20 +50,38 @@ be interoperable across popular GNU/Linux operating systems.
 *** Aren't there enough encryption tools already?
 
 We've felt the urgency of publishing Tomb for other operating systems
-than dyne:bolic since the current situation with [[http://en.wikipedia.org/wiki/TrueCrypt][TrueCrypt]] is far from
-optimal.  TrueCrypt makes use of statically linked libraries, its code
-is not hosted on CVS and is [[http://lists.freedesktop.org/archives/distributions/2008-October/000276.html][not considered free]] by GNU/Linux
-distributions because of liability reasons, see [[http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=364034][Debian]], [[https://bugs.edge.launchpad.net/ubuntu/+bug/109701][Ubuntu]],
-[[http://lists.opensuse.org/opensuse-buildservice/2008-10/msg00055.html][Suse]], [[http://bugs.gentoo.org/show_bug.cgi?id=241650][Gentoo]] and [[https://fedoraproject.org/wiki/ForbiddenItems#TrueCrypt][Fedora]].
+than dyne:bolic since the current situation in personal desktop
+encryption is far from optimal.
 
-Seen from this perspective, Tomb is intended as a rewrite of most
-functionality offered by TrueCrypt in a new application, confident it
-won't take much relying on previous experience and aiming at:
+[[http://en.wikipedia.org/wiki/TrueCrypt][TrueCrypt]] makes use of statically linked libraries so that its code is
+hard to audit, plus is [[http://lists.freedesktop.org/archives/distributions/2008-October/000276.html][not considered free]] by free operating system
+distributors because of liability reasons, see [[http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=364034][Debian]], [[https://bugs.edge.launchpad.net/ubuntu/+bug/109701][Ubuntu]], [[http://lists.opensuse.org/opensuse-buildservice/2008-10/msg00055.html][Suse]],
+[[http://bugs.gentoo.org/show_bug.cgi?id=241650][Gentoo]] and [[https://fedoraproject.org/wiki/ForbiddenItems#TrueCrypt][Fedora]].
+
+[[http://tom.noflag.org.uk/cryptkeeper.html][Cryptkeeper]] is the best alternative to Tomb out there and its main
+advantage consists in not needing root access on the machine it's
+being used. But Cryptkeeper still has drawbacks: it uses [[http://www.arg0.net/encfs][EncFS]] which
+implements weaker encryption than dm-crypt, its encrypted archives
+aren't transportable and it doesn't promotes the separated storage of
+keys.
+
+At last, the [[https://we.riseup.net/debian/automatically-mount-encrypted-home][Encrypted home]] on operating systems as Debian and Ubuntu
+adopts dm-crypt and encryption algorithms as strong as Tomb does, but
+it needs to be configured when one installs the system and it cannot
+be easily transported, plus again it doesn't promotes separated
+storage of keys. 
+
+With Tomb we try to overcome all these limitations providing strong
+encryption, encouraging users to separate keys from data and letting
+them transport tombs around easily. To facilitate auditing and usage
+we intend to:
  
- - short and readable code, linking shared libs and common components 
- - easy graphical interface, simple for ad-hoc (DIY-deniable)
- - transparent and distributed development hosted using GIT
- - GNU General Public License v3
+ - write short and readable code, linking shared libs
+ - provide easy to use graphical interfaces and desktop integration
+ - keep the development process open and distributed using GIT
+ - distribute Tomb under the GNU General Public License v3
+
+If you believe this is a worthy effort, you are welcome to [[http://dyne.org/donate][support it]].
 
 
 *** How does it works
@@ -89,6 +99,17 @@ reminding you that a tomb is open, offering to explore it or close it.
 See the [[manual][manpage]] for more information on how to operate Tomb from the
 commandline, also the back-end tool **tomb** comes complete with a brief
 --help.
+
+*** Where do  we learn more from
+
+Here below some articles that are useful to understand Tomb more in
+detail and to get in touch with the difficult job of a Crypto
+Undertaker:
+
+ - [[TKS1-draft.pdf][TKS1 - An anti-forensic, two level, and iterated key setup scheme]]
+ - [[New_methods_in_HD_encryption.pdf][New Methods in Hard Disk Encryption]]
+ - [[Luks_on_disk_format.pdf][LUKS On-Disk Format Specification]]
+ - [[LinuxHDEncSettings.txt][Linux hard disk encryption settings]]
 
 
 ** Downloads
@@ -139,11 +160,13 @@ kernel.
 
 *** People involved
 
-Tomb is designed and written by [[http://jaromil.dyne.org][Jaromil]]
+Tomb is designed and written by [[http://jaromil.dyne.org][Jaromil]].
 
-Tomb's artwork is contributed by [[http://monmort.blogspot.org][Món Mort]]
+Tomb's artwork is contributed by [[http://monmort.blogspot.org][Món Mort]].
 
 Testing and fixes are contributed by Dreamer and Hellekin O. Wolf.
+
+Most research we refer to is documented by Clemens Fruhwirth.
 
 Tomb relies on Cryptsetup(8) and LUKS, big up to the developers involved  \o/
 
