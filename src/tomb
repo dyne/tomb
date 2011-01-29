@@ -348,7 +348,7 @@ create_tomb() {
     act "Would you like to save the key on  an external usb device?"
     act "This is recommended for safety:"
     act "always keep the key in a different place than the door!"
-    act "If you answer yes, you'll need a USB KEY now: (yes/no)"
+    act "If you answer yes, you'll need a USB KEY now: (y/n)"
     tomb-notify "Tomb has forged a key." "Would you like to save it on USB?" 
     echo -n " >  "
     read -q
