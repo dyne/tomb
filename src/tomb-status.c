@@ -191,7 +191,7 @@ gboolean right_click(GtkWidget *w, GdkEvent *e) {
 		 1, gtk_get_current_event_time());
 } 
 gboolean cb_about(GtkWidget *w, GdkEvent *e) {
-  const gchar *authors[] = {"Denis Roio aka Jaromil - http://jaromil.dyne.org",NULL};
+  const gchar *authors[] = {"Tomb is written by Jaromil - http://jaromil.dyne.org",NULL};
   const gchar *artists[] = {"Jordi aka Món Mort - http://monmort.blogspot.org",
 			    "Asbesto Molesto - http://freaknet.org/asbesto",
 			    NULL};
@@ -199,7 +199,7 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e) {
   gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(dialog), PACKAGE);
   gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION); 
   gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog), 
-				 "(C)2007-2010 Denis Roio aka Jaromil");
+				 "(C)2007-2011 Denis Roio aka Jaromil");
   gtk_about_dialog_set_artists(GTK_ABOUT_DIALOG(dialog), artists);
   gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dialog), authors);
 
@@ -208,12 +208,26 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e) {
 "\n"
 "This program helps people keeping their bones together by taking care of their private data inside encrypted storage filesystems that are easy to access and transport.\n"
 "\n"
-"The level of security provided by this program is fairly good: it uses an accelerated AES/SHA256 (cbc-essiv) to access the data on the fly, as if it would be a mounted volume.\n"
+"The level of security provided by this program is fairly good: it uses an accelerated AES/SHA256 (cbc-essiv) to access the data on the fly, as if it would be a mounted volume, so that the data is physically stored on your disc only in an encrypted form.\n"
+"Tomb encourages users to store key files in a different place and to separate them from the data during transports\n"
 "\n"
-"To start digging your tomb be ready to get your hands dirty and use the commandline utility 'tomb' from a text terminal."
 );
   gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog), PACKAGE_URL);
   gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog), pb_monmort);
+  gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(dialog), "monmort");
+  // this below is active since gtk 3.0 so too early for it now
+  //  gtk_about_dialog_set_license_type(GTK_ABOUT_DIALOG(dialog), GtkLicense.GTK_LICENSE_GPL_3_0);
+  gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(dialog),
+"This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n"
+"\n"
+"This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\n"
+"\n"
+"You should have received a copy of the GNU General Public License along with this program.\n"
+"If not, see http://www.gnu.org/licenses\n"
+"\n"
+"Tomb is Copyright (C) 2007-2011 by Denis \"Jaromil\" Roio\n"
+"Shared libraries and external software used by Tomb are copyright by their respective authors, licensed and distributed as free software\n");
+  gtk_about_dialog_set_wrap_license(GTK_ABOUT_DIALOG(dialog), TRUE);
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
 }

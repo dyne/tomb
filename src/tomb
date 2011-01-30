@@ -223,7 +223,6 @@ done
 
 id | grep root > /dev/null
 if [ $? != 0 ]; then
-    error "This program must be run as root to produce results"
     if [ "$GETPRIV" = "true" ]; then
 	which gksu > /dev/null
 	if [ $? = 0 ]; then
@@ -239,6 +238,7 @@ if [ $? != 0 ]; then
 	fi
 	exit 1
     else
+	error "This program must be run as root to produce results"
 	exit 1
     fi
 fi

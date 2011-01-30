@@ -61,20 +61,19 @@ distributors because of liability reasons, see [[http://bugs.debian.org/cgi-bin/
 [[http://tom.noflag.org.uk/cryptkeeper.html][Cryptkeeper]] is the best alternative to Tomb out there and its main
 advantage consists in not needing root access on the machine it's
 being used. But Cryptkeeper still has drawbacks: it uses [[http://www.arg0.net/encfs][EncFS]] which
-implements weaker encryption than dm-crypt, its encrypted archives
-aren't transportable and it doesn't promotes the separated storage of
-keys.
+implements weaker encryption than dm-crypt and it doesn't promotes the
+separated storage of keys.
 
-At last, the [[https://we.riseup.net/debian/automatically-mount-encrypted-home][Encrypted home]] on operating systems as Debian and Ubuntu
-adopts dm-crypt and encryption algorithms as strong as Tomb does, but
-it needs to be configured when one installs the system and it cannot
-be easily transported, plus again it doesn't promotes separated
-storage of keys. 
+At last, the [[https://we.riseup.net/debian/automatically-mount-encrypted-home][Encrypted home]] mechanisms on operating systems as Debian
+and Ubuntu adopt encryption algorithms as strong as Tomb does, but
+they need to be configured when the machine is installed, they cannot
+be easily transported and again they don't promote separated storage
+of keys.
 
 With Tomb we try to overcome all these limitations providing strong
 encryption, encouraging users to separate keys from data and letting
-them transport tombs around easily. To facilitate auditing and usage
-we intend to:
+them transport tombs around easily. Also to facilitate auditing and
+customization we intend to:
  
  - write short and readable code, linking shared libs
  - provide easy to use graphical interfaces and desktop integration
@@ -97,8 +96,25 @@ When a tomb is open your panel will have a little icon in the tray
 reminding you that a tomb is open, offering to explore it or close it.
 
 See the [[manual][manpage]] for more information on how to operate Tomb from the
-commandline, also the back-end tool **tomb** comes complete with a brief
---help.
+text terminal.
+<example>
+[*] Tomb  -  simple commandline tool for encrypted storage
+ .  version 0.9 (Jan/2011) by Jaromil @ dyne.org
+ .  
+[*] Syntax: tomb [options] command [file] [mountpoint]
+ .  
+[*] Options:
+ .  -h     print this help
+ .  -v     print out the version information for this tool
+ .  -s     size of the storage file when creating one (in MB)
+ .  -k     path to the key to use for decryption
+ .  -S     acquire super user rights if possible
+ .  
+[*] Commands:
+ .  create     create a new encrypted storage FILE and keys
+ .  open       open an existing tomb FILE on MOUNTPOINT
+ .  close      closes the tomb on MOUNTPOINT
+</example>
 
 *** Where do  we learn more from
 

@@ -127,11 +127,11 @@ cat <<EOF
   job, but  in order  to do so  you will  need to provide  your sudo
   password:
 EOF
-sudo tomb -S create ${filename}.tomb $size
+tomb -S create ${filename}.tomb $size
 if ! [ -r /usr/share/applications/tomb.desktop ]; then
     echo "  Well done!"
     echo "  Now the last thing to do is to install Tomb on your desktop:"
-    sudo tomb install
+    sudo tomb -S install
 fi
 
 exit 0
