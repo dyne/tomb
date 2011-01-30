@@ -106,7 +106,7 @@ text terminal.
 [*] Options:
  .  -h     print this help
  .  -v     print out the version information for this tool
- .  -s     size of the storage file when creating one (in MB)
+ .  -s     size of the storage file when creating one (MB)
  .  -k     path to the key to use for decryption
  .  -S     acquire super user rights if possible
  .  

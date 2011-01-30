@@ -191,12 +191,12 @@ while true; do
     case "$1" in
 	-h)
 	    act ""
-	    notice "Syntax: tomb [options] command [file] [mountpoint | size]"
+	    notice "Syntax: tomb [options] command [file] [mountpoint]"
 	    act ""
             notice "Options:"
 	    act "-h     print this help"
 	    act "-v     print out the version information for this tool"
-	    act "-s     size of the storage file when creating one (in MBytes)"
+	    act "-s     size of the storage file when creating one (MB)"
 	    act "-k     path to the key to use for decryption"
 	    act "-S     acquire super user rights if possible"
 	    act ""
@@ -271,7 +271,7 @@ tombdir=${HOME}/.tomb
 tombtab=${tombdir}/fstab
 if ! [ -r ${tombtab} ]; then
     act "creating tomb filesystem tab in your home"
-    mkdir -p ${HOME}/.tomb
+    mkdir -m 0700 -p ${HOME}/.tomb
     echo "# entombed filesystem information, see man tomb (TODO)" >          ${tombtab}
     echo "# format here is similar to the system wide fstab" >>       ${tombtab}
     echo "# <file system> <mount point> <type> <options> <key>" >>    ${tombtab}
@@ -279,6 +279,11 @@ fi
 
 create_tomb() {
 
+    if [ -e "$FILE" ]; then
+        error "$FILE exists already. I'm not digging here."
+        exit 1
+    fi
+    
     notice "Creating a new tomb"
     if [ -z $SIZE ]; then
 	if [ $MOUNT ]; then
@@ -294,7 +299,7 @@ create_tomb() {
 # make sure the file has a .tomb extension
     FILE="${FILE%\.*}.tomb"
 
-    SIZE_4k=`expr \( $SIZE \* 1000 \) / 4`
+    SIZE_4k=`expr $SIZE \* 1000 / 4`
     act "Generating ${FILE} of ${SIZE}Mb (${SIZE_4k} blocks of 4Kb)"
 #   TODO: use dd_rescue 
     $DD if=/dev/urandom bs=4k count=${SIZE_4k} of=${FILE}
@@ -357,7 +362,7 @@ create_tomb() {
 	if ! [ -e ${usbkey_mount} ]; then
 	    error "cannot save the key in a separate place, move it yourself later."
 	else
-	    mkdir -p ${usbkey_mount}/.tomb
+	    mkdir -m 0700 -p ${usbkey_mount}/.tomb
 	    cp -v ${FILE}.gpg ${usbkey_mount}/.tomb/
 	    chmod -R go-rwx ${usbkey_mount}/.tomb
 	    ${WIPE[@]} ${FILE}.gpg
@@ -469,6 +474,11 @@ mount_tomb() {
     fsck -p -C0 /dev/mapper/${mapper}
     
     mount -o rw,noatime,nodev /dev/mapper/${mapper} ${MOUNT}
+
+    # Ensure the user can write the disk
+    ME=${SUDO_USER:-$(whoami)}
+    chmod 0750 ${MOUNT}
+    chown $(id -u $ME):$(id -g $ME) ${MOUNT}
     
     notice "encrypted storage $FILE succesfully mounted on $MOUNT"
     ( exec_as_user tomb-status ${mapper} ${FILE} ${MOUNT} ) &
@@ -480,16 +490,16 @@ umount_tomb() {
 
     if [ -z $FILE ]; then
 
-	how_many_tombs="`ls /dev/mapper/tomb* 2>/dev/null | wc -w`"
+	how_many_tombs=$(2>/dev/null (ls /dev/mapper/tomb.* | wc -w))
 	if [ $how_many_tombs = 0 ]; then
 	    error "there is no open tomb to be closed"
 	    exit 0
 	elif [ $how_many_tombs = 1 ]; then
-	    mapper=`ls /dev/mapper/tomb* 2>/dev/null`
+	    mapper=`ls /dev/mapper/tomb.* 2>/dev/null`
 	    FILE=`mount | grep $mapper | awk '{print $3}'`
 	else
 	    error "too many tombs mounted, please specify which to unmount:"
-	    ls /dev/mapper/tomb*
+	    ls /dev/mapper/tomb.*
 	    exit 1
 	fi
 
@@ -501,7 +511,8 @@ umount_tomb() {
 	    mapper=/dev/mapper/${FILE}
 	else
 	    error "tomb not found: $FILE"
-	    error "please specify an existing /dev/mapper/tomb*"
+	    error "please specify an existing /dev/mapper/tomb.*"
+	    ls /dev/mapper/tomb.*
 	    exit 1
 	fi
 #	FILE=`mount | grep $mapper | awk '{print $3}'`
