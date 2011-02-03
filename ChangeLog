@@ -1,4 +1,9 @@
-January 2011
+February 2011 - 0.9.1
+
+	Sourcecode cleanup, debugging and testing.
+	Integrated some feedback after filing Debian's ITP and RFS.
+
+January 2011 - 0.9
 
 	Tomb is now a desktop application following freedesktop standards:
 	it provides a status tray and integrates with file managers.  The
@@ -6,7 +11,7 @@ January 2011
 
 August 2010
 
-	The first version of Tomb ever released to the public
+	The first usable version of Tomb goes public among hacker friends
 
 During the year 2009
 
