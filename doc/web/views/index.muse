@@ -85,15 +85,16 @@ If you believe this is a worthy effort, you are welcome to [[http://dyne.org/don
 
 *** How does it works
 
+[[images/monmort.png]]
 
 Tombs are operated from a normal file browser or from the commandline.
 
 To open a tomb is sufficient to click on it, or use the command **tomb-open**
 
-[[images/monmort.png]]
-
 When a tomb is open your panel will have a little icon in the tray
 reminding you that a tomb is open, offering to explore it or close it.
+
+[[images/awesome-shot.png]]
 
 See the [[manual][manpage]] for more information on how to operate Tomb from the
 text terminal.
@@ -179,7 +180,7 @@ kernel.
 
 Tomb is designed and written by [[http://jaromil.dyne.org][Jaromil]].
 
-Tomb's artwork is contributed by [[http://monmort.blogspot.org][Món Mort]].
+Tomb's artwork is contributed by [[http://monmort.blogspot.com][Món Mort]].
 
 Testing and fixes are contributed by Dreamer and Hellekin O. Wolf.
 
