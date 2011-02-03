@@ -74,17 +74,25 @@ file adding a '.gpg' suffix,  but can be later renamed and transported
 on other media. When a key is  not found, the program asks to insert a
 USB storage device and it will look for the key file inside it.
 .B
-.IP "-S"
-The  tomb commandline  tool needs  to  acquire super  user rights  (to
-become root) for  most of its operations. When  used, this option will
-tell the tomb program to use 'sudo'  or 'gksu' to ask the user for the
-password or use the one already in cache.
-.B
 .IP "-h"
 Display a help text and quit
 .B
 .IP "-v"
 Display version and quit
+.B
+.IP "-q"
+Run more quietly
+
+.SH PRIVILEGE ESCALATION
+
+The tomb commandline tool needs to acquire super user rights to
+execute most of its operations.
+
+Once the rights are acquired Tomb executes as root only those commands
+requiring it, while it executes desktop applications as the user.
+
+The escalation to super user privileges is triggered automatically by
+calling 'gksu' or 'sudo' commands.
 
 
 .SH BUGS
@@ -94,6 +102,14 @@ Get in touch with developers via mail using this web page
 http://dyne.org/contact or via chat on http://irc.dyne.org
 
 .SH AUTHORS
+
+Tomb is designed and written by Denis Roio aka Jaromil.
+
+Tomb's artwork is contributed by Jordi aka Mon Mort
+
+Testing and fixes are contributed by Dreamer and Hellekin O. Wolf
+
+Cryptsetup is developed by Christophe Saout and Clemens Fruhwirth
 
 .SH COPYING
 
