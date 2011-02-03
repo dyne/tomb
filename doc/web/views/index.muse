@@ -99,16 +99,17 @@ See the [[manual][manpage]] for more information on how to operate Tomb from the
 text terminal.
 <example>
 [*] Tomb  -  simple commandline tool for encrypted storage
- .  version 0.9 (Jan/2011) by Jaromil @ dyne.org
+ .  version 0.9.1 (Feb/2011) by Jaromil @ dyne.org
  .  
 [*] Syntax: tomb [options] command [file] [mountpoint]
  .  
 [*] Options:
  .  -h     print this help
  .  -v     print out the version information for this tool
+ .  -q     run quietly, without printing informations
+ .  -D     print out debugging information at runtime
  .  -s     size of the storage file when creating one (MB)
  .  -k     path to the key to use for decryption
- .  -S     acquire super user rights if possible
  .  
 [*] Commands:
  .  create     create a new encrypted storage FILE and keys
@@ -138,7 +139,7 @@ build your own application and as source code you can study.
 
 *** Code repository
 
-Latest stable release is 0.9 (28 January 2011) more about it in the
+Latest stable release is 0.9.1 (3 February 2011) more about it in the
 [[ftp://ftp.dyne.org/tomb/NEWS][NEWS]] and [[ftp://ftp.dyne.org/tomb/ChangeLog][ChangeLog]]
 
 Source releases are checked and signed by [[http://jaromil.dyne.org][Jaromil]] using [[http://www.gnupg.org][GnuPG]].
