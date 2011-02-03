@@ -27,10 +27,10 @@ DATE=Feb/2011
 
 # standard output message routines
 # it's always useful to wrap them, in case we change behaviour later
-notice() { echo "[*] $1"; }
-act() { echo " .  $1"; }
-error() { echo "[!] $1"; }
-func() { if [ $DEBUG ]; then echo "[D] $1"; fi }
+notice() { if ! [ $QUIET ]; then echo "[*] $1"; fi }
+act()    { if ! [ $QUIET ]; then echo " .  $1"; fi }
+error()  { if ! [ $QUIET ]; then echo "[!] $1"; fi }
+func()   { if [ $DEBUG ];   then echo "[D] $1"; fi }
 
 # which dd command to use
 which dcfldd > /dev/null
@@ -256,10 +256,10 @@ while true; do
             notice "Options:"
 	    act "-h     print this help"
 	    act "-v     print out the version information for this tool"
+	    act "-q     run quietly, without printing informations"
 	    act "-D     print out debugging information at runtime"
 	    act "-s     size of the storage file when creating one (MB)"
 	    act "-k     path to the key to use for decryption"
-	    act "-S     acquire super user rights if possible"
 	    act ""
             notice "Commands:"
 	    act "create     create a new encrypted storage FILE and keys"
@@ -277,7 +277,7 @@ BEGIN { license=0 }
 '
 	    act ""
 	    exit 0 ;;
-	-q) shift 1 ;;
+	-q) QUIET=1; shift 1 ;;
 	-D) DEBUG=1; shift 1 ;;
         -s) SIZE=$2; shift 2 ;;
 	-k) KEY=$2; shift 2 ;;
