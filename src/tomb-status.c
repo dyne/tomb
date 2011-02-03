@@ -172,7 +172,7 @@ gboolean cb_close(GtkWidget *w, GdkEvent *e) {
     return FALSE;
   }
   if (cpid == 0) {    // Child
-    execlp("tomb","tomb","-S","umount",mapper,(char*)NULL);
+    execlp("tomb", "tomb", "close", mapper, (char*)NULL);
     exit(1);
   }
   waitpid(cpid, &res, 0);

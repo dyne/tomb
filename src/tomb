@@ -131,15 +131,15 @@ ask_usbkey() {
 # user interface (just to ask the password)
 ask_password() {
 
-    exec_as_user xhost # 2&>1 >/dev/null
+    exec_as_user xhost 2>&1 >/dev/null
     if [ $? = 0 ]; then # we have access to the X display
 	
-	exec_as_user which tomb-askpass # 2&>1 > /dev/null
+	exec_as_user which tomb-askpass # 2>&1 > /dev/null
 	if [ $? = 0 ]; then
 	    export scolopendro="`exec_as_user tomb-askpass ${1} 2>/dev/null`"
 	    return
 	fi
-	exec_as_user which ssh-askpass # 2&>1 > /dev/null
+	exec_as_user which ssh-askpass # 2>&1 > /dev/null
 	if [ $? = 0 ]; then
 	    export scolopendro="`exec_as_user ssh-askpass "Tomb: provide the password to unlock"`"
 	    return
@@ -193,17 +193,20 @@ exec_as_user() {
     fi
     
     func "executing as user '$SUDO_USER': ${(f)@}"
-    which gksu > /dev/null
-    if [ $? = 0 ]; then
-	func "Using gksu for execution of '${(f)@}' as user $SUDO_USER"
-	gksu -u $SUDO_USER "${@[@]}"
-	return $?
-    fi
+    # which gksu > /dev/null
+    # if [ $? = 0 ]; then
+    # 	func "Using gksu for execution of '${(f)@}' as user $SUDO_USER"
+    # 	gksu -u $SUDO_USER "${@[@]}"
+    # 	return $?
+    # fi
     which sudo > /dev/null
     if [ $? = 0 ]; then
 	func "Using sudo for execution of '${(f)@}' as user $SUDO_USER"
 	sudo -u $SUDO_USER "${@[@]}"
 	return $?
+    else
+	error "Tomb requires sudo. please install it."
+	return 1
     fi
 }
 
@@ -215,17 +218,18 @@ check_priv() {
 	which gksu > /dev/null
 	if [ $? = 0 ]; then
 	    func "Using gksu for root execution of 'tomb ${(f)ARGS}'"
-	    gksu "tomb ${ARGS[@]}"
-	    exit $?
+	    gksu "tomb -q ${ARGS[@]}"
+	    exit 0
 	fi
 	which sudo > /dev/null
 	if [ $? = 0 ]; then
 	    func "Using sudo for root execution of 'tomb ${(f)ARGS}'"
-	    sudo "tomb ${ARGS[@]}"
-	    exit $?
+	    sudo "tomb -q ${ARGS[@]}"
+	    exit 0
 	fi
-	exit 1
+	return 1
     fi
+    return 0
 }
 
 
@@ -233,13 +237,16 @@ check_priv() {
 ### main()
 ###
 
-notice "Tomb  -  simple commandline tool for encrypted storage"
-act "version $VERSION ($DATE) by Jaromil @ dyne.org"
+echo $@ | grep '\-q' 2>&1 > /dev/null
+if [ $? != 0 ]; then
+    notice "Tomb  -  simple commandline tool for encrypted storage"
+    act "version $VERSION ($DATE) by Jaromil @ dyne.org"
+fi
 func "invoked with args \"${(f)@}\" "
 func "running on `date`"
 ARGS=$@[@]
 
-OPTS=`getopt -o hvDs:k: -n 'tomb' -- "$@"`
+OPTS=`getopt -o hvqDs:k: -n 'tomb' -- "$@"`
 while true; do
     case "$1" in
 	-h)
@@ -270,6 +277,7 @@ BEGIN { license=0 }
 '
 	    act ""
 	    exit 0 ;;
+	-q) shift 1 ;;
 	-D) DEBUG=1; shift 1 ;;
         -s) SIZE=$2; shift 2 ;;
 	-k) KEY=$2; shift 2 ;;
@@ -282,7 +290,7 @@ done
 
 
 
-if [ -z $CMD ]; then
+if ! [ $CMD ]; then
     error "first argument missing, use -h for help"
     tomb-notify
     exit 0
@@ -290,17 +298,8 @@ fi
 
 
 
-func "command: $CMD for file $FILE"
+func "Tomb called: $CMD $CMD2 $CMD3"
 
-tombdir=${HOME}/.tomb
-tombtab=${tombdir}/fstab
-if ! [ -r ${tombtab} ]; then
-    act "creating tomb filesystem tab in your home"
-    mkdir -m 0700 -p ${HOME}/.tomb
-    echo "# entombed filesystem information, see man tomb (TODO)" >          ${tombtab}
-    echo "# format here is similar to the system wide fstab" >>       ${tombtab}
-    echo "# <file system> <mount point> <type> <options> <key>" >>    ${tombtab}
-fi
 
 create_tomb() {
 
@@ -309,7 +308,7 @@ create_tomb() {
 
     if [ -e "$FILE" ]; then
         error "$FILE exists already. I'm not digging here."
-        exit 1
+        return 1
     fi
 
     notice "Creating a new tomb"
@@ -318,9 +317,8 @@ create_tomb() {
 	    SIZE=$MOUNT
 	else
 	    act "No size specified, summoning the Tomb Undertaker to guide us in the creation."
-	    tomb-open &
-	    disown
-	    exit 0
+	    tomb-open &!
+	    return 0
 	fi
     fi
 
@@ -463,61 +461,83 @@ create_tomb() {
 
 mount_tomb() {
 
-    if ! [ -r $FILE ]; then
-#  try also adding a .tomb extension
-	FILEtomb="${FILE%\.*}.tomb"
-	if ! [ -r $FILEtomb ]; then
-	    error "cannot find a tomb named $FILE"
-	    exit 1
-	else
-	    FILE=$FILEtomb
-	fi
-    fi
-
-    if ! [ $KEY ]; then
-	enc_key="`basename ${FILE}.gpg`"
+    if ! [ $CMD2 ]; then
+	error "need an argument, operation aborted."
+	return 1
+    elif [ -r $CMD2 ]; then
+	tombfile=$CMD2
     else
-	enc_key="$KEY"
-    fi
-
-
-    notice "mounting $FILE on mountpoint $MOUNT"
-    if [ -z $MOUNT ]; then
-	MOUNT=/media/`basename ${FILE}`
-	act "mountpoint not specified, using default: $MOUNT"
-	mkdir -p $MOUNT
-    elif ! [ -x $MOUNT ]; then
-	error "mountpoint $MOUNT doesn't exist"
-	exit 1
-    fi
-
-    # check if key file is present
-    if ! [ -r "${enc_key}" ]; then
-	error "encryption key ${enc_key} not found on disk"
-	error "use -k option to specify which key to use"
-	error "or provide a usb key, or press ctrl-c to abort"
-	ask_usbkey
-        # returns usbkey_mount, now check if the key is there
-	if [ -r ${usbkey_mount}/.tomb/${enc_key} ]; then
-	    enc_key=${usbkey_mount}/.tomb/${enc_key}
-	    notice "key found on ${enc_key}"
-	else
-	    error "key is missing."
-	    exit 1
+        # try also adding a .tomb extension
+	tombfile="${CMD2%\.*}.tomb"
+	if ! [ -r $tombfile ]; then
+	    error "cannot find a tomb named $CMD"
+	    return 1
 	fi
     fi
+
+    file $tombfile | grep -i 'luks encrypted.*cbc-essiv' 2>&1 >/dev/null
+    if [ $? != 0 ]; then
+	error "$CMD2 is not a valid tomb file, operation aborted"
+	tomb-notify "Not a tomb." "$CMD2 doesn't seems a real tomb."
+	return 1
+    fi
+
+    tombdir=`dirname $tombfile`
+    tombname=`echo $tombfile | cut -d. -f1`
+
+    if [ $KEY ]; then
+	# key manually chosen from commandline with -k 
+	tombkey="`basename $KEY`"
+	tombkeypath="$KEY"
+    else
+	tombkey="`basename ${tombfile}.gpg`"
+	if [ -r $tombkey ]; then
+	    tombkeypath=$tombkey
+	elif [ -r "$tombdir/$tombkey" ]; then
+	    tombkeypath="$tombdir/$tombkey"
+	else
+	    notice "please insert your USB KEY"
+	    error "encryption key ${enc_key} not found on disk"
+	    error "use -k option to specify which key to use"
+	    error "or provide a usb key, or press ctrl-c to abort"
+	    ask_usbkey
+            # returns usbkey_mount, now check if the key is there
+	    if [ -r ${usbkey_mount}/.tomb/${tombkey} ]; then
+		tombkeypath=${usbkey_mount}/.tomb/${tombkey}
+		notice "key found on ${tombkeypath}"
+	    else
+		error "key is missing, try to locate $tombkey in your files."
+		error "operation aborted"
+		return 1
+	    fi
+	fi
+    fi
+
+    if ! [ $CMD3 ]; then
+	tombmount=/media/`basename ${tombfile}`
+	act "mountpoint not specified, using default: $tombmount"
+    elif ! [ -x $CMD3 ]; then
+	error "mountpoint $CMD2 doesn't exist, operation aborted."
+	return 1
+    else
+	tombmount=$CMD3
+    fi
+
+    notice "mounting $tombfile on mountpoint $tombmount"
+
+    # we need root from here on
+    mkdir -p $tombmount
     
     nstloop=`losetup -f`
-    losetup -f ${FILE}
+    losetup -f ${tombfile}
     
     act "check for a valid LUKS encrypted device"
     cryptsetup isLuks ${nstloop}
     if [ $? != 0 ]; then
  # is it a LUKS encrypted nest? see cryptsetup(1)
-	error "$FILE is not a valid Luks encrypted storage file"
-	exit 1
+	error "$tombfile is not a valid Luks encrypted storage file"
+	return 1
     fi
-	
 	
     modprobe dm-crypt
     modprobe aes-i586
@@ -526,10 +546,10 @@ mount_tomb() {
     mapdate="`date +%s`"
     mapdate="`echo ${mapdate}/60 | bc -l | cut -d. -f1`"
     
-    mapper="tomb.`basename $FILE | cut -d. -f1`.$mapdate.`basename $nstloop`"
+    mapper="tomb.`basename $tombfile | cut -d. -f1`.$mapdate.`basename $nstloop`"
     
-    notice "Password is required for key ${enc_key}"
-    keyname=`basename $enc_key | cut -d. -f1`
+    notice "Password is required for key ${tombkey}"
+    keyname=`basename $tombkey | cut -d. -f1`
     for c in 1 2 3; do
 	
 	if [ $c = 1 ]; then
@@ -539,7 +559,7 @@ mount_tomb() {
 	fi
 	echo "${scolopendro}" \
 	    | gpg --batch --passphrase-fd 0 --no-tty --no-options \
-	          -d "${enc_key}" 2>/dev/null \
+	          -d "${tombkeypath}" 2>/dev/null \
 	    | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 	
 	unset scolopendro
@@ -553,109 +573,95 @@ mount_tomb() {
     if ! [ -r /dev/mapper/${mapper} ]; then
 	error "failure mounting the encrypted file"
 	losetup -d ${nstloop}
-	exit 1
+	return 1
     fi
     
     act "encrypted storage filesystem check"
     fsck -p -C0 /dev/mapper/${mapper}
     
-    mount -o rw,noatime,nodev /dev/mapper/${mapper} ${MOUNT}
+    mount -o rw,noatime,nodev /dev/mapper/${mapper} ${tombmount}
 
     # Ensure the user can write the disk - 10x Hellekin :)
     ME=${SUDO_USER:-$(whoami)}
-    chmod 0750 ${MOUNT}
-    chown $(id -u $ME):$(id -g $ME) ${MOUNT}
+    chmod 0750 ${tombmount}
+    chown $(id -u $ME):$(id -g $ME) ${tombmount}
     
-    notice "encrypted storage $FILE succesfully mounted on $MOUNT"
-    ( exec_as_user tomb-status ${mapper} ${FILE} ${MOUNT} ) &
-    disown
-    exit 0
+    notice "encrypted storage $tombfile succesfully mounted on $tombmount"
+    exec_as_user tomb-status ${mapper} ${tombfile} ${tombmount} &!
+    return 0
 }
 
 umount_tomb() {
 
-    if [ -z $FILE ]; then
-
-	how_many_tombs=`ls /dev/mapper/tomb.* 2> /dev/null | wc -w`
-	if [ $how_many_tombs = 0 ]; then
+    if ! [ $1 ]; then
+	
+	how_many_tombs="`find /dev/mapper -name 'tomb.*' | wc -w`"
+	if [ "$how_many_tombs" = "0" ]; then
 	    error "there is no open tomb to be closed"
-	    exit 0
-	elif [ $how_many_tombs = 1 ]; then
-	    mapper=`ls /dev/mapper/tomb.* 2>/dev/null`
-	    FILE=`mount | grep $mapper | awk '{print $3}'`
+	    return 1
+	elif [ "$how_many_tombs" = "1" ]; then
+	    mapper=`find /dev/mapper -name 'tomb.*'`
+	    tombfile=`mount | grep $mapper | awk '{print $3}'`
 	else
 	    error "too many tombs mounted, please specify which to unmount:"
 	    ls /dev/mapper/tomb.*
-	    exit 1
+	    error "or issue the command 'tomb close all' to clos'em all."
+	    return 1
 	fi
 
     fi
 
-    if [ -r $FILE ]; then # accepts relative and absolute path
-	mapper=$FILE
-    elif [ -r /dev/mapper/${FILE} ]; then
-	mapper=/dev/mapper/${FILE}
+    if [ "$1" = "all" ]; then
+	tombs=`find /dev/mapper -name 'tomb.*'`
+	if ! [ $tombs ]; then
+	    error "Tombs are all closed, cemetery is quiet."
+	    return 1
+	fi
+	for t in ${(f)tombs}; do
+	    umount_tomb ${t}
+	done
+	return 0
     fi
-	
-    if ! [ -r $mapper ]; then
-	error "tomb not found: $mapper"
+
+    if [ -r "$1" ]; then # accepts relative and absolute path
+	mapper="$1"
+    elif [ -r /dev/mapper/${1} ]; then
+	mapper=/dev/mapper/${1}
+    else
+	error "tomb not found: $1"
 	error "please specify an existing /dev/mapper/tomb.*"
-	ls /dev/mapper/tomb.*
 	tomb-notify "My tomb vanished" "Crypto undertaker will rest in peace."
-	killall -e ${mapper}
-	exit 1
+	return 0
     fi
-
-
-    # if [ "$mapper" = "" ]; then
-    # 	error "$FILE is not mounted"
-    # 	return
-    # fi
-
-    # mapper=`basename $mapper`
-
-    # if ! [ -r /dev/mapper/${mapper} ]; then
-    # 	error "tomb doesn't seems to be mounted:"
-    # 	error "${mapper} is not present in /dev/mapper"
-    # 	exit 1
-    # fi
 
     basemap=`basename $mapper`
     tombname=`echo ${basemap} | cut -d. -f2`
 
     act "closing tomb $tombname on dm-crypt $basemap"
 
-    mount | grep $mapper 2&>1 > /dev/null
+    mount | grep $mapper 2>&1 >/dev/null
     if [ $? = 0 ]; then # still mounted
 	errno=`umount ${mapper}`
 	if ! [ $? = 0 ]; then
 	    tomb-notify "Tomb '$tombname' is too busy." \
 		"Close all applications and file managers, then try again."
-	    exit 1
+	    return 1
 	fi
     fi
 
     cryptsetup luksClose $basemap
     if ! [ $? = 0 ]; then
 	error "error occurred in cryptsetup luksClose ${basemap}"
-	exit 1
+	return 1
     fi
 
     losetup -d "/dev/`echo $basemap | cut -d. -f4`"
 
-    # echo ${nstloop} | grep loop 1>/dev/null 2>/dev/null
-    # # if it's a loopback then we need to do losetup -d
-    # if [ $? = 0 ]; then
-    # 	losetup -d ${nstloop}
-    # 	if ! [ $? = 0 ]; then
-    # 	    error "error occurred in losetup -d ${nstloop}"
-    # 	    exit 0
-    # 	fi
-    # fi
-
     notice "crypt storage ${mapper} unmounted"
     tomb-notify "Tomb closed: $tombname" "Your bones will Rest In Peace."
-    exit 0
+
+
+    return 0
 }
 
 # install mime-types, bells and whistles for the desktop
@@ -749,9 +755,14 @@ EOF
 
 kill_tomb() {
     # TODO: fixME - should close all tombs
-    umount /tmp/tomb*     2&>1 > /dev/null
+    umount /tmp/tomb*     2>&1 > /dev/null
     # todo check which are tomb loops
-    losetup -d /dev/loop* 2&>1 > /dev/null
+    losetup -d /dev/loop* 2>&1 > /dev/null
+    statuses=`ps ax| grep -v awk | awk "/tomb-status.$basemap/"' { print $1 }'`
+    for ts in ${(f)statuses}; do
+     	kill $ts
+    done
+
 }
     
 	
@@ -761,12 +772,12 @@ case "$CMD" in
     mount)    check_priv ; mount_tomb  ;;
     open)     check_priv ; mount_tomb  ;;
 
-    umount)   check_priv ; umount_tomb ;;
-    unmount)  check_priv ; umount_tomb ;;
-    close)    check_priv ; umount_tomb ;;
+    umount)   check_priv ; umount_tomb ${CMD2} ;;
+    unmount)  check_priv ; umount_tomb ${CMD2} ;;
+    close)    check_priv ; umount_tomb ${CMD2} ;;
 
-    install)  check_priv ; install_tomb     ;;
-    kill)     check_priv ; kill_tomb   ;;
+    install)  check_priv ; install_tomb ;;
+    kill)     check_priv ; kill_tomb    ;;
 
     status)   tomb-status ;;
     notify)   tomb-notify $CMD2 $CMD3 ;;
@@ -776,5 +787,5 @@ case "$CMD" in
 	exit 1
 	;;
 esac
-
-exit 0
+# return codes from called functions
+exit $?
