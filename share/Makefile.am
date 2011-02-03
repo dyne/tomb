@@ -17,6 +17,7 @@ install-data-hook:
 	xdg-mime install dyne-tomb.xml
 	xdg-icon-resource install --context mimetypes --size 32 ../src/monmort.xpm monmort
 	xdg-icon-resource install --size 32 ../src/monmort.xpm dyne-monmort
+	mkdir -p $(prefix)/lib/mime/packages
 	echo "application/x-tomb-volume; tomb-open '%s'; priority=8" > $(prefix)/lib/mime/packages/tomb
 	update-desktop-database
 	update-menus
