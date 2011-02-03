@@ -20,8 +20,8 @@
 # this source code; if not, write to:
 # Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-VERSION=0.9
-DATE=Jan/2011
+VERSION=0.9.1
+DATE=Feb/2011
 
 # PATH=/usr/bin:/usr/sbin:/bin:/sbin   
 
@@ -50,6 +50,10 @@ fi
 
 # usb auto detect using dmesg
 # tested on ubuntu 10.04 - please test and patch on other systems if you can
+# TODO: use udev rules, see how archlinux folks document it - arch rox 8)
+# https://wiki.archlinux.org/index.php/System_Encryption_with_LUKS_for_dm-crypt
+# here we could modularize the choice of methods using function pointers,
+# so that they are configurable when calling tomb.
 ask_usbkey() {
     notice "Waiting 1 minute for a usb key to connect"
     echo -n " .  please insert your usb key "
@@ -127,15 +131,16 @@ ask_usbkey() {
 # user interface (just to ask the password)
 ask_password() {
 
-    exec_as_user xhost 2>/dev/null
+    exec_as_user xhost # 2&>1 >/dev/null
     if [ $? = 0 ]; then # we have access to the X display
 	
-	exec_as_user which tomb-askpass
+	exec_as_user which tomb-askpass # 2&>1 > /dev/null
 	if [ $? = 0 ]; then
-	    keyname=`basename $enc_key | cut -d. -f1`
-	    export scolopendro="`exec_as_user tomb-askpass $keyname`"
+	    export scolopendro="`exec_as_user tomb-askpass ${1} 2>/dev/null`"
 	    return
-	elif [ -x /usr/bin/ssh-askpass ]; then # debian has this
+	fi
+	exec_as_user which ssh-askpass # 2&>1 > /dev/null
+	if [ $? = 0 ]; then
 	    export scolopendro="`exec_as_user ssh-askpass "Tomb: provide the password to unlock"`"
 	    return
 	fi
@@ -146,6 +151,7 @@ ask_password() {
 	echo -n " >  "
 	read -s scolopendro
 	export scolopendro
+
     fi
 
     # just in case we'd like to have dialog supported too:
@@ -157,22 +163,69 @@ ask_password() {
 
 # popup notification
 tomb-notify() {
+    # look for our icon in common prefixes
+    if   [ -r /usr/share/pixmaps/monmort.xpm ];       then icon=/usr/share/pixmaps/monmort.xpm
+    elif [ -r /usr/share/icons/monmort.xpm ];         then icon=/usr/share/icons/monmort.xpm
+    elif [ -r /usr/local/share/pixmaps/monmort.xpm ]; then icon=/usr/local/share/pixmaps/monmort.xpm
+    elif [ -r /usr/local/share/icons/monmort.xpm ];   then icon=/usr/local/share/icons/monmort.xpm
+    elif [ -r /opt/share/pixmaps/monmort.xpm ];       then icon=/opt/share/pixmaps/monmort.xpm
+    elif [ -r /sw/share/pixmaps/monmort.xpm ];        then icon=/sw/share/pixmaps/monmort.xpm
+    fi
+
     if [ -z $1 ]; then
-	exec_as_user notify-send -i monmort \
+	exec_as_user notify-send -i $icon \
 	    -u low -h string:App:Tomb \
 	    -h double:Version:${VERSION} \
 	    "Tomb version $VERSION" \
 	    "Hi, I'm the Undertaker.
 Let's start setting your Crypt?"
     else
-	exec_as_user notify-send -i monmort ${@}
+	exec_as_user notify-send -i $icon ${@}
     fi
 }
 
 # drop privileges
 exec_as_user() {
+
+    if ! [ $SUDO_USER ]; then
+	exec $@[@]
+	return $?
+    fi
+    
     func "executing as user '$SUDO_USER': ${(f)@}"
-    sudo -u $SUDO_USER ${@}
+    which gksu > /dev/null
+    if [ $? = 0 ]; then
+	func "Using gksu for execution of '${(f)@}' as user $SUDO_USER"
+	gksu -u $SUDO_USER "${@[@]}"
+	return $?
+    fi
+    which sudo > /dev/null
+    if [ $? = 0 ]; then
+	func "Using sudo for execution of '${(f)@}' as user $SUDO_USER"
+	sudo -u $SUDO_USER "${@[@]}"
+	return $?
+    fi
+}
+
+
+# escalate privileges
+check_priv() {
+    id | grep root > /dev/null
+    if [ $? != 0 ]; then
+	which gksu > /dev/null
+	if [ $? = 0 ]; then
+	    func "Using gksu for root execution of 'tomb ${(f)ARGS}'"
+	    gksu "tomb ${ARGS[@]}"
+	    exit $?
+	fi
+	which sudo > /dev/null
+	if [ $? = 0 ]; then
+	    func "Using sudo for root execution of 'tomb ${(f)ARGS}'"
+	    sudo "tomb ${ARGS[@]}"
+	    exit $?
+	fi
+	exit 1
+    fi
 }
 
 
@@ -184,9 +237,9 @@ notice "Tomb  -  simple commandline tool for encrypted storage"
 act "version $VERSION ($DATE) by Jaromil @ dyne.org"
 func "invoked with args \"${(f)@}\" "
 func "running on `date`"
+ARGS=$@[@]
 
-
-OPTS=`getopt -o hvs:k:S -n 'tomb' -- "$@"`
+OPTS=`getopt -o hvDs:k: -n 'tomb' -- "$@"`
 while true; do
     case "$1" in
 	-h)
@@ -196,6 +249,7 @@ while true; do
             notice "Options:"
 	    act "-h     print this help"
 	    act "-v     print out the version information for this tool"
+	    act "-D     print out debugging information at runtime"
 	    act "-s     size of the storage file when creating one (MB)"
 	    act "-k     path to the key to use for decryption"
 	    act "-S     acquire super user rights if possible"
@@ -216,37 +270,7 @@ BEGIN { license=0 }
 '
 	    act ""
 	    exit 0 ;;
-	-S) GETPRIV=true; shift 1 ;;
-	*)  break ;;
-    esac
-done
-
-id | grep root > /dev/null
-if [ $? != 0 ]; then
-    if [ "$GETPRIV" = "true" ]; then
-	which gksu > /dev/null
-	if [ $? = 0 ]; then
-	    act "Using gksu for root execution of 'tomb ${(f)@}'"
-	    gksu "tomb ${(f)@}"
-	    exit $?
-	fi
-	which sudo > /dev/null
-	if [ $? = 0 ]; then
-	    act "Using sudo for root execution of 'tomb ${(f)@}'"
-	    sudo "tomb ${(f)@}"
-	    exit $?
-	fi
-	exit 1
-    else
-	error "This program must be run as root to produce results"
-	exit 1
-    fi
-fi
-
-# now process the real options
-OPTS=`getopt -o hvs:k:S -n 'tomb' -- "$@"`
-while true; do
-    case "$1" in
+	-D) DEBUG=1; shift 1 ;;
         -s) SIZE=$2; shift 2 ;;
 	-k) KEY=$2; shift 2 ;;
 	--) shift; break ;;
@@ -255,6 +279,7 @@ while true; do
 	    CMD2=${2}; CMD3=${3}; break ;;
     esac
 done
+
 
 
 if [ -z $CMD ]; then
@@ -279,11 +304,14 @@ fi
 
 create_tomb() {
 
+# make sure the file has a .tomb extension
+    FILE="${FILE%\.*}.tomb"
+
     if [ -e "$FILE" ]; then
         error "$FILE exists already. I'm not digging here."
         exit 1
     fi
-    
+
     notice "Creating a new tomb"
     if [ -z $SIZE ]; then
 	if [ $MOUNT ]; then
@@ -296,12 +324,8 @@ create_tomb() {
 	fi
     fi
 
-# make sure the file has a .tomb extension
-    FILE="${FILE%\.*}.tomb"
-
     SIZE_4k=`expr $SIZE \* 1000 / 4`
     act "Generating ${FILE} of ${SIZE}Mb (${SIZE_4k} blocks of 4Kb)"
-#   TODO: use dd_rescue 
     $DD if=/dev/urandom bs=4k count=${SIZE_4k} of=${FILE}
     
     if [ $? = 0 -a -e ${FILE} ]; then
@@ -311,34 +335,78 @@ create_tomb() {
 	exit 1
     fi
 
-    mkdir -p /tmp/tomb
-
     modprobe dm-crypt
     modprobe aes-i586
 
     nstloop=`losetup -f` # get the number for next loopback device
     losetup -f ${FILE}   # allocates the next loopback for our file
-    keytmp=`tempfile`
+
+    # create the keyfile in tmpfs so that we leave less traces in RAM
+    keytmp=`tempfile -p tomb`
+    rm -f $keytmp
+    mkdir -p $keytmp
+    mount tmpfs ${keytmp} -t tmpfs -o size=1m
+    if [ $? != 0 ]; then
+	error "cannot mount tmpfs filesystem in volatile memory"
+	error "operation aborted."
+	losetup -d $nstloop
+	rm -r $keytmp
+	exit 1
+    fi
     act "Generating secret key..."
     act "this operation takes time, keep using this computer on other tasks,"
     act "once done you will be asked to choose a password for your tomb."
-    cat /dev/urandom | dd bs=1 count=256 of=${keytmp}
-
+    touch ${keytmp}/tomb.tmp
+    chmod 0600 ${keytmp}/tomb.tmp
+    $DD bs=1 count=256 if=/dev/urandom of=${keytmp}/tomb.tmp
+    if ! [ -r ${keytmp}/tomb.tmp ]; then
+	error "cannot generate encryption key, operation aborted."
+	umount ${keytmp}
+	losetup -d $nstloop
+	rm -r $keytmp
+	exit 1
+    fi
+	
     notice "Setup your secret key file ${FILE}.gpg"
     tomb-notify "The Tomb key is being forged:" "please set your password."
+
     # here user is prompted for key password
-    gpg -o "${FILE}.gpg" --no-options --openpgp -c -a ${keytmp}
-    while [ $? = 2 ]; do
-	gpg -o "${FILE}.gpg" --no-options --openpgp -c -a ${keytmp}
+    for c in 1 2 3; do
+	# 3 tries to write two times a matching password
+	ask_password ${FILE}
+	scolotemp=$scolopendro
+	ask_password "${FILE} (again)"
+	if [ "$scolotemp" = "$scolopendro" ]; then
+	    break;
+	fi
+	unset $scolotemp
+	unset $scolopendro
     done
+
+    if [ -z $scolopendro ]; then
+	error "passwords don't match, aborting operation"
+	umount ${keytmp}
+	losetup -d $nstloop
+	rm -r $keytmp
+	exit 1
+    fi
+
+    echo "${scolopendro}" | gpg --batch --no-options --no-tty --passphrase-fd 0 \
+	-o "${FILE}.gpg" -c -a ${keytmp}/tomb.tmp
+    if [ $? = 2 ]; then
+	error "setting password failed: gnupg returns 2"
+	umount ${keytmp}
+	losetup -d $nstloop
+	rm -r $keytmp
+	exit 1
+    fi
     
     act "formatting Luks mapped device"
-        # dm-crypt only supports sha1
-        # but we can use aes-cbc-essiv with sha256 for better security
-        # see http://clemens.endorphin.org/LinuxHDEncSettings
+        # we use aes-cbc-essiv with sha256
+        # for security, performance and compatibility
     cryptsetup --batch-mode \
 	--cipher aes-cbc-essiv:sha256 --key-size 256 \
-	luksFormat ${nstloop} ${keytmp}
+	luksFormat ${nstloop} ${keytmp}/tomb.tmp
 
     if ! [ $? = 0 ]; then
 	act "operation aborted."
@@ -346,8 +414,10 @@ create_tomb() {
     fi
  
     
-    cryptsetup --key-file ${keytmp} --cipher aes luksOpen ${nstloop} tomb.tmp
-    ${WIPE[@]} ${keytmp}
+    cryptsetup --key-file ${keytmp}/tomb.tmp --cipher aes luksOpen ${nstloop} tomb.tmp
+    ${WIPE[@]} ${keytmp}/tomb.tmp
+    umount ${keytmp}
+    rm -r ${keytmp}
 
     notice "Your tomb is ready on ${FILE} and secured with key ${FILE}.gpg"
     act "Would you like to save the key on  an external usb device?"
@@ -393,11 +463,23 @@ create_tomb() {
 
 mount_tomb() {
 
-    if [ -z $KEY ]; then
+    if ! [ -r $FILE ]; then
+#  try also adding a .tomb extension
+	FILEtomb="${FILE%\.*}.tomb"
+	if ! [ -r $FILEtomb ]; then
+	    error "cannot find a tomb named $FILE"
+	    exit 1
+	else
+	    FILE=$FILEtomb
+	fi
+    fi
+
+    if ! [ $KEY ]; then
 	enc_key="`basename ${FILE}.gpg`"
     else
 	enc_key="$KEY"
     fi
+
 
     notice "mounting $FILE on mountpoint $MOUNT"
     if [ -z $MOUNT ]; then
@@ -447,13 +529,17 @@ mount_tomb() {
     mapper="tomb.`basename $FILE | cut -d. -f1`.$mapdate.`basename $nstloop`"
     
     notice "Password is required for key ${enc_key}"
+    keyname=`basename $enc_key | cut -d. -f1`
     for c in 1 2 3; do
 	
-	ask_password
-	
+	if [ $c = 1 ]; then
+	    ask_password ${keyname}
+	else
+	    ask_password "$keyname (retry $c)"
+	fi
 	echo "${scolopendro}" \
-	    | gpg --passphrase-fd 0 --no-tty --no-options \
-	    -d "${enc_key}" 2>/dev/null \
+	    | gpg --batch --passphrase-fd 0 --no-tty --no-options \
+	          -d "${enc_key}" 2>/dev/null \
 	    | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 	
 	unset scolopendro
@@ -475,7 +561,7 @@ mount_tomb() {
     
     mount -o rw,noatime,nodev /dev/mapper/${mapper} ${MOUNT}
 
-    # Ensure the user can write the disk
+    # Ensure the user can write the disk - 10x Hellekin :)
     ME=${SUDO_USER:-$(whoami)}
     chmod 0750 ${MOUNT}
     chown $(id -u $ME):$(id -g $ME) ${MOUNT}
@@ -490,7 +576,7 @@ umount_tomb() {
 
     if [ -z $FILE ]; then
 
-	how_many_tombs=$(2>/dev/null (ls /dev/mapper/tomb.* | wc -w))
+	how_many_tombs=`ls /dev/mapper/tomb.* 2> /dev/null | wc -w`
 	if [ $how_many_tombs = 0 ]; then
 	    error "there is no open tomb to be closed"
 	    exit 0
@@ -503,21 +589,23 @@ umount_tomb() {
 	    exit 1
 	fi
 
-    else
-
-	if [ -r $FILE ]; then
-	    mapper=$FILE
-	elif [ -r /dev/mapper/${FILE} ]; then
-	    mapper=/dev/mapper/${FILE}
-	else
-	    error "tomb not found: $FILE"
-	    error "please specify an existing /dev/mapper/tomb.*"
-	    ls /dev/mapper/tomb.*
-	    exit 1
-	fi
-#	FILE=`mount | grep $mapper | awk '{print $3}'`
-
     fi
+
+    if [ -r $FILE ]; then # accepts relative and absolute path
+	mapper=$FILE
+    elif [ -r /dev/mapper/${FILE} ]; then
+	mapper=/dev/mapper/${FILE}
+    fi
+	
+    if ! [ -r $mapper ]; then
+	error "tomb not found: $mapper"
+	error "please specify an existing /dev/mapper/tomb.*"
+	ls /dev/mapper/tomb.*
+	tomb-notify "My tomb vanished" "Crypto undertaker will rest in peace."
+	killall -e ${mapper}
+	exit 1
+    fi
+
 
     # if [ "$mapper" = "" ]; then
     # 	error "$FILE is not mounted"
@@ -535,11 +623,16 @@ umount_tomb() {
     basemap=`basename $mapper`
     tombname=`echo ${basemap} | cut -d. -f2`
 
-    errno=`umount ${mapper}`
-    if ! [ $? = 0 ]; then
-	tomb-notify "Tomb '$tombname' is too busy." \
-	    "Close all applications and file managers, then try again."
-	exit 1
+    act "closing tomb $tombname on dm-crypt $basemap"
+
+    mount | grep $mapper 2&>1 > /dev/null
+    if [ $? = 0 ]; then # still mounted
+	errno=`umount ${mapper}`
+	if ! [ $? = 0 ]; then
+	    tomb-notify "Tomb '$tombname' is too busy." \
+		"Close all applications and file managers, then try again."
+	    exit 1
+	fi
     fi
 
     cryptsetup luksClose $basemap
@@ -568,7 +661,7 @@ umount_tomb() {
 # install mime-types, bells and whistles for the desktop
 # see http://developers.sun.com/solaris/articles/integrating_gnome.html
 # and freedesktop specs
-install() {
+install_tomb() {
 
 # TODO: distro package deps (for binary)
 # debian: zsh, cryptsetup, libgtk2.0-0, libnotify-bin
@@ -653,25 +746,34 @@ tomb
 EOF
     act "Tomb is now installed."
 }
+
+kill_tomb() {
+    # TODO: fixME - should close all tombs
+    umount /tmp/tomb*     2&>1 > /dev/null
+    # todo check which are tomb loops
+    losetup -d /dev/loop* 2&>1 > /dev/null
+}
+    
 	
 case "$CMD" in
-    create)   create_tomb ;;
+    create)   check_priv ; create_tomb ;;
 
-    mount)    mount_tomb  ;;
-    open)     mount_tomb  ;;
+    mount)    check_priv ; mount_tomb  ;;
+    open)     check_priv ; mount_tomb  ;;
 
-    umount)   umount_tomb ;;
-    unmount)  umount_tomb ;;
-    close)    umount_tomb ;;
+    umount)   check_priv ; umount_tomb ;;
+    unmount)  check_priv ; umount_tomb ;;
+    close)    check_priv ; umount_tomb ;;
 
-    install)  install     ;;
+    install)  check_priv ; install_tomb     ;;
+    kill)     check_priv ; kill_tomb   ;;
 
     status)   tomb-status ;;
     notify)   tomb-notify $CMD2 $CMD3 ;;
 
     *) error "command \"$CMD\" not recognized"
 	act "try -h for help"
-	break
+	exit 1
 	;;
 esac
 
