@@ -26,6 +26,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <pthread.h>
+
 #include <gtk/gtk.h>
 #include <libnotify/notify.h>
 
@@ -72,6 +74,7 @@ int main(int argc, char **argv) {
     // TODO: check if mapper really exists
     snprintf(mapper,255, "%s", argv[1]);
   }
+
 
   if(argc<3) sprintf(filename, "unknown");
   else snprintf(filename,255, "%s", argv[2]);
@@ -132,6 +135,7 @@ int main(int argc, char **argv) {
   
   notify_uninit();
 
+
   exit(0);
   
 }
@@ -158,29 +162,42 @@ gboolean cb_view(GtkWidget *w, GdkEvent *e) {
     return FALSE;
   }
   if (cpid == 0) {    // Child
-    execlp("tomb-open", "tomb-open", mountpoint ,(char*)NULL);
+    execlp("tomb-open", "tomb-open", "-q", mountpoint ,(char*)NULL);
     exit(1);
   }
   return TRUE;
 }
 
+void* thread_close(void *arg) {
+  char *map = (char*)arg;
+  execlp("tomb", "tomb", "-q", "close", map, (char*)NULL);
+  return NULL;
+}
+
 gboolean cb_close(GtkWidget *w, GdkEvent *e) { 
-  pid_t cpid = fork();
-  int res;
-  if (cpid == -1) {
-    fprintf(stderr,"error: problem forking process\n");
+  pthread_t thread;
+  pthread_attr_t attr;
+  int *res;
+
+  if(pthread_attr_init (&attr) == -1) {
+    fprintf(stderr, "error initializing POSIX thread attribute\n");
     return FALSE;
   }
-  if (cpid == 0) {    // Child
-    execlp("tomb", "tomb", "close", mapper, (char*)NULL);
-    exit(1);
-  }
-  waitpid(cpid, &res, 0);
-  if(res==0) {
+  pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_JOINABLE);
+
+  pthread_create(&thread, &attr, thread_close, mapper);
+
+  pthread_join(thread,(void**)&res);
+
+  if(*res==0) {
+    pthread_attr_destroy(&attr);
     gtk_main_quit();
     notify_uninit();
     exit(0);
   }
+
+  pthread_attr_destroy(&attr);
+
   return TRUE;
 }
 
