@@ -20,7 +20,7 @@
 # this source code; if not, write to:
 # Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-VERSION=0.9.1
+VERSION=0.9.2
 DATE=Feb/2011
 
 # PATH=/usr/bin:/usr/sbin:/bin:/sbin   
@@ -30,7 +30,7 @@ DATE=Feb/2011
 notice() { if ! [ $QUIET ]; then echo "[*] $1"; fi }
 act()    { if ! [ $QUIET ]; then echo " .  $1"; fi }
 error()  { if ! [ $QUIET ]; then echo "[!] $1"; fi }
-func()   { if [ $DEBUG ];   then echo "[D] $1"; fi }
+func()   { if [ $DEBUG ]; then echo "[D] $1"; fi }
 
 # which dd command to use
 which dcfldd > /dev/null
@@ -134,7 +134,7 @@ ask_password() {
     exec_as_user xhost 2>&1 >/dev/null
     if [ $? = 0 ]; then # we have access to the X display
 	
-	exec_as_user which tomb-askpass # 2>&1 > /dev/null
+	exec_as_user which tomb-askpass > /dev/null
 	if [ $? = 0 ]; then
 	    export scolopendro="`exec_as_user tomb-askpass ${1} 2>/dev/null`"
 	    return
@@ -192,10 +192,9 @@ exec_as_user() {
 	return $?
     fi
     
-    func "executing as user '$SUDO_USER': ${(f)@}"
+    func "exec_as_user '$SUDO_USER': ${(f)@}"
     which sudo > /dev/null
     if [ $? = 0 ]; then
-	func "Using sudo for execution of '${(f)@}' as user $SUDO_USER"
 	sudo -u $SUDO_USER "${@[@]}"
 	return $?
     else
@@ -212,14 +211,14 @@ check_priv() {
 	which gksu > /dev/null
 	if [ $? = 0 ]; then
 	    func "Using gksu for root execution of 'tomb ${(f)ARGS}'"
-	    gksu "tomb -q ${ARGS[@]}"
-	    exit 0
+	    gksu "tomb ${ARGS[@]}"
+	    exit $?
 	fi
 	which sudo > /dev/null
 	if [ $? = 0 ]; then
 	    func "Using sudo for root execution of 'tomb ${(f)ARGS}'"
-	    sudo "tomb -q ${ARGS[@]}"
-	    exit 0
+	    sudo "tomb ${ARGS[@]}"
+	    exit $?
 	fi
 	return 1
     fi
@@ -236,8 +235,12 @@ if [ $? != 0 ]; then
     notice "Tomb  -  simple commandline tool for encrypted storage"
     act "version $VERSION ($DATE) by Jaromil @ dyne.org"
 fi
-func "invoked with args \"${(f)@}\" "
-func "running on `date`"
+echo $@ | grep '\-D' 2>&1 > /dev/null
+if [ $? = 0 ]; then
+    echo "[D] invoked with args \"${(f)@}\" "
+    echo "[D] running on `date`"
+fi
+
 ARGS=$@[@]
 
 OPTS=`getopt -o hvqDs:k: -n 'tomb' -- "$@"`
@@ -655,7 +658,7 @@ umount_tomb() {
     # check if there are binded dirs and close them first
     mount | grep "${tombmount}" | grep -v loop 2>&1 > /dev/null
     if [ $? = 0 ]; then
-	act "closing tomb $tombname binded directories"
+	act "closing bind hooks for tomb $tombname "
 	unbind=`mount | grep ${tombmount} | grep -v loop | awk '
     { print "umount " $3 "; " }
     '`
@@ -668,7 +671,7 @@ umount_tomb() {
     act "closing tomb $tombname on dm-crypt $basemap"
     mount | grep $mapper 2>&1 >/dev/null
     if [ $? = 0 ]; then # still mounted
-	errno=`umount ${mapper}`
+	umount ${mapper}
 	if ! [ $? = 0 ]; then
 	    tomb-notify "Tomb '$tombname' is too busy." \
 		"Close all applications and file managers, then try again."
@@ -811,8 +814,8 @@ case "$CMD" in
 
     *) error "command \"$CMD\" not recognized"
 	act "try -h for help"
-	exit 1
+	return 1
 	;;
 esac
 # return codes from called functions
-exit $?
+return $?

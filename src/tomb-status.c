@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include <libgen.h>
 
 #include <sys/types.h>
@@ -141,6 +142,7 @@ gboolean left_click(GtkWidget *w, GdkEvent *e) {
   gtk_menu_popup(menu_left, NULL, NULL,
 		 gtk_status_icon_position_menu, status_tomb,
 		 1, gtk_get_current_event_time());
+  return TRUE;
 } 
 gboolean cb_view(GtkWidget *w, GdkEvent *e) { 
   // GtkWidget *dialog = 
@@ -165,17 +167,38 @@ gboolean cb_view(GtkWidget *w, GdkEvent *e) {
 }
 
 gboolean cb_close(GtkWidget *w, GdkEvent *e) { 
-  pid_t cpid = fork();
-  int res;
+  int pipefd[2];
+  pid_t cpid;
+  char buf;
+  int c, res;
+  char map[256];
+
+  if (pipe(pipefd) <0) {
+    fprintf(stderr,"pipe creation error: %s\n", strerror(errno));
+    return FALSE;
+  }
+  
+
+  cpid = fork();
   if (cpid == -1) {
-    fprintf(stderr,"error: problem forking process\n");
+    fprintf(stderr,"fork error: %s\n", strerror(errno));
     return FALSE;
   }
   if (cpid == 0) {    // Child
-    execlp("tomb", "tomb", "close", mapper, (char*)NULL);
-    exit(1);
+    close(pipefd[1]); // close unused write end
+    for(c=0; read(pipefd[0], &buf, 1) > 0; c++)
+      map[c] = buf;
+    close(pipefd[0]);
+    map[c+1] = '\0';
+    execlp("tomb", "tomb", "close", map, (char*)NULL);
+    _exit(1);
   }
+  close(pipefd[0]); // close unused read end
+  write(pipefd[1], mapper, strlen(mapper));
+  close(pipefd[1]); // reader will see EOF
+
   waitpid(cpid, &res, 0);
+  fprintf(stderr,"forked child returns %i",res);
   if(res==0) {
     gtk_main_quit();
     notify_uninit();
@@ -189,6 +212,7 @@ gboolean right_click(GtkWidget *w, GdkEvent *e) {
   gtk_menu_popup(menu_right, NULL, NULL,
 		 gtk_status_icon_position_menu, status_tomb,
 		 1, gtk_get_current_event_time());
+  return TRUE;
 } 
 gboolean cb_about(GtkWidget *w, GdkEvent *e) {
   const gchar *authors[] = {"Tomb is written by Jaromil - http://jaromil.dyne.org",NULL};
@@ -230,5 +254,7 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e) {
   gtk_about_dialog_set_wrap_license(GTK_ABOUT_DIALOG(dialog), TRUE);
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
+  return TRUE;
 }
   
+
