@@ -5,15 +5,13 @@ you are welcome to send patches to jaromil@dyne.org
 
 * TODO Release 1.0							:80%:
 
-** DONE [#A] desktop integration with mime types the freedesktop way :jaromil:
-
-** DONE [#B] debian packaging with desktop integration		    :jaromil:
+** DONE [#A] desktop integration the freedesktop way		    :jaromil:
 
 ** DONE [#A] use a posix thread instead of fork for status close    :jaromil:
 
-** TODO [#A] fix operation without DISPLAY (over SSH)		   :hellekin:
+** [#A] fix operation without DISPLAY (over SSH)		   :hellekin:
 
-** TODO [#A] use a config file to map bind mounts		    :jaromil:
+** [#A] use a config file to map bind mounts			    :jaromil:
 
  useful also to choose a default file browser and other things.
 
@@ -21,11 +19,21 @@ you are welcome to send patches to jaromil@dyne.org
  a tomb so that personal directories appear in the home folder.
 
 
-** [#C] make one single status handle more tombs
+** DONE [#B] debian packaging with desktop integration		    :jaromil:
 
-** [#C] decorate creation wizard with ASCII art
+** [#B] incremental backup system using bup			    :jaromil:
 
-* TODO Release 2.0
+   tombs are modifed only where needed so file changes are local to
+   the file segment where data is stored. i've tested this idea and it
+   works! bup makes incremental backups using git as a backend, big up
+   apenwarr :) on git://github.com/apenwarr/bup
+
+
+** TODO [#C] make one single status handle more tombs
+
+** TODO [#C] decorate creation wizard with ASCII art
+
+* TODO Release 2.0							:00%:
 
 100% backward compatible with tombs created with 1.0 
 
@@ -44,6 +52,4 @@ you are welcome to send patches to jaromil@dyne.org
 ** [#B] indeep security analysis of possible vulnerabilities
 
 ** [#C] more gtk dialogs for configurations? keep it minimal!
-
-** [#C] bomb the V...... and shoot the P...
 

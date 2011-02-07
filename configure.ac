@@ -12,7 +12,7 @@ AC_CANONICAL_HOST
 dnl backwards compatibility for autoconf >= 2.64
 dnl PACKAGE_URL should be the fifth argument of AC_INIT
 m4_define([AC_PACKAGE_URL], [http://tomb.dyne.org])
-AC_DEFINE(PACKAGE_URL, "AC_PACKAGE_URL", [Package URL])
+dnl AC_DEFINE(PACKAGE_URL, "AC_PACKAGE_URL", [Package URL])
 AC_SUBST(PACKAGE_URL, AC_PACKAGE_URL)
 
 dnl ==============================================================
@@ -83,11 +83,27 @@ PKG_CHECK_MODULES(NOTIFY, libnotify, :,
 AC_SUBST([NOTIFY_CFLAGS])
 AC_SUBST([NOTIFY_LIBS])
 
+dnl compile with full warnings and debugging symbols
+AC_ARG_ENABLE(debug,
+    AS_HELP_STRING([--enable-debug],[compile with debug symbols (no)]),
+    [enable_debug=$enableval],
+    [enable_debug=no])
+AC_MSG_CHECKING([if compiling with debug symbols])
+if test x$enable_debug = xyes; then
+    AC_MSG_RESULT([yes])
+    CFLAGS="$CFLAGS -Wall -g -ggdb"
+else
+    AC_MSG_RESULT([no])
+fi
+AC_SUBST(CFLAGS)
+
+
 PACKAGE_DATA_DIR='${prefix}/share/tomb'
 AC_SUBST(PACKAGE_DATA_DIR)
 # mime TODO see http://www.freedesktop.org/wiki/Specifications/AddingMIMETutor
 XDG_DATA_DIR='${prefix}/share/mime/packages'
 AC_SUBST(XDG_DATA_DIR)
+
 
 dnl alphabetic order on dir/subdir, but Makefile sorts before everything
 AC_CONFIG_FILES([
