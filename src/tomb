@@ -193,12 +193,6 @@ exec_as_user() {
     fi
     
     func "executing as user '$SUDO_USER': ${(f)@}"
-    # which gksu > /dev/null
-    # if [ $? = 0 ]; then
-    # 	func "Using gksu for execution of '${(f)@}' as user $SUDO_USER"
-    # 	gksu -u $SUDO_USER "${@[@]}"
-    # 	return $?
-    # fi
     which sudo > /dev/null
     if [ $? = 0 ]; then
 	func "Using sudo for execution of '${(f)@}' as user $SUDO_USER"
@@ -587,8 +581,29 @@ mount_tomb() {
     chown $(id -u $ME):$(id -g $ME) ${tombmount}
     
     notice "encrypted storage $tombfile succesfully mounted on $tombmount"
+    exec_bind_hooks ${tombmount}
     exec_as_user tomb-status ${mapper} ${tombfile} ${tombmount} &!
     return 0
+}
+
+exec_bind_hooks() {
+    mnt=$1 # first argument is where the tomb is mounted
+    if ! [ -r ${mnt}/bind-hooks ]; then return; fi
+
+    # if 'bind-hooks' is found inside the tomb, parse it
+    # every line contains two strings:
+    # the first is a directory existing inside the tomb
+    # the second is the place where it should be mounted (-o bind)
+    hook=`cat ${mnt}/bind-hooks | awk '
+/^#/ { next }
+{ if($1 && $2) print "mount -o bind \${mnt}/" $1 " " $2 "; " }
+'`
+    # restore $HOME for the calling user
+    HOME=/home/${SUDO_USER}
+
+    act "bind hooks found, mounting direcories as requested"
+    # execute the mount commands
+    eval $hook
 }
 
 umount_tomb() {
@@ -601,7 +616,6 @@ umount_tomb() {
 	    return 1
 	elif [ "$how_many_tombs" = "1" ]; then
 	    mapper=`find /dev/mapper -name 'tomb.*'`
-	    tombfile=`mount | grep $mapper | awk '{print $3}'`
 	else
 	    error "too many tombs mounted, please specify which to unmount:"
 	    ls /dev/mapper/tomb.*
@@ -630,15 +644,28 @@ umount_tomb() {
     else
 	error "tomb not found: $1"
 	error "please specify an existing /dev/mapper/tomb.*"
-	tomb-notify "My tomb vanished" "Crypto undertaker will rest in peace."
+	tomb-notify "Tomb was already closed." "Undertaker will rest in peace."
 	return 0
     fi
 
     basemap=`basename $mapper`
     tombname=`echo ${basemap} | cut -d. -f2`
+    tombmount=`mount | grep $mapper | awk '{print $3}'`
+
+    # check if there are binded dirs and close them first
+    mount | grep "${tombmount}" | grep -v loop 2>&1 > /dev/null
+    if [ $? = 0 ]; then
+	act "closing tomb $tombname binded directories"
+	unbind=`mount | grep ${tombmount} | grep -v loop | awk '
+    { print "umount " $3 "; " }
+    '`
+	eval $unbind
+	func "umount binded dirs:"
+	func "$unbind"
+    fi
+
 
     act "closing tomb $tombname on dm-crypt $basemap"
-
     mount | grep $mapper 2>&1 >/dev/null
     if [ $? = 0 ]; then # still mounted
 	errno=`umount ${mapper}`
