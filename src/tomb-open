@@ -57,7 +57,7 @@ fi
 if [ -f $1 ]; then
     file $1 | grep LUKS
     if [ $? = 0 ]; then
-	tomb -S mount $1
+	tomb mount $1
 	exit $?
     else
 	tomb notify "Not a real Tomb." "We found no real bones in there."
