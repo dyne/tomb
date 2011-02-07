@@ -198,7 +198,6 @@ gboolean cb_close(GtkWidget *w, GdkEvent *e) {
   close(pipefd[1]); // reader will see EOF
 
   waitpid(cpid, &res, 0);
-  fprintf(stderr,"forked child returns %i",res);
   if(res==0) {
     gtk_main_quit();
     notify_uninit();

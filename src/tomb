@@ -586,6 +586,7 @@ mount_tomb() {
     
     notice "encrypted storage $tombfile succesfully mounted on $tombmount"
     exec_bind_hooks ${tombmount}
+    exec_post_hooks ${tombmount}
     exec_as_user tomb-status ${mapper} ${tombfile} ${tombmount} &!
     return 0
 }
@@ -608,6 +609,21 @@ exec_bind_hooks() {
     act "bind hooks found, mounting direcories as requested"
     # execute the mount commands
     eval $hook
+}
+
+exec_post_hooks() {
+    mnt=$1 # first argument is where the tomb is mounted
+    if ! [ -x ${mnt}/post-hooks ]; then return; fi
+    # if 'post-hooks' is found inside the tomb, check it: if it is an
+    # executable, launch it as a user this might need a dialog for
+    # security on what is being run, however we expect you know well
+    # what is inside your tomb.  this feature opens the possibility to
+    # make encrypted executables.
+    cat ${mnt}/post-hooks | head -n1 | grep '^#!/'
+    if [ $? = 0 ]; then
+	act "post hooks found, executing as user $SUDO_USER"
+	exec_as_user ${mnt}/post-hooks
+    fi
 }
 
 umount_tomb() {
