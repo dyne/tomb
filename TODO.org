@@ -18,6 +18,13 @@ you are welcome to send patches to jaromil@dyne.org
  using mount -o bind we can trigger actions to be made after mounting
  a tomb so that personal directories appear in the home folder.
 
+** TODO [#A] SLAM tomb and kill all applications using it
+
+   using fuser(1) we can do that easily, but we should ask user
+   confirmation.
+
+   now tomb-dialog or something like that would be useful it askpass
+   and dialog might melt together into one binary later.
 
 ** DONE [#B] debian packaging with desktop integration		    :jaromil:
 
@@ -32,6 +39,7 @@ you are welcome to send patches to jaromil@dyne.org
 ** TODO [#C] make one single status handle more tombs
 
 ** TODO [#C] decorate creation wizard with ASCII art
+
 
 * TODO Release 2.0							:00%:
 
