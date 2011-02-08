@@ -90,9 +90,11 @@ Create a new Tomb
   other people  possessing it will discover your  secrets, unless they
   have your USB key and your password.
 
-  If you choose  to proceed now, we'll guide  you through the creation
-  of a new Tomb, You will also need the super-user (sudo) password for
-  the computer you are using.
+  If you choose to proceed now, we'll guide you through the creation
+  of a new Tomb. You will need the super-user (sudo) password for the
+  computer you are using, as well time available: depending how big
+  your tomb will be, make sure you are not running low on batteries,
+  considering 1GB takes little little less than an hour to be digged.
 
   If you will, I'll be your Crypto Undertaker.
   Do you want to proceed, Master? (y/n)
