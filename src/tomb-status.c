@@ -189,7 +189,7 @@ gboolean cb_close(GtkWidget *w, GdkEvent *e) {
     for(c=0; read(pipefd[0], &buf, 1) > 0; c++)
       map[c] = buf;
     close(pipefd[0]);
-    map[c+1] = '\0';
+    map[c] = '\n';
     execlp("tomb", "tomb", "close", map, (char*)NULL);
     _exit(1);
   }
