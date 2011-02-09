@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/zsh -x
 #
 # Tomb, the Crypto Undertaker
 #
@@ -71,9 +71,9 @@ ask_usbkey() {
 	dmesg | tail -n 12 | grep -q 'new.*USB device'
 	if [ $? = 0 ]; then plugged=true; fi
 	echo -n "."
-	sleep 1
+	sleep .5
 	c=`expr $c + 1`
-	if [ $c -gt 60 ]; then
+	if [ $c -gt 15 ]; then
 	    echo
 	    error "timeout."
 	    export usbkey_mount=none
@@ -82,12 +82,12 @@ ask_usbkey() {
     done
 
     echo
-    echo -n " .  usb key inserted, opening "
+    echo -n " .  usb key inserted, attaching "
     
     c=0
     attached=false
     while [ "$attached" != "true" ]; do
-	dmesg | tail -n 3| grep -q 'Attached.*removable disk'
+	dmesg | tail -n 12| grep -q 'Attached.*removable disk'
 	if [ $? = 0 ]; then attached=true; fi
 	echo -n "."
 	sleep  1
@@ -100,28 +100,44 @@ ask_usbkey() {
 	fi
     done
 
+    echo
+    echo -n " .  usb attached, opening "
+    
     # get the first partition
-    usbpart=`dmesg |tail -n 8 | grep '  sd.:' |cut -d: -f2 |tr -d ' '`
+    usbpart=`dmesg |tail -n 12 | grep '  sd.:' |cut -d: -f2 |tr -d ' '`
 
-    # wait that is mounted
-    c=0
-    mounted=false
-    while [ "$mounted" != "true" ]; do
-	cat /proc/mounts | tail -n 2 | grep -q $usbpart
-	if [ $? = 0 ]; then mounted=true; fi
-	echo -n "."
-	sleep .5
-	c=`expr $c + 1`
-	if [ $c -gt 30 ]; then
-	    echo
-	    error "timeout."
-	    export usbkey_mount=none
-	    return 1;
-	fi
-    done
+    # # wait that is mounted (it automount is on)
+    # c=0
+    # mounted=false
+    # while [ "$mounted" != "true" ]; do
+    # 	cat /proc/mounts | tail -n 2 | grep -q $usbpart
+    # 	if [ $? = 0 ]; then mounted=true; fi
+    # 	echo -n "."
+    # 	sleep .5
+    # 	c=`expr $c + 1`
+    # 	if [ $c -gt 30 ]; then
+    # 	    echo
+    # 	    error "timeout."
+    # 	    export usbkey_mount=none
+    # 	    return 1;
+    # 	fi
+    # done
+    # # check where it is mounted
+    # usbmount=`cat /proc/mounts | awk -v p=$usbpart '{ if( $1 == "/dev/" p) print $2 }'`
 
-    # check where it is mounted
-    usbmount=`cat /proc/mounts | awk -v p=$usbpart '{ if( $1 == "/dev/" p) print $2 }'`
+    sleep 1
+    # mount the first partition on the usb key
+    mtmp=`tempfile -p tomb`
+    rm -f $mtmp
+    mkdir -p $mtmp
+    mount /dev/$usbpart $mtmp
+    if [ $? = 0 ]; then
+	usbmount=$mtmp
+    else
+	error "cannot mount usbkey partition $usbmount"
+	return 1
+    fi
+
     echo
     act "usb key mounted on $usbmount"
     export usbkey_mount=$usbmount
@@ -211,7 +227,7 @@ check_priv() {
 	which gksu > /dev/null
 	if [ $? = 0 ]; then
 	    func "Using gksu for root execution of 'tomb ${(f)ARGS}'"
-	    gksu "tomb ${ARGS[@]}"
+	    gksudo "tomb ${ARGS[@]}"
 	    exit $?
 	fi
 	which sudo > /dev/null
@@ -354,7 +370,7 @@ create_tomb() {
     act "once done you will be asked to choose a password for your tomb."
     touch ${keytmp}/tomb.tmp
     chmod 0600 ${keytmp}/tomb.tmp
-    $DD bs=1 count=256 if=/dev/random of=${keytmp}/tomb.tmp
+    $DD bs=1 count=256 if=/dev/urandom of=${keytmp}/tomb.tmp
     if ! [ -r ${keytmp}/tomb.tmp ]; then
 	error "cannot generate encryption key, operation aborted."
 	umount ${keytmp}
@@ -408,12 +424,31 @@ create_tomb() {
 	act "operation aborted."
 	exit 0
     fi
- 
-    
+     
     cryptsetup --key-file ${keytmp}/tomb.tmp --cipher aes luksOpen ${nstloop} tomb.tmp
     ${WIPE[@]} ${keytmp}/tomb.tmp
     umount ${keytmp}
     rm -r ${keytmp}
+
+ #    cryptsetup luksDump ${nstloop}
+
+    act "formatting your Tomb with Ext4 filesystem"
+ 
+    mkfs.ext4 -q -F -j -L "${FILE%%.*}" /dev/mapper/tomb.tmp
+
+    if [ $? = 0 ]; then
+	act "OK, encrypted storage succesfully formatted"
+    else
+	act "error formatting Tomb"
+    fi
+
+    sync
+
+    cryptsetup luksClose tomb.tmp
+    losetup -d ${nstloop}
+
+    notice "done creating $FILE encrypted storage (using Luks dm-crypt AES/SHA256)"
+    tomb-notify "The Tomb is ready!" "We will now open your new Tomb for the first time."
 
     notice "Your tomb is ready on ${FILE} and secured with key ${FILE}.gpg"
     act "Would you like to save the key on  an external usb device?"
@@ -431,28 +466,12 @@ create_tomb() {
 	    mkdir -m 0700 -p ${usbkey_mount}/.tomb
 	    cp -v ${FILE}.gpg ${usbkey_mount}/.tomb/
 	    chmod -R go-rwx ${usbkey_mount}/.tomb
+	    umount ${usbkey_mount}
+	    unset  ${usbkey_mount}
 	    ${WIPE[@]} ${FILE}.gpg
 	fi
     fi
-#    cryptsetup luksDump ${nstloop}
 
-    act "formatting your Tomb with Ext4 filesystem"
- 
-    mkfs.ext4 -q -F -j -L "${FILE%\.*}-`hostname`" /dev/mapper/tomb.tmp
-
-    if [ $? = 0 ]; then
-	act "OK, encrypted storage succesfully formatted"
-    else
-	act "error formatting Tomb"
-    fi
-
-    sync
-
-    cryptsetup luksClose tomb.tmp
-    losetup -d ${nstloop}
-
-    notice "done creating $FILE encrypted storage (using Luks dm-crypt AES/SHA256)"
-    tomb-notify "The Tomb is ready!" "We will now open your new Tomb for the first time."
     tomb mount $FILE
 }
 
@@ -567,6 +586,11 @@ mount_tomb() {
 	fi
 	
     done
+
+    if [ -r ${usbkey_mount}/.tomb/${tombkey} ]; then
+        umount ${usbkey_mount}
+	unset  ${usbkey_mount}
+    fi
     
     if ! [ -r /dev/mapper/${mapper} ]; then
 	error "failure mounting the encrypted file"
@@ -587,7 +611,6 @@ mount_tomb() {
     notice "encrypted storage $tombfile succesfully mounted on $tombmount"
     exec_bind_hooks ${tombmount}
     exec_post_hooks ${tombmount}
-    exec_as_user tomb-status ${mapper} ${tombfile} ${tombmount} &!
     return 0
 }
 
@@ -706,8 +729,6 @@ umount_tomb() {
 
     notice "crypt storage ${mapper} unmounted"
     tomb-notify "Tomb closed: $tombname" "Your bones will Rest In Peace."
-
-
     return 0
 }
 
