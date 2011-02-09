@@ -145,26 +145,38 @@ gboolean left_click(GtkWidget *w, GdkEvent *e) {
   return TRUE;
 } 
 gboolean cb_view(GtkWidget *w, GdkEvent *e) { 
-  // GtkWidget *dialog = 
-  //   gtk_message_dialog_new (NULL,
-  // 			    GTK_DIALOG_DESTROY_WITH_PARENT,
-  // 			    GTK_MESSAGE_INFO,
-  // 			    GTK_BUTTONS_CLOSE,
-  // 			    "Tomb '%s' open on '%s'\n"
-  // 			    "device mapper: %s", filename, mountpoint, mapper);
-  // gtk_dialog_run (GTK_DIALOG (dialog));
-  // gtk_widget_destroy (dialog);
-  pid_t cpid = fork();
+  int pipefd[2];
+  pid_t cpid;
+  char buf;
+  int c, res;
+  char map[256];
+
+  if (pipe(pipefd) <0) {
+    fprintf(stderr,"pipe creation error: %s\n", strerror(errno));
+    return FALSE;
+  }
+
+  cpid = fork();
   if (cpid == -1) {
-    fprintf(stderr,"error: problem forking process\n");
+    fprintf(stderr,"fork error: %s\n", strerror(errno));
     return FALSE;
   }
   if (cpid == 0) {    // Child
-    execlp("tomb-open", "tomb-open", mountpoint ,(char*)NULL);
-    exit(1);
+    close(pipefd[1]); // close unused write end
+    for(c=0; read(pipefd[0], &buf, 1) > 0; c++)
+      map[c] = buf;
+    close(pipefd[0]);
+    map[c] = 0;
+    execlp("tomb-open", "tomb-open", map, (char*)NULL);
+    _exit(1);
   }
+  close(pipefd[0]); // close unused read end
+  write(pipefd[1], mountpoint, strlen(mountpoint));
+  close(pipefd[1]); // reader will see EOF
+
   return TRUE;
 }
+
 
 gboolean cb_close(GtkWidget *w, GdkEvent *e) { 
   int pipefd[2];
@@ -189,7 +201,7 @@ gboolean cb_close(GtkWidget *w, GdkEvent *e) {
     for(c=0; read(pipefd[0], &buf, 1) > 0; c++)
       map[c] = buf;
     close(pipefd[0]);
-    map[c] = '\n';
+    map[c] = 0;
     execlp("tomb", "tomb", "close", map, (char*)NULL);
     _exit(1);
   }
@@ -257,3 +269,12 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e) {
 }
   
 
+  // GtkWidget *dialog = 
+  //   gtk_message_dialog_new (NULL,
+  // 			    GTK_DIALOG_DESTROY_WITH_PARENT,
+  // 			    GTK_MESSAGE_INFO,
+  // 			    GTK_BUTTONS_CLOSE,
+  // 			    "Tomb '%s' open on '%s'\n"
+  // 			    "device mapper: %s", filename, mountpoint, mapper);
+  // gtk_dialog_run (GTK_DIALOG (dialog));
+  // gtk_widget_destroy (dialog);

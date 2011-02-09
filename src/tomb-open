@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/zsh -x
 #
 # Tomb, the Crypto Undertaker
 #
@@ -23,47 +23,62 @@
 # startup wrapper to open tombs
 
 
+echo "arg: $1"
+
 try() {
     which ${1} > /dev/null
     if [ $? = 0 ]; then return 0;
     else return -1; fi
 }
 	
-# if no arguments are given, run in terminal 
-if [ -z $1 ]; then
-    try gnome-terminal; if [ $? = 0 ]; then gnome-terminal -e "tomb-open create"; exit 0; fi
-    try lxterm; if [ $? = 0 ]; then lxterm -bg black -fg white -e "tomb-open create"; exit 0; fi
-    try urxvt; if [ $? = 0 ]; then urxvt -bg black -fg white -e "tomb-open create"; exit 0; fi
-    try uxterm; if [ $? = 0 ]; then uxterm -bg black -fg white -e "tomb-open create"; exit 0; fi
-    try xterm; if [ $? = 0 ]; then xterm -bg black -fg white -e "tomb-open create"; exit 0; fi
-    exit 1
-fi
 
 
-# got a directory as argument
-if [ -d $1 ]; then
+
+# got an argument
+if [ $1 ]; then
+# is it a tomb?
+    arg="${1%%\.*}.tomb"
+
+    if [ -f $arg ]; then
+	file $arg | grep LUKS
+
+	if [ $? = 0 ]; then # tomb is a valid LUKS file
+
+	    tomb mount $arg
+
+	    if [ $? = 0 ]; then	# mount was succesfull (with password and all)
+	    # strip extension if there
+		tombname="${arg%%.*}"
+		tombmap=`mount -l | awk "/\[${tombname}\]$/"' { print $1 } '`
+		tombmount=`mount -l | awk "/\[${tombname}\]$/"' { print $3 } '`
+		tomb-status $tombmap $tombname $tombmount &!
+		exit 0
+	    else
+		tomb notify "Tomb cannot open." "Are you knocking the wrong door?"
+		exit 1
+	    fi
+	else
+	    tomb notify "Not a real Tomb." "We found no real bones in there."
+	    exit 1
+	fi
+
+
+    elif [ -d $1 ]; then
+	# its a directory
+	
 # FIXME: somehow xdg-open loses mailcap mimes when executed by tomb-status
 #   try xdg-open; if [ $? = 0 ]; then xdg-open ${1}; exit 0; fi
-    try gnome-open; if [ $? = 0 ]; then gnome-open ${1}; exit 0; fi
-    try thunar; if [ $? = 0 ]; then thunar ${1}; exit 0; fi
-    try rox; if [ $? = 0 ]; then rox ${1}; exit 0; fi
-    try fsviewer; if [ $? = 0 ]; then fsviewer ${1}; exit 0; fi
-    try xnc; if [ $? = 0 ]; then xnc ${1}; exit 0; fi
-    tomb notify "File manager not found." "Tomb cannot guess which filemanager you are using"
-    exit 1
-fi
-
-# got a tomb as argument?
-if [ -f $1 ]; then
-    file $1 | grep LUKS
-    if [ $? = 0 ]; then
-	tomb mount $1
-	exit $?
-    else
-	tomb notify "Not a real Tomb." "We found no real bones in there."
+	try gnome-open; if [ $? = 0 ]; then gnome-open ${1}; exit 0; fi
+	try thunar; if [ $? = 0 ]; then thunar ${1}; exit 0; fi
+	try pcmanfm; if [ $? = 0 ]; then pcmanfm ${1}; exit 0; fi	
+	try rox; if [ $? = 0 ]; then rox ${1}; exit 0; fi
+	try fsviewer; if [ $? = 0 ]; then fsviewer ${1}; exit 0; fi
+#	try xnc; if [ $? = 0 ]; then xnc ${1}; exit 0; fi
+	tomb notify "File manager not found." "Tomb cannot guess which filemanager you are using"
 	exit 1
     fi
 fi
+
 
 # no argument but on graphical display: creation dialog
 if [ -z $DISPLAY ]; then
@@ -72,11 +87,7 @@ if [ -z $DISPLAY ]; then
     exit 1
 fi
 
-if [ "$1" != "create" ]; then
-    exit 0
-fi
-
-# start guided tomb creation
+# no arguments: start guided tomb creation
 tomb notify
 cat <<EOF
 Create a new Tomb
@@ -134,15 +145,11 @@ tomb create ${filename}.tomb $size
 
 if [ $? != 0 ]; then
     echo "An error occurred creating tomb, operation aborted."
-    tomb kill
-    echo "Press any key to close this terminal."
-    read -q
     exit 1
 fi
-if ! [ -r /usr/share/applications/tomb.desktop ]; then
-    echo "  Well done!"
-    echo "  Now the last thing to do is to install Tomb on your desktop:"
-    sudo tomb install
-fi
+# if ! [ -r /usr/share/applications/tomb.desktop ]; then
+#     echo "  Well done!"
+#     echo "  Now the last thing to do is to install Tomb on your desktop:"
+#     sudo tomb install
+# fi
 
-exit 0
