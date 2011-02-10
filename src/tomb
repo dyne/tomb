@@ -1,4 +1,4 @@
-#!/bin/zsh -x
+#!/bin/zsh
 #
 # Tomb, the Crypto Undertaker
 #
@@ -370,7 +370,7 @@ create_tomb() {
     act "once done you will be asked to choose a password for your tomb."
     touch ${keytmp}/tomb.tmp
     chmod 0600 ${keytmp}/tomb.tmp
-    $DD bs=1 count=256 if=/dev/urandom of=${keytmp}/tomb.tmp
+    $DD bs=1 count=256 if=/dev/random of=${keytmp}/tomb.tmp
     if ! [ -r ${keytmp}/tomb.tmp ]; then
 	error "cannot generate encryption key, operation aborted."
 	umount ${keytmp}
