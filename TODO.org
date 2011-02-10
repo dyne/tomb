@@ -46,7 +46,10 @@ you are welcome to send patches to jaromil@dyne.org
 
 100% backward compatible with tombs created with 1.0 
 
-** [#A] use inotify on /media to watch usb key plug events
+** [#A] use inotify on tomb
+
+   inotify can also count when was the last time tomb was used and
+   unmount it automatically after a timeout
 
 ** [#A] udev rules to avoid usb automount of keyplug in gnome
 
