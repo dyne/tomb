@@ -453,7 +453,7 @@ create_tomb() {
     notice "Your tomb is ready on ${FILE} and secured with key ${FILE}.gpg"
     act "Would you like to save the key on  an external usb device?"
     act "This is recommended for safety:"
-    act "always keep the key in a different place than the door!"
+    act "Always keep the key in a different place than the door!"
     act "If you answer yes, you'll need a USB KEY now: (y/n)"
     tomb-notify "Tomb has forged a key." "Would you like to save it on USB?" 
     echo -n " >  "
@@ -468,11 +468,20 @@ create_tomb() {
 	    chmod -R go-rwx ${usbkey_mount}/.tomb
 	    umount ${usbkey_mount}
 	    unset  ${usbkey_mount}
+	    notice "Key ${FILE}.gpg succesfully saved on your USB"
+	    act "now we proceed opening your new tomb"
+	    KEY=${FILE}.gpg
+	    CMD2=${FILE}
+	    CMD3=/media/${FILE}
+	    mount_tomb ${FILE}
 	    ${WIPE[@]} ${FILE}.gpg
 	fi
+    else # kept besides (deprecated behaviour)
+	act "now we proceed opening your new tomb"
+	KEY=${FILE}.gpg
+	mount_tomb ${FILE}
     fi
 
-    tomb mount $FILE
 }
 
 

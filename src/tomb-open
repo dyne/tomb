@@ -33,7 +33,6 @@ try() {
 	
 
 
-
 # got an argument
 if [ $1 ]; then
 # is it a tomb?
@@ -102,11 +101,7 @@ Create a new Tomb
   have your USB key and your password.
 
   If you choose to proceed now, we'll guide you through the creation
-  of a new Tomb. You will need the super-user (sudo) password for the
-  computer you are using, as well time available: depending how big
-  your tomb will be, make sure you are not running low on batteries,
-  considering 1GB takes little little less than an hour to be digged.
-
+  of a new Tomb.
   If you will, I'll be your Crypto Undertaker.
   Do you want to proceed, Master? (y/n)
 EOF
@@ -127,8 +122,17 @@ read size
 echo "  You have commanded the creation of this Tomb:"
 echo "    $filename ( $size MBytes )";
 echo
-echo "  Please confirm if you want to proceed now,"
-echo "  digging will take quite some time! (y/n)"
+cat <<EOF
+  Please confirm if you want to proceed now:
+
+  You will need the super-user (sudo) password for the computer you
+  are using, as well time available: depending how big your tomb will
+  be, make sure you are not running low on batteries, or inside a
+  detachable screen if on a server. Considering 1GB takes usually
+  little less than an hour to be digged.
+EOF
+echo "  "
+echo "  Digging will take quite some time! Should we start? (y/n)"
 echo -n "> "
 read -q
 if [ $? != 0 ]; then
@@ -146,7 +150,14 @@ tomb create ${filename}.tomb $size
 if [ $? != 0 ]; then
     echo "An error occurred creating tomb, operation aborted."
     exit 1
+else
+    tombname="${filename%%.*}"
+    tombmap=`mount -l | awk "/\[${tombname}\]$/"' { print $1 } '`
+    tombmount=`mount -l | awk "/\[${tombname}\]$/"' { print $3 } '`
+    tomb-status $tombmap $tombname $tombmount &!
 fi
+
+
 # if ! [ -r /usr/share/applications/tomb.desktop ]; then
 #     echo "  Well done!"
 #     echo "  Now the last thing to do is to install Tomb on your desktop:"
