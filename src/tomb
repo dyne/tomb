@@ -509,7 +509,7 @@ mount_tomb() {
         # try also adding a .tomb extension
 	tombfile="${CMD2%\.*}.tomb"
 	if ! [ -r $tombfile ]; then
-	    error "cannot find a tomb named $CMD"
+	    error "cannot find a tomb named $CMD2"
 	    return 1
 	fi
     fi
@@ -556,7 +556,7 @@ mount_tomb() {
 	tombmount=/media/`basename ${tombfile}`
 	act "mountpoint not specified, using default: $tombmount"
     elif ! [ -x $CMD3 ]; then
-	error "mountpoint $CMD2 doesn't exist, operation aborted."
+	error "mountpoint $CMD3 doesn't exist, operation aborted."
 	return 1
     else
 	tombmount=$CMD3
@@ -654,7 +654,7 @@ exec_bind_hooks() {
     # restore $HOME for the calling user
     HOME=/home/${SUDO_USER}
 
-    act "bind hooks found, mounting direcories as requested"
+    act "bind hooks found, mounting directories as requested"
     # execute the mount commands
     eval $hook
 }
