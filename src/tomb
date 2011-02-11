@@ -557,6 +557,11 @@ mount_tomb() {
 	act "mountpoint not specified, using default: $tombmount"
     elif ! [ -x $CMD3 ]; then
 	error "mountpoint $CMD3 doesn't exist, operation aborted."
+	if [ -n "$usbkey_mount" ]; then
+	    umount $usbkey_mount
+	    rmdir  $usbkey_mount
+	    unset  $usbkey_mount
+	fi
 	return 1
     else
 	tombmount=$CMD3
