@@ -137,11 +137,12 @@ ask_usbkey() {
     # # check where it is mounted
     # usbmount=`cat /proc/mounts | awk -v p=$usbpart '{ if( $1 == "/dev/" p) print $2 }'`
 
-    sleep 1
+#    sleep 1
     # mount the first partition on the usb key
-    mtmp=`tempfile -p tomb`
-    rm -f $mtmp
-    mkdir -p $mtmp
+#    mtmp=`tempfile -p tomb`
+#    rm -f $mtmp
+#    mkdir -p $mtmp
+    mtmp=$(/bin/mktemp -d --tmpdir tomb.XXXXXXXXXXXX)
     mount /dev/$usbpart $mtmp
     if [ $? = 0 ]; then
 	usbmount=$mtmp
