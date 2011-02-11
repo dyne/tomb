@@ -104,7 +104,19 @@ ask_usbkey() {
     echo -n " .  usb attached, opening "
     
     # get the first partition
-    usbpart=`dmesg |tail -n 12 | grep '  sd.:' |cut -d: -f2 |tr -d ' '`
+#    usbpart=`dmesg |tail -n 12 | grep '  sd.:' |cut -d: -f2 |tr -d ' '`
+    for i in $(seq 1 10); do
+        usbpart=$(dmesg | tail -n 12 | sed '/  sd.:/!d;s/^.*: \(sd.[0-9]*\)/\1/')
+        if [ -n "$usbpart" ]; then
+           break
+	elif [ $i -eq 10 ]; then
+            error "timeout."
+            return 1
+        else
+            echo -n .
+            sleep 1
+        fi
+    done
 
     # # wait that is mounted (it automount is on)
     # c=0
