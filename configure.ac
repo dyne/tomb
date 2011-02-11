@@ -71,7 +71,7 @@ AC_CHECK_PROG(have_cryptsetup,cryptsetup,yes,no)
 AC_CHECK_PROG(have_wipe,wipe,yes,no)
 AC_CHECK_PROG(have_dcfldd,dcfldd,yes,no)
 AC_CHECK_PROG(have_gksu,gksu,yes,no)
-AC_CHECK_PROG(have_sudo,gksu,yes,no)
+AC_CHECK_PROG(have_sudo,sudo,yes,no)
 
 PKG_CHECK_MODULES(GTK2, gtk+-2.0 >= 2.16, :,
   AC_MSG_ERROR([*** Gtk+2 >=2.16 development files not found!]))
