@@ -877,7 +877,7 @@ umount_tomb() {
     tombmount=`mount | grep $mapper | awk '{print $3}'`
 
     # check if there are binded dirs and close them first
-    mount | grep "${tombmount}" | grep -v loop 2>&1 > /dev/null
+    mount | grep "${tombmount}" 2>/dev/null | grep -v loop 2>&1 > /dev/null
     if [ $? = 0 ]; then
 	act "closing bind hooks for tomb $tombname "
 	unbind=`mount | grep ${tombmount} | grep -v loop | awk '
