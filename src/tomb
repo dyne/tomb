@@ -645,8 +645,9 @@ mount_tomb() {
     chown $(id -u $ME):$(id -g $ME) ${tombmount}
     
     notice "encrypted storage $tombfile succesfully mounted on $tombmount"
-    exec_bind_hooks ${tombmount}
-    exec_post_hooks ${tombmount}
+#    exec_bind_hooks ${tombmount}
+    exec_safe_bind_hooks ${tombmount}
+    exec_post_hooks ${tombmount} open
     return 0
 }
 
@@ -772,6 +773,48 @@ exec_bind_hooks() {
     eval $hook
 }
 
+# FIXME: this should sanitize pathes!
+exec_safe_bind_hooks() {
+  local MOUNTPOINT="${1}"
+  local ME=${SUDO_USER:-$(whoami)}
+  local HOME=$(grep $ME /etc/passwd | sed "s/^${ME}:.*:.*:.*:.*:\([\/a-z]*\):.*$/\1/" 2>/dev/null)
+  if [ $? -ne 0 ]; then
+      error "how pitiful!  A tomb, and no HOME"
+      return 1
+  fi
+  if [ -z "$MOUNTPOINT" -o ! -d "$MOUNTPOINT" ]; then
+      error "cannot exec bind hooks without a mounted tomb."
+      return 1
+   fi
+   if [ ! -r "$MOUNTPOINT/bind-hooks" ]; then
+      func "cannot read bind-hooks."
+      return
+   fi
+   typeset -al created
+   typeset -al mounted
+   typeset -Al maps
+   maps=($(<"$MOUNTPOINT/bind-hooks"))
+   for dir in ${(k)maps}; do
+      if [ "${dir[1]}" = "/" -o "${dir[1,2]}" = ".." ]; then
+	  error "bind-hooks map format: local/to/tomb local/to/\$HOME"
+	  continue
+      fi
+      if [ "${${maps[$dir]}[1]}" = "/" -o "${${maps[$dir]}[1,2]}" = ".." ]; then
+          error "bind-hooks map format: local/to/tomb local/to/\$HOME.  Rolling back"
+          for dir in ${mounted}; do umount $dir; done
+          for dir in ${created}; do rmdir  $dir; done
+	  return 1
+      fi
+      if [ ! -d "$HOME/${maps[$dir]}" ]; then
+          notice "creating $HOME/${maps[$dir]}"
+          mkdir -p $HOME/${maps[$dir]}
+          created+=("$HOME/${maps[$dir]}")
+      fi
+      mount --bind $MOUNTPOINT/$dir $HOME/${maps[$dir]}
+      mounted+=("$HOME/${maps[$dir]}")
+   done
+}
+
 exec_post_hooks() {
     mnt=$1 # first argument is where the tomb is mounted
     if ! [ -x ${mnt}/post-hooks ]; then return; fi
@@ -783,7 +826,7 @@ exec_post_hooks() {
     cat ${mnt}/post-hooks | head -n1 | grep '^#!/'
     if [ $? = 0 ]; then
 	act "post hooks found, executing as user $SUDO_USER"
-	exec_as_user ${mnt}/post-hooks
+	exec_as_user ${mnt}/post-hooks $2
     fi
 }
 
@@ -845,6 +888,8 @@ umount_tomb() {
 	func "$unbind"
     fi
 
+    # Execute post-hooks for eventual cleanup
+    exec_post_hooks ${tombmount} close
 
     act "closing tomb $tombname on dm-crypt $basemap"
     mount | grep $mapper 2>&1 >/dev/null
