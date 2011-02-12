@@ -1,11 +1,11 @@
-.TH tomb 1 "February 6, 2011" "tomb"
+.TH tomb 1 "February 12, 2011" "tomb"
 
 .SH NAME
 Tomb \- the Crypto Undertaker
 
 .SH SYNOPSIS
 .B
-.IP "tomb [options] command [file] [mountpoint]"
+.IP "tomb [options] command [arguments]"
 .B
 .IP "tomb-open [file]"
 .B
@@ -29,14 +29,11 @@ hidden in a filesystem; it encourages users to keep their keys
 separate from tombs, for instance keeping a tomb file on your computer
 harddisk and its key file on a USB stick.
 
-When used from commandline, \fIfile\fR is the name of the tomb to be
-created or opened, while \fImountpoint\fR is an existing directory
-where its contents should be made accessible.
-
-For simplified use, the command \fItomb-open\fR can be used to start a
-wizard that guides users in the creation of a new tomb or, if the
-\fIfile\fR argument is specified, to open a tomb and make it
-accessible in a default location under the /media folder.
+For simplified use, the command \fItomb-open\fR starts a wizard that
+guides users in the creation of a new tomb or, if an \fIargument\fR is
+specified, opens a the tomb file pointed by it and makes it accessible
+in a default location under the /media folder, starting the status
+tray icon if a desktop is present.
 
 The other commands \fItomb-status\fR and \fItomb-askpass\fR are for
 internal use (they are called by tomb with the right arguments) and
@@ -45,20 +42,41 @@ interface.
 
 
 .SH COMMANDS
+
 .B
 .IP "create"
-Create a new encrypted storage \fIfile\fR and its keys
+Creates a new encrypted storage tomb and its key, named as specified
+by the given \fIargument\fR.
+
 .B
 .IP "open"
-Opens an existing tomb \fIfile\fR. The \fImountpoint\fR where the tomb
-will be  made accessible can  be specified, if  not the default  is to
-create a directory named like the tomb inside /media.
+Opens an existing tomb file specified in the \fIfirst argument\fR. If
+a \fIsecond argument\fR is given it will indicate the \fImountpoint\fR
+where the tomb should be made accessible, if not then the tomb is
+mounted in a directory named after the filename and inside /media.
+
 .B
 .IP "close"
-Closes a currently open tomb.  When \fIfile\fR is specified, it should
-point to the /dev/mapper name used to mount the tomb; if \fIfile\fR is
-not specified  and only one tomb is  open, then it will  be closed; if
-multiple tombs are open, the command will list them on the terminal.
+Closes a currently open tomb.  When \fIan argument\fR is specified, it
+should point to the tomb mount on /dev/mapper; if not specified and
+only one tomb is open then it will be closed; if multiple tombs are
+open, the command will list them on the terminal. The special
+\fIargument\fR 'all' will close all currently open tombs.
+
+.B
+.IP "bury"
+Hides a tomb key (\fIfirst argument\fR) inside a jpeg image (\fIsecond
+argument\fR) using steganography: the image will change in a way that
+cannot be noticed by human eyes and the presence of the key inside it
+isn't detectable without the right password. This option is useful to
+backup tomb keys in unsuspected places; it uses steghide and the
+serpent encryption algorithm.
+
+.B
+.IP "exhume"
+Extracts a named tomb key (\fIfirst argument\fR) from a (jpeg) image file
+(\fIsecond argument\fR) known to be containing it, if the right password is
+given. This is used to recoved buried keys from unsuspected places.
 
 .SH OPTIONS
 .B

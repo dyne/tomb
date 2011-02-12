@@ -283,8 +283,9 @@ while true; do
 	    act "create     create a new encrypted storage FILE and keys"
 	    act "open       open an existing tomb FILE on MOUNTPOINT"
             act "close      closes the tomb on MOUNTPOINT"
-	    act "decode     read a hidden tomb key from a JPEG image"
-	    act "encode     hide the tomb key inside a JPEG image"
+	    act "bury       hide a tomb key inside an jpeg image"
+	    act "exhume     extract an hidden tomb key from a jpeg image"
+
 	    act ""
             notice "Options:"
 	    act "-s     size of the storage file when creating one (MB)"
@@ -1016,8 +1017,8 @@ case "$CMD" in
     unmount)  check_priv ; umount_tomb ${CMD2} ;;
     close)    check_priv ; umount_tomb ${CMD2} ;;
 
-    encode)   encode_key ${CMD2} ${CMD3} ;;
-    decode)   decode_key ${CMD2} ;;
+    bury)     encode_key ${CMD2} ${CMD3} ;;
+    exhume)   decode_key ${CMD2} ;;
 
     install)  check_priv ; install_tomb ;;
 

@@ -3,7 +3,7 @@ TODO and Roadmap for Tomb
 
 you are welcome to send patches to jaromil@dyne.org
 
-* TODO Release 1.0							:85%:
+* TODO Release 1.0							:90%:
 
 ** [#A] fix operation without DISPLAY (over SSH)		   :hellekin:
 ** TODO [#A] SLAM tomb and kill all applications using it
@@ -13,13 +13,7 @@ you are welcome to send patches to jaromil@dyne.org
 
    now tomb-dialog or something like that would be useful it askpass
    and dialog might melt together into one binary later.
-
-** TODO [#A] steganography to store tomb key
-
-   steghide can hide keys in JPG, BMP, WAV or AU files it also takes
-   care of compressing end encrypting the key file so we don't
-   necessarily need gpg... it has Serpent and AES256 (CBC)
-** [#B] incremental backup system using bup			    :jaromil:
+** [#A] incremental backup system using bup			    :jaromil:
 
    tombs are modifed only where needed so file changes are local to
    the file segment where data is stored. i've tested this idea and it
@@ -28,6 +22,12 @@ you are welcome to send patches to jaromil@dyne.org
 
 ** TODO [#C] make one single status handle more tombs
 ** TODO [#C] decorate creation wizard with ASCII art
+
+** DONE [#A] steganography to store tomb key			    :jaromil:
+
+   steghide can hide keys in JPG, BMP, WAV or AU files it also takes
+   care of compressing end encrypting the key file so we don't
+   necessarily need gpg... it has Serpent and AES256 (CBC)
 
 ** DONE [#A] use a posix thread instead of fork for status close    :jaromil:
 ** DONE [#A] use a config file to map bind mounts 		    :jaromil:
