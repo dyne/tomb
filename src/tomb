@@ -160,17 +160,17 @@ ask_usbkey() {
 # user interface (just to ask the password)
 ask_password() {
 
-    exec_as_user xhost 2>&1 >/dev/null
+    xhost 2>&1 >/dev/null
     if [ $? = 0 ]; then # we have access to the X display
 	
-	exec_as_user which tomb-askpass > /dev/null
+	which tomb-askpass > /dev/null
 	if [ $? = 0 ]; then
-	    export scolopendro="`exec_as_user tomb-askpass ${1} 2>/dev/null`"
+	    export scolopendro="`tomb-askpass ${1} 2>/dev/null`"
 	    return
 	fi
-	exec_as_user which ssh-askpass # 2>&1 > /dev/null
+	which ssh-askpass # 2>&1 > /dev/null
 	if [ $? = 0 ]; then
-	    export scolopendro="`exec_as_user ssh-askpass "Tomb: provide the password to unlock"`"
+	    export scolopendro="`ssh-askpass "Tomb: provide the password to unlock"`"
 	    return
 	fi
 	
@@ -499,37 +499,37 @@ create_tomb() {
 
 
 mount_tomb() {
-
     if ! [ $CMD2 ]; then
 	error "need an argument, operation aborted."
 	return 1
     elif [ -r $CMD2 ]; then
-	tombfile=$CMD2
+	tombfile=`basename $CMD2`
+	tombdir=`dirname $CMD2`
     else
         # try also adding a .tomb extension
-	tombfile="${CMD2%\.*}.tomb"
+	tombfile=${tombfile%%\.*}.tomb
 	if ! [ -r $tombfile ]; then
 	    error "cannot find a tomb named $CMD2"
 	    return 1
 	fi
     fi
 
-    file $tombfile | grep -i 'luks encrypted.*cbc-essiv' 2>&1 >/dev/null
+    file ${tombdir}/${tombfile} | grep -i 'luks encrypted.*cbc-essiv' 2>&1 >/dev/null
     if [ $? != 0 ]; then
 	error "$CMD2 is not a valid tomb file, operation aborted"
 	tomb-notify "Not a tomb." "$CMD2 doesn't seems a real tomb."
 	return 1
     fi
 
-    tombdir=`dirname $tombfile`
-    tombname=`echo $tombfile | cut -d. -f1`
+    tombname=${tombfile%%\.*}
+    act "mounting tomb named after $tombname"
 
     if [ $KEY ]; then
 	# key manually chosen from commandline with -k 
 	tombkey="`basename $KEY`"
 	tombkeypath="$KEY"
     else
-	tombkey="`basename ${tombfile}.gpg`"
+	tombkey=${tombfile}.gpg
 	if [ -r $tombkey ]; then
 	    tombkeypath=$tombkey
 	elif [ -r "$tombdir/$tombkey" ]; then
@@ -575,7 +575,7 @@ mount_tomb() {
     $norm || mkdir -p $tombmount
     
     nstloop=`losetup -f`
-    losetup -f ${tombfile}
+    losetup -f ${tombdir}/${tombfile}
     
     act "check for a valid LUKS encrypted device"
     cryptsetup isLuks ${nstloop}
@@ -593,7 +593,7 @@ mount_tomb() {
     mapdate="`date +%s`"
     mapdate="`echo ${mapdate}/60 | bc -l | cut -d. -f1`"
     
-    mapper="tomb.`basename $tombfile | cut -d. -f1`.$mapdate.`basename $nstloop`"
+    mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
     
     notice "Password is required for key ${tombkey}"
     keyname=`basename $tombkey | cut -d. -f1`
@@ -632,7 +632,9 @@ mount_tomb() {
     
     act "encrypted storage filesystem check"
     fsck -p -C0 /dev/mapper/${mapper}
-    
+    act "tomb engraved as $tombname"
+    tune2fs -L ${tombname} /dev/mapper/${mapper}
+
     mount -o rw,noatime,nodev /dev/mapper/${mapper} ${tombmount}
 
     # Ensure the user can write the disk - 10x Hellekin :)
@@ -644,6 +646,108 @@ mount_tomb() {
     exec_bind_hooks ${tombmount}
     exec_post_hooks ${tombmount}
     return 0
+}
+
+encode_key() {
+    tombkey=$CMD2
+    imagefile=$CMD3
+
+    file $tombkey | grep PGP > /dev/null
+    if [ $? != 0 ]; then
+        error "encode failed: $tombkey is not a tomb key"
+	return 1
+    fi
+    file $imagefile | grep JPEG > /dev/null
+    if [ $? != 0 ]; then
+	error "encode failed: $imagefile is not a jpeg image"
+	return 1
+    fi
+
+    notice "Encoding key $tombkey inside image $imagefile"
+    act "please choose a password for the encoding"
+
+    # here user is prompted for key password
+    for c in 1 2 3; do
+	# 3 tries to write two times a matching password
+	ask_password ${FILE}
+	scolotemp=$scolopendro
+	ask_password "${FILE} (again)"
+	if [ "$scolotemp" = "$scolopendro" ]; then
+	    break;
+	fi
+	unset $scolotemp
+	unset $scolopendro
+    done
+
+    if [ -z $scolopendro ]; then
+	error "passwords don't match, aborting operation."
+	return 1
+    fi
+
+    awk '
+/^-----/ {next}
+/^Version/ {next}
+/^Comment/ {next}
+{print $0}' ${tombkey} \
+    | steghide embed --embedfile - --coverfile ${imagefile} \
+      -p ${scolopendro} -z 9 -e serpent cbc
+    if [ $? != 0 ]; then
+	error "encoding error: steghide reports problems"
+	res=1
+    else
+	notice "tomb key encoded succesfully into image ${imagefile}"
+	res=0
+    fi
+
+    unset scolopendro
+
+    return $res
+}
+
+decode_key() {
+    tombname=$CMD2
+    imagefile=$CMD3
+    res=1
+
+    file $imagefile | grep JPEG > /dev/null
+    if [ $? != 0 ]; then
+	error "encode failed: $imagefile is not a jpeg image"
+	return 1
+    fi
+
+    tombfile=${tombname%%\.*}.tomb.gpg
+    notice "Decoding a key out of image $imagefile"
+    for c in 1 2 3; do
+	if [ $c = 1 ]; then
+	    ask_password ${keyname}
+	else
+	    ask_password "$keyname (retry $c)"
+	fi
+	steghide extract -sf ${imagefile} -p ${scolopendro} -xf - \
+	    | awk '
+BEGIN {
+print "-----BEGIN PGP MESSAGE-----"
+print "Version: GnuPG v1.4.10 (GNU/Linux)"
+}
+{ print $0 }
+END {
+print "-----END PGP MESSAGE-----"
+}' > ${tombfile}
+	
+	if [ "`cat ${tombfile} | wc -l`" != "3" ]; then
+	    act "${tombfile} succesfully decoded"
+	    res=0
+	    break;
+	fi
+    done
+
+    unset scolopendro
+
+    if [ $res != 0 ]; then
+	error "nothing found."
+    fi
+
+    return $res
 }
 
 exec_bind_hooks() {
@@ -853,17 +957,6 @@ EOF
     act "Tomb is now installed."
 }
 
-kill_tomb() {
-    # TODO: fixME - should close all tombs
-    umount /tmp/tomb*     2>&1 > /dev/null
-    # todo check which are tomb loops
-    losetup -d /dev/loop* 2>&1 > /dev/null
-    statuses=`ps ax| grep -v awk | awk "/tomb-status.$basemap/"' { print $1 }'`
-    for ts in ${(f)statuses}; do
-     	kill $ts
-    done
-
-}
     
 	
 case "$CMD" in
@@ -876,8 +969,10 @@ case "$CMD" in
     unmount)  check_priv ; umount_tomb ${CMD2} ;;
     close)    check_priv ; umount_tomb ${CMD2} ;;
 
+    encode)   encode_key ${CMD2} ${CMD3} ;;
+    decode)   decode_key ${CMD2} ;;
+
     install)  check_priv ; install_tomb ;;
-    kill)     check_priv ; kill_tomb    ;;
 
     status)   tomb-status ;;
     notify)   tomb-notify $CMD2 $CMD3 ;;

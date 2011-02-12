@@ -30,26 +30,28 @@ try() {
     if [ $? = 0 ]; then return 0;
     else return -1; fi
 }
-	
+
+tombdir=`dirname $1`
+tombfile=`basename $1`
+tombname=${tombfile%%\.*}
 
 
 # got an argument
-if [ $1 ]; then
-# is it a tomb?
-    arg="${1%%\.*}.tomb"
+if [ $1 ]; then # is it a file?
 
-    if [ -f $arg ]; then
-	file $arg | grep LUKS
+    if [ -f ${tombdir}/${tombfile} ]; then
 
+	# is it a luks partition
+	file ${tombdir}/${tombfile} | grep LUKS
 	if [ $? = 0 ]; then # tomb is a valid LUKS file
 
-	    tomb mount $arg
+	    tomb mount ${tombdir}/${tombfile}
 
 	    if [ $? = 0 ]; then	# mount was succesfull (with password and all)
 	    # strip extension if there
-		tombname="${arg%%.*}"
 		tombmap=`mount -l | awk "/\[${tombname}\]$/"' { print $1 } '`
 		tombmount=`mount -l | awk "/\[${tombname}\]$/"' { print $3 } '`
+		echo "tomb-status $tombmap $tombname $tombmount"
 		tomb-status $tombmap $tombname $tombmount &!
 		exit 0
 	    else
@@ -62,8 +64,7 @@ if [ $1 ]; then
 	fi
 
 
-    elif [ -d $1 ]; then
-	# its a directory
+    elif [ -d $1 ]; then # its a directory
 	
 # FIXME: somehow xdg-open loses mailcap mimes when executed by tomb-status
 #   try xdg-open; if [ $? = 0 ]; then xdg-open ${1}; exit 0; fi
