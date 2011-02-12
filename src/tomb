@@ -535,10 +535,10 @@ mount_tomb() {
 	elif [ -r "$tombdir/$tombkey" ]; then
 	    tombkeypath="$tombdir/$tombkey"
 	else
-	    notice "please insert your USB KEY"
 	    error "encryption key ${enc_key} not found on disk"
 	    error "use -k option to specify which key to use"
-	    error "or provide a usb key, or press ctrl-c to abort"
+	    error "provide a usb key now, or press ctrl-c to abort"
+	    notice "please insert your USB KEY"
 	    ask_usbkey
             # returns usbkey_mount, now check if the key is there
 	    if [ -r ${usbkey_mount}/.tomb/${tombkey} ]; then
