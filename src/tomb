@@ -283,6 +283,8 @@ while true; do
 	    act "create     create a new encrypted storage FILE and keys"
 	    act "open       open an existing tomb FILE on MOUNTPOINT"
             act "close      closes the tomb on MOUNTPOINT"
+	    act "decode     read a hidden tomb key from a JPEG image"
+	    act "encode     hide the tomb key inside a JPEG image"
 	    act ""
             notice "Options:"
 	    act "-s     size of the storage file when creating one (MB)"
