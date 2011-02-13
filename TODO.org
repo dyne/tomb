@@ -3,7 +3,7 @@ TODO and Roadmap for Tomb
 
 you are welcome to send patches to jaromil@dyne.org
 
-* TODO Release 1.0							:90%:
+* Release 1.0							:90%:
 
 ** [#A] fix operation without DISPLAY (over SSH)		   :hellekin:
 ** TODO [#A] SLAM tomb and kill all applications using it
@@ -22,7 +22,7 @@ you are welcome to send patches to jaromil@dyne.org
    gpg for backup sets and rdiff for incremental storage. its more
    stable than bup at this moment.
 
-** TODO [#B] remove gnome dependencies
+** TODO [#B] remove gnome dependencies from tomb core
 
    gksu is deeply connected to gnome in all its packages.  actually
    libgksu2-dev is and that doesn't helps.
@@ -71,6 +71,7 @@ you are welcome to send patches to jaromil@dyne.org
 
 ** [#A] sign and verify tomb script integrity (executed as root)
 
+** [#B] make a gnome tomb undertaker using gnome-druid in glade
 ** [#B] tomb locksmith for key management
    a graphical tool or text wizard to move keys in/out steganography
    as well split them
@@ -83,4 +84,14 @@ you are welcome to send patches to jaromil@dyne.org
 ** [#B] indeep security analysis of possible vulnerabilities
 
 ** [#C] more gtk dialogs for configurations? keep it minimal!
+
+* TODO Porting to Win$loth
+
+  using FReeOTFE http://www.freeotfe.org
+
+  or at least make it compatible with http://www.sdean12.org/SecureTrayUtil.htm
+
+* TODO Porting to Apple/OSX
+
+  still to be investigated what's there that supports cryptsetup-luks volumes
 
