@@ -246,7 +246,15 @@ check_priv() {
 	which sudo > /dev/null
 	if [ $? = 0 ]; then
 	    func "Using sudo for root execution of 'tomb ${(f)ARGS}'"
-	    sudo "tomb ${ARGS[@]}"
+	    # check if sudo has a timestamp active
+	    sudo -n true 2> /dev/null
+	    if [ $? != 0 ]; then
+		# if not then ask a password
+		echo "SETDESC Sudo execution of Tomb ${ARGS[@]}
+SETPROMPT Insert your USER password:
+GETPIN" | pinentry | awk '/^D/ { print $2 }' | sudo -S -v
+	    fi
+	    sudo "tomb" ${(s: :)ARGS}
 	    exit $?
 	fi
 	return 1
@@ -283,7 +291,7 @@ while true; do
 	    act "create     create a new encrypted storage FILE and keys"
 	    act "open       open an existing tomb FILE on MOUNTPOINT"
             act "close      closes the tomb on MOUNTPOINT"
-	    act "bury       hide a tomb key inside an jpeg image"
+	    act "bury       hide a tomb key inside a jpeg image"
 	    act "exhume     extract an hidden tomb key from a jpeg image"
 
 	    act ""
@@ -528,9 +536,9 @@ mount_tomb() {
     act "mounting tomb named after $tombname"
 
     if [ $KEY ]; then
-	# key manually chosen from commandline with -k 
 	tombkey="`basename $KEY`"
 	tombkeypath="$KEY"
+	act "tomb key specified manually, using: $tombkeypath" 
     else
 	tombkey=${tombfile}.gpg
 	if [ -r $tombkey ]; then
