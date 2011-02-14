@@ -164,7 +164,9 @@ ask_password() {
 
     # pinentry has no custom icon setting
     # so we need to temporary modify the gtk theme
-    cp ~/.gtkrc-2.0 ~/.gtkrc-2.0.bak
+    if [ -r ~/.gtkrc-2.0 ]; then
+	cp ~/.gtkrc-2.0 ~/.gtkrc-2.0.tomb.bak
+    fi
     cat <<EOF  >> ~/.gtkrc-2.0
     pixmap_path "/usr/local/share/pixmaps"
     style "normal" { stock["gtk-dialog-authentication"] = {{"monmort.xpm"}} }
@@ -179,8 +181,10 @@ GETPIN
 EOF
 
     # restore gtk as it was
-    cp ~/.gtkrc-2.0.bak ~/.gtkrc-2.0
-    rm ~/.gtkrc-2.0.bak
+    if [ -r ~/.gtkrc-2.0.tomb.bak ]; then
+	cp ~/.gtkrc-2.0.tomb.bak ~/.gtkrc-2.0
+	rm ~/.gtkrc-2.0.tomb.bak
+    fi
 
 }
 
