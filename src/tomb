@@ -27,10 +27,10 @@ DATE=Feb/2011
 
 # standard output message routines
 # it's always useful to wrap them, in case we change behaviour later
-notice() { if ! [ $QUIET ]; then echo "[*] $1"; fi }
-act()    { if ! [ $QUIET ]; then echo " .  $1"; fi }
-error()  { if ! [ $QUIET ]; then echo "[!] $1"; fi }
-func()   { if [ $DEBUG ]; then echo "[D] $1"; fi }
+notice() { if ! [ $QUIET ]; then echo "[*] $1" >&2; fi }
+act()    { if ! [ $QUIET ]; then echo " .  $1" >&2; fi }
+error()  { if ! [ $QUIET ]; then echo "[!] $1" >&2; fi }
+func()   { if [ $DEBUG ]; then   echo "[D] $1" >&2; fi }
 
 # which dd command to use
 which dcfldd > /dev/null
@@ -157,37 +157,31 @@ ask_usbkey() {
     return 0
 }
 
-# user interface (just to ask the password)
+# we use pinentry now
+# comes from gpg project and is much more secure
+# it also conveniently uses the right toolkit
 ask_password() {
 
-    xhost 2>&1 >/dev/null
-    if [ $? = 0 ]; then # we have access to the X display
-	
-	which tomb-askpass > /dev/null
-	if [ $? = 0 ]; then
-	    export scolopendro="`tomb-askpass ${1} 2>/dev/null`"
-	    return
-	fi
-	which ssh-askpass # 2>&1 > /dev/null
-	if [ $? = 0 ]; then
-	    export scolopendro="`ssh-askpass "Tomb: provide the password to unlock"`"
-	    return
-	fi
-	
-    else # we'll collect the password from commandline
-	
-	act "Tomb: provide the password to unlock"
-	echo -n " >  "
-	read -s scolopendro
-	export scolopendro
+    # pinentry has no custom icon setting
+    # so we need to temporary modify the gtk theme
+    cp ~/.gtkrc-2.0 ~/.gtkrc-2.0.bak
+    cat <<EOF  >> ~/.gtkrc-2.0
+    pixmap_path "/usr/local/share/pixmaps"
+    style "normal" { stock["gtk-dialog-authentication"] = {{"monmort.xpm"}} }
+    widget "*" style "normal"
+EOF
 
-    fi
+    cat <<EOF | pinentry | awk '/^D/ { print $2 }'
+SETTITLE Opening Tomb $1
+SETDESC You need a password to use its key
+SETPROMPT Password:
+GETPIN
+EOF
 
-    # just in case we'd like to have dialog supported too:
-    # 	    dialog --backtitle "This file is encrypted for privacy protection" \
-    # 		--title "Security check" --insecure \
-    # 		--passwordbox "Enter password:" 10 30 2> /var/run/.scolopendro
-	    
+    # restore gtk as it was
+    cp ~/.gtkrc-2.0.bak ~/.gtkrc-2.0
+    rm ~/.gtkrc-2.0.bak
+
 }
 
 # popup notification
@@ -247,18 +241,21 @@ check_priv() {
 	if [ $? = 0 ]; then
 	    func "Using sudo for root execution of 'tomb ${(f)ARGS}'"
 	    # check if sudo has a timestamp active
-	    sudo -n true 2> /dev/null
-	    if [ $? != 0 ]; then
-		# if not then ask a password
-		echo "SETDESC Sudo execution of Tomb ${ARGS[@]}
+	    sudok=false
+	    sudo -n tomb 2> /dev/null
+	    if [ $? != 0 ]; then # if not then ask a password
+		cat <<EOF | pinentry | awk '/^D/ { print $2 }' | sudo -S -v
+SETTITLE Super user privileges required
+SETDESC Sudo execution of Tomb ${ARGS[@]}
 SETPROMPT Insert your USER password:
-GETPIN" | pinentry | awk '/^D/ { print $2 }' | sudo -S -v
+GETPIN
+EOF
 	    fi
 	    sudo "tomb" ${(s: :)ARGS}
 	    exit $?
-	fi
+	fi # have sudo
 	return 1
-    fi
+    fi # are we root already
     return 0
 }
 
@@ -409,17 +406,17 @@ create_tomb() {
     # here user is prompted for key password
     for c in 1 2 3; do
 	# 3 tries to write two times a matching password
-	ask_password ${FILE}
-	scolotemp=$scolopendro
-	ask_password "${FILE} (again)"
-	if [ "$scolotemp" = "$scolopendro" ]; then
+	tombpass=`exec_as_user tomb -q askpass ${FILE}`
+	tombpasstmp=$tombpass
+	tombpass=`exec_as_user tomb -q askpass "${FILE} (again)"`
+	if [ "$tombpasstmp" = "$tombpass" ]; then
 	    break;
 	fi
-	unset $scolotemp
-	unset $scolopendro
+	unset tombpasstmp
+	unset tombpass
     done
 
-    if [ -z $scolopendro ]; then
+    if [ -z $tombpass ]; then
 	error "passwords don't match, aborting operation"
 	umount ${keytmp}
 	losetup -d $nstloop
@@ -427,8 +424,9 @@ create_tomb() {
 	exit 1
     fi
 
-    echo "${scolopendro}" | gpg --batch --no-options --no-tty --passphrase-fd 0 \
+    echo "${tombpass}" | gpg --batch --no-options --no-tty --passphrase-fd 0 \
 	-o "${FILE}.gpg" -c -a ${keytmp}/tomb.tmp
+
     if [ $? = 2 ]; then
 	error "setting password failed: gnupg returns 2"
 	umount ${keytmp}
@@ -491,7 +489,7 @@ create_tomb() {
 	    cp -v ${FILE}.gpg ${usbkey_mount}/.tomb/
 	    chmod -R go-rwx ${usbkey_mount}/.tomb
 	    umount ${usbkey_mount}
-	    unset  ${usbkey_mount}
+	    unset usbkey_mount
 	    notice "Key ${FILE}.gpg succesfully saved on your USB"
 	    act "now we proceed opening your new tomb"
 	    KEY=${FILE}.gpg
@@ -503,6 +501,8 @@ create_tomb() {
     else # kept besides (deprecated behaviour)
 	act "now we proceed opening your new tomb"
 	KEY=${FILE}.gpg
+	unset CMD2
+	unset CMD3
 	mount_tomb ${FILE}
     fi
 
@@ -515,7 +515,6 @@ mount_tomb() {
 	return 1
     elif [ -r $CMD2 ]; then
 	tombfile=`basename $CMD2`
-	tombdir=`dirname $CMD2`
     else
         # try also adding a .tomb extension
 	tombfile=${tombfile%%\.*}.tomb
@@ -525,6 +524,8 @@ mount_tomb() {
 	fi
     fi
 
+    tombdir=`dirname $CMD2`
+
     file ${tombdir}/${tombfile} | grep -i 'luks encrypted.*cbc-essiv' 2>&1 >/dev/null
     if [ $? != 0 ]; then
 	error "$CMD2 is not a valid tomb file, operation aborted"
@@ -533,7 +534,7 @@ mount_tomb() {
     fi
 
     tombname=${tombfile%%\.*}
-    act "mounting tomb named after $tombname"
+    act "mounting tomb named $tombname"
 
     if [ $KEY ]; then
 	tombkey="`basename $KEY`"
@@ -564,14 +565,14 @@ mount_tomb() {
     fi
 
     if ! [ $CMD3 ]; then
-	tombmount=/media/`basename ${tombfile}`
+	tombmount=/media/${tombfile}
 	act "mountpoint not specified, using default: $tombmount"
     elif ! [ -x $CMD3 ]; then
 	error "mountpoint $CMD3 doesn't exist, operation aborted."
 	if [ -n "$usbkey_mount" ]; then
 	    umount $usbkey_mount
 	    rmdir  $usbkey_mount
-	    unset  $usbkey_mount
+	    unset usbkey_mount
 	fi
 	return 1
     else
@@ -611,16 +612,16 @@ mount_tomb() {
     for c in 1 2 3; do
 	
 	if [ $c = 1 ]; then
-	    ask_password ${keyname}
+	    tombpass=`exec_as_user tomb -q askpass ${keyname}`
 	else
-	    ask_password "$keyname (retry $c)"
+	    tombpass=`exec_as_user tomb -q askpass "$keyname (retry $c)"`
 	fi
-	echo "${scolopendro}" \
+	echo "${tombpass}" \
 	    | gpg --batch --passphrase-fd 0 --no-tty --no-options \
-	          -d "${tombkeypath}" 2>/dev/null \
+	          -d "${tombkeypath}"  \
 	    | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 	
-	unset scolopendro
+	unset tombpass
 	
 	if [ -r /dev/mapper/${mapper} ]; then
 	    break;  # password was correct
@@ -631,7 +632,7 @@ mount_tomb() {
     if [ -r ${usbkey_mount}/.tomb/${tombkey} ]; then
         umount ${usbkey_mount}
 	rmdir  ${usbkey_mount}
-	unset  ${usbkey_mount}
+	unset  usbkey_mount
     fi
     
     if ! [ -r /dev/mapper/${mapper} ]; then
@@ -644,7 +645,7 @@ mount_tomb() {
     act "encrypted storage filesystem check"
     fsck -p -C0 /dev/mapper/${mapper}
     act "tomb engraved as $tombname"
-    tune2fs -L ${tombname} /dev/mapper/${mapper}
+    tune2fs -L ${tombname} /dev/mapper/${mapper} > /dev/null
 
     mount -o rw,noatime,nodev /dev/mapper/${mapper} ${tombmount}
 
@@ -681,17 +682,17 @@ encode_key() {
     # here user is prompted for key password
     for c in 1 2 3; do
 	# 3 tries to write two times a matching password
-	ask_password ${FILE}
-	scolotemp=$scolopendro
-	ask_password "${FILE} (again)"
-	if [ "$scolotemp" = "$scolopendro" ]; then
+	tombpass=`exec_as_user tomb -q askpass ${FILE}`
+	tombpasstmp=$tombpass
+	tombpass=`exec_as_user tomb -q askpass "${FILE} (again)"`
+	if [ "$tombpasstmp" = "$tombpass" ]; then
 	    break;
 	fi
-	unset $scolotemp
-	unset $scolopendro
+	unset tombpasstmp
+	unset tombpass
     done
 
-    if [ -z $scolopendro ]; then
+    if [ -z $tombpass ]; then
 	error "passwords don't match, aborting operation."
 	return 1
     fi
@@ -702,7 +703,7 @@ encode_key() {
 /^Comment/ {next}
 {print $0}' ${tombkey} \
     | steghide embed --embedfile - --coverfile ${imagefile} \
-      -p ${scolopendro} -z 9 -e serpent cbc
+      -p ${tombpass} -z 9 -e serpent cbc
     if [ $? != 0 ]; then
 	error "encoding error: steghide reports problems"
 	res=1
@@ -711,7 +712,7 @@ encode_key() {
 	res=0
     fi
 
-    unset scolopendro
+    unset tombpass
 
     return $res
 }
@@ -731,11 +732,11 @@ decode_key() {
     notice "Decoding a key out of image $imagefile"
     for c in 1 2 3; do
 	if [ $c = 1 ]; then
-	    ask_password ${keyname}
+	    tombpass=`exec_as_user tomb -q askpass ${keyname}`
 	else
-	    ask_password "$keyname (retry $c)"
+	    tombpass=`exec_as_user tomb -q askpass "$keyname (retry $c)"`
 	fi
-	steghide extract -sf ${imagefile} -p ${scolopendro} -xf - \
+	steghide extract -sf ${imagefile} -p ${tombpass} -xf - \
 	    | awk '
 BEGIN {
 print "-----BEGIN PGP MESSAGE-----"
@@ -753,7 +754,7 @@ print "-----END PGP MESSAGE-----"
 	fi
     done
 
-    unset scolopendro
+    unset tombpass
 
     if [ $res != 0 ]; then
 	error "nothing found."
@@ -1030,6 +1031,7 @@ case "$CMD" in
 
     install)  check_priv ; install_tomb ;;
 
+    askpass)  ask_password $CMD2 $CMD3 ;;
     status)   tomb-status ;;
     notify)   tomb-notify $CMD2 $CMD3 ;;
 
@@ -1039,4 +1041,4 @@ case "$CMD" in
 	;;
 esac
 # return codes from called functions
-return $?
+# return $?
