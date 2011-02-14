@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
   //  gtk_status_icon_set_name(status_tomb, "tomb");
   gtk_status_icon_set_title(status_tomb, "Tomb");
 
-  snprintf(tooltip,255,"Tomb in %s",mountpoint);
+  snprintf(tooltip,255,"%s",mountpoint);
   gtk_status_icon_set_tooltip_text (status_tomb, tooltip);
 
   // LEFT click menu
