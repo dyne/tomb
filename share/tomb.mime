@@ -3,4 +3,4 @@ application/x-tomb-volume
 	ext: tomb
 
 application/x-tomb-key
-        ext: tomb.gpg
+        ext: tomb.key

@@ -168,8 +168,8 @@ if [ $1 ]; then # is it a file?
 	# is it a luks partition
 	file ${tombdir}/${tombfile} | grep -i LUKS > /dev/null
 	if [ $? = 0 ]; then # tomb is a valid LUKS file
-	    if [ -r ${tombdir}/${tombname}.key ]; then
-		tombkey=${tombdir}/${tombname}.key
+	    if [ -r ${tombdir}/${tombname}.tomb.key ]; then
+		tombkey=${tombdir}/${tombname}.tomb.key
 	    else
 		ask_usbkey
 		if ! [ $usbkey_mount ]; then # no usb key was mounted
@@ -177,8 +177,8 @@ if [ $1 ]; then # is it a file?
 		    echo "operation aborted." # TODO: dialog with pinentry
 		    exit 1
 		else # usb mounted, check key presence
-		    if [ -r ${usbkey_mount}/.tomb/${tombname}.key ]; then
-			tombkey=${usbkey_mount}/.tomb/${tombname}.key
+		    if [ -r ${usbkey_mount}/.tomb/${tombname}.tomb.key ]; then
+			tombkey=${usbkey_mount}/.tomb/${tombname}.tomb.key
 		    elif [ -r ${usbkey_mount}/.tomb ]; then
 			echo "we can't find the right key, have a look yourself:"
 			ls -lha ${usbkey_mount}/.tomb
@@ -335,12 +335,12 @@ if [ $? = 0 ]; then
 	echo "${tombname}.key succesfully saved on your USB"
 	echo "now we'll proceed opening your brand new tomb"
 
-	tomb -k ${tombname}.key open ${tombfile}
+	tomb -k ${tombname}.tomb.key open ${tombfile}
 	if [ $? = 0 ]; then
 	    launch_status ${tombname}
 	fi
 
-	rm -f ${tombname}.key
+	rm -f ${tombname}.tomb.key
 
 	sudo umount ${usbkey_mount}
 	rmdir  ${usbkey_mount}
@@ -357,7 +357,7 @@ cat <<EOF
   named .tomb inside the first partition of an usb key.
 EOF
 
-tomb -k ${tombname}.key open ${tombfile}
+tomb -k ${tombname}.tomb.key open ${tombfile}
 if [ $? = 0 ]; then
     launch_status ${tombname}
 fi

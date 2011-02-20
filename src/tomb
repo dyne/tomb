@@ -170,8 +170,8 @@ get_arg_tomb() {
     if [ $KEY ]; then
 	tombkey=$KEY # commandline -k flag
 	act "tomb key specified manually: $tombkey"
-    elif [ -r ${tombdir}/${tombname}.key ]; then
-	tombkey=${tombdir}/${tombname}.key
+    elif [ -r ${tombdir}/${tombname}.tomb.key ]; then
+	tombkey=${tombdir}/${tombname}.tomb.key
 	act "key found for tomb '${tombname}': ${tombkey}"
     else
 	error "key not found for tomb '${tombname}'"
@@ -340,7 +340,7 @@ create_tomb() {
 	exit 1
     fi
 	
-    notice "Setup your secret key file ${tombname}.key"
+    notice "Setup your secret key file ${tombname}.tomb.key"
 
     # here user is prompted for key password
     for c in 1 2 3; do
@@ -365,7 +365,7 @@ create_tomb() {
 
     echo "${tombpass}" | gpg \
 	--openpgp --batch --no-options --no-tty --passphrase-fd 0 \
-	-o "${tombdir}/${tombname}.key" -c -a ${keytmp}/tomb.tmp
+	-o "${tombdir}/${tombname}.tomb.key" -c -a ${keytmp}/tomb.tmp
 
     if [ $? = 2 ]; then
 	error "setting password failed: gnupg returns 2"
@@ -409,7 +409,7 @@ create_tomb() {
     losetup -d ${nstloop}
 
     act "done creating $tombname encrypted storage (using Luks dm-crypt AES/SHA256)"
-    notice "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombname}.key"
+    notice "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombname}.tomb.key"
 
 }
 
@@ -580,7 +580,7 @@ decode_key() {
 	return 1
     fi
 
-    keyfile=${tombname%%\.*}.key
+    keyfile=${tombname%%\.*}.tomb.key
     notice "Trying to exhume a key out of image $imagefile"
     for c in 1 2 3; do
 	if [ $c = 1 ]; then
@@ -880,7 +880,7 @@ install_tomb() {
   </mime-type>
   <mime-type type="application/x-tomb-key">
     <comment>Tomb crypto key</comment>
-    <glob pattern="*.key"/>
+    <glob pattern="*.tomb.key"/>
   </mime-type>
 </mime-info>
 EOF
@@ -901,7 +901,7 @@ Comment=Keep your bones safe
 Exec=tomb-open %U
 TryExec=tomb-open
 Icon=monmort.xpm
-Terminal=false
+Terminal=true
 Categories=Utility;Security;Archiving;Filesystem;
 MimeType=application/x-tomb-volume;
 X-AppInstall-Package=tomb
@@ -910,7 +910,7 @@ EOF
 
     act "updating menus..."
     cat <<EOF > /etc/menu/tomb
-?package(tomb):command="tomb" icon="/usr/share/pixmaps/monmort.xpm" needs="cryptsetup" \
+?package(tomb):command="tomb" icon="/usr/share/pixmaps/monmort.xpm" needs="text" \
 	section="Applications/Accessories" title="Tomb" hints="Crypto" \
 	hotkey="Tomb"
 EOF
@@ -931,7 +931,7 @@ application/x-tomb-volume
 	ext: tomb
 
 application/x-tomb-key
-        ext: key
+        ext: tomb.key
 EOF
     cat <<EOF > /usr/lib/mime/packages/tomb
 application/x-tomb-volume; tomb-open '%s'; priority=8
@@ -946,7 +946,7 @@ tomb
          name=Tomb - Crypto Undertaker
          can_open_multiple_files=false
          expects_uris=false
-         requires_terminal=false
+         requires_terminal=true
          mime-types=application/x-tomb-volume,application/x-tomb-key
 EOF
     act "Tomb is now installed."
