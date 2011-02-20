@@ -26,6 +26,6 @@ install-data-hook:
 	@echo "installing icons";
 	@xdg-icon-resource install --context mimetypes --size 32 ../src/monmort.xpm monmort
 	@xdg-icon-resource install --size 32 ../src/monmort.xpm dyne-monmort
-	@echo "updating dekstop database"; update-desktop-database
+	@if ! [ -n `which update-desktop-database` ]; then echo update-desktop-database; update-desktop-database; fi
 	@if ! [ -n `which update-menus` ]; then echo update-menus;  update-menus; fi
 	update-mime
