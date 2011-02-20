@@ -1,4 +1,4 @@
-Applicationsdir = $(datadir)/applications $(datadir)/app-install/desktop
+Applicationsdir = $(datadir)/applications
 Applications_DATA = tomb.desktop
 
 AppRegdir = $(datadir)/application-registry
@@ -10,15 +10,22 @@ MimeInfo_DATA = tomb.keys tomb.mime
 Menudir = $(datadir)/menu
 Menu_DATA = tomb
 
-Iconsdir = $(datadir)/icons $(datadir)/app-install/icons
+Iconsdir = $(datadir)/icons
 Icons_DATA = monmort.png
+ 
+AppInstIcondir = $(datadir)/app-install/icons
+AppInstIcon_DATA = monmort.png
+
+AppInstDeskdir = $(datadir)/app-install/desktop
+AppInstDesk_DATA = tomb.desktop
 
 install-data-hook:
-	xdg-mime install dyne-tomb.xml
-	xdg-icon-resource install --context mimetypes --size 32 ../src/monmort.xpm monmort
-	xdg-icon-resource install --size 32 ../src/monmort.xpm dyne-monmort
-	mkdir -p $(prefix)/lib/mime/packages
-	echo "application/x-tomb-volume; tomb-open '%s'; priority=8" > $(prefix)/lib/mime/packages/tomb
-	update-desktop-database
-	update-menus
+	@echo "installing mime type"; xdg-mime install dyne-tomb.xml
+	@mkdir -p $(prefix)/lib/mime/packages
+	@echo "application/x-tomb-volume; tomb-open '%s'; priority=8" > $(prefix)/lib/mime/packages/tomb
+	@echo "installing icons";
+	@xdg-icon-resource install --context mimetypes --size 32 ../src/monmort.xpm monmort
+	@xdg-icon-resource install --size 32 ../src/monmort.xpm dyne-monmort
+	@echo "updating dekstop database"; update-desktop-database
+	@if ! [ -n `which update-menus` ]; then echo update-menus;  update-menus; fi
 	update-mime
