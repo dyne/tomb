@@ -31,35 +31,188 @@ try() {
     else return -1; fi
 }
 
-tombdir=`dirname $1`
-tombfile=`basename $1`
-tombname=${tombfile%%\.*}
+# popup notification
+tomb-notify() {
 
+    which notify-send > /dev/null
+    if [ $? != 0 ]; then return 1; fi
+
+    # look for our icon in common prefixes
+    if   [ -r /usr/share/pixmaps/monmort.xpm ];       then icon=/usr/share/pixmaps/monmort.xpm
+    elif [ -r /usr/share/icons/monmort.xpm ];         then icon=/usr/share/icons/monmort.xpm
+    elif [ -r /usr/local/share/pixmaps/monmort.xpm ]; then icon=/usr/local/share/pixmaps/monmort.xpm
+    elif [ -r /usr/local/share/icons/monmort.xpm ];   then icon=/usr/local/share/icons/monmort.xpm
+    elif [ -r /opt/share/pixmaps/monmort.xpm ];       then icon=/opt/share/pixmaps/monmort.xpm
+    elif [ -r /sw/share/pixmaps/monmort.xpm ];        then icon=/sw/share/pixmaps/monmort.xpm
+    fi
+
+    if [ -z $1 ]; then
+	notify-send -i $icon \
+	    -u low -h string:App:Tomb \
+	    -h double:Version:${VERSION} \
+	    "Tomb version $VERSION" \
+	    "Hi, I'm the Undertaker.
+Let's start setting your Crypt?"
+    else
+	notify-send -i $icon ${@}
+    fi
+}
+
+
+# USB plug auto detect using dmesg
+# tested on ubuntu 10.04 and debian 6.0
+# please test and patch on other systems if you can.
+# TODO: use udev rules, see how archlinux folks document it:
+# https://wiki.archlinux.org/index.php/System_Encryption_with_LUKS_for_dm-crypt
+# here we could modularize the choice of methods using function pointers,
+# so that they are configurable when calling tomb.
+ask_usbkey() {
+    unset usbkey_mount
+    echo "Waiting 1 minute for a usb key to connect"
+    echo -n " .  please insert your usb key "
+    
+    tomb-notify "Insert your USB KEY" \
+	"Tomb is waiting 30 seconds for you to insert an external key."
+    
+    plugged=false
+    c=0
+    while [ "$plugged" != "true" ]; do
+	dmesg | tail -n 12 | grep -q 'new.*USB device'
+	if [ $? = 0 ]; then plugged=true; fi
+	echo -n "."
+	sleep .5
+	c=`expr $c + 1`
+	if [ $c -gt 60 ]; then
+	    echo
+	    echo "[!] timeout."
+	    return 1;
+	fi
+    done
+
+    echo
+    echo -n " .  usb key inserted, attaching "
+    
+    c=0
+    attached=false
+    while [ "$attached" != "true" ]; do
+	dmesg | tail -n 12| grep -q 'Attached.*removable disk'
+	if [ $? = 0 ]; then attached=true; fi
+	echo -n "."
+	sleep  .5
+	c=`expr $c + 1`
+	if [ $c -gt 30 ]; then
+	    echo
+	    echo "[!] timeout."
+	    export usbkey_mount=none
+	    return 1;
+	fi
+    done
+
+    echo
+    echo -n " .  usb attached, opening "
+    
+    # get the first partition
+#    usbpart=`dmesg |tail -n 12 | grep '  sd.:' |cut -d: -f2 |tr -d ' '`
+    for i in $(seq 1 10); do
+        usbpart=$(dmesg | tail -n 12 | sed '/  sd.:/!d;s/^.*: \(sd.[0-9]*\)/\1/')
+        if [ -n "$usbpart" ]; then
+           break
+	elif [ $i -eq 10 ]; then
+            echo "[!] timeout."
+            return 1
+        else
+            echo -n .
+            sleep 1
+        fi
+    done
+
+    mtmp=$(/bin/mktemp -d --tmpdir tomb.XXXXXXXXXXXX)
+    sudo mount /dev/$usbpart $mtmp
+    if [ $? = 0 ]; then
+	usbmount=$mtmp
+    else
+	echo "[!] cannot mount usbkey partition $usbmount"
+	return 1
+    fi
+
+    echo
+    echo " .  usb key mounted on $usbmount"
+    usbkey_mount=$usbmount
+    return 0
+}
+
+launch_status() {
+    # calculates the correct arguments to launch tomb-status tray
+    # applet; it takes the tomb name as an argument and should be
+    # launched after a successful tomb mount.
+    if ! [ $1 ]; then
+	echo "[!] cannot launch status tray applet: we don't even know the name of our tomb."
+	exit 1
+    fi
+
+    tombname=${1}
+    tombmap=`mount -l | awk "/\[${tombname}\]$/"' { print $1 } '`
+    tombmount=`mount -l | awk "/\[${tombname}\]$/"' { print $3 } '`
+    tomb-status $tombmap $tombname $tombmount &!
+}
 
 # got an argument
 if [ $1 ]; then # is it a file?
 
+    tombdir=`dirname $1`
+    tombfile=`basename $1`
+    tombname=${tombfile%%\.*}
+
     if [ -f ${tombdir}/${tombfile} ]; then
 
 	# is it a luks partition
-	file ${tombdir}/${tombfile} | grep LUKS
+	file ${tombdir}/${tombfile} | grep -i LUKS > /dev/null
 	if [ $? = 0 ]; then # tomb is a valid LUKS file
+	    if [ -r ${tombdir}/${tombname}.key ]; then
+		tombkey=${tombdir}/${tombname}.key
+	    else
+		ask_usbkey
+		if ! [ $usbkey_mount ]; then # no usb key was mounted
+		    echo "key not provided for tomb: $tombname"
+		    echo "operation aborted." # TODO: dialog with pinentry
+		    exit 1
+		else # usb mounted, check key presence
+		    if [ -r ${usbkey_mount}/.tomb/${tombname}.key ]; then
+			tombkey=${usbkey_mount}/.tomb/${tombname}.key
+		    elif [ -r ${usbkey_mount}/.tomb ]; then
+			echo "we can't find the right key, have a look yourself:"
+			ls -lha ${usbkey_mount}/.tomb
+			exit 1
+		    else
+			echo "there are no keys stored in your usb"
+			exit 1
+		    fi
+		fi
+	    fi
+	    if ! [ ${tombkey} ]; then # just to be sure
+		echo "key not found, operation aborted."
+		exit 1
+	    else
+		
+		tomb -k ${tombkey} mount ${tombdir}/${tombfile}
+		success=$?
+	    fi
 
-	    tomb mount ${tombdir}/${tombfile}
+	    if [ $usbkey_mount ]; then
+		sudo umount ${usbkey_mount}
+		rmdir  ${usbkey_mount}
+		unset  usbkey_mount
+	    fi
 
-	    if [ $? = 0 ]; then	# mount was succesfull (with password and all)
-	    # strip extension if there
-		tombmap=`mount -l | awk "/\[${tombname}\]$/"' { print $1 } '`
-		tombmount=`mount -l | awk "/\[${tombname}\]$/"' { print $3 } '`
-		echo "tomb-status $tombmap $tombname $tombmount"
-		tomb-status $tombmap $tombname $tombmount &!
+	    if [ $success = 0 ]; then	# mount was succesfull (with password and all)
+		launch_status ${tombname}
 		exit 0
 	    else
-		tomb notify "Tomb cannot open." "Are you knocking the wrong door?"
+		tomb-notify "Tomb cannot open." "Are you knocking the wrong door?"
 		exit 1
 	    fi
 	else
-	    tomb notify "Not a real Tomb." "We found no real bones in there."
+	    tomb-notify "Not a real Tomb." "We found no real bones in there."
 	    exit 1
 	fi
 
@@ -74,7 +227,7 @@ if [ $1 ]; then # is it a file?
 	try rox; if [ $? = 0 ]; then rox ${1}; exit 0; fi
 	try fsviewer; if [ $? = 0 ]; then fsviewer ${1}; exit 0; fi
 #	try xnc; if [ $? = 0 ]; then xnc ${1}; exit 0; fi
-	tomb notify "File manager not found." "Tomb cannot guess which filemanager you are using"
+	tomb-notify "File manager not found." "Tomb cannot guess which filemanager you are using"
 	exit 1
     fi
 fi
@@ -88,7 +241,13 @@ if [ -z $DISPLAY ]; then
 fi
 
 # no arguments: start guided tomb creation
-tomb notify
+tomb-notify
+# we do it on the desktop by default
+if [ -r $HOME/Desktop ]; then 
+    cd $HOME/Desktop;
+# or inside HOME
+else cd $HOME; fi
+
 cat <<EOF
 Create a new Tomb
 =================
@@ -115,13 +274,14 @@ fi
     # let's proceed
 echo "  Please type in the name for your new tomb file:"
 echo -n "> "
-read filename
+read tombname
 echo "  How big you want the Tomb to be?"
 echo "  Type a size number in Megabytes:"
 echo -n "> "
-read size
+read tombsize
+clear
 echo "  You have commanded the creation of this Tomb:"
-echo "    $filename ( $size MBytes )";
+echo "    $tombname ( $tombsize MBytes )";
 echo
 cat <<EOF
   Please confirm if you want to proceed now:
@@ -146,22 +306,60 @@ cat <<EOF
   password:
 EOF
 
-tomb create ${filename}.tomb $size
+tombfile=${tombname}.tomb
+tomb -s $tombsize create ${tombfile}
 
 if [ $? != 0 ]; then
     echo "An error occurred creating tomb, operation aborted."
     exit 1
-else
-    tombname="${filename%%.*}"
-    tombmap=`mount -l | awk "/\[${tombname}\]$/"' { print $1 } '`
-    tombmount=`mount -l | awk "/\[${tombname}\]$/"' { print $3 } '`
-    tomb-status $tombmap $tombname $tombmount &!
 fi
 
+tomb-notify "The Tomb is ready!" "We will now open your new Tomb for the first time."
+cat <<EOF
+  Would you like to save the key on  an external usb device?"
+  This is recommended for safety:"
+  Always keep the key in a different place than the door!"
+  If you answer yes, you'll need a USB KEY now: (y/n)"
+EOF
+# tomb-notify "Tomb has forged a key." "Would you like to save it on USB?" 
+echo -n " >  "
+read -q
+if [ $? = 0 ]; then
+    ask_usbkey
+    if [  ${usbkey_mount} ]; then
 
-# if ! [ -r /usr/share/applications/tomb.desktop ]; then
-#     echo "  Well done!"
-#     echo "  Now the last thing to do is to install Tomb on your desktop:"
-#     sudo tomb install
-# fi
+	sudo mkdir -m 0700 -p ${usbkey_mount}/.tomb
+	sudo cp -v ${tombname}.key ${usbkey_mount}/.tomb/
+	sudo chmod -R go-rwx ${usbkey_mount}/.tomb
 
+	echo "${tombname}.key succesfully saved on your USB"
+	echo "now we'll proceed opening your brand new tomb"
+
+	tomb -k ${tombname}.key open ${tombfile}
+	if [ $? = 0 ]; then
+	    launch_status ${tombname}
+	fi
+
+	rm -f ${tombname}.key
+
+	sudo umount ${usbkey_mount}
+	rmdir  ${usbkey_mount}
+	unset usbkey_mount
+
+	exit 0
+    fi
+fi
+
+cat <<EOF
+  Impossible to save the key on USB.
+  We recommend to preserve the key in a separate place!
+  You can move it yourself later, place it in a hidden directory
+  named .tomb inside the first partition of an usb key.
+EOF
+
+tomb -k ${tombname}.key open ${tombfile}
+if [ $? = 0 ]; then
+    launch_status ${tombname}
+fi
+
+exit 0

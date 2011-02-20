@@ -215,6 +215,9 @@ gboolean cb_close(GtkWidget *w, GdkEvent *e) {
     notify_uninit();
     exit(0);
   }
+  /*  tomb-notify "Tomb '$tombname' is too busy."		\
+      "Close all applications and file managers, then try again."
+  */
   return TRUE;
 }
 
