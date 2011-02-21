@@ -10,8 +10,6 @@ Tomb \- the Crypto Undertaker
 .IP "tomb-open [file]"
 .B
 .IP "tomb-status mountpoint"
-.B
-.IP "tomb-askpass [file]"
 
 .SH DESCRIPTION
 
@@ -35,10 +33,9 @@ specified, opens a the tomb file pointed by it and makes it accessible
 in a default location under the /media folder, starting the status
 tray icon if a desktop is present.
 
-The other commands \fItomb-status\fR and \fItomb-askpass\fR are for
-internal use (they are called by tomb with the right arguments) and
-serve the purpose of communicating with the user via the graphical
-interface.
+The other commands \fItomb-status\fR is called by the \fItomb-open\fR
+helper and is meant to give access to opened tombs with operations
+(close and explore) for the desktop.
 
 
 .SH COMMANDS

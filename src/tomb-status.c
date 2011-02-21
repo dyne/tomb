@@ -229,7 +229,8 @@ gboolean right_click(GtkWidget *w, GdkEvent *e) {
   return TRUE;
 } 
 gboolean cb_about(GtkWidget *w, GdkEvent *e) {
-  const gchar *authors[] = {"Tomb is written by Jaromil - http://jaromil.dyne.org",NULL};
+  const gchar *authors[] = {"Jaromil - http://jaromil.dyne.org",
+			    "Hellekin O. Wolf", NULL};
   const gchar *artists[] = {"Jordi aka Món Mort - http://monmort.blogspot.org",
 			    "Asbesto Molesto - http://freaknet.org/asbesto",
 			    NULL};
@@ -237,7 +238,7 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e) {
   gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(dialog), PACKAGE);
   gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION); 
   gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog), 
-				 "(C)2007-2011 Denis Roio aka Jaromil");
+				 "(C)2007-2011 Jaromil @ Dyne.org Foundation");
   gtk_about_dialog_set_artists(GTK_ABOUT_DIALOG(dialog), artists);
   gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dialog), authors);
 
@@ -246,8 +247,8 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e) {
 "\n"
 "This program helps people keeping their bones together by taking care of their private data inside encrypted storage filesystems that are easy to access and transport.\n"
 "\n"
-"The level of security provided by this program is fairly good: it uses an accelerated AES/SHA256 (cbc-essiv) to access the data on the fly, as if it would be a mounted volume, so that the data is physically stored on your disc only in an encrypted form.\n"
-"Tomb encourages users to store key files in a different place and to separate them from the data during transports\n"
+"The level of security provided by this program is fairly strong: it uses  AES/SHA256 (cbc-essiv) to access the encrypted volumes in realtime so that all what is physically stored on your disc is only in an encrypted form.\n"
+"Tomb also encourages users to separate keys from data, for instance storing them on USB.\n"
 "\n"
 );
   gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog), PACKAGE_URL);
@@ -261,10 +262,9 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e) {
 "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\n"
 "\n"
 "You should have received a copy of the GNU General Public License along with this program.\n"
-"If not, see http://www.gnu.org/licenses\n"
+"If not, see <http://www.gnu.org/licenses>\n"
 "\n"
-"Tomb is Copyright (C) 2007-2011 by Denis \"Jaromil\" Roio\n"
-"Shared libraries and external software used by Tomb are copyright by their respective authors, licensed and distributed as free software\n");
+" The latest Tomb sourcecode is published on <http://tomb.dyne.org>\n");
   gtk_about_dialog_set_wrap_license(GTK_ABOUT_DIALOG(dialog), TRUE);
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
