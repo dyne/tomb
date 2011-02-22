@@ -308,9 +308,6 @@ create_tomb() {
 	exit 1
     fi
 
-    modprobe dm-crypt
-    modprobe aes-i586
-
     nstloop=`losetup -f` # get the number for next loopback device
     losetup -f ${tombdir}/${tombfile} # allocates the next loopback for our file
 
@@ -363,17 +360,18 @@ create_tomb() {
 	exit 1
     fi
 
+    
     echo "${tombpass}" | gpg \
-	--openpgp --batch --no-options --no-tty --passphrase-fd 0 \
+	--openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
 	-o "${tombdir}/${tombname}.tomb.key" -c -a ${keytmp}/tomb.tmp
 
-    if [ $? = 2 ]; then
-	error "setting password failed: gnupg returns 2"
-	umount ${keytmp}
-	losetup -d $nstloop
-	rm -r $keytmp
-	exit 1
-    fi
+    # if [ $? != 0 ]; then
+    # 	error "setting password failed: gnupg returns 2"
+    # 	umount ${keytmp}
+    # 	losetup -d $nstloop
+    # 	rm -r $keytmp
+    # 	exit 1
+    # fi
     
     act "formatting Luks mapped device"
         # we use aes-cbc-essiv with sha256
@@ -454,17 +452,15 @@ mount_tomb() {
 	$norm || rmdir $tombmount 2>/dev/null
 	return 1
     fi
-	
-    modprobe dm-crypt
-    modprobe aes-i586
-    
+
     # save date of mount in minutes since 1970
     mapdate="`date +%s`"
     mapdate="`echo ${mapdate}/60 | bc -l | cut -d. -f1`"
     
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
 
-    keyname=`basename $tombkey | cut -d. -f1`    
+    keyname=`basename $tombkey | cut -d. -f1`
+
     notice "Password is required for key ${keyname}"
     for c in 1 2 3; do
 	
@@ -475,7 +471,7 @@ mount_tomb() {
 	fi
 	echo "${tombpass}" \
 	    | gpg --batch --passphrase-fd 0 --no-tty --no-options \
-	          -d "${tombkey}"  \
+	          -d "${tombkey}" 2> /dev/null \
 	    | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 	
 	unset tombpass
