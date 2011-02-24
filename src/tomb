@@ -437,9 +437,7 @@ mount_tomb() {
     notice "mounting $tombfile on mountpoint $tombmount"
 
     # we need root from here on
-
-    local norm=$(test -d $tombmount)
-    $norm || mkdir -p $tombmount
+    mkdir -p $tombmount
     
     nstloop=`losetup -f`
     losetup -f ${tombdir}/${tombfile}

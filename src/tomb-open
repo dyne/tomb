@@ -23,8 +23,6 @@
 # startup wrapper to open tombs
 
 
-echo "arg: $1"
-
 try() {
     which ${1} > /dev/null
     if [ $? = 0 ]; then return 0;
@@ -49,7 +47,6 @@ tomb-notify() {
     if [ -z $1 ]; then
 	notify-send -i $icon \
 	    -u low -h string:App:Tomb \
-	    -h double:Version:${VERSION} \
 	    "Tomb version $VERSION" \
 	    "Hi, I'm the Undertaker.
 Let's start setting your Crypt?"

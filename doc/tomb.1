@@ -104,16 +104,42 @@ Run more quietly
 .IP "-D"
 Print more information while running, for debugging purposes
 
+.SH HOOKS
+
+Hooks are special files that can be placed inside the tomb and trigger
+actions when it is opened and closed; there are two kinds of such
+files: \fIbind-hooks\fR and \fIpost-hooks\fR can be placed in the
+base root of the tomb.
+
+.B
+.IP "bind-hooks"
+This hook file consists of a simple two column list of files or
+directories inside the tomb to be made directly accessible inside the
+current user's home directory. Tomb will use the "mount -o bind"
+command to bind locations inside the tomb to locations found in $HOME
+so in the first column are indicated paths relative to the tomb and in
+the second column are indicated paths relative to $HOME contents, for
+example:
+
+  mail          mail
+  .gnupg        .gnupg
+  .fmrc         .fetchmailrc
+  .mozilla      .mozilla
+
+.B
+.IP "post-hooks"
+This hook file gets executed as user by tomb right after opening it;
+it can consist of a shell script of a binary executable that performs
+batch operations every time a tomb is opened.
+
 .SH PRIVILEGE ESCALATION
 
 The tomb commandline tool needs to acquire super user rights to
-execute most of its operations.
+execute most of its operations: to do so it uses sudo(8), while
+pinentry(1) is adopted to collect passwords from the user.
 
-Once the rights are acquired Tomb executes as root only those commands
-requiring it, while it executes desktop applications as the user.
-
-The escalation to super user privileges is triggered automatically by
-calling 'gksu' or 'sudo' commands.
+Tomb executes as super user only those commands requiring it, while it
+executes desktop applications as processes owned by the user.
 
 
 .SH BUGS
