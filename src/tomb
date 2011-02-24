@@ -56,32 +56,19 @@ ask_password() {
 
     # pinentry has no custom icon setting
     # so we need to temporary modify the gtk theme
-    if [ -r ~/.gtkrc-2.0 ]; then
-	cp ~/.gtkrc-2.0 ~/.gtkrc-2.0.tomb.bak
-    else
-	touch ~/.gtkrc-2.0
+    if [ -r /usr/local/share/themes/tomb/gtk-2.0-key/gtkrc ]; then
+	GTK2_RC=/usr/local/share/themes/tomb/gtk-2.0-key/gtkrc
+    elif [ -r /usr/share/themes/tomb/gtk-2.0-key/gtkrc ]; then
+	GTK2_RC=/usr/share/themes/tomb/gtk-2.0-key/gtkrc
     fi
 
-    cat <<EOF  >> ~/.gtkrc-2.0
-    pixmap_path "/usr/local/share/pixmaps"
-    style "normal" { stock["gtk-dialog-authentication"] = {{"monmort.xpm"}} }
-    widget "*" style "normal"
-EOF
-
-    cat <<EOF | pinentry | awk '/^D/ { print $2 }'
+    cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry | awk '/^D/ { print $2 }'
 SETTITLE Insert tomb password
 SETDESC Open tomb: $1
 SETPROMPT Password:
 GETPIN
 EOF
 
-    # restore gtk as it was
-    if [ -r ~/.gtkrc-2.0.tomb.bak ]; then
-	cp ~/.gtkrc-2.0.tomb.bak ~/.gtkrc-2.0
-	rm ~/.gtkrc-2.0.tomb.bak
-    else
-	rm -f ~/.gtkrc-2.0
-    fi
 }
 
 

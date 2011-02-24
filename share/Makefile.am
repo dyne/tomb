@@ -25,7 +25,11 @@ install-data-hook:
 	@mkdir -p $(prefix)/lib/mime/packages
 	@echo "application/x-tomb-volume; tomb-open '%s'; priority=8" > $(prefix)/lib/mime/packages/tomb
 	@echo "installing icons";
-	@if ! [ -n `which xdg-icon-resource install` ]; then xdg-icon-resource install --context mimetypes --size 32 ../src/monmort.xpm monmort; xdg-icon-resource install --size 32 ../src/monmort.xpm dyne-monmort; fi
+	@if ! [ -n `which xdg-icon-resource` ]; then \
+		xdg-icon-resource install --context mimetypes --size 32 ../src/monmort.xpm monmort; \
+		xdg-icon-resource install --size 32 ../src/monmort.xpm dyne-monmort; fi
+	mkdir -p $(datadir)/themes/tomb/gtk-2.0-key
+	sed -e 's@\%prefix\%@'"$(datadir)"'@' gtkrc-2.0 > $(datadir)/themes/tomb/gtk-2.0-key/gtkrc
 	@if ! [ -n `which update-desktop-database` ]; then echo update-desktop-database; update-desktop-database; fi
 	@if ! [ -n `which update-menus` ]; then echo update-menus;  update-menus; fi
 	@if ! [ -n `which update-mime` ]; then echo update-mime; update-mime; fi
