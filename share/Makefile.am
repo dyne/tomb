@@ -20,12 +20,12 @@ AppInstDeskdir = $(datadir)/app-install/desktop
 AppInstDesk_DATA = tomb.desktop
 
 install-data-hook:
-	@echo "installing mime type"; xdg-mime install dyne-tomb.xml
+	@echo "installing mime type"
+	@if ! [ -n `which xdg-mime` ]; then xdg-mime install dyne-tomb.xml; fi
 	@mkdir -p $(prefix)/lib/mime/packages
 	@echo "application/x-tomb-volume; tomb-open '%s'; priority=8" > $(prefix)/lib/mime/packages/tomb
 	@echo "installing icons";
-	@xdg-icon-resource install --context mimetypes --size 32 ../src/monmort.xpm monmort
-	@xdg-icon-resource install --size 32 ../src/monmort.xpm dyne-monmort
+	@if ! [ -n `which xdg-icon-resource install` ]; then xdg-icon-resource install --context mimetypes --size 32 ../src/monmort.xpm monmort; xdg-icon-resource install --size 32 ../src/monmort.xpm dyne-monmort; fi
 	@if ! [ -n `which update-desktop-database` ]; then echo update-desktop-database; update-desktop-database; fi
 	@if ! [ -n `which update-menus` ]; then echo update-menus;  update-menus; fi
-	update-mime
+	@if ! [ -n `which update-mime` ]; then echo update-mime; update-mime; fi
