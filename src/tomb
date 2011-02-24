@@ -780,8 +780,13 @@ umount_tomb() {
 	if [ "$how_many_tombs" = "0" ]; then
 	    error "there is no open tomb to be closed"
 	    return 1
+
 	elif [ "$how_many_tombs" = "1" ]; then
 	    mapper=`find /dev/mapper -name 'tomb.*'`
+	    notice "trying to close $mapper"
+	    umount_tomb ${mapper}
+	    return 1
+
 	else
 	    error "too many tombs mounted, please specify which to unmount:"
 	    ls /dev/mapper/tomb.*
@@ -802,6 +807,7 @@ umount_tomb() {
 	done
 	return 0
     fi
+
 
     if [ -r "$1" ]; then # accepts relative and absolute path
 	mapper="$1"
