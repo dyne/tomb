@@ -20,7 +20,7 @@
 # this source code; if not, write to:
 # Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-VERSION=0.9.3
+VERSION=1.0
 DATE=Feb/2011
 
 # PATH=/usr/bin:/usr/sbin:/bin:/sbin   
