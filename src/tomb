@@ -633,7 +633,6 @@ exec_safe_bind_hooks() {
       func "bind-hooks not found in $MOUNTPOINT"
       return 1
    fi
-   typeset -al created
    typeset -al mounted
    typeset -Al maps
    maps=($(<"$MOUNTPOINT/bind-hooks"))
@@ -645,16 +644,16 @@ exec_safe_bind_hooks() {
       if [ "${${maps[$dir]}[1]}" = "/" -o "${${maps[$dir]}[1,2]}" = ".." ]; then
           error "bind-hooks map format: local/to/tomb local/to/\$HOME.  Rolling back"
           for dir in ${mounted}; do umount $dir; done
-          for dir in ${created}; do rmdir  $dir; done
 	  return 1
       fi
-      if [ ! -d "$HOME/${maps[$dir]}" ]; then
-          act "creating $HOME/${maps[$dir]}"
-          mkdir -p $HOME/${maps[$dir]}
-          created+=("$HOME/${maps[$dir]}")
+      if [ ! -r "$HOME/${maps[$dir]}" ]; then
+          error "bind-hook target not existent, skipping $HOME/${maps[$dir]}"
+      elif [ ! -r "$MOUNTPOINT/$dir" ]; then
+	  error "bind-hook source not found in tomb, skipping ${MOUNTPOINT}/${dir}"
+      else
+	  mount -o bind $MOUNTPOINT/$dir $HOME/${maps[$dir]}
+	  mounted+=("$HOME/${maps[$dir]}")
       fi
-      mount --bind $MOUNTPOINT/$dir $HOME/${maps[$dir]}
-      mounted+=("$HOME/${maps[$dir]}")
    done
 }
 
