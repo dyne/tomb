@@ -14,13 +14,13 @@ Tomb \- the Crypto Undertaker
 .SH DESCRIPTION
 
 Tomb is an application to manage the creation and access of encrypted
-storage files: it can be operated from commandline, it integrates with
-desktop managers and offers a simple graphical interface to facilitate
-its operation by desktop users.
+storage files: it can be operated from commandline and it can
+integrate with a user's graphical desktop.
 
-Tomb generates encrypted  storage files to be opened  and closed using
-their associated  keyfiles, which are  also protected with  a password
-chosen by the user.
+Tomb generates encrypted storage files to be opened and closed using
+their associated keys, which are also protected with a password chosen
+by the user. To create, open and close tombs a user will need super
+user rights to execute the tomb commandline utility.
 
 A tomb is like a locked folder that can be safely transported and
 hidden in a filesystem; it encourages users to keep their keys
@@ -28,14 +28,10 @@ separate from tombs, for instance keeping a tomb file on your computer
 harddisk and its key file on a USB stick.
 
 For simplified use, the command \fItomb-open\fR starts a wizard that
-guides users in the creation of a new tomb or, if an \fIargument\fR is
-specified, opens a the tomb file pointed by it and makes it accessible
-in a default location under the /media folder, starting the status
-tray icon if a desktop is present.
-
-The other commands \fItomb-status\fR is called by the \fItomb-open\fR
-helper and is meant to give access to opened tombs with operations
-(close and explore) for the desktop.
+guides users in the creation of a new tomb or, if a tomb file is
+specified as \fIargument\fR, it opens it and makes it accessible in a
+default location under the /media folder, starting the status tray
+applet (\fItomb-status\fR) if a desktop is present.
 
 
 .SH COMMANDS
