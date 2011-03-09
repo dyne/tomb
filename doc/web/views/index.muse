@@ -36,18 +36,107 @@ First of all the usual info you'd expect a software to provide:
 
 And more below, read on...
 
+*** How does it works
+
+[[images/monmort.png]]
+
+Tombs are operated from a normal file browser or from the commandline.
+
+To open a tomb is sufficient to click on it, or use the command **tomb-open**
+
+When a tomb is open your panel will have a little icon in the tray
+reminding you that a tomb is open, offering to explore it or close it.
+
+[[images/awesome-shot.png]]
+
+To make safety copies of your keys, tomb lets you "bury a key" inside
+an image (using steganography techniques) and of course "exhume"
+buried keys from pictures where they are hidden. Actually it is very
+hard to guess when something is hidden inside a picture without
+knowing the password used in steganography.
+
+See the [[manual.html][manpage]] for more information on how to operate Tomb from the
+text terminal.
+<example>
+Tomb 1.0 - a strong and gentle undertaker for your secrets
+
+Syntax: tomb [options] command [file] [place]
+
+Commands:
+
+ create     create a new tomb FILE and its keys
+ open       open an existing tomb FILE on PLACE
+ close      closes the tomb open on PLACE
+ bury       hide a tomb key FILE inside a jpeg PLACE
+ exhume     extract a tomb key FILE from a jpeg PLACE
+
+Options:
+
+ -s     size of the tomb file when creating one (in MB)
+ -k     path to the key to use for opening a tomb
+ -n     don't process the hooks found in tomb
+
+ -h     print this help
+ -v     version information for this tool
+ -q     run quietly without printing informations
+ -D     print debugging information at runtime
+
+For more informations on Tomb read the manual: man tomb
+Please report bugs on <http://bugs.dyne.org>.
+</example>
+
 *** Who needs Tomb
+
+ Democracy requires Privacy as much as Freedom of Expression.
 
 Our target community are desktop users with no time to click around,
 sometimes using old or borrowed computers, operating in places
 endangered by conflict where a leak of personal data can be a threat.
 
-If you don't own a laptop then it's possible to go around with a USB
+If you can't own a laptop then it's possible to go around with a USB
 stick and borrow computers, still leaving no trace and keeping your
 data safe during transports. Tomb aims to facilitate all this and to
 be interoperable across popular GNU/Linux operating systems.
 
+
+The internet offers plenty of free services, on the wave of the Web2.0
+fuzz and the community boom, while all private informations are hosted
+on servers owned by global corporations and monopolies.
+
+It is important to keep in mind that no-one else better than *you* can
+ensure the privacy of your personal data.  Server hosted services and
+web integrated technologies gather all data into huge information
+pools that are made available to established economical and cultural
+regimes.
+
+
+
+**This software urges you to reflect on the importance of your
+privacy**. World is full of prevarication and political imprisonments,
+war rages in several places and media is mainly used for propaganda by
+the powers in charge. Some of us face the dangers of being tracked by
+oppressors opposing our self definition, independent thinking and
+resistance to omologation.
+
+<verse>
+
+  "The  distinction between  what is  public  and what  is private  is
+   becoming more and more blurred with the increasing intrusiveness of
+   the  media  and  advances  in electronic  technology.   While  this
+   distinction   is  always   the  outcome   of   continuous  cultural
+   negotiation,  it continues  to be  critical, for  where  nothing is
+   private, democracy becomes impossible."
+
+(from [[http://www.newschool.edu/centers/socres/privacy/Home.html][Privacy Conference, Social Research, New School University]])
+</verse>
+
+
+
+
+
 *** Aren't there enough encryption tools already?
+
+[[images/foster_privacy.png]]
 
 We've felt the urgency of publishing Tomb for other operating systems
 than dyne:bolic since the current situation in personal desktop
@@ -81,42 +170,6 @@ customization we intend to:
  - distribute Tomb under the GNU General Public License v3
 
 If you believe this is a worthy effort, you are welcome to [[http://dyne.org/donate][support it]].
-
-
-*** How does it works
-
-[[images/monmort.png]]
-
-Tombs are operated from a normal file browser or from the commandline.
-
-To open a tomb is sufficient to click on it, or use the command **tomb-open**
-
-When a tomb is open your panel will have a little icon in the tray
-reminding you that a tomb is open, offering to explore it or close it.
-
-[[images/awesome-shot.png]]
-
-See the [[manual][manpage]] for more information on how to operate Tomb from the
-text terminal.
-<example>
- .  version 0.9.2 (Feb/2011) by Jaromil @ dyne.org
- .  
-[*] Syntax: tomb [options] command [file] [mountpoint]
- .  
-[*] Commands:
- .  create     create a new encrypted storage FILE and keys
- .  open       open an existing tomb FILE on MOUNTPOINT
- .  close      closes the tomb on MOUNTPOINT
- .  
-[*] Options:
- .  -s     size of the storage file when creating one (MB)
- .  -k     path to the key to use for decryption
- .  
- .  -h     print this help
- .  -v     version information for this tool
- .  -q     run quietly without printing information
- .  -D     print debugging information while running
-</example>
 
 *** Where do  we learn more from
 
