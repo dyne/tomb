@@ -27,6 +27,11 @@ USB stick.
 
 ** Documentation 
 
+  "*All I know is what the words know, and dead things, and that makes
+  a handsome little sum, with a beginning and a middle and an end, as
+  in the well-built phrase and the long sonata of the dead.*"
+  Samuel Beckett
+
 First of all the usual info you'd expect a software to provide: 
 
  - [[README]]
@@ -47,13 +52,14 @@ To open a tomb is sufficient to click on it, or use the command **tomb-open**
 When a tomb is open your panel will have a little icon in the tray
 reminding you that a tomb is open, offering to explore it or close it.
 
-[[images/awesome-shot.png]]
 
 To make safety copies of your keys, tomb lets you "bury a key" inside
 an image (using steganography techniques) and of course "exhume"
 buried keys from pictures where they are hidden. Actually it is very
 hard to guess when something is hidden inside a picture without
 knowing the password used in steganography.
+
+[[images/awesome-shot.png]]
 
 See the [[manual.html][manpage]] for more information on how to operate Tomb from the
 text terminal.
@@ -87,7 +93,7 @@ Please report bugs on <http://bugs.dyne.org>.
 
 *** Who needs Tomb
 
- Democracy requires Privacy as much as Freedom of Expression.
+ "*Democracy requires Privacy as much as Freedom of Expression.*" Anonymous
 
 Our target community are desktop users with no time to click around,
 sometimes using old or borrowed computers, operating in places

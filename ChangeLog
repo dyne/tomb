@@ -1,3 +1,10 @@
+March 2011 - 1.0
+
+	Clean and stable. Now passwords are handled exclusively using
+	pinentry. Also support for steganography of keys (bury and exhume)
+	was added to the commandline. Commandline and desktop operations
+	are separate so that tomb can be used via remote terminal.
+
 February 2011 - 0.9.1
 
 	Sourcecode cleanup, debugging and testing.
