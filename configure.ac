@@ -82,6 +82,13 @@ PKG_CHECK_MODULES(NOTIFY, libnotify, :,
   AC_MSG_ERROR([*** libnotify development files not found!]))
 AC_SUBST([NOTIFY_CFLAGS])
 AC_SUBST([NOTIFY_LIBS])
+REALCFLAGS="$CFLAGS"
+REALLIBS="$LIBS"
+CFLAGS="$NOTIFY_CFLAGS $CFLAGS"
+LIBS="$NOTIFY_LIBS $LIBS"
+AC_CHECK_FUNCS([notify_notification_new_with_status_icon])
+CFLAGS="$REALCFLAGS"
+LIBS="$REALLIBS"
 
 dnl compile with full warnings and debugging symbols
 AC_ARG_ENABLE(debug,

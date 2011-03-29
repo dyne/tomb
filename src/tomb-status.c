@@ -121,10 +121,17 @@ int main(int argc, char **argv) {
   g_signal_connect_swapped(status_tomb, "popup-menu", G_CALLBACK(right_click), menu_right);
 
   // status icon
+#if (HAVE_NOTIFY_NOTIFICATION_NEW_WITH_STATUS_ICON)
   notice = notify_notification_new_with_status_icon
     ("Tomb encrypted undertaker",
      "We started digging out bones",
      NULL, status_tomb);
+#else
+  notice = notify_notification_new
+    ("Tomb encrypted undertaker",
+     "We started digging out bones",
+     NULL);
+#endif
   notify_notification_set_icon_from_pixbuf(notice, pb_monmort);
 
   notify_notification_show(notice, &error);
