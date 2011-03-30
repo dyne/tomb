@@ -5,6 +5,12 @@ March 2011 - 1.0
 	was added to the commandline. Commandline and desktop operations
 	are separate so that tomb can be used via remote terminal.
 
+February 2011 - 0.9.2
+
+	The tomb-open wizard now correctly guides you through the creation
+	of new tombs and helps when saving the keys on external USB
+	storage devices. The status tray now reliably closes its tomb.
+
 February 2011 - 0.9.1
 
 	Sourcecode cleanup, debugging and testing.

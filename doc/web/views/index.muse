@@ -197,9 +197,37 @@ Below a list of formats you can download this application: ready to be
 run with some of the interfaces developed, as a library you can use to
 build your own application and as source code you can study.
 
+*** Debian
+
+To install the tomb and tomb-gtk package using apt, add this line to
+your software sources (/etc/apt/source/list)
+
+<example>
+ deb http://apt.dyne.org/debian stable main
+</example>
+
+
+*** Ubuntu
+
+If you use Lucid (10.04) add to your software sources this PPA
+
+<example>
+ ppa:jaromil/rastasoft
+</example>
+
+else if you are using Maverick or other older versions, you can still
+try to install the packages, as they should work well, by adding these
+two sources to /etc/apt/source.list
+
+<example>
+deb http://ppa.launchpad.net/jaromil/rastasoft/ubuntu lucid main
+deb-src http://ppa.launchpad.net/jaromil/rastasoft/ubuntu lucid main
+</example>
+
+
 *** Code repository
 
-Latest stable release is 0.9.2 (10 February 2011) more about it in the
+Latest stable release is 1.0 (11 March 2011) more about it in the
 [[ftp://ftp.dyne.org/tomb/NEWS][NEWS]] and [[ftp://ftp.dyne.org/tomb/ChangeLog][ChangeLog]]
 
 Source releases are checked and signed by [[http://jaromil.dyne.org][Jaromil]] using [[http://www.gnupg.org][GnuPG]].
@@ -241,12 +269,11 @@ Tomb is designed and written by [[http://jaromil.dyne.org][Jaromil]].
 
 Tomb's artwork is contributed by [[http://monmort.blogspot.com][Món Mort]].
 
-Testing and fixes are contributed by Dreamer and Hellekin O. Wolf.
+Testing and fixes are contributed by Dreamer, Hellekin O. Wolf,
+Shining and Mancausoft.
 
-Most research we refer to is documented by Clemens Fruhwirth.
-
-Tomb relies on Cryptsetup(8) and LUKS, big up to the developers involved  \o/
-
+Most research we refer to is documented by Clemens Fruhwirth who also
+developed Cryptsetup together with Christophe Saout.
 
 *** How can you help
 

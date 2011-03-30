@@ -231,7 +231,7 @@ gboolean right_click(GtkWidget *w, GdkEvent *e) {
 gboolean cb_about(GtkWidget *w, GdkEvent *e) {
   const gchar *authors[] = {"Jaromil - http://jaromil.dyne.org",
 			    "Code reviews and contributions by:",
-			    "Hellekin O. Wolf", NULL};
+			    "Dreamer, Hellekin O. Wolf, Shining and Mancausoft", NULL};
   const gchar *artists[] = {"Jordi aka Món Mort - http://monmort.blogspot.com",
 			    "Asbesto Molesto - http://freaknet.org/asbesto",
 			    NULL};
