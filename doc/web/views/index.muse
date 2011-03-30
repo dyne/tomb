@@ -197,7 +197,33 @@ Below a list of formats you can download this application: ready to be
 run with some of the interfaces developed, as a library you can use to
 build your own application and as source code you can study.
 
-*** Debian
+*** Source Code
+
+Latest stable release is 1.0 (March 2011), see the [[ftp://ftp.dyne.org/tomb/ChangeLog][ChangeLog]].
+
+Source releases are signed by [[http://jaromil.dyne.org][Jaromil]] using [[http://www.gnupg.org][GnuPG]] and MD5 hashes.
+
+On [[http://ftp.dyne.org/tomb][ftp.dyne.org/tomb]] you can find all present and past Tomb releases,
+plus binaries that are occasionally built for various architectures.
+
+The bleeding edge version is developed on our [[http://code.dyne.org][code repository]] using
+**GIT**, you can clone the repository free and anonymously
+
+<example>
+       git clone git://code.dyne.org/tomb.git
+</example>
+
+To compile the git master repository you first have to generate the
+auto-tools build environment giving the command:
+
+<example>
+       autoreconf -i
+</example>
+
+and then you can proceed with the usual configure && make mantra, may
+the source be with you.
+
+*** Debian GNU/Linux
 
 To install the tomb and tomb-gtk package using apt, add this line to
 your software sources (/etc/apt/source/list)
@@ -207,7 +233,7 @@ your software sources (/etc/apt/source/list)
 </example>
 
 
-*** Ubuntu
+*** Ubuntu GNU/Linux
 
 If you use Lucid (10.04) add to your software sources this PPA
 
@@ -224,24 +250,29 @@ deb http://ppa.launchpad.net/jaromil/rastasoft/ubuntu lucid main
 deb-src http://ppa.launchpad.net/jaromil/rastasoft/ubuntu lucid main
 </example>
 
+*** App1e/O$X
 
-*** Code repository
+There are several possibilities of porting Tomb to run on those
+expensive and fancy-schmancy toys.
 
-Latest stable release is 1.0 (11 March 2011) more about it in the
-[[ftp://ftp.dyne.org/tomb/NEWS][NEWS]] and [[ftp://ftp.dyne.org/tomb/ChangeLog][ChangeLog]]
+A good plan can be that of using TrueCrypt's version of cryptsetup
+which seems to be already ported for the purpose, with a bit of
+desktop integration and shell scripting it should be all set,
+[[http://dyne.org/contact][let us know]] if you like to join our team on this task.
 
-Source releases are checked and signed by [[http://jaromil.dyne.org][Jaromil]] using [[http://www.gnupg.org][GnuPG]].
 
-On [[ftp://ftp.dyne.org/tomb][ftp.dyne.org/tomb]] you find all present and past Tomb releases,
-source code for extra plugins and more binaries that we occasionally
-build for various architectures.
+*** Win$loth
 
-The bleeding edge version is developed on our [[http://code.dyne.org][code repository]] using
-**GIT**, you can clone the repository free and anonymously
+There are rumored plans to port Tomb on Win or at least make it
+possible to open tomb files under Win: this could be possible
+especially using [[http://www.freeotfe.org][FReeOTFE]] or adding compatibility in [[http://www.sdean12.org/SecureTrayUtil.htm][SecureTrayUtil]]
+and contributions are welcome in those directions.
 
-<example>
-       git clone git://code.dyne.org/tomb.git
-</example>
+However we strongly **encourage people in need of strong encryption to
+not use Winslows**, or at least to not generate encrypted partitions
+with it, since it can contain backdoors in the random number
+generation, as pointed by Bruce Schneier and Niels Ferguson in this
+[[http://www.schneier.com/essay-198.html][short essay about the Dual_EC_DRBG]].
 
 
 ** Development
