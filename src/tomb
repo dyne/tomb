@@ -303,7 +303,7 @@ create_tomb() {
     losetup -f ${tombdir}/${tombfile} # allocates the next loopback for our file
 
     # create the keyfile in tmpfs so that we leave less traces in RAM
-    keytmp=`tempfile -p tomb`
+    keytmp=`mktemp /tmp/tomb.XXX`
     rm -f $keytmp
     mkdir -p $keytmp
     mount tmpfs ${keytmp} -t tmpfs -o size=1m
