@@ -1,3 +1,11 @@
+April 2011 - 1.0
+
+        Fixed 2 bugs about pinentry ncurses requester; first,
+        the "LC_CTYPE" error, and a weird 100% cpu hangout. 
+        pinentry need to know the LC_CTYPE parameter and the TTY
+        in which he's working, so I added them in the code. 
+        -- asbesto
+
 March 2011 - 1.0
 
 	Clean and stable. Now passwords are handled exclusively using
