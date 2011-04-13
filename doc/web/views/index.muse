@@ -10,7 +10,7 @@
 </class>
 
 Tomb is a simple tool to manage **encrypted storage** on GNU/Linux, from
-the hashes of the [[http://dynebolic.org][dyne:bolic]] nesting mechanism.
+the *hashes* of the [[http://dynebolic.org][dyne:bolic]] nesting mechanism.
 
 Tomb aims to be an **100% free** and open source system for easy
 encryption and backup of personal files, written in code that is easy
@@ -250,6 +250,14 @@ deb http://ppa.launchpad.net/jaromil/rastasoft/ubuntu lucid main
 deb-src http://ppa.launchpad.net/jaromil/rastasoft/ubuntu lucid main
 </example>
 
+Don't forget to add the necessary gnupg key of our repository:
+
+<example>
+gpg --keyserver pgpkeys.mit.edu --recv-key 51A68D7A75FB7217
+gpg -a --export 51A68D7A75FB7217 | sudo apt-key add -
+</example>
+
+
 *** App1e/O$X
 
 There are several possibilities of porting Tomb to run on those
@@ -301,7 +309,7 @@ Tomb is designed and written by [[http://jaromil.dyne.org][Jaromil]].
 Tomb's artwork is contributed by [[http://monmort.blogspot.com][Món Mort]].
 
 Testing and fixes are contributed by Dreamer, Hellekin O. Wolf,
-Shining and Mancausoft.
+Shining, Mancausoft and Asbesto.
 
 Most research we refer to is documented by Clemens Fruhwirth who also
 developed Cryptsetup together with Christophe Saout.
