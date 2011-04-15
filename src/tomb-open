@@ -22,11 +22,19 @@
 
 # startup wrapper to open tombs
 
+TOMBEXEC="tomb"
+
+if [ "$0" = "./tomb-open" ]; then
+	TOMBEXEC="$PWD/tomb"
+fi
 
 try() {
     which ${1} > /dev/null
-    if [ $? = 0 ]; then return 0;
-    else return -1; fi
+    if [ $? = 0 ]; then 
+	return 0
+    else 
+	return -1 
+    fi
 }
 
 # popup notification
@@ -191,7 +199,7 @@ if [ $1 ]; then # is it a file?
 		exit 1
 	    else
 		
-		tomb -k ${tombkey} mount ${tombdir}/${tombfile}
+		"${TOMBEXEC}" -k ${tombkey} mount ${tombdir}/${tombfile}
 		success=$?
 	    fi
 
@@ -233,7 +241,7 @@ fi
 # no argument but on graphical display: creation dialog
 if [ -z $DISPLAY ]; then
     echo "[!] tomb-open is a wrapper for the command 'tomb'"
-    tomb -h
+    "${TOMBEXEC}" -h
     exit 1
 fi
 
@@ -264,18 +272,22 @@ Create a new Tomb
 EOF
 echo -n "> "
 read -q
-if [ $? != 0 ]; then
+if [ "$?" != 0 ]; then
     echo "Operation aborted."
     exit 1
 fi
     # let's proceed
 echo "  Please type in the name for your new tomb file:"
 echo -n "> "
-read tombname
+read -u 1 tombname
 echo "  How big you want the Tomb to be?"
 echo "  Type a size number in Megabytes:"
 echo -n "> "
-read tombsize
+read -u 1 tombsize
+if [[ "$tombsize" != <-> ]]; then
+	echo "Only digit allowed! Operation aborted"
+	exit 1
+fi
 clear
 echo "  You have commanded the creation of this Tomb:"
 echo "    $tombname ( $tombsize MBytes )";
@@ -304,7 +316,7 @@ cat <<EOF
 EOF
 
 tombfile=${tombname}.tomb
-tomb -s $tombsize create ${tombfile}
+"${TOMBEXEC}" -s $tombsize create ${tombfile}
 
 if [ $? != 0 ]; then
     echo "An error occurred creating tomb, operation aborted."
@@ -332,7 +344,7 @@ if [ $? = 0 ]; then
 	echo "${tombname}.key succesfully saved on your USB"
 	echo "now we'll proceed opening your brand new tomb"
 
-	tomb -k ${tombname}.tomb.key open ${tombfile}
+	"${TOMBEXEC}" -k ${tombname}.tomb.key open ${tombfile}
 	if [ $? = 0 ]; then
 	    launch_status ${tombname}
 	fi
@@ -354,7 +366,7 @@ cat <<EOF
   named .tomb inside the first partition of an usb key.
 EOF
 
-tomb -k ${tombname}.tomb.key open ${tombfile}
+"${TOMBEXEC}" -k ${tombname}.tomb.key open ${tombfile}
 if [ $? = 0 ]; then
     launch_status ${tombname}
 fi

@@ -281,7 +281,8 @@ create_tomb() {
 	    tombsize=${CMD3}
 	else
 	    act "No size specified, summoning the Tomb Undertaker to guide us in the creation."
-	    tomb-open &!
+	    "$TOMBOPENEXEC" &
+	    wait $!
 	    return 0
 	fi
     else
