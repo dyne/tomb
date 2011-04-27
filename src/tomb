@@ -22,6 +22,9 @@
 
 VERSION=1.0
 DATE=Feb/2011
+TOMBEXEC=$0
+TOMBOPENEXEC="tomb-open"
+STEGHIDE=1
 
 # PATH=/usr/bin:/usr/sbin:/bin:/sbin   
 
@@ -32,22 +35,59 @@ act()    { if ! [ $QUIET ]; then echo " .  $1" >&2; fi }
 error()  { if ! [ $QUIET ]; then echo "[!] $1" >&2; fi }
 func()   { if [ $DEBUG ]; then   echo "[D] $1" >&2; fi }
 
-# which dd command to use
-which dcfldd > /dev/null
-if [ $? = 0 ]; then
-    DD="dcfldd"
-else
-    DD=dd
-fi
 
-# which wipe command to use
-which wipe > /dev/null
-if [ $? = 0 ]; then
-    WIPE=(wipe -f -s -q)
-else
-    WIPE=(rm -f)
-fi
+check_bin() {
+    # which dd command to use
+    which dcfldd > /dev/null
+    if [ $? = 0 ]; then
+        DD="dcfldd"
+    else
+        DD=dd
+    fi
 
+    # which wipe command to use
+    which wipe > /dev/null
+    if [ $? = 0 ]; then
+        WIPE=(wipe -f -s)
+    else
+        WIPE=(rm -f)
+    fi
+
+    # check for filesystem creation progs
+    which mkfs.ext4 > /dev/null
+    if [ $? = 0 ]; then
+        MKFS=(mkfs.ext4 -q -F -j -L)
+    else
+        MKFS=(mkfs.ext3 -q -F -j -L)
+    fi
+
+    # check for sudo
+    which sudo > /dev/null
+    if [ $? != 0 ]; then
+        error "Cannot find sudo. Please install it"
+        exit 1
+    fi
+
+    # check for steghide
+    which steghide > /dev/null
+    if [ $? != 0 ]; then
+        STEGHIDE=0
+    fi
+
+    # check for tomb-open script
+    if [ "$0" = "./tomb" ]; then
+        TOMBOPENEXEC="./tomb-open"
+    elif [ "$0" != "tomb" ]; then
+	TOMBOPENEXEC="`dirname $0`/tomb-open"
+    fi
+}
+
+# safe dir creation function
+safe_dir() {
+    dir="/tmp/$1.$RANDOM.$RANDOM.$$"
+    (umask 077 && mkdir "$dir") || echo "-1"
+    echo "$dir"
+}
 
 # we use pinentry now
 # comes from gpg project and is much more secure
@@ -73,41 +113,26 @@ EOF
 
 }
 
-
 # drop privileges
 exec_as_user() {
-
     if ! [ $SUDO_USER ]; then
 	exec $@[@]
 	return $?
     fi
     
     func "exec_as_user '$SUDO_USER': ${(f)@}"
-    which sudo > /dev/null
-    if [ $? = 0 ]; then
-	sudo -u $SUDO_USER "${@[@]}"
-	return $?
-    else
-	error "Tomb requires sudo. please install it."
-	return 1
-    fi
+    sudo -u $SUDO_USER "${@[@]}"
+    return $?
 }
 
 
 # escalate privileges
 check_priv() {
-    id | grep root > /dev/null
-    if [ $? != 0 ]; then
-	which sudo > /dev/null
-	if [ $? != 0 ]; then
-	    error "Tomb requires sudo. please install it."
-	    exit 1
-	fi
-
+    if [ $UID != 0 ]; then
 	func "Using sudo for root execution of 'tomb ${(f)ARGS}'"
-	    # check if sudo has a timestamp active
+        # check if sudo has a timestamp active
 	sudok=false
-	sudo -n tomb 2> /dev/null
+	sudo -n ${TOMBEXEC} 2> /dev/null
 	if [ $? != 0 ]; then # if not then ask a password
 	    cat <<EOF | pinentry | awk '/^D/ { print $2 }' | sudo -S -v
 OPTION ttyname=$TTY
@@ -118,7 +143,7 @@ SETPROMPT Insert your USER password:
 GETPIN
 EOF
 	fi
-	sudo "tomb" ${(s: :)ARGS}
+	sudo "${TOMBEXEC}" ${(s: :)ARGS}
 	exit $?
     fi # are we root already
     return 0
@@ -171,22 +196,8 @@ get_arg_tomb() {
     return 0
 }
 
-
-############################
-### main()
-###
-
-echo $@ | grep '\-D' 2>&1 > /dev/null
-if [ $? = 0 ]; then
-fi
-
-ARGS=$@[@]
-
-OPTS=`getopt -o hvqDs:k:n -n 'tomb' -- "$@"`
-while true; do
-    case "$1" in
-	-h)
-	    cat <<EOF
+usage() {
+	cat <<EOF
 Tomb $VERSION - a strong and gentle undertaker for your secrets
 
  Copyright (C) 2007-2011 Dyne.org Foundation, License GNU GPL v3+
@@ -217,46 +228,9 @@ Options:
 For more informations on Tomb read the manual: man tomb
 Please report bugs on <http://bugs.dyne.org>.
 EOF
-exit 0 ;;
-	-v)
-	    notice "Tomb  -  simple commandline tool for encrypted storage"
-	    act "version $VERSION ($DATE) by Jaromil @ dyne.org"
-	    # print out the GPL license in this file
-	    act ""
-	    cat $0 | awk '
-BEGIN { license=0 }
-/^# This source/  { license=1 }
-{ if(license==1) print " " $0 }
-/MA 02139, USA.$/ { license=0 }
-'
-	    act ""
-	    exit 0 ;;
-	-q) QUIET=1; shift 1 ;;
-	-D)
-	    echo "[D] Tomb invoked with args \"${(f)@}\" "
-	    echo "[D] running on `date`"
-	    DEBUG=1; shift 1 ;;
-        -s) SIZE=$2; shift 2 ;;
-	-k) KEY=$2; shift 2 ;;
-	-b) NOBIND=1; shift 1 ;;
-	--) shift; break ;;
-	*)  CMD=$1;
-	    FILE=$2; MOUNT=$3; # compat with old args
-	    CMD2=${2}; CMD3=${3}; break ;;
-    esac
-done
-
-
-
-if ! [ $CMD ]; then
-    error "first argument missing, use -h for help"
-    exit 0
-fi
-
-func "Tomb command: $CMD $CMD2 $CMD3"
+}
 
 create_tomb() {
-
     if ! [ ${CMD2} ]; then
 	error "no tomb name specified for creation"
 	return 1
@@ -281,7 +255,8 @@ create_tomb() {
 	    tombsize=${CMD3}
 	else
 	    act "No size specified, summoning the Tomb Undertaker to guide us in the creation."
-	    tomb-open &!
+	    "$TOMBOPENEXEC" &
+	    wait $!
 	    return 0
 	fi
     else
@@ -303,15 +278,20 @@ create_tomb() {
     losetup -f ${tombdir}/${tombfile} # allocates the next loopback for our file
 
     # create the keyfile in tmpfs so that we leave less traces in RAM
-    keytmp=`mktemp /tmp/tomb.XXX`
-    rm -f $keytmp
-    mkdir -p $keytmp
-    mount tmpfs ${keytmp} -t tmpfs -o size=1m
+    keytmp=`safe_dir tomb`
+    if [ "$keytmp" = "-1" ]; then
+	error "error creating temp dir"
+        exit 1
+    fi
+    #rm -f $keytmp
+    # ?????? creo, cancello e ricreo ??????
+    #mkdir -p $keytmp
+    mount tmpfs "${keytmp}" -t tmpfs -o size=1m
     if [ $? != 0 ]; then
 	error "cannot mount tmpfs filesystem in volatile memory"
 	error "operation aborted."
 	losetup -d $nstloop
-	rm -r $keytmp
+	rm -r "${keytmp}"
 	exit 1
     fi
     act "Generating secret key..."
@@ -333,9 +313,9 @@ create_tomb() {
     # here user is prompted for key password
     for c in 1 2 3; do
 	# 3 tries to write two times a matching password
-	tombpass=`exec_as_user tomb askpass ${tombname}`
+	tombpass=`exec_as_user ${TOMBEXEC} askpass ${tombname}`
 	tombpasstmp=$tombpass
-	tombpass=`exec_as_user tomb askpass "${tombname} (again)"`
+	tombpass=`exec_as_user ${TOMBEXEC} askpass "${tombname} (again)"`
 	if [ "$tombpasstmp" = "$tombpass" ]; then
 	    break;
 	fi
@@ -381,11 +361,10 @@ create_tomb() {
     umount ${keytmp}
     rm -r ${keytmp}
 
- #    cryptsetup luksDump ${nstloop}
+ #  cryptsetup luksDump ${nstloop}
 
-    act "formatting your Tomb with Ext4 filesystem"
- 
-    mkfs.ext4 -q -F -j -L ${tombname} /dev/mapper/tomb.tmp
+    act "formatting your Tomb with Ext3/Ext4 filesystem"
+    ${MKFS} ${tombname} /dev/mapper/tomb.tmp
 
     if [ $? != 0 ]; then
 	error "Tomb format returns error"
@@ -401,7 +380,6 @@ create_tomb() {
     notice "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombname}.tomb.key"
 
 }
-
 
 mount_tomb() {
     get_arg_tomb $CMD2
@@ -431,12 +409,16 @@ mount_tomb() {
     mkdir -p $tombmount
     
     nstloop=`losetup -f`
+    if [ $? = 255 ]; then
+        error "too many tomb opened. Please close any of them to open another tomb"
+	exit 1
+    fi
     losetup -f ${tombdir}/${tombfile}
     
     act "check for a valid LUKS encrypted device"
     cryptsetup isLuks ${nstloop}
     if [ $? != 0 ]; then
- # is it a LUKS encrypted nest? see cryptsetup(1)
+        # is it a LUKS encrypted nest? see cryptsetup(1)
 	error "$tombfile is not a valid Luks encrypted storage file"
 	$norm || rmdir $tombmount 2>/dev/null
 	return 1
@@ -447,16 +429,14 @@ mount_tomb() {
     mapdate="`echo ${mapdate}/60 | bc -l | cut -d. -f1`"
     
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
-
     keyname=`basename $tombkey | cut -d. -f1`
 
     notice "Password is required for key ${keyname}"
     for c in 1 2 3; do
-	
 	if [ $c = 1 ]; then
-	    tombpass=`exec_as_user tomb askpass ${keyname}`
+	    tombpass=`exec_as_user ${TOMBEXEC} askpass ${keyname}`
 	else
-	    tombpass=`exec_as_user tomb askpass "$keyname (retry $c)"`
+	    tombpass=`exec_as_user ${TOMBEXEC} askpass "$keyname (retry $c)"`
 	fi
 	echo "${tombpass}" \
 	    | gpg --batch --passphrase-fd 0 --no-tty --no-options \
@@ -468,7 +448,6 @@ mount_tomb() {
 	if [ -r /dev/mapper/${mapper} ]; then
 	    break;  # password was correct
 	fi
-	
     done
     
     if ! [ -r /dev/mapper/${mapper} ]; then
@@ -491,10 +470,9 @@ mount_tomb() {
     chown $(id -u $ME):$(id -g $ME) ${tombmount}
     
     notice "encrypted storage $tombfile succesfully mounted on $tombmount"
-#    exec_bind_hooks ${tombmount}
     if ! [ $NOBIND ]; then
 	exec_safe_bind_hooks ${tombmount}
-	exec_post_hooks ${tombmount} open
+	exec_safe_post_hooks ${tombmount} open
     fi
     return 0
 }
@@ -520,9 +498,9 @@ encode_key() {
     # here user is prompted for key password
     for c in 1 2 3; do
 	# 3 tries to write two times a matching password
-	tombpass=`exec_as_user tomb askpass ${tombkey}`
+	tombpass=`exec_as_user ${TOMBEXEC} askpass ${tombkey}`
 	tombpasstmp=$tombpass
-	tombpass=`exec_as_user tomb askpass "${tombkey} (again)"`
+	tombpass=`exec_as_user ${TOMBEXEC} askpass "${tombkey} (again)"`
 	if [ "$tombpasstmp" = "$tombpass" ]; then
 	    break;
 	fi
@@ -569,9 +547,9 @@ decode_key() {
     notice "Trying to exhume a key out of image $imagefile"
     for c in 1 2 3; do
 	if [ $c = 1 ]; then
-	    tombpass=`exec_as_user tomb askpass ${keyfile}`
+	    tombpass=`exec_as_user ${TOMBEXEC} askpass ${keyfile}`
 	else
-	    tombpass=`exec_as_user tomb askpass "$keyfile (retry $c)"`
+	    tombpass=`exec_as_user ${TOMBEXEC} askpass "$keyfile (retry $c)"`
 	fi
 	steghide extract -sf ${imagefile} -p ${tombpass} -xf - \
 	    | awk '
@@ -599,28 +577,6 @@ print "-----END PGP MESSAGE-----"
     return $res
 }
 
-exec_bind_hooks() {
-    mnt=$1 # first argument is where the tomb is mounted
-    if ! [ -r ${mnt}/bind-hooks ]; then return; fi
-
-    # if 'bind-hooks' is found inside the tomb, parse it
-    # every line contains two strings:
-    # the first is a directory existing inside the tomb
-    # the second is the place where it should be mounted (-o bind)
-    hook=`cat ${mnt}/bind-hooks | awk '
-/^#/ { next }
-{ if($1 && $2) print "mount -o bind \${mnt}/" $1 " " $2 "; " }
-'`
-    # restore $HOME for the calling user
-    ME=${SUDO_USER:-$(whoami)}
-    HOME=$(grep $ME /etc/passwd | sed "s/^${ME}:.*:.*:.*:.*:\([\/a-z]*\):.*$/\1/" 2>/dev/null)
-
-    act "bind hooks found, mounting directories as requested"
-    # execute the mount commands
-    eval $hook
-}
-
-# FIXME: this should sanitize pathes!
 exec_safe_bind_hooks() {
   local MOUNTPOINT="${1}"
   local ME=${SUDO_USER:-$(whoami)}
@@ -661,8 +617,9 @@ exec_safe_bind_hooks() {
    done
 }
 
-exec_post_hooks() {
-    mnt=$1 # first argument is where the tomb is mounted
+exec_safe_post_hooks() {
+    local mnt=$1 # first argument is where the tomb is mounted
+    local ME=${SUDO_USER:-$(whoami)}
     if ! [ -x ${mnt}/post-hooks ]; then return; fi
     # if 'post-hooks' is found inside the tomb, check it: if it is an
     # executable, launch it as a user this might need a dialog for
@@ -711,7 +668,7 @@ backup_tomb() { # FIXME - duplicity asks passwords too often
     act "backup over protocol $protocol"
     if [ "$protocol" = "ssh" ]; then
 	act "ssh connection requires a password"
-	FTP_PASSWORD="`exec_as_user tomb askpass $bckurl`"
+	FTP_PASSWORD="`exec_as_user ${TOMBEXEC} askpass $bckurl`"
 	dupopts="--ssh-askpass"
     # TODO verify ssh access before duplicity does
     #      since it blocks the thing retrying 5 times and such crap
@@ -763,27 +720,27 @@ backup_tomb() { # FIXME - duplicity asks passwords too often
 }
 
 umount_tomb() {
+    local tombs how_many_tombs
+    local pathmap mapper tombname tombmount loopdev
+    local ans pidk pname
 
     if ! [ $1 ]; then
-	
-	how_many_tombs="`find /dev/mapper -name 'tomb.*' | wc -w`"
+	tombs=`find /dev/mapper -name 'tomb.*'`
+	how_many_tombs=`wc -w <<< "$tombs"`
 	if [ "$how_many_tombs" = "0" ]; then
 	    error "there is no open tomb to be closed"
 	    return 1
-
 	elif [ "$how_many_tombs" = "1" ]; then
-	    mapper=`find /dev/mapper -name 'tomb.*'`
-	    notice "trying to close $mapper"
-	    umount_tomb ${mapper}
+	    #mapper=`find /dev/mapper -name 'tomb.*'`
+	    notice "trying to close $tombs"
+	    umount_tomb ${tombs}
 	    return 1
-
 	else
 	    error "too many tombs mounted, please specify which to unmount:"
 	    ls /dev/mapper/tomb.*
 	    error "or issue the command 'tomb close all' to clos'em all."
 	    return 1
 	fi
-
     fi
 
     if [ "$1" = "all" ]; then
@@ -798,26 +755,28 @@ umount_tomb() {
 	return 0
     fi
 
-
-    if [ -r "$1" ]; then # accepts relative and absolute path
-	mapper="$1"
-    elif [ -r /dev/mapper/${1} ]; then
-	mapper=/dev/mapper/${1}
-    else
+    if ! [ -e "$1" ]; then
 	error "tomb not found: $1"
-	error "please specify an existing /dev/mapper/tomb.*"
+	error "Please specify an existing tomb"
 	return 0
     fi
 
-    basemap=`basename $mapper`
-    tombname=`echo ${basemap} | cut -d. -f2`
-    tombmount=`mount | grep $mapper | awk '{print $3}'`
+    pathmap=`dirname "$1"`
+    if [ "${pathmap}" = "/dev/mapper" ]; then	
+	mapper="$1" # $1 is /dev/mapper/tomb.*
+        tombname=`basename "$1"` # this is tomb.NAME.XXX.loopX
+	tombmount=`mount | grep "$mapper" | awk -F ' ' '{print $3}'` # tomb mount point
+    else
+        tombmount="$1" # $1 is the tomb mount point (e.g. /mnt)
+    	mapper=`mount | grep -w "${tombmount%%/}" | awk -F ' ' '{print $1}'`
+	tombname=`basename "$mapper"` # this is tomb.NAME.XXX.loopX
+    fi
 
     # check if there are binded dirs and close them first
-    mount | grep "${tombmount}" 2>/dev/null | grep -v loop 2>&1 > /dev/null
+    mount | grep "${tombmount%%/}" 2>/dev/null | grep -v loop 2>&1 > /dev/null
     if [ $? = 0 ]; then
 	act "closing bind hooks for tomb $tombname "
-	unbind=`mount | grep ${tombmount} | grep -v loop | awk '
+	unbind=`mount | grep ${tombmount%%/} | grep -v loop | awk '
     { print "umount " $3 "; " }
     '`
 	eval $unbind
@@ -827,27 +786,37 @@ umount_tomb() {
 
     # Execute post-hooks for eventual cleanup
     if ! [ $NOBIND ]; then
-	exec_post_hooks ${tombmount} close
+	exec_safe_post_hooks ${tombmount%%/} close
     fi
 
-    act "closing tomb $tombname on dm-crypt $basemap"
-    mount | grep $mapper 2>&1 >/dev/null
-    if [ $? = 0 ]; then # still mounted
-	umount ${mapper}
-	if ! [ $? = 0 ]; then
-	    # TODO: ask user if wanting to SLAM the tomb closed
-	    # then kill all processes found using it with fuser and lsof
-	    return 1
-	fi
-    fi
-
-    cryptsetup luksClose $basemap
+    act "closing tomb $tombname on dm-crypt $tombmount"
+    umount ${tombmount} 2> /dev/null
     if ! [ $? = 0 ]; then
-	error "error occurred in cryptsetup luksClose ${basemap}"
+	    error "Tomb is busy, cannot umount!"
+	    notice "Do you want to force umount? y/N: "
+	    read ans
+	    if [ "$ans" = "S" -o "$ans" = "s" -o "$ans" = "y" -o "$ans" = "Y" ]; then
+		pidk=`lsof -t "$tombmount"`
+		for p in "$pidk"; do
+		   pname=`pidof $p`
+		   func "killing PID $p of $pname..."
+		   kill -9 $p
+		done
+	    umount "${tombmount}"
+	    else
+		error "Cannot umount $tombname on $tombmount"
+		return 1
+	   fi	
+    fi
+
+    cryptsetup luksClose $tombname
+    if ! [ $? = 0 ]; then
+	error "error occurred in cryptsetup luksClose ${mapper}"
 	return 1
     fi
 
-    losetup -d "/dev/`echo $basemap | cut -d. -f4`"
+    loopdev=`cut -d '.' -f4 <<< "$tombname"`	
+    losetup -d "/dev/$loopdev"
 
     notice "Tomb $tombname closed: your bones will rest in peace."
     return 0
@@ -888,7 +857,7 @@ Type=Application
 Name=Tomb crypto undertaker
 GenericName=Crypto undertaker
 Comment=Keep your bones safe
-Exec=tomb-open %U
+Exec="${TOMBOPENEXEC}" %U
 TryExec=tomb-open
 Icon=monmort.xpm
 Terminal=true
@@ -910,7 +879,7 @@ EOF
     cat <<EOF > /usr/share/mime-info/tomb.keys
 # actions for encrypted tomb storage
 application/x-tomb-volume:
-	open=tomb-open %f
+	open="${TOMBOPENEXEC}" %f
 	view=tomb-open %f
 	icon-filename=monmort.xpm
         short_list_application_ids_for_novice_user_level=tomb
@@ -942,32 +911,79 @@ EOF
     act "Tomb is now installed."
 }
 
+main () {
+    echo $@ | grep '\-D' 2>&1 > /dev/null
+    # ?????
+    if [ $? = 0 ]; then
+    fi
+
+    ARGS=$@[@]
+
+    OPTS=`getopt -o hvqDs:k:n -n 'tomb' -- "$@"`
+    while true; do
+        case "$1" in
+	      -h)
+		usage
+		exit 0 ;;
+	      -v)
+	        notice "Tomb  -  simple commandline tool for encrypted storage"
+	        act "version $VERSION ($DATE) by Jaromil @ dyne.org"
+	        # print out the GPL license in this file
+	        act ""
+	        cat $0 | awk 'BEGIN { license=0 } /^# This source/  { license=1 } { if(license==1) print " " $0 }
+/MA 02139, USA.$/ { license=0 }'
+	        act ""
+	        exit 0 ;;
+	      -q) QUIET=1; shift 1 ;;
+	      -D)
+	        echo "[D] Tomb invoked with args \"${(f)@}\" "
+	        echo "[D] running on `date`"
+	        DEBUG=1; shift 1 ;;
+              -s) SIZE=$2; shift 2 ;;
+	      -k) KEY=$2; shift 2 ;;
+	      -n) NOBIND=1; shift 1 ;;
+	      --) shift; break ;;
+	       *) CMD=$1;
+	          FILE=$2; MOUNT=$3; # compat with old args
+	          CMD2=${2}; CMD3=${3}; break ;;
+        esac
+    done
+
+    if ! [ $CMD ]; then
+       error "first argument missing, use -h for help"
+       exit 0
+    fi
+
+    func "Tomb command: $CMD $CMD2 $CMD3"
     
-	
-case "$CMD" in
-    create)   check_priv ; create_tomb ;;
+    case "$CMD" in
+         create) check_priv ; create_tomb ;;
+          mount) check_priv ; mount_tomb  ;;
+           open) check_priv ; mount_tomb  ;;
+         umount) check_priv ; umount_tomb ${CMD2} ;;
+        unmount) check_priv ; umount_tomb ${CMD2} ;;
+          close) check_priv ; umount_tomb ${CMD2} ;;
+           bury) if [ "$STEGHIDE" = 0 ]; then
+		    error "steghide not installed. Cannot bury your key"
+		    return 1
+		 fi	 
+		 encode_key ${CMD2} ${CMD3} ;;
+         exhume) if [ "$STEGHIDE" = 0 ]; then
+ 		    error "steghide not installed. Cannot exhume your key"
+		    return 1
+		 fi 
+		 decode_key ${CMD2} ;;
+         backup) check_priv ; backup_tomb ${CMD2} ${CMD3} ;;
+        install) check_priv ; install_tomb ;;
+        askpass) ask_password $CMD2 ;;
+         status) tomb-status ;;
+              *) error "command \"$CMD\" not recognized"
+	         act "try -h for help"
+	         return 1
+	         ;;
+    esac
+    return 0
+}
 
-    mount)    check_priv ; mount_tomb  ;;
-    open)     check_priv ; mount_tomb  ;;
-
-    umount)   check_priv ; umount_tomb ${CMD2} ;;
-    unmount)  check_priv ; umount_tomb ${CMD2} ;;
-    close)    check_priv ; umount_tomb ${CMD2} ;;
-
-    bury)     encode_key ${CMD2} ${CMD3} ;;
-    exhume)   decode_key ${CMD2} ;;
-
-    backup)   check_priv ; backup_tomb ${CMD2} ${CMD3} ;;
-
-    install)  check_priv ; install_tomb ;;
-
-    askpass)  ask_password $CMD2 ;;
-    status)   tomb-status ;;
-
-    *) error "command \"$CMD\" not recognized"
-	act "try -h for help"
-	return 1
-	;;
-esac
-# return codes from called functions
-# return $?
+check_bin
+main $@
