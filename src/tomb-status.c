@@ -238,8 +238,9 @@ gboolean right_click(GtkWidget *w, GdkEvent *e) {
 gboolean cb_about(GtkWidget *w, GdkEvent *e) {
   const gchar *authors[] = {"Jaromil - http://jaromil.dyne.org",
 			    "Code reviews and contributions by:",
-			    "Dreamer, Hellekin O. Wolf, Shining and Mancausoft", NULL};
-  const gchar *artists[] = {"Jordi aka Món Mort - http://monmort.blogspot.com",
+			    "Dreamer, Hellekin O. Wolf, Shining, Mancausoft,",
+			    "Anathema, Boyska and Nignux", NULL};
+  const gchar *artists[] = {"Món Mort - http://monmort.blogspot.com",
 			    "Asbesto Molesto - http://freaknet.org/asbesto",
 			    NULL};
   GtkWidget *dialog = gtk_about_dialog_new();
