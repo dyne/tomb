@@ -633,92 +633,6 @@ exec_safe_post_hooks() {
     fi
 }
 
-
-backup_tomb() { # FIXME - duplicity asks passwords too often
-    # using duplicity
-    which duplicity > /dev/null
-    if [ $? != 0 ]; then
-	error "duplicity not found, can't operate backup"
-	return 1
-    fi
-    if [ -z $CMD3 ]; then
-	error "backup command needs 2 arguments: tomb and destination url"
-	error "please refer to tomb(1) and duplicity(1) manuals for more information"
-	return 1
-    fi
-
-    # is it a tomb?
-    get_arg_tomb ${CMD2}
-    if [ $? != 0 ]; then
-	error "there is no tomb to backup, operation aborted."
-	return 1
-    fi
-
-    # is it a url?
-    echo "${CMD3}" | grep -i -e '^.*:\/\/.*' 2>&1 > /dev/null
-    if ! [ $? = 0 ]; then
-	error "second argument is not a valid duplicity url."
-	error "read the tomb(1) and duplicity(1) manual for more information"
-	return 1
-    fi
-    bckurl=${CMD3}
-
-    # is it ssh?
-    protocol="`expr substr $bckurl 1 3`"
-    act "backup over protocol $protocol"
-    if [ "$protocol" = "ssh" ]; then
-	act "ssh connection requires a password"
-	FTP_PASSWORD="`exec_as_user ${TOMBEXEC} askpass $bckurl`"
-	dupopts="--ssh-askpass"
-    # TODO verify ssh access before duplicity does
-    #      since it blocks the thing retrying 5 times and such crap
-    #      i.e. try ssh true to sshurl="`echo $bckurl | sed -e 's/ssh:\/\///'`"
-    #  --no-print-statistics
-    fi
-
-    # duplicity works only on directories
-    # so we create a directory in tmpfs and bind the tomb inside it
-    # during backup the encrypted tomb will be exposed
-    # TODO: check that the tomb is not mounted and, if mounted
-    #       remount it read-only so it doesn't gets modified during bck
-    bckname=${tombname}.bck
-    mkdir -p /dev/shm/${bckname}
-    if [ $? != 0 ]; then
-	error "cannot generate a temporary backup directory in /dev/shm, operation aborted."
-	return 1
-    fi
-    bcktmpdir=/dev/shm/${bckname}
-    # mmm, maybe we should mount our own tmpfs? we need root anyway for mount -o bind
-    # if we reach to eliminate this mount trick and upload only one file with duplicity
-    # then this function doesn't needs to be root to work.
-    touch ${bcktmpdir}/${tombfile}
-    mount -o bind ${tombdir}/${tombfile} ${bcktmpdir}/${tombfile}
-    bcklast=`exec_as_user duplicity \
-	${(s: :)dupopts} \
-	collection-status ${bckurl} \
-	| awk '/^Last full backup date:/ { print $5 }'`
-    # we detect if backup already exists or not so we can handle
-    # password prompt (choosing a password for full, inserting for incr)
-    if [ "$bcklast" = "none" ]; then
-	notice "Creating a backup of tomb $tombname on url $bckurl"
-	exec_as_user FTP_PASSWORD="$FTP_PASSWORD" duplicity ${(s: :)dupopts} \
-	    full ${bcktmpdir} ${bckurl}
-    else
-	notice "Updating a backup of tomb $tombname on url $bckurl"
-	exec_as_user FTP_PASSWORD="$FTP_PASSWORD" duplicity ${(s: :)dupopts} \
-	    incr ${bcktmpdir} ${bckurl}
-    fi
-    unset FTP_PASSWORD
-    if [ $? != 0 ]; then
-	error "duplicity reported error, operation aborted"
-	umount ${bcktmpdir}/${tombfile}
-	return 1
-    fi
-    notice "Operation successful."
-    umount ${bcktmpdir}/${tombfile}
-    return 0
-}
-
 umount_tomb() {
     local tombs how_many_tombs
     local pathmap mapper tombname tombmount loopdev
@@ -973,7 +887,6 @@ main () {
 		    return 1
 		 fi 
 		 decode_key ${CMD2} ;;
-         backup) check_priv ; backup_tomb ${CMD2} ${CMD3} ;;
         install) check_priv ; install_tomb ;;
         askpass) ask_password $CMD2 ;;
          status) tomb-status ;;
