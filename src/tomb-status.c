@@ -49,13 +49,15 @@ char mountpoint[256];
 gboolean left_click(GtkWidget *w, GdkEvent *e);
 gboolean cb_view(GtkWidget *w, GdkEvent *e);
 gboolean cb_close(GtkWidget *w, GdkEvent *e);
+gboolean cb_slam(GtkWidget *w, GdkEvent *e);
 
 gboolean right_click(GtkWidget *w, GdkEvent *e);
 gboolean cb_about(GtkWidget *w, GdkEvent *e);
 
 
 int main(int argc, char **argv) {
-  GtkWidget *item_close, *item_view, *item_about;
+  GtkWidget *item_close, *item_slam;
+  GtkWidget *item_view, *item_about;
   gint menu_x, menu_y;
   gboolean push_in = TRUE;
 
@@ -104,6 +106,11 @@ int main(int argc, char **argv) {
   gtk_menu_attach(menu_left, item_close, 0, 1, 1, 2);
   g_signal_connect_swapped(item_close, "activate", G_CALLBACK(cb_close), NULL);
   gtk_widget_show(item_close);
+  // slam
+  item_slam = gtk_menu_item_new_with_label("Slam");
+  gtk_menu_attach(menu_left, item_slam, 0, 1, 2, 3);
+  g_signal_connect_swapped(item_slam, "activate", G_CALLBACK(cb_slam), NULL);
+  gtk_widget_show(item_slam);
 
   // connect it
   g_signal_connect_swapped(status_tomb, "activate", G_CALLBACK(left_click), menu_left);
@@ -196,7 +203,6 @@ gboolean cb_close(GtkWidget *w, GdkEvent *e) {
     fprintf(stderr,"pipe creation error: %s\n", strerror(errno));
     return FALSE;
   }
-  
 
   cpid = fork();
   if (cpid == -1) {
@@ -210,6 +216,49 @@ gboolean cb_close(GtkWidget *w, GdkEvent *e) {
     close(pipefd[0]);
     map[c] = 0;
     execlp("tomb", "tomb", "close", map, (char*)NULL);
+    _exit(1);
+  }
+  close(pipefd[0]); // close unused read end
+  write(pipefd[1], mapper, strlen(mapper));
+  close(pipefd[1]); // reader will see EOF
+
+  waitpid(cpid, &res, 0);
+  if(res==0) {
+    gtk_main_quit();
+    notify_uninit();
+    exit(0);
+  }
+  /*  tomb-notify "Tomb '$tombname' is too busy."		\
+      "Close all applications and file managers, then try again."
+  */
+  return TRUE;
+}
+
+
+gboolean cb_slam(GtkWidget *w, GdkEvent *e) {
+  int pipefd[2];
+  pid_t cpid;
+  char buf;
+  int c, res;
+  char map[256];
+
+  if (pipe(pipefd) <0) {
+    fprintf(stderr,"pipe creation error: %s\n", strerror(errno));
+    return FALSE;
+  }
+
+  cpid = fork();
+  if (cpid == -1) {
+    fprintf(stderr,"fork error: %s\n", strerror(errno));
+    return FALSE;
+  }
+  if (cpid == 0) {    // Child
+    close(pipefd[1]); // close unused write end
+    for(c=0; read(pipefd[0], &buf, 1) > 0; c++)
+      map[c] = buf;
+    close(pipefd[0]);
+    map[c] = 0;
+    execlp("tomb", "tomb", "slam", map, (char*)NULL);
     _exit(1);
   }
   close(pipefd[0]); // close unused read end

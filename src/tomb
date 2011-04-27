@@ -210,7 +210,8 @@ Commands:
 
  create     create a new tomb FILE and its keys
  open       open an existing tomb FILE on PLACE
- close      closes the tomb open on PLACE
+ close      close the open tomb called FILE (or all)
+ slam       close tomb FILE and kill all pids using it
  bury       hide a tomb key FILE inside a jpeg PLACE
  exhume     extract a tomb key FILE from a jpeg PLACE
 
@@ -707,16 +708,15 @@ umount_tomb() {
     umount ${tombmount} 2> /dev/null
     if ! [ $? = 0 ]; then
 	    error "Tomb is busy, cannot umount!"
-	    notice "Do you want to force umount? y/N: "
-	    read ans
-	    if [ "$ans" = "S" -o "$ans" = "s" -o "$ans" = "y" -o "$ans" = "Y" ]; then
+	    if [ $SLAM ]; then
+		notice "Slamming tomb killing all processes using it"
 		pidk=`lsof -t "$tombmount"`
 		for p in "$pidk"; do
-		   pname=`pidof $p`
-		   func "killing PID $p of $pname..."
-		   kill -9 $p
+		    pname=`pidof $p`
+		    func "killing PID $p of $pname..."
+		    kill -9 $p
 		done
-	    umount "${tombmount}"
+		umount "${tombmount}"
 	    else
 		error "Cannot umount $tombname on $tombmount"
 		return 1
@@ -877,6 +877,7 @@ main () {
          umount) check_priv ; umount_tomb ${CMD2} ;;
         unmount) check_priv ; umount_tomb ${CMD2} ;;
           close) check_priv ; umount_tomb ${CMD2} ;;
+	  slam) chack_priv ; SLAM=1; umount_tomb ${CMD2} ;;
            bury) if [ "$STEGHIDE" = 0 ]; then
 		    error "steghide not installed. Cannot bury your key"
 		    return 1

@@ -51,10 +51,18 @@ mounted in a directory named after the filename and inside /media.
 .B
 .IP "close"
 Closes a currently open tomb.  When \fIan argument\fR is specified, it
-should point to the tomb mount on /dev/mapper; if not specified and
-only one tomb is open then it will be closed; if multiple tombs are
-open, the command will list them on the terminal. The special
-\fIargument\fR 'all' will close all currently open tombs.
+should be the name of a mounted tomb; if not specified and only one
+tomb is open then it will be closed; if multiple tombs are open, the
+command will list them on the terminal. The special
+\fIargument\fR 'all' will close all currently open tombs. This command
+fails if the tomb is in use by running processes, the command
+\fIslam\fR can be used to force close.
+
+.B
+.IP "slam"
+Closes a tomb like the command \fIclose\fR does, but in case it is in
+use looks for all the processes accessing its files and violently
+kills them using \-9.
 
 .B
 .IP "bury"
