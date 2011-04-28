@@ -643,15 +643,15 @@ umount_tomb() {
 	tombs=`find /dev/mapper -name 'tomb.*'`
 	how_many_tombs=`wc -w <<< "$tombs"`
 	if [ "$how_many_tombs" = "0" ]; then
-	    error "there is no open tomb to be closed"
+	    error "There is no open tomb to be closed"
 	    return 1
 	elif [ "$how_many_tombs" = "1" ]; then
 	    #mapper=`find /dev/mapper -name 'tomb.*'`
-	    notice "trying to close $tombs"
+	    notice "Closing $tombs"
 	    umount_tomb ${tombs}
 	    return 1
 	else
-	    error "too many tombs mounted, please specify which to unmount:"
+	    error "Too many tombs mounted, please specify which to unmount:"
 	    ls /dev/mapper/tomb.*
 	    error "or issue the command 'tomb close all' to clos'em all."
 	    return 1
@@ -670,43 +670,83 @@ umount_tomb() {
 	return 0
     fi
 
-    if ! [ -e "$1" ]; then
-	error "tomb not found: $1"
-	error "Please specify an existing tomb"
+    
+    # tomb close argument deduction
+    pathmap=`dirname "$1"`
+
+    if [ "${pathmap}" = "/dev/mapper" ]; then	
+
+	mapper="$1" # argument is the mapper (or none which autofills mapper) 
+	tombname="`echo $mapper | cut -d. -f2`"
+	tombmount=`mount -l | \
+	    awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $3 } '`
+	
+    elif [ "$pathmap" = "." ]; then
+
+	tombname="$1" # argument is the name
+	mapper=`mount -l | \
+	    awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 } '`
+	tombmount=`mount -l | \
+	    awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $3 } '`
+
+    else
+	
+        tombmount="$1" # argument should be the mount
+    	mapper=`mount | awk -vmnt="$tombmount" '/^\/dev\/mapper\/tomb/ { if($3==mnt) print $1 }'`
+	tombname="`echo $mapper | cut -d. -f2`"
+
+    fi
+    
+    func "tomb close argument: $1"
+    func "name:\t$tombname"
+    func "mount:\t$tombmount"
+    func "mapper:\t$mapper"
+
+    if ! [ -e "$mapper" ]; then
+	error "Tomb not found: $1"
+	error "Please specify an existing tomb."
 	return 0
     fi
 
-    pathmap=`dirname "$1"`
-    if [ "${pathmap}" = "/dev/mapper" ]; then	
-	mapper="$1" # $1 is /dev/mapper/tomb.*
-        tombname=`basename "$1"` # this is tomb.NAME.XXX.loopX
-	tombmount=`mount | grep "$mapper" | awk -F ' ' '{print $3}'` # tomb mount point
+    if [ $SLAM ]; then
+	notice "Slamming tomb $tombname mounted on $tombmount"
+	act "Kill all processes busy inside the tomb"
     else
-        tombmount="$1" # $1 is the tomb mount point (e.g. /mnt)
-    	mapper=`mount | grep -w "${tombmount%%/}" | awk -F ' ' '{print $1}'`
-	tombname=`basename "$mapper"` # this is tomb.NAME.XXX.loopX
+	notice "Closing tomb $tombname mounted on $tombmount"
     fi
-
     # check if there are binded dirs and close them first
-    mount | grep "${tombmount%%/}" 2>/dev/null | grep -v loop 2>&1 > /dev/null
-    if [ $? = 0 ]; then
-	act "closing bind hooks for tomb $tombname "
-	unbind=`mount | grep ${tombmount%%/} | grep -v loop | awk '
-    { print "umount " $3 "; " }
-    '`
-	eval $unbind
-	func "umount binded dirs:"
-	func "$unbind"
-    fi
+    tombmount_esc="`echo ${tombmount} | sed 's:\/:\\\/:g'`"
+    unbind=`mount | awk "/^$tombmount_esc.*bind/"' { print $3 }'`
+    for b in ${(f)unbind}; do
+	hook="`basename $b`"
+	act "closing tomb hook: $hook"
+	umount $b
+	if ! [ $? = 0 ]; then
+	    if [ $SLAM ]; then
+		notice "Slamming tomb: killing all processes using this hook"
+		pidk=`lsof -t $b`
+		for p in "$pidk"; do
+		    pname=`pidof $p`
+		    notice "Killing PID $p of $pname..."
+		    kill -9 $p
+		done
+		umount $b
+	    else
+		error "Tomb hook is busy, cannot close tomb."
+		return 1
+	    fi
+	fi
+    done
 
     # Execute post-hooks for eventual cleanup
     if ! [ $NOBIND ]; then
 	exec_safe_post_hooks ${tombmount%%/} close
     fi
 
-    act "closing tomb $tombname on dm-crypt $tombmount"
-    umount ${tombmount} 2> /dev/null
-    if ! [ $? = 0 ]; then
+    if [ $tombmount ]; then # tomb is actively mounted
+	act "closing tomb $tombname mounted on $tombmount"
+	umount ${tombmount} 2> /dev/null
+	if ! [ $? = 0 ]; then
 	    error "Tomb is busy, cannot umount!"
 	    if [ $SLAM ]; then
 		notice "Slamming tomb killing all processes using it"
@@ -720,16 +760,17 @@ umount_tomb() {
 	    else
 		error "Cannot umount $tombname on $tombmount"
 		return 1
-	   fi	
+	    fi	
+	fi
     fi
-
-    cryptsetup luksClose $tombname
+    
+    cryptsetup luksClose $mapper
     if ! [ $? = 0 ]; then
 	error "error occurred in cryptsetup luksClose ${mapper}"
 	return 1
     fi
 
-    loopdev=`cut -d '.' -f4 <<< "$tombname"`	
+    loopdev=`cut -d '.' -f4 <<< "$mapper"`	
     losetup -d "/dev/$loopdev"
 
     notice "Tomb $tombname closed: your bones will rest in peace."
