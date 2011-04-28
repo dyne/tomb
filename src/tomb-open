@@ -131,7 +131,7 @@ ask_usbkey() {
         fi
     done
 
-    mtmp=$(/bin/mktemp -d --tmpdir tomb.XXXXXXXXXXXX)
+    mtmp=`$TOMBEXEC mktemp tomb`
     sudo mount /dev/$usbpart $mtmp
     if [ $? = 0 ]; then
 	usbmount=$mtmp
@@ -265,9 +265,11 @@ Create a new Tomb
   other people  possessing it will discover your  secrets, unless they
   have your USB key and your password.
 
-  If you choose to proceed now, we'll guide you through the creation
+  If you choose  to proceed now, we'll guide  you through the creation
   of a new Tomb.
+
   If you will, I'll be your Crypto Undertaker.
+
   Do you want to proceed, Master? (y/n)
 EOF
 echo -n "> "
@@ -295,13 +297,18 @@ echo
 cat <<EOF
   Please confirm if you want to proceed now:
 
-  You will need the super-user (sudo) password for the computer you
-  are using, as well time available: depending how big your tomb will
-  be, make sure you are not running low on batteries, or inside a
-  detachable screen if on a server. Considering 1GB takes usually
-  little less than an hour to be digged.
+  You will  need the super-user  (sudo) password for the  computer you
+  are using, as well time available.
+
+  Depending how big  your tomb will be, make sure  you are not running
+  low on batteries.
+
+  If  you are  remotely connected  to  a server,  make sure  to use  a
+  detachable screen.
+
+  Considering 1GB takes usually little less than an hour to be digged.
+
 EOF
-echo "  "
 echo "  Digging will take quite some time! Should we start? (y/n)"
 echo -n "> "
 read -q
@@ -310,9 +317,8 @@ if [ $? != 0 ]; then
     exit 1
 fi
 cat <<EOF
-  Operation confirmed!  we will  now call the  undertaker to  do its
-  job, but  in order  to do so  you will  need to provide  your sudo
-  password:
+  Operation confirmed!  we will now call the undertaker to do its job,
+  but in order to do so you will need to provide your sudo password:
 EOF
 
 tombfile=${tombname}.tomb
@@ -325,10 +331,12 @@ fi
 
 tomb-notify "The Tomb is ready!" "We will now open your new Tomb for the first time."
 cat <<EOF
-  Would you like to save the key on  an external usb device?"
-  This is recommended for safety:"
-  Always keep the key in a different place than the door!"
-  If you answer yes, you'll need a USB KEY now: (y/n)"
+  Would you like to save the key on  an external usb device?
+
+  This is recommended for safety:
+  Always keep the key in a different place than the door!
+
+  If you answer yes, you'll need a USB KEY now: (y/n)
 EOF
 # tomb-notify "Tomb has forged a key." "Would you like to save it on USB?" 
 echo -n " >  "
@@ -338,18 +346,18 @@ if [ $? = 0 ]; then
     if [  ${usbkey_mount} ]; then
 
 	sudo mkdir -m 0700 -p ${usbkey_mount}/.tomb
-	sudo cp -v ${tombname}.key ${usbkey_mount}/.tomb/
+	sudo cp -v ${tombfile}.key ${usbkey_mount}/.tomb/
 	sudo chmod -R go-rwx ${usbkey_mount}/.tomb
 
 	echo "${tombname}.key succesfully saved on your USB"
 	echo "now we'll proceed opening your brand new tomb"
 
-	"${TOMBEXEC}" -k ${tombname}.tomb.key open ${tombfile}
+	"${TOMBEXEC}" -k ${tombfile}.key open ${tombfile}
 	if [ $? = 0 ]; then
 	    launch_status ${tombname}
 	fi
 
-	rm -f ${tombname}.tomb.key
+	rm -f ${tombfile}.key
 
 	sudo umount ${usbkey_mount}
 	rmdir  ${usbkey_mount}
@@ -361,9 +369,11 @@ fi
 
 cat <<EOF
   Impossible to save the key on USB.
-  We recommend to preserve the key in a separate place!
-  You can move it yourself later, place it in a hidden directory
-  named .tomb inside the first partition of an usb key.
+
+  We recommend to preserve the key  in a separate place!  You can move
+  it yourself later, place it in a hidden directory named .tomb inside
+  the first partition of an usb key.
+
 EOF
 
 "${TOMBEXEC}" -k ${tombname}.tomb.key open ${tombfile}
