@@ -84,6 +84,11 @@ check_bin() {
 
 # safe dir creation function
 safe_dir() {
+    try mktemp
+    if [[ $? = 0 ]]; then
+        mktemp -d /dev/shm/$1.XXXX.$$
+        return
+    fi
     dir="/dev/shm/$1.$RANDOM.$RANDOM.$$"
     (umask 077 && mkdir "$dir") || echo "-1"
     echo "$dir"
@@ -298,7 +303,7 @@ create_tomb() {
     act "Generating secret key..."
     act "this operation takes time, keep using this computer on other tasks,"
     act "once done you will be asked to choose a password for your tomb."
-    act "To make it faster you can move the mouse"
+    act "To make it faster you can move the mouse around"
     touch ${keytmp}/tomb.tmp
     chmod 0600 ${keytmp}/tomb.tmp
     if [[ $DD = "dcfldd" ]]; then
