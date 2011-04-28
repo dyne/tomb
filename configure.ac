@@ -66,24 +66,21 @@ dnl Checks for reguired programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 
+dnl ---------------------------------------------------------------
+dnl Checks for external programs.
+
+dnl none of these will fail with error if missing since technically
+dnl these are not *build* dependencies, but *runtime* dependencies.
+
+dnl Mandatory
 AC_CHECK_PROG(have_zsh,zsh,yes,no)
-if test "x$have_zsh" = "xno"; then
-	AC_MSG_ERROR([*** zsh required!])
-fi
 AC_CHECK_PROG(have_cryptsetup,cryptsetup,yes,no)
-if test "x$have_cryptosetup" = "xno"; then
-	AC_MSG_ERROR([*** cryptosetup required!])
-fi
 AC_CHECK_PROG(have_pinentry,pinentry,yes,no)
-if test "x$have_pinentry" = "xno"; then
-	AC_MSG_ERROR([*** pinentry required!])
-fi
+AC_CHECK_PROG(have_sudo,sudo,yes,no)
+dnl Optional
 AC_CHECK_PROG(have_wipe,wipe,yes,no)
 AC_CHECK_PROG(have_dcfldd,dcfldd,yes,no)
-AC_CHECK_PROG(have_sudo,sudo,yes,no)
-if test "x$have_sudo" = "xno"; then
-	AC_MSG_ERROR([*** sudo required!])
-fi
+dnl ---------------------------------------------------------------
 
 PKG_CHECK_MODULES(GTK2, [gtk+-2.0 >= 2.16], :,
   AC_MSG_ERROR([*** Gtk+2 >=2.16 development files not found!]))
