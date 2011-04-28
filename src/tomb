@@ -298,9 +298,14 @@ create_tomb() {
     act "Generating secret key..."
     act "this operation takes time, keep using this computer on other tasks,"
     act "once done you will be asked to choose a password for your tomb."
+    act "To make it faster you can move the mouse"
     touch ${keytmp}/tomb.tmp
     chmod 0600 ${keytmp}/tomb.tmp
-    $DD bs=1 count=256 if=/dev/random of=${keytmp}/tomb.tmp
+    if [[ $DD = "dcfldd" ]]; then
+        $DD bs=1 count=256 if=/dev/random of=${keytmp}/tomb.tmp statusinterval=1
+    else
+        $DD bs=1 count=256 if=/dev/random of=${keytmp}/tomb.tmp
+    fi
     if ! [ -r ${keytmp}/tomb.tmp ]; then
 	error "cannot generate encryption key, operation aborted."
 	umount ${keytmp}
