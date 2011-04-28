@@ -426,8 +426,7 @@ mount_tomb() {
     fi
 
     # save date of mount in minutes since 1970
-    mapdate="`date +%s`"
-    mapdate="`echo ${mapdate}/60 | bc -l | cut -d. -f1`"
+    mapdate="expr `date +%s` / 60"
 
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
     keyname=`basename $tombkey | cut -d. -f1`

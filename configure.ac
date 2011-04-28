@@ -85,11 +85,6 @@ if test "x$have_sudo" = "xno"; then
 	AC_MSG_ERROR([*** sudo required!])
 fi
 
-AC_CHECK_PROG(have_bc,bc,yes,no)
-if test "x$have_bc" = "xno"; then
-	AC_MSG_ERROR([*** bc required!])
-fi
-
 PKG_CHECK_MODULES(GTK2, [gtk+-2.0 >= 2.16], :,
   AC_MSG_ERROR([*** Gtk+2 >=2.16 development files not found!]))
 AC_SUBST([GTK2_CFLAGS])
