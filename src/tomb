@@ -84,7 +84,7 @@ check_bin() {
 
 # safe dir creation function
 safe_dir() {
-    dir="/tmp/$1.$RANDOM.$RANDOM.$$"
+    dir="/dev/shm/$1.$RANDOM.$RANDOM.$$"
     (umask 077 && mkdir "$dir") || echo "-1"
     echo "$dir"
 }
@@ -377,8 +377,12 @@ create_tomb() {
     cryptsetup luksClose tomb.tmp
     losetup -d ${nstloop}
 
+    # set permissions on the tomb
+    sudo chown $UID:$GID ${tombfile}
+    sudo chmod go-rwx ${tombfile}
+
     act "done creating $tombname encrypted storage (using Luks dm-crypt AES/SHA256)"
-    notice "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombname}.tomb.key"
+    notice "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombfile}.key"
 
 }
 
@@ -426,7 +430,8 @@ mount_tomb() {
     fi
 
     # save date of mount in minutes since 1970
-    mapdate="expr `date +%s` / 60"
+    mapdate=`date +%s`
+    mapdate="`expr $mapdate / 60`"
 
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
     keyname=`basename $tombkey | cut -d. -f1`
@@ -917,7 +922,7 @@ main () {
 	 umount) check_priv ; umount_tomb ${CMD2} ;;
 	unmount) check_priv ; umount_tomb ${CMD2} ;;
 	  close) check_priv ; umount_tomb ${CMD2} ;;
-	  slam) chack_priv ; SLAM=1; umount_tomb ${CMD2} ;;
+	   slam) check_priv ; SLAM=1; umount_tomb ${CMD2} ;;
 	   bury) if [ "$STEGHIDE" = 0 ]; then
 		    error "steghide not installed. Cannot bury your key"
 		    return 1
@@ -931,6 +936,7 @@ main () {
 	install) check_priv ; install_tomb ;;
 	askpass) ask_password $CMD2 ;;
 	 status) tomb-status ;;
+	 mktemp) safe_dir ${CMD2} ;;
 	      *) error "command \"$CMD\" not recognized"
 		 act "try -h for help"
 		 return 1
