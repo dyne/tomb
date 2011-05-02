@@ -1,0 +1,21 @@
+Style guidelines
+===============
+
+Indentation
+-----------
+Code must be indented using four spaces.
+In vim, this can be accomplished using
+
+	set shiftwidth=4
+	set expandtab
+
+Naming
+------
+
+global variables should be `$UPPERCASE`.
+
+local variables should be `$lowercase`, best if it can be written without underscores.
+If you feel the need to name a variable `$longdescriptionofwhatthisisusefulfor`,
+then you're allowed to use underscores. But do you really need?
+
+functions should be lowercase+underscores: `do_this()`
