@@ -28,3 +28,4 @@ tags
 doc/web/public
 doc/web/dyne
 debian
+share/gtkrc
