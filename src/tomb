@@ -84,7 +84,7 @@ check_bin() {
 
 # safe dir creation function
 safe_dir() {
-    try mktemp
+    which mktemp &> /dev/null
     if [[ $? = 0 ]]; then
         mktemp -d /dev/shm/$1.XXXX.$$
         return
