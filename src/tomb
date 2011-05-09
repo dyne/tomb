@@ -441,7 +441,6 @@ mount_tomb() {
 
     # save date of mount in minutes since 1970
     mapdate=`date +%s`
-    mapdate="`expr $mapdate / 60`"
 
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
     keyname=`basename $tombkey | cut -d. -f1`
@@ -729,7 +728,7 @@ umount_tomb() {
 	notice "Closing tomb $tombname mounted on $tombmount"
     fi
     # check if there are binded dirs and close them first
-    tombmount_esc="`echo ${tombmount} | sed 's:\/:\\\/:g'`"
+    tombmount_esc=`sed 's:\/:\\\/:g' <<< $tombmount `
     unbind=`mount | awk "/^$tombmount_esc.*bind/"' { print $3 }'`
     for b in ${(f)unbind}; do
 	hook="`basename $b`"
@@ -789,6 +788,64 @@ umount_tomb() {
 
     notice "Tomb $tombname closed: your bones will rest in peace."
     return 0
+}
+
+# list all tombs mounted in a readable format
+list_tombs() {
+    if [ $1 ]; then
+	# list a specific tomb
+	mounted_tombs=`mount -l |
+    awk -vtomb="[$1]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
+    else
+	# list all open tombs
+	mounted_tombs=`mount -l |
+    awk '/^\/dev\/mapper\/tomb/ { print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
+    fi
+    # 1 = full mapper path
+    # 2 = mountpont
+    # 3 = filesystem
+    # 4 = mount options
+    # 5 = name
+
+    if ! [ $mounted_tombs ]; then
+	if [ $1 ]; then
+	    notice "There seems to be no open tomb engraved as [${1}]"
+	else
+	    notice "I can't see any open tomb, may they all rest in peace."
+	fi
+	return
+    fi
+
+    
+    for t in ${(f)mounted_tombs}; do
+	mapper=`basename ${t[(ws:;:)1]}`
+
+	tombname=${t[(ws:;:)5]}
+	tombmount=${t[(ws:;:)2]}
+	tombfs=${t[(ws:;:)3]}
+	tombfsopts=${t[(ws:;:)4]}
+
+	tombsince=`date --date=@${mapper[(ws:.:)3]} +%c`
+	# breaking up such strings is good for translation
+	echo -n $tombname
+	echo -n " open on "
+	echo -n $tombmount
+	echo -n " using "
+	echo -n "$tombfs $tombfsopts"
+	echo -n " since "
+	echo $tombsince
+	
+	# now check hooks
+	mtomb=`sed 's:\/:\\\/:g' <<< $tombmount`
+	mounted_hooks=`mount | awk "/^$mtomb/"' {print $1 ";" $3}'`
+	for h in ${(f)mounted_hooks}; do
+	    echo -n $tombname
+	    echo -n " hooks "
+	    echo -n `basename ${h[(ws:;:)1]}`
+	    echo -n " on "
+	    echo ${h[(ws:;:)2]}
+	done
+    done
 }
 
 # install mime-types, bells and whistles for the desktop
@@ -930,9 +987,9 @@ main () {
 	  mount) check_priv ; mount_tomb  ;;
 	   open) check_priv ; mount_tomb  ;;
 	 umount) check_priv ; umount_tomb ${CMD2} ;;
-	unmount) check_priv ; umount_tomb ${CMD2} ;;
 	  close) check_priv ; umount_tomb ${CMD2} ;;
 	   slam) check_priv ; SLAM=1; umount_tomb ${CMD2} ;;
+	   list) list_tombs ${CMD2} ;;
 	   bury) if [ "$STEGHIDE" = 0 ]; then
 		    error "steghide not installed. Cannot bury your key"
 		    return 1
