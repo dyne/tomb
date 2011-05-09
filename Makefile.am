@@ -1,1 +1,1 @@
-SUBDIRS = src share doc
+SUBDIRS = src share doc po intl

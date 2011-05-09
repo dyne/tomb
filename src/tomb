@@ -245,6 +245,50 @@ Please report bugs on <http://bugs.dyne.org>.
 EOF
 }
 
+generate_translatable_strings() {
+    cat <<EOF
+# Tomb - The Crypto Undertaker.
+# Copyright (C) 2007-2011 Dyne.org Foundation
+# Denis Roio <jaromil@dyne.org>, 2011.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Tomb $VERSION\n"
+"PO-Revision-Date: `date`\n"
+"Last-Translator: Denis Roio <jaromil@dyne.org>\n"
+"Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#
+#: commandline help
+#
+
+msgid ""
+EOF
+
+    usage | awk '
+{ print "\"" $0 "\"" }'
+cat <<EOF
+msgstr ""
+
+#
+# tomb internal messages
+#
+
+EOF
+
+    cat $TOMBEXEC | awk '
+/notice ".*"$/ { sub( /notice/ , "");
+                 print "#: notice"; print "msgid " $0; print "msgstr \"\"\n" }
+
+/act ".*"$/ { sub( /act/ , "");
+              print "#: act"; print "msgid " $0; print "msgstr \"\"\n" }
+'
+}
+
 create_tomb() {
     if ! [ ${CMD2} ]; then
 	error "no tomb name specified for creation"
@@ -1014,6 +1058,7 @@ main () {
 	askpass) ask_password $CMD2 ;;
 	 status) tomb-status ;;
 	 mktemp) safe_dir ${CMD2} ;;
+      translate) generate_translatable_strings ;;
 	      *) error "command \"$CMD\" not recognized"
 		 act "try -h for help"
 		 return 1

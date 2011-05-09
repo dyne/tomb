@@ -66,6 +66,11 @@ dnl Checks for reguired programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 
+dnl translation infrastructure
+dnl waiting for translations..
+dnl AM_GNU_GETTEXT
+dnl AM_GNU_GETTEXT_VERSION(0.12)
+
 dnl ---------------------------------------------------------------
 dnl Checks for external programs.
 
