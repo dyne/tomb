@@ -5,24 +5,10 @@ you are welcome to send patches to jaromil@dyne.org
 
 * Release 1.0							:90%:
 
-** [#A] fix operation without DISPLAY (over SSH)		   :hellekin:
-** TODO [#A] SLAM tomb and kill all applications using it
+** TODO [#C] make one single status handle more tombs
+** TODO [#C] decorate creation wizard with ASCII art
 
-   using lsof and fuser(1) we can do that easily
-
-   we should ask user confirmation when closing a tomb if to slam
-
-   tomb-askpass will become tomb-ask managing such user interaction,
-   using libassuan and pinentry from the gpg project.
-
-** [#A] incremental backup system using bup			    :jaromil:
-
-   tombs are modifed only where needed so file changes are local to
-   the file segment where data is stored. duplicity handles this using
-   gpg for backup sets and rdiff for incremental storage. its more
-   stable than bup at this moment.
-
-** TODO [#B] remove gnome dependencies from tomb core
+** DONE [#B] remove gnome dependencies from tomb core		    :jaromil:
 
    gksu is deeply connected to gnome in all its packages.  actually
    libgksu2-dev is and that doesn't helps.
@@ -35,10 +21,16 @@ you are welcome to send patches to jaromil@dyne.org
    to sudo and provide it an interface to ask the password graphically
    via pinentry
 
-** TODO [#C] make one single status handle more tombs
-** TODO [#C] decorate creation wizard with ASCII art
+** DONE [#B] SLAM tomb and kill all applications using it	   :anathema:
 
+   using lsof and fuser(1) we can do that easily
 
+   we should ask user confirmation when closing a tomb if to slam
+
+   tomb-askpass will become tomb-ask managing such user interaction,
+   using libassuan and pinentry from the gpg project.
+
+** DONE [#B] fix operation without DISPLAY (over SSH)		   :hellekin:
 ** DONE [#A] steganography to store tomb key			    :jaromil:
 
    steghide can hide keys in JPG, BMP, WAV or AU files it also takes

@@ -21,19 +21,21 @@
 # Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 VERSION=1.0
-DATE=Feb/2011
+DATE=May/2011
 TOMBEXEC=$0
 TOMBOPENEXEC="tomb-open"
 STEGHIDE=1
 
 # PATH=/usr/bin:/usr/sbin:/bin:/sbin
 
+autoload colors; colors
+
 # standard output message routines
 # it's always useful to wrap them, in case we change behaviour later
-notice() { if ! [ $QUIET ]; then echo "[*] $1" >&2; fi }
-act()    { if ! [ $QUIET ]; then echo " .  $1" >&2; fi }
-error()  { if ! [ $QUIET ]; then echo "[!] $1" >&2; fi }
-func()   { if [ $DEBUG ]; then   echo "[D] $1" >&2; fi }
+notice() { if ! [ $QUIET ]; then print "$fg_bold[green][*]$fg_no_bold[white] $1" >&2; fi }
+act()    { if ! [ $QUIET ]; then print "$fg_bold[white] . $fg_no_bold[white] $1" >&2; fi }
+error()  { if ! [ $QUIET ]; then print "$fg[red][!]$fg[white] $1" >&2; fi }
+func()   { if [ $DEBUG ]; then   print "$fg[blue][D]$fg[white] $1" >&2; fi }
 
 
 check_bin() {
@@ -215,6 +217,7 @@ Commands:
 
  create     create a new tomb FILE and its keys
  open       open an existing tomb FILE on PLACE
+ list       list all open tombs or the one called FILE
  close      close the open tomb called FILE (or all)
  slam       close tomb FILE and kill all pids using it
  bury       hide a tomb key FILE inside a jpeg PLACE
@@ -809,11 +812,11 @@ list_tombs() {
 
     if ! [ $mounted_tombs ]; then
 	if [ $1 ]; then
-	    notice "There seems to be no open tomb engraved as [${1}]"
+	    error "There seems to be no open tomb engraved as [${1}]"
 	else
-	    notice "I can't see any open tomb, may they all rest in peace."
+	    error "I can't see any open tomb, may they all rest in peace."
 	fi
-	return
+	exit 1
     fi
 
     
@@ -827,23 +830,23 @@ list_tombs() {
 
 	tombsince=`date --date=@${mapper[(ws:.:)3]} +%c`
 	# breaking up such strings is good for translation
-	echo -n $tombname
-	echo -n " open on "
-	echo -n $tombmount
-	echo -n " using "
-	echo -n "$tombfs $tombfsopts"
-	echo -n " since "
-	echo $tombsince
+	print -n "$fg[green]$tombname"
+	print -n "$fg[white] open on "
+	print -n "$fg_bold[white]$tombmount"
+	print -n "$fg_no_bold[white] using "
+	print -n "$fg_bold[white]$tombfs $tombfsopts"
+	print -n "$fg_no_bold[white] since "
+	print "$fg_bold[white]$tombsince$fg_no_bold[white]"
 	
 	# now check hooks
 	mtomb=`sed 's:\/:\\\/:g' <<< $tombmount`
 	mounted_hooks=`mount | awk "/^$mtomb/"' {print $1 ";" $3}'`
 	for h in ${(f)mounted_hooks}; do
-	    echo -n $tombname
-	    echo -n " hooks "
-	    echo -n `basename ${h[(ws:;:)1]}`
-	    echo -n " on "
-	    echo ${h[(ws:;:)2]}
+	    print -n "$fg[green]$tombname"
+	    print -n "$fg_no_bold[white] hooks "
+	    print -n "$fg_bold[white]`basename ${h[(ws:;:)1]}`"
+	    print -n "$fg_no_bold[white] on "
+	    print "$fg_bold[white]${h[(ws:;:)2]}$fg_no_bold[white]"
 	done
     done
 }
@@ -990,6 +993,7 @@ main () {
 	  close) check_priv ; umount_tomb ${CMD2} ;;
 	   slam) check_priv ; SLAM=1; umount_tomb ${CMD2} ;;
 	   list) list_tombs ${CMD2} ;;
+	   help) usage ;;
 	   bury) if [ "$STEGHIDE" = 0 ]; then
 		    error "steghide not installed. Cannot bury your key"
 		    return 1

@@ -49,6 +49,14 @@ where the tomb should be made accessible, if not then the tomb is
 mounted in a directory named after the filename and inside /media.
 
 .B
+.IP "list"
+
+List all the tombs found open, including information about the time
+they were opened and the hooks that they mounted. If the \fIfirst
+argument\fR is present, then shows only the tomb named that way or
+returns an error if its not found.
+
+.B
 .IP "close"
 Closes a currently open tomb.  When \fIan argument\fR is specified, it
 should be the name of a mounted tomb; if not specified and only one
