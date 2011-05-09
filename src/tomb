@@ -92,8 +92,8 @@ safe_dir() {
         return
     fi
     dir="/dev/shm/$1.$RANDOM.$RANDOM.$$"
-    (umask 077 && mkdir "$dir") || echo "-1"
-    echo "$dir"
+    (umask 077 && mkdir "$dir") || print "-1"
+    print "$dir"
 }
 
 # we use pinentry now
@@ -220,8 +220,14 @@ Commands:
  list       list all open tombs or the one called FILE
  close      close the open tomb called FILE (or all)
  slam       close tomb FILE and kill all pids using it
+EOF
+if [ "$STEGHIDE" = 1 ]; then
+    cat <<EOF
  bury       hide a tomb key FILE inside a jpeg PLACE
- exhume     extract a tomb key FILE from a jpeg PLACE
+ exhume     extract a tomb key FILE from a jpeg PL
+EOF
+fi
+cat <<EOF
 
 Options:
 
@@ -346,7 +352,7 @@ create_tomb() {
     fi
 
 
-    echo "${tombpass}" | gpg \
+    print "${tombpass}" | gpg \
 	--openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
 	-o "${tombdir}/${tombname}.tomb.key" -c -a ${keytmp}/tomb.tmp
 
@@ -455,7 +461,7 @@ mount_tomb() {
 	else
 	    tombpass=`exec_as_user ${TOMBEXEC} askpass "$keyname (retry $c)"`
 	fi
-	echo "${tombpass}" \
+	print "${tombpass}" \
 	    | gpg --batch --passphrase-fd 0 --no-tty --no-options \
 		  -d "${tombkey}" 2> /dev/null \
 	    | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
@@ -693,7 +699,7 @@ umount_tomb() {
     if [ "${pathmap}" = "/dev/mapper" ]; then
 
 	mapper="$1" # argument is the mapper (or none which autofills mapper)
-	tombname="`echo $mapper | cut -d. -f2`"
+	tombname="`print $mapper | cut -d. -f2`"
 	tombmount=`mount -l | \
 	    awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $3 } '`
 
@@ -709,7 +715,7 @@ umount_tomb() {
 
 	tombmount="$1" # argument should be the mount
     	mapper=`mount | awk -vmnt="$tombmount" '/^\/dev\/mapper\/tomb/ { if($3==mnt) print $1 }'`
-	tombname="`echo $mapper | cut -d. -f2`"
+	tombname="`print $mapper | cut -d. -f2`"
 
     fi
 
@@ -941,7 +947,7 @@ EOF
 }
 
 main () {
-    echo $@ | grep '\-D' 2>&1 > /dev/null
+    print $@ | grep '\-D' 2>&1 > /dev/null
     # ?????
     if [ $? = 0 ]; then
     fi
@@ -965,8 +971,8 @@ main () {
 		exit 0 ;;
 	      -q) QUIET=1; shift 1 ;;
 	      -D)
-		echo "[D] Tomb invoked with args \"${(f)@}\" "
-		echo "[D] running on `date`"
+		print "[D] Tomb invoked with args \"${(f)@}\" "
+		print "[D] running on `date`"
 		DEBUG=1; shift 1 ;;
 	      -s) SIZE=$2; shift 2 ;;
 	      -k) KEY=$2; shift 2 ;;
