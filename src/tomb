@@ -884,8 +884,9 @@ list_tombs() {
 	print -n "$fg[white] open on "
 	print -n "$fg_bold[white]$tombmount"
 	print -n "$fg_no_bold[white] using "
-	print -n "$fg_bold[white]$tombfs $tombfsopts"
-	print -n "$fg_no_bold[white] since "
+	print "$fg_bold[white]$tombfs $tombfsopts"
+	print -n "$fg_no_bold[green]$tombname"
+	print -n "$fg_no_bold[white] open since "
 	print "$fg_bold[white]$tombsince$fg_no_bold[white]"
 	
 	# now check hooks
@@ -991,7 +992,7 @@ EOF
 }
 
 main () {
-    print $@ | grep '\-D' 2>&1 > /dev/null
+    echo $@ | grep '\-D' 2>&1 > /dev/null
     # ?????
     if [ $? = 0 ]; then
     fi

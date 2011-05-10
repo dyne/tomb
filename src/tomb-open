@@ -158,7 +158,11 @@ launch_status() {
     tombname=${1}
     tombmap=`mount -l | awk "/\[${tombname}\]$/"' { print $1 } '`
     tombmount=`mount -l | awk "/\[${tombname}\]$/"' { print $3 } '`
-    tomb-status $tombmap $tombname $tombmount &!
+    if [ -x ./tomb-status ]; then # launch from build dir
+	./tomb-status $tombmap $tombname $tombmount &!
+    else
+	tomb-status $tombmap $tombname $tombmount &!
+    fi
 }
 
 # got an argument
