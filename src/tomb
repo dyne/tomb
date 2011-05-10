@@ -322,7 +322,7 @@ create_tomb() {
 	tombsize=${SIZE}
     fi
 
-    tombsize_4k=`expr $tombsize \* 1000 / 4`
+    tombsize_4k=`expr $tombsize \* 1024 / 4`
     act "Generating ${tombfile} of ${tombsize}Mb (${tombsize_4k} blocks of 4Kb)"
     $DD if=/dev/urandom bs=4k count=${tombsize_4k} of=${tombdir}/${tombfile}
 
