@@ -221,7 +221,7 @@ if [ $1 ]; then # is it a file?
 		exit 1
 	    fi
 	else
-	    tomb-notify "Not a real Tomb." "We found no real bones in there."
+	    tomb-notify "Not a real Tomb." "We found no real bones in there, or the tomb file permissions won't allow us in."
 	    exit 1
 	fi
 
