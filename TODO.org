@@ -3,12 +3,9 @@ TODO and Roadmap for Tomb
 
 you are welcome to send patches to jaromil@dyne.org
 
-* Release 1.0							:90%:
+* DONE Release 1.0							:100%:
 
-** TODO [#C] make one single status handle more tombs
-** TODO [#C] decorate creation wizard with ASCII art
-
-** DONE [#B] remove gnome dependencies from tomb core		    :jaromil:
+** [#B] remove gnome dependencies from tomb core		    :jaromil:
 
    gksu is deeply connected to gnome in all its packages.  actually
    libgksu2-dev is and that doesn't helps.
@@ -21,7 +18,7 @@ you are welcome to send patches to jaromil@dyne.org
    to sudo and provide it an interface to ask the password graphically
    via pinentry
 
-** DONE [#B] SLAM tomb and kill all applications using it	   :anathema:
+** [#B] SLAM tomb and kill all applications using it		   :anathema:
 
    using lsof and fuser(1) we can do that easily
 
@@ -30,15 +27,15 @@ you are welcome to send patches to jaromil@dyne.org
    tomb-askpass will become tomb-ask managing such user interaction,
    using libassuan and pinentry from the gpg project.
 
-** DONE [#B] fix operation without DISPLAY (over SSH)		   :hellekin:
-** DONE [#A] steganography to store tomb key			    :jaromil:
+** [#B] fix operation without DISPLAY (over SSH)		   :hellekin:
+** [#A] steganography to store tomb key				    :jaromil:
 
    steghide can hide keys in JPG, BMP, WAV or AU files it also takes
    care of compressing end encrypting the key file so we don't
    necessarily need gpg... it has Serpent and AES256 (CBC)
 
-** DONE [#A] use a posix thread instead of fork for status close    :jaromil:
-** DONE [#A] use a config file to map bind mounts 		    :jaromil:
+** [#A] use a posix thread instead of fork for status close	    :jaromil:
+** [#A] use a config file to map bind mounts			    :jaromil:
 
    done as file 'bind-hooks' inside tom. also 'post-hooks' is executed
    as user in case symlinks are needed and so
@@ -46,28 +43,27 @@ you are welcome to send patches to jaromil@dyne.org
    using mount -o bind we can trigger actions to be made after mounting
    a tomb so that personal directories appear in the home folder.
 
-** DONE [#A] desktop integration the freedesktop way		    :jaromil:
-** DONE [#B] debian packaging with desktop integration 		    :jaromil:
+** [#A] desktop integration the freedesktop way			    :jaromil:
+** [#B] debian packaging with desktop integration		    :jaromil:
 
 
 * TODO Release 2.0							:00%:
 
 100% backward compatible with tombs created with 1.0 
 
+
+** [#A] system to split keys in parts (ssss)			     :boyska:
 ** [#A] use inotify on tomb
 
    inotify can also count when was the last time tomb was used and
    unmount it automatically after a timeout
 
 ** [#A] udev rules to avoid usb automount of keyplug in gnome
-
 ** [#A] sign and verify tomb script integrity (executed as root)
-
 ** [#B] make a gnome tomb undertaker using gnome-druid in glade
 ** [#B] tomb locksmith for key management
    a graphical tool or text wizard to move keys in/out steganography
    as well split them
-** [#B] system to split keys in parts (ssss)
 
 ** [#B] transport keys and integrity checksums on qrcodes
 
@@ -75,7 +71,11 @@ you are welcome to send patches to jaromil@dyne.org
 
 ** [#B] indeep security analysis of possible vulnerabilities
 
+** [#C] make one single status handle more tombs
+** [#C] decorate creation wizard with ASCII art
+
 ** [#C] more gtk dialogs for configurations? keep it minimal!
+
 
 * TODO Porting to Win$loth
 
