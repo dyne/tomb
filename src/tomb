@@ -833,6 +833,12 @@ umount_tomb() {
     loopdev=`cut -d '.' -f4 <<< "$mapper"`
     losetup -d "/dev/$loopdev"
 
+    # kill the status tray widget if still present
+    # this makes the widget disappear when closing tomb from cli
+    awkmapper=`sed 's:\/:\\\/:g' <<< $mapper`
+    statustray_pid=`ps ax | awk "/tomb-status $awkmapper/"' {print $1} '`
+    kill ${statustray_pid}
+
     notice "Tomb $tombname closed: your bones will rest in peace."
     return 0
 }
