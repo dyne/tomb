@@ -1,0 +1,5 @@
+version = 3
+
+# Package mantained by upstream developer
+# wishing there would be a way to watch git repos?
+# however our ftp is on ftp://ftp.dyne.org/tomb/releases
