@@ -777,10 +777,17 @@ umount_tomb() {
     if [ $SLAM ]; then
 	notice "Slamming tomb $tombname mounted on $tombmount"
 	act "Kill all processes busy inside the tomb"
+	pidk=`lsof -t "$tombmount"`
+	for p in "$pidk"; do
+	    pname=`pidof $p`
+	    func "killing PID $p of $pname..."
+	    kill -9 $p
+	done
     else
 	notice "Closing tomb $tombname mounted on $tombmount"
     fi
-    # check if there are binded dirs and close them first
+
+    # check if there are binded dirs and close them
     tombmount_esc=`sed 's:\/:\\\/:g' <<< $tombmount `
     unbind=`mount | awk "/^$tombmount_esc.*bind/"' { print $3 }'`
     for b in ${(f)unbind}; do
@@ -814,19 +821,6 @@ umount_tomb() {
 	umount ${tombmount} 2> /dev/null
 	if ! [ $? = 0 ]; then
 	    error "Tomb is busy, cannot umount!"
-	    if [ $SLAM ]; then
-		notice "Slamming tomb killing all processes using it"
-		pidk=`lsof -t "$tombmount"`
-		for p in "$pidk"; do
-		    pname=`pidof $p`
-		    func "killing PID $p of $pname..."
-		    kill -9 $p
-		done
-		umount "${tombmount}"
-	    else
-		error "Cannot umount $tombname on $tombmount"
-		return 1
-	    fi
 	fi
     fi
 
