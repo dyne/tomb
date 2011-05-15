@@ -33,7 +33,7 @@ install-data-hook:
 	@install -D dyne-tomb.xml $(DESTDIR)$(datadir)/mime/packages
 	@if ! [ -n `which xdg-mime` ]; then xdg-mime install dyne-tomb.xml; fi
 	@echo "installing icons";
-	@install -D monmort.xpm $(DESTDIR)$(datadir)/pixmaps
+	@install -D monmort.png $(DESTDIR)$(datadir)/pixmaps
 	@if ! [ -n `which xdg-icon-resource` ]; then \
 		xdg-icon-resource install --context mimetypes --size 32 ../src/monmort.xpm monmort; \
 		xdg-icon-resource install --size 32 ../src/monmort.xpm dyne-monmort; fi
