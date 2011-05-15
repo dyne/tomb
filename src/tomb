@@ -837,7 +837,9 @@ umount_tomb() {
     # this makes the widget disappear when closing tomb from cli
     awkmapper=`sed 's:\/:\\\/:g' <<< $mapper`
     statustray_pid=`ps ax | awk "/tomb-status $awkmapper/"' {print $1} '`
-    kill ${statustray_pid}
+    if [ ${statustray_pid} ]; then
+	kill ${statustray_pid}
+    fi
 
     notice "Tomb $tombname closed: your bones will rest in peace."
     return 0
