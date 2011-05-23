@@ -52,30 +52,43 @@ you are welcome to send patches to jaromil@dyne.org
 
 * TODO Release 2.0							:00%:
 
-100% backward compatible with tombs created with 1.0 
+Must be 100% backward compatible with tombs created with 1.0 
 
-** [#A] use inotify on tomb
+** Bugs to fix
 
-   inotify can also count when was the last time tomb was used and
-   unmount it automatically after a timeout
+*** TODO [#A] Should refuse opening a tomb that is already open	    :jaromil:
 
-** [#A] udev rules to avoid usb automount of keyplug in gnome
+** New features
 
-** [#A] sign and verify tomb script integrity (executed as root)
+*** [#A] use inotify on tomb
 
-** [#B] make a gnome tomb undertaker using gnome-druid in glade
-** [#B] tomb locksmith for key management
-   a graphical tool or text wizard to move keys in/out steganography
-   as well split them
-** [#B] system to split keys in parts (ssss)
+    inotify can also count when was the last time tomb was used and
+    unmount it automatically after a timeout, see how much free space
+    is left and warn when the space is almost finished
 
-** [#B] transport keys and integrity checksums on qrcodes
+*** [#A] udev rules to avoid usb automount of keyplug in gnome
 
-** [#B] analyse and show tomb entropy using libdisorder
+*** [#A] sign and verify tomb script integrity (executed as root)
 
-** [#B] indeep security analysis of possible vulnerabilities
+*** TODO [#B] Internationalization using gettext		    :jaromil:
 
-** [#C] more gtk dialogs for configurations? keep it minimal!
+    Started generating the strings, still need to figure out how to
+    install it
+
+*** [#B] make a gnome tomb undertaker using gnome-druid in glade
+*** [#B] tomb locksmith for key management
+    a graphical tool or text wizard to move keys in/out steganography
+    as well split them
+*** [#B] system to split keys in parts (ssss)
+
+*** [#B] transport keys and integrity checksums on qrcodes
+
+*** [#B] analyse and show tomb entropy using libdisorder
+
+*** [#B] indeep security analysis of possible vulnerabilities
+
+*** [#C] more gtk dialogs for configurations? keep it minimal!
+
 
 * TODO Porting to Win$loth
 
