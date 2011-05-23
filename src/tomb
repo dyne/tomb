@@ -763,6 +763,9 @@ umount_tomb() {
 
     fi
 
+    # avoid block when the same tomb is mounted, take only the first
+    for tm in ${(f)tombmount}; do tombmount=${tm}; break; done
+
     func "tomb close argument: $1"
     func "name:\t$tombname"
     func "mount:\t$tombmount"
