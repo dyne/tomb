@@ -25,6 +25,7 @@ DATE=May/2011
 TOMBEXEC=$0
 TOMBOPENEXEC="tomb-open"
 STEGHIDE=1
+MOUNTOPTS="rw,noatime,nodev"
 
 # PATH=/usr/bin:/usr/sbin:/bin:/sbin
 
@@ -234,6 +235,7 @@ Options:
  -s     size of the tomb file when creating one (in MB)
  -k     path to the key to use for opening a tomb
  -n     don't process the hooks found in tomb
+ -o     mount options used to open (default: rw,noatime,nodev)
 
  -h     print this help
  -v     version information for this tool
@@ -530,7 +532,7 @@ mount_tomb() {
     act "tomb engraved as $tombname"
     tune2fs -L ${tombname} /dev/mapper/${mapper} > /dev/null
 
-    mount -o rw,noatime,nodev /dev/mapper/${mapper} ${tombmount}
+    mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
 
     # Ensure the user can write the disk - 10x Hellekin :)
     ME=${SUDO_USER:-$(whoami)}
@@ -679,7 +681,7 @@ exec_safe_bind_hooks() {
       elif [ ! -r "$MOUNTPOINT/$dir" ]; then
 	  error "bind-hook source not found in tomb, skipping ${MOUNTPOINT}/${dir}"
       else
-	  mount -o bind $MOUNTPOINT/$dir $HOME/${maps[$dir]}
+	  mount -o bind,$MOUNTOPTS $MOUNTPOINT/$dir $HOME/${maps[$dir]}
 	  mounted+=("$HOME/${maps[$dir]}")
       fi
    done
@@ -1005,7 +1007,7 @@ main () {
 
     ARGS=$@[@]
 
-    OPTS=`getopt -o hvqDs:k:n -n 'tomb' -- "$@"`
+    OPTS=`getopt -o hvqDs:k:no: -n 'tomb' -- "$@"`
     while true; do
 	case "$1" in
 	      -h)
@@ -1028,6 +1030,7 @@ main () {
 	      -s) SIZE=$2; shift 2 ;;
 	      -k) KEY=$2; shift 2 ;;
 	      -n) NOBIND=1; shift 1 ;;
+	      -o) MOUNTOPTS=$2; shift 2;;
 	      --) shift; break ;;
 	       *) CMD=$1;
 		  FILE=$2; MOUNT=$3; # compat with old args

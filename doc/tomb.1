@@ -105,6 +105,14 @@ USB storage device and it will look for the key file inside it.
 Skip processing of post-hooks and bind-hooks if found inside the tomb.
 See the \fIHOOKS\fR section in this manual for more information.
 .B
+.IP "-o"
+Manually specify mount options to be used when opening a tomb instead
+of the default \fIrw,noatime,nodev\fR. This option can be used to
+mount a tomb read-only (ro) to prevent any modification of its data,
+or to experiment with other settings (if you really know what you are
+doing) see the mount(8) man page.
+
+.B
 .IP "-h"
 Display a help text and quit
 .B
