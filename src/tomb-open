@@ -243,10 +243,13 @@ fi
 
 
 # no argument but on graphical display: creation dialog
-if [ -z $DISPLAY ]; then
-    echo "[!] tomb-open is a wrapper for the command 'tomb'"
-    "${TOMBEXEC}" -h
-    exit 1
+if [ "$1" != "wizard" ]; then
+    if [ -z $DISPLAY ]; then
+	echo "[!] tomb-open is a wrapper for the command 'tomb'"
+	echo "[!] type 'tomb-open wizard' if you want to be guided"
+	"${TOMBEXEC}" -h
+	exit 1
+    fi
 fi
 
 # no arguments: start guided tomb creation
