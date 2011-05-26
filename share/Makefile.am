@@ -52,7 +52,7 @@ install-data-hook:
 		$(DESTDIR)/$(datadir)/icons/hicolor/32x32/mimetypes/application-x-tomb-key.png
 	@if ! [ -n `which update-icon-caches` ]; then \
 		update-icon-caches $(DESTDIR)/$(datadir)/icons/hicolor; fi
-
+	install $(top_builddir)/share/gtkrc $(DESTDIR)/$(GtkRcdir)/
 distclean:
 	unlink gtkrc
 	unlink Makefile
