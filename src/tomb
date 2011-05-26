@@ -191,7 +191,7 @@ get_arg_tomb() {
     fi
 
     tombname=${tombfile%%\.*}
-    act "tomb found: ${tombdir}/${tombfile}"
+    func "tomb found: ${tombdir}/${tombfile}"
     # now check if the key is kept beside or in args
     # we use the extension .key
 
@@ -460,6 +460,7 @@ create_tomb() {
 }
 
 mount_tomb() {
+    notice "Commanded to open tomb $CMD2"
     get_arg_tomb $CMD2
     if [ $? != 0 ]; then
 	error "operation aborted."
@@ -481,7 +482,22 @@ mount_tomb() {
 	tombmount=$CMD3
     fi
 
+    # check if its already open
+    mount -l | grep "${tombname}.tomb.*\[$tombname\]$" 2>&1 > /dev/null
+    if [ $? = 0 ]; then
+	error "$tombname is already mounted on $tombmount"
+	act "tomb list - show all tombs currently open"
+	if [ -n "$usbkey_mount" ]; then
+	    umount $usbkey_mount
+	    rmdir  $usbkey_mount
+	    unset usbkey_mount
+	fi
+	error "operation aborted."
+	return 1
+    fi
+
     notice "mounting $tombfile on mountpoint $tombmount"
+
 
     # we need root from here on
     mkdir -p $tombmount
