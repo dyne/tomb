@@ -2,32 +2,32 @@
 EXTRA_DIST = tomb.desktop tomb.applications tomb.keys tomb.mime tomb	\
              monmort.png gtkrc.in tomb.mimepkg dyne-tomb.xml
 
-Applicationsdir = $(DESTDIR)/$(datadir)/applications
+Applicationsdir = $(datadir)/applications
 Applications_DATA = tomb.desktop
 
-AppRegdir = $(DESTDIR)/$(datadir)/application-registry
+AppRegdir = $(datadir)/application-registry
 AppReg_DATA = tomb.applications
 
-MimeInfodir = $(DESTDIR)/$(datadir)/mime-info
+MimeInfodir = $(datadir)/mime-info
 MimeInfo_DATA = tomb.keys tomb.mime
 
-Menudir = $(DESTDIR)/$(datadir)/menu
+Menudir = $(datadir)/menu
 Menu_DATA = tomb
 
-Iconsdir = $(DESTDIR)/$(datadir)/pixmaps
+Iconsdir = $(datadir)/pixmaps
 Icons_DATA = monmort.png
 
-AppInstIcondir = $(DESTDIR)/$(datadir)/app-install/icons
+AppInstIcondir = $(datadir)/app-install/icons
 AppInstIcon_DATA = monmort.png
 
-AppInstDeskdir = $(DESTDIR)/$(datadir)/app-install/desktop
+AppInstDeskdir = $(datadir)/app-install/desktop
 AppInstDesk_DATA = tomb.desktop
 
 gtkrc:
 	sed -e 's@\%prefix\%@'"$(datadir)"'@' $(top_srcdir)/share/gtkrc.in > \
 					      $(top_builddir)/share/gtkrc
 
-GtkRcdir = $(DESTDIR)/$(datadir)/themes/tomb/gtk-2.0-key
+GtkRcdir = $(datadir)/themes/tomb/gtk-2.0-key
 GtkRc_DATA = gtkrc
 
 MimePkgdir = $(DESTDIR)/$(prefix)/lib/mime/packages/tomb
