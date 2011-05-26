@@ -14,9 +14,9 @@ MimeInfo_DATA = tomb.keys tomb.mime
 Menudir = $(DESTDIR)/$(datadir)/menu
 Menu_DATA = tomb
 
-Iconsdir = $(DESTDIR)/$(datadir)/icons
+Iconsdir = $(DESTDIR)/$(datadir)/pixmaps
 Icons_DATA = monmort.png
- 
+
 AppInstIcondir = $(DESTDIR)/$(datadir)/app-install/icons
 AppInstIcon_DATA = monmort.png
 
@@ -38,7 +38,7 @@ install-data-hook:
 	@install -D $(top_srcdir)/share/dyne-tomb.xml $(DESTDIR)/$(datadir)/mime/packages
 	@if ! [ -n `which xdg-mime` ]; then xdg-mime install dyne-tomb.xml; fi
 	@echo "installing icons";
-	@install -D $(top_srcdir)/share/monmort.png $(DESTDIR)/$(datadir)/pixmaps
+#	@install -D $(top_srcdir)/share/monmort.png $(DESTDIR)/$(datadir)/pixmaps
 	@if ! [ -n `which xdg-icon-resource` ]; then \
 		xdg-icon-resource install --context mimetypes --size 32 \
 			$(top_srcdir)/src/monmort.xpm monmort; \
@@ -48,7 +48,7 @@ install-data-hook:
 	@if ! [ -n `which update-mime` ]; then echo update-mime; update-mime; fi
 
 uninstall-hook:
-	unlink $(DESTDIR)/$(datadir)/pixmaps/monmort.png
+#	unlink $(DESTDIR)/$(datadir)/pixmaps/monmort.png
 
 distclean:
 	unlink gtkrc
