@@ -34,10 +34,17 @@ autoload colors; colors
 # standard output message routines
 # it's always useful to wrap them, in case we change behaviour later
 notice() { if ! [ $QUIET ]; then print "$fg_bold[green][*]$fg_no_bold[white] $1" >&2; fi }
-act()    { if ! [ $QUIET ]; then print "$fg_bold[white] . $fg_no_bold[white] $1" >&2; fi }
 error()  { if ! [ $QUIET ]; then print "$fg[red][!]$fg[white] $1" >&2; fi }
 func()   { if [ $DEBUG ]; then   print "$fg[blue][D]$fg[white] $1" >&2; fi }
-
+act()    {
+    if ! [ $QUIET ]; then
+	if [ "$1" = "-n" ]; then
+	    print -n "$fg_bold[white] . $fg_no_bold[white] $2" >&2;
+	else
+	    print "$fg_bold[white] . $fg_no_bold[white] $1" >&2;
+	fi
+    fi
+}
 
 check_bin() {
     # which dd command to use
@@ -886,13 +893,34 @@ list_tombs() {
 	tombfs=${t[(ws:;:)3]}
 	tombfsopts=${t[(ws:;:)4]}
 
+	# calculate tomb size
+	ts=`df -hP /dev/mapper/$mapper |
+    awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
+	tombtot=${ts[(ws:;:)1]}
+	tombused=${ts[(ws:;:)2]}
+	tombavail=${ts[(ws:;:)3]}
+	tombpercent=${ts[(ws:;:)4]}
+
 	tombsince=`date --date=@${mapper[(ws:.:)3]} +%c`
+
 	# breaking up such strings is good for translation
 	print -n "$fg[green]$tombname"
 	print -n "$fg[white] open on "
 	print -n "$fg_bold[white]$tombmount"
 	print -n "$fg_no_bold[white] using "
 	print "$fg_bold[white]$tombfs $tombfsopts"
+
+	print -n "$fg_no_bold[green]$tombname"
+	print -n "$fg[white] size "
+	print -n "$fg_bold[white]$tombtot"
+	print -n "$fg_no_bold[white] of which "
+	print -n "$fg_bold[white]$tombused"
+	print -n "$fg_no_bold[white] used "
+	print -n "$fg_bold[white]$tombavail"
+	print -n "$fg_no_bold[white] free ("
+	print -n "$fg_bold[white]$tombpercent"
+	print "$fg_no_bold[white] full)"
+
 	print -n "$fg_no_bold[green]$tombname"
 	print -n "$fg_no_bold[white] open since "
 	print "$fg_bold[white]$tombsince$fg_no_bold[white]"
@@ -1064,9 +1092,10 @@ main () {
 		    return 1
 		 fi
 		 decode_key ${CMD2} ;;
+	# internal commands useful to developers
+       'source') return 0 ;;
 	install) check_priv ; install_tomb ;;
 	askpass) ask_password $CMD2 ;;
-	 status) tomb-status ;;
 	 mktemp) safe_dir ${CMD2} ;;
       translate) generate_translatable_strings ;;
 	      *) error "command \"$CMD\" not recognized"
