@@ -739,7 +739,7 @@ umount_tomb() {
 	    return 1
 	elif [ "$how_many_tombs" = "1" ]; then
 	    #mapper=`find /dev/mapper -name 'tomb.*'`
-	    notice "Closing $tombs"
+	    func "closing mapper $tombs"
 	    umount_tomb ${tombs}
 	    return 1
 	else
@@ -846,7 +846,7 @@ umount_tomb() {
     fi
 
     if [ $tombmount ]; then # tomb is actively mounted
-	act "closing tomb $tombname mounted on $tombmount"
+	func "performing umount of $tombmount"
 	umount ${tombmount} 2> /dev/null
 	if ! [ $? = 0 ]; then
 	    error "Tomb is busy, cannot umount!"
