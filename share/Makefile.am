@@ -37,18 +37,19 @@ install-data-hook:
 	@echo "installing mime type"
 	@install -D $(top_srcdir)/share/dyne-tomb.xml $(DESTDIR)/$(datadir)/mime/packages
 	@if ! [ -n `which xdg-mime` ]; then xdg-mime install dyne-tomb.xml; fi
+	@if ! [ -n `which update-desktop-database` ]; then echo update-desktop-database; update-desktop-database; fi
+	@if ! [ -n `which update-menus` ]; then echo update-menus;  update-menus; fi
+	@if ! [ -n `which update-mime` ]; then echo update-mime; update-mime; fi
 	@echo "installing icons";
-#	@install -D $(top_srcdir)/share/monmort.png $(DESTDIR)/$(datadir)/pixmaps
 	@if ! [ -n `which xdg-icon-resource` ]; then \
 		xdg-icon-resource install --context mimetypes --size 32 \
 			$(top_srcdir)/src/monmort.xpm monmort; \
 		xdg-icon-resource install --size 32 $(top_srcdir)/src/monmort.xpm monmort; fi
-	@if ! [ -n `which update-desktop-database` ]; then echo update-desktop-database; update-desktop-database; fi
-	@if ! [ -n `which update-menus` ]; then echo update-menus;  update-menus; fi
-	@if ! [ -n `which update-mime` ]; then echo update-mime; update-mime; fi
-
-uninstall-hook:
-#	unlink $(DESTDIR)/$(datadir)/pixmaps/monmort.png
+	@mkdir -p $(DESTDIR)/$(datadir)/icons/hicolor/32x32/mimetypes; \
+	 ln -s $(AppInstIcondir)/monmort.png \
+	 $(DESTDIR)/$(datadir)/icons/hicolor/32x32/mimetypes/application-x-tomb-volume.png
+	@if ! [ -n `which update-icon-caches` ]; then \
+		update-icon-caches $(DESTDIR)/$(datadir)/icons/hicolor; fi
 
 distclean:
 	unlink gtkrc
