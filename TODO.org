@@ -56,7 +56,11 @@ Must be 100% backward compatible with tombs created with 1.0
 
 ** Bugs to fix
 
-*** TODO [#A] Should refuse opening a tomb that is already open	    :jaromil:
+*** TODO [#B] Avoid overwriting key on exhume on same filename
+
+
+*** DONE [#A] Should refuse opening a tomb that is already open	    :jaromil:
+
 
 ** New features
 
