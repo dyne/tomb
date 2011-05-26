@@ -28,6 +28,9 @@ if [ "$0" = "./tomb-open" ]; then
 	TOMBEXEC="$PWD/tomb"
 fi
 
+# includes all shell functions in tomb
+source $TOMBEXEC source
+
 try() {
     which ${1} > /dev/null
     if [ $? = 0 ]; then 
@@ -73,8 +76,8 @@ Let's start setting your Crypt?"
 # so that they are configurable when calling tomb.
 ask_usbkey() {
     unset usbkey_mount
-    echo "Waiting 1 minute for a usb key to connect"
-    echo -n " .  please insert your usb key "
+    notice "Waiting 1 minute for a usb key to connect"
+    act -n "please insert your usb key "
     
     tomb-notify "Insert your USB KEY" \
 	"Tomb is waiting 30 seconds for you to insert an external key."
@@ -89,13 +92,13 @@ ask_usbkey() {
 	c=`expr $c + 1`
 	if [ $c -gt 60 ]; then
 	    echo
-	    echo "[!] timeout."
+	    error "timeout."
 	    return 1;
 	fi
     done
 
     echo
-    echo -n " .  usb key inserted, attaching "
+    act -n "usb key inserted, attaching "
     
     c=0
     attached=false
@@ -107,14 +110,14 @@ ask_usbkey() {
 	c=`expr $c + 1`
 	if [ $c -gt 30 ]; then
 	    echo
-	    echo "[!] timeout."
+	    error "[!] timeout."
 	    export usbkey_mount=none
 	    return 1;
 	fi
     done
 
     echo
-    echo -n " .  usb attached, opening "
+    act -n "usb attached, opening "
     
     # get the first partition
 #    usbpart=`dmesg |tail -n 12 | grep '  sd.:' |cut -d: -f2 |tr -d ' '`
@@ -123,7 +126,7 @@ ask_usbkey() {
         if [ -n "$usbpart" ]; then
            break
 	elif [ $i -eq 10 ]; then
-            echo "[!] timeout."
+            error "timeout."
             return 1
         else
             echo -n .
@@ -136,12 +139,12 @@ ask_usbkey() {
     if [ $? = 0 ]; then
 	usbmount=$mtmp
     else
-	echo "[!] cannot mount usbkey partition $usbmount"
+	error "cannot mount usbkey partition $usbmount"
 	return 1
     fi
 
     echo
-    echo " .  usb key mounted on $usbmount"
+    act "usb key mounted on $usbmount"
     usbkey_mount=$usbmount
     return 0
 }
@@ -151,17 +154,22 @@ launch_status() {
     # applet; it takes the tomb name as an argument and should be
     # launched after a successful tomb mount.
     if ! [ $1 ]; then
-	echo "[!] cannot launch status tray applet: we don't even know the name of our tomb."
+	error "cannot launch status tray applet: we don't even know the name of our tomb."
 	exit 1
     fi
 
-    tombname=${1}
-    tombmap=`mount -l | awk "/\[${tombname}\]$/"' { print $1 } '`
-    tombmount=`mount -l | awk "/\[${tombname}\]$/"' { print $3 } '`
-    if [ -x ./tomb-status ]; then # launch from build dir
-	./tomb-status $tombmap $tombname $tombmount &!
-    else
-	tomb-status $tombmap $tombname $tombmount &!
+    if [ $DISPLAY ]; then
+	tombname=${1}
+	tombmap=`mount -l | awk "/\[${tombname}\]$/"' { print $1 } '`
+	tombmount=`mount -l | awk "/\[${tombname}\]$/"' { print $3 } '`
+	if [ -x ./tomb-status ]; then # launch from build dir
+	    ./tomb-status $tombmap $tombname $tombmount &!
+	else
+	    which tomb-status > /dev/null
+	    if [ $? = 0 ]; then
+		tomb-status $tombmap $tombname $tombmount &!
+	    fi
+	fi
     fi
 }
 
@@ -182,24 +190,24 @@ if [ $1 ]; then # is it a file?
 	    else
 		ask_usbkey
 		if ! [ $usbkey_mount ]; then # no usb key was mounted
-		    echo "key not provided for tomb: $tombname"
-		    echo "operation aborted." # TODO: dialog with pinentry
+		    error "key not provided for tomb: $tombname"
+		    error "operation aborted." # TODO: dialog with pinentry
 		    exit 1
 		else # usb mounted, check key presence
 		    if [ -r ${usbkey_mount}/.tomb/${tombname}.tomb.key ]; then
 			tombkey=${usbkey_mount}/.tomb/${tombname}.tomb.key
 		    elif [ -r ${usbkey_mount}/.tomb ]; then
-			echo "we can't find the right key, have a look yourself:"
+			error "we can't find the right key, have a look yourself:"
 			ls -lha ${usbkey_mount}/.tomb
 			exit 1
 		    else
-			echo "there are no keys stored in your usb"
+			error "there are no keys stored in your usb"
 			exit 1
 		    fi
 		fi
 	    fi
 	    if ! [ ${tombkey} ]; then # just to be sure
-		echo "key not found, operation aborted."
+		error "key not found, operation aborted."
 		exit 1
 	    else
 		
@@ -245,8 +253,8 @@ fi
 # no argument but on graphical display: creation dialog
 if [ "$1" != "wizard" ]; then
     if [ -z $DISPLAY ]; then
-	echo "[!] tomb-open is a wrapper for the command 'tomb'"
-	echo "[!] type 'tomb-open wizard' if you want to be guided"
+	error "tomb-open is a wrapper for the command 'tomb'"
+	error "[!] type 'tomb-open wizard' if you want to be guided"
 	"${TOMBEXEC}" -h
 	exit 1
     fi
@@ -259,10 +267,11 @@ if [ -r $HOME/Desktop ]; then
     cd $HOME/Desktop;
 # or inside HOME
 else cd $HOME; fi
-
+notice "Tomb  -  simple commandline tool for encrypted storage"
+act "version $VERSION ($DATE) by Jaromil @ dyne.org"
+echo
+notice "Guided creation of a new Tomb"
 cat <<EOF
-Create a new Tomb
-=================
 
   A Tomb is  a special folder that keeps files  safe using a password:
   it makes use  of strong encryption and helps you keep  the keys on a
@@ -282,24 +291,24 @@ EOF
 echo -n "> "
 read -q
 if [ "$?" != 0 ]; then
-    echo "Operation aborted."
+    error "Operation aborted."
     exit 1
 fi
     # let's proceed
-echo "  Please type in the name for your new tomb file:"
+notice "Please type in the name for your new tomb file:"
 echo -n "> "
 read -u 1 tombname
-echo "  How big you want the Tomb to be?"
-echo "  Type a size number in Megabytes:"
+notice "How big you want the Tomb to be?"
+act "Type a size number in Megabytes:"
 echo -n "> "
 read -u 1 tombsize
 if [[ "$tombsize" != <-> ]]; then
-	echo "Only digit allowed! Operation aborted"
+	error "Only digit allowed! Operation aborted"
 	exit 1
 fi
 clear
-echo "  You have commanded the creation of this Tomb:"
-echo "    $tombname ( $tombsize MBytes )";
+notice "You have commanded the creation of this Tomb:"
+act "$tombname ( $tombsize MBytes )";
 echo
 cat <<EOF
   Please confirm if you want to proceed now:
@@ -316,11 +325,11 @@ cat <<EOF
   Considering 1GB takes usually little less than an hour to be digged.
 
 EOF
-echo "  Digging will take quite some time! Should we start? (y/n)"
+notice "  Digging will take quite some time! Should we start? (y/n)"
 echo -n "> "
 read -q
 if [ $? != 0 ]; then
-    echo "Operation aborted."
+    error "Operation aborted."
     exit 1
 fi
 cat <<EOF
@@ -332,7 +341,7 @@ tombfile=${tombname}.tomb
 "${TOMBEXEC}" -s $tombsize create ${tombfile}
 
 if [ $? != 0 ]; then
-    echo "An error occurred creating tomb, operation aborted."
+    error "An error occurred creating tomb, operation aborted."
     exit 1
 fi
 
@@ -356,8 +365,8 @@ if [ $? = 0 ]; then
 	sudo cp -v ${tombfile}.key ${usbkey_mount}/.tomb/
 	sudo chmod -R go-rwx ${usbkey_mount}/.tomb
 
-	echo "${tombname}.key succesfully saved on your USB"
-	echo "now we'll proceed opening your brand new tomb"
+	notice "${tombname}.key succesfully saved on your USB"
+	act "now we'll proceed opening your brand new tomb"
 
 	"${TOMBEXEC}" -k ${tombfile}.key open ${tombfile}
 	if [ $? = 0 ]; then
