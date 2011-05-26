@@ -64,7 +64,7 @@ knowing the password used in steganography.
 See the [[manual.html][manpage]] for more information on how to operate Tomb from the
 text terminal.
 <example>
-Tomb 1.0 - a strong and gentle undertaker for your secrets
+Tomb 1.1 - a strong and gentle undertaker for your secrets
 
 Syntax: tomb [options] command [file] [place]
 
@@ -197,9 +197,24 @@ Below a list of formats you can download this application: ready to be
 run with some of the interfaces developed, as a library you can use to
 build your own application and as source code you can study.
 
+
+*** Debian and Ubuntu GNU/Linux
+
+Visit our brand new [[http://apt.dyne.org][APT.dyne.org]] repository, there you can tune into
+our software channel via an easy to use installer, so you can always
+stay up to date with our **freshly brewed software, from the upstream
+tap!**
+
+
+
+*** Arch GNU/Linux and derivatives
+
+Tomb is [[https://aur.archlinux.org/packages.php?ID=48257][packaged in AUR]], check it out !
+
+
 *** Source Code
 
-Latest stable release is 1.0 (March 2011), see the [[ftp://ftp.dyne.org/tomb/ChangeLog][ChangeLog]].
+Latest stable release is 1.1 (May 2011), see the [[ftp://ftp.dyne.org/tomb/ChangeLog][ChangeLog]].
 
 Source releases are signed by [[http://jaromil.dyne.org][Jaromil]] using [[http://www.gnupg.org][GnuPG]] and MD5 hashes.
 
@@ -222,40 +237,6 @@ auto-tools build environment giving the command:
 
 and then you can proceed with the usual configure && make mantra, may
 the source be with you.
-
-*** Debian GNU/Linux
-
-To install the tomb and tomb-gtk package using apt, add this line to
-your software sources (/etc/apt/source/list)
-
-<example>
- deb http://apt.dyne.org/debian stable main
-</example>
-
-
-*** Ubuntu GNU/Linux
-
-If you use Lucid (10.04) add to your software sources this PPA
-
-<example>
- ppa:jaromil/rastasoft
-</example>
-
-else if you are using Maverick or other older versions, you can still
-try to install the packages, as they should work well, by adding these
-two sources to /etc/apt/source.list
-
-<example>
-deb http://ppa.launchpad.net/jaromil/rastasoft/ubuntu lucid main
-deb-src http://ppa.launchpad.net/jaromil/rastasoft/ubuntu lucid main
-</example>
-
-Don't forget to add the necessary gnupg key of our repository:
-
-<example>
-gpg --keyserver pgpkeys.mit.edu --recv-key 51A68D7A75FB7217
-gpg -a --export 51A68D7A75FB7217 | sudo apt-key add -
-</example>
 
 
 *** App1e/O$X

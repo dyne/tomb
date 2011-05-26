@@ -1,4 +1,12 @@
-May 2011 - 1.0
+
+May 2011 - 1.1
+	Fixes to mime types, icons and desktop integration. A new 'list'
+	command provides an overview on all tombs currently open. Now a
+	tomb cannot be mounted multiple times, the message console has
+	colors and better messages. Different mount options (like
+	read-only) can also be specified by hand on the commandline.
+
+March 2011 - 1.0
 
 	Clean and stable. Now passwords are handled exclusively using
 	pinentry. Also support for steganography of keys (bury and exhume)

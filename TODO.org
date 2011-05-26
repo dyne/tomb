@@ -64,6 +64,7 @@ Must be 100% backward compatible with tombs created with 1.0
 
 ** New features
 
+*** [#A] system to split keys in parts (ssss)
 *** [#A] use inotify on tomb
 
     inotify can also count when was the last time tomb was used and
@@ -73,8 +74,7 @@ Must be 100% backward compatible with tombs created with 1.0
 *** [#A] udev rules to avoid usb automount of keyplug in gnome
 
 *** [#A] sign and verify tomb script integrity (executed as root)
-
-*** TODO [#B] Internationalization using gettext		    :jaromil:
+*** TODO [#B] Internationalization using gettext 		    :jaromil:
 
     Started generating the strings, still need to figure out how to
     install it
@@ -83,14 +83,12 @@ Must be 100% backward compatible with tombs created with 1.0
 *** [#B] tomb locksmith for key management
     a graphical tool or text wizard to move keys in/out steganography
     as well split them
-*** [#B] system to split keys in parts (ssss)
 
 *** [#B] transport keys and integrity checksums on qrcodes
 
 *** [#B] analyse and show tomb entropy using libdisorder
 
 *** [#B] indeep security analysis of possible vulnerabilities
-
 *** [#C] more gtk dialogs for configurations? keep it minimal!
 
 
