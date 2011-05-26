@@ -47,7 +47,9 @@ install-data-hook:
 		xdg-icon-resource install --size 32 $(top_srcdir)/src/monmort.xpm monmort; fi
 	@mkdir -p $(DESTDIR)/$(datadir)/icons/hicolor/32x32/mimetypes; \
 	 ln -s $(AppInstIcondir)/monmort.png \
-	 $(DESTDIR)/$(datadir)/icons/hicolor/32x32/mimetypes/application-x-tomb-volume.png
+	 	$(DESTDIR)/$(datadir)/icons/hicolor/32x32/mimetypes/application-x-tomb-volume.png
+	 ln -s $(AppInstIcondir)/monmort.png \
+		$(DESTDIR)/$(datadir)/icons/hicolor/32x32/mimetypes/application-x-tomb-key.png
 	@if ! [ -n `which update-icon-caches` ]; then \
 		update-icon-caches $(DESTDIR)/$(datadir)/icons/hicolor; fi
 
