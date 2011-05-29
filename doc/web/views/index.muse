@@ -72,23 +72,21 @@ Commands:
 
  create     create a new tomb FILE and its keys
  open       open an existing tomb FILE on PLACE
- close      closes the tomb open on PLACE
- bury       hide a tomb key FILE inside a jpeg PLACE
- exhume     extract a tomb key FILE from a jpeg PLACE
+ list       list all open tombs or the one called FILE
+ close      close the open tomb called FILE (or all)
+ slam       close tomb FILE and kill all pids using it
 
 Options:
 
  -s     size of the tomb file when creating one (in MB)
  -k     path to the key to use for opening a tomb
  -n     don't process the hooks found in tomb
+ -o     mount options used to open (default: rw,noatime,nodev)
 
  -h     print this help
  -v     version information for this tool
  -q     run quietly without printing informations
  -D     print debugging information at runtime
-
-For more informations on Tomb read the manual: man tomb
-Please report bugs on <http://bugs.dyne.org>.
 </example>
 
 *** Who needs Tomb
@@ -289,8 +287,10 @@ Tomb is designed and written by [[http://jaromil.dyne.org][Jaromil]].
 
 Tomb's artwork is contributed by [[http://monmort.blogspot.com][Món Mort]].
 
-Testing and fixes are contributed by Dreamer, Hellekin O. Wolf,
-Shining, Mancausoft and Asbesto.
+Tomb includes code by Hellekin O. Wolf and Anathema.
+
+Testing and fixes are contributed by Dreamer, Shining, Mancausoft,
+Asbesto and Boyska.
 
 Most research we refer to is documented by Clemens Fruhwirth who also
 developed Cryptsetup together with Christophe Saout.
