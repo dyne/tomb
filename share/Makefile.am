@@ -35,7 +35,7 @@ MimePkg = tomb.mimepkg
 
 install-data-hook:
 	@echo "installing mime type"
-	@install -D $(top_srcdir)/share/dyne-tomb.xml $(DESTDIR)/$(datadir)/mime/packages
+	@install -D $(top_srcdir)/share/dyne-tomb.xml $(DESTDIR)/$(datadir)/mime/packages/dyne-tomb.xml
 	@if ! [ -n `which xdg-mime` ]; then xdg-mime install dyne-tomb.xml; fi
 	@if ! [ -n `which update-desktop-database` ]; then echo update-desktop-database; update-desktop-database; fi
 	@if ! [ -n `which update-menus` ]; then echo update-menus;  update-menus; fi
