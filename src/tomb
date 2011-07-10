@@ -124,6 +124,23 @@ safe_dir() {
     print "$dir"
 }
 
+#check if there is swap activated
+check_swap() {
+    # Return 0 if NO swap is used, 1 if swap is used
+    # TODO: it should return 2 if swap is used, but encrypted
+    nlines=$(wc -l /proc/swaps|cut -f1 -d ' ')
+    if [[ $nlines -gt 1 ]]; then
+        r=1
+    else
+        #and return 2
+        r=0
+    fi
+    if [[ $1 == out ]]; then
+        echo $r;
+    fi
+    return $r;
+}
+
 # we use pinentry now
 # comes from gpg project and is much more secure
 # it also conveniently uses the right toolkit
@@ -319,6 +336,12 @@ EOF
 }
 
 create_tomb() {
+    if [[ `check_swap out` == 1 && `option_is_set "--ignore-swap" out` == 'set' ]]; then
+        error "You have swap activated; use --ignore-swap if you want to skip this check"
+        act "Using encryption with swap activated is very bad, because some files, or even your secret key, could be written on hard disk."
+        act "However, it could be that your swap is encrypted. If this is case, this is ok. Then, use --ignore-swap to skip this check"
+        exit 1
+    fi
     if ! [ ${CMD2} ]; then
         error "no tomb name specified for creation"
         return 1
@@ -482,6 +505,16 @@ create_tomb() {
 
 mount_tomb() {
     notice "Commanded to open tomb $CMD2"
+    if [[ `check_swap out` == 1 && `option_is_set "--ignore-swap" out` == 'set' ]]; then
+        error "You have swap activated; use --ignore-swap if you want to skip this check"
+        act "Using encryption with swap activated is very bad, because some files, or even your secret key, could be written on hard disk."
+        act "However, it could be that your swap is encrypted. If this is case, this is ok. Then, use --ignore-swap to skip this check"
+        exit 1
+    fi
+    if ! [ ${CMD2} ]; then
+        error "no tomb name specified for creation"
+        return 1
+    fi
     get_arg_tomb $CMD2
     local tombkey
     if option_is_set -k ; then
@@ -1163,9 +1196,9 @@ main() {
     #               (it will say "option defined more than once, and he's right)
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v)
     subcommands_opts[__default]=""
-    subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o"
+    subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o -ignore-swap"
     subcommands_opts[mount]=${subcommands_opts[open]}
-    subcommands_opts[create]="s: -size=s"
+    subcommands_opts[create]="s: -size=s -ignore-swap"
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
