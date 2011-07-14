@@ -24,8 +24,15 @@ VERSION=1.1
 DATE=May/2011
 TOMBEXEC=$0
 TOMBOPENEXEC="tomb-open"
+OLDARGS=$*
 STEGHIDE=1
 MOUNTOPTS="rw,noatime,nodev"
+
+#declare global variables
+QUIET=0
+DEBUG=0
+typeset -A global_opts
+typeset -A opts
 
 # PATH=/usr/bin:/usr/sbin:/bin:/sbin
 
@@ -33,11 +40,11 @@ autoload colors; colors
 
 # standard output message routines
 # it's always useful to wrap them, in case we change behaviour later
-notice() { if ! [ $QUIET ]; then print "$fg_bold[green][*]$fg_no_bold[white] $1" >&2; fi }
-error()  { if ! [ $QUIET ]; then print "$fg[red][!]$fg[white] $1" >&2; fi }
-func()   { if [ $DEBUG ]; then   print "$fg[blue][D]$fg[white] $1" >&2; fi }
+notice() { if [[ $QUIET == 0 ]]; then print "$fg_bold[green][*]$fg_no_bold[white] $1" >&2; fi }
+error()  { if [[ $QUIET == 0 ]]; then print "$fg[red][!]$fg[white] $1" >&2; fi }
+func()   { if [[ $DEBUG == 1 ]]; then   print "$fg[blue][D]$fg[white] $1" >&2; fi }
 act()    {
-    if ! [ $QUIET ]; then
+    if [[ $QUIET == 0 ]]; then
 	if [ "$1" = "-n" ]; then
 	    print -n "$fg_bold[white] . $fg_no_bold[white] $2" >&2;
 	else
@@ -156,7 +163,7 @@ exec_as_user() {
 # escalate privileges
 check_priv() {
     if [ $UID != 0 ]; then
-	func "Using sudo for root execution of 'tomb ${(f)ARGS}'"
+	func "Using sudo for root execution of 'tomb ${(f)OLDARGS}'"
 	# check if sudo has a timestamp active
 	sudok=false
 	sudo -n ${TOMBEXEC} 2> /dev/null
@@ -165,12 +172,12 @@ check_priv() {
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE Super user privileges required
-SETDESC Sudo execution of Tomb ${ARGS[@]}
+SETDESC Sudo execution of Tomb ${OLDARGS[@]}
 SETPROMPT Insert your USER password:
 GETPIN
 EOF
 	fi
-	sudo "${TOMBEXEC}" ${(s: :)ARGS}
+	sudo "${TOMBEXEC}" ${(s: :)OLDARGS}
 	exit $?
     fi # are we root already
     return 0
@@ -312,8 +319,8 @@ EOF
 
 create_tomb() {
     if ! [ ${CMD2} ]; then
-	error "no tomb name specified for creation"
-	return 1
+        error "no tomb name specified for creation"
+        return 1
     fi
 
     tombfile=`basename ${CMD2}`
@@ -321,6 +328,7 @@ create_tomb() {
     # make sure the file has a .tomb extension
     tombname=${tombfile%%\.*}
     tombfile=${tombname}.tomb
+	tombsize=$opts[-s]
 
     if [ -e ${tombdir}/${tombfile} ]; then
 	    error "tomb exists already. I'm not digging here:"
@@ -336,17 +344,11 @@ create_tomb() {
 
     notice "Creating a new tomb in ${tombdir}/${tombfile}"
 
-    if [ -z $SIZE ]; then
-	if [ $CMD3 ]; then
-	    tombsize=${CMD3}
-	else
-	    act "No size specified, summoning the Tomb Undertaker to guide us in the creation."
-	    "$TOMBOPENEXEC" &
-	    wait $!
-	    return 0
-	fi
-    else
-	tombsize=${SIZE}
+    if [ -z $tombsize ]; then
+        act "No size specified, summoning the Tomb Undertaker to guide us in the creation."
+        "$TOMBOPENEXEC" &
+        wait $!
+        return 0
     fi
 
     tombsize_4k=`expr $tombsize \* 1024 / 4`
@@ -481,37 +483,37 @@ mount_tomb() {
     notice "Commanded to open tomb $CMD2"
     get_arg_tomb $CMD2
     if [ $? != 0 ]; then
-	error "operation aborted."
-	return 1
+        error "operation aborted."
+        return 1
     fi
 
     if ! [ $CMD3 ]; then
-	tombmount=/media/${tombfile}
-	act "mountpoint not specified, using default: $tombmount"
+        tombmount=/media/${tombfile}
+        act "mountpoint not specified, using default: $tombmount"
     elif ! [ -x $CMD3 ]; then
-	error "mountpoint $CMD3 doesn't exist, operation aborted."
-	if [ -n "$usbkey_mount" ]; then
-	    umount $usbkey_mount
-	    rmdir  $usbkey_mount
-	    unset usbkey_mount
-	fi
-	return 1
+        error "mountpoint $CMD3 doesn't exist, operation aborted."
+        if [ -n "$usbkey_mount" ]; then
+            umount $usbkey_mount
+            rmdir  $usbkey_mount
+            unset usbkey_mount
+        fi
+        return 1
     else
-	tombmount=$CMD3
+        tombmount=$CMD3
     fi
 
     # check if its already open
     mount -l | grep "${tombname}.tomb.*\[$tombname\]$" 2>&1 > /dev/null
     if [ $? = 0 ]; then
-	error "$tombname is already mounted on $tombmount"
-	act "tomb list - show all tombs currently open"
-	if [ -n "$usbkey_mount" ]; then
-	    umount $usbkey_mount
-	    rmdir  $usbkey_mount
-	    unset usbkey_mount
-	fi
-	error "operation aborted."
-	return 1
+        error "$tombname is already mounted on $tombmount"
+        act "tomb list - show all tombs currently open"
+        if [ -n "$usbkey_mount" ]; then
+            umount $usbkey_mount
+            rmdir  $usbkey_mount
+            unset usbkey_mount
+        fi
+        error "operation aborted."
+        return 1
     fi
 
     notice "mounting $tombfile on mountpoint $tombmount"
@@ -522,18 +524,18 @@ mount_tomb() {
 
     nstloop=`losetup -f`
     if [ $? = 255 ]; then
-	error "too many tomb opened. Please close any of them to open another tomb"
-	exit 1
+        error "too many tomb opened. Please close any of them to open another tomb"
+        exit 1
     fi
     losetup -f ${tombdir}/${tombfile}
 
     act "check for a valid LUKS encrypted device"
     cryptsetup isLuks ${nstloop}
     if [ $? != 0 ]; then
-	# is it a LUKS encrypted nest? see cryptsetup(1)
-	error "$tombfile is not a valid Luks encrypted storage file"
-	$norm || rmdir $tombmount 2>/dev/null
-	return 1
+        # is it a LUKS encrypted nest? see cryptsetup(1)
+        error "$tombfile is not a valid Luks encrypted storage file"
+        $norm || rmdir $tombmount 2>/dev/null
+        return 1
     fi
 
     # save date of mount in minutes since 1970
@@ -562,10 +564,10 @@ mount_tomb() {
     done
 
     if ! [ -r /dev/mapper/${mapper} ]; then
-	error "failure mounting the encrypted file"
-	losetup -d ${nstloop}
-	$norm || rmdir ${tombmount} 2>/dev/null
-	return 1
+        error "failure mounting the encrypted file"
+        losetup -d ${nstloop}
+        $norm || rmdir ${tombmount} 2>/dev/null
+        return 1
     fi
 
     act "encrypted storage filesystem check"
@@ -582,8 +584,8 @@ mount_tomb() {
 
     notice "encrypted storage $tombfile succesfully mounted on $tombmount"
     if ! [ $NOBIND ]; then
-	exec_safe_bind_hooks ${tombmount}
-	exec_safe_post_hooks ${tombmount} open
+        exec_safe_bind_hooks ${tombmount}
+        exec_safe_post_hooks ${tombmount} open
     fi
     return 0
 }
@@ -689,6 +691,9 @@ print "-----END PGP MESSAGE-----"
 }
 
 exec_safe_bind_hooks() {
+    if [[ -n ${(k)opts[-o]} ]]; then
+        MOUNTOPTS=${opts[-o]}
+    fi
   local MOUNTPOINT="${1}"
   local ME=${SUDO_USER:-$(whoami)}
   local HOME=$(grep $ME /etc/passwd | sed "s/^${ME}:.*:.*:.*:.*:\([\/a-z]*\):.*$/\1/" 2>/dev/null)
@@ -1062,52 +1067,91 @@ EOF
 }
 
 main () {
-    echo $@ | grep '\-D' 2>&1 > /dev/null
-    # ?????
-    if [ $? = 0 ]; then
+  main_opts=(q -quiet=q D -debug=D h -help=h v -verbose=v)
+  typeset -A subcommands_opts
+  subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o"
+  subcommands_opts[create]="s: -size=s"
+  subcommands_opts[close]=""
+  subcommands_opts[help]=""
+
+  ### Parsing global options (wherever they are)
+  zparseopts -M -E -D -Aglobal_opts $main_opts
+  if [[ -n ${(k)global_opts[-h]} ]]; then # -h is set
+	usage
+	exit 0
+  fi
+
+  if [[ $? != 0 ]]; then
+	error Some error occurred during option processing. See tomb help for more info
+	exit 127
+  fi
+  typeset -a pars
+  set -A pars $*
+  typeset -g subcommand
+  subcommand=''
+  for arg in $*; do
+	if [[ $arg[1] != '-' ]]; then
+	  subcommand=$arg
+	  valid=0
+      if [[ -z ${(k)subcommands_opts[$subcommand]} ]]; then #command not set
+		echo "Subcommand $subcommand is not valid; see tomb help"
+		exit 126
+	  fi
+	  pars[${(k)*[(r)$arg]}]=()
+	  break
+	fi
+  done
+  set -- $pars
+    if [[ -z $subcommand ]]; then
+        error You have to specify some subcommand
+        exit 126
     fi
+  ### End global options
 
-    ARGS=$@[@]
 
-    OPTS=`getopt -o hvqDs:k:no: -n 'tomb' -- "$@"`
-    while true; do
-	case "$1" in
-	      -h)
-		usage
-		exit 0 ;;
-	      -v)
-		notice "Tomb  -  simple commandline tool for encrypted storage"
-		act "version $VERSION ($DATE) by Jaromil @ dyne.org"
-		# print out the GPL license in this file
-		act ""
-		cat ${TOMBEXEC} | awk 'BEGIN { license=0 } /^# This source/  { license=1 } { if(license==1) print " " $0 }
-/MA 02139, USA.$/ { license=0 }'
-		act ""
-		exit 0 ;;
-	      -q) QUIET=1; shift 1 ;;
-	      -D)
-		print "[D] Tomb invoked with args \"${(f)@}\" "
-		print "[D] running on `date`"
-		DEBUG=1; shift 1 ;;
-	      -s) SIZE=$2; shift 2 ;;
-	      -k) KEY=$2; shift 2 ;;
-	      -n) NOBIND=1; shift 1 ;;
-	      -o) MOUNTOPTS=$2; shift 2;;
-	      --) shift; break ;;
-	       *) CMD=$1;
-		  FILE=$2; MOUNT=$3; # compat with old args
-		  CMD2=${2}; CMD3=${3}; break ;;
-	esac
-    done
+  ### Parsing command-specific options
+  # zsh magic: ${=string} will split to multiple arguments when spaces occur
+  set -A cmd_opts ${=subcommands_opts[$subcommand]}
+  if [[ -n $cmd_opts ]]; then
+        zparseopts -M -E -D -Aopts ${cmd_opts}
+	if [[ $? != 0 ]]; then
+	  error "Some error occurred during option processing. See \"tomb help\" for more info"
+	  exit 127
+	fi
+  fi
+  #build PARAM (array of arguments) and check if there are unrecognized options
+  ok=0
+  PARAM=()
+  for arg in $*; do
+	if [[ $arg == '--' || $arg == '-' ]]; then
+	  ok=1
+	  continue #it shouldnt be appended to PARAM
+	elif [[ $arg[1] == '-'  ]]; then
+	  if [[ $ok == 0 ]]; then
+		echo ERROR: unrecognized option $arg >&2
+		exit 127
+	  fi
+	fi
+	PARAM+=$arg
+  done
+  ### End parsing command-specific options
 
-    if ! [ $CMD ]; then
-       error "first argument missing, use -h for help"
-       exit 0
-    fi
+  ### Set global options (useless, but for code retro-compatibility)
+  for opt in ${(k)global_opts}; do
+	if [[ $opt == '-q' ]]; then
+	  QUIET=1
+	elif [[ $opt == '-D' ]]; then
+        DEBUG=1
+	fi
+  done
+
+  CMD=$subcommand
+  CMD2=$PARAM[1]
+  CMD3=$PARAM[2]
 
     func "Tomb command: $CMD $CMD2 $CMD3"
 
-    case "$CMD" in
+    case "$subcommand" in
 	 create) check_priv ; create_tomb ;;
 	  mount) check_priv ; mount_tomb  ;;
 	   open) check_priv ; mount_tomb  ;;
