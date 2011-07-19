@@ -1067,13 +1067,24 @@ EOF
 }
 
 main () {
-  main_opts=(q -quiet=q D -debug=D h -help=h v -verbose=v)
-  typeset -A subcommands_opts
-  subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o"
-  subcommands_opts[create]="s: -size=s"
-  subcommands_opts[close]=""
-  subcommands_opts[help]=""
-
+    typeset -A subcommands_opts
+    ### Options configuration
+    main_opts=(q -quiet=q D -debug=D h -help=h v -verbose=v)
+    subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o"
+    subcommand_opts[mount]=subcommand_opts[open]
+    subcommands_opts[create]="s: -size=s"
+    subcommands_opts[close]=""
+    subcommands_opts[help]=""
+    subcommand_opts[slam]=""
+    subcommand_opts[list]=""
+    subcommand_opts[help]=""
+    subcommand_opts[bury]=""
+    subcommand_opts[exhume]=""
+    subcommand_opts[decompose]=""
+    subcommand_opts[recompose]=""
+    subcommand_opts[install]=""
+    subcommand_opts[askpass]=""
+    subcommand_opts[mktemp]=""
   ### Parsing global options (wherever they are)
   zparseopts -M -E -D -Aglobal_opts $main_opts
   if [[ -n ${(k)global_opts[-h]} ]]; then # -h is set
