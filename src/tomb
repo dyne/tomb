@@ -1066,64 +1066,58 @@ EOF
     act "Tomb is now installed."
 }
 
-main () {
-    typeset -A subcommands_opts
+main() {
+    local -A subcommands_opts
     ### Options configuration
+    #Hi, dear developer! Are you trying to add a new subcommand, or to add some options?
+    #Well, keep in mind that:
+    # 1. An option CAN'T have differente meanings/behaviour in different subcommands.
+    #    For example, "-s" means "size" and accept an argument. If you are tempted to add
+    #    an option "-s" (that means, for example "silent", and doesn't accept an argument)
+    #              DON'T DO IT!
+    #     There are two reasons for that:
+    #       I. usability; user expect that "-s" is "size
+    #       II. Option parsing WILL EXPLODE if you do this kind of bad things
+    #               (it will say "option defined more than once, and he's right)
     main_opts=(q -quiet=q D -debug=D h -help=h v -verbose=v)
     subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o"
     subcommands_opts[mount]=${subcommands_opts[open]}
     subcommands_opts[create]="s: -size=s"
     subcommands_opts[close]=""
     subcommands_opts[help]=""
-    subcommand_opts[slam]=""
-    subcommand_opts[list]=""
-    subcommand_opts[help]=""
-    subcommand_opts[bury]=""
-    subcommand_opts[exhume]=""
-    subcommand_opts[decompose]=""
-    subcommand_opts[recompose]=""
-    subcommand_opts[install]=""
-    subcommand_opts[askpass]=""
-    subcommand_opts[mktemp]=""
-  ### Parsing global options (wherever they are)
-  zparseopts -M -E -D -Aglobal_opts $main_opts
-  if [[ -n ${(k)global_opts[-h]} ]]; then # -h is set
-	usage
-	exit 0
-  fi
-
-  if [[ $? != 0 ]]; then
-	error Some error occurred during option processing. See tomb help for more info
-	exit 127
-  fi
-  typeset -a pars
-  set -A pars $*
-  typeset -g subcommand
-  subcommand=''
-  for arg in $*; do
-	if [[ $arg[1] != '-' ]]; then
-	  subcommand=$arg
-	  valid=0
-      if [[ -z ${(k)subcommands_opts[$subcommand]} ]]; then #command not set
-		echo "Subcommand $subcommand is not valid; see tomb help"
-		exit 126
-	  fi
-	  pars[${(k)*[(r)$arg]}]=()
-	  break
-	fi
-  done
-  set -- $pars
-    if [[ -z $subcommand ]]; then
-        error You have to specify some subcommand
-        exit 126
+    subcommands_opts[slam]=""
+    subcommands_opts[list]=""
+    subcommands_opts[help]=""
+    subcommands_opts[bury]=""
+    subcommands_opts[exhume]=""
+    subcommands_opts[decompose]=""
+    subcommands_opts[recompose]=""
+    subcommands_opts[install]=""
+    subcommands_opts[askpass]=""
+    subcommands_opts[mktemp]=""
+    ### Detect subcommand
+    local -aU every_opts #every_opts behave like a set; that is, an array with unique elements
+    for optspec in $subcommands_opts$main_opts; do
+        for opt in ${=optspec}; do
+            every_opts+=${opt}
+        done
+    done
+    local -a oldstar
+    oldstar=($argv)
+    zparseopts -M -E -D -Adiscardme ${every_opts}
+    unset discardme
+    subcommand=$1
+    if [[ -z ${(k)subcommands_opts[$subcommand]} ]]; then #there's no such subcommand
+        error "Subcommand '$subcommand' doesn't exist"
+        exit 127
     fi
-  ### End global options
+    argv=(${oldstar})
+    unset oldstar
 
-
-  ### Parsing command-specific options
+  ### Parsing global + command-specific options
   # zsh magic: ${=string} will split to multiple arguments when spaces occur
-  set -A cmd_opts ${=subcommands_opts[$subcommand]}
-  if [[ -n $cmd_opts ]]; then
+  set -A cmd_opts ${main_opts} ${=subcommands_opts[$subcommand]}
+  if [[ -n $cmd_opts ]]; then #if there is no option, we don't need parsing
         zparseopts -M -E -D -Aopts ${cmd_opts}
 	if [[ $? != 0 ]]; then
 	  error "Some error occurred during option processing. See \"tomb help\" for more info"
@@ -1139,7 +1133,7 @@ main () {
 	  continue #it shouldnt be appended to PARAM
 	elif [[ $arg[1] == '-'  ]]; then
 	  if [[ $ok == 0 ]]; then
-		echo ERROR: unrecognized option $arg >&2
+		error "unrecognized option $arg"
 		exit 127
 	  fi
 	fi
