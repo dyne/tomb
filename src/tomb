@@ -1139,6 +1139,9 @@ main() {
 	fi
 	PARAM+=$arg
   done
+  #first parameter actually is the subcommand: delete it and shift
+  PARAM[1]=()
+  shift
   ### End parsing command-specific options
 
   ### Set global options (useless, but for code retro-compatibility)
