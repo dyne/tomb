@@ -311,10 +311,16 @@ create_tomb() {
     tombfile=${tombname}.tomb
 
     if [ -e ${tombdir}/${tombfile} ]; then
-	error "tomb exists already. I'm not digging here:"
-	ls -lh ${tombdir}/${tombfile}
-	return 1
+	    error "tomb exists already. I'm not digging here:"
+	    ls -lh ${tombdir}/${tombfile}
+	    return 1
     fi
+
+	if [ -e ${tombdir}/${tombfile}.key ]; then
+        error "tomb key already exists. Quitting"
+        ls -lh ${tombdir}/${tombfile}.key
+        return 1
+	fi
 
     notice "Creating a new tomb in ${tombdir}/${tombfile}"
 
@@ -404,17 +410,10 @@ create_tomb() {
 	exit 1
     fi
 
-	local tombkey="${tombdir}/${tombname}.tomb.key"
-	local rnd=$RANDOM
-	if [ -e "${tomkey}" ]; then
-		notice "Key file ${tombkey} already exists!"
-		notice "Renaming to ${tombdir}/${tombname}.tomb.$rnd.key"
-		tombkey="${tombdir}/${tombname}.tomb.$rnd.key"
-	fi
 
     print "${tombpass}" | gpg \
 	--openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
-	-o "${tombkey}" -c -a ${keytmp}/tomb.tmp
+	-o "${tombdir}/${tombname}.tomb.key" -c -a ${keytmp}/tomb.tmp
 
     # if [ $? != 0 ]; then
     # 	error "setting password failed: gnupg returns 2"
