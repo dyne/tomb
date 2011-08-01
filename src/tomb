@@ -84,6 +84,18 @@ check_bin() {
 	STEGHIDE=0
     fi
 
+    which cryptsetup > /dev/null
+    if [ $? != 0 ]; then
+        error "Cannot find cryptsetup. Please install it."
+        exit 1
+    fi
+
+    which pinentry > /dev/null
+    if [ $? != 0 ]; then
+        error "Cannot find pinentry. Please install it."
+        exit 1
+    fi
+ 
     # check for tomb-open script
     if [ "$0" = "./tomb" ]; then
 	TOMBOPENEXEC="./tomb-open"
