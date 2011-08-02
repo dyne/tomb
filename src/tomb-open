@@ -211,7 +211,7 @@ if [ $1 ]; then # is it a file?
 		exit 1
 	    else
 		
-		"${TOMBEXEC}" -k ${tombkey} mount ${tombdir}/${tombfile}
+		"${TOMBEXEC}" mount -k ${tombkey} ${tombdir}/${tombfile}
 		success=$?
 	    fi
 
@@ -255,7 +255,7 @@ if [ "$1" != "wizard" ]; then
     if [ -z $DISPLAY ]; then
 	error "tomb-open is a wrapper for the command 'tomb'"
 	error "[!] type 'tomb-open wizard' if you want to be guided"
-	"${TOMBEXEC}" -h
+	"${TOMBEXEC}" help
 	exit 1
     fi
 fi
@@ -338,7 +338,7 @@ cat <<EOF
 EOF
 
 tombfile=${tombname}.tomb
-"${TOMBEXEC}" -s $tombsize create ${tombfile}
+"${TOMBEXEC}" create -s $tombsize ${tombfile}
 
 if [ $? != 0 ]; then
     error "An error occurred creating tomb, operation aborted."
@@ -368,7 +368,7 @@ if [ $? = 0 ]; then
 	notice "${tombname}.key succesfully saved on your USB"
 	act "now we'll proceed opening your brand new tomb"
 
-	"${TOMBEXEC}" -k ${tombfile}.key open ${tombfile}
+	"${TOMBEXEC}" open -k ${tombfile}.key ${tombfile}
 	if [ $? = 0 ]; then
 	    launch_status ${tombname}
 	fi
@@ -392,7 +392,7 @@ cat <<EOF
 
 EOF
 
-"${TOMBEXEC}" -k ${tombname}.tomb.key open ${tombfile}
+"${TOMBEXEC}" open -k ${tombname}.tomb.key ${tombfile}
 if [ $? = 0 ]; then
     launch_status ${tombname}
 fi
