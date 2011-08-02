@@ -24,7 +24,8 @@ VERSION=1.1
 DATE=May/2011
 TOMBEXEC=$0
 TOMBOPENEXEC="tomb-open"
-OLDARGS=$*
+typeset -a OLDARGS
+for arg in ${argv}; do OLDARGS+=($arg); done
 STEGHIDE=1
 MOUNTOPTS="rw,noatime,nodev"
 
@@ -177,7 +178,7 @@ SETPROMPT Insert your USER password:
 GETPIN
 EOF
 	fi
-	sudo "${TOMBEXEC}" ${(s: :)OLDARGS}
+	sudo "${TOMBEXEC}" "${(@)OLDARGS}"
 	exit $?
     fi # are we root already
     return 0
@@ -482,6 +483,13 @@ create_tomb() {
 mount_tomb() {
     notice "Commanded to open tomb $CMD2"
     get_arg_tomb $CMD2
+    local tombkey
+    if option_is_set -k ; then
+        tombkey=`option_value -k`
+    else
+        tombkey="${PARAM[1]}.key"
+    fi
+    echo the key used is $tombkey
     if [ $? != 0 ]; then
         error "operation aborted."
         return 1
@@ -1064,6 +1072,27 @@ tomb
 	 mime-types=application/x-tomb-volume,application/x-tomb-key
 EOF
     act "Tomb is now installed."
+}
+
+option_is_set() {
+    #First argument, the option (something like "-s")
+    #Second (optional) argument: if it's "out", command will print it out 'set'/'unset'
+    #                       This is useful for if conditions
+    #Return 0 if is set, 1 otherwise
+    [[ -n ${(k)opts[$1]} ]];
+    r=$?
+    if [[ $2 == out ]]; then
+        if [[ $r == 0 ]]; then
+            echo 'set'
+        else
+            echo 'unset'
+        fi
+    fi
+    return $r;
+}
+option_value() {
+    #First argument, the option (something like "-s")
+    echo ${opts[$1]}
 }
 
 main() {
