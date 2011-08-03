@@ -481,37 +481,37 @@ mount_tomb() {
     notice "Commanded to open tomb $CMD2"
     get_arg_tomb $CMD2
     if [ $? != 0 ]; then
-	error "operation aborted."
-	return 1
+	    error "operation aborted."
+	    return 1
     fi
 
     if ! [ $CMD3 ]; then
-	tombmount=/media/${tombfile}
-	act "mountpoint not specified, using default: $tombmount"
+	    tombmount=/media/${tombfile}
+	    act "mountpoint not specified, using default: $tombmount"
     elif ! [ -x $CMD3 ]; then
-	error "mountpoint $CMD3 doesn't exist, operation aborted."
-	if [ -n "$usbkey_mount" ]; then
-	    umount $usbkey_mount
-	    rmdir  $usbkey_mount
-	    unset usbkey_mount
-	fi
-	return 1
+	    error "mountpoint $CMD3 doesn't exist, operation aborted."
+	    if [ -n "$usbkey_mount" ]; then
+	        umount $usbkey_mount
+	        rmdir  $usbkey_mount
+	        unset usbkey_mount
+	    fi
+	    return 1
     else
-	tombmount=$CMD3
+	    tombmount=$CMD3
     fi
 
     # check if its already open
     mount -l | grep "${tombname}.tomb.*\[$tombname\]$" 2>&1 > /dev/null
     if [ $? = 0 ]; then
-	error "$tombname is already mounted on $tombmount"
-	act "tomb list - show all tombs currently open"
-	if [ -n "$usbkey_mount" ]; then
-	    umount $usbkey_mount
-	    rmdir  $usbkey_mount
-	    unset usbkey_mount
-	fi
-	error "operation aborted."
-	return 1
+	    error "$tombname is already mounted on $tombmount"
+	    act "tomb list - show all tombs currently open"
+	    if [ -n "$usbkey_mount" ]; then
+	        umount $usbkey_mount
+	        rmdir  $usbkey_mount
+	        unset usbkey_mount
+	    fi
+	    error "operation aborted."
+	    return 1
     fi
 
     notice "mounting $tombfile on mountpoint $tombmount"
@@ -522,18 +522,18 @@ mount_tomb() {
 
     nstloop=`losetup -f`
     if [ $? = 255 ]; then
-	error "too many tomb opened. Please close any of them to open another tomb"
-	exit 1
+	    error "too many tomb opened. Please close any of them to open another tomb"
+	    exit 1
     fi
     losetup -f ${tombdir}/${tombfile}
 
     act "check for a valid LUKS encrypted device"
     cryptsetup isLuks ${nstloop}
     if [ $? != 0 ]; then
-	# is it a LUKS encrypted nest? see cryptsetup(1)
-	error "$tombfile is not a valid Luks encrypted storage file"
-	$norm || rmdir $tombmount 2>/dev/null
-	return 1
+	    # is it a LUKS encrypted nest? see cryptsetup(1)
+	    error "$tombfile is not a valid Luks encrypted storage file"
+	    $norm || rmdir $tombmount 2>/dev/null
+	    return 1
     fi
 
     # save date of mount in minutes since 1970
@@ -544,28 +544,28 @@ mount_tomb() {
 
     notice "Password is required for key ${keyname}"
     for c in 1 2 3; do
-	if [ $c = 1 ]; then
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass ${keyname}`
-	else
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "$keyname (retry $c)"`
-	fi
-	print "${tombpass}" \
-	    | gpg --batch --passphrase-fd 0 --no-tty --no-options \
-		  -d "${tombkey}" 2> /dev/null \
-	    | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+	    if [ $c = 1 ]; then
+	        tombpass=`exec_as_user ${TOMBEXEC} askpass ${keyname}`
+	    else
+	        tombpass=`exec_as_user ${TOMBEXEC} askpass "$keyname (retry $c)"`
+	    fi
+	    print "${tombpass}" \
+	        | gpg --batch --passphrase-fd 0 --no-tty --no-options \
+		    -d "${tombkey}" 2> /dev/null \
+	        | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 
-	unset tombpass
+	    unset tombpass
 
-	if [ -r /dev/mapper/${mapper} ]; then
-	    break;  # password was correct
-	fi
+	    if [ -r /dev/mapper/${mapper} ]; then
+	        break;  # password was correct
+	    fi
     done
 
     if ! [ -r /dev/mapper/${mapper} ]; then
-	error "failure mounting the encrypted file"
-	losetup -d ${nstloop}
-	$norm || rmdir ${tombmount} 2>/dev/null
-	return 1
+	    error "failure mounting the encrypted file"
+	    losetup -d ${nstloop}
+	    $norm || rmdir ${tombmount} 2>/dev/null
+	    return 1
     fi
 
     act "encrypted storage filesystem check"
@@ -580,10 +580,11 @@ mount_tomb() {
     chmod 0750 ${tombmount}
     chown $(id -u $ME):$(id -g $ME) ${tombmount}
 
+    list_tombs "${tombname}"
     notice "encrypted storage $tombfile succesfully mounted on $tombmount"
     if ! [ $NOBIND ]; then
-	exec_safe_bind_hooks ${tombmount}
-	exec_safe_post_hooks ${tombmount} open
+	    exec_safe_bind_hooks ${tombmount}
+	    exec_safe_post_hooks ${tombmount} open
     fi
     return 0
 }
@@ -894,14 +895,20 @@ umount_tomb() {
 
 # list all tombs mounted in a readable format
 list_tombs() {
+    local mounted_tombs tombname tombmount
+    local tombfs tombfsopt tombtot
+    local tombused tombavail tombpercent
+    local tombp tombsince 
+    local mapper mtomb mount_hooks 
+
     if [ $1 ]; then
-	# list a specific tomb
-	mounted_tombs=`mount -l |
-    awk -vtomb="[$1]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
+	    # list a specific tomb
+	    mounted_tombs=`mount -l |
+        awk -vtomb="[$1]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
     else
-	# list all open tombs
-	mounted_tombs=`mount -l |
-    awk '/^\/dev\/mapper\/tomb/ { print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
+	    # list all open tombs
+	    mounted_tombs=`mount -l |
+        awk '/^\/dev\/mapper\/tomb/ { print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
     fi
     # 1 = full mapper path
     # 2 = mountpont
@@ -934,7 +941,7 @@ list_tombs() {
 	tombused=${ts[(ws:;:)2]}
 	tombavail=${ts[(ws:;:)3]}
 	tombpercent=${ts[(ws:;:)4]}
-
+    tombp=${tombpercent%%%}
 	tombsince=`date --date=@${mapper[(ws:.:)3]} +%c`
 
 	# breaking up such strings is good for translation
@@ -954,7 +961,9 @@ list_tombs() {
 	print -n "$fg_no_bold[white] free ("
 	print -n "$fg_bold[white]$tombpercent"
 	print "$fg_no_bold[white] full)"
-
+    if [[ ${tombp} -ge 90 ]]; then
+         error "your tomb is almost full!"
+    fi
 	print -n "$fg_no_bold[green]$tombname"
 	print -n "$fg_no_bold[white] open since "
 	print "$fg_bold[white]$tombsince$fg_no_bold[white]"
