@@ -965,7 +965,7 @@ umount_tomb() {
     if [ $tombmount ]; then # tomb is actively mounted
 	func "performing umount of $tombmount"
 	umount ${tombmount} 2> /dev/null
-    rm -r ${tombmount}
+    rmdir ${tombmount}
 	if ! [ $? = 0 ]; then
 	    error "Tomb is busy, cannot umount!"
 	fi
