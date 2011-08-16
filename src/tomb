@@ -1108,7 +1108,7 @@ main() {
     #       I. usability; user expect that "-s" is "size
     #       II. Option parsing WILL EXPLODE if you do this kind of bad things
     #               (it will say "option defined more than once, and he's right)
-    main_opts=(q -quiet=q D -debug=D h -help=h v -verbose=v)
+    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v)
     subcommands_opts[__default]=""
     subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o"
     subcommands_opts[mount]=${subcommands_opts[open]}
@@ -1219,7 +1219,12 @@ main() {
 	askpass) ask_password $CMD2 ;;
 	 mktemp) safe_dir ${CMD2} ;;
       translate) generate_translatable_strings ;;
-      __default) usage ;;
+      __default)
+          if option_is_set -v; then
+            echo Tomb - $VERSION
+        else
+          usage
+      fi;;
 	      *) error "command \"$CMD\" not recognized"
 		 act "try -h for help"
 		 return 1
