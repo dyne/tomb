@@ -757,16 +757,57 @@ exec_safe_post_hooks() {
     fi
 }
 
+kill_tomb() {
+    # $1 = pids to kill
+    # $2 = type of kill
+    for p in "$1"; do
+        func "killing PID $p..."
+        if [[ "$2" == "soft" ]]; then
+            kill -USR1 $p
+        elif [[ "$2" == "hard" ]]; then
+            kill -TERM $p
+        elif [[ "$2" == "must die" ]]; then
+            kill -9 $p
+        fi
+    done
+}
+
 slam_tomb() {
     # $1 = tomb mount point
-    local pidk p
+    local pidk
+
     pidk=`lsof -t "$1"`
     if [[ ! -z "$pidk" ]]; then
-        for p in "$pidk"; do
-            func "killing PID $p..."
-            kill -9 $p
-        done
+        kill_tomb "$pidk" "soft"
+    else
+        return 0
     fi
+
+    # if there are remaining pids
+    # we need to play hard    
+    pidk=`lsof -t "$1"`
+    if [[ -z "$pidk" ]]; then
+        return 0
+    fi
+
+    sleep 3
+    kill_tomb "$pidk" "hard"
+    pidk=`lsof -t "$1"`
+    if [[ -z "$pidk" ]]; then
+        return 0
+    fi
+
+    # if there are still some pids around
+    # we have to kill 'em all
+    sleep 3
+    kill_tomb "$pidk" "must die"
+    pidk=`lsof -t "$1"`
+    if [[ -z "$pidk" ]]; then
+        return 0
+    fi
+
+    # what PITA!
+    return 1
 }
 
 umount_tomb() {
@@ -775,34 +816,34 @@ umount_tomb() {
     local ans pidk pname
 
     if ! [ $1 ]; then
-	tombs=`find /dev/mapper -name 'tomb.*'`
-	how_many_tombs=`wc -w <<< "$tombs"`
-	if [ "$how_many_tombs" = "0" ]; then
-	    error "There is no open tomb to be closed"
-	    return 1
-	elif [ "$how_many_tombs" = "1" ]; then
-	    #mapper=`find /dev/mapper -name 'tomb.*'`
-	    func "closing mapper $tombs"
-	    umount_tomb ${tombs}
-	    return 1
-	else
-	    error "Too many tombs mounted, please specify which to unmount:"
-	    ls /dev/mapper/tomb.*
-	    error "or issue the command 'tomb close all' to clos'em all."
-	    return 1
-	fi
+	    tombs=`find /dev/mapper -name 'tomb.*'`
+	    how_many_tombs=`wc -w <<< "$tombs"`
+	    if [[ "$how_many_tombs" == "0" ]]; then
+	        error "There is no open tomb to be closed"
+	        return 1
+	    elif [[ "$how_many_tombs" == "1" ]]; then
+	        #mapper=`find /dev/mapper -name 'tomb.*'`
+	        func "closing mapper $tombs"
+	        umount_tomb ${tombs}
+	        return 1
+	    else
+	        error "Too many tombs mounted, please specify which to unmount:"
+	        ls /dev/mapper/tomb.*
+	        error "or issue the command 'tomb close all' to clos'em all."
+	        return 1
+	    fi
     fi
 
     if [ "$1" = "all" ]; then
-	tombs=`find /dev/mapper -name 'tomb.*'`
-	if ! [ $tombs ]; then
-	    notice "Tombs are all closed, cemetery is quiet."
+	    tombs=`find /dev/mapper -name 'tomb.*'`
+	    if ! [ $tombs ]; then
+	        notice "Tombs are all closed, cemetery is quiet."
+	        return 0
+	    fi
+	    for t in ${(f)tombs}; do
+	        umount_tomb ${t}
+	    done
 	    return 0
-	fi
-	for t in ${(f)tombs}; do
-	    umount_tomb ${t}
-	done
-	return 0
     fi
 
 
@@ -844,6 +885,10 @@ umount_tomb() {
 	    notice "Slamming tomb $tombname mounted on $tombmount"
 	    act "Kill all processes busy inside the tomb"
         slam_tomb "$tombmount"
+        if [[ $? == 1 ]]; then
+            error "Cannot slam the tomb $tombname"
+            return 1
+        fi
     else
 	    notice "Closing tomb $tombname mounted on $tombmount"
     fi
@@ -855,10 +900,14 @@ umount_tomb() {
 	    hook="`basename $b`"
 	    act "closing tomb hook: $hook"
 	    umount $b
-	    if ! [ $? = 0 ]; then
+	    if [[ $? != 0 ]]; then
 	        if [ $SLAM ]; then
 		        notice "Slamming tomb: killing all processes using this hook"
                 slam_tomb "$b"
+                if [[ $? == 1 ]]; then
+                    error "Cannot slam the tomb $b"
+                    return 1
+                fi
 		        umount $b
             else
 		        error "Tomb hook is busy, cannot close tomb."
