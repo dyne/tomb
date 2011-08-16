@@ -757,6 +757,18 @@ exec_safe_post_hooks() {
     fi
 }
 
+slam_tomb() {
+    # $1 = tomb mount point
+    local pidk p
+    pidk=`lsof -t "$1"`
+    if [[ ! -z "$pidk" ]]; then
+        for p in "$pidk"; do
+            func "killing PID $p..."
+            kill -9 $p
+        done
+    fi
+}
+
 umount_tomb() {
     local tombs how_many_tombs
     local pathmap mapper tombname tombmount loopdev
@@ -798,26 +810,20 @@ umount_tomb() {
     pathmap=`dirname "$1"`
 
     if [ "${pathmap}" = "/dev/mapper" ]; then
-
-	mapper="$1" # argument is the mapper (or none which autofills mapper)
-	tombname="`print $mapper | cut -d. -f2`"
-	tombmount=`mount -l | \
+	    mapper="$1" # argument is the mapper (or none which autofills mapper)
+	    tombname="`print $mapper | cut -d. -f2`"
+	    tombmount=`mount -l | \
 	    awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $3 } '`
-
     elif [ "$pathmap" = "." ]; then
-
-	tombname="$1" # argument is the name
-	mapper=`mount -l | \
+	    tombname="$1" # argument is the name
+	    mapper=`mount -l | \
 	    awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 } '`
-	tombmount=`mount -l | \
+	    tombmount=`mount -l | \
 	    awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $3 } '`
-
     else
-
-	tombmount="$1" # argument should be the mount
+	    tombmount="$1" # argument should be the mount
     	mapper=`mount | awk -vmnt="$tombmount" '/^\/dev\/mapper\/tomb/ { if($3==mnt) print $1 }'`
-	tombname="`print $mapper | cut -d. -f2`"
-
+	    tombname="`print $mapper | cut -d. -f2`"
     fi
 
     # avoid block when the same tomb is mounted, take only the first
@@ -835,45 +841,35 @@ umount_tomb() {
     fi
 
     if [ $SLAM ]; then
-	notice "Slamming tomb $tombname mounted on $tombmount"
-	act "Kill all processes busy inside the tomb"
-	pidk=`lsof -t "$tombmount"`
-	for p in "$pidk"; do
-	    pname=`pidof $p`
-	    func "killing PID $p of $pname..."
-	    kill -9 $p
-	done
+	    notice "Slamming tomb $tombname mounted on $tombmount"
+	    act "Kill all processes busy inside the tomb"
+        slam_tomb "$tombmount"
     else
-	notice "Closing tomb $tombname mounted on $tombmount"
+	    notice "Closing tomb $tombname mounted on $tombmount"
     fi
 
     # check if there are binded dirs and close them
     tombmount_esc=`sed 's:\/:\\\/:g' <<< $tombmount `
     unbind=`mount | awk "/^$tombmount_esc.*bind/"' { print $3 }'`
     for b in ${(f)unbind}; do
-	hook="`basename $b`"
-	act "closing tomb hook: $hook"
-	umount $b
-	if ! [ $? = 0 ]; then
-	    if [ $SLAM ]; then
-		notice "Slamming tomb: killing all processes using this hook"
-		pidk=`lsof -t $b`
-		for p in "$pidk"; do
-		    pname=`pidof $p`
-		    notice "Killing PID $p of $pname..."
-		    kill -9 $p
-		done
-		umount $b
-	    else
-		error "Tomb hook is busy, cannot close tomb."
-		return 1
+	    hook="`basename $b`"
+	    act "closing tomb hook: $hook"
+	    umount $b
+	    if ! [ $? = 0 ]; then
+	        if [ $SLAM ]; then
+		        notice "Slamming tomb: killing all processes using this hook"
+                slam_tomb "$b"
+		        umount $b
+            else
+		        error "Tomb hook is busy, cannot close tomb."
+		        return 1
+	        fi
 	    fi
-	fi
     done
 
     # Execute post-hooks for eventual cleanup
     if ! [ $NOBIND ]; then
-	exec_safe_post_hooks ${tombmount%%/} close
+	    exec_safe_post_hooks ${tombmount%%/} close
     fi
 
     if [ $tombmount ]; then # tomb is actively mounted
