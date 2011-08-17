@@ -1108,7 +1108,8 @@ main() {
     #       I. usability; user expect that "-s" is "size
     #       II. Option parsing WILL EXPLODE if you do this kind of bad things
     #               (it will say "option defined more than once, and he's right)
-    main_opts=(q -quiet=q D -debug=D h -help=h v -verbose=v)
+    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v)
+    subcommands_opts[__default]=""
     subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o"
     subcommands_opts[mount]=${subcommands_opts[open]}
     subcommands_opts[create]="s: -size=s"
@@ -1136,6 +1137,9 @@ main() {
     zparseopts -M -E -D -Adiscardme ${every_opts}
     unset discardme
     subcommand=$1
+    if [[ -z $subcommand ]]; then
+        subcommand="__default"
+    fi
     if [[ -z ${(k)subcommands_opts[$subcommand]} ]]; then #there's no such subcommand
         error "Subcommand '$subcommand' doesn't exist"
         exit 127
@@ -1169,8 +1173,10 @@ main() {
 	PARAM+=$arg
   done
   #first parameter actually is the subcommand: delete it and shift
-  PARAM[1]=()
-  shift
+  if [[ $subcommand != '__default' ]]; then
+      PARAM[1]=()
+      shift
+  fi
   ### End parsing command-specific options
 
   ### Set global options (useless, but for code retro-compatibility)
@@ -1213,6 +1219,12 @@ main() {
 	askpass) ask_password $CMD2 ;;
 	 mktemp) safe_dir ${CMD2} ;;
       translate) generate_translatable_strings ;;
+      __default)
+          if option_is_set -v; then
+            echo Tomb - $VERSION
+        else
+          usage
+      fi;;
 	      *) error "command \"$CMD\" not recognized"
 		 act "try -h for help"
 		 return 1
