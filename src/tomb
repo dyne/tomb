@@ -760,14 +760,21 @@ exec_safe_post_hooks() {
 kill_tomb() {
     # $1 = pids to kill
     # $2 = type of kill
-    for p in "$1"; do
+    local e p
+    # substitute the \n with space
+    e=${1//$'\n'/ }
+    # split the string at space delim
+    # so we can get a for loop honestly
+    e=(${(s: :)e})
+    for p in $e; do
+        echo "p $p"
         func "killing PID $p..."
         if [[ "$2" == "soft" ]]; then
             kill -USR1 $p
         elif [[ "$2" == "hard" ]]; then
             kill -TERM $p
         elif [[ "$2" == "must die" ]]; then
-            kill -9 $p
+            kill -KILL $p
         fi
     done
 }
