@@ -767,7 +767,6 @@ kill_tomb() {
     # so we can get a for loop honestly
     e=(${(s: :)e})
     for p in $e; do
-        echo "p $p"
         func "killing PID $p..."
         if [[ "$2" == "soft" ]]; then
             kill -USR1 $p
@@ -797,7 +796,9 @@ slam_tomb() {
         return 0
     fi
 
-    sleep 3
+    # if we set the -f (force) option
+    # don't wait, just kill
+    option_is_set -f || sleep 3
     kill_tomb "$pidk" "hard"
     pidk=`lsof -t "$1"`
     if [[ -z "$pidk" ]]; then
@@ -806,7 +807,7 @@ slam_tomb() {
 
     # if there are still some pids around
     # we have to kill 'em all
-    sleep 3
+    option_is_set -f || sleep 3
     kill_tomb "$pidk" "must die"
     pidk=`lsof -t "$1"`
     if [[ -z "$pidk" ]]; then
