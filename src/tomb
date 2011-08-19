@@ -1034,7 +1034,7 @@ list_tombs() {
 	tombused=${ts[(ws:;:)2]}
 	tombavail=${ts[(ws:;:)3]}
 	tombpercent=${ts[(ws:;:)4]}
-
+    tombp=${tombpercent%%%}
 	tombsince=`date --date=@${mapper[(ws:.:)3]} +%c`
 
 	# breaking up such strings is good for translation
@@ -1054,6 +1054,10 @@ list_tombs() {
 	print -n "$fg_no_bold[white] free ("
 	print -n "$fg_bold[white]$tombpercent"
 	print "$fg_no_bold[white] full)"
+    
+    if [[ ${tombp} -ge 90 ]]; then
+        error "Your tomb is almost full!"
+    fi
 
 	print -n "$fg_no_bold[green]$tombname"
 	print -n "$fg_no_bold[white] open since "
