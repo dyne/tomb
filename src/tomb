@@ -500,8 +500,8 @@ create_tomb() {
 
     # set permissions on the tomb
     ME=${SUDO_USER:-$(whoami)}
-    chmod 0600 ${tombfile}
-    chown $(id -u $ME):$(id -g $ME) ${tombfile}
+    chmod 0600 ${tombdir}/${tombfile}
+    chown $(id -u $ME):$(id -g $ME) ${tombdir}/${tombfile}
 
     act "done creating $tombname encrypted storage (using Luks dm-crypt AES/SHA256)"
     notice "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombfile}.key"
