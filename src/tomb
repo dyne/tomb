@@ -1216,6 +1216,7 @@ main() {
     subcommands_opts[install]=""
     subcommands_opts[askpass]=""
     subcommands_opts[mktemp]=""
+    subcommands_opts[source]=""
     ### Detect subcommand
     local -aU every_opts #every_opts behave like a set; that is, an array with unique elements
     for optspec in $subcommands_opts$main_opts; do
