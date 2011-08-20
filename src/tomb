@@ -758,6 +758,7 @@ mount_tomb() {
 
     # set up variables to be used
     # the full path is made with $tombdir/$tombfile
+
     local tombkey
     local tombfile
     local tombdir
@@ -862,6 +863,12 @@ mount_tomb() {
 	# if key was from stdin delete temp file and dir
 	if [ $tombkeydir ]; then
 	    ${=WIPE} ${tombkey}
+	    rmdir $tombkeydir
+	fi
+
+	# if key was from stdin delete temp file and dir
+	if [ $tombkeydir ]; then
+	    ${WIPE[@]} ${tombkey}
 	    rmdir $tombkeydir
 	fi
 
