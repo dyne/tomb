@@ -184,7 +184,7 @@ check_priv() {
 	func "Using sudo for root execution of 'tomb ${(f)OLDARGS}'"
 	# check if sudo has a timestamp active
 	sudok=false
-	sudo -n ${TOMBEXEC} 2> /dev/null
+	sudo -n ${TOMBEXEC} &> /dev/null
 	if [ $? != 0 ]; then # if not then ask a password
 	    cat <<EOF | pinentry 2>/dev/null | awk '/^D/ { print $2 }' | sudo -S -v
 OPTION ttyname=$TTY
