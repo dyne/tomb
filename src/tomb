@@ -1188,7 +1188,7 @@ option_is_set() {
 }
 option_value() {
     #First argument, the option (something like "-s")
-    echo ${opts[$1]}
+    <<< ${opts[$1]}
 }
 
 main() {
