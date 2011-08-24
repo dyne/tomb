@@ -89,6 +89,14 @@ Options:
  -D     print debugging information at runtime
 </example>
 
+
+**** More sources of information
+
+Tomb's documentation is being actively written as we speak, you will
+find some more informations about it on the wiki found on
+[[http://github.com/dyne/Tomb][github.com/dyne/Tomb]] as well on the one on [[http://crypto.is][crypto.is]].
+
+
 *** Who needs Tomb
 
  "*Democracy requires Privacy as much as Freedom of Expression.*" Anonymous
@@ -219,14 +227,12 @@ Source releases are signed by [[http://jaromil.dyne.org][Jaromil]] using [[http:
 On [[http://ftp.dyne.org/tomb][ftp.dyne.org/tomb]] you can find all present and past Tomb releases,
 plus binaries that are occasionally built for various architectures.
 
-The bleeding edge version is developed on our [[http://code.dyne.org][code repository]] using
-**GIT**, you can clone the repository free and anonymously
+The bleeding edge version is developed on [[http://github.com/dyne/Tomb][GitHub/dyne/Tomb]]: you can
+clone the repository free and anonymously, as well contribute to
+development interacting with us via GitHub (fork, code and then
+request a pull).
 
-<example>
-       git clone git://code.dyne.org/tomb.git
-</example>
-
-To compile the git master repository you first have to generate the
+To compile fresh code out of Git you first have to generate the
 auto-tools build environment giving the command:
 
 <example>
@@ -283,6 +289,8 @@ kernel.
 
 *** People involved
 
+[[images/tomb_crew_hkm11.jpg]]
+
 Tomb is designed and written by [[http://jaromil.dyne.org][Jaromil]].
 
 Tomb's artwork is contributed by [[http://monmort.blogspot.com][Món Mort]].
@@ -295,6 +303,10 @@ Asbesto and Boyska.
 Most research we refer to is documented by Clemens Fruhwirth who also
 developed Cryptsetup together with Christophe Saout.
 
+Here below a cheerful picture of Tomb's developers meeting at the
+[[http://http://hackmeeting.org][hackmeeting]] 2011 in Firenze...
+
+
 *** How can you help
 
 Code is pretty short and readable: start looking around it and the
@@ -305,9 +317,14 @@ Have a look in the TODO file to see what our plans are.
 
 At the moment we can use some good help in porting this tool on
 M$/Windows and Apple/OSX, still keeping the minimal approach we all
-love.
+love: write short code and make it readable.
 
-Please report bugs on the tracker at http://bugs.dyne.org
+Please report any issue you encounter on [[http://github.com/dyne/Tomb][github.com/dyne/Tomb]]
+
 
 Get in touch with developers via mail using this web page
-http://dyne.org/contact or via chat on http://irc.dyne.org
+[[http://dyne.org/contact][dyne.org/contact]] or via chat on [[http://irc.dyne.org][irc.dyne.org]] channel #tomb
+
+We do have a mailinglist too, but its in Italian language, just
+contact us if you like to subscribe.
+
