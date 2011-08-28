@@ -520,11 +520,24 @@ mount_tomb() {
         error "no tomb name specified for creation"
         return 1
     fi
+
+    # TODO: eliminate this function
     get_arg_tomb $CMD2
+
     local tombkey
     if option_is_set -k ; then
-        tombkey=`option_value -k`
+	if [[ "`option_value -k`" == "stdin" ]]; then
+	    # take key from stdin
+	    local tombkeydir
+	    tombkeydir=`safe_dir`
+	    cat > ${tombkeydir}/stdin.tmp
+	    tombkey=${tombkeydir}/stdin.tmp
+	else
+	    # take key from a file
+            tombkey=`option_value -k`
+	fi
     else
+	# guess key as lying besides the tomb
         tombkey="${PARAM[1]}.key"
     fi
     echo the key used is $tombkey
@@ -603,6 +616,12 @@ mount_tomb() {
 	    | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 
 	unset tombpass
+
+	# if key was from stdin delete temp file and dir
+	if [ $tombkeydir ]; then
+	    ${WIPE[@]} ${tombkey}
+	    rmdir $tombkeydir
+	fi
 
 	if [ -r /dev/mapper/${mapper} ]; then
 	    break;  # password was correct
