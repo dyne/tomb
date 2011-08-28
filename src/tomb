@@ -353,7 +353,12 @@ create_tomb() {
     tombname=${tombfile%%\.*}
     tombfile=${tombname}.tomb
 	tombsize=$opts[-s]
-
+    
+    if [[ $tombsize != <-> ]]; then
+        error "Size is not an integer"
+        return 1
+    fi
+    
     if [ -e ${tombdir}/${tombfile} ]; then
 	    error "tomb exists already. I'm not digging here:"
 	    ls -lh ${tombdir}/${tombfile}
