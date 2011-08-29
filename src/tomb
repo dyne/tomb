@@ -154,7 +154,7 @@ ask_password() {
 	GTK2_RC=/usr/share/themes/tomb/gtk-2.0-key/gtkrc
     fi
 
-    cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>/dev/null | awk '/^D/ { print $2 }'
+    cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }'
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE Insert tomb password
@@ -186,7 +186,7 @@ check_priv() {
 	sudok=false
 	sudo -n ${TOMBEXEC} &> /dev/null
 	if [ $? != 0 ]; then # if not then ask a password
-	    cat <<EOF | pinentry 2>/dev/null | awk '/^D/ { print $2 }' | sudo -S -v
+	    cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE Super user privileges required
