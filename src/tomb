@@ -352,7 +352,7 @@ create_tomb() {
     # make sure the file has a .tomb extension
     tombname=${tombfile%%\.*}
     tombfile=${tombname}.tomb
-	tombsize=$opts[-s]
+	 tombsize=$opts[-s]
     
     if [[ $tombsize != <-> ]]; then
         error "Size is not an integer"
@@ -365,9 +365,15 @@ create_tomb() {
 	    return 1
     fi
     
-    if [ -e ${tombdir}/${tombfile}.key ]; then
+    if option_is_set -k; then
+        tombkey="`option_value -k`.tomb.key"
+    else
+        tombkey="${tombdir}/${tombfile}.key"
+    fi
+
+    if [ -e "${tombkey}" ]; then
         error "tomb key already exists. Quitting."
-        ls -lh ${tombdir}/${tombfile}.key
+        ls -lh ${tombkey}
         return 1
     fi
 
@@ -430,7 +436,7 @@ create_tomb() {
 	exit 1
     fi
 
-    notice "Setup your secret key file ${tombname}.tomb.key"
+    notice "Setup your secret key file ${tombkey}"
 
     # here user is prompted for key password
     for c in 1 2 3; do
@@ -456,7 +462,7 @@ create_tomb() {
 
     print "${tombpass}" | gpg \
 	--openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
-	-o "${tombdir}/${tombname}.tomb.key" -c -a ${keytmp}/tomb.tmp
+	-o "${tombkey}" -c -a ${keytmp}/tomb.tmp
 
     # if [ $? != 0 ]; then
     # 	error "setting password failed: gnupg returns 2"
@@ -504,7 +510,7 @@ create_tomb() {
     chown $(id -u $ME):$(id -g $ME) "${tombdir}/${tombfile}"
 
     act "done creating $tombname encrypted storage (using Luks dm-crypt AES/SHA256)"
-    notice "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombfile}.key"
+    notice "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
 
 }
 
@@ -1227,7 +1233,7 @@ main() {
     subcommands_opts[__default]=""
     subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o -ignore-swap"
     subcommands_opts[mount]=${subcommands_opts[open]}
-    subcommands_opts[create]="s: -size=s -ignore-swap"
+    subcommands_opts[create]="s: -size=s -ignore-swap k: -key=k"
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
