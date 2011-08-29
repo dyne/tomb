@@ -352,7 +352,7 @@ create_tomb() {
     # make sure the file has a .tomb extension
     tombname=${tombfile%%\.*}
     tombfile=${tombname}.tomb
-	tombsize=$opts[-s]
+	 tombsize=$opts[-s]
     
     if [[ $tombsize != <-> ]]; then
         error "Size is not an integer"
@@ -366,7 +366,7 @@ create_tomb() {
     fi
     
     if option_is_set -k; then
-        tombkey=`option_value -k`
+        tombkey="`option_value -k`.tomb.key"
     else
         tombkey="${tombdir}/${tombfile}.key"
     fi
@@ -436,7 +436,7 @@ create_tomb() {
 	exit 1
     fi
 
-    notice "Setup your secret key file ${tombname}.tomb.key"
+    notice "Setup your secret key file ${tombkey}"
 
     # here user is prompted for key password
     for c in 1 2 3; do
