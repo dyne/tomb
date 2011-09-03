@@ -116,10 +116,10 @@ check_bin() {
 safe_dir() {
     which mktemp &> /dev/null
     if [[ $? = 0 ]]; then
-        mktemp -d /dev/shm/$1.XXXX.$$
+        mktemp -d /dev/shm/$1.$$.XXXXXXX
         return
     fi
-    dir="/dev/shm/$1.$RANDOM.$RANDOM.$$"
+    dir="/dev/shm/$1.$$.$RANDOM.$RANDOM"
     (umask 077 && mkdir "$dir") || print "-1"
     print "$dir"
 }
