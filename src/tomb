@@ -1107,6 +1107,58 @@ list_tombs() {
     done
 }
 
+launch_status() {
+    # calculates the correct arguments to launch tomb-status tray
+    # applet; it takes the tomb name as an argument and can be
+    # launched after a successful tomb mount.
+
+    which tomb-status > /dev/null
+    if [ $? != 0 ]; then
+	error "Cannot find tomb-status binary, operation aborted."
+	return 1
+    fi
+
+    if ! [ $DISPLAY ]; then
+	error "No active X display found, operation aborted."
+	error "Status launches a graphical tray applet, you need X running."
+	return 1
+    fi
+
+    # check argument. use single tomb mounted if no argument
+    # abort if more than one tomb is mounted.
+    if ! [ $1 ]; then
+	tombs=`find /dev/mapper -name 'tomb.*'`
+	how_many_tombs=`wc -w <<< "$tombs"`
+	if [[ "$how_many_tombs" == "0" ]]; then
+	    error "There is no open tomb, status cannot be launched"
+	    return 1
+	elif [[ "$how_many_tombs" == "1" ]]; then
+	        #mapper=`find /dev/mapper -name 'tomb.*'`
+	    tombname=`find /dev/mapper -name "tomb.*"`
+	    tombname=`basename $tombname | cut -d. -f2`
+	    notice "launching status for tomb $tombname"
+	else
+	    error "Too many tombs mounted, please specify which one"
+	    list_tombs
+	    return 0
+	fi
+    else
+	# name was specified on command line
+	tombname=$1
+	ls /dev/mapper | grep "^tomb.${tombname}.*" > /dev/null
+	if [ $? != 0 ]; then
+	    error "Cannot find any tomb named $tombname being open, operation aborted."
+	    return 1
+	fi
+    fi
+
+    # finally we launch
+    tombmap=`mount -l | awk "/\[${tombname}\]$/"' { print $1 } '`
+    tombmount=`mount -l | awk "/\[${tombname}\]$/"' { print $3 } '`
+    tomb-status $tombmap $tombname $tombmount &!
+    return 0
+}
+
 # install mime-types, bells and whistles for the desktop
 # see http://developers.sun.com/solaris/articles/integrating_gnome.html
 # and freedesktop specs
@@ -1248,6 +1300,7 @@ main() {
     subcommands_opts[askpass]=""
     subcommands_opts[mktemp]=""
     subcommands_opts[source]=""
+    subcommands_opts[status]=""
     ### Detect subcommand
     local -aU every_opts #every_opts behave like a set; that is, an array with unique elements
     for optspec in $subcommands_opts$main_opts; do
@@ -1325,6 +1378,7 @@ main() {
 	  close) check_priv ; umount_tomb ${CMD2} ;;
 	   slam) check_priv ; SLAM=1; umount_tomb ${CMD2} ;;
 	   list) list_tombs ${CMD2} ;;
+	 status) launch_status ${CMD2} ;;
 	   help) usage ;;
 	   bury) if [ "$STEGHIDE" = 0 ]; then
 		    error "steghide not installed. Cannot bury your key"
