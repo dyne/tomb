@@ -726,6 +726,10 @@ decode_key() {
     fi
 
     keyfile=${tombname%%\.*}.tomb.key
+    if [[ -e "$keyfile" ]]; then
+        error "Key file $keyfile already exist."
+        return 1
+    fi
     notice "Trying to exhume a key out of image $imagefile"
     for c in 1 2 3; do
 	if [ $c = 1 ]; then
