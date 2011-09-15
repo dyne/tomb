@@ -280,6 +280,7 @@ Options:
  -k     path to the key to use for opening a tomb
  -n     don't process the hooks found in tomb
  -o     mount options used to open (default: rw,noatime,nodev)
+ --use-stegh treat key file (-k) as a steganography key
 
  -h     print this help
  -v     version information for this tool
@@ -538,6 +539,12 @@ mount_tomb() {
 	    tombkeydir=`safe_dir`
 	    cat > ${tombkeydir}/stdin.tmp
 	    tombkey=${tombkeydir}/stdin.tmp
+    elif option_is_set --use-stegh ; then
+        decode_key `option_value -k` 
+        if [[ $? == 1 ]]; then
+            return 1
+        fi
+        tombkey="${PARAM[1]}.key"
 	else
 	    # take key from a file
             tombkey=`option_value -k`
@@ -546,6 +553,10 @@ mount_tomb() {
 	# guess key as lying besides the tomb
         tombkey="${PARAM[1]}.key"
     fi
+    
+    tombfile=`basename ${PARAM[1]}`
+    tombname=${tombfile%%\.*}
+    
     echo the key used is $tombkey
     if [ $? != 0 ]; then
         error "operation aborted."
@@ -717,8 +728,8 @@ encode_key() {
 }
 
 decode_key() {
-    tombname=$CMD2
-    imagefile=$CMD3
+    tombname=${PARAM[1]}
+    imagefile=$1
     res=1
 
     file $imagefile | grep JPEG > /dev/null
@@ -745,7 +756,7 @@ END {
 print "-----END PGP MESSAGE-----"
 }' > ${keyfile}
 
-	if [ "`cat ${keyfile} | wc -l`" != "3" ]; then
+	if [ "`cat ${keyfile} | wc -l`" != "2" ]; then
 	    act "${keyfile} succesfully decoded"
 	    res=0
 	    break;
@@ -1284,7 +1295,7 @@ main() {
     #               (it will say "option defined more than once, and he's right)
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v)
     subcommands_opts[__default]=""
-    subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o -ignore-swap"
+    subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o -ignore-swap -use-stegh"
     subcommands_opts[mount]=${subcommands_opts[open]}
     subcommands_opts[create]="s: -size=s -ignore-swap k: -key=k"
     subcommands_opts[close]=""
