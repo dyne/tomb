@@ -460,9 +460,9 @@ create_tomb() {
     fi
 
 
-    print "${tombpass}" | gpg \
+    gpg \
 	--openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
-	-o "${tombkey}" -c -a ${keytmp}/tomb.tmp
+	-o "${tombkey}" -c -a ${keytmp}/tomb.tmp <<< ${tombpass}
 
     # if [ $? != 0 ]; then
     # 	error "setting password failed: gnupg returns 2"
@@ -616,11 +616,9 @@ mount_tomb() {
 	else
 	    tombpass=`exec_as_user ${TOMBEXEC} askpass "$keyname (retry $c)"`
 	fi
-	print "${tombpass}" \
-	    | gpg --batch --passphrase-fd 0 --no-tty --no-options \
-		  -d "${tombkey}" 2> /dev/null \
-	    | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
-
+    (gpg --batch --passphrase-fd 0 --no-tty --no-options \
+        -d "${tombkey}" 2> /dev/null <<< ${tombpass} ) \
+    | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 	unset tombpass
 
 	# if key was from stdin delete temp file and dir
