@@ -1,4 +1,4 @@
-.TH tomb 1 "May 15, 2011" "tomb"
+.TH tomb 1 "Sept 26, 2011" "tomb"
 
 .SH NAME
 Tomb \- the Crypto Undertaker
@@ -91,7 +91,7 @@ given. This is used to recoved buried keys from unsuspected places.
 .B
 .B
 .IP "-s \fI<MBytes>\fR" 
-When creating a tomb, this option  must be used to specify the size of
+When creating a tomb, this option  MUST be used to specify the size of
 the new \fIfile\fR to be created, in megabytes.
 .B
 .IP "-k \fI<keyfile>\fR"
@@ -100,6 +100,15 @@ of the  key to use. Keys  are created with  the same name of  the tomb
 file adding a '.gpg' suffix,  but can be later renamed and transported
 on other media. When a key is  not found, the program asks to insert a
 USB storage device and it will look for the key file inside it.
+If \fI<keyfile>\fR is "-" (dash), it will read stdin
+.IP
+When creating a tomb, this option can be used to specify the name (and
+location) of the key you are creating. For example, you could use
+.EX
+tomb create -s 100 tombname -k /media/usb/tombname
+.EE
+to put the key on a usb pendrive
+
 .B
 .IP "-n"
 Skip processing of post-hooks and bind-hooks if found inside the tomb.
@@ -111,6 +120,11 @@ of the default \fIrw,noatime,nodev\fR. This option can be used to
 mount a tomb read-only (ro) to prevent any modification of its data,
 or to experiment with other settings (if you really know what you are
 doing) see the mount(8) man page.
+.B
+.IP "--ignore-swap"
+By default, Tomb will abort any create and open operation if swap is used (see
+SWAP section for details). This flag will disable this behaviour. NOTE: it is
+not secure to do so, unless you know that your swap is encrypted
 
 .B
 .IP "-h"
@@ -123,6 +137,7 @@ Display version and quit
 Run more quietly
 .IP "-D"
 Print more information while running, for debugging purposes
+
 
 .SH HOOKS
 
@@ -161,27 +176,57 @@ pinentry(1) is adopted to collect passwords from the user.
 Tomb executes as super user only those commands requiring it, while it
 executes desktop applications as processes owned by the user.
 
+.SH SWAP
+
+During "create" and "open" operation, swap will complain and \fIabort\fR if
+your system has swap activated. This can be annoying, and you can disable this
+behaviour using \fI--ignore-swap\fR. Before doing that, however, you may be
+interested in knowing the risks of doing so:
+.IP \(bu
+During both creation and opening it could write your secret key on the disk
+.IP \(bu
+After having opened the tomb, an application you're using could swap file
+contents. So you'll put file contents in clear on your disk
+.P
+
+If you don't need swap, execute \fI swapoff -a\fR. If you really need it, you
+could encrypt it. Tomb doesn't detect if your swap is encrypted, and will
+complain anyway. In that case, using --ignore-swap is safe. Otherwise, use
+--ignore-swap at your own risk
+
+
 
 .SH BUGS
-Please report bugs on the tracker at http://bugs.dyne.org
+Please report bugs on the tracker at
+.UR http://bugs.dyne.org
+.UE
 
-Get in touch with developers via mail using this web page
-http://dyne.org/contact or via chat on http://irc.dyne.org
+Get in touch with developers via mail using this
+.UR http://dyne.org/contact
+web page
+.UE
+or via chat on
+.UR http://irc.dyne.org
+.UE
 
 .SH AUTHORS
 
 Tomb is designed and written by Denis Roio aka Jaromil.
 
+Tomb includes code by Anathema and Boyska.
+
 Tomb's artwork is contributed by Jordi aka Mon Mort
 
-Testing and fixes are contributed by Dreamer, Hellekin O. Wolf,
-Shining, Asbesto Molesto, Anathema, Boyska and Nignux.
+Testing and reviews are contributed by Hellekin O. Wolf, Dreamer,
+Shining, Mancausoft, Asbesto Molesto.
 
 Cryptsetup is developed by Christophe Saout and Clemens Fruhwirth
 
 .SH COPYING
 
 This manual is Copyleft (c) 2011 Denis Roio <\fIjaromil@dyne.org\fR>
+
+It includes contributions by Boyska
 
 Permission is  granted to copy,  distribute and/or modify  this manual
 under the terms of the  GNU Free Documentation License, Version 1.1 or

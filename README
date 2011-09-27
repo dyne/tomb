@@ -53,7 +53,8 @@ encrypt the Home directory of users.
 As such, it uses well tested and reviewed routines and its shell code
 is pretty readable. The name transition from 'mknest' to 'tomb' is
 marked by the adaptation of mknest to work on the Debian operating
-system, used by its author in the past 3 years.
+system and it has been used in production environments for the past 4
+years.
 
 ** How can you help
 

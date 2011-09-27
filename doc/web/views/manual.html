@@ -4,7 +4,7 @@ Content-type: text/html
 <HTML><HEAD><TITLE>Man page of tomb</TITLE>
 </HEAD><BODY>
 <H1>tomb</H1>
-Section: User Commands  (1)<BR>Updated: February 12, 2011<BR><A HREF="#index">Index</A>
+Section: User Commands  (1)<BR>Updated: Sept 26, 2011<BR><A HREF="#index">Index</A>
 <A HREF="/cgi-bin/man/man2html">Return to Main Contents</A><HR>
 
 <P>
@@ -72,14 +72,32 @@ a <I>second argument</I> is given it will indicate the <I>mountpoint</I>
 where the tomb should be made accessible, if not then the tomb is
 mounted in a directory named after the filename and inside /media.
 <P>
+<B><DT>list<DD>
+</B>
+
+<P>
+List all the tombs found open, including information about the time
+they were opened and the hooks that they mounted. If the <I>first
+argument</I> is present, then shows only the tomb named that way or
+returns an error if its not found.
+<P>
 <B><DT>close<DD>
 </B>
 
 Closes a currently open tomb.  When <I>an argument</I> is specified, it
-should point to the tomb mount on /dev/mapper; if not specified and
-only one tomb is open then it will be closed; if multiple tombs are
-open, the command will list them on the terminal. The special
-<I>argument</I> 'all' will close all currently open tombs.
+should be the name of a mounted tomb; if not specified and only one
+tomb is open then it will be closed; if multiple tombs are open, the
+command will list them on the terminal. The special
+<I>argument</I> 'all' will close all currently open tombs. This command
+fails if the tomb is in use by running processes, the command
+<I>slam</I> can be used to force close.
+<P>
+<B><DT>slam<DD>
+</B>
+
+Closes a tomb like the command <I>close</I> does, but in case it is in
+use looks for all the processes accessing its files and violently
+kills them using -9.
 <P>
 <B><DT>bury<DD>
 </B>
@@ -108,7 +126,7 @@ given. This is used to recoved buried keys from unsuspected places.
 
 
 
-When creating a tomb, this option  must be used to specify the size of
+When creating a tomb, this option  MUST be used to specify the size of
 the new <I>file</I> to be created, in megabytes.
 <B><DT>-k </B><I>&lt;keyfile&gt;</I><DD>
 
@@ -118,11 +136,35 @@ of the  key to use. Keys  are created with  the same name of  the tomb
 file adding a '.gpg' suffix,  but can be later renamed and transported
 on other media. When a key is  not found, the program asks to insert a
 USB storage device and it will look for the key file inside it.
+If <I>&lt;keyfile&gt;</I> is &quot;-&quot; (dash), it will read stdin
+<DT><DD>
+When creating a tomb, this option can be used to specify the name (and
+location) of the key you are creating. For example, you could use
+
+tomb create -s 100 tombname -k /media/usb/tombname
+
+to put the key on a usb pendrive
+<P>
 <B><DT>-n<DD>
 </B>
 
 Skip processing of post-hooks and bind-hooks if found inside the tomb.
 See the <I>HOOKS</I> section in this manual for more information.
+<B><DT>-o<DD>
+</B>
+
+Manually specify mount options to be used when opening a tomb instead
+of the default <I>rw,noatime,nodev</I>. This option can be used to
+mount a tomb read-only (ro) to prevent any modification of its data,
+or to experiment with other settings (if you really know what you are
+doing) see the <A HREF="/cgi-bin/man/man2html?8+mount">mount</A>(8) man page.
+<B><DT>--ignore-swap<DD>
+</B>
+
+By default, Tomb will abort any create and open operation if swap is used (see
+SWAP section for details). This flag will disable this behaviour. NOTE: it is
+not secure to do so, unless you know that your swap is encrypted
+<P>
 <B><DT>-h<DD>
 </B>
 
@@ -137,6 +179,7 @@ Display version and quit
 Run more quietly
 <DT>-D<DD>
 Print more information while running, for debugging purposes
+<P>
 <P>
 </DL>
 <A NAME="lbAG">&nbsp;</A>
@@ -184,32 +227,68 @@ execute most of its operations: to do so it uses <A HREF="/cgi-bin/man/man2html?
 Tomb executes as super user only those commands requiring it, while it
 executes desktop applications as processes owned by the user.
 <P>
-<P>
 <A NAME="lbAI">&nbsp;</A>
-<H2>BUGS</H2>
+<H2>SWAP</H2>
 
-Please report bugs on the tracker at <A HREF="http://bugs.dyne.org">http://bugs.dyne.org</A>
 <P>
-Get in touch with developers via mail using this web page
-<A HREF="http://dyne.org/contact">http://dyne.org/contact</A> or via chat on <A HREF="http://irc.dyne.org">http://irc.dyne.org</A>
+During &quot;create&quot; and &quot;open&quot; operation, swap will complain and <I>abort</I> if
+your system has swap activated. This can be annoying, and you can disable this
+behaviour using <I>--ignore-swap</I>. Before doing that, however, you may be
+interested in knowing the risks of doing so:
+<DL COMPACT>
+<DT>&bull;<DD>
+During both creation and opening it could write your secret key on the disk
+<DT>&bull;<DD>
+After having opened the tomb, an application you're using could swap file
+contents. So you'll put file contents in clear on your disk
+</DL>
+<P>
+
+<P>
+If you don't need swap, execute <I> swapoff -a</I>. If you really need it, you
+could encrypt it. Tomb doesn't detect if your swap is encrypted, and will
+complain anyway. In that case, using --ignore-swap is safe. Otherwise, use
+--ignore-swap at your own risk
+<P>
+<P>
 <P>
 <A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Please report bugs on the tracker at
+
+
+<P>
+Get in touch with developers via mail using this
+
+web page
+
+or via chat on
+
+
+<P>
+<A NAME="lbAK">&nbsp;</A>
 <H2>AUTHORS</H2>
 
 <P>
 Tomb is designed and written by Denis Roio aka Jaromil.
 <P>
+Tomb includes code by Hellekin O. Wolf, Anathema and Boyska.
+<P>
 Tomb's artwork is contributed by Jordi aka Mon Mort
 <P>
-Testing and fixes are contributed by Dreamer and Hellekin O. Wolf
+Testing and reviews are contributed by Dreamer, Shining, Mancausoft,
+Asbesto Molesto.
 <P>
 Cryptsetup is developed by Christophe Saout and Clemens Fruhwirth
 <P>
-<A NAME="lbAK">&nbsp;</A>
+<A NAME="lbAL">&nbsp;</A>
 <H2>COPYING</H2>
 
 <P>
 This manual is Copyleft (c) 2011 Denis Roio &lt;<I><A HREF="mailto:jaromil@dyne.org">jaromil@dyne.org</A></I>&gt;
+<P>
+It includes contributions by Boyska
 <P>
 Permission is  granted to copy,  distribute and/or modify  this manual
 under the terms of the  GNU Free Documentation License, Version 1.1 or
@@ -218,7 +297,7 @@ Permission is granted  to make and distribute verbatim  copies of this
 manual page  provided the above  copyright notice and  this permission
 notice are preserved on all copies.
 <P>
-<A NAME="lbAL">&nbsp;</A>
+<A NAME="lbAM">&nbsp;</A>
 <H2>AVAILABILITY</H2>
 
 <P>
@@ -226,7 +305,7 @@ The most recent version of Tomb sourcecode and up to date
 documentation is available for download from its website on
 <I><A HREF="http://tomb.dyne.org">http://tomb.dyne.org</A></I>.
 <P>
-<A NAME="lbAM">&nbsp;</A>
+<A NAME="lbAN">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
 <P>
@@ -253,16 +332,17 @@ LUKS website, <A HREF="http://code.google.com/p/cryptsetup">http://code.google.c
 <DT><A HREF="#lbAF">OPTIONS</A><DD>
 <DT><A HREF="#lbAG">HOOKS</A><DD>
 <DT><A HREF="#lbAH">PRIVILEGE ESCALATION</A><DD>
-<DT><A HREF="#lbAI">BUGS</A><DD>
-<DT><A HREF="#lbAJ">AUTHORS</A><DD>
-<DT><A HREF="#lbAK">COPYING</A><DD>
-<DT><A HREF="#lbAL">AVAILABILITY</A><DD>
-<DT><A HREF="#lbAM">SEE ALSO</A><DD>
+<DT><A HREF="#lbAI">SWAP</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+<DT><A HREF="#lbAK">AUTHORS</A><DD>
+<DT><A HREF="#lbAL">COPYING</A><DD>
+<DT><A HREF="#lbAM">AVAILABILITY</A><DD>
+<DT><A HREF="#lbAN">SEE ALSO</A><DD>
 </DL>
 <HR>
 This document was created by
 <A HREF="/cgi-bin/man/man2html">man2html</A>,
 using the manual pages.<BR>
-Time: 18:57:34 GMT, March 09, 2011
+Time: 10:33:09 GMT, September 26, 2011
 </BODY>
 </HTML>

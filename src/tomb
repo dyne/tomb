@@ -21,7 +21,7 @@
 # Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 VERSION=1.1
-DATE=May/2011
+DATE=Sept/2011
 TOMBEXEC=$0
 TOMBOPENEXEC="tomb-open"
 typeset -a OLDARGS

@@ -3,6 +3,10 @@ TODO and Roadmap for Tomb
 
 you are welcome to send patches to jaromil@dyne.org
 
+Issue tracking is now handled via GitHub, see http://github.com/dyne/Tomb
+
+Old roadmap notes:
+
 * DONE Release 1.0							:100%:
 
 ** TODO [#C] make one single status handle more tombs
@@ -48,19 +52,14 @@ you are welcome to send patches to jaromil@dyne.org
 
 ** DONE [#A] desktop integration the freedesktop way		    :jaromil:
 ** DONE [#B] debian packaging with desktop integration 		    :jaromil:
+** DONE [#A] Avoid overwriting key on exhume on same filename
+** DONE [#A] Should refuse opening a tomb that is already open	    :jaromil:
+
 
 
 * TODO Release 2.0							:00%:
 
 Must be 100% backward compatible with tombs created with 1.0 
-
-** Bugs to fix
-
-*** TODO [#B] Avoid overwriting key on exhume on same filename
-
-
-*** DONE [#A] Should refuse opening a tomb that is already open	    :jaromil:
-
 
 ** New features
 

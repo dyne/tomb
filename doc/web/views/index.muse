@@ -295,10 +295,10 @@ Tomb is designed and written by [[http://jaromil.dyne.org][Jaromil]].
 
 Tomb's artwork is contributed by [[http://monmort.blogspot.com][Món Mort]].
 
-Tomb includes code by Hellekin O. Wolf and Anathema.
+Tomb includes code by Anathema and Boyska.
 
-Testing and fixes are contributed by Dreamer, Shining, Mancausoft,
-Asbesto and Boyska.
+Testing and reviews are contributed by Hellekin O. Wolf, Dreamer,
+Shining, Mancausoft, Asbesto Molesto.
 
 Most research we refer to is documented by Clemens Fruhwirth who also
 developed Cryptsetup together with Christophe Saout.
