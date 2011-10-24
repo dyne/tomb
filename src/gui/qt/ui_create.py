@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'create.ui'
 #
-# Created: Mon Oct 24 03:26:55 2011
+# Created: Mon Oct 24 18:27:59 2011
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,7 +19,6 @@ class Ui_Wizard(object):
         Wizard.setObjectName(_fromUtf8("Wizard"))
         Wizard.resize(710, 368)
         Wizard.setWindowTitle(QtGui.QApplication.translate("Wizard", "Wizard", None, QtGui.QApplication.UnicodeUTF8))
-        Wizard.setWizardStyle(QtGui.QWizard.ModernStyle)
         Wizard.setOptions(QtGui.QWizard.HaveHelpButton|QtGui.QWizard.IndependentPages)
         self.wizardPage_intro = QtGui.QWizardPage()
         self.wizardPage_intro.setTitle(QtGui.QApplication.translate("Wizard", "Tomb", None, QtGui.QApplication.UnicodeUTF8))
@@ -67,9 +66,11 @@ class Ui_Wizard(object):
         self.verticalLayout_3.addWidget(self.label_4)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
-        self.lineEdit = QtGui.QLineEdit(self.wizardPage_tomb_location)
-        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
-        self.horizontalLayout_2.addWidget(self.lineEdit)
+        self.lineEdit_tombpath = QtGui.QLineEdit(self.wizardPage_tomb_location)
+        self.lineEdit_tombpath.setFrame(True)
+        self.lineEdit_tombpath.setPlaceholderText(QtGui.QApplication.translate("Wizard", "/path/to/file.tomb", None, QtGui.QApplication.UnicodeUTF8))
+        self.lineEdit_tombpath.setObjectName(_fromUtf8("lineEdit_tombpath"))
+        self.horizontalLayout_2.addWidget(self.lineEdit_tombpath)
         self.pushButton = QtGui.QPushButton(self.wizardPage_tomb_location)
         self.pushButton.setText(QtGui.QApplication.translate("Wizard", "Open file", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
@@ -206,7 +207,7 @@ class Ui_Wizard(object):
         self.verticalLayout_8.addWidget(self.checkBox)
         Wizard.addPage(self.wizardPage_end)
         self.label_3.setBuddy(self.spinBox)
-        self.label_4.setBuddy(self.lineEdit)
+        self.label_4.setBuddy(self.lineEdit_tombpath)
         self.label_8.setBuddy(self.lineEdit_pass)
         self.label_9.setBuddy(self.lineEdit_pass_again)
 

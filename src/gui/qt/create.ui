@@ -88,14 +88,21 @@
        <bool>true</bool>
       </property>
       <property name="buddy">
-       <cstring>lineEdit</cstring>
+       <cstring>lineEdit_tombpath</cstring>
       </property>
      </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QLineEdit" name="lineEdit"/>
+       <widget class="QLineEdit" name="lineEdit_tombpath">
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>/path/to/file.tomb</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="pushButton">
@@ -370,11 +377,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>62</x>
-     <y>212</y>
+     <y>29</y>
     </hint>
     <hint type="destinationlabel">
-     <x>164</x>
-     <y>243</y>
+     <x>99</x>
+     <y>29</y>
     </hint>
    </hints>
   </connection>
@@ -385,12 +392,12 @@ p, li { white-space: pre-wrap; }
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>118</x>
-     <y>212</y>
+     <x>99</x>
+     <y>29</y>
     </hint>
     <hint type="destinationlabel">
-     <x>677</x>
-     <y>246</y>
+     <x>99</x>
+     <y>29</y>
     </hint>
    </hints>
   </connection>
@@ -406,7 +413,7 @@ p, li { white-space: pre-wrap; }
     </hint>
     <hint type="destinationlabel">
      <x>77</x>
-     <y>267</y>
+     <y>29</y>
     </hint>
    </hints>
   </connection>
@@ -421,8 +428,8 @@ p, li { white-space: pre-wrap; }
      <y>356</y>
     </hint>
     <hint type="destinationlabel">
-     <x>117</x>
-     <y>267</y>
+     <x>99</x>
+     <y>29</y>
     </hint>
    </hints>
   </connection>
@@ -433,12 +440,12 @@ p, li { white-space: pre-wrap; }
    <slot>check_password_match()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>339</x>
-     <y>105</y>
+     <x>99</x>
+     <y>29</y>
     </hint>
     <hint type="destinationlabel">
      <x>99</x>
-     <y>85</y>
+     <y>29</y>
     </hint>
    </hints>
   </connection>
@@ -450,11 +457,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>99</x>
-     <y>85</y>
+     <y>29</y>
     </hint>
     <hint type="destinationlabel">
-     <x>117</x>
-     <y>152</y>
+     <x>99</x>
+     <y>29</y>
     </hint>
    </hints>
   </connection>
@@ -465,12 +472,12 @@ p, li { white-space: pre-wrap; }
    <slot>check_password_match()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>289</x>
-     <y>126</y>
+     <x>99</x>
+     <y>29</y>
     </hint>
     <hint type="destinationlabel">
      <x>49</x>
-     <y>70</y>
+     <y>14</y>
     </hint>
    </hints>
   </connection>
