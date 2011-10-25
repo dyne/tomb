@@ -954,8 +954,11 @@ umount_tomb() {
 	umount ${tombmount}
 	if ! [ $? = 0 ]; then
 	    error "Tomb is busy, cannot umount!"
-	else
-	    rmdir ${tombmount}
+	else   
+        # this means we used a "default" mount point
+        if [ "${tombmount}" = "/media/${tombname}.tomb" ]; then
+	        rmdir ${tombmount}
+        fi
 	fi
     fi
 
