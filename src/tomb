@@ -724,7 +724,7 @@ exec_safe_bind_hooks() {
     fi
   local MOUNTPOINT="${1}"
   local ME=${SUDO_USER:-$(whoami)}
-  local HOME=$(awk -F ':' '{if ($1 == "$ME") print $6}' /etc/passwd 2>/dev/null)
+  local HOME=$(awk -v a="$ME" -F ':' '{if ($1 == a) print $6}' /etc/passwd 2>/dev/null)
   if [ $? -ne 0 ]; then
       error "how pitiful!  A tomb, and no HOME"
       return 1
