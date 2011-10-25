@@ -607,7 +607,7 @@ mount_tomb() {
     chown $(id -u $ME):$(id -g $ME) ${tombmount}
 
     notice "encrypted storage $tombfile succesfully mounted on $tombmount"
-    if ! [ $NOBIND ]; then
+    if ! option_is_set -n ; then
         exec_safe_bind_hooks ${tombmount}
         exec_safe_post_hooks ${tombmount} open
     fi
@@ -945,7 +945,7 @@ umount_tomb() {
     done
 
     # Execute post-hooks for eventual cleanup
-    if ! [ $NOBIND ]; then
+    if ! option_is_set -n ; then
 	    exec_safe_post_hooks ${tombmount%%/} close
     fi
 
