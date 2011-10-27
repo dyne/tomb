@@ -27,7 +27,6 @@ class TombCreateWizard(QWizard):
 
     def on_tomb_location_clicked(self, *args, **kwargs):
         filename = QtGui.QFileDialog.getSaveFileName(self, 'Create Tomb', filter="*.tomb")
-        print filename
         self.ui.lineEdit_tombpath.setText(filename)
     def on_change_page(self, pagenumber):
         if self.currentPage() == self.ui.wizardPage_progress:
@@ -35,7 +34,19 @@ class TombCreateWizard(QWizard):
     def create_tomb(self, *args, **kwargs):
         #FIXME: this will lock up the GUI
         #FIXME: no support for other keypath than "next to tomb"
-        tomb.Tomb.create(self.ui.lineEdit_tombpath.text(), str(self.ui.spinBox_size.value()), None)
+        keyloc = None
+        if self.ui.radioButton_usb.isChecked():
+            print 'Warning: it is not supported'
+            raise NotImplementedError
+        elif self.ui.radioButton_near.isChecked():
+            print 'going near'
+            keyloc = None
+        else:
+            keyloc = self.ui.lineEdit_custom.text()
+            if not keyloc:
+                raise ValueError
+
+        tomb.Tomb.create(self.ui.lineEdit_tombpath.text(), str(self.ui.spinBox_size.value()), keyloc)
         self.ui.progressBar.setValue(100)
 
 
