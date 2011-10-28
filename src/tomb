@@ -186,7 +186,8 @@ check_priv() {
 	sudok=false
 	sudo -n ${TOMBEXEC} &> /dev/null
 	if [ $? != 0 ]; then # if not then ask a password
-	    cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
+	  for imnotused in 1 2 3; do
+		cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE Super user privileges required
@@ -194,11 +195,18 @@ SETDESC Sudo execution of Tomb ${OLDARGS[@]}
 SETPROMPT Insert your USER password:
 GETPIN
 EOF
+		if [[ $? == 0 ]]; then #success
+		  break
+		fi
+		if [[ $i == 3 ]]; then
+		fi
+	  done
 	fi
+	echo 'password correct; you are sudo now'
 	sudo "${TOMBEXEC}" "${(@)OLDARGS}"
 	exit $?
-    fi # are we root already
-    return 0
+	fi # are we root already
+	return 0
 }
 
 usage() {
