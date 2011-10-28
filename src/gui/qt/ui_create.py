@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'create.ui'
 #
-# Created: Fri Oct 28 02:27:24 2011
+# Created: Fri Oct 28 10:43:28 2011
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -99,8 +99,10 @@ class Ui_Wizard(object):
         self.verticalLayout_4 = QtGui.QVBoxLayout()
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
         self.radioButton_usb = QtGui.QRadioButton(self.wizardPage_key_location)
+        self.radioButton_usb.setEnabled(False)
         self.radioButton_usb.setText(QtGui.QApplication.translate("Wizard", "On a USB pen (best security)", None, QtGui.QApplication.UnicodeUTF8))
-        self.radioButton_usb.setChecked(True)
+        self.radioButton_usb.setCheckable(True)
+        self.radioButton_usb.setChecked(False)
         self.radioButton_usb.setObjectName(_fromUtf8("radioButton_usb"))
         self.verticalLayout_4.addWidget(self.radioButton_usb)
         self.horizontalLayout_4 = QtGui.QHBoxLayout()
@@ -108,6 +110,7 @@ class Ui_Wizard(object):
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem)
         self.label_6 = QtGui.QLabel(self.wizardPage_key_location)
+        self.label_6.setEnabled(False)
         self.label_6.setText(QtGui.QApplication.translate("Wizard", "If you choose to do so, do not insert it NOW. Do it when you are asked to do so", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setObjectName(_fromUtf8("label_6"))
         self.horizontalLayout_4.addWidget(self.label_6)
@@ -121,6 +124,7 @@ class Ui_Wizard(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">It will be created as a regular file in the same directory of your tomb.</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">It is much easier to use, but also much more <span style=\" font-style:italic;\">insecure</span>: all your security will be guaranteed by your <span style=\" font-weight:600;\">password</span>. If you really want to do this, choose a strong password (lot of random/non-dictionary words, spaces, numbers, odd characters)</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton_near.setText(QtGui.QApplication.translate("Wizard", "Near to the tomb itself (this is BAD)", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton_near.setChecked(True)
         self.radioButton_near.setObjectName(_fromUtf8("radioButton_near"))
         self.verticalLayout_5.addWidget(self.radioButton_near)
         self.radioButton_custom = QtGui.QRadioButton(self.wizardPage_key_location)
@@ -170,10 +174,10 @@ class Ui_Wizard(object):
         self.verticalLayout_7.addWidget(self.progressBar)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
-        self.label_7 = QtGui.QLabel(self.layoutWidget)
-        self.label_7.setText(QtGui.QApplication.translate("Wizard", "Creating tomb, please wait...", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_7.setObjectName(_fromUtf8("label_7"))
-        self.horizontalLayout_5.addWidget(self.label_7)
+        self.label_progress = QtGui.QLabel(self.layoutWidget)
+        self.label_progress.setText(QtGui.QApplication.translate("Wizard", "Creating tomb, please wait...", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_progress.setObjectName(_fromUtf8("label_progress"))
+        self.horizontalLayout_5.addWidget(self.label_progress)
         self.verticalLayout_7.addLayout(self.horizontalLayout_5)
         Wizard.addPage(self.wizardPage_progress)
         self.wizardPage_end = QtGui.QWizardPage()
@@ -184,12 +188,12 @@ class Ui_Wizard(object):
         self.label_10.setText(QtGui.QApplication.translate("Wizard", "You successfully created the tomb!", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setObjectName(_fromUtf8("label_10"))
         self.verticalLayout_8.addWidget(self.label_10)
-        self.checkBox = QtGui.QCheckBox(self.wizardPage_end)
-        self.checkBox.setText(QtGui.QApplication.translate("Wizard", "Open the just-created tomb NOW!", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox.setChecked(True)
-        self.checkBox.setTristate(False)
-        self.checkBox.setObjectName(_fromUtf8("checkBox"))
-        self.verticalLayout_8.addWidget(self.checkBox)
+        self.checkBox_open = QtGui.QCheckBox(self.wizardPage_end)
+        self.checkBox_open.setText(QtGui.QApplication.translate("Wizard", "Open the just-created tomb NOW!", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkBox_open.setChecked(True)
+        self.checkBox_open.setTristate(False)
+        self.checkBox_open.setObjectName(_fromUtf8("checkBox_open"))
+        self.verticalLayout_8.addWidget(self.checkBox_open)
         Wizard.addPage(self.wizardPage_end)
         self.label_3.setBuddy(self.spinBox_size)
         self.label_4.setBuddy(self.lineEdit_tombpath)

@@ -147,11 +147,17 @@ p, li { white-space: pre-wrap; }
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <widget class="QRadioButton" name="radioButton_usb">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>On a USB pen (best security)</string>
           </property>
-          <property name="checked">
+          <property name="checkable">
            <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -175,6 +181,9 @@ p, li { white-space: pre-wrap; }
           </item>
           <item>
            <widget class="QLabel" name="label_6">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>If you choose to do so, do not insert it NOW. Do it when you are asked to do so</string>
             </property>
@@ -196,6 +205,9 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Near to the tomb itself (this is BAD)</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -294,7 +306,7 @@ p, li { white-space: pre-wrap; }
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
-        <widget class="QLabel" name="label_7">
+        <widget class="QLabel" name="label_progress">
          <property name="text">
           <string>Creating tomb, please wait...</string>
          </property>
@@ -315,7 +327,7 @@ p, li { white-space: pre-wrap; }
      </widget>
     </item>
     <item>
-     <widget class="QCheckBox" name="checkBox">
+     <widget class="QCheckBox" name="checkBox_open">
       <property name="text">
        <string>Open the just-created tomb NOW!</string>
       </property>
