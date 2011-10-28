@@ -1,4 +1,6 @@
 import sys, os
+from functools import partial
+
 from PyQt4.QtGui import QApplication, QWizard
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -6,7 +8,7 @@ from ui_create import Ui_Wizard
 
 parentdir = sys.path[0].split(os.sep)[:-1]
 sys.path.append(os.sep.join(parentdir))
-from tomblib import tomb
+from tomblib.tomb import Tomb
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -46,9 +48,20 @@ class TombCreateWizard(QWizard):
             if not keyloc:
                 raise ValueError
 
-        tomb.Tomb.create(self.ui.lineEdit_tombpath.text(), str(self.ui.spinBox_size.value()), keyloc)
-        self.ui.progressBar.setValue(100)
+        self.thread = TombCreateThread(self.ui.lineEdit_tombpath.text(), str(self.ui.spinBox_size.value()), keyloc)
+        self.thread.finished.connect(partial(self.ui.progressBar.setValue, 100))
+        self.thread.terminated.connect(partial(self.ui.progressBar.setValue, 100))
+        self.thread.start()
 
+class TombCreateThread(QtCore.QThread):
+    def __init__(self, tombpath, size, keypath):
+        QtCore.QThread.__init__(self)
+        self.tombpath = tombpath
+        self.size = size
+        self.keypath = keypath
+
+    def run(self):
+        Tomb.create(self.tombpath, str(self.size), self.keypath)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
