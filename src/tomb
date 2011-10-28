@@ -33,6 +33,9 @@ STEGHIDE=1
 MKTEMP=1
 MOUNTOPTS="rw,noatime,nodev"
 
+#declare global variables
+QUIET=0
+DEBUG=0
 typeset -A global_opts
 typeset -A opts
 typeset -h username
@@ -292,7 +295,8 @@ check_priv() {
 	sudok=false
 	sudo -n ${TOMBEXEC} &> /dev/null
 	if [ $? != 0 ]; then # if not then ask a password
-	    cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
+	  for imnotused in 1 2 3; do
+		cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE Super user privileges required
@@ -300,6 +304,12 @@ SETDESC Sudo execution of Tomb ${OLDARGS[@]}
 SETPROMPT Insert your USER password:
 GETPIN
 EOF
+		if [[ $? == 0 ]]; then #success
+		  break
+		fi
+		if [[ $i == 3 ]]; then
+		fi
+	  done
 	fi
 	sudo "${TOMBEXEC}" "${(@)OLDARGS}" -U ${UID} -G ${GID}
 	exit $?
