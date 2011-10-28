@@ -186,7 +186,7 @@ check_priv() {
 	sudok=false
 	sudo -n ${TOMBEXEC} &> /dev/null
 	if [ $? != 0 ]; then # if not then ask a password
-	  for imnotused in 1 2 3; do
+	  for i in 1 2 3; do
 		cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
@@ -199,6 +199,7 @@ EOF
 		  break
 		fi
 		if [[ $i == 3 ]]; then
+            exit 16
 		fi
 	  done
 	fi
