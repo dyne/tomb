@@ -1,5 +1,5 @@
 import sys, os
-from functools import partial
+#from functools import partial
 
 from PyQt4.QtGui import QApplication, QWizard
 from PyQt4 import QtCore
@@ -9,6 +9,7 @@ from ui_create import Ui_Wizard
 parentdir = sys.path[0].split(os.sep)[:-1]
 sys.path.append(os.sep.join(parentdir))
 from tomblib.tomb import Tomb
+from worker import TombCreateThread
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -70,25 +71,15 @@ class TombCreateWizard(QWizard):
             self.ui.wizardPage_progress.setFinalPage(True)
         self.ui.wizardPage_progress.completeChanged.emit()
     def create_tomb(self, *args, **kwargs):
-        #TODO: report error
-        keyloc = self._keyloc()
         self.thread = TombCreateThread(self.ui.lineEdit_tombpath.text(), str(self.ui.spinBox_size.value()), self._keyloc())
         self.thread.finished.connect(self.on_thread_creation_finished)
         self.thread.terminated.connect(self.on_thread_creation_finished)
+        self.thread.line_received.connect(self.ui.textBrowser_log.append)
+        def err_append_to_log(text):
+            self.ui.textBrowser_log.append('Error: <strong>' + text + '</strong>')
+        self.thread.error_received.connect(err_append_to_log)
         self.thread.start()
 
-class TombCreateThread(QtCore.QThread):
-    def __init__(self, tombpath, size, keypath):
-        QtCore.QThread.__init__(self)
-        self.tombpath = tombpath
-        self.size = size
-        self.keypath = keypath
-
-    def run(self):
-        self.status = Tomb.create(self.tombpath, str(self.size), self.keypath)
-    
-    def get_success(self):
-        return self.status
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

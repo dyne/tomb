@@ -23,7 +23,7 @@ class Tomb(object):
     If you want to interact asynchronously with tomb, just do it in a separate
     layer.
     '''
-    #TODO: support setting a "pipe" to pass out/err on
+    tombexec = 'tomb'
     def _check_exec_path(self):
         '''Checks, using which, if tomb is available.
         Returns None on error, the path on success.
@@ -34,8 +34,8 @@ class Tomb(object):
             return None
         return path
 
-    @staticmethod
-    def create(tombpath,tombsize,keypath):
+    @classmethod
+    def create(cls, tombpath,tombsize,keypath, stdout=None, stderr=None):
         '''If keypath is None, it will be created adjacent to the tomb.
         This is unsafe, and you should NOT do it.
 
@@ -45,7 +45,7 @@ class Tomb(object):
         if keypath is not None:
             args += ['-k', keypath]
         try:
-            subprocess.check_call(['tomb', 'create'] + args)
+            subprocess.check_call([cls.tombexec, 'create'] + args, stdout=stdout, stderr=stderr)
         except subprocess.CalledProcessError:
             return False
         return True

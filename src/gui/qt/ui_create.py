@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'create.ui'
 #
-# Created: Fri Oct 28 10:43:28 2011
+# Created: Fri Oct 28 20:11:40 2011
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -49,6 +49,7 @@ class Ui_Wizard(object):
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.horizontalLayout.addWidget(self.label_3)
         self.spinBox_size = QtGui.QSpinBox(self.wizardPage_tomb_size)
+        self.spinBox_size.setMinimum(10)
         self.spinBox_size.setMaximum(100000)
         self.spinBox_size.setProperty("value", 100)
         self.spinBox_size.setObjectName(_fromUtf8("spinBox_size"))
@@ -160,13 +161,11 @@ class Ui_Wizard(object):
         self.wizardPage_progress.setTitle(QtGui.QApplication.translate("Wizard", "Creating", None, QtGui.QApplication.UnicodeUTF8))
         self.wizardPage_progress.setSubTitle(QtGui.QApplication.translate("Wizard", "Please wait", None, QtGui.QApplication.UnicodeUTF8))
         self.wizardPage_progress.setObjectName(_fromUtf8("wizardPage_progress"))
-        self.layoutWidget = QtGui.QWidget(self.wizardPage_progress)
-        self.layoutWidget.setGeometry(QtCore.QRect(30, 30, 276, 52))
-        self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
-        self.verticalLayout_7 = QtGui.QVBoxLayout(self.layoutWidget)
-        self.verticalLayout_7.setMargin(0)
+        self.verticalLayout_9 = QtGui.QVBoxLayout(self.wizardPage_progress)
+        self.verticalLayout_9.setObjectName(_fromUtf8("verticalLayout_9"))
+        self.verticalLayout_7 = QtGui.QVBoxLayout()
         self.verticalLayout_7.setObjectName(_fromUtf8("verticalLayout_7"))
-        self.progressBar = QtGui.QProgressBar(self.layoutWidget)
+        self.progressBar = QtGui.QProgressBar(self.wizardPage_progress)
         self.progressBar.setProperty("value", 0)
         self.progressBar.setTextVisible(True)
         self.progressBar.setInvertedAppearance(False)
@@ -174,11 +173,22 @@ class Ui_Wizard(object):
         self.verticalLayout_7.addWidget(self.progressBar)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
-        self.label_progress = QtGui.QLabel(self.layoutWidget)
+        self.label_progress = QtGui.QLabel(self.wizardPage_progress)
         self.label_progress.setText(QtGui.QApplication.translate("Wizard", "Creating tomb, please wait...", None, QtGui.QApplication.UnicodeUTF8))
         self.label_progress.setObjectName(_fromUtf8("label_progress"))
         self.horizontalLayout_5.addWidget(self.label_progress)
         self.verticalLayout_7.addLayout(self.horizontalLayout_5)
+        self.verticalLayout_9.addLayout(self.verticalLayout_7)
+        self.textBrowser_log = QtGui.QTextBrowser(self.wizardPage_progress)
+        self.textBrowser_log.setDocumentTitle(QtGui.QApplication.translate("Wizard", "Log", None, QtGui.QApplication.UnicodeUTF8))
+        self.textBrowser_log.setHtml(QtGui.QApplication.translate("Wizard", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><title>Log</title><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">Log</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600;\"></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.textBrowser_log.setObjectName(_fromUtf8("textBrowser_log"))
+        self.verticalLayout_9.addWidget(self.textBrowser_log)
         Wizard.addPage(self.wizardPage_progress)
         self.wizardPage_end = QtGui.QWizardPage()
         self.wizardPage_end.setObjectName(_fromUtf8("wizardPage_end"))
