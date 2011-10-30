@@ -293,6 +293,8 @@ create_tomb() {
         error "You have swap activated; use --ignore-swap if you want to skip this check"
         act "Using encryption with swap activated is very bad, because some files, or even your secret key, could be written on hard disk."
         act "However, it could be that your swap is encrypted. If this is case, this is ok. Then, use --ignore-swap to skip this check"
+        act "You seem to be using `tail -n +2 /proc/swaps|wc -l` swaps:"
+        tail -n +2 /proc/swaps
         exit 1
     fi
     if ! [ ${CMD2} ]; then
@@ -473,6 +475,8 @@ mount_tomb() {
         error "You have swap activated; use --ignore-swap if you want to skip this check"
         act "Using encryption with swap activated is very bad, because some files, or even your secret key, could be written on hard disk."
         act "However, it could be that your swap is encrypted. If this is case, this is ok. Then, use --ignore-swap to skip this check"
+        act "You seem to be using `tail -n +2 /proc/swaps|wc -l` swaps:"
+        tail -n +2 /proc/swaps
         exit 1
     fi
     if ! [ ${CMD2} ]; then
