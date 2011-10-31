@@ -37,8 +37,6 @@ typeset -A opts
 
 # PATH=/usr/bin:/usr/sbin:/bin:/sbin
 
-autoload colors; colors
-
 # standard output message routines
 # it's always useful to wrap them, in case we change behaviour later
 notice() { if [[ $QUIET == 0 ]]; then print "$fg_bold[green][*]$fg_no_bold[white] $1" >&2; fi }
@@ -1247,8 +1245,8 @@ main() {
     #     There are two reasons for that:
     #       I. usability; user expect that "-s" is "size
     #       II. Option parsing WILL EXPLODE if you do this kind of bad things
-    #               (it will say "option defined more than once, and he's right)
-    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v)
+    #               (it will say "option defined more than once, and he's right")
+    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v -no-color)
     subcommands_opts[__default]=""
     subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o -ignore-swap"
     subcommands_opts[mount]=${subcommands_opts[open]}
@@ -1320,6 +1318,10 @@ main() {
       shift
   fi
   ### End parsing command-specific options
+
+    if ! option_is_set --no-color; then
+        autoload colors; colors
+    fi
 
   ### Set global options (useless, but for code retro-compatibility)
   for opt in ${(k)global_opts}; do
