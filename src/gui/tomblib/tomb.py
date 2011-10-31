@@ -34,6 +34,14 @@ class Tomb(object):
         return path
 
     @classmethod
+    def check(cls, command, stdout=None, stderr=None, no_color=True):
+        try:
+            subprocess.check_call([cls.tombexec, 'check'] + [command], stdout=stdout, stderr=stderr)
+        except subprocess.CalledProcessError:
+            return False
+        return True
+
+    @classmethod
     def create(cls, tombpath,tombsize,keypath, stdout=None, stderr=None, no_color=True, ignore_swap=False):
         '''If keypath is None, it will be created adjacent to the tomb.
         This is unsafe, and you should NOT do it.

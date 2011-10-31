@@ -298,8 +298,20 @@ EOF
     return 0
 }
 # }}}
-# }}}
-# {{{ - TOMB USAGE
+check_command() {
+    #generic checks; useful for interaction, to check if there are problems
+    #before wasting user's time
+    
+    if ! option_is_set --ignore-swap; then
+        if [[ $1 == 'create' || $1 == 'open' ]]; then
+            if ! check_swap; then
+                error "Swap activated. Disable it with swapoff, or use --ignore-swap"
+                exit 1
+            fi
+        fi
+    fi
+}
+
 usage() {
     cat <<EOF
 
@@ -1624,6 +1636,7 @@ main() {
     subcommands_opts[source]=""
     subcommands_opts[status]=""
     subcommands_opts[resize]="s: -size=s k: -key=k"
+    subcommands_opts[check]="-ignore-swap"
 #    subcommands_opts[translate]=""
     
     ### Detect subcommand
@@ -1723,14 +1736,13 @@ main() {
 		_warning "steghide not installed. Cannot bury your key"
 		return 1
 	    fi
-	    encode_key ${CMD2} ${CMD3}
-	    ;;
+		 encode_key $PARAM[1] $PARAM[2] ;;	
 	exhume)
 	    if [ "$STEGHIDE" = 0 ]; then
  		_warning "steghide not installed. Cannot exhume your key"
 		return 1
 	    fi
-	    decode_key ${CMD2}
+		 decode_key $PARAM[1] 
 	    ;;
 	resize)
         check_priv
@@ -1740,8 +1752,9 @@ main() {
 	'source')   return 0 ;;
 	install)    check_priv ; install_tomb ;;
 	askpass)    ask_password ${CMD2} ${CMD3} ;;
-	mktemp)     safe_dir ${CMD2} ;;
+	 mktemp) safe_dir $PARAM[1] ;;
 	translate)  generate_translatable_strings ;;
+      check) check_command $PARAM[1] ;;
 	__default)
 	    cat <<EOF
 Tomb $VERSION - a strong and gentle undertaker for your secrets
