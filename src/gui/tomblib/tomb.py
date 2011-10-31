@@ -9,7 +9,6 @@ Notes: consider moving to a more typical usage (instantiate, then use method)
 to make it more configurable (ie set the tomb executable path).
 '''
 
-import os
 import subprocess
 
 class Tomb(object):
@@ -35,15 +34,22 @@ class Tomb(object):
         return path
 
     @classmethod
-    def create(cls, tombpath,tombsize,keypath, stdout=None, stderr=None):
+    def create(cls, tombpath,tombsize,keypath, stdout=None, stderr=None, no_color=True, ignore_swap=False):
         '''If keypath is None, it will be created adjacent to the tomb.
         This is unsafe, and you should NOT do it.
 
         Note that this will invoke pinentry
+
+        no_color is supported as an option for short-lived retrocompatibility:
+            it will be removed as soon as no-color will be integrated
         '''
         args = [tombpath, '-s', tombsize]
         if keypath is not None:
             args += ['-k', keypath]
+        if no_color:
+            args += ['--no-color']
+        if ignore_swap:
+            args += ['--ignore-swap']
         try:
             subprocess.check_call([cls.tombexec, 'create'] + args, stdout=stdout, stderr=stderr)
         except subprocess.CalledProcessError:
