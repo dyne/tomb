@@ -34,9 +34,14 @@ class Tomb(object):
         return path
 
     @classmethod
-    def check(cls, command, stdout=None, stderr=None, no_color=True):
+    def check(cls, command, stdout=None, stderr=None, no_color=True, ignore_swap=False):
+        args = [command]
+        if no_color:
+            args += ['--no-color']
+        if ignore_swap:
+            args += ['--ignore-swap']
         try:
-            subprocess.check_call([cls.tombexec, 'check'] + [command], stdout=stdout, stderr=stderr)
+            subprocess.check_call([cls.tombexec, 'check'] + args, stdout=stdout, stderr=stderr)
         except subprocess.CalledProcessError:
             return False
         return True

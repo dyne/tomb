@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'create.ui'
 #
-# Created: Fri Oct 28 20:11:40 2011
-#      by: PyQt4 UI code generator 4.8.5
+# Created: Tue Nov  1 02:35:05 2011
+#      by: PyQt4 UI code generator 4.8.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -33,6 +33,67 @@ class Ui_Wizard(object):
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
         Wizard.addPage(self.wizardPage_intro)
+        self.wizardPage_check = QtGui.QWizardPage()
+        self.wizardPage_check.setTitle(QtGui.QApplication.translate("Wizard", "Requirements check", None, QtGui.QApplication.UnicodeUTF8))
+        self.wizardPage_check.setObjectName(_fromUtf8("wizardPage_check"))
+        self.verticalLayout_12 = QtGui.QVBoxLayout(self.wizardPage_check)
+        self.verticalLayout_12.setObjectName(_fromUtf8("verticalLayout_12"))
+        self.label_check = QtGui.QLabel(self.wizardPage_check)
+        self.label_check.setText(QtGui.QApplication.translate("Wizard", "Checking...", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_check.setObjectName(_fromUtf8("label_check"))
+        self.verticalLayout_12.addWidget(self.label_check)
+        self.groupBox_swap = QtGui.QGroupBox(self.wizardPage_check)
+        self.groupBox_swap.setEnabled(True)
+        self.groupBox_swap.setTitle(QtGui.QApplication.translate("Wizard", "Swap error", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_swap.setObjectName(_fromUtf8("groupBox_swap"))
+        self.verticalLayout_13 = QtGui.QVBoxLayout(self.groupBox_swap)
+        self.verticalLayout_13.setObjectName(_fromUtf8("verticalLayout_13"))
+        self.label_7 = QtGui.QLabel(self.groupBox_swap)
+        self.label_7.setText(QtGui.QApplication.translate("Wizard", "It seems that you have swap activated. It is very dangerous, since you could leave LOT of traces on your computer UNencrypted. You have some options:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_7.setWordWrap(True)
+        self.label_7.setObjectName(_fromUtf8("label_7"))
+        self.verticalLayout_13.addWidget(self.label_7)
+        self.verticalLayout_swapoff = QtGui.QVBoxLayout()
+        self.verticalLayout_swapoff.setObjectName(_fromUtf8("verticalLayout_swapoff"))
+        self.radioButton_swapoff = QtGui.QRadioButton(self.groupBox_swap)
+        self.radioButton_swapoff.setText(QtGui.QApplication.translate("Wizard", "Swapoff", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton_swapoff.setObjectName(_fromUtf8("radioButton_swapoff"))
+        self.verticalLayout_swapoff.addWidget(self.radioButton_swapoff)
+        self.horizontalLayout_6 = QtGui.QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
+        spacerItem = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_6.addItem(spacerItem)
+        self.label_swapoff = QtGui.QLabel(self.groupBox_swap)
+        self.label_swapoff.setText(QtGui.QApplication.translate("Wizard", "Note: swapoff could take a long time, and, in case the memory is not enough, could even make your system crash. Your system seems to have %freeram%MB free", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_swapoff.setWordWrap(True)
+        self.label_swapoff.setObjectName(_fromUtf8("label_swapoff"))
+        self.horizontalLayout_6.addWidget(self.label_swapoff)
+        self.verticalLayout_swapoff.addLayout(self.horizontalLayout_6)
+        self.verticalLayout_13.addLayout(self.verticalLayout_swapoff)
+        self.verticalLayout_11 = QtGui.QVBoxLayout()
+        self.verticalLayout_11.setObjectName(_fromUtf8("verticalLayout_11"))
+        self.radioButton_ignore = QtGui.QRadioButton(self.groupBox_swap)
+        self.radioButton_ignore.setText(QtGui.QApplication.translate("Wizard", "Ignore", None, QtGui.QApplication.UnicodeUTF8))
+        self.radioButton_ignore.setObjectName(_fromUtf8("radioButton_ignore"))
+        self.verticalLayout_11.addWidget(self.radioButton_ignore)
+        self.horizontalLayout_7 = QtGui.QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
+        spacerItem1 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_7.addItem(spacerItem1)
+        self.label_9 = QtGui.QLabel(self.groupBox_swap)
+        self.label_9.setText(QtGui.QApplication.translate("Wizard", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'DejaVu Sans\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">Note:</span> You should use this only if you are sure that your swap is encrypted, or that you are using compcache.</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">If this is not the case, DON\'T select this, as it is <span style=\" font-weight:600;\">VERY DANGEROUS </span>to use encryption with swap activated</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_9.setWordWrap(True)
+        self.label_9.setObjectName(_fromUtf8("label_9"))
+        self.horizontalLayout_7.addWidget(self.label_9)
+        self.verticalLayout_11.addLayout(self.horizontalLayout_7)
+        self.verticalLayout_13.addLayout(self.verticalLayout_11)
+        self.verticalLayout_12.addWidget(self.groupBox_swap)
+        Wizard.addPage(self.wizardPage_check)
         self.wizardPage_tomb_size = QtGui.QWizardPage()
         self.wizardPage_tomb_size.setObjectName(_fromUtf8("wizardPage_tomb_size"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.wizardPage_tomb_size)
@@ -108,8 +169,8 @@ class Ui_Wizard(object):
         self.verticalLayout_4.addWidget(self.radioButton_usb)
         self.horizontalLayout_4 = QtGui.QHBoxLayout()
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_4.addItem(spacerItem)
+        spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem2)
         self.label_6 = QtGui.QLabel(self.wizardPage_key_location)
         self.label_6.setEnabled(False)
         self.label_6.setText(QtGui.QApplication.translate("Wizard", "If you choose to do so, do not insert it NOW. Do it when you are asked to do so", None, QtGui.QApplication.UnicodeUTF8))
@@ -135,8 +196,8 @@ class Ui_Wizard(object):
         self.verticalLayout_6.addLayout(self.verticalLayout_5)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_3.addItem(spacerItem1)
+        spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem3)
         self.lineEdit_custom = QtGui.QLineEdit(self.wizardPage_key_location)
         self.lineEdit_custom.setEnabled(False)
         self.lineEdit_custom.setObjectName(_fromUtf8("lineEdit_custom"))
@@ -184,9 +245,9 @@ class Ui_Wizard(object):
         self.textBrowser_log.setHtml(QtGui.QApplication.translate("Wizard", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><title>Log</title><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">Log</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600;\"></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+"</style></head><body style=\" font-family:\'DejaVu Sans\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:600;\">Log</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Sans Serif\'; font-size:9pt; font-weight:600;\"></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.textBrowser_log.setObjectName(_fromUtf8("textBrowser_log"))
         self.verticalLayout_9.addWidget(self.textBrowser_log)
         Wizard.addPage(self.wizardPage_progress)
