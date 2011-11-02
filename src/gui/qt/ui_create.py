@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'create.ui'
 #
-# Created: Tue Nov  1 02:35:05 2011
+# Created: Thu Nov  3 00:16:51 2011
 #      by: PyQt4 UI code generator 4.8.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -260,8 +260,9 @@ class Ui_Wizard(object):
         self.label_10.setObjectName(_fromUtf8("label_10"))
         self.verticalLayout_8.addWidget(self.label_10)
         self.checkBox_open = QtGui.QCheckBox(self.wizardPage_end)
+        self.checkBox_open.setEnabled(False)
         self.checkBox_open.setText(QtGui.QApplication.translate("Wizard", "Open the just-created tomb NOW!", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkBox_open.setChecked(True)
+        self.checkBox_open.setChecked(False)
         self.checkBox_open.setTristate(False)
         self.checkBox_open.setObjectName(_fromUtf8("checkBox_open"))
         self.verticalLayout_8.addWidget(self.checkBox_open)
