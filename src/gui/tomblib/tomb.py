@@ -28,7 +28,7 @@ class Tomb(object):
         Returns None on error, the path on success.
         '''
         try:
-            path=subprocess.check_output(['which', 'tomb'])
+            path = subprocess.check_output(['which', 'tomb'])
         except subprocess.CalledProcessError:
             return None
         return path
@@ -47,7 +47,7 @@ class Tomb(object):
         return True
 
     @classmethod
-    def create(cls, tombpath,tombsize,keypath, stdout=None, stderr=None, no_color=True, ignore_swap=False):
+    def create(cls, tombpath, tombsize,keypath, stdout=None, stderr=None, no_color=True, ignore_swap=False):
         '''If keypath is None, it will be created adjacent to the tomb.
         This is unsafe, and you should NOT do it.
 

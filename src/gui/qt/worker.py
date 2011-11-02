@@ -1,6 +1,5 @@
 import sys,os
 import time
-import re
 from tempfile import NamedTemporaryFile
 
 from PyQt4 import QtCore
@@ -8,6 +7,7 @@ from PyQt4 import QtCore
 parentdir = sys.path[0].split(os.sep)[:-1]
 sys.path.append(os.sep.join(parentdir))
 from tomblib.tomb import Tomb
+from tomblib.parser import parse_line
 
 class TombCreateThread(QtCore.QThread):
     line_received = QtCore.pyqtSignal(QtCore.QString)
@@ -58,7 +58,6 @@ class TombOutputThread(QtCore.QThread):
         #This could be simplified, and s/search/match, if --no-color supported
         #see #59
         #TODO: this should be moved to tomblib.parse
-        err_regex = re.compile(r'\[!\][^ ]* +(.+)$')
-        match = err_regex.search(line)
-        if match:
-            self.error_received.emit(match.group(1))
+        parsed = parse_line(line)
+        if parsed and parsed['type'] == 'error':
+            self.error_received.emit(parsed.content)
