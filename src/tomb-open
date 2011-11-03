@@ -338,7 +338,7 @@ cat <<EOF
 EOF
 
 tombfile=${tombname}.tomb
-"${TOMBEXEC}" create -s $tombsize ${tombfile}
+"${TOMBEXEC}" create --ignore-swap -s $tombsize ${tombfile}
 
 if [ $? != 0 ]; then
     error "An error occurred creating tomb, operation aborted."
