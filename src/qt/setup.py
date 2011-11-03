@@ -38,6 +38,11 @@ setup(
         packages = ['tombqt'],
         cmdclass = {
             'build_ui': build_ui
+            },
+        entry_points = {
+            'gui_scripts': [
+                'tomb-qt-create = tombqt.create:run_create_wizard'
+                ]
             }
 )
 

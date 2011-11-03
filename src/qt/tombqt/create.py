@@ -109,6 +109,7 @@ class TombCreateWizard(QWizard):
         self.thread.error_received.connect(err_append_to_log)
         self.thread.start()
     def check_requisite(self):
+        Tomb.tombexec = '/home/davide/coding/projects/tomb/src/tomb'
         self._tomb_check = check = Tomb.check('create', no_color=False)
         self.ui.wizardPage_check.completeChanged.emit()
         if check:
@@ -123,8 +124,12 @@ class TombCreateWizard(QWizard):
             self.ui.label_swapoff.setEnabled(False)
 
 
-if __name__ == '__main__':
+def run_create_wizard():
     app = QApplication(sys.argv)
     window = TombCreateWizard()
     window.show()
     sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    run_create_wizard()
+
