@@ -67,6 +67,12 @@ fails if the tomb is in use by running processes, the command
 \fIslam\fR can be used to force close.
 
 .B
+.IP "passwd"
+Changes the password of a tomb key file specified in the \fIfirst
+argument\fR. It will need the old password to decode the key file, it
+will then reencode it using the new password.
+
+.B
 .IP "slam"
 Closes a tomb like the command \fIclose\fR does, but in case it is in
 use looks for all the processes accessing its files and violently
@@ -135,8 +141,12 @@ Display version and quit
 .B
 .IP "-q"
 Run more quietly
+.B
 .IP "-D"
 Print more information while running, for debugging purposes
+.B
+.IP "--no-color"
+Don't use colors; useful for old terminals or integration in other scripts
 
 
 .SH HOOKS
