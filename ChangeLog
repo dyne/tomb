@@ -1,3 +1,9 @@
+Nov 2011 - 1.2
+	Includes an Important fix to password parsing for spaces and
+	extended chars, plus a new 'passwd' command to change a key's
+	password. Tomb now checks for swap to avoid its usage (see SWAP
+	section in manpage) and warns the user when the tomb is almost
+	full.
 
 May 2011 - 1.1
 	Fixes to mime types, icons and desktop integration. A new 'list'

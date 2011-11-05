@@ -20,8 +20,8 @@
 # this source code; if not, write to:
 # Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-VERSION=1.1
-DATE=Sept/2011
+VERSION=1.2
+DATE=Nov/2011
 TOMBEXEC=$0
 TOMBOPENEXEC="tomb-open"
 typeset -a OLDARGS

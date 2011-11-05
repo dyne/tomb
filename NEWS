@@ -1,0 +1,14 @@
+Critical bugfix
+
+The previous version of Tomb had a critical bug: passwords containing
+odd characters where badly interpreted and split at spaces. This means
+that if you password was ‘I am 12!! perfectly 7^!@^#38123 secure' it
+has been understood by tomb as simply ‘I’ being split at the first
+“odd” character. So even if you thought you have a long pass-phrase,
+instead it might have happened that you were using a single character
+one.
+
+Now this bug has been fixed. However, it won’t fix the password for
+the tomb that you created and used so far: you need to change the
+password using the new command 'tomb passwd'.
+

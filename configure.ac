@@ -4,7 +4,7 @@ dnl ==============================================================
 
 AC_PREREQ([2.60])
 
-AC_INIT([Tomb],[1.1],[jaromil@dyne.org],[Tomb])
+AC_INIT([Tomb],[1.2],[jaromil@dyne.org],[Tomb])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_CANONICAL_HOST
