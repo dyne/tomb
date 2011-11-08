@@ -25,7 +25,6 @@ class TombCreateThread(QtCore.QThread):
 
     def run(self):
         self.err_thread.start()
-        #Tomb.tombexec = '/home/davide/coding/projects/tomb/src/tomb'
         self.status = Tomb.create(str(self.tombpath), str(self.size),
                 self.keypath, stderr=self.err_thread.buffer, **self.opts)
 #        self.err_thread.terminate()

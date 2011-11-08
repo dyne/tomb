@@ -109,7 +109,6 @@ class TombCreateWizard(QWizard):
         self.thread.error_received.connect(err_append_to_log)
         self.thread.start()
     def check_requisite(self):
-        Tomb.tombexec = '/home/davide/coding/projects/tomb/src/tomb'
         self._tomb_check = check = Tomb.check('create', no_color=False)
         self.ui.wizardPage_check.completeChanged.emit()
         if check:
