@@ -31,34 +31,30 @@ if [[ $? != 0 ]]; then
 fi
 source tomb source
 
-if ! [ $1 ] ; then
-    _warning "an argument is missing, the undertaker is confused"
-    _failure "usage: undertaker url://host:path/to/tomb.key"
-fi
+typeset -A opts
+typeset -A args
+function undertaker_scheme() {
+    zparseopts -D -print-path=print_path
 
-ARG1=${1}
-
-check_bin
-
-_message "Undertaker will look for ${ARG1}"
-
-baseurl=${ARG1%//*}
-
-case $baseurl in
-    bluetooth:)
-	_message "access to bluetooth protocol requested"
-	which obexftp &> /dev/null
-	if [[ $? != 0 ]]; then
-	    die "obexftp not found, needed for bluetooth: operation aborted."
-	fi
-	keytmp=`safe_dir undertaker`
-	cd $keytmp
-	# fetch key from bluetooth, url format: bluetooth://55:33:44:55:66/file/path
-	obexdevpath=${ARG1#*//}
-	obexdev=${obexdevpath%%/*}
-	obexpath=${obexdevpath#*/}
-	_message "obex device: $obexdev"
-	_message "obex path: $obexpath"
+    scheme=$1
+    keypath=$2
+    case $scheme in
+        bluetooth)
+            #TODO: support --print-path
+            act "access to bluetooth protocol requested"
+            which obexftp &> /dev/null
+            if [[ $? != 0 ]]; then
+                error "obexftp not found, needed for bluetooth: operation aborted."
+                return 64
+            fi
+            keytmp=`safe_dir undertaker`
+            cd $keytmp
+            # fetch key from bluetooth, url format: bluetooth://55:33:44:55:66/file/path
+            obexdevpath=${keypath#*//}
+            obexdev=${obexdevpath%%/*}
+            obexpath=${obexdevpath#*/}
+            act "obex device: $obexdev"
+            act "obex path: $obexpath"
 	obexftp -b $obexdev -g $obexpath 
 	if [[ $? != 0 ]]; then
 	    rmdir ${keytmp}
@@ -66,28 +62,72 @@ case $baseurl in
 	fi
 	# print out the key on stdout
 	cat $obexpath >&1
-	# wipe out the key
-	${=WIPE} $obexpath
-	cd -
-	rmdir ${keytmp}
+            # wipe out the key
+	${WIPE[@]} $obexpath
+            cd -
+            rmdir ${keytmp}
 
-#	tombkey="basename $obexpath"
-	
-	;;
+        #	tombkey="basename $obexpath"
+            ;;
+        file)
+            if ! [[ -f $keypath ]]; then
+                error "Invalid path $keypath"
+                return 1
+            fi
+            if [[ -n $print_path ]]; then
+                echo $keypath;
+            else
+                < $keypath
+                r=$?
+                if [[ $r != 0 ]]; then return 1; fi
+                return 0
+            fi
+            ;;
 
-    file:)
-        _message "local file access requested"
-	die "TODO"
-	;;
-    http:)
-	_message "access to web protocol requested"
-	die "TODO"
-	;;
-    ssh:)
-	_message "access to secure shell requested"
-	die "TODO"
-	;;
-    *)
-	die "url protocol not recognized: $baseurl"
-	;;
-esac
+        *)
+            #TODO: support undertaker-$scheme
+            error "url protocol not recognized: $baseurl"
+            return 64
+            ;;
+    esac
+}
+function main() {
+        zparseopts -M -E -D -Aopts -poll -print-path
+        if ! [ $1 ] ; then
+            error "an argument is missing, the undertaker is confused"
+            act "usage: undertaker [options] url://host:path/to/tomb.key"
+            exit 1;
+        fi
+        check_bin
+
+        notice "Undertaker will look for ${1}"
+
+        ARG1=${1}
+        scheme=${ARG1%://*}
+        keypath=${ARG1#*//}
+
+        if [[ -n ${(k)opts[--poll]} ]]; then
+            while true; do
+                undertaker_scheme $scheme $keypath
+                r=$?
+                if [[ $r == 0 ]]; then
+                    exit 0
+                fi
+                if [[ $r == 64 ]]; then
+                    exit 64
+                fi
+                sleep 3
+            done
+        else
+            undertaker_scheme $scheme $keypath
+        fi
+}
+main $*
+
+### Conventions and other comments:
+# 
+# EXIT CODES FOR SCHEME HANDLERS
+# 0 is for everything went fine
+# 64 is for "not supported/the problem won't be solved by polling". This is for things like: unmet dependencies, not supported at all, etc
+# everything else means just "error". Use 1, please. So other codes can be used if needed
+#
