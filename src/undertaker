@@ -110,9 +110,6 @@ function main() {
             while true; do
                 undertaker_scheme $scheme $keypath
                 r=$?
-                if [[ $r == 0 ]]; then
-                    exit 0
-                fi
                 if [[ $r == 64 ]]; then
                     exit 64
                 fi
