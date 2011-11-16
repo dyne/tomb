@@ -100,6 +100,27 @@ function undertaker_scheme() {
                 fi
             done
             ;;
+        udisks)
+            #It implements automounting using udisks; udisks is a (recently)
+            #new technology, so we can't rely on it being present
+            if ! which udisks &> /dev/null; then
+                error 'udisks not found'
+                exit 64
+            fi
+            while true; do
+                device=`udisks --monitor|egrep '/sd[a-z][0-9]' -o -m1`
+                device=/dev$device
+                udisks --mount $device
+                ###get mountpoint for device
+                mountpoint=`egrep "^${device} " /etc/mtab|cut -d ' ' -f2`
+                undertaker_scheme ${print_path[@]} file ${mountpoint}/${keypath}
+                ret=$?
+                udisks --unmount $device
+                if [[ $ret == 0 ]]; then
+                    return 0
+                fi
+            done
+            ;;
         *)
             if ! which undertaker-$scheme &> /dev/null; then
                 error "url protocol not recognized: $scheme"
