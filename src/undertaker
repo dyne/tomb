@@ -84,9 +84,12 @@ function undertaker_scheme() {
             ;;
 
         *)
-            #TODO: support undertaker-$scheme
-            error "url protocol not recognized: $baseurl"
-            return 64
+            if ! which undertaker-$scheme &> /dev/null; then
+                error "url protocol not recognized: $scheme"
+                return 64
+            fi
+            undertaker-$scheme ${(kv)opts} ${scheme}://$keypath
+            return $?
             ;;
     esac
 }
