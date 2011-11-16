@@ -121,6 +121,10 @@ function undertaker_scheme() {
                 fi
             done
             ;;
+        near)
+            ###Given the path to the tomb, search the key near to that
+            undertaker_scheme file ${keypath}.key
+            ;;
         *)
             if ! which undertaker-$scheme &> /dev/null; then
                 error "url protocol not recognized: $scheme"
