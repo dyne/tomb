@@ -29,7 +29,6 @@ which tomb > /dev/null
 if [[ $? != 0 ]]; then
     print "$fg[red][!]$fg[white] Tomb command not found, operation aborted."; exit 1
 fi
-source tomb source
 
 typeset -A opts
 typeset -A args
@@ -92,15 +91,25 @@ function undertaker_scheme() {
     esac
 }
 function main() {
-        zparseopts -M -E -D -Aopts -poll -print-path
+        typeset -A opts
+        zparseopts -M -E -D -Aopts -poll -print-path -machine-parseable
         if ! [ $1 ] ; then
             error "an argument is missing, the undertaker is confused"
             act "usage: undertaker [options] url://host:path/to/tomb.key"
             exit 1;
         fi
+        local -a tomb_opts
+        if [[ -n ${(k)opts[--machine-parseable]} ]]; then
+            tomb_opts+='--machine-parseable'
+        fi
+        local -A backupopts
+        backupopts=${(kv)opts}
+        source tomb ${tomb_opts[@]} source
+        opts=${(kv)backupopts}
         check_bin
 
-        notice "Undertaker will look for ${1}"
+
+        notice "Undertaker will look for $1"
 
         ARG1=${1}
         scheme=${ARG1%://*}
@@ -108,11 +117,13 @@ function main() {
 
         if [[ -n ${(k)opts[--poll]} ]]; then
             while true; do
+                progress poll 0 search
                 undertaker_scheme $scheme $keypath
                 r=$?
                 if [[ $r == 64 ]]; then
                     exit 64
                 fi
+                progress poll 100 done
                 sleep 3
             done
         else
