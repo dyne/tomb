@@ -30,12 +30,20 @@ if [[ $? != 0 ]]; then
     print "$fg[red][!]$fg[white] Tomb command not found, operation aborted."; exit 1
 fi
 
-typeset -A opts
-typeset -A args
+key_found() {
+    # $1 is "url"
+    if option_is_set --machine-parseable; then
+        print -n '[m]'
+    fi
+    print "$fg[white][found] $1"
+}
+
 function undertaker_scheme() {
     zparseopts -D -print-path=print_path
 
+    local scheme
     scheme=$1
+    local keypath
     keypath=$2
     case $scheme in
         bluetooth)
@@ -74,7 +82,7 @@ function undertaker_scheme() {
                 return 1
             fi
             if [[ -n $print_path ]]; then
-                echo $keypath;
+                key_found $scheme://$keypath;
             else
                 < $keypath
                 r=$?
@@ -83,12 +91,21 @@ function undertaker_scheme() {
             fi
             ;;
 
+        mounted)
+            for mountpoint in `cut -f2 /etc/mtab -d ' ' | sort -u`; do
+                undertaker_scheme ${print_path[@]} file ${mountpoint}/${keypath}
+                ret=$?
+                if [[ $ret == 0 ]]; then
+                    return 0
+                fi
+            done
+            ;;
         *)
             if ! which undertaker-$scheme &> /dev/null; then
                 error "url protocol not recognized: $scheme"
                 return 64
             fi
-            undertaker-$scheme ${(kv)opts} ${scheme}://$keypath
+            undertaker-$scheme ${print_path[@]} ${scheme}://$keypath
             return $?
             ;;
     esac
@@ -105,12 +122,19 @@ function main() {
         if [[ -n ${(k)opts[--machine-parseable]} ]]; then
             tomb_opts+='--machine-parseable'
         fi
+        local -a under_opts
+        if [[ -n ${(k)opts[--print-path]} ]]; then
+            under_opts+='--print-path'
+        fi
         local -A backupopts
-        backupopts=${(kv)opts}
+        for a in ${(k)opts}; do
+            backupopts[$a]=${opts[$a]}
+        done
         source tomb ${tomb_opts[@]} source
-        opts=${(kv)backupopts}
+        for a in ${(k)backupopts}; do
+            opts[$a]=${backupopts[$a]}
+        done
         check_bin
-
 
         notice "Undertaker will look for $1"
 
@@ -121,7 +145,7 @@ function main() {
         if [[ -n ${(k)opts[--poll]} ]]; then
             while true; do
                 progress poll 0 search
-                undertaker_scheme $scheme $keypath
+                undertaker_scheme ${under_opts[@]} $scheme $keypath
                 r=$?
                 if [[ $r == 64 ]]; then
                     exit 64
@@ -130,7 +154,7 @@ function main() {
                 sleep 3
             done
         else
-            undertaker_scheme $scheme $keypath
+            undertaker_scheme ${under_opts[@]} $scheme $keypath
         fi
 }
 main $*

@@ -110,6 +110,28 @@ function _failure die()
     option_is_set -q || _msg failure "$1"
     exit $exitcode
 }
+progress() {
+    #      $1 is "what is progressing"
+    #      $2 is "percentage"
+    #      $3 is (eventually blank) status
+    #      Example: if creating a tomb, it could be sth like
+    #          progress create 0 filling with random data
+    #          progress create 40 generating key
+    #          progress keygen 0 please move the mouse
+    #          progress keygen 30 please move the mouse
+    #          progress keygen 60 please move the mouse
+    #          progress keygen 100 key generated
+    #          progress create 80 please enter password
+    #          progress create 90 formatting the tomb
+    #          progress create 100 tomb created successfully
+    local -a prog_opts
+    zparseopts -a prog_opts -D -E -machine-parseable
+    if ! option_is_set --machine-parseable; then
+        return
+    fi
+    print "[m][P][$1][$2][$3]" >&2
+
+}
 
 # }}}
 # {{{ - CHECK BINARY DEPENDENCIES
