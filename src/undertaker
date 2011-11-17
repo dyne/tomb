@@ -1,0 +1,96 @@
+#!/bin/zsh
+#
+# Undertaker, auxiliary command for Tomb
+#
+# Tomb is a tool to operate file encryption of private and secret data
+#
+# Undertaker is a tool to retrieve tomb keys from various sources
+#
+# Copyleft (C) 2011 Denis Roio <jaromil@dyne.org>
+#
+# This source  code is free  software; you can redistribute  it and/or
+# modify it under the terms of  the GNU Public License as published by
+# the Free  Software Foundation; either  version 3 of the  License, or
+# (at your option) any later version.
+#
+# This source code is distributed in  the hope that it will be useful,
+# but  WITHOUT ANY  WARRANTY;  without even  the  implied warranty  of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# Please refer to the GNU Public License for more details.
+#
+# You should have received a copy of the GNU Public License along with
+# this source code; if not, write to:
+# Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+# first of all source the tomb core functions
+which tomb > /dev/null
+if [[ $? != 0 ]]; then
+    print "$fg[red][!]$fg[white] Tomb command not found, operation aborted."; exit 1
+fi
+source tomb source
+
+if ! [ $1 ] ; then
+    error "an argument is missing, the undertaker is confused"
+    act "usage: undertaker url://host:path/to/tomb.key"
+    exit 1;
+fi
+
+ARG1=${1}
+
+check_bin
+
+notice "Undertaker will look for ${ARG1}"
+
+baseurl=${ARG1%//*}
+
+case $baseurl in
+    bluetooth:)
+	act "access to bluetooth protocol requested"
+	which obexftp &> /dev/null
+	if [[ $? != 0 ]]; then
+	    error "obexftp not found, needed for bluetooth: operation aborted."
+	    exit 1
+	fi
+	keytmp=`safe_dir undertaker`
+	cd $keytmp
+	# fetch key from bluetooth, url format: bluetooth://55:33:44:55:66/file/path
+	obexdevpath=${ARG1#*//}
+	obexdev=${obexdevpath%%/*}
+	obexpath=${obexdevpath#*/}
+	act "obex device: $obexdev"
+	act "obex path: $obexpath"
+	obexftp -b $obexdev -g $obexpath 
+	if [[ $? != 0 ]]; then
+	    error "a problem occurred retreiving the key via bluetooth."
+	    rmdir ${keytmp}
+	    exit 1;
+	fi
+	# print out the key on stdout
+	cat $obexpath >&1
+	# wipe out the key
+	${WIPE[@]} $obexpath
+	cd -
+	rmdir ${keytmp}
+
+#	tombkey="basename $obexpath"
+	
+	;;
+
+    file:)
+	act "local file access requested"
+	error "TODO"
+	;;
+    http:)
+	act "access to web protocol requested"
+	error "TODO"
+	;;
+    ssh:)
+	act "access to secure shell requested"
+	error "TODO"
+	;;
+    *)
+	error "url protocol not recognized: $baseurl"
+	exit 1
+	;;
+esac
