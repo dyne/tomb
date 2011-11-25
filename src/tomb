@@ -37,6 +37,10 @@ DEBUG=0
 typeset -A global_opts
 typeset -A opts
 
+# Set a sensible PATH
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+[[ "$TOMBEXEC" =~ "^/usr/local" ]] && PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+
 # PATH=/usr/bin:/usr/sbin:/bin:/sbin
 # }}}
 # {{{ HELPER FUNCTIONS
