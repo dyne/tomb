@@ -8,7 +8,7 @@ Homepage: http://tomb.dyne.org
 
 Package: tomb
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, zsh, cryptsetup, pinentry-curses, gnupg, sudo
+Depends: ${shlibs:Depends}, ${misc:Depends}, zsh, cryptsetup, pinentry-curses, gnupg, sudo, psmisc
 Suggests: tomb-gtk, wipe, dcfldd, steghide
 Description: the crypto undertaker
  Derived from the dyne:bolic nesting mechanism, Tomb is a free and
