@@ -79,7 +79,7 @@ dnl these are not *build* dependencies, but *runtime* dependencies.
 
 dnl Mandatory
 AC_CHECK_PROG(have_zsh,zsh,yes,no)
-AC_CHECK_PROG(have_cryptsetup,cryptsetup,yes,no)
+AC_CHECK_PROG(have_cryptsetup,cryptsetup,yes,no,[/sbin$PATH_SEPARATOR/usr/local/sbin$PATH_SEPARATOR$PATH])
 AC_CHECK_PROG(have_pinentry,pinentry,yes,no)
 AC_CHECK_PROG(have_sudo,sudo,yes,no)
 dnl Optional
