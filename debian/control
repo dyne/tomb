@@ -2,13 +2,13 @@ Source: tomb
 Section: misc
 Priority: extra
 Maintainer: Denis Roio <jaromil@dyne.org>
-Build-Depends: debhelper (>= 7), autotools-dev, cdbs, libgtk2.0-dev, libnotify-dev
+Build-Depends: debhelper (>= 7), autotools-dev, cdbs, libgtk2.0-dev, libnotify-dev, pkg-config
 Standards-Version: 3.9.1
 Homepage: http://tomb.dyne.org
 
 Package: tomb
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, zsh, cryptsetup, pinentry-curses, gnupg, sudo
+Depends: ${shlibs:Depends}, ${misc:Depends}, zsh, cryptsetup, pinentry-curses, gnupg, sudo, psmisc
 Suggests: tomb-gtk, wipe, dcfldd, steghide
 Description: the crypto undertaker
  Derived from the dyne:bolic nesting mechanism, Tomb is a free and
