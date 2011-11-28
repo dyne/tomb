@@ -679,7 +679,7 @@ create_tomb() {
  #  cryptsetup luksDump ${nstloop}
 
     say "formatting your Tomb with Ext3/Ext4 filesystem"
-    ${MKFS} ${tombname} /dev/mapper/tomb.tmp
+    ${=MKFS} ${tombname} /dev/mapper/tomb.tmp
 
     if [ $? != 0 ]; then
 	nee "Tomb format returned an error:"
