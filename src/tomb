@@ -35,7 +35,7 @@ MOUNTOPTS="rw,noatime,nodev"
 
 #declare global variables
 QUIET=0
-DEBUG=0
+DEBUG=1
 typeset -A global_opts
 typeset -A opts
 
@@ -149,45 +149,85 @@ check_bin() {
 # }}}
 # {{{ - "SAFE" FUNCTIONS
 # {{{   - Create a directory with caution
+
+_have_shm() {
+    # Check availability of 1MB of SHM
+    xxx "_have_shm 0 We need only 1 MB of RAM"
+    [[ -k /dev/shm ]] || return 1
+
+    local -i SHM RAM
+
+    SHM=$(df -k -B 4K -a -t tmpfs /dev/shm | awk '/\/dev\/shm/ { print $4; }')
+    (( $? )) && return 1
+    xxx "_have_shm 1 SHM $SHM KB are available"
+
+    RAM=$(awk '/MemFree/ { print $2 }' /proc/meminfo)
+    xxx "_have_shm 2 RAM $RAM KB are free"
+    (( $RAM >= 1024 )) && return 0
+
+    xxx "_have_shm 3 RAM $RAM KB left only :("
+    # Now we have more RAM than affected to SHM, so we can expect some for our little needs.
+    # Does that work when SHM is disabled from kernel config?
+    return 1
+}
+
 safe_dir() {
-    which mktemp &> /dev/null
-    if [[ $? = 0 ]]; then
-        mktemp -d /dev/shm/$1.$$.XXXXXXX
-        return
-    fi
-    dir="/dev/shm/$1.$$.$RANDOM.$RANDOM"
-    (umask 077 && mkdir "$dir") || print "-1"
-    print "$dir"
+    # Try and create our temporary directory in RAM
+    # Note that there's no warranty the underlying FS won't swap
+    # every 5 seconds (e.g., ext3)
+    local -i tries
+    while (( $tries < 3 )) ; do
+	tries+=1
+	if _have_shm; then
+	    xxx "safe_dir creating directory in RAM"
+	    if (( $MKTEMP )); then
+		mktemp -d /dev/shm/$1.$$.XXXXXXX
+	    else
+   		dir="/dev/shm/$1.$$.$RANDOM$RANDOM"
+		mkdir -m 0700 -p "$dir"
+		print "$dir"
+	    fi
+	    return 0
+	else
+	    nee "WARNING: we cannot ensure we're running in RAM."
+	    xxx "Wait a bit before retrying... (attempt $tries)"
+	    sleep 0.5 && sync
+	fi
+    done
+    nee "WARNING: no RAM available for me to run safely."
+#	say "Creating my own encrypted loop device..."
+#	safe_tmpfs_dir
+    return 1
 }
 # }}}
-# {{{   - Create a file with caution
-safe_file() {
-    local tmpdir tmpfile
-
-    if [ "$MKTEMP" = "1" ]; then
-        mktemp -u /dev/shm/$1.$$.XXXXXXX
-        # this return needs to output ONLY the file
-    else
-	tmpfile="/dev/shm/$1.$$.$RANDOM.$RANDOM"
-	print $tmpfile
-    fi
+# {{{   - Provide a random filename in shared memory
+safe_filename() {
+    _have_shm || die "No access to shared memory on this system, sorry." 1
+    (( $MKTEMP )) && \
+	mktemp -u /dev/shm/$1.$$.XXXXXXX || \
+	print "/dev/shm/$1.$$.$RANDOM$RANDOM"
 }
 # }}}
 # {{{   - Check if swap is activated
 check_swap() {
     # Return 0 if NO swap is used, 1 if swap is used
-    # TODO: it should return 2 if swap is used, but encrypted
-    nlines=$(wc -l /proc/swaps|cut -f1 -d ' ')
-    if [[ $nlines -gt 1 ]]; then
-        r=1
-    else
-        #and return 2
-        r=0
-    fi
-    if [[ $1 == out ]]; then
-        echo $r;
-    fi
-    return $r;
+    # Return 2 if swap(s) is(are) used, but ALL encrypted
+    local swaps=$(awk '/partition/ { print $1 }' /proc/swaps 2>/dev/null)
+    [[ -z "$swaps" ]] && return 0                # No swap partition is active
+
+    local -i count
+    xxx "check_swap $swaps"
+    for dev in ${=swaps}
+    do
+	xxx "check_swap testing device $dev (count = $count)"
+	sudo cryptsetup status ${dev} | grep 'active' &>/dev/null && count+=1
+    done
+    xxx "$count encrypted swap(s) [${(%w)#swaps} total]"
+    (( ${count} == ${(%w)#swaps} )) && return 2  # All swap partitions are encrypted
+    xxx "check_swap detected some unencrypted swap"
+    (( ${#{=swaps}} )) && return 1               # Some unencrypted swap partition(s)
+    xxx "check_swap should never reach here"
+    return 0                                     # No swap partition is active
 }
 # }}}
 # {{{   - Ask user for a password
@@ -457,6 +497,7 @@ print "-----END PGP MESSAGE-----"
 # }}}
 # {{{ - HOOK HELPERS
 # {{{   - Execute Bind Hooks
+
 exec_safe_bind_hooks() {
     if [[ -n ${(k)opts[-o]} ]]; then
         MOUNTOPTS=${opts[-o]}
@@ -499,6 +540,7 @@ exec_safe_bind_hooks() {
 	fi
     done
 }
+
 # }}}
 # {{{   - POST-MOUNT HOOKS
 exec_safe_post_hooks() {
@@ -592,9 +634,9 @@ create_tomb() {
 
     # create the keyfile in tmpfs so that we leave less traces in RAM
     keytmp=`safe_dir tomb`
-    if [ "$keytmp" = "-1" ]; then
-	die "error creating temp dir" 1
-    fi
+    (( $? )) && die "error creating temp dir" 1
+    xxx "safe_dir at $keytmp"
+
     #rm -f $keytmp
     # ?????? creo, cancello e ricreo ??????
     #mkdir -p $keytmp
@@ -1040,8 +1082,8 @@ change_passwd() {
 
     local tmpnewkey tmpoldkey c tombpass tombpasstmp
 
-    tmpnewkey=`safe_file tomb`
-    tmpoldkey=`safe_file tomb`
+    tmpnewkey=`safe_filename tomb`
+    tmpoldkey=`safe_filename tomb`
 
     yes "Changing password for $keyfile"
     keyname=`basename $keyfile`
@@ -1060,7 +1102,7 @@ change_passwd() {
 
     if [ "$tombpass" != "ok" ]; then
         nee "You typed an Invalid old password. Operation aborted."
-        # /dev/null because the file cannot exists
+        # /dev/null because the file may not exist
         ${=WIPE} "${tmpnewkey}" 2> /dev/null
         ${=WIPE} "${tmpoldkey}" 2> /dev/null
         return 1
@@ -1075,7 +1117,7 @@ change_passwd() {
 	fi
 	tombpasstmp=$tombpass
 	tombpass=`exec_as_user ${TOMBEXEC} askpass "Type the new password again" "Change tomb key password"`
-	if [ "$tombpasstmp" = "$tombpass" ]; then
+	if [ "$tombpasstmp" == "$tombpass" ]; then
 	    break;
 	fi
 	unset tombpasstmp
