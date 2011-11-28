@@ -119,13 +119,13 @@ _failure die() { [[ $QUIET == 0 ]] && _msg 'failure' "$1" "$2" }
 # }}}
 # {{{ - CHECK BINARY DEPENDENCIES
 check_bin() {
+    # check for required programs
+    for req in cryptsetup pinentry sudo; do
+	which $req >/dev/null || die "Cannot find $req.  Please install it." 1
+    done
+
     # which dd command to use
-    which dcfldd > /dev/null
-    if [ $? = 0 ]; then
-	DD="dcfldd"
-    else
-	DD=dd
-    fi
+    which dcfldd > /dev/null && DD=dcfldd || DD=dd
 
     # which wipe command to use
     which wipe > /dev/null
@@ -136,39 +136,14 @@ check_bin() {
     fi
 
     # check for filesystem creation progs
-    which mkfs.ext4 > /dev/null
-    if [ $? = 0 ]; then
-	MKFS=(mkfs.ext4 -q -F -j -L)
-    else
-	MKFS=(mkfs.ext3 -q -F -j -L)
-    fi
+    which mkfs.ext4 > /dev/null && \
+	MKFS="mkfs.ext4 -q -F -j -L"  || \
+	MKFS="mkfs.ext3 -q -F -j -L"
 
-    # check for sudo
-    which sudo > /dev/null
-    if [ $? != 0 ]; then
-	die "Cannot find sudo. Please install it" 1
-    fi
-
+    # check for mktemp
+    which mktemp > /dev/null || MKTEMP=0
     # check for steghide
-    which steghide > /dev/null
-    if [ $? != 0 ]; then
-	STEGHIDE=0
-    fi
-
-    which cryptsetup > /dev/null
-    if [ $? != 0 ]; then
-        die "Cannot find cryptsetup. Please install it." 1
-    fi
-
-    which pinentry > /dev/null
-    if [ $? != 0 ]; then
-        die "Cannot find pinentry. Please install it." 1
-    fi
-
-    which mktemp > /dev/null
-    if [ $?! = 0 ]; then
-        MKTEMP=0
-    fi
+    which steghide > /dev/null || STEGHIDE=0
 
     # check for tomb-open script
     if [ "$0" = "./tomb" ]; then
