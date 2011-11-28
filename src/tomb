@@ -145,12 +145,8 @@ check_bin() {
     # check for steghide
     which steghide > /dev/null || STEGHIDE=0
 
-    # check for tomb-open script
-    if [ "$0" = "./tomb" ]; then
-	TOMBOPENEXEC="./tomb-open"
-    elif [ "$0" != "tomb" ]; then
-	TOMBOPENEXEC="`dirname $0`/tomb-open"
-    fi
+    # tomb-open is relative to tomb
+    TOMBOPENEXEC=$TOMBEXEC"-open"
 }
 # }}}
 # {{{ - "SAFE" FUNCTIONS
