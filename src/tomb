@@ -46,6 +46,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 # PATH=/usr/bin:/usr/sbin:/bin:/sbin
 # }}}
 # {{{ HELPER FUNCTIONS
+
 # {{{ - Standard output message routines
 
 # {{{   - Internal message function
@@ -118,6 +119,7 @@ _failure die() { [[ $QUIET == 0 ]] && _msg 'failure' "$1" "$2" }
 
 # }}}
 # {{{ - CHECK BINARY DEPENDENCIES
+
 check_bin() {
     # check for required programs
     for req in cryptsetup pinentry sudo; do
@@ -128,12 +130,7 @@ check_bin() {
     which dcfldd > /dev/null && DD=dcfldd || DD=dd
 
     # which wipe command to use
-    which wipe > /dev/null
-    if [ $? = 0 ]; then
-	WIPE=(wipe -f -s)
-    else
-	WIPE=(rm -f)
-    fi
+    which wipe > /dev/null && WIPE="wipe -f -s" || WIPE="rm -f"
 
     # check for filesystem creation progs
     which mkfs.ext4 > /dev/null && \
@@ -148,6 +145,7 @@ check_bin() {
     # tomb-open is relative to tomb
     TOMBOPENEXEC=$TOMBEXEC"-open"
 }
+
 # }}}
 # {{{ - "SAFE" FUNCTIONS
 # {{{   - Create a directory with caution
@@ -520,6 +518,7 @@ exec_safe_post_hooks() {
 }
 # }}}
 # }}}
+
 # }}}
 # {{{ TOMB SUB-COMMANDS
 
@@ -673,7 +672,7 @@ create_tomb() {
     fi
 
     cryptsetup --key-file ${keytmp}/tomb.tmp --cipher aes luksOpen ${nstloop} tomb.tmp
-    ${WIPE[@]} ${keytmp}/tomb.tmp
+    ${=WIPE} ${keytmp}/tomb.tmp
     umount ${keytmp}
     rm -r ${keytmp}
 
@@ -817,7 +816,7 @@ mount_tomb() {
 
 	# if key was from stdin delete temp file and dir
 	if [ $tombkeydir ]; then
-	    ${WIPE[@]} ${tombkey}
+	    ${=WIPE} ${tombkey}
 	    rmdir $tombkeydir
 	fi
 
@@ -1013,6 +1012,7 @@ umount_tomb() {
 # }}}
 # }}}
 # {{{ - Change Password
+
 # change tomb key password
 change_passwd() {
     if ! option_is_set --ignore-swap && [[ `check_swap out` == 1 ]]; then
@@ -1061,8 +1061,8 @@ change_passwd() {
     if [ "$tombpass" != "ok" ]; then
         nee "You typed an Invalid old password. Operation aborted."
         # /dev/null because the file cannot exists
-        ${WIPE[@]} "${tmpnewkey}" 2> /dev/null
-        ${WIPE[@]} "${tmpoldkey}" 2> /dev/null
+        ${=WIPE} "${tmpnewkey}" 2> /dev/null
+        ${=WIPE} "${tmpoldkey}" 2> /dev/null
         return 1
     fi
 
@@ -1085,8 +1085,8 @@ change_passwd() {
     if [ -z $tombpass ]; then
 	nee "You mistyped the new password. Operation aborted."
         # /dev/null because the file cannot exists
-        ${WIPE[@]} "${tmpnewkey}" 2> /dev/null
-        ${WIPE[@]} "${tmpoldkey}" 2> /dev/null
+        ${=WIPE} "${tmpnewkey}" 2> /dev/null
+        ${=WIPE} "${tmpoldkey}" 2> /dev/null
 	return 1
     fi
 
@@ -1097,25 +1097,26 @@ change_passwd() {
     if [ $? != 0 ]; then
         nee "Cannot change your key passphrase"
         # /dev/null because the file cannot exists
-        ${WIPE[@]} "${tmpnewkey}" 2> /dev/null
-        ${WIPE[@]} "${tmpoldkey}" 2> /dev/null
+        ${=WIPE} "${tmpnewkey}" 2> /dev/null
+        ${=WIPE} "${tmpoldkey}" 2> /dev/null
         return 1
     fi
 
     # wipe the previous, original, key
-    ${WIPE[@]} "${keyfile}"
+    ${=WIPE} "${keyfile}"
     # copy the new key as the original keyfile name
     cp "${tmpnewkey}" "${keyfile}"
 
     say "Cleaning environment"
     # wipe all temp file
-    ${WIPE[@]} "${tmpnewkey}"
-    ${WIPE[@]} "${tmpoldkey}"
+    ${=WIPE} "${tmpnewkey}"
+    ${=WIPE} "${tmpoldkey}"
 
     yes "Your passphrase was successfully updated."
 
     return 0
 }
+
 # }}}
 # {{{ - List
 # list all tombs mounted in a readable format
@@ -1550,3 +1551,4 @@ if [[ $? != 0 ]]; then #this "if" seems useless, but avoid source tomb source fr
     exit $?
 fi
 # }}}
+
