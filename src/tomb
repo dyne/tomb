@@ -5,6 +5,7 @@
 # a tool to easily operate file encryption of private and secret data
 #
 # {{{ Copyleft (C) 2007-2011 Denis Roio <jaromil@dyne.org>
+
 #
 # This source  code is free  software; you can redistribute  it and/or
 # modify it under the terms of  the GNU Public License as published by
@@ -19,6 +20,7 @@
 # You should have received a copy of the GNU Public License along with
 # this source code; if not, write to:
 # Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 # }}}
 # {{{ GLOBAL VARIABLES
 VERSION=1.2
@@ -144,7 +146,7 @@ check_bin() {
     # check for sudo
     which sudo > /dev/null
     if [ $? != 0 ]; then
-	die "Cannot find sudo. Please install it"
+	die "Cannot find sudo. Please install it" 1
     fi
 
     # check for steghide
@@ -155,12 +157,12 @@ check_bin() {
 
     which cryptsetup > /dev/null
     if [ $? != 0 ]; then
-        die "Cannot find cryptsetup. Please install it."
+        die "Cannot find cryptsetup. Please install it." 1
     fi
 
     which pinentry > /dev/null
     if [ $? != 0 ]; then
-        die "Cannot find pinentry. Please install it."
+        die "Cannot find pinentry. Please install it." 1
     fi
 
     which mktemp > /dev/null
@@ -549,7 +551,9 @@ exec_safe_post_hooks() {
 # }}}
 # }}}
 # {{{ TOMB SUB-COMMANDS
+
 # {{{ - Create
+
 create_tomb() {
     if ! option_is_set --ignore-swap && [[ `check_swap out` == 1 ]]; then
         nee "You have swap activated; use --ignore-swap if you want to skip this check"
@@ -610,7 +614,7 @@ create_tomb() {
     if [ $? = 0 -a -e ${tombdir}/${tombfile} ]; then
 	yes "OK: `ls -lh ${tombdir}/${tombfile}`"
     else
-	die "Error creating the tomb ${tombdir}/${tombfile}, operation aborted."
+	die "Error creating the tomb ${tombdir}/${tombfile}, operation aborted." 1
     fi
 
     nstloop=`losetup -f` # get the number for next loopback device
@@ -619,7 +623,7 @@ create_tomb() {
     # create the keyfile in tmpfs so that we leave less traces in RAM
     keytmp=`safe_dir tomb`
     if [ "$keytmp" = "-1" ]; then
-	die "error creating temp dir"
+	die "error creating temp dir" 1
     fi
     #rm -f $keytmp
     # ?????? creo, cancello e ricreo ??????
@@ -629,7 +633,7 @@ create_tomb() {
 	nee "cannot mount tmpfs filesystem in volatile memory"
 	losetup -d $nstloop
 	rm -r "${keytmp}"
-	die "operation aborted."
+	die "operation aborted." 1
     fi
     say "Generating secret key..."
     say "this operation takes time, keep using this computer on other tasks,"
@@ -647,7 +651,7 @@ create_tomb() {
 	umount ${keytmp}
 	losetup -d $nstloop
 	rm -r $keytmp
-	die "operation aborted."
+	die "operation aborted." 1
     fi
 
     yes "Setup your secret key file ${tombkey}"
@@ -669,7 +673,7 @@ create_tomb() {
 	umount ${keytmp}
 	losetup -d $nstloop
 	rm -r $keytmp
-	die "passwords don't match, aborting operation"
+	die "passwords don't match, aborting operation" 1
     fi
 
 
@@ -726,8 +730,10 @@ create_tomb() {
     yes "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
 
 }
+
 # }}}
 # {{{ - Open
+
 mount_tomb() {
     say "Commanded to open tomb $CMD2"
     if ! option_is_set --ignore-swap && [[ `check_swap out` == 1 ]]; then
@@ -736,7 +742,7 @@ mount_tomb() {
         say "However, it could be that your swap is encrypted. If this is case, this is ok. Then, use --ignore-swap to skip this check"
         say "You seem to be using `tail -n +2 /proc/swaps|wc -l` swaps:"
         tail -n +2 /proc/swaps
-        die "I'm stopping now."
+        die "I'm stopping now." 1
     fi
     if ! [ ${CMD2} ]; then
         nee "no tomb name specified for creation"
@@ -807,7 +813,7 @@ mount_tomb() {
 
     nstloop=`losetup -f`
     if [ $? = 255 ]; then
-        die "too many tomb opened. Please close any of them to open another tomb"
+        die "too many tomb opened. Please close any of them to open another tomb" 1
     fi
     losetup -f ${tombdir}/${tombfile}
 
@@ -875,6 +881,7 @@ mount_tomb() {
     fi
     return 0
 }
+
 # }}}
 # {{{ - Close
 # {{{   - Slam the door
@@ -1366,6 +1373,7 @@ EOF
     say "Tomb is now installed."
 }
 # }}}
+
 # }}}
 # {{{ OPTION PARSING
 # {{{ - Check an option
@@ -1394,6 +1402,7 @@ option_value() {
 # }}}
 # }}}
 # {{{ MAIN COMMAND
+
 main() {
     local -A subcommands_opts
     ### Options configuration
@@ -1561,6 +1570,7 @@ main() {
     esac
     return $?
 }
+
 # }}}
 # {{{ RUNTIME
 check_bin
