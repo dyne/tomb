@@ -802,66 +802,17 @@ exec_safe_post_hooks() {
     fi
 }
 
-kill_tomb() {
-    # $1 = pids to kill
-    # $2 = type of kill
-    local e p
-    # substitute the \n with space
-    e=${1//$'\n'/ }
-    # split the string at space delim
-    # so we can get a for loop honestly
-    e=(${(s: :)e})
-    for p in $e; do
-        func "killing PID $p..."
-        if [[ "$2" == "soft" ]]; then
-            kill -USR1 $p
-        elif [[ "$2" == "hard" ]]; then
-            kill -TERM $p
-        elif [[ "$2" == "must die" ]]; then
-            kill -KILL $p
-        fi
-    done
-}
-
+# {{{ slam_tomb
+# Kill all processes using the tomb
 slam_tomb() {
     # $1 = tomb mount point
-    local pidk
-
-    pidk=`lsof -t "$1"`
-    if [[ ! -z "$pidk" ]]; then
-        kill_tomb "$pidk" "soft"
-    else
-        return 0
-    fi
-
-    # if there are remaining pids
-    # we need to play hard    
-    pidk=`lsof -t "$1"`
-    if [[ -z "$pidk" ]]; then
-        return 0
-    fi
-
-    # if we set the -f (force) option
-    # don't wait, just kill
-    option_is_set -f || sleep 3
-    kill_tomb "$pidk" "hard"
-    pidk=`lsof -t "$1"`
-    if [[ -z "$pidk" ]]; then
-        return 0
-    fi
-
-    # if there are still some pids around
-    # we have to kill 'em all
-    option_is_set -f || sleep 3
-    kill_tomb "$pidk" "must die"
-    pidk=`lsof -t "$1"`
-    if [[ -z "$pidk" ]]; then
-        return 0
-    fi
-
-    # what PITA!
+    for s in INT TERM HUP KILL; do
+	fuser -s -m "$1" || return 0
+	fuser -s -m "$1" -k -M -$s && { option_is_set -f || sleep 3 }
+    done
     return 1
 }
+# }}}
 
 umount_tomb() {
     local tombs how_many_tombs
