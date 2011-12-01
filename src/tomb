@@ -26,7 +26,7 @@
 VERSION=1.2
 DATE=Nov/2011
 TOMBEXEC=$0
-TOMBOPENEXEC="tomb-open"
+TOMBOPENEXEC="${TOMBEXEC}-open"
 typeset -a OLDARGS
 for arg in ${argv}; do OLDARGS+=($arg); done
 STEGHIDE=1
@@ -138,13 +138,6 @@ check_bin() {
     which mktemp > /dev/null || MKTEMP=0
     # check for steghide
     which steghide > /dev/null || STEGHIDE=0
-
-    # check for tomb-open script
-    if [ "$0" = "./tomb" ]; then
-	TOMBOPENEXEC="./tomb-open"
-    elif [ "$0" != "tomb" ]; then
-	TOMBOPENEXEC="`dirname $0`/tomb-open"
-    fi
 }
 
 # }}}
