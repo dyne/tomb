@@ -46,6 +46,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 # PATH=/usr/bin:/usr/sbin:/bin:/sbin
 # }}}
 # {{{ HELPER FUNCTIONS
+
 # {{{ - Standard output message routines
 
 function _msg() {
@@ -115,57 +116,28 @@ function _failure die()
 
 # }}}
 # {{{ - CHECK BINARY DEPENDENCIES
+
 check_bin() {
+    # check for required programs
+    for req in cryptsetup pinentry sudo; do
+	which $req >/dev/null || die "Cannot find $req.  Please install it." 1
+    done
+
     # which dd command to use
-    which dcfldd > /dev/null
-    if [ $? = 0 ]; then
-	DD="dcfldd"
-    else
-	DD=dd
-    fi
+    which dcfldd > /dev/null && DD=dcfldd || DD=dd
 
     # which wipe command to use
-    which wipe > /dev/null
-    if [ $? = 0 ]; then
-	WIPE=(wipe -f -s)
-    else
-	WIPE=(rm -f)
-    fi
+    which wipe > /dev/null && WIPE="wipe -f -s" || WIPE="rm -f"
 
     # check for filesystem creation progs
-    which mkfs.ext4 > /dev/null
-    if [ $? = 0 ]; then
-	MKFS=(mkfs.ext4 -q -F -j -L)
-    else
-	MKFS=(mkfs.ext3 -q -F -j -L)
-    fi
+    which mkfs.ext4 > /dev/null && \
+        MKFS="mkfs.ext4 -q -F -j -L" || \
+        MKFS="mkfs.ext3 -q -F -j -L"
 
-    # check for sudo
-    which sudo > /dev/null
-    if [ $? != 0 ]; then
-	die "Cannot find sudo. Please install it"
-    fi
-
+    # check for mktemp
+    which mktemp > /dev/null || MKTEMP=0
     # check for steghide
-    which steghide > /dev/null
-    if [ $? != 0 ]; then
-	STEGHIDE=0
-    fi
-
-    which cryptsetup > /dev/null
-    if [ $? != 0 ]; then
-        die "Cannot find cryptsetup. Please install it." 1
-    fi
-
-    which pinentry > /dev/null
-    if [ $? != 0 ]; then
-        die "Cannot find pinentry. Please install it." 1
-    fi
-
-    which mktemp > /dev/null
-    if [ $?! = 0 ]; then
-        MKTEMP=0
-    fi
+    which steghide > /dev/null || STEGHIDE=0
 
     # check for tomb-open script
     if [ "$0" = "./tomb" ]; then
@@ -174,6 +146,7 @@ check_bin() {
 	TOMBOPENEXEC="`dirname $0`/tomb-open"
     fi
 }
+
 # }}}
 # {{{ - "SAFE" FUNCTIONS
 # {{{   - Create a directory with caution
@@ -555,6 +528,7 @@ exec_safe_post_hooks() {
 }
 # }}}
 # }}}
+
 # }}}
 # {{{ TOMB SUB-COMMANDS
 
@@ -708,14 +682,14 @@ create_tomb() {
     fi
 
     cryptsetup --key-file ${keytmp}/tomb.tmp --cipher aes luksOpen ${nstloop} tomb.tmp
-    ${WIPE[@]} ${keytmp}/tomb.tmp
+    ${=WIPE} ${keytmp}/tomb.tmp
     umount ${keytmp}
     rm -r ${keytmp}
 
  #  cryptsetup luksDump ${nstloop}
 
     _message "formatting your Tomb with Ext3/Ext4 filesystem"
-    ${MKFS} ${tombname} /dev/mapper/tomb.tmp
+    ${=MKFS} ${tombname} /dev/mapper/tomb.tmp
 
     if [ $? != 0 ]; then
 	_warning "Tomb format returned an error:"
@@ -852,7 +826,7 @@ mount_tomb() {
 
 	# if key was from stdin delete temp file and dir
 	if [ $tombkeydir ]; then
-	    ${WIPE[@]} ${tombkey}
+	    ${=WIPE} ${tombkey}
 	    rmdir $tombkeydir
 	fi
 
@@ -1048,6 +1022,7 @@ umount_tomb() {
 # }}}
 # }}}
 # {{{ - Change Password
+
 # change tomb key password
 change_passwd() {
     if ! option_is_set --ignore-swap && [[ `check_swap out` == 1 ]]; then
@@ -1096,8 +1071,8 @@ change_passwd() {
     if [ "$tombpass" != "ok" ]; then
         _warning "You typed an Invalid old password. Operation aborted."
         # /dev/null because the file cannot exists
-        ${WIPE[@]} "${tmpnewkey}" 2> /dev/null
-        ${WIPE[@]} "${tmpoldkey}" 2> /dev/null
+        ${=WIPE} "${tmpnewkey}" 2> /dev/null
+        ${=WIPE} "${tmpoldkey}" 2> /dev/null
         return 1
     fi
 
@@ -1120,8 +1095,8 @@ change_passwd() {
     if [ -z $tombpass ]; then
 	_warning "You mistyped the new password. Operation aborted."
         # /dev/null because the file cannot exists
-        ${WIPE[@]} "${tmpnewkey}" 2> /dev/null
-        ${WIPE[@]} "${tmpoldkey}" 2> /dev/null
+        ${=WIPE} "${tmpnewkey}" 2> /dev/null
+        ${=WIPE} "${tmpoldkey}" 2> /dev/null
 	return 1
     fi
 
@@ -1132,25 +1107,26 @@ change_passwd() {
     if [ $? != 0 ]; then
         _warning "Cannot change your key passphrase"
         # /dev/null because the file cannot exists
-        ${WIPE[@]} "${tmpnewkey}" 2> /dev/null
-        ${WIPE[@]} "${tmpoldkey}" 2> /dev/null
+        ${=WIPE} "${tmpnewkey}" 2> /dev/null
+        ${=WIPE} "${tmpoldkey}" 2> /dev/null
         return 1
     fi
 
     # wipe the previous, original, key
-    ${WIPE[@]} "${keyfile}"
+    ${=WIPE} "${keyfile}"
     # copy the new key as the original keyfile name
     cp "${tmpnewkey}" "${keyfile}"
 
     _message "Cleaning environment"
     # wipe all temp file
-    ${WIPE[@]} "${tmpnewkey}"
-    ${WIPE[@]} "${tmpoldkey}"
+    ${=WIPE} "${tmpnewkey}"
+    ${=WIPE} "${tmpoldkey}"
 
     _success "Your passphrase was successfully updated."
 
     return 0
 }
+
 # }}}
 # {{{ - List
 # list all tombs mounted in a readable format
@@ -1589,3 +1565,4 @@ if [[ $? != 0 ]]; then #this "if" seems useless, but avoid source tomb source fr
     exit $?
 fi
 # }}}
+
