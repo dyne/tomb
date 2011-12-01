@@ -6,7 +6,7 @@
 #
 # Undertaker is a tool to retrieve tomb keys from various sources
 #
-# Copyleft (C) 2011 Denis Roio <jaromil@dyne.org>
+# {{{ Copyleft (C) 2011 Denis Roio <jaromil@dyne.org>
 #
 # This source  code is free  software; you can redistribute  it and/or
 # modify it under the terms of  the GNU Public License as published by
@@ -22,6 +22,7 @@
 # this source code; if not, write to:
 # Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+# }}}
 
 # first of all source the tomb core functions
 which tomb > /dev/null
@@ -31,26 +32,24 @@ fi
 source tomb source
 
 if ! [ $1 ] ; then
-    error "an argument is missing, the undertaker is confused"
-    act "usage: undertaker url://host:path/to/tomb.key"
-    exit 1;
+    _warning "an argument is missing, the undertaker is confused"
+    _failure "usage: undertaker url://host:path/to/tomb.key"
 fi
 
 ARG1=${1}
 
 check_bin
 
-notice "Undertaker will look for ${ARG1}"
+_message "Undertaker will look for ${ARG1}"
 
 baseurl=${ARG1%//*}
 
 case $baseurl in
     bluetooth:)
-	act "access to bluetooth protocol requested"
+	_message "access to bluetooth protocol requested"
 	which obexftp &> /dev/null
 	if [[ $? != 0 ]]; then
-	    error "obexftp not found, needed for bluetooth: operation aborted."
-	    exit 1
+	    die "obexftp not found, needed for bluetooth: operation aborted."
 	fi
 	keytmp=`safe_dir undertaker`
 	cd $keytmp
@@ -58,18 +57,17 @@ case $baseurl in
 	obexdevpath=${ARG1#*//}
 	obexdev=${obexdevpath%%/*}
 	obexpath=${obexdevpath#*/}
-	act "obex device: $obexdev"
-	act "obex path: $obexpath"
+	_message "obex device: $obexdev"
+	_message "obex path: $obexpath"
 	obexftp -b $obexdev -g $obexpath 
 	if [[ $? != 0 ]]; then
-	    error "a problem occurred retreiving the key via bluetooth."
 	    rmdir ${keytmp}
-	    exit 1;
+	    die "a problem occurred retreiving the key via bluetooth."
 	fi
 	# print out the key on stdout
 	cat $obexpath >&1
 	# wipe out the key
-	${WIPE[@]} $obexpath
+	${=WIPE} $obexpath
 	cd -
 	rmdir ${keytmp}
 
@@ -78,19 +76,18 @@ case $baseurl in
 	;;
 
     file:)
-	act "local file access requested"
-	error "TODO"
+        _message "local file access requested"
+	die "TODO"
 	;;
     http:)
-	act "access to web protocol requested"
-	error "TODO"
+	_message "access to web protocol requested"
+	die "TODO"
 	;;
     ssh:)
-	act "access to secure shell requested"
-	error "TODO"
+	_message "access to secure shell requested"
+	die "TODO"
 	;;
     *)
-	error "url protocol not recognized: $baseurl"
-	exit 1
+	die "url protocol not recognized: $baseurl"
 	;;
 esac
