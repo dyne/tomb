@@ -138,6 +138,10 @@ check_bin() {
     which mktemp > /dev/null || MKTEMP=0
     # check for steghide
     which steghide > /dev/null || STEGHIDE=0
+
+    # resize suite check bin!
+    which e2fsck > /dev/null || die "Cannot find e2fsck. Please install it." 1
+    which resize2fs > /dev/null || die "Cannot find resize2fs. Please install it." 1
 }
 
 # }}}
@@ -297,6 +301,7 @@ Commands:
  close      close the open tomb called FILE (or all)
  slam       close tomb FILE and kill all pids using it
  passwd     change the password of a tomb key FILE
+ resize     resize a tomb FILE
 EOF
     if [ "$STEGHIDE" = 1 ]; then
 	cat <<EOF
@@ -308,7 +313,7 @@ EOF
 
 Options:
 
- -s     size of the tomb file when creating one (in MB)
+ -s     size of the tomb file when creating/resizing one (in MB)
  -k     path to the key to use for opening a tomb
  -n     don't process the hooks found in tomb
  -o     mount options used to open (default: rw,noatime,nodev)
@@ -1137,6 +1142,138 @@ change_passwd() {
 }
 
 # }}}
+# {{{ - Resize
+# resize tomb file size
+resize_tomb() {
+    if ! [ ${CMD2} ]; then
+        _failure "No tomb name specified for resizing"
+    elif ! [ -r "${CMD2}" ]; then
+        _failure "Cannot find ${CMD2}"
+    fi
+
+    local c tombpass tombkey
+    local tombfile=`basename ${CMD2}`
+    local tombdir=`dirname ${CMD2}`
+    # make sure the file has a .tomb extension
+    local tombname=${tombfile%%\.*}
+    tombfile=${tombname}.tomb
+
+    if option_is_set -k ; then
+	    if [[ "`option_value -k`" == "-" ]]; then
+	        # take key from stdin
+	        local tombkeydir
+	        tombkeydir=`safe_dir`
+	        cat > ${tombkeydir}/stdin.tmp
+	        tombkey=${tombkeydir}/stdin.tmp
+	    else
+	        # take key from a file
+            tombkey=`option_value -k`
+	    fi
+    else
+	    # guess key as lying besides the tomb
+        tombkey=${tombdir}/${tombfile}.key
+    fi
+    
+    if ! [ -r ${tombkey} ]; then
+	    _failure "key file not found: ${tombkey}"
+    fi
+
+    local tmp_resize=`safe_filename tmbrsz`
+    local newtombsize=$opts[-s]
+    local oldtombsize=`stat -c %s "${CMD2}" 2>/dev/null`
+	local mounted_tomb=`mount -l |
+        awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
+
+    if [ "$mounted_tomb" ]; then
+        _failure "the tomb $tombname is mounted: to resize, umount it ('tomb close $tombname' is your friend)."
+    fi
+
+    # MB to bytes conversion
+    newtombsize=`expr \( $newtombsize \* 1024 \) \* 1024 2> /dev/null`
+    
+    if ! [ "$newtombsize" ] ; then
+        _failure "You must specify the new size of $tombname"
+    elif [[ $newtombsize != <-> ]]; then
+        _failure "Size is not an integer"
+    elif [ "$newtombsize" -le "$oldtombsize" ]; then
+        _failure "the new size must be greater then old tomb size."
+    fi
+
+    local delta=`expr $newtombsize \- $oldtombsize`
+    
+    local tombsize_4k=`expr $delta \/ 1024`
+    tombsize_4k=`expr $tombsize_4k \/ 4 `
+    
+    act "Generating ${tombfile} of ${newtombsize}Mb (${tombsize_4k} blocks of 4Kb)"
+    "$DD" if=/dev/urandom bs=4k count=${tombsize_4k} of="${tmp_resize}"
+
+    if [ $? = 0 -a -e "${tmp_resize}" ]; then
+	    act "OK: `ls -lh ${tmp_resize}`"
+    else
+	    _failure "Error creating the extra resize $tmp_resize, operation aborted."
+    fi
+    
+    cat "${tmp_resize}" >> "${CMD2}"
+    "${WIPE}" "${tmp_resize}"
+    
+    local nstloop=`losetup -f`
+    if [ $? = 255 ]; then
+        _failure "too many tomb opened. Please close any of them to open another tomb"
+    fi
+    losetup -f "${CMD2}"
+    
+    local mapdate=`date +%s`
+    local mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
+    
+    _message "Password is required for key ${keyname}"
+    for c in 1 2 3; do
+	    if [ $c = 1 ]; then
+	        tombpass=`exec_as_user ${TOMBEXEC} askpass ${keyname}`
+	    else
+	        tombpass=`exec_as_user ${TOMBEXEC} askpass "$keyname (retry $c)"`
+	    fi
+        (gpg --batch --passphrase-fd 0 --no-tty --no-options \
+            -d "${tombkey}" 2> /dev/null <<< ${tombpass} ) \
+            | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+	    
+        unset tombpass
+	
+	    if [ -r /dev/mapper/${mapper} ]; then
+	        break;  # password was correct
+        fi
+    done
+
+    if ! [ -r /dev/mapper/${mapper} ]; then
+        losetup -d ${nstloop}
+        _failure "failure mounting the encrypted file"
+    fi
+
+    cryptsetup resize "${mapper}"
+    if [ $? != 0 ]; then
+        losetup -d ${nstloop}
+        _failure "cryptsetup failed to resize $mapper"
+    fi
+
+    e2fsck -f /dev/mapper/${mapper}
+    if [ $? != 0 ]; then
+        losetup -d ${nstloop}
+        _failure "e2fsck failed to check $mapper"
+    fi
+
+    resize2fs /dev/mapper/${mapper}
+    if [ $? != 0 ]; then
+        losetup -d ${nstloop}
+        _failure "resize2fs failed to resize $mapper"
+    fi
+
+    # close and free the loop device
+    cryptsetup luksClose "${mapper}"
+    losetup -d ${nstloop}
+
+    return 0
+}
+
+# }}}
 # {{{ - List
 # list all tombs mounted in a readable format
 list_tombs() {
@@ -1433,6 +1570,7 @@ main() {
     subcommands_opts[mktemp]=""
     subcommands_opts[source]=""
     subcommands_opts[status]=""
+    subcommands_opts[resize]="s: -size=s k: -key=k"
 #    subcommands_opts[translate]=""
     
     ### Detect subcommand
@@ -1551,6 +1689,10 @@ main() {
 	    fi
 	    decode_key ${CMD2}
 	    ;;
+	resize)
+        check_priv
+        resize_tomb
+        ;;
 	# internal commands useful to developers
 	'source')   return 0 ;;
 	install)    check_priv ; install_tomb ;;
