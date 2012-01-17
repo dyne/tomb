@@ -78,7 +78,7 @@ function _msg() {
 	    returncode=127
 	    ;;
     esac
-    ${=command} "${progname} $fg_bold[$pcolor]$pchars$fg[reset_color] ${message}$color[reset_color]"
+    ${=command} "${progname} $fg_bold[$pcolor]$pchars$fg[reset_color] ${message}$color[reset_color]" >&2
     return $returncode
 }
 function _message say()
