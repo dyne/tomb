@@ -401,8 +401,8 @@ EOF
 # {{{ - HELPERS FOR KEYS
 # {{{   - Encode Key
 encode_key() {
-    tombkey=$CMD2
-    imagefile=$CMD3
+    tombkey=$1
+    imagefile=$2
 
     file $tombkey | grep PGP > /dev/null
     if [ $? != 0 ]; then
@@ -457,8 +457,8 @@ encode_key() {
 # }}}
 # {{{   - Decode Key
 decode_key() {
-    tombname=$CMD2
-    imagefile=$CMD3
+    tombname=$1
+    imagefile=$2
     res=1
 
     file $imagefile | grep JPEG > /dev/null
@@ -597,13 +597,13 @@ create_tomb() {
     _message "Commanded to create tomb $CMD2"
     if ! option_is_set -f; then check_swap; fi
 
-    if ! [ ${CMD2} ]; then
+    if ! [ $1 ]; then
         _warning "no tomb name specified for creation"
         return 1
     fi
 
-    tombfile=`basename ${CMD2}`
-    tombdir=`dirname ${CMD2}`
+    tombfile=`basename $1`
+    tombdir=`dirname $1`
     # make sure the file has a .tomb extension
     tombname=${tombfile%%\.*}
     tombfile=${tombname}.tomb
@@ -767,11 +767,12 @@ create_tomb() {
 # }}}
 # {{{ - Open
 
+# $1 = tombfile $2(optional) = mountpoint
 mount_tomb() {
-    _message "Commanded to open tomb $CMD2"
+    _message "Commanded to open tomb $1"
     if ! option_is_set -f; then check_swap; fi
 
-    if ! [ ${CMD2} ]; then
+    if ! [ ${1} ]; then
         _warning "no tomb name specified for creation"
         return 1
     fi
@@ -783,12 +784,12 @@ mount_tomb() {
     local tombfile
     local tombdir
     local tombname
-    tombfile=`basename ${CMD2}`
-    tombdir=`dirname ${CMD2}`
+    tombfile=`basename ${1}`
+    tombdir=`dirname ${1}`
     # check file type (if its a Luks fs)
     file ${tombdir}/${tombfile} | grep -i 'luks encrypted file' 2>&1 >/dev/null
     if [ $? != 0 ]; then
-	_warning "$CMD2 is not a valid tomb file, operation aborted"
+	_warning "$1 is not a valid tomb file, operation aborted"
 	return 1
     fi
     tombname=${tombfile%%\.*}
@@ -815,14 +816,14 @@ mount_tomb() {
 	return 1
     fi
 
-    if ! [ $CMD3 ]; then
+    if ! [ $2 ]; then
         tombmount=/media/${tombfile}
         _message "mountpoint not specified, using default: $tombmount"
-    elif ! [ -x $CMD3 ]; then
-        _warning "mountpoint $CMD3 doesn't exist, operation aborted."
+    elif ! [ -x $2 ]; then
+        _warning "mountpoint $2 doesn't exist, operation aborted."
         return 1
     else
-	tombmount=${CMD3}
+	tombmount=$2
     fi
 
     # check if its already open
@@ -1689,16 +1690,16 @@ main() {
     CMD2=$PARAM[1]
     CMD3=$PARAM[2]
 
-    xxx "Tomb command: $CMD $CMD2 $CMD3"
+    xxx "Tomb command: $subcommand ${PARAM}"
 
     case "$subcommand" in
 	create)
 	    check_priv
-	    create_tomb
+	    create_tomb $PARAM[1]
 	    ;;
 	mount|open)
 	    check_priv
-	    mount_tomb
+	    mount_tomb $PARAM[1] $PARAM[2]
 	    ;;
 	umount|close|slam)
 	    check_priv
@@ -1730,7 +1731,7 @@ main() {
  		_warning "steghide not installed. Cannot exhume your key"
 		return 1
 	    fi
-	    decode_key ${CMD2}
+	    decode_key ${CMD2} ${CMD3}
 	    ;;
 	resize)
         check_priv
@@ -1758,7 +1759,7 @@ EOF
 	    usage
 	    ;;
 	*)
-	    _warning "command \"$CMD\" not recognized"
+	    _warning "command \"$subcommand\" not recognized"
 	    _message "try -h for help"
 	    return 1
 	    ;;
