@@ -33,9 +33,6 @@ STEGHIDE=1
 MKTEMP=1
 MOUNTOPTS="rw,noatime,nodev"
 
-#declare global variables
-QUIET=0
-DEBUG=0
 typeset -A global_opts
 typeset -A opts
 
@@ -1661,15 +1658,6 @@ main() {
     if ! option_is_set --no-color; then
         autoload colors; colors
     fi
-
-    ### Set global options (useless, but for code retro-compatibility)
-    for opt in ${(k)global_opts}; do
-	if [[ $opt == '-q' ]]; then
-	    QUIET=1
-	elif [[ $opt == '-D' ]]; then
-            DEBUG=1
-	fi
-    done
 
     CMD=$subcommand
     CMD2=$PARAM[1]
