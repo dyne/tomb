@@ -1145,6 +1145,7 @@ change_passwd() {
 # {{{ - Resize
 # resize tomb file size
 resize_tomb() {
+    _message "Commanded to resize tomb $CMD2 to $opts[-s] megabytes"
     if ! [ ${CMD2} ]; then
         _failure "No tomb name specified for resizing"
     elif ! [ -r "${CMD2}" ]; then
@@ -1181,11 +1182,11 @@ resize_tomb() {
     local tmp_resize=`safe_filename tmbrsz`
     local newtombsize=$opts[-s]
     local oldtombsize=`stat -c %s "${CMD2}" 2>/dev/null`
-	local mounted_tomb=`mount -l |
+    local mounted_tomb=`mount -l |
         awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
 
     if [ "$mounted_tomb" ]; then
-        _failure "the tomb $tombname is mounted: to resize, umount it ('tomb close $tombname' is your friend)."
+        _failure "the tomb $tombname is open, to resize it it needs to be close."
     fi
 
     # MB to bytes conversion
@@ -1208,13 +1209,13 @@ resize_tomb() {
     "$DD" if=/dev/urandom bs=4k count=${tombsize_4k} of="${tmp_resize}"
 
     if [ $? = 0 -a -e "${tmp_resize}" ]; then
-	    act "OK: `ls -lh ${tmp_resize}`"
+	xxx "OK: `ls -lh ${tmp_resize}`"
     else
-	    _failure "Error creating the extra resize $tmp_resize, operation aborted."
+	_failure "Error creating the extra resize $tmp_resize, operation aborted."
     fi
     
     cat "${tmp_resize}" >> "${CMD2}"
-    "${WIPE}" "${tmp_resize}"
+    ${=WIPE} "${tmp_resize}"
     
     local nstloop=`losetup -f`
     if [ $? = 255 ]; then
@@ -1265,6 +1266,8 @@ resize_tomb() {
         losetup -d ${nstloop}
         _failure "resize2fs failed to resize $mapper"
     fi
+
+    sleep 1 # needs to settle a bit
 
     # close and free the loop device
     cryptsetup luksClose "${mapper}"
