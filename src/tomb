@@ -206,21 +206,13 @@ check_swap() {
     # Return 2 if swap(s) is(are) used, but ALL encrypted
     local swaps=$(awk '/partition/ { print $1 }' /proc/swaps 2>/dev/null)
     [[ -z "$swaps" ]] && return 0                # No swap partition is active
-
-    local -i count
-    xxx "check_swap $swaps"
-    for dev in ${=swaps}
-    do
-	xxx "check_swap testing device $dev (count = $count)"
-	sudo cryptsetup status ${dev} | grep 'active' &>/dev/null && count+=1
-    done
-    xxx "$count encrypted swap(s) [${(%w)#swaps} total]"
-    (( ${count} == ${(%w)#swaps} )) && return 2  # All swap partitions are encrypted
-    xxx "check_swap detected some unencrypted swap"
-    (( ${#{=swaps}} )) && return 1               # Some unencrypted swap partition(s)
-    xxx "check_swap should never reach here"
-    return 0                                     # No swap partition is active
+    no  "An active swap partition is detected, this poses security risks."
+    no  "You can deactivate all swap partitions using the command:"
+    no  " swapoff -a"
+    no  "But if you want to proceed like this, use the --force flag."
+    die "Operation aborted."
 }
+
 # }}}
 # {{{   - Ask user for a password
 # we use pinentry now
@@ -320,6 +312,7 @@ Options:
  -k     path to the key to use for opening a tomb
  -n     don't process the hooks found in tomb
  -o     mount options used to open (default: rw,noatime,nodev)
+ -f     force operation (i.e. even if swap is active)
 
  -h     print this help
  -v     version information for this tool
@@ -568,14 +561,9 @@ exec_safe_post_hooks() {
 # {{{ - Create
 
 create_tomb() {
-    if ! option_is_set --ignore-swap && [[ `check_swap out` == 1 ]]; then
-        _warning "You have swap activated; use --ignore-swap if you want to skip this check"
-        _message "Using encryption with swap activated is very bad, because some files, or even your secret key, could be written on hard disk."
-        _message "However, it could be that your swap is encrypted. If this is case, this is ok. Then, use --ignore-swap to skip this check"
-        _message "You seem to be using `tail -n +2 /proc/swaps|wc -l` swaps:"
-        tail -n +2 /proc/swaps
-        exit 1
-    fi
+    _message "Commanded to create tomb $CMD2"
+    if ! option_is_set --force; then check_swap; fi
+
     if ! [ ${CMD2} ]; then
         _warning "no tomb name specified for creation"
         return 1
@@ -588,10 +576,9 @@ create_tomb() {
     tombfile=${tombname}.tomb
     tombsize=$opts[-s]
 
-    if [[ $tombsize != <-> ]]; then
-        _warning "Size is not an integer"
-        return 1
-    fi
+    [ $tombsize ] || die "Size argument missing, use --size"
+
+    [[ $tombsize != <-> ]] && die "Size argument is not an integer"
 
     if [ -e ${tombdir}/${tombfile} ]; then
 	_warning "tomb exists already. I'm not digging here:"
@@ -749,14 +736,8 @@ create_tomb() {
 
 mount_tomb() {
     _message "Commanded to open tomb $CMD2"
-    if ! option_is_set --ignore-swap && [[ `check_swap out` == 1 ]]; then
-        _warning "You have swap activated; use --ignore-swap if you want to skip this check"
-        _message "Using encryption with swap activated is very bad, because some files, or even your secret key, could be written on hard disk."
-        _message "However, it could be that your swap is encrypted. If this is case, this is ok. Then, use --ignore-swap to skip this check"
-        _message "You seem to be using `tail -n +2 /proc/swaps|wc -l` swaps:"
-        tail -n +2 /proc/swaps
-        die "I'm stopping now." 
-    fi
+    if ! option_is_set --force; then check_swap; fi
+
     if ! [ ${CMD2} ]; then
         _warning "no tomb name specified for creation"
         return 1
@@ -1058,15 +1039,10 @@ umount_tomb() {
 
 # change tomb key password
 change_passwd() {
-    if ! option_is_set --ignore-swap && [[ `check_swap out` == 1 ]]; then
-        _warning "You have swap activated; use --ignore-swap if you want to skip this check"
-        _message "Using encryption with swap activated is very bad, because some files, or even your secret key, could be written on hard disk."
-        _message "However, it could be that your swap is encrypted. If this is case, this is ok. Then, use --ignore-swap to skip this check"
-        _message "You seem to be using `tail -n +2 /proc/swaps|wc -l` swaps:"
-        tail -n +2 /proc/swaps
-        return 1
-    fi
-    local keyfile="${1}"
+    _message "Commanded to change password for tomb key $CMD2"
+    if ! option_is_set --force; then check_swap; fi
+
+    local keyfile="$CMD2"
 
     # check the keyfile
     if ! [ -r $keyfile ]; then
@@ -1164,7 +1140,7 @@ change_passwd() {
 # {{{ - List
 # list all tombs mounted in a readable format
 list_tombs() {
-    if [ $1 ]; then
+    if [ $CMD2 ]; then
 	# list a specific tomb
 	mounted_tombs=`mount -l |
     awk -vtomb="[$1]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
@@ -1181,7 +1157,7 @@ list_tombs() {
 
     if ! [ $mounted_tombs ]; then
 	if [ $1 ]; then
-	    die "There seems to be no open tomb engraved as [${1}]"
+	    die "There seems to be no open tomb engraved as [$CMD2]"
 	else
 	    die "I can't see any open tomb, may they all rest in peace."
 	fi
@@ -1420,22 +1396,29 @@ option_value() {
 main() {
     local -A subcommands_opts
     ### Options configuration
-    #Hi, dear developer! Are you trying to add a new subcommand, or to add some options?
-    #Well, keep in mind that:
-    # 1. An option CAN'T have differente meanings/behaviour in different subcommands.
+
+    # Hi, dear developer! Are you trying to add a new subcommand, or
+    # to add some options?  Well, keep in mind that an option CAN'T
+    # have differente meanings/behaviour in different subcommands.
+
     #    For example, "-s" means "size" and accept an argument. If you are tempted to add
     #    an option "-s" (that means, for example "silent", and doesn't accept an argument)
     #              DON'T DO IT!
+
     #     There are two reasons for that:
-    #       I. usability; user expect that "-s" is "size
+    #       I. usability; user expect that "-s" is "size"
     #       II. Option parsing WILL EXPLODE if you do this kind of bad things
     #               (it will say "option defined more than once, and he's right")
+    #
+    #    If you want to use the same option in multiple commands then
+    #    you can only use the non-abbreviated long-option version like:
+    #    -force and NOT -f
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v -no-color)
     subcommands_opts[__default]=""
-    subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o -ignore-swap"
+    subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o -force"
     subcommands_opts[mount]=${subcommands_opts[open]}
-    subcommands_opts[create]="s: -size=s -ignore-swap k: -key=k"
-    subcommands_opts[passwd]="-ignore-swap"
+    subcommands_opts[create]="s: -size=s -force k: -key=k"
+    subcommands_opts[passwd]="-force"
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""

@@ -188,22 +188,23 @@ executes desktop applications as processes owned by the user.
 
 .SH SWAP
 
-During "create" and "open" operation, swap will complain and \fIabort\fR if
-your system has swap activated. This can be annoying, and you can disable this
-behaviour using \fI--ignore-swap\fR. Before doing that, however, you may be
-interested in knowing the risks of doing so:
+During "create", "open" and "passwd" operations, swap will complain
+and \fIabort if your system has swap activated\fR. You can disable
+this behaviour using the \fI--force\fR. Before doing that, however,
+you may be interested in knowing the risks of doing so:
 .IP \(bu
-During both creation and opening it could write your secret key on the disk
+During such operations a lack of available memory could cause the swap
+to write your secret key on the disk.
 .IP \(bu
-After having opened the tomb, an application you're using could swap file
-contents. So you'll put file contents in clear on your disk
+Even while using an opened tomb, another application could occupy too
+much memory so that the swap needs to be used, this way it is possible
+that some contents of files contained into the tomb are physically
+written on your disk, not encrypted.
 .P
 
-If you don't need swap, execute \fI swapoff -a\fR. If you really need it, you
-could encrypt it. Tomb doesn't detect if your swap is encrypted, and will
-complain anyway. In that case, using --ignore-swap is safe. Otherwise, use
---ignore-swap at your own risk
-
+If you don't need swap, execute \fI swapoff -a\fR. If you really need
+it, you could make an encrypted swap it. Tomb doesn't detect if your
+swap is encrypted, and will complain anyway.
 
 
 .SH BUGS
