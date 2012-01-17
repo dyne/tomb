@@ -6,7 +6,8 @@
 #
 # Undertaker is a tool to retrieve tomb keys from various sources
 #
-# {{{ Copyleft (C) 2011 Denis Roio <jaromil@dyne.org>
+# {{{ Copyleft (C) 2012 Dyne.org foundation
+#             2011-2012 Denis Roio <jaromil@dyne.org>
 #
 # This source  code is free  software; you can redistribute  it and/or
 # modify it under the terms of  the GNU Public License as published by
@@ -24,6 +25,10 @@
 
 # }}}
 
+# signal traps (special funcs in Zsh)
+TRAPKILL() die "KILL signal caught, undertaker aborting."
+TRAPSTOP() die "STOP signal caught, undertaker aborting."
+
 # first of all source the tomb core functions
 which tomb > /dev/null
 if [[ $? != 0 ]]; then
@@ -38,6 +43,8 @@ key_found() {
     print "$fg[white][found] $1"
 }
 
+
+
 function undertaker_scheme() {
     zparseopts -D -print-path=print_path
 
@@ -46,6 +53,8 @@ function undertaker_scheme() {
     local keypath
     keypath=$2
     case $scheme in
+
+
         bluetooth)
             #TODO: support --print-path
             act "access to bluetooth protocol requested"
@@ -62,20 +71,28 @@ function undertaker_scheme() {
             obexpath=${obexdevpath#*/}
             act "obex device: $obexdev"
             act "obex path: $obexpath"
-	obexftp -b $obexdev -g $obexpath 
-	if [[ $? != 0 ]]; then
-	    rmdir ${keytmp}
-	    die "a problem occurred retreiving the key via bluetooth."
-	fi
+	    obexftp -b $obexdev -g $obexpath 
+	    if [[ $? != 0 ]]; then
+		rmdir ${keytmp}
+		die "a problem occurred retreiving the key via bluetooth."
+	    fi
 	# print out the key on stdout
-	cat $obexpath >&1
-            # wipe out the key
-	${WIPE[@]} $obexpath
-            cd -
-            rmdir ${keytmp}
-
+	    if option_is_set --path; then
+		echo $obexpath
+                # up to the caller to delete the key
+		# TODO: --path should have the directory where to put the key
+		# as argument, instead of creating keytmp
+	    else
+		cat `pwd`/$obexpath >&1
+                # wipe out the key
+		${WIPE[@]} $obexpath
+		cd -
+		rmdir ${keytmp}
+	    fi
+	    
         #	tombkey="basename $obexpath"
             ;;
+
         file)
             if ! [[ -f $keypath ]]; then
                 error "Invalid path $keypath"
@@ -100,6 +117,7 @@ function undertaker_scheme() {
                 fi
             done
             ;;
+
         udisks)
             #It implements automounting using udisks; udisks is a (recently)
             #new technology, so we can't rely on it being present
@@ -121,10 +139,14 @@ function undertaker_scheme() {
                 fi
             done
             ;;
+
         near)
             ###Given the path to the tomb, search the key near to that
             undertaker_scheme file ${keypath}.key
             ;;
+
+
+
         *)
             if ! which undertaker-$scheme &> /dev/null; then
                 error "url protocol not recognized: $scheme"
@@ -135,21 +157,22 @@ function undertaker_scheme() {
             ;;
     esac
 }
+
 function main() {
         typeset -A opts
-        zparseopts -M -E -D -Aopts -poll -print-path -machine-parseable
+        zparseopts -M -E -D -Aopts -poll -path -batch
         if ! [ $1 ] ; then
             error "an argument is missing, the undertaker is confused"
             act "usage: undertaker [options] url://host:path/to/tomb.key"
             exit 1;
         fi
         local -a tomb_opts
-        if [[ -n ${(k)opts[--machine-parseable]} ]]; then
-            tomb_opts+='--machine-parseable'
+        if [[ -n ${(k)opts[--batch]} ]]; then
+            tomb_opts+='--batch'
         fi
         local -a under_opts
-        if [[ -n ${(k)opts[--print-path]} ]]; then
-            under_opts+='--print-path'
+        if [[ -n ${(k)opts[--path]} ]]; then
+            under_opts+='--path'
         fi
         local -A backupopts
         for a in ${(k)opts}; do

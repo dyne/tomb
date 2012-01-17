@@ -135,11 +135,10 @@ mount a tomb read-only (ro) to prevent any modification of its data,
 or to experiment with other settings (if you really know what you are
 doing) see the mount(8) man page.
 .B
-.IP "--ignore-swap"
-By default, Tomb will abort any create and open operation if swap is used (see
-SWAP section for details). This flag will disable this behaviour. NOTE: it is
-not secure to do so, unless you know that your swap is encrypted
-
+.IP "-f"
+Force flag, currently used to override swap checks, might be
+overriding more wimpy behaviours in future, but make sure you know
+what you are doing if you force an operation...
 .B
 .IP "-h"
 Display a help text and quit
@@ -154,10 +153,8 @@ Run more quietly
 Print more information while running, for debugging purposes
 .B
 .IP "--no-color"
-Don't use colors; useful for old terminals or integration in other scripts
-.B
-.IP "--machine-parseable"
-The output is easily parseable via software. This implies --no-color
+Don't use colors; useful for old terminals or integration in other
+scripts parsers
 
 
 .SH HOOKS

@@ -124,9 +124,7 @@ progress() {
     #          progress create 80 please enter password
     #          progress create 90 formatting the tomb
     #          progress create 100 tomb created successfully
-    local -a prog_opts
-    zparseopts -a prog_opts -D -E -machine-parseable
-    if ! option_is_set --machine-parseable; then
+    if ! option_is_set --batch; then
         return
     fi
     print "[m][P][$1][$2][$3]" >&2
@@ -1683,10 +1681,6 @@ main() {
 	shift
     fi
     ### End parsing command-specific options
-
-    if option_is_set --machine-parseable; then
-        opts[--no-color]=''
-    fi
     if ! option_is_set --no-color; then
         autoload colors; colors
     fi
