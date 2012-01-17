@@ -213,7 +213,7 @@ check_swap() {
     no  "An active swap partition is detected, this poses security risks."
     no  "You can deactivate all swap partitions using the command:"
     no  " swapoff -a"
-    no  "But if you want to proceed like this, use the --force flag."
+    no  "But if you want to proceed like this, use the -f (force) flag."
     die "Operation aborted."
 }
 
@@ -295,13 +295,13 @@ Syntax: tomb [options] command [file] [place]
 
 Commands:
 
- create     create a new tomb FILE and its keys
+ create     create a new tomb FILE and its keys (needs size)
  open       open an existing tomb FILE on PLACE
  list       list all open tombs or the one called FILE
  close      close the open tomb called FILE (or all)
  slam       close tomb FILE and kill all pids using it
  passwd     change the password of a tomb key FILE
- resize     resize a tomb FILE
+ resize     resize a tomb FILE (only bigger, needs size)
 EOF
     if [ "$STEGHIDE" = 1 ]; then
 	cat <<EOF
@@ -567,7 +567,7 @@ exec_safe_post_hooks() {
 
 create_tomb() {
     _message "Commanded to create tomb $CMD2"
-    if ! option_is_set --force; then check_swap; fi
+    if ! option_is_set -f; then check_swap; fi
 
     if ! [ ${CMD2} ]; then
         _warning "no tomb name specified for creation"
@@ -741,7 +741,7 @@ create_tomb() {
 
 mount_tomb() {
     _message "Commanded to open tomb $CMD2"
-    if ! option_is_set --force; then check_swap; fi
+    if ! option_is_set -f; then check_swap; fi
 
     if ! [ ${CMD2} ]; then
         _warning "no tomb name specified for creation"
@@ -1045,7 +1045,7 @@ umount_tomb() {
 # change tomb key password
 change_passwd() {
     _message "Commanded to change password for tomb key $CMD2"
-    if ! option_is_set --force; then check_swap; fi
+    if ! option_is_set -f; then check_swap; fi
 
     local keyfile="$CMD2"
 
@@ -1555,10 +1555,10 @@ main() {
     #    -force and NOT -f
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v -no-color)
     subcommands_opts[__default]=""
-    subcommands_opts[open]="n -nohook=n k: -key=k o: -mount-options=o -force"
+    subcommands_opts[open]="f n -nohook=n k: -key=k o: -mount-options=o"
     subcommands_opts[mount]=${subcommands_opts[open]}
-    subcommands_opts[create]="s: -size=s -force k: -key=k"
-    subcommands_opts[passwd]="-force"
+    subcommands_opts[create]="f s: -size=s -force k: -key=k"
+    subcommands_opts[passwd]="f"
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
