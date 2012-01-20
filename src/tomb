@@ -1776,3 +1776,5 @@ if [[ $? != 0 ]]; then #this "if" seems useless, but avoid source tomb source fr
 fi
 # }}}
 
+# -*- tab-width: 4; indent-tabs-mode:nil; -*-
+# vim: set shiftwidth=4 expandtab:
