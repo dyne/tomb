@@ -592,9 +592,10 @@ exec_safe_post_hooks() {
 # {{{ TOMB SUB-COMMANDS
 
 # {{{ - Create
+# $1 is the tomb path
 
 create_tomb() {
-    _message "Commanded to create tomb $CMD2"
+    _message "Commanded to create tomb $1"
     if ! option_is_set -f; then check_swap; fi
 
     if ! [ $1 ]; then
@@ -1092,13 +1093,14 @@ umount_tomb() {
 # }}}
 # }}}
 # {{{ - Change Password
+# $1 is the tomb key path
 
 # change tomb key password
 change_passwd() {
-    _message "Commanded to change password for tomb key $CMD2"
+    _message "Commanded to change password for tomb key $1"
     if ! option_is_set -f; then check_swap; fi
 
-    local keyfile="$CMD2"
+    local keyfile="$1"
 
     # check the keyfile
     if ! [ -r $keyfile ]; then
@@ -1195,17 +1197,18 @@ change_passwd() {
 # }}}
 # {{{ - Resize
 # resize tomb file size
+# $1 is tomb path
 resize_tomb() {
-    _message "Commanded to resize tomb $CMD2 to $opts[-s] megabytes"
-    if ! [ ${CMD2} ]; then
+    _message "Commanded to resize tomb $1 to $opts[-s] megabytes"
+    if ! [ $1 ]; then
         _failure "No tomb name specified for resizing"
-    elif ! [ -r "${CMD2}" ]; then
-        _failure "Cannot find ${CMD2}"
+    elif ! [ -r "$1" ]; then
+        _failure "Cannot find $1"
     fi
 
     local c tombpass tombkey
-    local tombfile=`basename ${CMD2}`
-    local tombdir=`dirname ${CMD2}`
+    local tombfile=`basename $1`
+    local tombdir=`dirname $1`
     # make sure the file has a .tomb extension
     local tombname=${tombfile%%\.*}
     tombfile=${tombname}.tomb
@@ -1232,7 +1235,7 @@ resize_tomb() {
 
     local tmp_resize=`safe_filename tmbrsz`
     local newtombsize=$opts[-s]
-    local oldtombsize=`stat -c %s "${CMD2}" 2>/dev/null`
+    local oldtombsize=`stat -c %s "$1" 2>/dev/null`
     local mounted_tomb=`mount -l |
         awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
 
@@ -1265,14 +1268,14 @@ resize_tomb() {
 	_failure "Error creating the extra resize $tmp_resize, operation aborted."
     fi
     
-    cat "${tmp_resize}" >> "${CMD2}"
+    cat "${tmp_resize}" >> "$1"
     ${=WIPE} "${tmp_resize}"
     
     local nstloop=`losetup -f`
     if [ $? = 255 ]; then
         _failure "too many tomb opened. Please close any of them to open another tomb"
     fi
-    losetup -f "${CMD2}"
+    losetup -f "$1"
     
     local mapdate=`date +%s`
     local mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
@@ -1330,8 +1333,9 @@ resize_tomb() {
 # }}}
 # {{{ - List
 # list all tombs mounted in a readable format
+# $1 is optional, to specify a tomb
 list_tombs() {
-    if [ $CMD2 ]; then
+    if [ $1 ]; then
 	# list a specific tomb
 	mounted_tombs=`mount -l |
     awk -vtomb="[$1]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
@@ -1348,7 +1352,7 @@ list_tombs() {
 
     if ! [ $mounted_tombs ]; then
 	if [ $1 ]; then
-	    die "There seems to be no open tomb engraved as [$CMD2]"
+	    die "There seems to be no open tomb engraved as [$1]"
 	else
 	    die "I can't see any open tomb, may they all rest in peace."
 	fi
@@ -1686,10 +1690,6 @@ main() {
         autoload colors; colors
     fi
 
-    CMD=$subcommand
-    CMD2=$PARAM[1]
-    CMD3=$PARAM[2]
-
     xxx "Tomb command: $subcommand ${PARAM}"
 
     case "$subcommand" in
@@ -1704,17 +1704,17 @@ main() {
 	umount|close|slam)
 	    check_priv
 	    [ "$subcommand" =  "slam" ] && SLAM=1
-	    umount_tomb ${CMD2}
+	    umount_tomb $PARAM[1]
 	    ;;
 	passwd)
 	    check_priv
-	    change_passwd ${CMD2}
+	    change_passwd $PARAM[1]
 	    ;;
 	list)
-	    list_tombs ${CMD2}
+	    list_tombs $PARAM[1]
 	    ;;
 	status)
-	    launch_status ${CMD2}
+	    launch_status $PARAM[1]
 	    ;;
 	help)
 	    usage
@@ -1724,24 +1724,24 @@ main() {
 		_warning "steghide not installed. Cannot bury your key"
 		return 1
 	    fi
-	    encode_key ${CMD2} ${CMD3}
+	    encode_key $PARAM[1] $PARAM[2]
 	    ;;
 	exhume)
 	    if [ "$STEGHIDE" = 0 ]; then
  		_warning "steghide not installed. Cannot exhume your key"
 		return 1
 	    fi
-	    decode_key ${CMD2} ${CMD3}
+	    decode_key $PARAM[1] $PARAM[2]
 	    ;;
 	resize)
         check_priv
-        resize_tomb
+        resize_tomb $PARAM[1]
         ;;
 	# internal commands useful to developers
 	'source')   return 0 ;;
 	install)    check_priv ; install_tomb ;;
-	askpass)    ask_password ${CMD2} ${CMD3} ;;
-	mktemp)     safe_dir ${CMD2} ;;
+	askpass)    ask_password $PARAM[1] $PARAM[2] ;;
+	mktemp)     safe_dir $PARAM[1] ;;
 	translate)  generate_translatable_strings ;;
 	__default)
 	    cat <<EOF
