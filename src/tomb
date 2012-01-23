@@ -1603,19 +1603,19 @@ main() {
     # to add some options?  Well, keep in mind that an option CAN'T
     # have differente meanings/behaviour in different subcommands.
 
-    #    For example, "-s" means "size" and accept an argument. If you are tempted to add
-    #    an option "-s" (that means, for example "silent", and doesn't accept an argument)
-    #              DON'T DO IT!
+    # For example, "-s" means "size" and accept an argument. If you are tempted to add
+    # an option "-s" (that means, for example "silent", and doesn't accept an argument)
+    #           DON'T DO IT!
 
-    #     There are two reasons for that:
+    #  There are two reasons for that:
     #       I. usability; user expect that "-s" is "size"
-    #       II. Option parsing WILL EXPLODE if you do this kind of bad things
-    #               (it will say "option defined more than once, and he's right")
+    #    II. Option parsing WILL EXPLODE if you do this kind of bad things
+    #            (it will say "option defined more than once, and he's right")
     #
     #    If you want to use the same option in multiple commands then
     #    you can only use the non-abbreviated long-option version like:
     #    -force and NOT -f
-    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v -no-color)
+	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v -no-color)
     subcommands_opts[__default]=""
     subcommands_opts[open]="f n -nohook=n k: -key=k o: -mount-options=o"
     subcommands_opts[mount]=${subcommands_opts[open]}
@@ -1648,7 +1648,20 @@ main() {
     done
     local -a oldstar
     oldstar=($argv)
-    zparseopts -M -E -D -Adiscardme ${every_opts}
+	#### detect early: useful for --optiion-parsing
+    zparseopts -M -D -Adiscardme ${every_opts}
+	if [[ -n ${(k)discardme[--option-parsing]} ]]; then
+		echo $1
+		if [[ -n "$1" ]]; then
+			return 1
+		fi
+		return 0
+	fi
+	unset discardme
+    if ! zparseopts -M -E -D -Adiscardme ${every_opts}; then
+		error "error parsing"
+		return 127
+	fi
     unset discardme
     subcommand=$1
     if [[ -z $subcommand ]]; then
@@ -1783,8 +1796,9 @@ EOF
 # {{{ RUNTIME
 check_bin
 main $@
-if [[ $? != 0 ]]; then #this "if" seems useless, but avoid source tomb source from exiting
-    exit $?
+ret=$?
+if [[ $ret != 0 ]]; then #this "if" seems useless, but avoid source tomb source from exiting
+    exit $ret
 fi
 # }}}
 
