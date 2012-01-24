@@ -47,7 +47,8 @@ class Tomb(object):
         return True
 
     @classmethod
-    def create(cls, tombpath, tombsize,keypath, stdout=None, stderr=None, no_color=True, ignore_swap=False):
+    def create(cls, tombpath, tombsize,keypath, stdout=None, stderr=None,
+            no_color=True, ignore_swap=False):
         '''If keypath is None, it will be created adjacent to the tomb.
         This is unsafe, and you should NOT do it.
 
@@ -69,9 +70,20 @@ class Tomb(object):
             return False
         return True
 
-    @staticmethod
-    def open(tombpath,keypath=None):
-        raise NotImplementedError
+    @classmethod
+    def open(cls, tombpath,keypath=None, no_color=True, ignore_swap=False):
+        args = [tombpath]
+        if keypath is not None:
+            args += ['-k', keypath]
+        if no_color:
+            args += ['--no-color']
+        if ignore_swap:
+            args += ['--ignore-swap']
+        try:
+            subprocess.check_call([cls.tombexec, 'open'] + args)
+        except subprocess.CalledProcessError:
+            return False
+        return True
 
 
 if __name__ == '__main__':

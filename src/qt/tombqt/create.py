@@ -73,7 +73,7 @@ class TombCreateWizard(QWizard):
 
     def on_tomb_location_clicked(self, *args, **kwargs):
         filename = QtGui.QFileDialog.getSaveFileName(self, 'Create Tomb',
-                filter="*.tomb")
+                filter="Tomb(*.tomb)")
         self.ui.lineEdit_tombpath.setText(filename)
     def on_change_page(self, pagenumber):
         if self.currentPage() == self.ui.wizardPage_progress:
