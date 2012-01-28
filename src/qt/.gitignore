@@ -2,3 +2,5 @@
 *.pyc
 TombQt.egg-info
 build
+dist
+disk

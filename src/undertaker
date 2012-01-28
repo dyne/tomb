@@ -37,7 +37,7 @@ fi
 
 key_found() {
     # $1 is "url"
-    if option_is_set --machine-parseable; then
+    if option_is_set --batch; then
         print -n '[m]'
     fi
     print "$fg[white][found] $1"
@@ -46,7 +46,7 @@ key_found() {
 
 
 function undertaker_scheme() {
-    zparseopts -D -print-path=print_path
+    zparseopts -D -path=print_path
 
     local scheme
     scheme=$1
@@ -60,7 +60,7 @@ function undertaker_scheme() {
             act "access to bluetooth protocol requested"
             which obexftp &> /dev/null
             if [[ $? != 0 ]]; then
-                error "obexftp not found, needed for bluetooth: operation aborted."
+                _warning "obexftp not found, needed for bluetooth: operation aborted."
                 return 64
             fi
             keytmp=`safe_dir undertaker`
@@ -95,10 +95,10 @@ function undertaker_scheme() {
 
         file)
             if ! [[ -f $keypath ]]; then
-                error "Invalid path $keypath"
+                _warning "Invalid path $keypath"
                 return 1
             fi
-            if [[ -n $print_path ]]; then
+            if option_is_set --path; then
                 key_found $scheme://$keypath;
             else
                 < $keypath
@@ -122,7 +122,7 @@ function undertaker_scheme() {
             #It implements automounting using udisks; udisks is a (recently)
             #new technology, so we can't rely on it being present
             if ! which udisks &> /dev/null; then
-                error 'udisks not found'
+                _warning 'udisks not found'
                 exit 64
             fi
             while true; do
@@ -149,7 +149,7 @@ function undertaker_scheme() {
 
         *)
             if ! which undertaker-$scheme &> /dev/null; then
-                error "url protocol not recognized: $scheme"
+                _warning "url protocol not recognized: $scheme"
                 return 64
             fi
             undertaker-$scheme ${print_path[@]} ${scheme}://$keypath
@@ -162,13 +162,14 @@ function main() {
         typeset -A opts
         zparseopts -M -E -D -Aopts -poll -path -batch
         if ! [ $1 ] ; then
-            error "an argument is missing, the undertaker is confused"
-            act "usage: undertaker [options] url://host:path/to/tomb.key"
+            echo "[W] an argument is missing, the undertaker is confused"
+            echo "usage: undertaker [options] url://host:path/to/tomb.key"
             exit 1;
         fi
         local -a tomb_opts
         if [[ -n ${(k)opts[--batch]} ]]; then
-            tomb_opts+='--batch'
+            tomb_opts+='--no-color'
+			tomb_opts+='--quiet'
         fi
         local -a under_opts
         if [[ -n ${(k)opts[--path]} ]]; then
@@ -178,13 +179,14 @@ function main() {
         for a in ${(k)opts}; do
             backupopts[$a]=${opts[$a]}
         done
-        source tomb ${tomb_opts[@]} source
+		source tomb ${tomb_opts[@]} source
+		TOMBEXEC=undertaker
         for a in ${(k)backupopts}; do
             opts[$a]=${backupopts[$a]}
         done
         check_bin
 
-        notice "Undertaker will look for $1"
+        _success "Undertaker will look for $1"
 
         ARG1=${1}
         scheme=${ARG1%://*}
