@@ -41,7 +41,8 @@ setup(
             },
         entry_points = {
             'gui_scripts': [
-                'tomb-qt-create = tombqt.create:run_create_wizard'
+                'tomb-qt-create = tombqt.create:run_create_wizard',
+                'tomb-qt-open = tombqt.open:run_open_wizard'
                 ]
             }
 )
