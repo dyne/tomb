@@ -1,5 +1,5 @@
 
-bin_SCRIPTS = tomb tomb-open
+bin_SCRIPTS = tomb tomb-open undertaker
 
 bin_PROGRAMS = tomb-status
 
