@@ -36,7 +36,7 @@ class Undertaker(object):
         buf = NamedTemporaryFile()
         try:
             subprocess.check_call([cls.undertakerexec, paths, '--batch',
-                '--path'], stdout=buf)
+                '--path'], stderr=buf)
         except subprocess.CalledProcessError as exc:
             return False
 
