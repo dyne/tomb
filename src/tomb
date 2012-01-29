@@ -48,8 +48,8 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
 function _msg() {
     local command="print -P"
-    local progname="$fg[magenta]${TOMBEXEC##*/}$fg[reset_color]"
-    local message="$fg_bold[normal]$fg_no_bold[normal]${2}$fg[reset_color]"
+    local progname="$fg[magenta]${TOMBEXEC##*/}$reset_color"
+    local message="$fg_bold[normal]$fg_no_bold[normal]${2}$reset_color"
     local -i returncode
 
     case "$1" in
@@ -57,19 +57,19 @@ function _msg() {
 	    command+=" -n"; pchars=" > "; pcolor="yellow"
 	    ;;
 	message)
-	    pchars=" . "; pcolor="white"; message="$fg_no_bold[$pcolor]${2}$fg[reset_color]"
+	    pchars=" . "; pcolor="white"; message="$fg_no_bold[$pcolor]${2}$reset_color"
 	    ;;
 	verbose)
 	    pchars="[D]"; pcolor="blue"
 	    ;;
 	success)
-	    pchars="(*)"; pcolor="green"; message="$fg_no_bold[$pcolor]${2}$fg[reset_color]"
+	    pchars="(*)"; pcolor="green"; message="$fg_no_bold[$pcolor]${2}$reset_color"
 	    ;;
 	warning)
-	    pchars="[W]"; pcolor="yellow"; message="$fg_no_bold[$pcolor]${2}$fg[reset_color]"
+	    pchars="[W]"; pcolor="yellow"; message="$fg_no_bold[$pcolor]${2}$reset_color"
 	    ;;
 	failure)
-	    pchars="[E]"; pcolor="red"; message="$fg_no_bold[$pcolor]${2}$fg[reset_color]"
+	    pchars="[E]"; pcolor="red"; message="$fg_no_bold[$pcolor]${2}$reset_color"
 	    returncode=1
 	    ;;
 	*)
@@ -78,7 +78,7 @@ function _msg() {
 	    returncode=127
 	    ;;
     esac
-    ${=command} "${progname} $fg_bold[$pcolor]$pchars$fg[reset_color] ${message}$color[reset_color]" >&2
+    ${=command} "${progname} $fg_bold[$pcolor]$pchars$reset_color ${message}$color[reset_color]" >&2
     return $returncode
 }
 function _message say()
@@ -298,8 +298,20 @@ EOF
     return 0
 }
 # }}}
-# }}}
-# {{{ - TOMB USAGE
+check_command() {
+    #generic checks; useful for interaction, to check if there are problems
+    #before wasting user's time
+    
+    if ! option_is_set --ignore-swap; then
+        if [[ $1 == 'create' || $1 == 'open' ]]; then
+            if ! check_swap; then
+                error "Swap activated. Disable it with swapoff, or use --ignore-swap"
+                exit 1
+            fi
+        fi
+    fi
+}
+
 usage() {
     cat <<EOF
 
@@ -1591,19 +1603,19 @@ main() {
     # to add some options?  Well, keep in mind that an option CAN'T
     # have differente meanings/behaviour in different subcommands.
 
-    #    For example, "-s" means "size" and accept an argument. If you are tempted to add
-    #    an option "-s" (that means, for example "silent", and doesn't accept an argument)
-    #              DON'T DO IT!
+    # For example, "-s" means "size" and accept an argument. If you are tempted to add
+    # an option "-s" (that means, for example "silent", and doesn't accept an argument)
+    #           DON'T DO IT!
 
-    #     There are two reasons for that:
+    #  There are two reasons for that:
     #       I. usability; user expect that "-s" is "size"
-    #       II. Option parsing WILL EXPLODE if you do this kind of bad things
-    #               (it will say "option defined more than once, and he's right")
+    #    II. Option parsing WILL EXPLODE if you do this kind of bad things
+    #            (it will say "option defined more than once, and he's right")
     #
     #    If you want to use the same option in multiple commands then
     #    you can only use the non-abbreviated long-option version like:
     #    -force and NOT -f
-    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v -no-color)
+	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v -no-color)
     subcommands_opts[__default]=""
     subcommands_opts[open]="f n -nohook=n k: -key=k o: -mount-options=o"
     subcommands_opts[mount]=${subcommands_opts[open]}
@@ -1624,6 +1636,7 @@ main() {
     subcommands_opts[source]=""
     subcommands_opts[status]=""
     subcommands_opts[resize]="s: -size=s k: -key=k"
+    subcommands_opts[check]="-ignore-swap"
 #    subcommands_opts[translate]=""
     
     ### Detect subcommand
@@ -1635,7 +1648,20 @@ main() {
     done
     local -a oldstar
     oldstar=($argv)
-    zparseopts -M -E -D -Adiscardme ${every_opts}
+	#### detect early: useful for --optiion-parsing
+    zparseopts -M -D -Adiscardme ${every_opts}
+	if [[ -n ${(k)discardme[--option-parsing]} ]]; then
+		echo $1
+		if [[ -n "$1" ]]; then
+			return 1
+		fi
+		return 0
+	fi
+	unset discardme
+    if ! zparseopts -M -E -D -Adiscardme ${every_opts}; then
+		error "error parsing"
+		return 127
+	fi
     unset discardme
     subcommand=$1
     if [[ -z $subcommand ]]; then
@@ -1723,14 +1749,13 @@ main() {
 		_warning "steghide not installed. Cannot bury your key"
 		return 1
 	    fi
-	    encode_key ${CMD2} ${CMD3}
-	    ;;
+		 encode_key $PARAM[1] $PARAM[2] ;;	
 	exhume)
 	    if [ "$STEGHIDE" = 0 ]; then
  		_warning "steghide not installed. Cannot exhume your key"
 		return 1
 	    fi
-	    decode_key ${CMD2}
+		 decode_key $PARAM[1] 
 	    ;;
 	resize)
         check_priv
@@ -1740,8 +1765,9 @@ main() {
 	'source')   return 0 ;;
 	install)    check_priv ; install_tomb ;;
 	askpass)    ask_password ${CMD2} ${CMD3} ;;
-	mktemp)     safe_dir ${CMD2} ;;
+	 mktemp) safe_dir $PARAM[1] ;;
 	translate)  generate_translatable_strings ;;
+      check) check_command $PARAM[1] ;;
 	__default)
 	    cat <<EOF
 Tomb $VERSION - a strong and gentle undertaker for your secrets
@@ -1770,8 +1796,9 @@ EOF
 # {{{ RUNTIME
 check_bin
 main $@
-if [[ $? != 0 ]]; then #this "if" seems useless, but avoid source tomb source from exiting
-    exit $?
+ret=$?
+if [[ $ret != 0 ]]; then #this "if" seems useless, but avoid source tomb source from exiting
+    exit $ret
 fi
 # }}}
 
