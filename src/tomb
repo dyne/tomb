@@ -48,8 +48,8 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
 function _msg() {
     local command="print -P"
-    local progname="$fg[magenta]${TOMBEXEC##*/}$fg[reset_color]"
-    local message="$fg_bold[normal]$fg_no_bold[normal]${2}$fg[reset_color]"
+    local progname="$fg[magenta]${TOMBEXEC##*/}$reset_color"
+    local message="$fg_bold[normal]$fg_no_bold[normal]${2}$reset_color"
     local -i returncode
 
     case "$1" in
@@ -57,19 +57,19 @@ function _msg() {
 	    command+=" -n"; pchars=" > "; pcolor="yellow"
 	    ;;
 	message)
-	    pchars=" . "; pcolor="white"; message="$fg_no_bold[$pcolor]${2}$fg[reset_color]"
+	    pchars=" . "; pcolor="white"; message="$fg_no_bold[$pcolor]${2}$reset_color"
 	    ;;
 	verbose)
 	    pchars="[D]"; pcolor="blue"
 	    ;;
 	success)
-	    pchars="(*)"; pcolor="green"; message="$fg_no_bold[$pcolor]${2}$fg[reset_color]"
+	    pchars="(*)"; pcolor="green"; message="$fg_no_bold[$pcolor]${2}$reset_color"
 	    ;;
 	warning)
-	    pchars="[W]"; pcolor="yellow"; message="$fg_no_bold[$pcolor]${2}$fg[reset_color]"
+	    pchars="[W]"; pcolor="yellow"; message="$fg_no_bold[$pcolor]${2}$reset_color"
 	    ;;
 	failure)
-	    pchars="[E]"; pcolor="red"; message="$fg_no_bold[$pcolor]${2}$fg[reset_color]"
+	    pchars="[E]"; pcolor="red"; message="$fg_no_bold[$pcolor]${2}$reset_color"
 	    returncode=1
 	    ;;
 	*)
@@ -78,7 +78,7 @@ function _msg() {
 	    returncode=127
 	    ;;
     esac
-    ${=command} "${progname} $fg_bold[$pcolor]$pchars$fg[reset_color] ${message}$color[reset_color]" >&2
+    ${=command} "${progname} $fg_bold[$pcolor]$pchars$reset_color ${message}$color[reset_color]" >&2
     return $returncode
 }
 function _message say()
