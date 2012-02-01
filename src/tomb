@@ -949,9 +949,25 @@ mount_tomb() {
 # Kill all processes using the tomb
 slam_tomb() {
     # $1 = tomb mount point
-    for s in INT TERM HUP KILL; do
-	fuser -s -m "$1" || return 0
-	fuser -s -m "$1" -k -M -$s && { option_is_set -f || sleep 3 }
+    if [[ -z `fuser -m "$1" 2> /dev/null` ]]; then
+        return 0
+    fi
+    #Note: shells are NOT killed by INT or TERM, but they are killed by HUP
+    for s in TERM HUP KILL; do
+        xxx "Sending $s to processes inside the tomb:"
+        if option_is_set -D; then
+            ps -fp `fuser -m /media/a.tomb 2> /dev/null`|
+            while read line; do
+                xxx $line
+            done
+        fi
+        fuser -s -m "$1" -k -M -$s
+        if [[ -z `fuser -m "$1" 2> /dev/null` ]]; then
+            return 0
+        fi
+        if ! option_is_set -f; then
+            sleep 3
+        fi
     done
     return 1
 }
@@ -1030,8 +1046,7 @@ umount_tomb() {
     if [ $SLAM ]; then
 	_success "Slamming tomb $tombname mounted on $tombmount"
 	_message "Kill all processes busy inside the tomb"
-        slam_tomb "$tombmount"
-        if [[ $? == 1 ]]; then
+        if ! slam_tomb "$tombmount"; then
             _warning "Cannot slam the tomb $tombname"
             return 1
         fi
