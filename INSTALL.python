@@ -1,0 +1,30 @@
+About
+*****
+
+This document is about the installing of both pytomb and the tomb gui.
+
+Pytomb is a python library that is needed to run the tomb gui
+
+Dependencies
+============
+
+The pytomb library has NO dependencies. Hooray!
+
+The gui depends on having PyQt4 installed in your operative system. This is
+package python-qt4 in debian or ubuntu, python2-pyqt in archlinux.  If you are
+unsure about this, try to install and check if it works ;)
+
+Basic Installation
+==================
+
+First, install pytomb. It has no dependencies
+
+1. `cd' to the directory containing pytomb (src/pytomb)
+2. do `sudo python2 setup.py install'
+
+Then, you have to install the gui.
+
+1. `cd' to the directory containing the gui (src/qt)
+2. do `python2 setup.py build_ui'
+3. do `sudo python2 setup.py install'
+

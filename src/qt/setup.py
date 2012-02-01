@@ -34,6 +34,9 @@ class build_ui(Command):
 
 setup(
         name = 'TombQt',
+        url = 'http://tomb.dyne.org/',
+        author = 'boyska',
+        author_email = 'piuttosto@logorroici.org',
         version = '0.1',
         packages = ['tombqt'],
         cmdclass = {
@@ -44,7 +47,15 @@ setup(
                 'tomb-qt-create = tombqt.create:run_create_wizard',
                 'tomb-qt-open = tombqt.open:run_open_wizard'
                 ]
-            }
+            },
+        classifiers = [
+            'Topic :: Security :: Cryptography',
+            'Intended Audience :: End Users/Desktop',
+            'Operating System :: POSIX :: Linux',
+            'Environment :: X11 Applications :: Qt',
+            'License :: OSI Approved :: GNU General Public License (GPL)',
+            'Development Status :: 3 - Alpha'
+            ]
 )
 
 
