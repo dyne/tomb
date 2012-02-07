@@ -349,7 +349,7 @@ Options:
  -D     print debugging information at runtime
 
 For more informations on Tomb read the manual: man tomb
-Please report bugs on <http://bugs.dyne.org>.
+Please report bugs on <http://github.com/dyne/tomb/issues>.
 EOF
 }
 # }}}
@@ -520,7 +520,7 @@ print "-----END PGP MESSAGE-----"
 list_gnupg_ciphers() {
     # prints an array of ciphers available in gnupg (to encrypt keys)
     # prints an error if GnuPG is not found
-    which gnupg > /dev/null || die "gpg (GnuPG) is not found, Tomb cannot function without it."
+    which gpg > /dev/null || die "gpg (GnuPG) is not found, Tomb cannot function without it."
 
     ciphers=(`gpg --version | awk '
 BEGIN { ciphers=0 }
@@ -1791,12 +1791,15 @@ Tomb $VERSION - a strong and gentle undertaker for your secrets
  Copyright (C) 2007-2012 Dyne.org Foundation, License GNU GPL v3+
  This is free software: you are free to change and redistribute it
  The latest Tomb sourcecode is published on <http://tomb.dyne.org>
+EOF
+	    option_is_set -v && {
+		cat <<EOF
 
 GnuPG available ciphers:
 `list_gnupg_ciphers`
 EOF
-	    option_is_set -v && return 0
-
+		return 0
+	    }
 	    usage
 	    ;;
 	*)
