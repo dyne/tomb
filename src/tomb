@@ -136,9 +136,13 @@ progress() {
 
 check_bin() {
     # check for required programs
-    for req in cryptsetup pinentry sudo gpg; do
+    for req in pinentry sudo gpg; do
 	which $req >/dev/null || die "Cannot find $req.  Please install it." 1
     done
+
+    export PATH=/sbin:/usr/sbin:$PATH
+
+    which cryptsetup > /dev/null && CRYPTSETUP=cryptsetup || die "Cryptsetup not found in $PATH." 1
 
     # which dd command to use
     which dcfldd > /dev/null && DD=dcfldd || DD=dd
@@ -727,6 +731,8 @@ create_tomb() {
 	--openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
 	-o "${tombkey}" -c -a ${keytmp}/tomb.tmp <<< ${tombpass}
 
+    unset tombpass
+
     # if [ $? != 0 ]; then
     # 	_warning "setting password failed: gnupg returns 2"
     # 	umount ${keytmp}
@@ -1197,6 +1203,8 @@ change_passwd() {
     gpg \
 	--openpgp --batch --no-options --no-tty --passphrase-fd 0 \
 	-o "${tmpnewkey}" -c -a ${tmpoldkey} <<< ${tombpass}
+
+    unset tombpass
     
     if [ $? != 0 ]; then
         _warning "Cannot change your key passphrase"
