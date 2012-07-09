@@ -35,6 +35,9 @@ MOUNTOPTS="rw,noatime,nodev"
 
 typeset -A global_opts
 typeset -A opts
+typeset -h username
+typeset -h _uid
+typeset -h _gid
 
 # Set a sensible PATH
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
@@ -281,6 +284,8 @@ exec_as_user() {
 # }}}
 # {{{   - Escalate privileges
 check_priv() {
+    # save original user
+    username=$USER
     if [ $UID != 0 ]; then
 	xxx "Using sudo for root execution of 'tomb ${(f)OLDARGS}'"
 	# check if sudo has a timestamp active
@@ -296,7 +301,7 @@ SETPROMPT Insert your USER password:
 GETPIN
 EOF
 	fi
-	sudo "${TOMBEXEC}" "${(@)OLDARGS}"
+	sudo "${TOMBEXEC}" "${(@)OLDARGS}" -U ${UID} -G ${GID}
 	exit $?
     fi # are we root already
     return 0
@@ -612,11 +617,22 @@ exec_safe_post_hooks() {
 
 create_tomb() {
     _message "Commanded to create tomb $1"
+
+    # running as root, remembering the uid:gid
+    if option_is_set -U; then _uid="`option_value -U`"; fi
+    if option_is_set -G; then _gid="`option_value -G`"; fi
+
     if ! option_is_set -f; then check_swap; fi
 
     if ! [ $1 ]; then
         _warning "no tomb name specified for creation"
         return 1
+    fi
+
+    if ! [ $2 ]; then
+	create_cipher=aes-cbc-essiv
+    else
+        create_cipher=${2}
     fi
 
     tombfile=`basename $1`
@@ -732,6 +748,8 @@ create_tomb() {
 	-o "${tombkey}" -c -a ${keytmp}/tomb.tmp <<< ${tombpass}
 
     unset tombpass
+    chown ${_uid}:${_gid} ${tombkey}
+    chmod 0600 ${tombkey}
 
     # if [ $? != 0 ]; then
     # 	_warning "setting password failed: gnupg returns 2"
@@ -746,14 +764,18 @@ create_tomb() {
 	# for security, performance and compatibility
     # XXX: More for compatibility then, because xts-plain is better nowadays.
     cryptsetup --batch-mode \
-	--cipher aes-cbc-essiv:sha256 --key-size 256 \
+	--cipher ${create_cipher}:sha256 --key-size 256 \
 	luksFormat ${nstloop} ${keytmp}/tomb.tmp
 
     if ! [ $? = 0 ]; then
+	umount ${keytmp}
+	losetup -d $nstloop
+	rm -r $keytmp
+	rm ${tombdir}/${tombfile}
 	die "operation aborted." 0
     fi
 
-    cryptsetup --key-file ${keytmp}/tomb.tmp --cipher aes luksOpen ${nstloop} tomb.tmp
+    cryptsetup --key-file ${keytmp}/tomb.tmp --cipher ${create_cipher}:sha256 luksOpen ${nstloop} tomb.tmp
     ${=WIPE} ${keytmp}/tomb.tmp
     umount ${keytmp}
     rm -r ${keytmp}
@@ -774,11 +796,10 @@ create_tomb() {
     losetup -d ${nstloop}
 
     # set permissions on the tomb
-    ME=${SUDO_USER:-$(whoami)}
+    chown ${_uid}:${_gid} "${tombdir}/${tombfile}"
     chmod 0600 "${tombdir}/${tombfile}"
-    chown $(id -u $ME):$(id -g $ME) "${tombdir}/${tombfile}"
 
-    _message "done creating $tombname encrypted storage (using Luks dm-crypt AES/SHA256)"
+    _message "done creating $tombname encrypted storage (using Luks dm-crypt ${create_cipher}:sha256)"
     _success "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
 
 }
@@ -789,12 +810,17 @@ create_tomb() {
 # $1 = tombfile $2(optional) = mountpoint
 mount_tomb() {
     _message "Commanded to open tomb $1"
+
     if ! option_is_set -f; then check_swap; fi
 
     if ! [ ${1} ]; then
         _warning "no tomb name specified for creation"
         return 1
     fi
+
+    # running as root, remembering the uid:gid
+    if option_is_set -U; then _uid="`option_value -U`"; fi
+    if option_is_set -G; then _gid="`option_value -G`"; fi
 
     # set up variables to be used
     # the full path is made with $tombdir/$tombfile
@@ -938,10 +964,8 @@ mount_tomb() {
 
     mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
 
-    # Ensure the user can write the disk - 10x Hellekin :)
-    ME=${SUDO_USER:-$(whoami)}
+    chown ${_uid}:${_gid} ${tombmount}
     chmod 0750 ${tombmount}
-    chown $(id -u $ME):$(id -g $ME) ${tombmount}
 
     _success "Success opening $tombfile on $tombmount"
     if ! option_is_set -n ; then
@@ -1647,7 +1671,7 @@ main() {
     subcommands_opts[__default]=""
     subcommands_opts[open]="f n -nohook=n k: -key=k o: -mount-options=o"
     subcommands_opts[mount]=${subcommands_opts[open]}
-    subcommands_opts[create]="f s: -size=s -force k: -key=k"
+    subcommands_opts[create]="f s: -size=s -force k: -key=k U: -uid=U G: -gid=G"
     subcommands_opts[passwd]="f"
     subcommands_opts[close]=""
     subcommands_opts[help]=""
@@ -1744,7 +1768,7 @@ main() {
     case "$subcommand" in
 	create)
 	    check_priv
-	    create_tomb $PARAM[1]
+	    create_tomb ${=PARAM}
 	    ;;
 	mount|open)
 	    check_priv
