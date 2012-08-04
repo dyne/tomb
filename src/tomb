@@ -166,6 +166,17 @@ check_bin() {
     # resize suite check bin!
     which e2fsck > /dev/null || die "Cannot find e2fsck. Please install it." 1
     which resize2fs > /dev/null || die "Cannot find resize2fs. Please install it." 1
+    
+    if which tomb-kdf-pbkdf2 &> /dev/null; then
+        KDF_PBKDF2="tomb-kdf-pbkdf2"
+    else
+        local our_pbkdf2
+        our_pbkdf2="$(dirname $(readlink -f $TOMBEXEC))/kdf/tomb-kdf-pbkdf2"
+        if which $our_pbkdf2 &> /dev/null; then
+            KDF_PBKDF2=$our_pbkdf2
+        fi
+    fi
+
 }
 
 # }}}
@@ -732,15 +743,15 @@ create_tomb() {
 
     # here user is prompted for key password
     for c in 1 2 3; do
-	# 3 tries to write two times a matching password
-	tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname}"`
-	tombpasstmp=$tombpass
-	tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname} (again)"`
-	if [ "$tombpasstmp" = "$tombpass" ]; then
-	    break;
-	fi
-	unset tombpasstmp
-	unset tombpass
+        # 3 tries to write two times a matching password
+        tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname}"`
+        tombpasstmp=$tombpass
+        tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname} (again)"`
+        if [ "$tombpasstmp" = "$tombpass" ]; then
+            break;
+        fi
+        unset tombpasstmp
+        unset tombpass
     done
 
     if [ -z $tombpass ]; then
@@ -751,9 +762,36 @@ create_tomb() {
     fi
 
 
-    gpg \
-	--openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
-	-o "${tombkey}" -c -a ${keytmp}/tomb.tmp <<< ${tombpass}
+    _verbose "KDF method chosen is: '`option_value --kdf`'"
+    kdf_method=$(cut -d: -f1 <<<`option_value --kdf` )
+    case $kdf_method in
+        pbkdf2)
+#one parameter: iter time in seconds
+            seconds=$(cut -d: -f2 -s <<<`option_value --kdf`)
+            if [[ -z $seconds ]]; then
+                seconds=1
+            fi
+            local -i microseconds
+            microseconds=$((seconds*1000000))
+            _verbose "Microseconds: $microseconds"
+            pbkdf2_salt=`${KDF_PBKDF2}-gensalt`
+            pbkdf2_iter=`${KDF_PBKDF2}-getiter $microseconds`
+            tombpass=`${KDF_PBKDF2} $pbkdf2_salt $pbkdf2_iter 64 <<<${tombpass}` #64bytes=512bits is the key length (huge!)
+            header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+            ;;
+        ""|null)
+        
+            header=""
+            ;;
+        *)
+            _warning "KDF method non recognized"
+            return 1
+            header=""
+            ;;
+    esac
+    ( echo -n $header; gpg \
+        --openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
+        -o - -c -a ${keytmp}/tomb.tmp <<< ${tombpass} ) > $tombkey
 
     unset tombpass
     chown ${_uid}:${_gid} ${tombkey}
@@ -924,31 +962,46 @@ mount_tomb() {
 
     _warning "Password is required for key ${keyname}"
     for c in 1 2 3; do
-	if [ $c = 1 ]; then
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb ${keyname}"`
-	else
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb $keyname (retry $c)"`
-	fi
-	(gpg --batch --passphrase-fd 0 --no-tty --no-options \
-            -d "${tombkey}" 2> /dev/null <<< ${tombpass} ) \
-	    | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
-	unset tombpass
+        if [ $c = 1 ]; then
+            tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb ${keyname}"`
+        else
+            tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb $keyname (retry $c)"`
+        fi
+#TODO: read the first line: if it looks like a KDF, do KDF
+        firstline=`head -n1 < $tombkey`
+        if [[ $firstline =~ '^_KDF_' ]]; then
+            _verbose "KDF: `cut -d_ -f 3 <<<$firstline`"
+            case `cut -d_ -f 3 <<<$firstline` in
+                pbkdf2sha1)
+                    pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
+                    tombpass=$(${KDF_PBKDF2} ${=pbkdf2_param} 2> /dev/null <<<$tombpass)
+                    ;;
+                *)
+                    _failure "No suitable program for KDF `cut -f 3 <<<$firstline`"
+                    return 1
+                    ;;
+            esac
+        fi
+        (gpg --batch --passphrase-fd 0 --no-tty --no-options \
+                -d "${tombkey}" 2> /dev/null <<< ${tombpass} ) \
+            | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+        unset tombpass
 
-	# if key was from stdin delete temp file and dir
-	if [ $tombkeydir ]; then
-	    ${=WIPE} ${tombkey}
-	    rmdir $tombkeydir
-	fi
+        # if key was from stdin delete temp file and dir
+        if [ $tombkeydir ]; then
+            ${=WIPE} ${tombkey}
+            rmdir $tombkeydir
+        fi
 
-	# if key was from stdin delete temp file and dir
-	if [ $tombkeydir ]; then
-	    ${WIPE[@]} ${tombkey}
-	    rmdir $tombkeydir
-	fi
+        # if key was from stdin delete temp file and dir
+        if [ $tombkeydir ]; then
+            ${WIPE[@]} ${tombkey}
+            rmdir $tombkeydir
+        fi
 
-	if [ -r /dev/mapper/${mapper} ]; then
-	    break;  # password was correct
-	fi
+        if [ -r /dev/mapper/${mapper} ]; then
+            break;  # password was correct
+        fi
     done
 
     if ! [ -r /dev/mapper/${mapper} ]; then
@@ -1679,7 +1732,7 @@ main() {
     subcommands_opts[__default]=""
     subcommands_opts[open]="f n -nohook=n k: -key=k  U: -uid=U G: -gid=G o: -mount-options=o -ignore-swap"
     subcommands_opts[mount]=${subcommands_opts[open]}
-    subcommands_opts[create]="f s: -size=s -force k: -key=k U: -uid=U G: -gid=G -ignore-swap"
+    subcommands_opts[create]="f s: -size=s -force k: -key=k U: -uid=U G: -gid=G -ignore-swap -kdf:" 
     subcommands_opts[passwd]="f -ignore-swap"
     subcommands_opts[close]=""
     subcommands_opts[help]=""
@@ -1756,7 +1809,7 @@ main() {
 	    continue #it shouldnt be appended to PARAM
 	elif [[ $arg[1] == '-'  ]]; then
 	    if [[ $ok == 0 ]]; then
-		die "unrecognized option $arg" 127
+		die "unrecognized option $arg for subcommand $subcommand" 127
 	    fi
 	fi
 	PARAM+=$arg

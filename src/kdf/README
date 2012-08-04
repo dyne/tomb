@@ -1,0 +1,20 @@
+PLANS
+------
+
+While this can be useful for general purpose, it specially fits tomb, and it's designed for easy integration and compilation.
+
+Binary name will then be:
+tomb-kdf-${algo}
+tomb-kdf-${algo}-gensalt
+tomb-kdf-${algo}-getiter
+
+hexencode (or similar utils, should they be developed), go with:
+tomb-utils-hexencode
+
+Base64 vs hexencode
+-------------------
+
+While base64 is easier to use (shell command, more compact), pbkdf2 use hex
+in its specifications.
+This could be solved with an option (-x for hex, defaults to base64)
+

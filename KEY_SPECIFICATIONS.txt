@@ -1,0 +1,36 @@
+Overview
+=========
+
+
+What's a key?
+It basicly is a gpg simmetrically encrypted, ascii-armored file.
+It's encryption key is a function (see below, on KDF section) of your tomb
+passphrase.
+
+
+Layout
+======
+
+Before coming to the gpg part, there could be some "header" lines specifying
+metatada. They're done like this:
+_FIELD_params_params_and_more_params_
+
+where FIELD should be the description for the header.
+Pay much attention to the fact that there should ONLY be ASCII characters there,
+to avoid encoding issues and whatever. Needs something more? Use base64encode.
+(Of course, you're free to pack params into a single field, base64encoding
+whatever you want).
+And every header field should be in only one line.
+
+KDF
+===
+
+Key Derivation Functions, are functions which will make your key stronger
+spending some CPU time: the basic idea is that you have to compute that function
+just once in a while, but an attacker that wants to bruteforce has to compute it
+for every passphrase he's checking. This will make the bruteforce much more
+expensive.
+
+The header line format is _KDF_$method_$params_$params_... where $method is the
+method we are using (ie: scrypt) and params is something that it needs (ie:
+salt).

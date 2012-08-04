@@ -1,1 +1,1 @@
-SUBDIRS = src share doc
+SUBDIRS = src src/kdf share doc
