@@ -30,10 +30,12 @@ TRAPKILL() die "KILL signal caught, undertaker aborting."
 TRAPSTOP() die "STOP signal caught, undertaker aborting."
 
 # first of all source the tomb core functions
-which tomb > /dev/null
-if [[ $? != 0 ]]; then
+TOMBBIN=$(dirname $(readlink -f $0))/tomb 
+if ! [[ -x $TOMBBIN ]]; then
     print "$fg[red][!]$fg[white] Tomb command not found, operation aborted." >&2; exit 1
 fi
+source $TOMBBIN ${tomb_opts[@]} source
+TOMBEXEC=undertaker
 
 key_found() {
     # $1 is "url"
