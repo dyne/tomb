@@ -302,9 +302,9 @@ check_priv() {
 	# check if sudo has a timestamp active
 	sudok=false
 	sudo -n ${TOMBEXEC} &> /dev/null
-	if [ $? != 0 ]; then # if not then ask a password
-	  for i in 1 2 3; do
-		cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
+    if ! option_is_set --sudo-pwd; then
+        if [ $? != 0 ]; then # if not then ask a password
+            cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE Super user privileges required
@@ -312,14 +312,11 @@ SETDESC Sudo execution of Tomb ${OLDARGS[@]}
 SETPROMPT Insert your USER password:
 GETPIN
 EOF
-		if [[ $? == 0 ]]; then #success
-		  break
-		fi
-		if [[ $i == 3 ]]; then
-            exit 16
-		fi
-	  done
-	fi
+        fi
+    else
+        _verbose "Escalating privileges using sudo-pwd"
+        sudo -S -v <<<`option_value --sudo-pwd`
+    fi
 	sudo "${TOMBEXEC}" "${(@)OLDARGS}" -U ${UID} -G ${GID}
 	exit $?
     fi # are we root already
@@ -726,10 +723,14 @@ create_tomb() {
     _message "To make it faster you can move the mouse around"
     touch ${keytmp}/tomb.tmp
     chmod 0600 ${keytmp}/tomb.tmp
+    random_source=/dev/random
+    if option_is_set --use-urandom; then
+        random_source=/dev/urandom
+    fi
     if [[ $DD = "dcfldd" ]]; then
-        $DD bs=1 count=256 if=/dev/random of=${keytmp}/tomb.tmp statusinterval=1
+        $DD bs=1 count=256 if=$random_source of=${keytmp}/tomb.tmp statusinterval=1
     else
-        $DD bs=1 count=256 if=/dev/random of=${keytmp}/tomb.tmp
+        $DD bs=1 count=256 if=$random_source of=${keytmp}/tomb.tmp
     fi
     if ! [ -r ${keytmp}/tomb.tmp ]; then
 	_warning "cannot generate encryption key"
@@ -742,17 +743,21 @@ create_tomb() {
     _success "Setup your secret key file ${tombkey}"
 
     # here user is prompted for key password
-    for c in 1 2 3; do
-        # 3 tries to write two times a matching password
-        tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname}"`
-        tombpasstmp=$tombpass
-        tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname} (again)"`
-        if [ "$tombpasstmp" = "$tombpass" ]; then
-            break;
-        fi
-        unset tombpasstmp
-        unset tombpass
-    done
+    if ! option_is_set --tomb-pwd; then
+        for c in 1 2 3; do
+            # 3 tries to write two times a matching password
+            tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname}"`
+            tombpasstmp=$tombpass
+            tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname} (again)"`
+            if [ "$tombpasstmp" = "$tombpass" ]; then
+                break;
+            fi
+            unset tombpasstmp
+            unset tombpass
+        done
+    else
+        tombpass=`option_value --tomb-pwd`
+    fi
 
     if [ -z $tombpass ]; then
 	umount ${keytmp}
@@ -962,10 +967,14 @@ mount_tomb() {
 
     _warning "Password is required for key ${keyname}"
     for c in 1 2 3; do
-        if [ $c = 1 ]; then
-            tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb ${keyname}"`
+        if ! option_is_set --tomb-pwd; then
+            if [ $c = 1 ]; then
+                tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb ${keyname}"`
+            else
+                tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb $keyname (retry $c)"`
+            fi
         else
-            tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb $keyname (retry $c)"`
+            tombpass=`option_value --tomb-pwd`
         fi
 #TODO: read the first line: if it looks like a KDF, do KDF
         firstline=`head -n1 < $tombkey`
@@ -1495,6 +1504,10 @@ list_tombs() {
 	tombp=${tombpercent%%%}
 	tombsince=`date --date=@${mapper[(ws:.:)3]} +%c`
 
+    if option_is_set --get-mountpoint; then
+        echo $tombmount
+        continue
+    fi
 	# breaking up such strings is good for translation
 	print -n "$fg[green]$tombname"
 	print -n "$fg[white] open on "
@@ -1728,16 +1741,16 @@ main() {
     #    If you want to use the same option in multiple commands then
     #    you can only use the non-abbreviated long-option version like:
     #    -force and NOT -f
-	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v -no-color)
+	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v -no-color -unsecure-dev-mode)
     subcommands_opts[__default]=""
-    subcommands_opts[open]="f n -nohook=n k: -key=k  U: -uid=U G: -gid=G o: -mount-options=o -ignore-swap"
+    subcommands_opts[open]="f n -nohook=n k: -key=k  U: -uid=U G: -gid=G o: -mount-options=o -ignore-swap -sudo-pwd: -tomb-pwd:"
     subcommands_opts[mount]=${subcommands_opts[open]}
-    subcommands_opts[create]="f s: -size=s -force k: -key=k U: -uid=U G: -gid=G -ignore-swap -kdf:" 
+    subcommands_opts[create]="f s: -size=s -force k: -key=k U: -uid=U G: -gid=G -ignore-swap -kdf: -sudo-pwd: -tomb-pwd:  -use-urandom"
     subcommands_opts[passwd]="f -ignore-swap"
-    subcommands_opts[close]=""
+    subcommands_opts[close]="-sudo-pwd: U: -uid=U G: -gid=G"
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
-    subcommands_opts[list]=""
+    subcommands_opts[list]="-get-mountpoint"
     subcommands_opts[help]=""
     subcommands_opts[bury]=""
     subcommands_opts[exhume]=""
@@ -1822,6 +1835,13 @@ main() {
     ### End parsing command-specific options
     if ! option_is_set --no-color; then
         autoload colors; colors
+    fi
+    if ! option_is_set --unsecure-dev-mode; then
+        for opt in --sudo-pwd --tomb-pwd --use-urandom; do
+            if option_is_set $opt; then
+                die "You specified option $opt, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsecure-dev-mode" 127
+            fi
+        done
     fi
 
     xxx "Tomb command: $subcommand ${PARAM}"
