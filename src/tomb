@@ -691,6 +691,10 @@ create_tomb() {
 
     tombsize_4k=`expr $tombsize \* 1024 / 4`
     _message "Generating ${tombfile} of ${tombsize}Mb (${tombsize_4k} blocks of 4Kb)"
+    # we will first touch the file and set permissions: this way, even if interrupted, permissions are right
+    touch ${tombdir}/${tombfile}
+    chown ${_uid}:${_gid} "${tombdir}/${tombfile}"
+    chmod 0600 "${tombdir}/${tombfile}"
     $DD if=/dev/urandom bs=4k count=${tombsize_4k} of=${tombdir}/${tombfile}
 
     if [ $? = 0 -a -e ${tombdir}/${tombfile} ]; then
@@ -794,13 +798,14 @@ create_tomb() {
             header=""
             ;;
     esac
+    touch $tombkey
+    chown ${_uid}:${_gid} ${tombkey}
+    chmod 0600 ${tombkey}
     ( echo -n $header; gpg \
         --openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
         -o - -c -a ${keytmp}/tomb.tmp <<< ${tombpass} ) > $tombkey
 
     unset tombpass
-    chown ${_uid}:${_gid} ${tombkey}
-    chmod 0600 ${tombkey}
 
     # if [ $? != 0 ]; then
     # 	_warning "setting password failed: gnupg returns 2"
@@ -845,10 +850,6 @@ create_tomb() {
 
     cryptsetup luksClose tomb.tmp
     losetup -d ${nstloop}
-
-    # set permissions on the tomb
-    chown ${_uid}:${_gid} "${tombdir}/${tombfile}"
-    chmod 0600 "${tombdir}/${tombfile}"
 
     _message "done creating $tombname encrypted storage (using Luks dm-crypt ${create_cipher}:sha256)"
     _success "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
