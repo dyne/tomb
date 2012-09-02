@@ -76,7 +76,7 @@ Let's start setting your Crypt?"
 # so that they are configurable when calling tomb.
 ask_usbkey() {
     unset usbkey_mount
-    notice "Waiting 1 minute for a usb key to connect"
+    say "Waiting 1 minute for a usb key to connect"
     act -n "please insert your usb key "
     
     tomb-notify "Insert your USB KEY" \
@@ -92,8 +92,7 @@ ask_usbkey() {
 	c=`expr $c + 1`
 	if [ $c -gt 60 ]; then
 	    echo
-	    error "timeout."
-	    return 1;
+	    die "timeout"
 	fi
     done
 
@@ -103,17 +102,16 @@ ask_usbkey() {
     c=0
     attached=false
     while [ "$attached" != "true" ]; do
-	dmesg | tail -n 12| grep -q 'Attached.*removable disk'
-	if [ $? = 0 ]; then attached=true; fi
-	echo -n "."
-	sleep  .5
-	c=`expr $c + 1`
-	if [ $c -gt 30 ]; then
-	    echo
-	    error "[!] timeout."
-	    export usbkey_mount=none
-	    return 1;
-	fi
+        dmesg | tail -n 12| grep -q 'Attached.*removable disk'
+        if [ $? = 0 ]; then attached=true; fi
+        echo -n "."
+        sleep  .5
+        c=`expr $c + 1`
+        if [ $c -gt 30 ]; then
+            echo
+            export usbkey_mount=none
+            die "timeout"
+        fi
     done
 
     echo
@@ -124,10 +122,9 @@ ask_usbkey() {
     for i in $(seq 1 10); do
         usbpart=$(dmesg | tail -n 12 | sed '/  sd.:/!d;s/^.*: \(sd.[0-9]*\)/\1/')
         if [ -n "$usbpart" ]; then
-           break
-	elif [ $i -eq 10 ]; then
-            error "timeout."
-            return 1
+            break
+        elif [ $i -eq 10 ]; then
+            die "timeout" 1
         else
             echo -n .
             sleep 1
@@ -137,10 +134,9 @@ ask_usbkey() {
     mtmp=`$TOMBEXEC mktemp tomb`
     sudo mount /dev/$usbpart $mtmp
     if [ $? = 0 ]; then
-	usbmount=$mtmp
+        usbmount=$mtmp
     else
-	error "cannot mount usbkey partition $usbmount"
-	return 1
+        die "cannot mount usbkey partition $usbmount"
     fi
 
     echo
@@ -154,8 +150,7 @@ launch_status() {
     # applet; it takes the tomb name as an argument and should be
     # launched after a successful tomb mount.
     if ! [ $1 ]; then
-	error "cannot launch status tray applet: we don't even know the name of our tomb."
-	exit 1
+        die "cannot launch status tray applet: we don't even know the name of our tomb."
     fi
 
     if [ $DISPLAY ]; then
@@ -185,49 +180,43 @@ if [ $1 ]; then # is it a file?
 	# is it a luks partition
 	file ${tombdir}/${tombfile} | grep -i LUKS > /dev/null
 	if [ $? = 0 ]; then # tomb is a valid LUKS file
-	    if [ -r ${tombdir}/${tombname}.tomb.key ]; then
-		tombkey=${tombdir}/${tombname}.tomb.key
+        if [ -r ${tombdir}/${tombname}.tomb.key ]; then
+            tombkey=${tombdir}/${tombname}.tomb.key
 	    else
 		ask_usbkey
-		if ! [ $usbkey_mount ]; then # no usb key was mounted
-		    error "key not provided for tomb: $tombname"
-		    error "operation aborted." # TODO: dialog with pinentry
-		    exit 1
-		else # usb mounted, check key presence
-		    if [ -r ${usbkey_mount}/.tomb/${tombname}.tomb.key ]; then
-			tombkey=${usbkey_mount}/.tomb/${tombname}.tomb.key
-		    elif [ -r ${usbkey_mount}/.tomb ]; then
-			error "we can't find the right key, have a look yourself:"
-			ls -lha ${usbkey_mount}/.tomb
-			exit 1
-		    else
-			error "there are no keys stored in your usb"
-			exit 1
-		    fi
-		fi
+        if ! [ $usbkey_mount ]; then # no usb key was mounted
+            die "key not provided for tomb  $tombname: operation aborted" 1
+        else # usb mounted, check key presence
+            if [ -r ${usbkey_mount}/.tomb/${tombname}.tomb.key ]; then
+                tombkey=${usbkey_mount}/.tomb/${tombname}.tomb.key
+            elif [ -r ${usbkey_mount}/.tomb ]; then
+                die "we can't find the right key, have a look yourself:\n$(ls -lha ${usbkey_mount}/.tomb)" 1
+            else
+                die "there are no keys stored in your usb" 1
+            fi
+        fi
 	    fi
-	    if ! [ ${tombkey} ]; then # just to be sure
-		error "key not found, operation aborted."
-		exit 1
-	    else
-		
-		"${TOMBEXEC}" mount -k ${tombkey} ${tombdir}/${tombfile}
-		success=$?
-	    fi
+        if ! [ ${tombkey} ]; then # just to be sure
+            die "key not found, operation aborted." 1
+        else
 
-	    if [ $usbkey_mount ]; then
-		sudo umount ${usbkey_mount}
-		rmdir  ${usbkey_mount}
-		unset  usbkey_mount
-	    fi
+            "${TOMBEXEC}" mount -k ${tombkey} ${tombdir}/${tombfile}
+            success=$?
+        fi
 
-	    if [ $success = 0 ]; then	# mount was succesfull (with password and all)
-		launch_status ${tombname}
-		exit 0
-	    else
-		tomb-notify "Tomb cannot open." "Are you knocking the wrong door?"
-		exit 1
-	    fi
+        if [ $usbkey_mount ]; then
+            sudo umount ${usbkey_mount}
+            rmdir  ${usbkey_mount}
+            unset  usbkey_mount
+        fi
+
+        if [ $success = 0 ]; then	# mount was succesfull (with password and all)
+            launch_status ${tombname}
+            exit 0
+        else
+            tomb-notify "Tomb cannot open." "Are you knocking the wrong door?"
+            exit 1
+        fi
 	else
 	    tomb-notify "Not a real Tomb." "We found no real bones in there, or the tomb file permissions won't allow us in."
 	    exit 1
@@ -253,10 +242,10 @@ fi
 # no argument but on graphical display: creation dialog
 if [ "$1" != "wizard" ]; then
     if [ -z $DISPLAY ]; then
-	error "tomb-open is a wrapper for the command 'tomb'"
-	error "[!] type 'tomb-open wizard' if you want to be guided"
-	"${TOMBEXEC}" help
-	exit 1
+        no "tomb-open is a wrapper for the command 'tomb'"
+        no "type 'tomb-open wizard' if you want to be guided"
+        "${TOMBEXEC}" help
+        exit 1
     fi
 fi
 
@@ -267,10 +256,9 @@ if [ -r $HOME/Desktop ]; then
     cd $HOME/Desktop;
 # or inside HOME
 else cd $HOME; fi
-notice "Tomb  -  simple commandline tool for encrypted storage"
-act "version $VERSION ($DATE) by Jaromil @ dyne.org"
-echo
-notice "Guided creation of a new Tomb"
+say "Tomb  -  simple commandline tool for encrypted storage"
+say "version $VERSION ($DATE) by Jaromil @ dyne.org"
+say "Guided creation of a new Tomb"
 cat <<EOF
 
   A Tomb is  a special folder that keeps files  safe using a password:
@@ -291,23 +279,21 @@ EOF
 echo -n "> "
 read -q
 if [ "$?" != 0 ]; then
-    error "Operation aborted."
-    exit 1
+    die "Operation aborted" 1
 fi
     # let's proceed
-notice "Please type in the name for your new tomb file:"
+say "Please type in the name for your new tomb file:"
 echo -n "> "
 read -u 1 tombname
-notice "How big you want the Tomb to be?"
+say "How big you want the Tomb to be?"
 act "Type a size number in Megabytes:"
 echo -n "> "
 read -u 1 tombsize
 if [[ "$tombsize" != <-> ]]; then
-	error "Only digit allowed! Operation aborted"
-	exit 1
+    die "Only digit allowed! Operation aborted"
 fi
 clear
-notice "You have commanded the creation of this Tomb:"
+say "You have commanded the creation of this Tomb:"
 act "$tombname ( $tombsize MBytes )";
 echo
 cat <<EOF
@@ -325,12 +311,12 @@ cat <<EOF
   Considering 1GB takes usually little less than an hour to be digged.
 
 EOF
-notice "  Digging will take quite some time! Should we start? (y/n)"
+say "  Digging will take quite some time! Should we start? (y/n)"
 echo -n "> "
 read -q
 if [ $? != 0 ]; then
-    error "Operation aborted."
-    exit 1
+    die "Operation aborted." 1
+
 fi
 cat <<EOF
   Operation confirmed!  we will now call the undertaker to do its job,
@@ -341,8 +327,7 @@ tombfile=${tombname}.tomb
 "${TOMBEXEC}" create --ignore-swap -s $tombsize ${tombfile}
 
 if [ $? != 0 ]; then
-    error "An error occurred creating tomb, operation aborted."
-    exit 1
+    die "An error occurred creating tomb, operation aborted."
 fi
 
 tomb-notify "The Tomb is ready!" "We will now open your new Tomb for the first time."
@@ -365,7 +350,7 @@ if [ $? = 0 ]; then
 	sudo cp -v ${tombfile}.key ${usbkey_mount}/.tomb/
 	sudo chmod -R go-rwx ${usbkey_mount}/.tomb
 
-	notice "${tombname}.key succesfully saved on your USB"
+	yes "${tombname}.key succesfully saved on your USB"
 	act "now we'll proceed opening your brand new tomb"
 
 	"${TOMBEXEC}" open -k ${tombfile}.key ${tombfile}
