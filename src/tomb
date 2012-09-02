@@ -319,7 +319,7 @@ check_command() {
     #generic checks; useful for interaction, to check if there are problems
     #before wasting user's time
     
-    if ! option_is_set --ignore-swap; then
+    if ! option_is_set --ignore-swap && ! option_is_set -f; then
         if [[ $1 == 'create' || $1 == 'open' ]]; then
             if ! check_swap; then
                 error "Swap activated. Disable it with swapoff, or use --ignore-swap"
@@ -630,7 +630,7 @@ create_tomb() {
     if option_is_set -U; then _uid="`option_value -U`"; fi
     if option_is_set -G; then _gid="`option_value -G`"; fi
 
-    if ! option_is_set -f; then check_swap; fi
+    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
 
     if ! [ $1 ]; then
         _warning "no tomb name specified for creation"
@@ -819,7 +819,7 @@ create_tomb() {
 mount_tomb() {
     _message "Commanded to open tomb $1"
 
-    if ! option_is_set -f; then check_swap; fi
+    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
 
     if ! [ ${1} ]; then
         _warning "no tomb name specified for creation"
@@ -1163,7 +1163,7 @@ umount_tomb() {
 # change tomb key password
 change_passwd() {
     _message "Commanded to change password for tomb key $1"
-    if ! option_is_set -f; then check_swap; fi
+    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
 
     local keyfile="$1"
 
@@ -1677,10 +1677,10 @@ main() {
     #    -force and NOT -f
 	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v -no-color)
     subcommands_opts[__default]=""
-    subcommands_opts[open]="f n -nohook=n k: -key=k o: -mount-options=o"
+    subcommands_opts[open]="f n -nohook=n k: -key=k  U: -uid=U G: -gid=G o: -mount-options=o -ignore-swap"
     subcommands_opts[mount]=${subcommands_opts[open]}
-    subcommands_opts[create]="f s: -size=s -force k: -key=k U: -uid=U G: -gid=G"
-    subcommands_opts[passwd]="f"
+    subcommands_opts[create]="f s: -size=s -force k: -key=k U: -uid=U G: -gid=G -ignore-swap"
+    subcommands_opts[passwd]="f -ignore-swap"
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
