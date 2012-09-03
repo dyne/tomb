@@ -155,8 +155,9 @@ launch_status() {
 
     if [ $DISPLAY ]; then
 	tombname=${1}
-	tombmap=`mount -l | awk "/\[${tombname}\]$/"' { print $1 } '`
-	tombmount=`mount -l | awk "/\[${tombname}\]$/"' { print $3 } '`
+    tombbase=`basename $tombname`
+	tombmap=`mount -l | awk "/\[${tombbase}\]\$/"' { print $1 } '`
+	tombmount=`mount -l | awk "/\[${tombbase}\]\$/"' { print $3 } '`
 	if [ -x ./tomb-status ]; then # launch from build dir
 	    ./tomb-status $tombmap $tombname $tombmount &!
 	else
