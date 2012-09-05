@@ -89,7 +89,16 @@ dnl ---------------------------------------------------------------
 
 PKG_CHECK_MODULES(GTK2, [gtk+-2.0 >= 2.16], :,
   AC_MSG_ERROR([*** Gtk+2 >=2.16 development files not found!]))
-AM_PATH_LIBGCRYPT([1.5.0], :,  AC_MSG_ERROR([gcrypt development files not found]))
+AC_ARG_WITH(gcrypt, "used for kdf=pbkdf2 [reccomended]", [], [with_gcrypt=check])
+GCRYPT_DETECTED=no
+AS_IF([test "x$with_gcrypt" != xno],
+	[ AM_PATH_LIBGCRYPT([1.5.0],
+		[GCRYPT_DETECTED=yes],
+		[if test "x$with_readline" != check; then
+			 AC_MSG_ERROR([gcrypt development files not found])
+		 fi]) ]
+	)
+AM_CONDITIONAL([GCRYPT], [test "x$GCRYPT_DETECTED" = xyes])
 AC_SUBST([GTK2_CFLAGS])
 AC_SUBST([GTK2_LIBS])
 

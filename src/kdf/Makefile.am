@@ -1,4 +1,11 @@
-bin_PROGRAMS = tomb-kdf-pbkdf2 tomb-kdf-pbkdf2-gensalt tomb-kdf-pbkdf2-getiter hexencode
+if GCRYPT
+gcrypt_needing_programs = tomb-kdf-pbkdf2 tomb-kdf-pbkdf2-getiter
+else
+gcrypt_needing_programs=
+endif
+	
+
+bin_PROGRAMS = $(gcrypt_needing_programs) tomb-kdf-pbkdf2-gensalt hexencode
 tomb_kdf_pbkdf2_SOURCES = pbkdf2/pbkdf2.c
 tomb_kdf_pbkdf2_CFLAGS = $(LIBGCRYPT_CFLAGS)
 tomb_kdf_pbkdf2_LDADD = $(LIBGCRYPT_LIBS)
