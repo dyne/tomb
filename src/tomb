@@ -24,7 +24,7 @@
 # }}}
 # {{{ GLOBAL VARIABLES
 VERSION=1.3
-DATE=Nov/2012
+DATE="Nov/2012"
 TOMBEXEC=$0
 TOMBOPENEXEC="${TOMBEXEC}-open"
 typeset -a OLDARGS
@@ -174,6 +174,8 @@ check_bin() {
         our_pbkdf2="$(dirname $(readlink -f $TOMBEXEC))/kdf/tomb-kdf-pbkdf2"
         if which $our_pbkdf2 &> /dev/null; then
             KDF_PBKDF2=$our_pbkdf2
+        else
+            KDF_PBKDF2=
         fi
     fi
 
@@ -270,15 +272,19 @@ ask_password() {
     title="Insert tomb password"
     if [ $2 ]; then title="$2"; fi
 
-    cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }'
+    output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>/dev/null | tail -n +7
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE $title
 SETDESC $1
 SETPROMPT Password:
 GETPIN
-EOF
-
+EOF`
+    if [[ `tail -n1 <<<$output` =~ ERR ]]; then
+        return 1
+    fi
+    head -n1 <<<$output | awk '/^D / { sub(/^D /, ""); print }'
+    return 0
 }
 # }}}
 # {{{   - Drop privileges
@@ -301,7 +307,7 @@ check_priv() {
 	xxx "Using sudo for root execution of 'tomb ${(f)OLDARGS}'"
 	# check if sudo has a timestamp active
 	sudok=false
-	sudo -n ${TOMBEXEC} &> /dev/null
+#     sudo -n ${TOMBEXEC} &> /dev/null
     if ! option_is_set --sudo-pwd; then
         if [ $? != 0 ]; then # if not then ask a password
             cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
@@ -745,68 +751,14 @@ create_tomb() {
     fi
 
     _success "Setup your secret key file ${tombkey}"
-
-    # here user is prompted for key password
-    if ! option_is_set --tomb-pwd; then
-        for c in 1 2 3; do
-            # 3 tries to write two times a matching password
-            tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname}"`
-            tombpasstmp=$tombpass
-            tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname} (again)"`
-            if [ "$tombpasstmp" = "$tombpass" ]; then
-                break;
-            fi
-            unset tombpasstmp
-            unset tombpass
-        done
-    else
-        tombpass=`option_value --tomb-pwd`
-    fi
-
-    if [ -z $tombpass ]; then
-	umount ${keytmp}
-	losetup -d $nstloop
-	rm -r $keytmp
-	die "passwords don't match, aborting operation" 
-    fi
-
-
-    _verbose "KDF method chosen is: '`option_value --kdf`'"
-    kdf_method=$(cut -d: -f1 <<<`option_value --kdf` )
-    case $kdf_method in
-        pbkdf2)
-#one parameter: iter time in seconds
-            seconds=$(cut -d: -f2 -s <<<`option_value --kdf`)
-            if [[ -z $seconds ]]; then
-                seconds=1
-            fi
-            local -i microseconds
-            microseconds=$((seconds*1000000))
-            _verbose "Microseconds: $microseconds"
-            pbkdf2_salt=`${KDF_PBKDF2}-gensalt`
-            pbkdf2_iter=`${KDF_PBKDF2}-getiter $microseconds`
-            tombpass=`${KDF_PBKDF2} $pbkdf2_salt $pbkdf2_iter 64 <<<${tombpass}` #64bytes=512bits is the key length (huge!)
-            header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
-            ;;
-        ""|null)
-        
-            header=""
-            ;;
-        *)
-            _warning "KDF method non recognized"
-            return 1
-            header=""
-            ;;
-    esac
-    touch $tombkey
+    touch ${tombkey}
     chown ${_uid}:${_gid} ${tombkey}
     chmod 0600 ${tombkey}
-    ( echo -n $header; gpg \
-        --openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
-        -o - -c -a ${keytmp}/tomb.tmp <<< ${tombpass} ) > $tombkey
+    gen_key ${keytmp}/tomb.tmp > ${tombkey}
 
-    unset tombpass
-
+    if ! is_valid_key ${tombkey}; then
+        _warning "The key does not seem to be valid"
+    fi
     # if [ $? != 0 ]; then
     # 	_warning "setting password failed: gnupg returns 2"
     # 	umount ${keytmp}
@@ -853,7 +805,116 @@ create_tomb() {
 
     _message "done creating $tombname encrypted storage (using Luks dm-crypt ${create_cipher}:sha256)"
     _success "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
+}
 
+#internal use
+#$1 is the keyfile we are checking
+is_valid_key() {
+    [[ `file =(awk '/^-+BEGIN/,0' $1) -bi` =~ application/pgp ]]
+    return $?
+}
+#internal use
+#$1 is the password, $2 is the keyfile
+#will output the lukskey
+get_lukskey() {
+    local tombpass=$1
+    keyfile=$2
+    firstline=`head -n1 $keyfile`
+    if [[ $firstline =~ '^_KDF_' ]]; then
+        _verbose "KDF: `cut -d_ -f 3 <<<$firstline`"
+        case `cut -d_ -f 3 <<<$firstline` in
+            pbkdf2sha1)
+                if [[ -z $KDF_PBKDF2 ]]; then
+                    die "The tomb use kdf method 'pbkdf2', which is unsupported on your system"
+                fi
+                pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
+                tombpass=$(${KDF_PBKDF2} ${=pbkdf2_param} 2> /dev/null <<<$tombpass)
+                ;;
+            *)
+                _failure "No suitable program for KDF `cut -f 3 <<<$firstline`"
+                unset tombpass
+                return 1
+                ;;
+        esac
+    fi
+    gpg --batch --passphrase-fd 0 --no-tty --no-options \
+        -d "${keyfile}" 2> /dev/null <<< ${tombpass}
+    ret=$?
+    unset tombpass
+    return $ret
+}
+
+#internal use
+#$1 the lukskey to encrypt
+#it respects --kdf and --tomb-pwd
+gen_key() {
+    local lukskey=$1
+    # here user is prompted for key password
+    local tombpass=""
+    local tombpasstmp=""
+    if ! option_is_set --tomb-pwd; then
+        while true; do
+            # 3 tries to write two times a matching password
+            tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname}"`
+            if [[ $? != 0 ]]; then
+                die "User aborted"
+            fi
+            if [ -z $tombpass ]; then
+                _warning "you set empty password, which is not possible"
+                continue
+            fi
+            tombpasstmp=$tombpass
+            tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname} (again)"`
+            if [[ $? != 0 ]]; then
+                die "User aborted"
+            fi
+            if [ "$tombpasstmp" = "$tombpass" ]; then
+                break;
+            fi
+            unset tombpasstmp
+            unset tombpass
+        done
+    else
+        tombpass=`option_value --tomb-pwd`
+    fi
+
+
+
+    _verbose "KDF method chosen is: '`option_value --kdf`'"
+    kdf_method=$(cut -d: -f1 <<<`option_value --kdf` )
+    case $kdf_method in
+        pbkdf2)
+            if [[ -z $KDF_PBKDF2 ]]; then
+                die "The tomb use kdf method 'pbkdf2', which is unsupported on your system"
+            fi
+#one parameter: iter time in seconds
+            seconds=$(cut -d: -f2 -s <<<`option_value --kdf`)
+            if [[ -z $seconds ]]; then
+                seconds=1
+            fi
+            local -i microseconds
+            microseconds=$((seconds*1000000))
+            _verbose "Microseconds: $microseconds"
+            pbkdf2_salt=`${KDF_PBKDF2}-gensalt`
+            pbkdf2_iter=`${KDF_PBKDF2}-getiter $microseconds`
+            tombpass=`${KDF_PBKDF2} $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"` #64bytes=512bits is the key length (huge!)
+            header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+            ;;
+        ""|null)
+        
+            header=""
+            ;;
+        *)
+            _warning "KDF method non recognized"
+            return 1
+            header=""
+            ;;
+    esac
+    echo -n $header
+    gpg --openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
+        -o - -c -a ${lukskey} <<< "${tombpass}"
+
+    unset tombpass
 }
 
 # }}}
@@ -969,33 +1030,20 @@ mount_tomb() {
     _warning "Password is required for key ${keyname}"
     for c in 1 2 3; do
         if ! option_is_set --tomb-pwd; then
-            if [ $c = 1 ]; then
-                tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb ${keyname}"`
-            else
-                tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb $keyname (retry $c)"`
+            tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb ${keyname}"`
+            if [[ $? != 0 ]]; then
+                die "User aborted"
             fi
         else
             tombpass=`option_value --tomb-pwd`
         fi
-#TODO: read the first line: if it looks like a KDF, do KDF
-        firstline=`head -n1 < $tombkey`
-        if [[ $firstline =~ '^_KDF_' ]]; then
-            _verbose "KDF: `cut -d_ -f 3 <<<$firstline`"
-            case `cut -d_ -f 3 <<<$firstline` in
-                pbkdf2sha1)
-                    pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
-                    tombpass=$(${KDF_PBKDF2} ${=pbkdf2_param} 2> /dev/null <<<$tombpass)
-                    ;;
-                *)
-                    _failure "No suitable program for KDF `cut -f 3 <<<$firstline`"
-                    return 1
-                    ;;
-            esac
-        fi
-        (gpg --batch --passphrase-fd 0 --no-tty --no-options \
-                -d "${tombkey}" 2> /dev/null <<< ${tombpass} ) \
-            | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+        get_lukskey "${tombpass}" ${tombkey} | \
+            cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+        local ret=$?
         unset tombpass
+        if [[ $ret != 0 ]]; then
+            continue
+        fi
 
         # if key was from stdin delete temp file and dir
         if [ $tombkeydir ]; then
@@ -1232,93 +1280,44 @@ change_passwd() {
 
     # check the keyfile
     if ! [ -r $keyfile ]; then
-	_warning "key not found: $keyfile"
-	return 1
+        _warning "key not found: $keyfile"
+        return 1
     fi
 
-    file $keyfile | grep PGP > /dev/null
-    if [ $? != 0 ]; then
-	_warning "file doesn't seems to be a tomb key: $keyfile"
-	_warning "operation aborted."
-	return 1
+    if ! is_valid_key $keyfile ; then
+        _warning "file doesn't seems to be a tomb key: $keyfile"
+        _warning "operation aborted."
+        return 1
     fi
 
-    local tmpnewkey tmpoldkey c tombpass tombpasstmp
+    local tmpnewkey lukskey c tombpass tombpasstmp
 
     tmpnewkey=`safe_filename tomb`
-    tmpoldkey=`safe_filename tomb`
+    lukskey=`safe_filename tomb`
 
     _success "Changing password for $keyfile"
     keyname=`basename $keyfile`
-    for c in 1 2 3; do
-	if [ $c = 1 ]; then
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Type old password for ${keyname}" "Change tomb key password"`
-	else
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Type old password for ${keyname} (retry $c)" "Change tomb key password"`
-	fi
-        gpg --batch --no-options --no-tty --passphrase-fd 0 -o "${tmpoldkey}" -d $keyfile <<< "$tombpass" &> /dev/null
-        if [ $? = 0 ]; then
-            tombpass="ok"
+    while true; do
+        tombpass=`exec_as_user ${TOMBEXEC} askpass "Type old password for ${keyname}" "Change tomb key password"`
+        if [[ $? == 1 ]]; then
+            die "User aborted"
+        fi
+        if get_lukskey "${tombpass}" ${keyfile} > ${lukskey}; then
             break
         fi
     done
 
-    if [ "$tombpass" != "ok" ]; then
-        _warning "You typed an Invalid old password. Operation aborted."
-        # /dev/null because the file may not exist
-        ${=WIPE} "${tmpnewkey}" 2> /dev/null
-        ${=WIPE} "${tmpoldkey}" 2> /dev/null
-        return 1
+    gen_key $lukskey > $tmpnewkey
+
+    if ! is_valid_key $tmpnewkey; then
+        # wipe all temp file
+        ${=WIPE} "${tmpnewkey}"
+        ${=WIPE} "${lukskey}"
+        die "Error: the newly generated keyfile does not seem valid"
     fi
 
-    for c in 1 2 3; do
-	# 3 tries to write two times a matching password
-	if [ $c = 1 ]; then
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Type the new password for ${keyname}" "Change tomb key password"`
-	else
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Type the new password for ${keyname} (retry $c)" "Change tomb key password"`
-	fi
-	tombpasstmp=$tombpass
-	tombpass=`exec_as_user ${TOMBEXEC} askpass "Type the new password again" "Change tomb key password"`
-	if [ "$tombpasstmp" = "$tombpass" ]; then
-	    break;
-	fi
-	unset tombpasstmp
-	unset tombpass
-    done
-
-    if [ -z $tombpass ]; then
-	_warning "You mistyped the new password. Operation aborted."
-        # /dev/null because the file cannot exists
-        ${=WIPE} "${tmpnewkey}" 2> /dev/null
-        ${=WIPE} "${tmpoldkey}" 2> /dev/null
-	return 1
-    fi
-
-    gpg \
-	--openpgp --batch --no-options --no-tty --passphrase-fd 0 \
-	-o "${tmpnewkey}" -c -a ${tmpoldkey} <<< ${tombpass}
-
-    unset tombpass
-    
-    if [ $? != 0 ]; then
-        _warning "Cannot change your key passphrase"
-        # /dev/null because the file cannot exists
-        ${=WIPE} "${tmpnewkey}" 2> /dev/null
-        ${=WIPE} "${tmpoldkey}" 2> /dev/null
-        return 1
-    fi
-
-    # wipe the previous, original, key
-    ${=WIPE} "${keyfile}"
     # copy the new key as the original keyfile name
     cp "${tmpnewkey}" "${keyfile}"
-
-    _message "Cleaning environment"
-    # wipe all temp file
-    ${=WIPE} "${tmpnewkey}"
-    ${=WIPE} "${tmpoldkey}"
-
     _success "Your passphrase was successfully updated."
 
     return 0
@@ -1417,9 +1416,8 @@ resize_tomb() {
 	    else
 	        tombpass=`exec_as_user ${TOMBEXEC} askpass "$keyname (retry $c)"`
 	    fi
-        (gpg --batch --passphrase-fd 0 --no-tty --no-options \
-            -d "${tombkey}" 2> /dev/null <<< ${tombpass} ) \
-            | cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+        get_lukskey "${tombpass}" ${tombkey} | \
+            cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 	    
         unset tombpass
 	
@@ -1747,7 +1745,7 @@ main() {
     subcommands_opts[open]="f n -nohook=n k: -key=k  U: -uid=U G: -gid=G o: -mount-options=o -ignore-swap -sudo-pwd: -tomb-pwd:"
     subcommands_opts[mount]=${subcommands_opts[open]}
     subcommands_opts[create]="f s: -size=s -force k: -key=k U: -uid=U G: -gid=G -ignore-swap -kdf: -sudo-pwd: -tomb-pwd:  -use-urandom"
-    subcommands_opts[passwd]="f -ignore-swap"
+    subcommands_opts[passwd]="f -ignore-swap -kdf: "
     subcommands_opts[close]="-sudo-pwd: U: -uid=U G: -gid=G"
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
@@ -1762,7 +1760,7 @@ main() {
     subcommands_opts[mktemp]=""
     subcommands_opts[source]=""
     subcommands_opts[status]=""
-    subcommands_opts[resize]="s: -size=s k: -key=k"
+    subcommands_opts[resize]="s: -size=s k: -key=k U: -uid=U G: -gid=G"
     subcommands_opts[check]="-ignore-swap"
 #    subcommands_opts[translate]=""
     
@@ -1862,7 +1860,6 @@ main() {
 	    umount_tomb $PARAM[1]
 	    ;;
 	passwd)
-	    check_priv
 	    change_passwd $PARAM[1]
 	    ;;
 	list)
