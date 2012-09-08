@@ -1042,6 +1042,9 @@ mount_tomb() {
         local ret=$?
         unset tombpass
         if [[ $ret != 0 ]]; then
+            if [[ $c = 3 ]] || option_is_set --tomb-pwd; then
+                die "Wrong password: aborting"
+            fi
             continue
         fi
 
@@ -1292,35 +1295,46 @@ change_passwd() {
 
     local tmpnewkey lukskey c tombpass tombpasstmp
 
-    tmpnewkey=`safe_filename tomb`
-    lukskey=`safe_filename tomb`
+    tmpnewkey=`safe_filename tombnew`
+    lukskey=`safe_filename tombluks`
 
     _success "Changing password for $keyfile"
     keyname=`basename $keyfile`
-    while true; do
-        tombpass=`exec_as_user ${TOMBEXEC} askpass "Type old password for ${keyname}" "Change tomb key password"`
-        if [[ $? == 1 ]]; then
-            die "User aborted"
+    if ! option_is_set --tomb-old-pwd; then
+        while true; do
+            tombpass=`exec_as_user ${TOMBEXEC} askpass "Type old password for ${keyname}" "Change tomb key password"`
+            if [[ $? == 1 ]]; then
+                die "User aborted"
+            fi
+            if get_lukskey "${tombpass}" ${keyfile} > ${lukskey}; then
+                break
+            fi
+        done
+    else
+        tombpass=`option_value --tomb-old-pwd`
+        if ! get_lukskey "${tombpass}" ${keyfile} > ${lukskey}; then
+            die "Invalid old password"
         fi
-        if get_lukskey "${tombpass}" ${keyfile} > ${lukskey}; then
-            break
+    fi
+
+    {
+        gen_key $lukskey > ${tmpnewkey}
+
+        if ! is_valid_key $tmpnewkey; then
+            die "Error: the newly generated keyfile does not seem valid"
+        else
+            # copy the new key as the original keyfile name
+            cp "${tmpnewkey}" "${keyfile}"
+            _success "Your passphrase was successfully updated."
         fi
-    done
-
-    gen_key $lukskey > $tmpnewkey
-
-    if ! is_valid_key $tmpnewkey; then
+    } always {
+        _verbose "cleanup: $tmpnewkey $lukskey"
         # wipe all temp file
         ${=WIPE} "${tmpnewkey}"
         ${=WIPE} "${lukskey}"
-        die "Error: the newly generated keyfile does not seem valid"
-    fi
+    }
 
-    # copy the new key as the original keyfile name
-    cp "${tmpnewkey}" "${keyfile}"
-    _success "Your passphrase was successfully updated."
-
-    return 0
+    return $?
 }
 
 # }}}
@@ -1745,7 +1759,7 @@ main() {
     subcommands_opts[open]="f n -nohook=n k: -key=k  U: -uid=U G: -gid=G o: -mount-options=o -ignore-swap -sudo-pwd: -tomb-pwd:"
     subcommands_opts[mount]=${subcommands_opts[open]}
     subcommands_opts[create]="f s: -size=s -force k: -key=k U: -uid=U G: -gid=G -ignore-swap -kdf: -sudo-pwd: -tomb-pwd:  -use-urandom"
-    subcommands_opts[passwd]="f -ignore-swap -kdf: "
+    subcommands_opts[passwd]="f -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
     subcommands_opts[close]="-sudo-pwd: U: -uid=U G: -gid=G"
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
@@ -1836,7 +1850,7 @@ main() {
         autoload colors; colors
     fi
     if ! option_is_set --unsecure-dev-mode; then
-        for opt in --sudo-pwd --tomb-pwd --use-urandom; do
+        for opt in --sudo-pwd --tomb-pwd --use-urandom --tomb-old-pwd; do
             if option_is_set $opt; then
                 die "You specified option $opt, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsecure-dev-mode" 127
             fi
