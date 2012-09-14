@@ -1,2 +1,14 @@
 usr/bin/tomb-status
 usr/share/man/man1/tomb-status.1
+usr/share/pixmaps/monmort.png
+usr/share/pixmaps/monmort.xpm
+usr/share/app-install/icons/monmort.png
+usr/share/application-registry/tomb.applications
+usr/share/applications/tomb.desktop
+usr/share/mime-info/tomb.keys
+usr/share/mime-info/tomb.mime
+usr/share/mime/packages/dyne-tomb.xml
+usr/share/themes/tomb/gtk-2.0-key/gtkrc
+usr/share/icons/hicolor/32x32/mimetypes/application-x-tomb-volume.png
+usr/share/icons/hicolor/32x32/mimetypes/application-x-tomb-key.png
+usr/share/app-install/desktop/tomb.desktop

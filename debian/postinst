@@ -1,0 +1,6 @@
+#!/bin/sh
+
+if [ -x /usr/sbin/update-mime ]; then
+	update-mime
+fi
+

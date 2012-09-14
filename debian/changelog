@@ -1,3 +1,9 @@
+tomb (1.2-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Denis Roio <jaromil@dyne.org>  Mon, 07 Nov 2011 21:03:34 +0100
+
 tomb (1.0-1) unstable; urgency=low
 
   * New upstream release
