@@ -33,9 +33,6 @@ STEGHIDE=1
 MKTEMP=1
 MOUNTOPTS="rw,noatime,nodev"
 
-#declare global variables
-QUIET=0
-DEBUG=0
 typeset -A global_opts
 typeset -A opts
 typeset -h username
