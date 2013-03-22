@@ -868,10 +868,10 @@ lock_tomb_with_key() {
 
     keyname=`basename $tombkey | cut -d. -f1`
     _message "a password is required to use key ${keyname}"
+    local passok=0
     if option_is_set --tomb-pwd; then
             tombpass=`option_value --tomb-pwd`
     else	
-
 	for c in 1 2 3; do
 	    if [ $c = 1 ]; then
 	        tombpass=`exec_as_user ${TOMBEXEC} askpass "Insert password to use key: $keyname"`
@@ -883,27 +883,20 @@ lock_tomb_with_key() {
                 die "User aborted"
             fi
 	    
-	    gpg --batch --passphrase-fd 0 --no-tty --no-options \
-		-d "${tombkey}" 1> /dev/null 2>/dev/null <<< ${tombpass}
-	    if [[ $? = 0 ]]; then
-		passok=1
-		_message "Password OK."
+            get_lukskey "${tombpass}" ${tombkey} >/dev/null
+ 	    if [ $? = 0 ]; then
+		passok=1; _message "Password OK."
 		break;
 	    fi
 	done
     fi
-    if [[ $passok != 1 ]]; then
+    if [ "$passok" = "0" ]; then
 	_warning "Password incorrect"
 	losetup -d $nstloop	
 	die "Operation aborted."
     fi
 
     _success "Locking ${tombfile} with ${tombkey}"
-
-    echo
-    get_lukskey "${tombpass}" ${tombkey}
-    echo
-    xxx "cryptsetup --key-file - --batch-mode --cipher ${cipher} --key-size 256 luksFormat ${nstloop}"
 
     _message "formatting Luks mapped device"
     get_lukskey "${tombpass}" ${tombkey} | \
@@ -963,6 +956,7 @@ get_lukskey() {
     local tombpass=$1
     keyfile=$2
     firstline=`head -n1 $keyfile`
+    xxx "get_lukskey XXX $keyfile"
     if [[ $firstline =~ '^_KDF_' ]]; then
         _verbose "KDF: `cut -d_ -f 3 <<<$firstline`"
         case `cut -d_ -f 3 <<<$firstline` in
@@ -980,9 +974,11 @@ get_lukskey() {
                 ;;
         esac
     fi
-    gpg --batch --passphrase-fd 0 --no-tty --no-options \
-        -d "${keyfile}" 2> /dev/null <<< ${tombpass}
+    gpg --batch --passphrase-fd 0 --no-tty --no-options --status-fd 1 -d "${keyfile}" \
+	<<< ${tombpass} \
+	| grep 'DECRYPTION_OKAY'
     ret=$?
+    xxx "gpg decryption returns $ret"
     unset tombpass
     return $ret
 }
