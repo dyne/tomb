@@ -334,11 +334,9 @@ check_command() {
     #before wasting user's time
     
     if ! option_is_set --ignore-swap && ! option_is_set -f; then
-        if [[ $1 == 'create' || $1 == 'open' ]]; then
-            if ! check_swap; then
-                error "Swap activated. Disable it with swapoff, or use --ignore-swap"
-                exit 1
-            fi
+        if ! check_swap; then
+            error "Swap activated. Disable it with swapoff, or use --ignore-swap"
+            exit 1
         fi
     fi
 }
@@ -350,18 +348,24 @@ Syntax: tomb [options] command [file] [place]
 
 Commands:
 
- create     create a new tomb FILE and its keys (needs size)
- open       open an existing tomb FILE on PLACE
- list       list all open tombs or the one called FILE
- close      close the open tomb called FILE (or all)
- slam       close tomb FILE and kill all pids using it
- passwd     change the password of a tomb key FILE
- resize     resize a tomb FILE (only bigger, needs size)
+ dig     create a new empty TOMB file of --size in MB
+ forge   create a new KEY file and set its password
+ lock    installs a lock on a TOMB to use it with KEY
+
+ open    open an existing TOMB
+
+ list    list open TOMBs
+
+ close   close a TOMB (or all)
+ slam    slam a TOMB killing all programs using it
+
+ passwd  change the password of a KEY
+ resize  resize a TOMB to a new --size (can only grow)
 EOF
     if [ "$STEGHIDE" = 1 ]; then
 	cat <<EOF
- bury       hide a tomb key FILE inside a jpeg PLACE
- exhume     extract a tomb key FILE from a jpeg PLACE
+ bury       hide a KEY inside a JPEG image
+ exhume     extract a KEY from a JPEG image
 EOF
     fi
     cat <<EOF
@@ -633,195 +637,6 @@ exec_safe_post_hooks() {
 
 # }}}
 # {{{ TOMB SUB-COMMANDS
-
-# {{{ - Create
-# $1 is the tomb path
-
-create_tomb() {
-    _message "Commanded to create tomb $1"
-
-    # we run as root, but remember the original uid:gid to drop
-    # privileges when not needed anymore
-    if option_is_set -U; then _uid="`option_value -U`"; fi
-    if option_is_set -G; then _gid="`option_value -G`"; fi
-
-    # if swap is on, we remind the user about possible data leaks to disk
-    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
-
-    if ! [ $1 ]; then
-        _warning "no tomb name specified for creation"
-        return 1
-    fi
-
-    # the encryption cipher for a tomb can be set at creation using -o
-    if ! option_is_set -o; then 
-        create_cipher="`option_value -o`"
-    else
-	create_cipher=aes-cbc-essiv:sha256
-    fi
-
-    tombfile=`basename $1`
-    tombdir=`dirname $1`
-    # make sure the file has a .tomb extension
-    tombname=${tombfile%%\.*}
-    tombfile=${tombname}.tomb
-
-
-    # require the specification of the size of the tomb (-s) in MB
-    tombsize="`option_value -s`"
-
-    [ $tombsize ] || die "Size argument missing, use --size"
-
-    [[ $tombsize != <-> ]] && die "Size argument is not an integer"
-
-    if [ -e ${tombdir}/${tombfile} ]; then
-	_warning "tomb exists already. I'm not digging here:"
-	ls -lh ${tombdir}/${tombfile}
-	return 1
-    fi
-
-    # check if the key is set manually then use the one existing
-    if option_is_set -k; then
-        tombkey="`option_value -k`"
-	if [ -e "${tombkey}" ]; then
-	    _message "Use an existing key to lock the new tomb:"
-	    ls -lh ${tombkey}
-	fi
-
-	# this does a check on the file header, virtuosism by hellekin
-	# [[ `file =(awk '/^-+BEGIN/,0' $1) -bi` =~ application/pgp ]]
-	if ! is_valid_key ${tombkey}; then
-	    _warning "The key seems invalid, the application/pgp header is missing"
-	    die "Operation aborted."
-	fi	    
-    else
-        tombkey="new" # generate it new later
-    fi
-    
-    _success "Creating a new tomb in ${tombdir}/${tombfile}"
-    
-    if [ -z $tombsize ]; then
-        _message "No size specified, summoning the Tomb Undertaker to guide us in the creation."
-        "$TOMBOPENEXEC" &
-        wait $!
-        return 0
-    fi
-
-    tombsize_4k=`expr $tombsize \* 1024 / 4`
-    _message "Generating ${tombfile} of ${tombsize}Mb (${tombsize_4k} blocks of 4Kb)"
-    # we will first touch the file and set permissions: this way, even if interrupted, permissions are right
-    touch ${tombdir}/${tombfile}
-    chown ${_uid}:${_gid} "${tombdir}/${tombfile}"
-    chmod 0600 "${tombdir}/${tombfile}"
-    $DD if=/dev/urandom bs=4k count=${tombsize_4k} of=${tombdir}/${tombfile}
-
-    if [ $? = 0 -a -e ${tombdir}/${tombfile} ]; then
-	_success "OK: `ls -lh ${tombdir}/${tombfile}`"
-    else
-	die "Error creating the tomb ${tombdir}/${tombfile}, operation aborted." 
-    fi
-
-    nstloop=`losetup -f` # get the number for next loopback device
-    losetup -f ${tombdir}/${tombfile} # allocates the next loopback for our file
-
-    # create the keyfile in tmpfs so that we leave less traces in RAM
-    keytmp=`safe_dir tomb`
-    (( $? )) && die "error creating temp dir"
-    xxx "safe_dir at $keytmp"
-
-    #rm -f $keytmp
-    # ?????? creo, cancello e ricreo ??????
-    #mkdir -p $keytmp
-    mount tmpfs "${keytmp}" -t tmpfs -o size=1m
-    if [ $? != 0 ]; then
-	_warning "cannot mount tmpfs filesystem in volatile memory"
-	losetup -d $nstloop
-	rm -r "${keytmp}"
-	die "operation aborted." 
-    fi
-    _message "Generating secret key..."
-    _message "this operation takes time, keep using this computer on other tasks,"
-    _message "once done you will be asked to choose a password for your tomb."
-    _message "To make it faster you can move the mouse around"
-    touch ${keytmp}/tomb.tmp
-    chmod 0600 ${keytmp}/tomb.tmp
-    random_source=/dev/random
-    if option_is_set --use-urandom; then
-        random_source=/dev/urandom
-    fi
-    if [[ $DD = "dcfldd" ]]; then
-        $DD bs=1 count=256 if=$random_source of=${keytmp}/tomb.tmp statusinterval=1
-    else
-        $DD bs=1 count=256 if=$random_source of=${keytmp}/tomb.tmp
-    fi
-    if ! [ -r ${keytmp}/tomb.tmp ]; then
-	_warning "cannot generate encryption key"
-	umount ${keytmp}
-	losetup -d $nstloop
-	rm -r $keytmp
-	die "operation aborted." 
-    fi
-
-    _success "Setup your secret key file ${tombkey}"
-    if [ "$tombkey" = "new" ]; then
-	tombkey="${tombdir}/${tombfile}.key"
-	touch ${tombkey}
-	chown ${_uid}:${_gid} ${tombkey}
-	chmod 0600 ${tombkey}
-	gen_key ${keytmp}/tomb.tmp > ${tombkey}
-    fi
-
-    if ! is_valid_key ${tombkey}; then
-        _warning "The key does not seem to be valid"
-    fi
-
-    # if [ $? != 0 ]; then
-    # 	_warning "setting password failed: gnupg returns 2"
-    # 	umount ${keytmp}
-    # 	losetup -d $nstloop
-    # 	rm -r $keytmp
-    # 	exit 1
-    # fi
-
-    _message "formatting Luks mapped device"
-	# we use aes-cbc-essiv with sha256
-	# for security, performance and compatibility
-    # XXX: More for compatibility then, because xts-plain is better nowadays.
-    cryptsetup --batch-mode \
-	--cipher ${create_cipher} --key-size 256 \
-	luksFormat ${nstloop} ${keytmp}/tomb.tmp
-
-    if ! [ $? = 0 ]; then
-	umount ${keytmp}
-	losetup -d $nstloop
-	rm -r $keytmp
-	rm ${tombdir}/${tombfile}
-	die "operation aborted." 0
-    fi
-
-    cryptsetup --key-file ${keytmp}/tomb.tmp --cipher ${create_cipher} luksOpen ${nstloop} tomb.tmp
-    ${=WIPE} ${keytmp}/tomb.tmp
-    umount ${keytmp}
-    rm -r ${keytmp}
-
- #  cryptsetup luksDump ${nstloop}
-
-    _message "formatting your Tomb with Ext3/Ext4 filesystem"
-    ${=MKFS} ${tombname} /dev/mapper/tomb.tmp
-
-    if [ $? != 0 ]; then
-	_warning "Tomb format returned an error:"
-	_warning "your tomb ${tombfile} may be corrupted."
-    fi
-
-    sync
-
-    cryptsetup luksClose tomb.tmp
-    losetup -d ${nstloop}
-
-    _message "done creating $tombname encrypted storage (using Luks dm-crypt ${create_cipher})"
-    _success "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
-}
 
 # This is a new way to create tombs which dissects the whole create_tomb() into 3 clear steps:
 #  - dig a .tomb (the large file) using /dev/random (takes some minutes at least)
@@ -2191,10 +2006,6 @@ main() {
     xxx "Tomb command: $subcommand ${PARAM}"
 
     case "$subcommand" in
-	create)
-	    check_priv
-	    create_tomb ${=PARAM}
-	    ;;
 
 	# new creation in three steps
 	forge)
