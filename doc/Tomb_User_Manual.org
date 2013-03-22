@@ -1,0 +1,25 @@
+
+
+when creating a tomb make sure the device mapper is loaded among kernel modules
+or creation will fail and leave you in the dust.
+
+modprobe dm_mod
+modprobe dm_crypt
+
+to create a tomb on a server (even VPS) is possible, but the problem becomes the little
+available entropy. in order to fix this one can use EGD the Entropy Gathering Daemon.
+
+on Debian, do:
+
+sudo aptitude install libdigest-sha1-perl
+sudo aptitude install ekeyd-egd-linux
+
+/etc/default/ekeyd-egd-linux
+
+wget http://egd.sourceforge.net/
+
+perl ./egd.pl
+
+/etc/init.d/ekeyd-egd-linux start
+
+

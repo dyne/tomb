@@ -640,10 +640,12 @@ exec_safe_post_hooks() {
 create_tomb() {
     _message "Commanded to create tomb $1"
 
-    # running as root, remembering the uid:gid
+    # we run as root, but remember the original uid:gid to drop
+    # privileges when not needed anymore
     if option_is_set -U; then _uid="`option_value -U`"; fi
     if option_is_set -G; then _gid="`option_value -G`"; fi
 
+    # if swap is on, we remind the user about possible data leaks to disk
     if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
 
     if ! [ $1 ]; then
@@ -651,10 +653,11 @@ create_tomb() {
         return 1
     fi
 
-    if ! [ $2 ]; then
-	create_cipher=aes-cbc-essiv
+    # the encryption cipher for a tomb can be set at creation using -o
+    if ! option_is_set -o; then 
+        create_cipher="`option_value -o`"
     else
-        create_cipher=${2}
+	create_cipher=aes-cbc-essiv:sha256
     fi
 
     tombfile=`basename $1`
@@ -662,7 +665,10 @@ create_tomb() {
     # make sure the file has a .tomb extension
     tombname=${tombfile%%\.*}
     tombfile=${tombname}.tomb
-    tombsize=$opts[-s]
+
+
+    # require the specification of the size of the tomb (-s) in MB
+    tombsize="`option_value -s`"
 
     [ $tombsize ] || die "Size argument missing, use --size"
 
@@ -674,20 +680,26 @@ create_tomb() {
 	return 1
     fi
 
+    # check if the key is set manually then use the one existing
     if option_is_set -k; then
-        tombkey="`option_value -k`.tomb.key"
+        tombkey="`option_value -k`"
+	if [ -e "${tombkey}" ]; then
+	    _message "Use an existing key to lock the new tomb:"
+	    ls -lh ${tombkey}
+	fi
+
+	# this does a check on the file header, virtuosism by hellekin
+	# [[ `file =(awk '/^-+BEGIN/,0' $1) -bi` =~ application/pgp ]]
+	if ! is_valid_key ${tombkey}; then
+	    _warning "The key seems invalid, the application/pgp header is missing"
+	    die "Operation aborted."
+	fi	    
     else
-        tombkey="${tombdir}/${tombfile}.key"
+        tombkey="new" # generate it new later
     fi
-
-    if [ -e "${tombkey}" ]; then
-        _warning "tomb key already exists. Quitting."
-        ls -lh ${tombkey}
-        return 1
-    fi
-
+    
     _success "Creating a new tomb in ${tombdir}/${tombfile}"
-
+    
     if [ -z $tombsize ]; then
         _message "No size specified, summoning the Tomb Undertaker to guide us in the creation."
         "$TOMBOPENEXEC" &
@@ -751,14 +763,18 @@ create_tomb() {
     fi
 
     _success "Setup your secret key file ${tombkey}"
-    touch ${tombkey}
-    chown ${_uid}:${_gid} ${tombkey}
-    chmod 0600 ${tombkey}
-    gen_key ${keytmp}/tomb.tmp > ${tombkey}
+    if [ "$tombkey" = "new" ]; then
+	tombkey="${tombdir}/${tombfile}.key"
+	touch ${tombkey}
+	chown ${_uid}:${_gid} ${tombkey}
+	chmod 0600 ${tombkey}
+	gen_key ${keytmp}/tomb.tmp > ${tombkey}
+    fi
 
     if ! is_valid_key ${tombkey}; then
         _warning "The key does not seem to be valid"
     fi
+
     # if [ $? != 0 ]; then
     # 	_warning "setting password failed: gnupg returns 2"
     # 	umount ${keytmp}
@@ -772,7 +788,7 @@ create_tomb() {
 	# for security, performance and compatibility
     # XXX: More for compatibility then, because xts-plain is better nowadays.
     cryptsetup --batch-mode \
-	--cipher ${create_cipher}:sha256 --key-size 256 \
+	--cipher ${create_cipher} --key-size 256 \
 	luksFormat ${nstloop} ${keytmp}/tomb.tmp
 
     if ! [ $? = 0 ]; then
@@ -807,6 +823,162 @@ create_tomb() {
     _success "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
 }
 
+# This is a new way to create tombs which dissects the whole create_tomb() into 3 clear steps:
+#  - dig a .tomb (the large file) using /dev/random (takes some minutes at least)
+#  - forge a .key (the small file) using /dev/urandom (good entropy needed)
+#  - lock the .tomb file with the key, binding the key to the tomb (requires dm_crypt format)
+
+forge_key() {
+    _message "Commanded to forge key $1"
+
+    # we run as root, but remember the original uid:gid
+    # to set the permissions as readable for the calling user
+    if option_is_set -U; then _uid="`option_value -U`"; fi
+    if option_is_set -G; then _gid="`option_value -G`"; fi
+
+    if ! [ $1 ]; then
+        _warning "no key name specified for creation"
+        return 1
+    fi
+
+    # if swap is on, we remind the user about possible data leaks to disk
+    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
+
+    # the encryption cipher for a tomb can be set at creation using -o
+    if ! option_is_set -o; then 
+        create_cipher="`option_value -o`"
+    else
+	create_cipher=aes-cbc-essiv:sha256
+    fi
+
+
+    # create the keyfile in tmpfs so that we leave less traces in RAM
+    keytmp=`safe_dir tomb`
+    (( $? )) && die "error creating temp dir"
+    xxx "safe_dir at $keytmp"
+
+    mount tmpfs "${keytmp}" -t tmpfs -o size=1m
+    if [ $? != 0 ]; then
+	_warning "cannot mount tmpfs filesystem in volatile memory"
+	rm -r "${keytmp}"
+	die "operation aborted." 
+    fi
+
+    tombkey="$1"
+
+    _message "this operation takes time, keep using this computer on other tasks,"
+    _message "once done you will be asked to choose a password for your tomb."
+    _message "To make it faster you can move the mouse around."
+    _message "If you are on a server, you can use an Entropy Generation Daemon."
+
+    touch ${keytmp}/tomb.tmp
+    chmod 0600 ${keytmp}/tomb.tmp
+    random_source=/dev/random
+    if option_is_set --use-urandom; then
+        random_source=/dev/urandom
+    fi
+
+    if [[ $DD = "dcfldd" ]]; then
+        $DD bs=1 count=256 if=$random_source of=${keytmp}/tomb.tmp statusinterval=1
+    else
+        $DD bs=1 count=256 if=$random_source of=${keytmp}/tomb.tmp
+    fi
+    if ! [ -r ${keytmp}/tomb.tmp ]; then
+	_warning "cannot generate encryption key"
+	umount ${keytmp}
+	rm -r $keytmp
+	die "operation aborted." 
+    fi
+
+    _success "Choose the password of your key: ${tombkey}"
+    _message "(you can also change it later using 'tomb passwd')"
+    touch ${tombkey}
+    chown ${_uid}:${_gid} ${tombkey}
+    chmod 0600 ${tombkey}
+
+    tombname="$tombkey"
+    # the gen_key() function takes care of the new key's encryption
+    gen_key ${keytmp}/tomb.tmp > ${tombkey}
+
+    # this does a check on the file header, virtuosism by hellekin
+    # [[ `file =(awk '/^-+BEGIN/,0' $1) -bi` =~ application/pgp ]]    
+    if ! is_valid_key ${tombkey}; then
+        _warning "The key does not seem to be valid"
+	_warning "Dumping contents to screen:"
+	cat ${tombkey}
+	_warning "--"
+	umount ${keytmp}
+	rm -r $keytmp
+	die "operation aborted." 
+    fi
+
+    ${=WIPE} ${keytmp}/tomb.tmp # no need really, but anyway    
+    umount ${keytmp}
+    rm -r ${keytmp}
+
+    chown ${_uid}:${_gid} ${tombkey}
+
+    _message "done forging $tombkey"
+    _success "Your key is ready:"
+    ls -lh ${tombkey}
+}
+
+# dig a tomb
+dig_tomb() {
+    _message "Commanded to dig tomb $1"
+
+    # if swap is on, we remind the user about possible data leaks to disk
+    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
+
+    if ! [ $1 ]; then
+        _warning "no tomb name specified for creation"
+        return 1
+    fi
+
+
+    tombfile=`basename $1`
+    tombdir=`dirname $1`
+    # make sure the file has a .tomb extension
+    tombname=${tombfile%%\.*}
+    tombfile=${tombname}.tomb
+
+
+    # require the specification of the size of the tomb (-s) in MB
+    tombsize="`option_value -s`"
+
+    [ $tombsize ] || die "Size argument missing, use --size"
+
+    [[ $tombsize != <-> ]] && die "Size argument is not an integer"
+
+    if [ -e ${tombdir}/${tombfile} ]; then
+	_warning "A tomb exists already. I'm not digging here:"
+	_warning " `ls -lh ${tombdir}/${tombfile}`"
+	return 1
+    fi
+    
+    _success "Creating a new tomb in ${tombdir}/${tombfile}"
+
+
+    tombsize_4k=`expr $tombsize \* 1024 / 4`
+    _message "Generating ${tombfile} of ${tombsize}Mb (${tombsize_4k} blocks of 4Kb)"
+    # we will first touch the file and set permissions: this way, even if interrupted, permissions are right
+    touch ${tombdir}/${tombfile}
+    chmod 0600 "${tombdir}/${tombfile}"
+    $DD if=/dev/urandom bs=4k count=${tombsize_4k} of=${tombdir}/${tombfile}
+
+    if [ $? = 0 -a -e ${tombdir}/${tombfile} ]; then
+	_message " `ls -lh ${tombdir}/${tombfile}`"
+    else
+	die "Error creating the tomb ${tombdir}/${tombfile}, operation aborted." 
+    fi
+
+    _success "Done digging $tombname"
+    _message "your tomb is not yet ready, you need to forge a key and lock it:"
+    _message "tomb forge ${tombname}.tomb.key"
+    _message "tomb lock ${tombname}.tomb ${tombname}.tomb.key"
+}
+
+    
 #internal use
 #$1 is the keyfile we are checking
 is_valid_key() {
@@ -844,9 +1016,9 @@ get_lukskey() {
     return $ret
 }
 
-#internal use
-#$1 the lukskey to encrypt
-#it respects --kdf and --tomb-pwd
+# internal use
+# $1 the lukskey to encrypt
+# honored options: --kdf  --tomb-pwd
 gen_key() {
     local lukskey=$1
     # here user is prompted for key password
@@ -879,7 +1051,8 @@ gen_key() {
     fi
 
 
-
+    # KDF is a new key strenghtening technique against brute forcing
+    # see: https://github.com/dyne/Tomb/issues/82
     _verbose "KDF method chosen is: '`option_value --kdf`'"
     kdf_method=$(cut -d: -f1 <<<`option_value --kdf` )
     case $kdf_method in
@@ -887,7 +1060,7 @@ gen_key() {
             if [[ -z $KDF_PBKDF2 ]]; then
                 die "The tomb use kdf method 'pbkdf2', which is unsupported on your system"
             fi
-#one parameter: iter time in seconds
+            # --kdf takes one parameter: iter time (on present machine) in seconds
             seconds=$(cut -d: -f2 -s <<<`option_value --kdf`)
             if [[ -z $seconds ]]; then
                 seconds=1
@@ -897,7 +1070,9 @@ gen_key() {
             _verbose "Microseconds: $microseconds"
             pbkdf2_salt=`${KDF_PBKDF2}-gensalt`
             pbkdf2_iter=`${KDF_PBKDF2}-getiter $microseconds`
-            tombpass=`${KDF_PBKDF2} $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"` #64bytes=512bits is the key length (huge!)
+            # We use a length of 64bytes = 512bits (more than needed!?)
+            tombpass=`${KDF_PBKDF2} $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
+           
             header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
             ;;
         ""|null)
@@ -1758,7 +1933,12 @@ main() {
     subcommands_opts[__default]=""
     subcommands_opts[open]="f n -nohook=n k: -key=k  U: -uid=U G: -gid=G o: -mount-options=o -ignore-swap -sudo-pwd: -tomb-pwd:"
     subcommands_opts[mount]=${subcommands_opts[open]}
+
     subcommands_opts[create]="f s: -size=s -force k: -key=k U: -uid=U G: -gid=G -ignore-swap -kdf: -sudo-pwd: -tomb-pwd:  -use-urandom"
+
+    subcommands_opts[forge]="f -ignore-swap -kdf: -use-urandom U: -uid=U G: -gid=G"
+    subcommands_opts[dig]="f -ignore-swap s: -size=s"
+
     subcommands_opts[passwd]="f -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
     subcommands_opts[close]="-sudo-pwd: U: -uid=U G: -gid=G"
     subcommands_opts[help]=""
@@ -1864,6 +2044,16 @@ main() {
 	    check_priv
 	    create_tomb ${=PARAM}
 	    ;;
+
+	# new creation in three steps
+	forge)
+	    check_priv
+	    forge_key ${=PARAM}
+	    ;;
+	dig)
+	    dig_tomb ${=PARAM}
+	    ;;
+
 	mount|open)
 	    check_priv
 	    mount_tomb $PARAM[1] $PARAM[2]
