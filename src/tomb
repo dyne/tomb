@@ -4,7 +4,7 @@
 #
 # a tool to easily operate file encryption of private and secret data
 #
-# {{{ Copyleft (C) 2007-2012 Denis Roio <jaromil@dyne.org>
+# {{{ Copyleft (C) 2007-2013 Denis Roio <jaromil@dyne.org>
 
 #
 # This source  code is free  software; you can redistribute  it and/or
@@ -24,7 +24,7 @@
 # }}}
 # {{{ GLOBAL VARIABLES
 VERSION=1.3
-DATE="Nov/2012"
+DATE="Apr/2013"
 TOMBEXEC=$0
 TOMBOPENEXEC="${TOMBEXEC}-open"
 typeset -a OLDARGS
@@ -36,16 +36,46 @@ MOUNTOPTS="rw,noatime,nodev"
 typeset -A global_opts
 typeset -A opts
 typeset -h username
+
 typeset -h _uid
 typeset -h _gid
+typeset -h _tty
 
 # Set a sensible PATH
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 [[ "$TOMBEXEC" =~ "^/usr/local" ]] && PATH="/usr/local/bin:/usr/local/sbin:$PATH"
 
-# PATH=/usr/bin:/usr/sbin:/bin:/sbin
+
 # }}}
 # {{{ HELPER FUNCTIONS
+
+# {{{ OPTION PARSING
+# {{{ - Check an option
+option_is_set() {
+    #First argument, the option (something like "-s")
+    #Second (optional) argument: if it's "out", command will print it out 'set'/'unset'
+    #                       This is useful for if conditions
+    #Return 0 if is set, 1 otherwise
+    [[ -n ${(k)opts[$1]} ]];
+    r=$?
+    if [[ $2 == out ]]; then
+        if [[ $r == 0 ]]; then
+            echo 'set'
+        else
+            echo 'unset'
+        fi
+    fi
+    return $r;
+}
+# }}}
+# {{{ - Get an option value
+option_value() {
+    #First argument, the option (something like "-s")
+    <<< ${opts[$1]}
+}
+# }}}
+# }}}
+
 
 # {{{ - Standard output message routines
 
@@ -308,9 +338,9 @@ check_priv() {
 	# check if sudo has a timestamp active
 	sudok=false
 #     sudo -n ${TOMBEXEC} &> /dev/null
-    if ! option_is_set --sudo-pwd; then
-        if [ $? != 0 ]; then # if not then ask a password
-            cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
+	if ! option_is_set --sudo-pwd; then
+            if [ $? != 0 ]; then # if not then ask a password
+		cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE Super user privileges required
@@ -318,12 +348,12 @@ SETDESC Sudo execution of Tomb ${OLDARGS[@]}
 SETPROMPT Insert your USER password:
 GETPIN
 EOF
-        fi
-    else
-        _verbose "Escalating privileges using sudo-pwd"
-        sudo -S -v <<<`option_value --sudo-pwd`
-    fi
-	sudo "${TOMBEXEC}" "${(@)OLDARGS}" -U ${UID} -G ${GID}
+            fi
+	else
+            _verbose "Escalating privileges using sudo-pwd"
+            sudo -S -v <<<`option_value --sudo-pwd`
+	fi
+	sudo "${TOMBEXEC}" -U ${UID} -G ${GID} -T ${TTY} "${(@)OLDARGS}"
 	exit $?
     fi # are we root already
     return 0
@@ -392,8 +422,8 @@ EOF
 generate_translatable_strings() {
     cat <<EOF
 # Tomb - The Crypto Undertaker.
-# Copyright (C) 2007-2012 Dyne.org Foundation
-# Denis Roio <jaromil@dyne.org>, 2012.
+# Copyright (C) 2007-2013 Dyne.org Foundation
+# Denis Roio <jaromil@dyne.org>, 2013.
 #
 #, fuzzy
 msgid ""
@@ -646,11 +676,6 @@ exec_safe_post_hooks() {
 forge_key() {
     _message "Commanded to forge key $1"
 
-    # we run as root, but remember the original uid:gid
-    # to set the permissions as readable for the calling user
-    if option_is_set -U; then _uid="`option_value -U`"; fi
-    if option_is_set -G; then _gid="`option_value -G`"; fi
-
     if ! [ $1 ]; then
         _warning "no key name specified for creation"
         return 1
@@ -790,13 +815,15 @@ dig_tomb() {
 # in fact LUKS formatting the loopback volume
 # it take arguments as the LUKS cipher to be used
 lock_tomb_with_key() {
-    _message "Commanded to lock tomb ${tombfile}"
     if ! [ $1 ]; then
         _warning "no tomb specified for locking"
+	_warning "usage: tomb lock file.tomb file.tomb.key"
         return 1
     fi
 
     tombfile=`basename $1`
+    _message "Commanded to lock tomb ${tombfile}"
+
     tombdir=`dirname $1`
     # make sure the file has a .tomb extension
     tombname=${tombfile%%\.*}
@@ -1073,9 +1100,6 @@ mount_tomb() {
         return 1
     fi
 
-    # running as root, remembering the uid:gid
-    if option_is_set -U; then _uid="`option_value -U`"; fi
-    if option_is_set -G; then _gid="`option_value -G`"; fi
 
     # set up variables to be used
     # the full path is made with $tombdir/$tombfile
@@ -1225,7 +1249,35 @@ mount_tomb() {
     chown ${_uid}:${_gid} ${tombmount}
     chmod 0750 ${tombmount}
 
-    _success "Success opening $tombfile on $tombmount"
+    _success "Success opening $tombfile on $fg_bold[white]$tombmount$fg_no_bold[white]"
+
+    # print out when was opened the last time, by whom and where
+    { test -r ${tombmount}/.last } && {
+	tombtty="`cat ${tombmount}/.tty`"
+	tombhost="`cat ${tombmount}/.host`"
+	tombuid="`cat ${tombmount}/.uid`"
+	tomblast="`cat ${tombmount}/.last`"
+	tombuser=`awk -F: '/:'"$tombuid"':/ {print $1}' /etc/passwd`
+	say "last visit by $fg_bold[white]$tombuser($tombuid)$fg_no_bold[white] from $fg_bold[white]$tombtty$fg_no_bold[white] on $fg_bold[white]$tombhost$fg_no_bold[white]"
+	say "on date $fg_bold[white]`date --date @${tomblast} +%c`$fg_no_bold[white]"
+    }
+    # write down the UID and TTY that opened the tomb
+    rm -f ${tombmount}/.uid
+    echo ${_uid} > ${tombmount}/.uid
+    rm -f ${tombmount}/.tty
+    echo ${_tty} > ${tombmount}/.tty
+    # also the hostname
+    rm -f ${tombmount}/.host
+    echo `hostname` > ${tombmount}/.host
+    # and the "last time opened" information
+    # in minutes since 1970, this is printed at next open
+    rm -f ${tombmount}/.last
+    echo "`date +%s`" > ${tombmount}/.last
+    # human readable: date --date=@"`cat .last`" +%c
+
+
+    # process bind-hooks (mount -o bind of directories)
+    # and post-hooks (execute on open)
     if ! option_is_set -n ; then
         exec_safe_bind_hooks ${tombmount}
         exec_safe_post_hooks ${tombmount} open
@@ -1304,7 +1356,7 @@ umount_tomb() {
 
     if [ "${pathmap}" = "/dev/mapper" ]; then
 	mapper="$1" # argument is the mapper (or none which autofills mapper)
-	tombname="`print $mapper | cut -d. -f2`"
+	tombname="${mapper[(ws:.:)2]}"
 	tombmount=`mount -l | \
 	    awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $3 } '`
     elif [ "$pathmap" = "." ]; then
@@ -1316,16 +1368,16 @@ umount_tomb() {
     else
 	tombmount="$1" # argument should be the mount
     	mapper=`mount | awk -vmnt="$tombmount" '/^\/dev\/mapper\/tomb/ { if($3==mnt) print $1 }'`
-	tombname="`print $mapper | cut -d. -f2`"
+	tombname="${mapper[(ws:.:)2]}"
     fi
 
     # avoid block when the same tomb is mounted, take only the first
     for tm in ${(f)tombmount}; do tombmount=${tm}; break; done
 
     xxx "tomb close argument: $1"
-    xxx "name:\t$tombname"
-    xxx "mount:\t$tombmount"
-    xxx "mapper:\t$mapper"
+    xxx "name: $tombname"
+    xxx "mount: $tombmount"
+    xxx "mapper: $mapper"
 
     if ! [ -e "$mapper" ]; then
 	_warning "Tomb not found: $1"
@@ -1653,6 +1705,14 @@ list_tombs() {
 	tombp=${tombpercent%%%}
 	tombsince=`date --date=@${mapper[(ws:.:)3]} +%c`
 
+	# find out who opens it from where
+	{ test -r ${tombmount}/.tty } && {
+	    tombtty="`cat ${tombmount}/.tty`"
+	    tombhost="`cat ${tombmount}/.host`"
+	    tombuid="`cat ${tombmount}/.uid`"
+	    tombuser=`awk -F: '/:'"$tombuid"':/ {print $1}' /etc/passwd`
+	}
+
     if option_is_set --get-mountpoint; then
         echo $tombmount
         continue
@@ -1667,6 +1727,16 @@ list_tombs() {
 	print -n "$fg_no_bold[green]$tombname"
 	print -n "$fg_no_bold[white] open since "
 	print "$fg_bold[white]$tombsince$fg_no_bold[white]"
+
+	{ test "$tombtty" = "" } || {
+	    print -n "$fg_no_bold[green]$tombname"
+	    print -n "$fg_no_bold[white] open by "
+	    print -n "$fg_bold[white]$tombuser"
+	    print -n "$fg_no_bold[white] from "
+	    print -n "$fg_bold[white]$tombtty"
+	    print -n "$fg_no_bold[white] on "
+	    print "$fg_bold[white]$tombhost"
+	}
 
 	print -n "$fg_no_bold[green]$tombname"
 	print -n "$fg[white] size "
@@ -1842,32 +1912,6 @@ EOF
 # }}}
 
 # }}}
-# {{{ OPTION PARSING
-# {{{ - Check an option
-option_is_set() {
-    #First argument, the option (something like "-s")
-    #Second (optional) argument: if it's "out", command will print it out 'set'/'unset'
-    #                       This is useful for if conditions
-    #Return 0 if is set, 1 otherwise
-    [[ -n ${(k)opts[$1]} ]];
-    r=$?
-    if [[ $2 == out ]]; then
-        if [[ $r == 0 ]]; then
-            echo 'set'
-        else
-            echo 'unset'
-        fi
-    fi
-    return $r;
-}
-# }}}
-# {{{ - Get an option value
-option_value() {
-    #First argument, the option (something like "-s")
-    <<< ${opts[$1]}
-}
-# }}}
-# }}}
 # {{{ MAIN COMMAND
 
 main() {
@@ -1890,19 +1934,19 @@ main() {
     #    If you want to use the same option in multiple commands then
     #    you can only use the non-abbreviated long-option version like:
     #    -force and NOT -f
-	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v -no-color -unsecure-dev-mode)
+	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v U: -uid=U G: -gid=G T: -tty=T -no-color -unsecure-dev-mode)
     subcommands_opts[__default]=""
-    subcommands_opts[open]="f n -nohook=n k: -key=k  U: -uid=U G: -gid=G o: -mount-options=o -ignore-swap -sudo-pwd: -tomb-pwd:"
+    subcommands_opts[open]="f n -nohook=n k: -key=k o: -mount-options=o -ignore-swap -sudo-pwd: -tomb-pwd:"
     subcommands_opts[mount]=${subcommands_opts[open]}
 
-    subcommands_opts[create]="f s: -size=s -force k: -key=k U: -uid=U G: -gid=G -ignore-swap -kdf: -sudo-pwd: -tomb-pwd:  -use-urandom"
+    subcommands_opts[create]="f s: -size=s -force k: -key=k -ignore-swap -kdf: -sudo-pwd: -tomb-pwd:  -use-urandom"
 
-    subcommands_opts[forge]="f -ignore-swap -kdf: -use-urandom U: -uid=U G: -gid=G"
+    subcommands_opts[forge]="f -ignore-swap -kdf: -use-urandom"
     subcommands_opts[dig]="f -ignore-swap s: -size=s"
-    subcommands_opts[lock]="f -force -ignore-swap s: -size=s k: -key=k U: -uid=U G: -gid=G -sudo-pwd: -tomb-pwd:"
+    subcommands_opts[lock]="f -force -ignore-swap s: -size=s k: -key=k -sudo-pwd: -tomb-pwd:"
 
     subcommands_opts[passwd]="f -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
-    subcommands_opts[close]="-sudo-pwd: U: -uid=U G: -gid=G"
+    subcommands_opts[close]="-sudo-pwd:"
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
     subcommands_opts[list]="-get-mountpoint"
@@ -1916,7 +1960,7 @@ main() {
     subcommands_opts[mktemp]=""
     subcommands_opts[source]=""
     subcommands_opts[status]=""
-    subcommands_opts[resize]="s: -size=s k: -key=k U: -uid=U G: -gid=G"
+    subcommands_opts[resize]="s: -size=s k: -key=k"
     subcommands_opts[check]="-ignore-swap"
 #    subcommands_opts[translate]=""
     
@@ -1999,7 +2043,14 @@ main() {
         done
     fi
 
+    # when we run as root, we remember the original uid:gid
+    # to set permissions for the calling user and drop privileges 
+    if option_is_set -U; then _uid="`option_value -U`"; fi
+    if option_is_set -G; then _gid="`option_value -G`"; fi
+    if option_is_set -T; then _tty="`option_value -T`"; fi
+
     xxx "Tomb command: $subcommand ${PARAM}"
+    xxx "caller uid[$_uid] gid[$_gid] tty[$_tty]"
 
     case "$subcommand" in
 
@@ -2065,7 +2116,7 @@ main() {
 	    cat <<EOF
 Tomb $VERSION - a strong and gentle undertaker for your secrets
 
- Copyright (C) 2007-2012 Dyne.org Foundation, License GNU GPL v3+
+ Copyright (C) 2007-2013 Dyne.org Foundation, License GNU GPL v3+
  This is free software: you are free to change and redistribute it
  The latest Tomb sourcecode is published on <http://tomb.dyne.org>
 EOF
@@ -2091,6 +2142,8 @@ EOF
 # }}}
 # {{{ RUNTIME
 check_bin
+
+
 main $@
 ret=$?
 if [[ $ret != 0 ]]; then #this "if" seems useless, but avoid source tomb source from exiting
