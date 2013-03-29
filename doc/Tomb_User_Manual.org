@@ -14,6 +14,8 @@
 #+LATEX_HEADER: \usepackage{lmodern}
 #+LATEX_HEADER: \usepackage[hang,small]{caption}
 #+LATEX_HEADER: \usepackage{float}
+#+LATEX_HEADER: \usepackage{makeidx}
+#+LATEX_HEADER: \makeindex
 
 *Abstract*: Tomb is a cryptographic application that helps you store
  private and confidential data into volumes secured by keys and
@@ -26,6 +28,7 @@
 #+KEYWORDS: Crypto, Storage, Luks, Cryptsetup, DM-Crypt, Privacy, Secrecy
 
 #+EXCLUDE_KEYWORD: noexport
+
 
 
 [TABLE-OF-CONTENTS]
@@ -64,7 +67,13 @@ resistance to omologation.
 (from [[http://www.newschool.edu/centers/socres/privacy/Home.html][Privacy Conference, Social Research, New School University]])
 #+END_QUOTE
 
+
 ** Who needs Tomb
+
+Tomb improves the usability patterns of every-day cryptography and
+relies on military-grade algorithms to grant a level of secrecy for
+stored data that is very hard to break by most military organisations
+and law enforcement agencies.
 
 Our target community are GNU/Linux users with no time to click around,
 sometimes using old or borrowed computers, operating in places
@@ -81,12 +90,13 @@ personal directories in place using /bind hooks/.
 
 ** Under the Hood
 
-Tomb provides military-grade encryption on your fingertips, fostering
-best practices and saving users the time to look into the details of
-/LUKS/ volumes and /cryptsetup/. Rather than reinventing the wheel,
-Tomb relies only on peer-reviewed, free and open source software
-components: at its core is DM-Crypt[fn:dm-crypt] which is part of the
-Linux kernel architecture.
+Tomb provides military-grade encryption at the reach of your
+fingertips, fostering best practices and saving users the time to look
+into the details of /LUKS/ volumes and /cryptsetup/. Rather than
+reinventing the wheel, Tomb relies only on peer-reviewed, free and
+open source software components: at its core is DM-Crypt[fn:dm-crypt]
+which is part of the Linux kernel architecture.
+
 
 For better clarity, Tomb is written in shell script and its code can
 be reviewed any time. More specifically, Tomb is written in ZSh, but
@@ -106,7 +116,7 @@ storage.
 
 ** Yet another tool?
 
-\indexentry{dyne:bolic}
+\index{dyne:bolic}
 
 Tomb is an evolution of the /Nesting/ tool developed in 2001 for the
 [[http://www.dynebolic.org][Dyne:bolic GNU/Linux distribution]]: a /nomadic system/ to encrypt the
@@ -120,13 +130,13 @@ Later on we've felt the urgency to publishing this mechanism for other
 operating systems than dyne:bolic since the current situation in
 personal desktop encryption is far from optimal. Let's have a look.
 
-\indexentry{truecrypt}
+\index{truecrypt}
 [[http://en.wikipedia.org/wiki/TrueCrypt][TrueCrypt]] makes use of statically linked libraries so that its code is
 hard to audit, plus is [[http://lists.freedesktop.org/archives/distributions/2008-October/000276.html][not considered free]] by free operating system
 distributors because of liability reasons, see [[http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=364034][Debian]], [[https://bugs.edge.launchpad.net/ubuntu/+bug/109701][Ubuntu]], [[http://lists.opensuse.org/opensuse-buildservice/2008-10/msg00055.html][Suse]],
 [[http://bugs.gentoo.org/show_bug.cgi?id=241650][Gentoo]] and [[https://fedoraproject.org/wiki/ForbiddenItems#TrueCrypt][Fedora]].
 
-\indexentry{cryptkeeper}
+\index{cryptkeeper}
 [[http://tom.noflag.org.uk/cryptkeeper.html][Cryptkeeper]] is the best alternative to Tomb out there and its main
 advantage consists in not needing root access on the machine it's
 being used. But Cryptkeeper still has drawbacks: it uses [[http://www.arg0.net/encfs][EncFS]] which
@@ -154,7 +164,70 @@ If you believe this is a worthy effort, you are welcome to [[http://dyne.org/don
 
 * TODO Getting Started
 
-/work on contents in the crunchbang howto/
+** Build
+
+Tomb at its core consists of a single Z-Shell script which has to be run as root, plus a few common dependencies that must be present on the system:
+
+ - *Zsh* http://www.zsh.org
+ - *Cryptsetup*
+ - *Sudo*
+ - *GnuPG* http://www.gnupg.org
+ - *Pinentry* 
+
+Provided the programs above are installed and root access is available on the system, *the impatient user can just skip the rest of this section, download the bare Tomb script and use it*. The nitpickers out there are right to wonder about running a script as root, so please be welcome to [[http://tomb.dyne.org/codedoc][review Tomb's code]]. Those running on [[http://www.dynebolic.org][Dyne:bolic GNU/Linux]] can simply skip this step since our operating system already contains a fully featured version of Tomb.
+
+In addition to the core script there are a number of optional packages that, if present on the system, will be used by Tomb to enhance the user experience, add features and improve security.
+
+To start a full build make sure you know some command-line basics, then [[http://files.dyne.org/tomb/releases][download the full stable source distribution of Tomb]], unpack it and read on.
+
+: tar xvfz Tomb-1.3.tar.gz
+: cd Tomb
+
+Be welcome to the making of your tomb.
+
+*** Security extras
+
+To make the steganography feature available, that is the possibility to hide keys inside images, one needs to install the *steghide* software on your system.
+
+To insure secure deletion of all Tomb traces temporary written in memory or on storage by Tomb, one should install *wipe*.
+
+To enable the anti-bruteforce feature, KDF libs should be installed and they often require a recent version of GLib-2[fn:debglib]
+
+[fn:debglib] On Debian 6.0 for instance the version of GLib-2 is too old and should be installed from source or from backports
+
+*** Usability extras
+
+To have a progress bar that informs about the status of tomb creation steps, one should install *dcfldd* which is an enhanced version of the simple /dd/ UNIX tool.
+
+If Tomb is used locally on a graphical desktop, one might prefer to use a graphical dialog to input the password, then install *pinentry-gtk* or *pinentry-qt*.
+
+To compile the *gtk-tray* component that shows the open tomb in your desktop tray, make sure the following packages are installed (this list matches package names for Debian/Ubuntu distributions:
+
+: build-essential autoconf libtool gtk2.0-dev libnotify-dev zsh pinentry-curses pinentry-gtk2 
+
+*** Binary builds
+
+Once all the extra dependencies are in place on your system, to build the gtk-tray or the KDF components, one should run the usual commands:
+
+: ./configure
+: make
+
+This will autodetect the capabilities of the system and build binary helper applications needed for those two extra functions. Any other feature in Tomb does not require compiling anything.
+
+** Installation
+
+After running the configure-make combo to compile binaries it is possible to simply use *make install* to copy several files in place, including the main tomb script, image resources for the gtk pinentry and manuals.
+
+Assuming the prefix is /usr/local paths for installation are:
+
+ - /usr/local/bin/tomb
+ - /usr/local/share/tomb
+
+When installed on a multi-user system, Tomb can be made available to all users even without granting them root access. Simply add this line to */etc/sudoers* (using the visudo command as root) for each user you like to enable to build and use tombs:
+
+: username ALL=NOPASSWD: /usr/local/bin/tomb
+
+Tomb is built with this possibility in mind and its code is reviewed to make this setup safe, so that a user cannot escalate to the privilege of a full root shell on the system, but just handle Tombs.
 
 * Tombs in your pockets
 
@@ -199,5 +272,7 @@ community]] and the mestizo community of southern Mexico, Chapas and
 Oaxaca.
 
 * Remote tombs
+* Alphabetic Index
 
 
+\printindex
