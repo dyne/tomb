@@ -800,6 +800,7 @@ dig_tomb() {
     # we will first touch the file and set permissions: this way, even if interrupted, permissions are right
     touch ${tombdir}/${tombfile}
     chmod 0600 "${tombdir}/${tombfile}"
+    chown $_uid:$_gid "${tombdir}/${tombfile}"
     $DD if=/dev/urandom bs=4k count=${tombsize_4k} of=${tombdir}/${tombfile}
 
     if [ $? = 0 -a -e ${tombdir}/${tombfile} ]; then
@@ -972,7 +973,34 @@ lock_tomb_with_key() {
     _success "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
 
 }
+
+# backward compatibility
+create_tomb() {
+    if ! [ $1 ]; then
+        _warning "no tomb name specified for creation"
+        return 1
+    fi
     
+    dig_tomb ${=PARAM}
+    { test $? = 0 } || { die "Failed to dig tomb, operation aborted." }
+
+    tombfile=`basename $1`
+    tombdir=`dirname $1`
+    # make sure the file has a .tomb extension
+    tombname=${tombfile%%\.*}
+    tombfile=${tombname}.tomb
+    
+    forge_key ${tombfile}.key
+    { test $? = 0 } || { die "Failed to forge key, operation aborted." }
+
+    lock_tomb_with_key ${tombfile} -l ${tombfile}.key
+    { test $? = 0 } || { die "Failed to lock tomb with key, operation aborted." }
+    
+    yes "Tomb $tombname succesfully created"
+    ls -l ${tombfile}*
+}
+
+
 #internal use
 #$1 is the keyfile we are checking
 is_valid_key() {
@@ -2140,7 +2168,12 @@ main() {
 	    check_priv
 	    lock_tomb_with_key ${=PARAM}
 	    ;;
-	
+	# backward compat
+	create)
+	    check_priv
+	    create_tomb ${=PARAM}
+	    ;;
+
 	mount|open)
 	    check_priv
 	    mount_tomb $PARAM[1] $PARAM[2]
