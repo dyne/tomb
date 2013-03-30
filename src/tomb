@@ -931,7 +931,7 @@ lock_tomb_with_key() {
     _message "formatting Luks mapped device"
     get_lukskey "${tombpass}" ${tombkey} | \
 	cryptsetup --key-file -   --batch-mode \
-	--cipher ${cipher} --key-size 256 \
+	--cipher ${cipher} --key-size 256 --key-slot 0 \
 	luksFormat ${nstloop}
     if ! [ $? = 0 ]; then
 	_warning "cryptsetup luksFormat returned an error"
@@ -1173,7 +1173,6 @@ mount_tomb() {
     fi
     losetup -f ${tombdir}/${tombfile}
 
-    _message "check for a valid LUKS encrypted device"
     cryptsetup isLuks ${nstloop}
     if [ $? != 0 ]; then
         # is it a LUKS encrypted nest? see cryptsetup(1)
@@ -1181,13 +1180,21 @@ mount_tomb() {
         $norm || rmdir $tombmount 2>/dev/null
         return 1
     fi
+    say "this tomb is a valid LUKS encrypted device"
 
-    tombdump=(`cryptsetup luksDump ${nstloop} | awk '
+    luksdump="`cryptsetup luksDump ${nstloop}`"
+    tombdump=(`print $luksdump | awk '
 	/^Cipher name/ {print $3}
 	/^Cipher mode/ {print $3}
 	/^Hash spec/   {print $3}'`)
     say "cipher is \"$tombdump[1]\" mode \"$tombdump[2]\" hash \"$tombdump[3]\""
 
+    slotwarn=`print $luksdump | awk '
+	BEGIN { zero=0 }
+	/^Key slot 0/ { zero=1 }
+	/^Key slot.*ENABLED/ { if(zero==1) print "WARN" }'`
+    { test "$slotwarn" = "WARN" } && {
+	_warning "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor." }
 
     # save date of mount in minutes since 1970
     mapdate=`date +%s`
@@ -1756,6 +1763,7 @@ list_tombs() {
 	tombmount=${t[(ws:;:)2]}
 	tombfs=${t[(ws:;:)3]}
 	tombfsopts=${t[(ws:;:)4]}
+	tombloop=${mapper[(ws:.:)4]}
 
 	# calculate tomb size
 	ts=`df -hP /dev/mapper/$mapper |
