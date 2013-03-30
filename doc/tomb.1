@@ -73,11 +73,24 @@ options (default: rw,noatime,nodev).
 
 .B
 .IP "list"
-
 List all the tombs found open, including information about the time
-they were opened and the hooks that they mounted. If the \fIfirst
-argument\fR is present, then shows only the tomb named that way or
+they were opened and the hooks that they mounted. If the first
+argument is present, then shows only the tomb named that way or
 returns an error if its not found.
+
+.B
+.IP "index"
+Creates or updates the \fIsearch index\fR of a tomb, or all tombs currently
+opened if none is specified. Indexes are created using updatedb(8) and
+enable users to run quick search commands using simple word patterns.
+
+.B
+.IP "search"
+Searches through all tombs currently open for filenames matching one
+or more text patterns given as arguments. Search returns a list of
+files found inside the tombs that have been previously indexed using
+locate(1). The option \fI--regex\fR can be used to interpret all
+patterns as extended regexps.
 
 .B
 .IP "close"

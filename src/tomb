@@ -384,6 +384,9 @@ Commands:
 
  open    open an existing TOMB
 
+ index   update the search indexes of tombs
+ search  looks for filenames matching text patterns
+
  list    list open TOMBs
 
  close   close a TOMB (or all)
@@ -1661,6 +1664,65 @@ resize_tomb() {
 }
 
 # }}}
+
+# {{{ - Index
+# index files in all tombs for search
+# $1 is optional, to specify a tomb
+index_tombs() {
+    { command -v updatedb > /dev/null } || { 
+	die "Cannot index tombs on this system: updatedb not installed" }
+    
+    if [ $1 ]; then
+	# list a specific tomb
+	mounted_tombs=`mount -l |
+    awk -vtomb="[$1]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
+    else
+	# list all open tombs
+	mounted_tombs=`mount -l |
+    awk '/^\/dev\/mapper\/tomb/ { print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
+    fi
+    if ! [ $mounted_tombs ]; then
+	if [ $1 ]; then
+	    die "There seems to be no open tomb engraved as [$1]"
+	else
+	    die "I can't see any open tomb, may they all rest in peace."
+	fi
+    fi
+    yes "Creating and updating search indexes"
+    for t in ${(f)mounted_tombs}; do
+	mapper=`basename ${t[(ws:;:)1]}`
+	tombname=${t[(ws:;:)5]}
+	tombmount=${t[(ws:;:)2]}
+	say "Indexing $tombname"
+	updatedb -l 0 -o ${tombmount}/.updatedb -U ${tombmount}
+	say "search index updated"
+    done
+}
+search_tombs() {
+    { command -v locate > /dev/null } || { 
+	die "Cannot index tombs on this system: updatedb not installed" }
+
+    # list all open tombs
+    mounted_tombs=(`mount -l |
+    awk '/^\/dev\/mapper\/tomb/ { print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`)
+    { test ${#mounted_tombs} = 0 } && {
+	    die "I can't see any open tomb, may they all rest in peace." }
+    yes "Searching for: $fg_bold[white]${=PARAM}$fg_no_bold[white]"
+    for t in ${(f)mounted_tombs}; do
+	mapper=`basename ${t[(ws:;:)1]}`
+	tombname=${t[(ws:;:)5]}
+	tombmount=${t[(ws:;:)2]}
+	{ test -r ${tombmount}/.updatedb } || {
+	    no "skipping tomb $tombname: not indexed"
+	    no "run 'tomb index' to create indexes"
+	    continue }
+	say "Searching in tomb $tombname"
+	locate -d ${tombmount}/.updatedb -e -i ${=PARAM}
+	say "Matches found: `locate -d ${tombmount}/.updatedb -e -i -c ${=PARAM}`"
+    done
+	
+}
+
 # {{{ - List
 # list all tombs mounted in a readable format
 # $1 is optional, to specify a tomb
@@ -1950,6 +2012,10 @@ main() {
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
     subcommands_opts[list]="-get-mountpoint"
+
+    subcommands_opts[index]=""
+    subcommands_opts[search]=""
+
     subcommands_opts[help]=""
     subcommands_opts[bury]=""
     subcommands_opts[exhume]=""
@@ -2085,6 +2151,14 @@ main() {
 	status)
 	    launch_status $PARAM[1]
 	    ;;
+
+	index)
+	    index_tombs $PARAM[1]
+	    ;;
+	search)
+	    search_tombs ${=PARAM}
+	    ;;
+
 	help)
 	    usage
 	    ;;
