@@ -1032,9 +1032,9 @@ get_lukskey() {
                 ;;
         esac
     fi
-    gpg --batch --passphrase-fd 0 --no-tty --no-options --status-fd 1 -d "${keyfile}" \
-	<<< ${tombpass} \
-	| grep 'DECRYPTION_OKAY'
+    print ${tombpass} | \
+	gpg --batch --passphrase-fd 0 --no-tty --no-options --status-fd 2 \
+	-d "${keyfile}" 2> /dev/null 
     ret=$?
     xxx "gpg decryption returns $ret"
     unset tombpass
