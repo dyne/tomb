@@ -70,6 +70,8 @@ resistance to omologation.
 
 ** Who needs Tomb
 
+[[file:tomb_and_bats.png]]
+
 Tomb improves the usability patterns of every-day cryptography and
 relies on military-grade algorithms to grant a level of secrecy for
 stored data that is very hard to break by most military organisations
@@ -124,7 +126,7 @@ Home directory of users and have it ready for use on different
 machines. At that time, Tomb was the first secure implementation of
 what nowadays we call /persistent storage/ in live operating systems.
 
-[[images/foster_privacy.png]]
+[[file:foster_privacy.png]]
 
 Later on we've felt the urgency to publishing this mechanism for other
 operating systems than dyne:bolic since the current situation in
@@ -216,62 +218,113 @@ This will autodetect the capabilities of the system and build binary helper appl
 
 ** Installation
 
-After running the configure-make combo to compile binaries it is possible to simply use *make install* to copy several files in place, including the main tomb script, image resources for the gtk pinentry and manuals.
+After running the configure-make combo to compile binaries it is
+possible to simply use *make install* to copy several files in place,
+including the main tomb script, image resources for the gtk pinentry
+and manuals.
 
 Assuming the prefix is /usr/local paths for installation are:
 
  - /usr/local/bin/tomb
  - /usr/local/share/tomb
 
-When installed on a multi-user system, Tomb can be made available to all users even without granting them root access. Simply add this line to */etc/sudoers* (using the visudo command as root) for each user you like to enable to build and use tombs:
+
+*** Multi-user systems
+
+When installed on systems used by multiple users, Tomb can be made
+available to all of them even without granting root access. Simply add
+this line to */etc/sudoers* (using the visudo command as root) for
+each user you like to enable to build and use tombs:
 
 : username ALL=NOPASSWD: /usr/local/bin/tomb
 
-Tomb is built with this possibility in mind and its code is reviewed to make this setup safe, so that a user cannot escalate to the privilege of a full root shell on the system, but just handle Tombs.
+Tomb is built with this possibility in mind and its code is reviewed
+to make this setup safe, so that a user cannot escalate to the
+privilege of a full root shell on the system, but just handle Tombs.
 
 * Tombs in your pockets
 
 * Tombs in the clouds
 
+** Server requirements
 
-
-when creating a tomb make sure the device mapper is loaded among kernel modules
+When creating a tomb make sure the device mapper is loaded among kernel modules
 or creation will fail and leave you in the dust.
 
 modprobe dm_mod
 modprobe dm_crypt
 
-to create a tomb on a server (even VPS) is possible, but the problem becomes the little
-available entropy. in order to fix this one can use EGD the Entropy Gathering Daemon.
+** Automatic doors
 
-on Debian, do:
+When logging out of a server it is very easy to forget and leave behind open tombs.
 
-sudo aptitude install libdigest-sha1-perl
-sudo aptitude install ekeyd-egd-linux
+Using a simple cronjob will make sure that all tombs on server are
+closed automatically if the user who opened them is no more logged in:
 
-/etc/default/ekeyd-egd-linux
+#+BEGIN_EXAMPLE
+#!/bin/zsh
+PATH=$PATH:/usr/local/bin
+tombs=`find /media -name "*tomb"`
+for i in ${(f)tombs}; do
+  { test -r ${i}/.tty } && {
+    tty=`cat ${i}/.tty`
+    uid=`cat ${i}/.uid`
+    if [ -r ${tty} ]; then 
+      ttyuid=`ls -ln ${tty} | awk '{print $3}'`
+      { test "$ttyuid" = "$uid" } || { tomb close ${i} }
+    else tomb close ${i}; fi
+  }
+done
+return 0
+#+END_EXAMPLE
 
-wget http://egd.sourceforge.net/
+This script assumes all tombs are opened inside the /media folder and
+that the 'tomb' script is included in root's PATH. Feel free to adapt
+it to your needs and then add it to root's cronjob so that it is run
+every minute.
 
-perl ./egd.pl
+** Lack of entropy
 
-/etc/init.d/ekeyd-egd-linux start
+To create a tomb on a server (especially VPS) the problem becomes the
+lack of available entropy.  Generating keys on a desktop (using
+the *forge* command) is the best choice, since entropy can be gathered
+simply moving the mouse. Anyway, in case there is no GNU/Linux desktop
+available with the tomb script installed, one can try generating keys
+directly on the server in a reasonable time usi EGD, the Entropy
+Gathering Daemon.
+
+On Debian/Ubuntu, install these packages:
+
+: # apt-get install libdigest-sha1-perl
+: # apt-get install ekeyd-egd-linux
+
+Then check ekeyd's default configuration in:
+
+: /etc/default/ekeyd-egd-linux
+
+Then download EGD from its website http://egd.sourceforge.net and
+finally start both EGD and ekeyd:
+
+: perl ./egd.pl # from inside EGD source directory
+: /etc/init.d/ekeyd-egd-linux start # as root on debian
+
+You should see both daemons running, they will feed as much entropy as
+they can gather from various sources. Usually one will experience a
+burst of entropy when they are launched, then the stream keeps going
+rather slow anyway.
 
 
-
-* Advanced techniques
-
-* Credits
+* Acknowledgments
 
 The development of Tomb was not supported by any governative or
 non-governative organization, its author and maintainer is an European
-citizen residing in the Netherlands. Test cases for the development
-Tomb have been analyzed through active exchange with the needs of
-various activist communities, in particular the Italian [[http://www.hackmeeting.org][Hackmeeting
-community]] and the mestizo community of southern Mexico, Chapas and
-Oaxaca.
+citizen residing in the Netherlands.
 
-* Remote tombs
+Test cases for the development Tomb have been analyzed through active
+exchange with the needs of various activist communities, in particular
+the Italian [[http://www.hackmeeting.org][Hackmeeting community]] and the mestizo community of
+southern Mexico, Chapas and Oaxaca.
+
 * Alphabetic Index
 
 
