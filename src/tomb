@@ -1728,7 +1728,10 @@ index_tombs() {
 	mapper=`basename ${t[(ws:;:)1]}`
 	tombname=${t[(ws:;:)5]}
 	tombmount=${t[(ws:;:)2]}
-	say "Indexing $tombname"
+	{ test -r ${tombmount}/.noindex } && {
+	    say "skipping $tombname (.noindex found)"
+	    continue }
+	say "sndexing $tombname"
 	updatedb -l 0 -o ${tombmount}/.updatedb -U ${tombmount}
 	say "search index updated"
     done

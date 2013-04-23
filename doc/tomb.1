@@ -80,16 +80,18 @@ returns an error if its not found.
 
 .B
 .IP "index"
-Creates or updates the \fIsearch index\fR of a tomb, or all tombs currently
-opened if none is specified. Indexes are created using updatedb(8) and
-enable users to run quick search commands using simple word patterns.
+Creates or updates the search index of a specific tomb (or all tombs)
+open: enables use of the \fIsearch\fR command using simple word
+patterns on file names. Indexes are created using updatedb(8) and
+stored in an .updatedb file inside the tomb's root. To avoid indexing
+a specific tomb simply touch a \fI.noindex\fR file in its root.
 
 .B
 .IP "search"
 Searches through all tombs currently open for filenames matching one
 or more text patterns given as arguments. Search returns a list of
-files found inside the tombs that have been previously indexed using
-locate(1). The option \fI--regex\fR can be used to interpret all
+files found in all open tombs on which the \fIindex\fR command was run
+at least once. The option \fI--regex\fR can be used to interpret all
 patterns as extended regexps.
 
 .B
@@ -307,7 +309,7 @@ Cryptsetup is developed by Christophe Saout and Clemens Fruhwirth
 
 .SH COPYING
 
-This manual is Copyleft (c) 2011 Denis Roio <\fIjaromil@dyne.org\fR>
+This manual is Copyleft (c) 2011-2013 Denis Roio <\fIjaromil@dyne.org\fR>
 
 It includes contributions by Boyska
 
