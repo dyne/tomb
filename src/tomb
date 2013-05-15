@@ -1700,31 +1700,77 @@ resize_tomb() {
 
 # }}}
 
+# print out an array of mounted tombs (internal use)
+# format is semi-colon separated list of attributes
+# if 1st arg is supplied, then list only that tomb
+# Positions in array:
+# 1 = full mapper path
+# 2 = mountpoint
+# 3 = filesystem type
+# 4 = mount options
+# 5 = tomb name
+list_tomb_mounts() {
+    if [ "$1" = "" ]; then
+	# list all open tombs
+	mount -l |
+	awk '
+BEGIN { main="" }
+/^\/dev\/mapper\/tomb/ { 
+  if(main==$1) next;
+  print $1 ";" $3 ";" $5 ";" $6 ";" $7
+  main=$1
+}
+'
+    else
+    	# list a specific tomb
+	mount -l |
+	awk -vtomb="[$1]" '
+BEGIN { main="" }
+/^\/dev\/mapper\/tomb/ {
+  if($7!=tomb) next;
+  if(main==$1) next;
+  print $1 ";" $3 ";" $5 ";" $6 ";" $7
+  main=$1
+}
+'
+    fi
+}
+
+# print out an array of mounted bind hooks (internal use)
+# format is semi-colon separated list of attributes
+# needs an argument: name of tomb whose hooks belong
+list_tomb_binds() {
+    if [ "$1" = "" ]; then
+        _failure "internal error: list_tomb_binds called without argument."; fi
+
+	mount -l |
+	awk -vtomb="$1" '
+BEGIN { main="" }
+/^\/dev\/mapper\/tomb/ {
+  if($7!=tomb) next;
+  if(main=="") { main=$1; next; }
+  if(main==$1)
+    print $1 ";" $3 ";" $5 ";" $6 ";" $7 
+}
+'
+}    
+
 # {{{ - Index
 # index files in all tombs for search
 # $1 is optional, to specify a tomb
 index_tombs() {
     { command -v updatedb > /dev/null } || { 
 	die "Cannot index tombs on this system: updatedb not installed" }
-    
-    if [ $1 ]; then
-	# list a specific tomb
-	mounted_tombs=`mount -l |
-    awk -vtomb="[$1]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
-    else
-	# list all open tombs
-	mounted_tombs=`mount -l |
-    awk '/^\/dev\/mapper\/tomb/ { print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
-    fi
-    if ! [ $mounted_tombs ]; then
-	if [ $1 ]; then
-	    die "There seems to be no open tomb engraved as [$1]"
-	else
-	    die "I can't see any open tomb, may they all rest in peace."
+
+    mounted_tombs=(`list_tomb_mounts $1`)
+    { test ${#mounted_tombs} = 0 } && {
+	if [ $1 ]; then die "There seems to be no open tomb engraved as [$1]"
+	else die "I can't see any open tomb, may they all rest in peace."
 	fi
-    fi
+    }
+
     yes "Creating and updating search indexes"
-    for t in ${(f)mounted_tombs}; do
+    for t in ${mounted_tombs}; do
 	mapper=`basename ${t[(ws:;:)1]}`
 	tombname=${t[(ws:;:)5]}
 	tombmount=${t[(ws:;:)2]}
@@ -1741,10 +1787,9 @@ search_tombs() {
 	die "Cannot index tombs on this system: updatedb not installed" }
 
     # list all open tombs
-    mounted_tombs=(`mount -l |
-    awk '/^\/dev\/mapper\/tomb/ { print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`)
+    mounted_tombs=(`list_tomb_mounts $1`)
     { test ${#mounted_tombs} = 0 } && {
-	    die "I can't see any open tomb, may they all rest in peace." }
+	die "I can't see any open tomb, may they all rest in peace." }
     yes "Searching for: $fg_bold[white]${=PARAM}$fg_no_bold[white]"
     for t in ${mounted_tombs}; do
 	xxx "checking for index: ${t}"
@@ -1767,30 +1812,13 @@ search_tombs() {
 # list all tombs mounted in a readable format
 # $1 is optional, to specify a tomb
 list_tombs() {
-    if [ $1 ]; then
-	# list a specific tomb
-	mounted_tombs=`mount -l |
-    awk -vtomb="[$1]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
-    else
-	# list all open tombs
-	mounted_tombs=`mount -l |
-    awk '/^\/dev\/mapper\/tomb/ { print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'`
-    fi
-    # 1 = full mapper path
-    # 2 = mountpont
-    # 3 = filesystem
-    # 4 = mount options
-    # 5 = name
 
-    if ! [ $mounted_tombs ]; then
-	if [ $1 ]; then
-	    die "There seems to be no open tomb engraved as [$1]"
-	else
-	    die "I can't see any open tomb, may they all rest in peace."
-	fi
-    fi
+    # list all open tombs
+    mounted_tombs=(`list_tomb_mounts $1`)
+    { test ${#mounted_tombs} = 0 } && {
+	die "I can't see any ${1:-open} tomb, may they all rest in peace." }
 
-    for t in ${(f)mounted_tombs}; do
+    for t in ${mounted_tombs}; do
 	mapper=`basename ${t[(ws:;:)1]}`
 	tombname=${t[(ws:;:)5]}
 	tombmount=${t[(ws:;:)2]}
@@ -1856,11 +1884,10 @@ list_tombs() {
 	    print -n "$fg_no_bold[green]$tombname"
             print "$fg_bold[red] Your tomb is almost full!"
 	fi
-	
+
 	# now check hooks
-	mtomb=`sed 's:\/:\\\/:g' <<< $tombmount`
-	mounted_hooks=`mount | awk "/^$mtomb/"' {print $1 ";" $3}'`
-	for h in ${(f)mounted_hooks}; do
+	mounted_hooks=(`list_tomb_binds $tombname`)
+	for h in ${mounted_hooks}; do
 	    print -n "$fg_no_bold[green]$tombname"
 	    print -n "$fg_no_bold[white] hooks "
 	    print -n "$fg_bold[white]`basename ${h[(ws:;:)1]}`"
