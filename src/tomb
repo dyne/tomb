@@ -850,7 +850,7 @@ lock_tomb_with_key() {
     if [ $? = 0 ]; then
         # is it a LUKS encrypted nest? then bail out and avoid reformatting it
         _warning "The tomb was already locked with another key"
-        losetup -d ${nstloop}
+	losetup -d ${nstloop}
 	die "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
     else
 	_message "fine, this tomb seems empty."
@@ -1324,6 +1324,78 @@ mount_tomb() {
 }
 
 # }}}
+
+# {{{ - Internal operations on mounted tombs
+
+# list_tomb_mounts 
+# print out an array of mounted tombs (internal use)
+# format is semi-colon separated list of attributes
+# if 1st arg is supplied, then list only that tomb
+# Positions in array:
+# 1 = full mapper path
+# 2 = mountpoint
+# 3 = filesystem type
+# 4 = mount options
+# 5 = tomb name
+list_tomb_mounts() {
+    if [ "$1" = "" ]; then
+	# list all open tombs
+	mount -l \
+	    | awk '
+BEGIN { main="" }
+/^\/dev\/mapper\/tomb/ { 
+  if(main==$1) next;
+  print $1 ";" $3 ";" $5 ";" $6 ";" $7
+  main=$1
+}
+'
+    else
+    	# list a specific tomb
+	mount -l \
+	    | awk -vtomb="[$1]" '
+BEGIN { main="" }
+/^\/dev\/mapper\/tomb/ {
+  if($7!=tomb) next;
+  if(main==$1) next;
+  print $1 ";" $3 ";" $5 ";" $6 ";" $7
+  main=$1
+}
+'
+    fi
+}
+
+# list_tomb_binds
+# print out an array of mounted bind hooks (internal use)
+# format is semi-colon separated list of attributes
+# needs an argument: name of tomb whose hooks belong
+list_tomb_binds() {
+    if [ "$1" = "" ]; then
+        _failure "internal error: list_tomb_binds called without argument."; fi
+    
+    # list bind hooks on util-linux 2.20 (Debian 7)
+    mount -l \
+	| awk -vtomb="$1" '
+BEGIN { main="" }
+/^\/dev\/mapper\/tomb/ {
+  if($7!=tomb) next;
+  if(main=="") { main=$1; next; }
+  if(main==$1)
+    print $1 ";" $3 ";" $5 ";" $6 ";" $7 
+}
+'
+    
+    # list bind hooks on util-linux 2.17 (Debian 6)
+    tombmount=`mount -l \
+      | awk -vtomb="$1" '
+/^\/dev\/mapper\/tomb/ { if($7!=tomb) next; print $3; exit; }'`
+    
+    mount -l | grep "^$tombmount" \
+	| awk -vtomb="$1" '
+        /bind/ { print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'
+}
+
+# }}}
+
 # {{{ - Close
 # {{{   - Slam the door
 # Kill all processes using the tomb
@@ -1358,141 +1430,104 @@ umount_tomb() {
     local pathmap mapper tombname tombmount loopdev
     local ans pidk pname
 
-    if ! [ $1 ]; then
-	tombs=`find /dev/mapper -name 'tomb.*'`
-	how_many_tombs=`wc -w <<< "$tombs"`
-	if [[ "$how_many_tombs" == "0" ]]; then
-	    _warning "There is no open tomb to be closed"
-	    return 1
-	elif [[ "$how_many_tombs" == "1" ]]; then
-	    #mapper=`find /dev/mapper -name 'tomb.*'`
-	    xxx "closing mapper $tombs"
-	    umount_tomb ${tombs}
-	    return 1
-	else
-	    _warning "Too many tombs mounted, please specify which to unmount:"
-	    ls /dev/mapper/tomb.*
-	    _warning "or issue the command 'tomb close all' to clos'em all."
-	    return 1
-	fi
-    fi
-
     if [ "$1" = "all" ]; then
-	tombs=`find /dev/mapper -name 'tomb.*'`
-	if ! [ $tombs ]; then
-	    _success "Tombs are all closed, cemetery is quiet."
-	    return 0
+	mounted_tombs=(`list_tomb_mounts`)
+    else
+	mounted_tombs=(`list_tomb_mounts $1`)
+    fi
+
+    { test ${#mounted_tombs} = 0 } && {
+	    _warning "There is no open tomb to be closed"
+	    return 1 }
+
+    { test ${#mounted_tombs} -gt 1 } && { test "$1" = "" } && {
+	    _warning "Too many tombs mounted, please specify one (see tomb list)"
+	    _warning "or issue the command 'tomb close all' to close them all."
+	    return 1 }
+
+    say "Tomb close $1"
+
+    for t in ${mounted_tombs}; do
+	mapper=`basename ${t[(ws:;:)1]}`
+	tombname=${t[(ws:;:)5]}
+	tombmount=${t[(ws:;:)2]}
+	tombfs=${t[(ws:;:)3]}
+	tombfsopts=${t[(ws:;:)4]}
+	tombloop=${mapper[(ws:.:)4]}
+
+	xxx "name: $tombname"
+	xxx "mount: $tombmount"
+	xxx "mapper: $mapper"
+	
+	{ test -e "$mapper" } && {
+	    _warning "Tomb not found: $1"
+	    _warning "Please specify an existing tomb."
+	    return 0 }
+	
+	if [ $SLAM ]; then
+	    _success "Slamming tomb $tombname mounted on $tombmount"
+	    _message "Kill all processes busy inside the tomb"
+            if ! slam_tomb "$tombmount"; then
+		_warning "Cannot slam the tomb $tombname"
+		return 1
+            fi
+	else
+	    say "Closing tomb $tombname mounted on $tombmount"
 	fi
-	for t in ${(f)tombs}; do
-	    umount_tomb ${t}
-	done
-	return 0
-    fi
-
-    # tomb close argument deduction
-    pathmap=`dirname "$1"`
-
-    if [ "${pathmap}" = "/dev/mapper" ]; then
-	mapper="$1" # argument is the mapper (or none which autofills mapper)
-	tombname="${mapper[(ws:.:)2]}"
-	tombmount=`mount -l | \
-	    awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $3 } '`
-    elif [ "$pathmap" = "." ]; then
-	tombname="$1" # argument is the name
-	mapper=`mount -l | \
-	    awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 } '`
-	tombmount=`mount -l | \
-	    awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $3 } '`
-    else
-	tombmount="$1" # argument should be the mount
-    	mapper=`mount | awk -vmnt="$tombmount" '/^\/dev\/mapper\/tomb/ { if($3==mnt) print $1 }'`
-	tombname="${mapper[(ws:.:)2]}"
-    fi
-
-    # avoid block when the same tomb is mounted, take only the first
-    for tm in ${(f)tombmount}; do tombmount=${tm}; break; done
-
-    xxx "tomb close argument: $1"
-    xxx "name: $tombname"
-    xxx "mount: $tombmount"
-    xxx "mapper: $mapper"
-
-    if ! [ -e "$mapper" ]; then
-	_warning "Tomb not found: $1"
-	_warning "Please specify an existing tomb."
-	return 0
-    fi
-
-    if [ $SLAM ]; then
-	_success "Slamming tomb $tombname mounted on $tombmount"
-	_message "Kill all processes busy inside the tomb"
-        if ! slam_tomb "$tombmount"; then
-            _warning "Cannot slam the tomb $tombname"
-            return 1
-        fi
-    else
-	_success "Closing tomb $tombname mounted on $tombmount"
-    fi
 
     # check if there are binded dirs and close them
-    tombmount_esc=`sed 's:\/:\\\/:g' <<< $tombmount `
-    unbind=`mount | awk "/^$tombmount_esc.*bind/"' { print $3 }'`
-    for b in ${(f)unbind}; do
-	hook="`basename $b`"
-	_message "closing tomb hook: $hook"
-	umount $b
-	if [[ $? != 0 ]]; then
-	    if [ $SLAM ]; then
-		_success "Slamming tomb: killing all processes using this hook"
-                slam_tomb "$b"
-                if [[ $? == 1 ]]; then
-                    _warning "Cannot slam the tomb $b"
-                    return 1
-                fi
-		umount $b
-            else
-		_warning "Tomb hook is busy, cannot close tomb."
-		return 1
+	bind_tombs=(`list_tomb_binds $tombname`)
+	for b in ${bind_tombs}; do
+	    bind_mapper="${b[(ws:;:)1]}"
+	    bind_mount="${b[(ws:;:)2]}"
+	    _message "closing tomb bind hook: $bind_mount"
+	    umount $bind_mount
+	    if [[ $? != 0 ]]; then
+		if [ $SLAM ]; then
+		    _success "Slamming tomb: killing all processes using this hook"
+                    slam_tomb "$bind_mount"
+                    if [[ $? == 1 ]]; then
+			_warning "Cannot slam the bind hook $bind_mount"
+			return 1
+                    fi
+		    umount $bind_mount
+		else
+		    _warning "Tomb bind hook $bind_mount is busy, cannot close tomb."
+		fi
 	    fi
-	fi
-    done
-
+	done
+	
     # Execute post-hooks for eventual cleanup
-    if ! option_is_set -n ; then
-	exec_safe_post_hooks ${tombmount%%/} close
-    fi
+	if ! option_is_set -n ; then
+	    exec_safe_post_hooks ${tombmount%%/} close
+	fi
 
-    if [ $tombmount ]; then # tomb is actively mounted
 	xxx "performing umount of $tombmount"
 	umount ${tombmount}
-	if ! [ $? = 0 ]; then
-	    _warning "Tomb is busy, cannot umount!"
+	if ! [ $? = 0 ]; then _warning "Tomb is busy, cannot umount!"
 	else
         # this means we used a "default" mount point
-            if [ "${tombmount}" = "/media/${tombname}.tomb" ]; then
-	        rmdir ${tombmount}
-            fi
+            { test "${tombmount}" = "/media/${tombname}.tomb" } && {
+	        rmdir ${tombmount} }
 	fi
-    fi
 
-    cryptsetup luksClose $mapper
-    if ! [ $? = 0 ]; then
-	_warning "error occurred in cryptsetup luksClose ${mapper}"
-	return 1
-    fi
-
-    loopdev=`cut -d '.' -f4 <<< "$mapper"`
-    losetup -d "/dev/$loopdev"
-
-    # kill the status tray widget if still present
-    # this makes the widget disappear when closing tomb from cli
-    awkmapper=`sed 's:\/:\\\/:g' <<< $mapper`
-    statustray_pid=`ps ax | awk "/tomb-status $awkmapper/"' {print $1} '`
-    if [ ${statustray_pid} ]; then
-	kill ${statustray_pid}
-    fi
-
-    _success "Tomb $tombname closed: your bones will rest in peace."
+	cryptsetup luksClose $mapper
+	{ test $? = 0 } || {
+	    _warning "error occurred in cryptsetup luksClose ${mapper}"
+	    return 1 }
+	
+	losetup -d "/dev/$tombloop"
+	
+    # # kill the status tray widget if still present
+    # # this makes the widget disappear when closing tomb from cli
+    # 	awkmapper=`sed 's:\/:\\\/:g' <<< $mapper`
+    # 	statustray_pid=`ps ax | awk "/tomb-status $awkmapper/"' {print $1} '`
+    # 	{ test "$statustray_pid" = "" } || { kill ${statustray_pid} }
+	
+	_success "Tomb $tombname closed: your bones will rest in peace."
+	
+    done # loop across mounted tombs
+    
     return 0
 }
 # }}}
@@ -1700,60 +1735,6 @@ resize_tomb() {
 
 # }}}
 
-# print out an array of mounted tombs (internal use)
-# format is semi-colon separated list of attributes
-# if 1st arg is supplied, then list only that tomb
-# Positions in array:
-# 1 = full mapper path
-# 2 = mountpoint
-# 3 = filesystem type
-# 4 = mount options
-# 5 = tomb name
-list_tomb_mounts() {
-    if [ "$1" = "" ]; then
-	# list all open tombs
-	mount -l |
-	awk '
-BEGIN { main="" }
-/^\/dev\/mapper\/tomb/ { 
-  if(main==$1) next;
-  print $1 ";" $3 ";" $5 ";" $6 ";" $7
-  main=$1
-}
-'
-    else
-    	# list a specific tomb
-	mount -l |
-	awk -vtomb="[$1]" '
-BEGIN { main="" }
-/^\/dev\/mapper\/tomb/ {
-  if($7!=tomb) next;
-  if(main==$1) next;
-  print $1 ";" $3 ";" $5 ";" $6 ";" $7
-  main=$1
-}
-'
-    fi
-}
-
-# print out an array of mounted bind hooks (internal use)
-# format is semi-colon separated list of attributes
-# needs an argument: name of tomb whose hooks belong
-list_tomb_binds() {
-    if [ "$1" = "" ]; then
-        _failure "internal error: list_tomb_binds called without argument."; fi
-
-	mount -l |
-	awk -vtomb="$1" '
-BEGIN { main="" }
-/^\/dev\/mapper\/tomb/ {
-  if($7!=tomb) next;
-  if(main=="") { main=$1; next; }
-  if(main==$1)
-    print $1 ";" $3 ";" $5 ";" $6 ";" $7 
-}
-'
-}    
 
 # {{{ - Index
 # index files in all tombs for search
