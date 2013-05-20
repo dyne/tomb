@@ -256,7 +256,8 @@ modprobe dm_crypt
 
 ** Automatic doors
 
-When logging out of a server it is very easy to forget and leave behind open tombs.
+When logging out of a server it is very easy to forget and leave
+behind open tombs.
 
 Using a simple cronjob will make sure that all tombs on server are
 closed automatically if the user who opened them is no more logged in:
@@ -285,13 +286,12 @@ every minute.
 
 ** Lack of entropy
 
-To create a tomb on a server (especially VPS) the problem becomes the
-lack of available entropy.  Generating keys on a desktop (using
+To create a tomb key on a server (especially VPS) the problem becomes
+the lack of available entropy.  Generating keys on a desktop (using
 the *forge* command) is the best choice, since entropy can be gathered
-simply moving the mouse. Anyway, in case there is no GNU/Linux desktop
-available with the tomb script installed, one can try generating keys
-directly on the server in a reasonable time usi EGD, the Entropy
-Gathering Daemon.
+simply moving the mouse. Anyway, in case there is no GNU/Linux
+desktop, one can try generating keys directly on the server in a
+reasonable time usi EGD, the Entropy Gathering Daemon.
 
 On Debian/Ubuntu, install these packages:
 

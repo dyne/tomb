@@ -277,9 +277,12 @@ it, you could make an encrypted swap it. Tomb doesn't detect if your
 swap is encrypted, and will complain anyway.
 
 .SH EXAMPLES
-Inline example:
+Create a 128MB large "secret" tomb and its keys, then open it
 .EX
-	test test
+	tomb dig -s 128 secret.tomb
+	tomb forge secret.tomb.key
+	tomb lock secret.tomb secret.tomb.key
+	tomb open secret.tomb -k secret.tomb.key
 .EE
 .SH BUGS
 Please report bugs on the tracker at
