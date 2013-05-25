@@ -1,4 +1,17 @@
+May 2013 - 1.3
+
+	A refactoring of Tomb's main script internals was made, including
+	a new messaging system, machine parsable output, cleaner code and
+	updated compatibility to Debian 7. A new search feature lets users
+	index and run fast filename searches in their open tombs. Creation
+	of tombs is broken out in three steps (dig, forge and lock).
+	Source distribution includes experimental add-ons for a python
+	GUI, KDF key encryption and a key "undertaker". Documentation was
+	updated.
+
+
 Nov 2011 - 1.2
+
 	Includes an Important fix to password parsing for spaces and
 	extended chars, plus a new 'passwd' command to change a key's
 	password. Tomb now checks for swap to avoid its usage (see SWAP
@@ -6,6 +19,7 @@ Nov 2011 - 1.2
 	full.
 
 May 2011 - 1.1
+
 	Fixes to mime types, icons and desktop integration. A new 'list'
 	command provides an overview on all tombs currently open. Now a
 	tomb cannot be mounted multiple times, the message console has

@@ -1,4 +1,4 @@
-.TH tomb 1 "Sept 26, 2011" "tomb"
+.TH tomb 1 "May 25, 2013" "tomb"
 
 .SH NAME
 Tomb \- the Crypto Undertaker
@@ -6,10 +6,6 @@ Tomb \- the Crypto Undertaker
 .SH SYNOPSIS
 .B
 .IP "tomb [options] command [arguments]"
-.B
-.IP "tomb-open [file]"
-.B
-.IP "tomb-status mountpoint"
 
 .SH DESCRIPTION
 
@@ -26,12 +22,6 @@ A tomb is like a locked folder that can be safely transported and
 hidden in a filesystem; it encourages users to keep their keys
 separate from tombs, for instance keeping a tomb file on your computer
 harddisk and its key file on a USB stick.
-
-For simplified use, the command \fItomb-open\fR starts a wizard that
-guides users in the creation of a new tomb or, if a tomb file is
-specified as \fIargument\fR, it opens it and makes it accessible in a
-default location under the /media folder, starting the status tray
-applet (\fItomb-status\fR) if a desktop is present.
 
 
 .SH COMMANDS
@@ -251,17 +241,24 @@ batch operations every time a tomb is opened.
 
 The tomb commandline tool needs to acquire super user rights to
 execute most of its operations: to do so it uses sudo(8), while
-pinentry(1) is adopted to collect passwords from the user.
+pinentry(1) is adopted to collect passwords from the user. Tomb
+executes as super user only when required.
 
-Tomb executes as super user only those commands requiring it, while it
-executes desktop applications as processes owned by the user.
+To be made available on multi user systems, the superuser execution of
+the tomb script can be authorized for users without jeopardizing the
+whole system's security: just add such a line to \fI/etc/sudoers\fR:
+
+.EX
+	username ALL=NOPASSWD: /usr/local/bin/tomb
+.EE
 
 .SH SWAP
 
-During "create", "open" and "passwd" operations, swap will complain
-and \fIabort if your system has swap activated\fR. You can disable
-this behaviour using the \fI--force\fR. Before doing that, however,
-you may be interested in knowing the risks of doing so:
+On execution of certain commands Tomb will complain about swap memory
+on disk when that is presend and \fIabort if your system has swap
+activated\fR. You can disable this behaviour using the
+\fI--force\fR. Before doing that, however, you may be interested in
+knowing the risks of doing so:
 .IP \(bu
 During such operations a lack of available memory could cause the swap
 to write your secret key on the disk.
@@ -273,48 +270,79 @@ written on your disk, not encrypted.
 .P
 
 If you don't need swap, execute \fI swapoff -a\fR. If you really need
-it, you could make an encrypted swap it. Tomb doesn't detect if your
-swap is encrypted, and will complain anyway.
+it, you could make an encrypted swap partition. Tomb doesn't detect if
+your swap is encrypted, and will complain anyway.
 
 .SH EXAMPLES
-Create a 128MB large "secret" tomb and its keys, then open it
+
+.IP \(bu
+Create a 128MB large "secret" tomb and its keys, then open it:
+
 .EX
 	tomb dig -s 128 secret.tomb
 	tomb forge secret.tomb.key
 	tomb lock secret.tomb secret.tomb.key
 	tomb open secret.tomb -k secret.tomb.key
 .EE
+
+.IP \(bu
+Create a bind hook that places your GnuPG folder inside the tomb, but
+makes it reachable from the standard $HOME/.gnupg location every time
+the tomb will be opened:
+
+.EX
+	tomb open GPG.tomb
+	echo ".gnupg .gnupg" > /media/GPG.tomb/bind-hooks
+	mv ~/.gnupg /media/GPG.tomb/.gnupg && mkdir ~/.gnupg
+	tomb close GPG && tomb open GPG.tomb
+.EE
+
+.IP \(bu
+Create an exec post hook that launches a Firefox browser every time
+the tomb will be opened, keeping all its profile data inside it:
+
+.EX
+	tomb open FOX.tomb
+	touch        /media/FOX.tomb/post-hooks
+	chmod +x     /media/FOX.tomb/post-hooks
+	cat <<EOF >> /media/FOX.tomb/post-hooks
+#!/usr/bin/env bash
+if [ "$1" == open ]; then
+  firefox -no-remote -profile $(dirname $0)/firefox_prof &
+fi
+EOF
+.EE
+
 .SH BUGS
 Please report bugs on the tracker at
-.UR http://bugs.dyne.org
+.UR https://bugs.dyne.org
 .UE
 
-Get in touch with developers via mail using this
-.UR http://dyne.org/contact
-web page
+Get in touch with developers via mail by subscribing the "crypto" mailinglist
+.UR http://lists.dyne.org
 .UE
-or via chat on
-.UR http://irc.dyne.org
+or via the #dyne chat channel on
+.UR https://irc.dyne.org
 .UE
 
 .SH AUTHORS
 
-Tomb is designed and written by Denis Roio aka Jaromil.
+Tomb is designed, written and maintained by Denis Roio aka Jaromil.
 
-Tomb includes code by Anathema and Boyska.
+Tomb includes code by Anathema, Boyska and Hellekin O. Wolf.
 
 Tomb's artwork is contributed by Jordi aka Mon Mort
 
-Testing and reviews are contributed by Hellekin O. Wolf, Dreamer,
-Shining, Mancausoft, Asbesto Molesto.
+Testing and reviews are contributed by Dreamer, Shining, Mancausoft,
+Asbesto Molesto and Nignux.
 
-Cryptsetup is developed by Christophe Saout and Clemens Fruhwirth
+Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth
 
 .SH COPYING
 
-This manual is Copyleft (c) 2011-2013 Denis Roio <\fIjaromil@dyne.org\fR>
+This manual is Copyright (c) 2011-2013 by Denis Roio <\fIjaromil@dyne.org\fR>
 
-It includes contributions by Boyska
+This manual includes contributions by Boyska.
 
 Permission is  granted to copy,  distribute and/or modify  this manual
 under the terms of the  GNU Free Documentation License, Version 1.1 or

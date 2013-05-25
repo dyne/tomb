@@ -355,6 +355,7 @@ EOF
     fi # are we root already
 
     # make sure necessary kernel modules are loaded
+    modprobe dm_mod
     modprobe dm_crypt
 
     return 0
