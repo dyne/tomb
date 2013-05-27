@@ -180,7 +180,7 @@ check_bin() {
     export PATH=/sbin:/usr/sbin:$PATH
 
     # which dd command to use
-    command -v dcfldd
+    command -v dcfldd > /dev/null
     { test $? = 0 } && { DD="dcfldd statusinterval=1" }
 
     # which wipe command to use
@@ -249,14 +249,14 @@ safe_dir() {
 	    if (( $MKTEMP )); then
 		mktemp -d /dev/shm/$1.$$.XXXXXXX
 	    else
-   		dir="/dev/shm/$1.$$.$RANDOM$RANDOM"
+		dir="/dev/shm/$1.$$.$RANDOM$RANDOM"
 		mkdir -m 0700 -p "$dir"
 		print "$dir"
 	    fi
 	    return 0
 	else
 	    _warning "WARNING: we cannot ensure we're running in RAM."
- 		 xxx "Wait a bit before retrying... (attempt $tries)"
+		 xxx "Wait a bit before retrying... (attempt $tries)"
 	    sync && sleep 0.5
 	fi
     done
@@ -827,6 +827,92 @@ dig_tomb() {
     _message "tomb lock ${tombname}.tomb ${tombname}.tomb.key"
 }
 
+# this function retrieves a tomb key specified on commandline
+# or one implicit if laying nearby the tomb, or from stin
+# it also runs checks and creates a temporary key in memory
+# to be dropped at the end of functions using it with drop_key()
+# on success returns 0 and prints out the full path to the key
+typeset -h tombkeydir
+load_key() {
+    # check if the key is set manually then use the one existing
+    local tombdir="$1"
+    local tombname="$2"
+    if option_is_set -k ; then
+	if [[ "`option_value -k`" == "-" ]]; then
+	    # take key from stdin
+	    local tombkeydir
+	    tombkeydir=`safe_dir`
+	    cat > ${tombkeydir}/stdin.tmp
+	    tombkey=${tombkeydir}/stdin.tmp
+	else
+	    # take key from a file
+	    tombkey=`option_value -k`
+	fi
+    else
+	# guess key as lying besides the tomb
+	tombkey=${tombdir}/${tombname}.tomb.key
+    fi
+
+    if [ -r "${tombkey}" ]; then
+	_message "We'll use this key:"
+	_message " `ls -lh ${tombkey}`"
+    else
+	return 1
+    fi
+
+    # this does a check on the file header, virtuosism by hellekin
+    # [[ `file =(awk '/^-+BEGIN/,0' $1) -bi` =~ application/pgp ]]
+    if ! is_valid_key ${tombkey}; then
+	_warning "The key seems invalid, the application/pgp header is missing"
+	return 1
+    fi
+    print "$tombkey"
+    return 0
+}
+# it asks the user for the password to use the key
+# it tests it against the return code of gpg
+# on success returns 0 and prints the password
+# (to be saved into a temporary variable!)
+ask_key_password() {
+    tombkey="$1"
+    local keyname=`basename $tombkey`
+    _message "a password is required to use key ${keyname}"
+    local passok=0
+    local tombpass=""
+    if option_is_set --tomb-pwd; then
+	    tombpass=`option_value --tomb-pwd`
+    else
+	for c in 1 2 3; do
+	    if [ $c = 1 ]; then
+		tombpass=`exec_as_user ${TOMBEXEC} askpass "Insert password to use key: $keyname"`
+	    else
+		tombpass=`exec_as_user ${TOMBEXEC} askpass "Insert password to use key: $keyname (retry $c)"`
+	    fi
+	    if [[ $? != 0 ]]; then
+		_warning "User aborted password dialog"
+		return 1
+	    fi
+
+	    get_lukskey "$tombpass" ${tombkey} >/dev/null
+
+	    if [ $? = 0 ]; then
+		passok=1; _message "Password OK."
+		break;
+	    fi
+	done
+    fi
+
+    { test "$passok" = "1" } || { return 1 }
+    print "$tombpass"
+    unset $tombpass
+    return 0
+}
+drop_key() {
+   { test "$tombkeydir" = "" } && { return 0 }
+   { test -r ${tombkeydir}/stdin.tmp } && {
+       ${=WIPE} ${tombkeydir}/stdin.tmp; rmdir ${tombkeydir} }
+}
+
 # this function locks a tomb with a key file
 # in fact LUKS formatting the loopback volume
 # it take arguments as the LUKS cipher to be used
@@ -858,7 +944,7 @@ lock_tomb_with_key() {
     xxx "loop mounted on ${nstloop}"
 
     _message "checking if the tomb is empty (we never step on somebody else's bones)"
-	cryptsetup isLuks ${nstloop}
+    cryptsetup isLuks ${nstloop}
     if [ $? = 0 ]; then
 	# is it a LUKS encrypted nest? then bail out and avoid reformatting it
 	_warning "The tomb was already locked with another key"
@@ -868,38 +954,12 @@ lock_tomb_with_key() {
 	_message "fine, this tomb seems empty."
     fi
 
-    # check if the key is set manually then use the one existing
-    if option_is_set -k ; then
-	if [[ "`option_value -k`" == "-" ]]; then
-	    # take key from stdin
-	    local tombkeydir
-	    tombkeydir=`safe_dir`
-	    cat > ${tombkeydir}/stdin.tmp
-	    tombkey=${tombkeydir}/stdin.tmp
-	else
-	    # take key from a file
-	    tombkey=`option_value -k`
-	fi
-    else
-	# guess key as lying besides the tomb
-	tombkey=${tombdir}/${tombname}.tomb.key
-    fi
-
-    if [ -r "${tombkey}" ]; then
-	_message "We'll use this key to lock the tomb:"
-	_message " `ls -lh ${tombkey}`"
-    else
-	losetup -d ${nstloop}
-	die "No key found. Use the option -k to specify a key file."
-    fi
-
-    # this does a check on the file header, virtuosism by hellekin
-    # [[ `file =(awk '/^-+BEGIN/,0' $1) -bi` =~ application/pgp ]]
-    if ! is_valid_key ${tombkey}; then
-	_warning "The key seems invalid, the application/pgp header is missing"
-	losetup -d ${nstloop}
-	die "Operation aborted."
-    fi
+    # load key from options or file
+    tombkey=`load_key ${tombdir} ${tombname}`
+    { test $? = 0 } || {
+	losetup -d $nstloop
+	die "Aborting operations: error loading key $tombkey" }
+	# make sure to call drop_key later
 
     # the encryption cipher for a tomb can be set at creation using -o
     if option_is_set -o; then
@@ -909,35 +969,11 @@ lock_tomb_with_key() {
     fi
     _message "locking using cipher: $cipher"
 
-    keyname=`basename $tombkey | cut -d. -f1`
-    _message "a password is required to use key ${keyname}"
-    local passok=0
-    if option_is_set --tomb-pwd; then
-	    tombpass=`option_value --tomb-pwd`
-    else
-	for c in 1 2 3; do
-	    if [ $c = 1 ]; then
-		tombpass=`exec_as_user ${TOMBEXEC} askpass "Insert password to use key: $keyname"`
-	    else
-		tombpass=`exec_as_user ${TOMBEXEC} askpass "Insert password to use key: $keyname (retry $c)"`
-	    fi
-	    if [[ $? != 0 ]]; then
-		losetup -d ${nstloop}
-		die "User aborted"
-	    fi
-
-	    get_lukskey "${tombpass}" ${tombkey} >/dev/null
- 	    if [ $? = 0 ]; then
-		passok=1; _message "Password OK."
-		break;
-	    fi
-	done
-    fi
-    if [ "$passok" = "0" ]; then
-	_warning "Password incorrect"
-	losetup -d $nstloop
-	die "Operation aborted."
-    fi
+    # get the pass from the user and check it
+    tombpass=`ask_key_password "$tombkey"`
+    { test $? = 0 } || {
+	losetup -d ${nstloop}
+	die "No valid password supplied" }
 
     _success "Locking ${tombfile} with ${tombkey}"
 
@@ -953,8 +989,6 @@ lock_tomb_with_key() {
 	die "Operation aborted."
     fi
 
-
-
     get_lukskey "${tombpass}" ${tombkey} | \
 	cryptsetup --key-file - \
 	--cipher ${cipher} luksOpen ${nstloop} tomb.tmp
@@ -965,7 +999,9 @@ lock_tomb_with_key() {
 	die "Operation aborted."
     fi
 
+    # cleanup tombs
     unset tombpass
+    drop_key # make sure all temp files are out
 
     _message "formatting your Tomb with Ext3/Ext4 filesystem"
     ${=MKFS} ${tombname} /dev/mapper/tomb.tmp
@@ -1024,7 +1060,7 @@ is_valid_key() {
 #will output the lukskey
 get_lukskey() {
     local tombpass=$1
-    keyfile=$2
+    local keyfile=$2
     firstline=`head -n1 $keyfile`
     xxx "get_lukskey XXX $keyfile"
     if [[ $firstline =~ '^_KDF_' ]]; then
@@ -1164,33 +1200,14 @@ mount_tomb() {
     tombname=${tombfile%%\.*}
     xxx "tomb found: ${tombdir}/${tombfile}"
 
-    if option_is_set -k ; then
-	if [[ "`option_value -k`" == "-" ]]; then
-	    # take key from stdin
-	    local tombkeydir
-	    tombkeydir=`safe_dir`
-	    cat > ${tombkeydir}/stdin.tmp
-	    tombkey=${tombkeydir}/stdin.tmp
-	else
-	    # take key from a file
-	    tombkey=`option_value -k`
-	fi
-    else
-	# guess key as lying besides the tomb
-	tombkey=${tombdir}/${tombfile}.key
-    fi
-    if ! [ -r ${tombkey} ]; then
-	_warning "key file not found: ${tombkey}"
-	_warning "operation aborted."
-	return 1
-    fi
+    tombkey=`load_key ${tombdir} ${tombname}`
+    { test $? = 0 } || {
+	die "Aborting operations: error loading key $tombkey" }
 
-    if ! [ $2 ]; then
+
+    if [ "$2" = "" ]; then
 	tombmount=/media/${tombfile}
 	_message "mountpoint not specified, using default: $tombmount"
-    elif ! [ -x $2 ]; then
-	_warning "mountpoint $2 doesn't exist, operation aborted."
-	return 1
     else
 	tombmount=$2
     fi
@@ -1198,7 +1215,7 @@ mount_tomb() {
     # check if its already open
     mount -l | grep "${tombfile}.*\[$tombname\]$" 2>&1 > /dev/null
     if [ $? = 0 ]; then
-	_warning "$tombname is already open on $tombmount"
+	_warning "$tombname is already open."
 	_message "here below its status is reported:"
 	list_tombs ${tombname}
 	return 1
@@ -1206,8 +1223,6 @@ mount_tomb() {
 
     _success "Opening $tombfile on $tombmount"
 
-    # we need root from here on
-    mkdir -p $tombmount
 
     nstloop=`losetup -f`
     if [ $? = 255 ]; then
@@ -1219,7 +1234,6 @@ mount_tomb() {
     if [ $? != 0 ]; then
 	# is it a LUKS encrypted nest? see cryptsetup(1)
 	_warning "$tombfile is not a valid Luks encrypted storage file"
-	$norm || rmdir $tombmount 2>/dev/null
 	return 1
     fi
     say "this tomb is a valid LUKS encrypted device"
@@ -1241,45 +1255,21 @@ mount_tomb() {
     # save date of mount in minutes since 1970
     mapdate=`date +%s`
 
-
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
     keyname=`basename $tombkey | cut -d. -f1`
 
-    _warning "Password is required for key ${keyname}"
-    for c in 1 2 3; do
-	if ! option_is_set --tomb-pwd; then
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Open tomb ${keyname}"`
-	    if [[ $? != 0 ]]; then
-		die "User aborted"
-	    fi
-	else
-	    tombpass=`option_value --tomb-pwd`
-	fi
-	get_lukskey "${tombpass}" ${tombkey} | \
-	    cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
-	local ret=$?
-	unset tombpass
-	if [[ $ret != 0 ]]; then
-	    if [[ $c = 3 ]] || option_is_set --tomb-pwd; then
-		die "Wrong password: aborting"
-	    fi
-	    continue
-	fi
+    tombpass=`ask_key_password $tombkey`
+    { test $? = 0 } || {
+	die "No valid password supplied" }
 
-	# if key was from stdin delete temp file and dir
-	if [ $tombkeydir ]; then
-	    ${=WIPE} ${tombkey}
-	    rmdir $tombkeydir
-	fi
+    get_lukskey "${tombpass}" ${tombkey} | \
+	cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 
-	if [ -r /dev/mapper/${mapper} ]; then
-	    break;  # password was correct
-	fi
-    done
+    drop_key
+    unset tombpass
 
     if ! [ -r /dev/mapper/${mapper} ]; then
 	losetup -d ${nstloop}
-	$norm || rmdir ${tombmount} 2>/dev/null
 	die "failure mounting the encrypted file"
     fi
 
@@ -1295,6 +1285,9 @@ mount_tomb() {
     fsck -p -C0 /dev/mapper/${mapper}
     xxx "tomb engraved as $tombname"
     tune2fs -L ${tombname} /dev/mapper/${mapper} > /dev/null
+
+    # we need root from here on
+    mkdir -p $tombmount
 
     mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
 
@@ -1364,7 +1357,7 @@ BEGIN { main="" }
 }
 '
     else
-    	# list a specific tomb
+	# list a specific tomb
 	mount -l \
 	    | awk -vtomb="[$1]" '
 BEGIN { main="" }
@@ -1534,9 +1527,9 @@ umount_tomb() {
 
     # # kill the status tray widget if still present
     # # this makes the widget disappear when closing tomb from cli
-    # 	awkmapper=`sed 's:\/:\\\/:g' <<< $mapper`
-    # 	statustray_pid=`ps ax | awk "/tomb-status $awkmapper/"' {print $1} '`
-    # 	{ test "$statustray_pid" = "" } || { kill ${statustray_pid} }
+    #	awkmapper=`sed 's:\/:\\\/:g' <<< $mapper`
+    #	statustray_pid=`ps ax | awk "/tomb-status $awkmapper/"' {print $1} '`
+    #	{ test "$statustray_pid" = "" } || { kill ${statustray_pid} }
 
 	_success "Tomb $tombname closed: your bones will rest in peace."
 
@@ -1574,23 +1567,14 @@ change_passwd() {
     lukskey=`safe_filename tombluks`
 
     _success "Changing password for $keyfile"
-    keyname=`basename $keyfile`
-    if ! option_is_set --tomb-old-pwd; then
-	while true; do
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Type old password for ${keyname}" "Change tomb key password"`
-	    if [[ $? == 1 ]]; then
-		die "User aborted"
-	    fi
-	    if get_lukskey "${tombpass}" ${keyfile} > ${lukskey}; then
-		break
-	    fi
-	done
-    else
-	tombpass=`option_value --tomb-old-pwd`
-	if ! get_lukskey "${tombpass}" ${keyfile} > ${lukskey}; then
-	    die "Invalid old password"
-	fi
-    fi
+
+    tombpass=`ask_key_password $keyfile`
+    { test $? = 0 } || {
+	die "No valid password supplied" }
+
+    get_lukskey "${tombpass}" ${keyfile} > ${lukskey};
+
+    drop_key
 
     {
 	gen_key $lukskey > ${tmpnewkey}
@@ -1631,25 +1615,11 @@ resize_tomb() {
     local tombname=${tombfile%%\.*}
     tombfile=${tombname}.tomb
 
-    if option_is_set -k ; then
-	    if [[ "`option_value -k`" == "-" ]]; then
-		# take key from stdin
-		local tombkeydir
-		tombkeydir=`safe_dir`
-		cat > ${tombkeydir}/stdin.tmp
-		tombkey=${tombkeydir}/stdin.tmp
-	    else
-		# take key from a file
-	    tombkey=`option_value -k`
-	    fi
-    else
-	    # guess key as lying besides the tomb
-	tombkey=${tombdir}/${tombfile}.key
-    fi
-
-    if ! [ -r ${tombkey} ]; then
-	    _failure "key file not found: ${tombkey}"
-    fi
+    # load key from options or file
+    tombkey=`load_key ${tombdir} ${tombname}`
+    { test $? = 0 } || {
+	die "Aborting operations: error loading key $tombkey" }
+    # make sure to call drop_key later
 
     local tmp_resize=`safe_filename tmbrsz`
     local newtombsize=$opts[-s]
@@ -1688,31 +1658,26 @@ resize_tomb() {
     cat "${tmp_resize}" >> "$1"
     ${=WIPE} "${tmp_resize}"
 
+
+    tombpass=`ask_key_password $tombkey`
+    { test $? = 0 } || {
+	die "No valid password supplied" }
+
     local nstloop=`losetup -f`
     if [ $? = 255 ]; then
 	_failure "too many tomb opened. Please close any of them to open another tomb"
     fi
+
     losetup -f "$1"
 
     local mapdate=`date +%s`
     local mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
 
-    _message "Password is required for key ${keyname}"
-    for c in 1 2 3; do
-	if [ $c = 1 ]; then
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass ${keyname}`
-	else
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "$keyname (retry $c)"`
-	fi
-	get_lukskey "${tombpass}" ${tombkey} | \
-	    cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+    get_lukskey "${tombpass}" ${tombkey} | \
+	cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 
-	unset tombpass
-
-	if [ -r /dev/mapper/${mapper} ]; then
-	    break;  # password was correct
-	fi
-    done
+    unset tombpass
+    drop_key # cleanup after load_key
 
     if ! [ -r /dev/mapper/${mapper} ]; then
 	losetup -d ${nstloop}
@@ -1974,7 +1939,7 @@ main() {
 
     subcommands_opts[create]="f s: -size=s -force k: -key=k -ignore-swap -kdf: -sudo-pwd: -tomb-pwd:  -use-urandom"
 
-    subcommands_opts[forge]="f -ignore-swap -kdf: -use-urandom"
+    subcommands_opts[forge]="f -ignore-swap k: -key=k -kdf: -use-urandom"
     subcommands_opts[dig]="f -ignore-swap s: -size=s"
     subcommands_opts[lock]="f -force -ignore-swap s: -size=s k: -key=k -sudo-pwd: -tomb-pwd:"
 
@@ -2146,7 +2111,7 @@ main() {
 		 encode_key $PARAM[1] $PARAM[2] ;;
 	exhume)
 	    if [ "$STEGHIDE" = 0 ]; then
- 		_warning "steghide not installed. Cannot exhume your key"
+		_warning "steghide not installed. Cannot exhume your key"
 		return 1
 	    fi
 	    decode_key $PARAM[1] $PARAM[2]
