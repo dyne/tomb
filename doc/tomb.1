@@ -112,7 +112,7 @@ action can't be forced if the current password is not known.
 .B
 .IP "resize"
 Increase the size of a tomb file to the amount specified by the
-\fI--size\fR option (in megabytes). Tombs cannot be made smaller with
+\fI--size\fR option in megabytes. Tombs cannot be made smaller with
 this command, only bigger. This command makes use of the cryptsetup
 resize feature and the resize2fs command, hence it supports only tombs
 formatted with an Ext filesystem.
@@ -140,7 +140,7 @@ verify if a key is buried in the image or not.
 .B
 .IP "-s \fI<MBytes>\fR" 
 When digging or resizing a tomb, this option must be used to specify
-the \fIsize\fR of the new file to be created, in megabytes.
+the \fIsize\fR of the new file to be created. Units are megabytes (MiB).
 .B
 .IP "-k \fI<keyfile>\fR"
 When opening a tomb, this option can specify the location of the key

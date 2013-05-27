@@ -24,11 +24,14 @@
 # }}}
 # {{{ GLOBAL VARIABLES
 VERSION=1.3
-DATE="Apr/2013"
+DATE="May/2013"
 TOMBEXEC=$0
 TOMBOPENEXEC="${TOMBEXEC}-open"
 typeset -a OLDARGS
 for arg in ${argv}; do OLDARGS+=($arg); done
+DD="dd"
+WIPE="rm -f"
+MKFS="mkfs.ext3 -q -F -j -L"
 STEGHIDE=1
 MKTEMP=1
 RESIZER=1
@@ -177,7 +180,8 @@ check_bin() {
     export PATH=/sbin:/usr/sbin:$PATH
 
     # which dd command to use
-    command -v dcfldd > /dev/null && DD=dcfldd || DD=dd
+    command -v dcfldd
+    { test $? = 0 } && { DD="dcfldd statusinterval=1" }
 
     # which wipe command to use
     command -v wipe > /dev/null && WIPE="wipe -f -s" || WIPE="rm -f"
@@ -720,11 +724,9 @@ forge_key() {
 	random_source=/dev/urandom
     fi
 
-    if [[ $DD = "dcfldd" ]]; then
-	$DD bs=1 count=256 if=$random_source of=${keytmp}/tomb.tmp statusinterval=1
-    else
-	$DD bs=1 count=256 if=$random_source of=${keytmp}/tomb.tmp
-    fi
+    xxx "Data dump using ${DD[1]} from $random_source"
+    ${=DD} bs=1 count=256 if=$random_source of=${keytmp}/tomb.tmp
+
     if ! [ -r ${keytmp}/tomb.tmp ]; then
 	_warning "cannot generate encryption key"
 	umount ${keytmp}
@@ -802,14 +804,14 @@ dig_tomb() {
 
     _success "Creating a new tomb in ${tombdir}/${tombfile}"
 
-
-    tombsize_4k=`expr $tombsize \* 1024 / 4`
-    _message "Generating ${tombfile} of ${tombsize}Mb (${tombsize_4k} blocks of 4Kb)"
+    _message "Generating ${tombfile} of ${tombsize}MiB"
     # we will first touch the file and set permissions: this way, even if interrupted, permissions are right
     touch ${tombdir}/${tombfile}
     chmod 0600 "${tombdir}/${tombfile}"
     chown $_uid:$_gid "${tombdir}/${tombfile}"
-    $DD if=/dev/urandom bs=4k count=${tombsize_4k} of=${tombdir}/${tombfile}
+
+    xxx "Data dump using ${DD[1]} from /dev/urandom"
+    ${=DD} if=/dev/urandom bs=1048576 count=${tombsize} of=${tombdir}/${tombfile}
 
     if [ $? = 0 -a -e ${tombdir}/${tombfile} ]; then
 	_message " `ls -lh ${tombdir}/${tombfile}`"
@@ -1670,11 +1672,10 @@ resize_tomb() {
 
     local delta=`expr $newtombsize \- $oldtombsize`
 
-    local tombsize_4k=`expr $delta \/ 1024`
-    tombsize_4k=`expr $tombsize_4k \/ 4 `
+    act "Generating ${tombfile} of ${newtombsize}MiB"
 
-    act "Generating ${tombfile} of ${newtombsize}Mb (${tombsize_4k} blocks of 4Kb)"
-    "$DD" if=/dev/urandom bs=4k count=${tombsize_4k} of="${tmp_resize}"
+    xxx "Data dump using ${DD[1]} from /dev/urandom"
+    ${=DD} if=/dev/urandom bs=1048576 count=${tombsize} of="${tmp_resize}"
 
     if [ $? = 0 -a -e "${tmp_resize}" ]; then
 	xxx "OK: `ls -lh ${tmp_resize}`"
