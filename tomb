@@ -796,6 +796,8 @@ dig_tomb() {
 
     [[ $tombsize != <-> ]] && die "Size argument is not an integer"
 
+    [[ $tombsize -lt 10 ]] && die "Tombs can't be smaller than 10 megabytes"
+
     if [ -e ${tombdir}/${tombfile} ]; then
 	_warning "A tomb exists already. I'm not digging here:"
 	_warning " `ls -lh ${tombdir}/${tombfile}`"
