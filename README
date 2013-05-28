@@ -47,6 +47,21 @@ facilitating the storage of backup keys using image steganography,
 listing open tombs and selectively closing them, warning the user
 about their size and last time they were used, etc.
 
+** How secure is this?
+
+Death is the only sure thing in life. Said that, Tomb is a pretty
+secure tool especially because it keeps minimal, its source is always
+open and its code is easy to review with a bit of shell script
+knowledge.
+
+All encryption tools being used in Tomb are included as default in
+many GNU/Linux operating systems and therefore are regularly peer
+reviewed: we don't add anything else to them really, just a layer of
+usability.
+
+The code of Tomb can be read in a literate programming style on
+http://tomb.dyne.org/literate
+
 ** Stage of development
 
 Tomb is an evolution of the 'mknest' tool developed for the dyne:bolic
