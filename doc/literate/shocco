@@ -70,7 +70,7 @@ file="$1"
 
 # These are replaced with the full paths to real utilities by the
 # configure/make system.
-MARKDOWN='/usr/local/bin/markdown'
+MARKDOWN='/usr/bin/markdown_py'
 PYGMENTIZE='/usr/bin/pygmentize'
 
 # On GNU systems, csplit doesn't elide empty files by default:
@@ -149,7 +149,12 @@ trap "rm -rf $WORK" 0
 # Get a pipeline going with the `<source>` data. We write a single blank
 # line at the end of the file to make sure we have an equal number of code/comment
 # pairs.
-(cat "$file" && printf "\n\n# \n\n")         |
+
+# Folding.el support: turn {{{ folds }}} into titles -jrml
+(cat "$file" \
+    | sed -e 's/^# {{{/# #/' -e 's/^# }}}.*/# --------------/' \
+    | awk '/\(\) {$/ { print "# ### " $1 } {print $0}' \
+    && printf "\n\n# \n\n")         |
 
 # We want the shebang line and any code preceding the first comment to
 # appear as the first code block. This inverts the normal flow of things.
