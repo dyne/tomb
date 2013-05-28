@@ -211,6 +211,7 @@ EOF
 # }}}
 
 # {{{ Commandline interaction
+
 usage() {
     cat <<EOF
 
@@ -250,7 +251,7 @@ EOF
 Options:
 
  -s     size of the tomb file when creating/resizing one (in MB)
- -k     path to the key to use for opening a tomb
+ -k     path to the key to be used ('-k -' to read from stdin)
  -n     don't process the hooks found in tomb
  -o     mount options used to open (default: rw,noatime,nodev)
  -f     force operation (i.e. even if swap is active)
@@ -424,7 +425,7 @@ check_bin() {
 
 # {{{ Key operations
 
-typeset -h tombkeydir
+typeset -h tombkeydir # global used if key comes from stdin
 
 # This function retrieves a tomb key specified on commandline or one
 # laying nearby the tomb if found, or from stdin if the option was
@@ -438,7 +439,6 @@ load_key() {
     if option_is_set -k ; then
 	if [[ "`option_value -k`" == "-" ]]; then
 	    # take key from stdin
-	    local tombkeydir
 	    tombkeydir=`safe_dir`
 	    cat > ${tombkeydir}/stdin.tmp
 	    tombkey=${tombkeydir}/stdin.tmp
