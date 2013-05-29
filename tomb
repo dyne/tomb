@@ -600,12 +600,16 @@ get_lukskey() {
 		;;
 	esac
     fi
+    res=`safe_filename tomb.open`
+    (( $? )) && { unset tombpass; die "error creating temp dir" }
+
     print ${tombpass} | \
 	gpg --batch --passphrase-fd 0 --no-tty --no-options --status-fd 2 \
-	-d "${keyfile}" 2> /dev/null
-    ret=$?
-    xxx "gpg decryption returns $ret"
+	-d "${keyfile}" 2>$res
     unset tombpass
+    grep 'DECRYPTION_OKAY' $res
+    ret=$?; rm -f $res
+    xxx "get_lukskey returns $ret"
     return $ret
 }
 
@@ -983,10 +987,9 @@ lock_tomb_with_key() {
     tombname=${tombfile%%\.*}
     tombfile=${tombname}.tomb
 
-    if ! [ -e ${tombdir}/${tombfile} ]; then
+    { test -f ${tombdir}/${tombfile} } || {
 	die "There is no tomb here. You have to it dig first."
-	return 1
-    fi
+	return 1 }
 
     xxx "tomb found: ${tombdir}/${tombfile}"
 
