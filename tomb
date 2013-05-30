@@ -247,7 +247,7 @@ Commands:
 EOF
     if [ "$RESIZER" = 1 ]; then
 	cat <<EOF
-	resize  resize a TOMB to a new --size (can only grow)
+ resize  resize a TOMB to a new --size (can only grow)
 EOF
     fi
     if [ "$STEGHIDE" = 1 ]; then
@@ -1527,7 +1527,7 @@ index_tombs() {
 	{ test -r ${tombmount}/.noindex } && {
 	    say "skipping $tombname (.noindex found)"
 	    continue }
-	say "sndexing $tombname"
+	say "indexing $tombname"
 	updatedb -l 0 -o ${tombmount}/.updatedb -U ${tombmount}
 	say "search index updated"
     done
