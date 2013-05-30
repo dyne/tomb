@@ -1537,7 +1537,7 @@ search_tombs() {
 	die "Cannot index tombs on this system: updatedb not installed" }
 
     # list all open tombs
-    mounted_tombs=(`list_tomb_mounts $1`)
+    mounted_tombs=(`list_tomb_mounts`)
     { test ${#mounted_tombs} = 0 } && {
 	die "I can't see any open tomb, may they all rest in peace." }
     yes "Searching for: $fg_bold[white]${=PARAM}$fg_no_bold[white]"
