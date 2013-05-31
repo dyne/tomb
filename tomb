@@ -1540,7 +1540,8 @@ search_tombs() {
     mounted_tombs=(`list_tomb_mounts $1`)
     { test ${#mounted_tombs} = 0 } && {
 	die "I can't see any open tomb, may they all rest in peace." }
-    yes "Searching for: $fg_bold[white]${=PARAM}$fg_no_bold[white]"
+    shift	
+    yes "Searching for: $fg_bold[white]${=@}$fg_no_bold[white]"
     for t in ${mounted_tombs}; do
 	xxx "checking for index: ${t}"
 	mapper=`basename ${t[(ws:;:)1]}`
@@ -1548,8 +1549,8 @@ search_tombs() {
 	tombmount=${t[(ws:;:)2]}
 	if [ -r ${tombmount}/.updatedb ]; then
 	    say "Searching in tomb $tombname"
-	    locate -d ${tombmount}/.updatedb -e -i ${=PARAM}
-	    say "Matches found: `locate -d ${tombmount}/.updatedb -e -i -c ${=PARAM}`"
+	    locate -d ${tombmount}/.updatedb -e -i ${=@}
+	    say "Matches found: `locate -d ${tombmount}/.updatedb -e -i -c ${=@}`"
 	else
 	    no "skipping tomb $tombname: not indexed"
 	    no "run 'tomb index' to create indexes"
