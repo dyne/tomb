@@ -445,29 +445,33 @@ check_bin() {
 # always use drop_key() when done with all key operations.
 # On success returns 0 and prints out the full path to the key
 load_key() {
-    # check if the key is set manually then use the one existing
-    local tombdir="$1"
-    local tombname="$2"
-    local tombkey=""
+    tombdir=`dirname $1`
+    tombfile=`basename $1`
+    tombname=${tombfile%%\.*}
     if option_is_set -k ; then
 	if [[ "`option_value -k`" == "-" ]]; then
+	    xxx "load_key reading from stdin"
 	    # take key from stdin
 	    tombkeydir=`safe_dir tomb`
+	    xxx "tempdir is $tombkeydir"
 	    cat > ${tombkeydir}/stdin.tmp
-	    tombkey=${tombkeydir}/stdin.tmp
-	    xxx " `ls -lh ${tombkey}`"
-	else
+	    tombdir=${tombkeydir}
+	    tombfile=stdin.tmp
+	    tombname="stdin"
+	elif [[ "`option_value -k`" != "" ]]; then
 	    # take key from a file
 	    tombkey=`option_value -k`
+	    tombdir=`dirname $tombkey`
+	    tombfile=`basename $tombkey`
 	fi
-    else
-	# guess key as lying besides the tomb
-	tombkey=${tombdir}/${tombname}.tomb.key
     fi
+    
+    tombkey=${tombdir}/${tombfile}
+
+    xxx "load_key: `ls -lh ${tombkey}`"
 
     if [ -r "${tombkey}" ]; then
-	_message "We'll use this key:"
-	_message " `ls -lh ${tombkey}`"
+	_message "We'll use this key: ${tombkey}"
     else
 	return 1
     fi
@@ -1009,13 +1013,12 @@ lock_tomb_with_key() {
 	return 1
     fi
 
-    tombfile=`basename $1`
+    tombfile="$1"
     _message "Commanded to lock tomb ${tombfile}"
 
     tombdir=`dirname $1`
-    # make sure the file has a .tomb extension
+    tombfile=`basename $1`
     tombname=${tombfile%%\.*}
-    tombfile=${tombname}.tomb
 
     { test -f ${tombdir}/${tombfile} } || {
 	die "There is no tomb here. You have to it dig first."
@@ -1040,7 +1043,7 @@ lock_tomb_with_key() {
     fi
 
     # load key from options or file
-    tombkey=`load_key ${tombdir} ${tombname}`
+    tombkey=`load_key ${tombdir}/${tombfile}`
     { test $? = 0 } || {
 	losetup -d $nstloop
 	die "Aborting operations: error loading key $tombkey" }
@@ -1167,9 +1170,9 @@ mount_tomb() {
     xxx "tomb found: ${tombdir}/${tombfile}"
 
     # load_key called here
-    tombkey=`load_key ${tombdir} ${tombname}`
+    tombkey=`load_key ${tombdir}/${tombfile}.key`
     { test $? = 0 } || {
-	die "Aborting operations: error loading key $tombkey" }
+	die "Aborting operations: error loading key $tombkey"    }
 
 
     if [ "$2" = "" ]; then
@@ -1185,7 +1188,7 @@ mount_tomb() {
 	_warning "$tombname is already open."
 	_message "here below its status is reported:"
 	list_tombs ${tombname}
-	return 1
+	return 0
     fi
 
     _success "Opening $tombfile on $tombmount"
@@ -1613,14 +1616,13 @@ resize_tomb() {
     # $1 is the tomb file path
 
     local c tombpass tombkey
-    local tombfile=`basename $1`
-    local tombdir=`dirname $1`
-    # make sure the file has a .tomb extension
-    local tombname=${tombfile%%\.*}
-    tombfile=${tombname}.tomb
+
+    tombdir=`dirname $1`
+    tombfile=`basename $1`
+    tombname=${tombfile%%\.*}
 
     # load key from options or file
-    tombkey=`load_key ${tombdir} ${tombname}`
+    tombkey=`load_key ${tombdir}/${tombfile}`
     { test $? = 0 } || {
 	die "Aborting operations: error loading key $tombkey" }
     # make sure to call drop_key later
