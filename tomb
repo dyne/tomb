@@ -614,15 +614,31 @@ get_lukskey() {
 		;;
 	esac
     fi
+
+    # fix for gpg 1.4.11 where the --status-* options don't work ;^/
+    gpgver=`gpg --version | awk '/^gpg/ {print $3}'`
+    if [ "$gpgver" = "1.4.11" ]; then
+    xxx "GnuPG is version 1.4.11 - adopting status fix"
+
+    print ${tombpass} | \
+	gpg --batch --passphrase-fd 0 --no-tty --no-options -d "${keyfile}"
+    unset tombpass
+    ret=$?
+
+    else # using status-file in gpg != 1.4.12
+
     res=`safe_filename tomb.open`
-    (( $? )) && { unset tombpass; die "error creating temp dir" }
+    { test $? = 0 } || { unset tombpass; die "Fatal error creating temp file." }
 
     print ${tombpass} | \
 	gpg --batch --passphrase-fd 0 --no-tty --no-options --status-fd 2 \
+	--no-mdc-warning --no-permission-warning --no-secmem-warning \
 	-d "${keyfile}" 2>$res
     unset tombpass
     grep 'DECRYPTION_OKAY' $res
     ret=$?; rm -f $res
+
+    fi
     xxx "get_lukskey returns $ret"
     return $ret
 }
