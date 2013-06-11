@@ -40,10 +40,9 @@
 
 # {{{ Global variables
 
-VERSION=1.3
-DATE="May/2013"
+VERSION=1.3.1
+DATE="Jun/2013"
 TOMBEXEC=$0
-TOMBOPENEXEC="${TOMBEXEC}-open"
 typeset -a OLDARGS
 for arg in ${argv}; do OLDARGS+=($arg); done
 DD="dd"
@@ -191,7 +190,7 @@ check_priv() {
     # save original user
     username=$USER
     if [ $UID != 0 ]; then
-	xxx "Using sudo for root execution of 'tomb ${(f)OLDARGS}'"
+	xxx "Using sudo for root execution of '${TOMBEXEC} ${(f)OLDARGS}'"
 	# check if sudo has a timestamp active
 	sudok=false
 
@@ -215,8 +214,8 @@ EOF
     fi # are we root already
 
     # make sure necessary kernel modules are loaded
-    modprobe dm_mod
-    modprobe dm_crypt
+    modprobe dm_mod 2>/dev/null 
+    modprobe dm_crypt 2>/dev/null
 
     return 0
 }
@@ -496,6 +495,13 @@ ask_key_password() {
     local tombpass=""
     if option_is_set --tomb-pwd; then
 	    tombpass=`option_value --tomb-pwd`
+            xxx "ask_key_password takes tombpass from CLI argument: $tombpass"
+
+	    get_lukskey "$tombpass" ${tombkey} >/dev/null
+
+	    if [ $? = 0 ]; then
+		passok=1; _message "Password OK."; fi
+
     else
 	for c in 1 2 3; do
 	    if [ $c = 1 ]; then
@@ -679,7 +685,8 @@ gen_key() {
 	    unset tombpass
 	done
     else
-	tombpass=`option_value --tomb-pwd`
+	tombpass="`option_value --tomb-pwd`"
+        xxx "gen_key takes tombpass from CLI argument: $tombpass"
     fi
 
 
@@ -1046,7 +1053,7 @@ lock_tomb_with_key() {
     fi
 
     # load key from options or file
-    tombkey=`load_key ${tombdir}/${tombfile}`
+    tombkey=`load_key ${tombdir}/${tombfile}.key`
     { test $? = 0 } || {
 	losetup -d $nstloop
 	die "Aborting operations: error loading key $tombkey" }
@@ -1115,6 +1122,7 @@ lock_tomb_with_key() {
 
 # backward compatibility
 create_tomb() {
+    xxx "create_tomb(): ${=@} ${=OLDARGS}"
     if ! [ $1 ]; then
 	_warning "no tomb name specified for creation"
 	return 1
@@ -1125,8 +1133,8 @@ create_tomb() {
 	_warning "Creating this tomb would overwrite an existing file. Operation aborted."
 	die "`ls -lh $1`"    }
 
-    dig_tomb ${=PARAM}
     { test $? = 0 } || { die "Failed to dig tomb, operation aborted." }
+
 
     tombfile=`basename $1`
     tombdir=`dirname $1`
@@ -1134,10 +1142,11 @@ create_tomb() {
     tombname=${tombfile%%\.*}
     tombfile=${tombname}.tomb
 
-    forge_key ${tombfile}.key
+    ${TOMBEXEC} dig ${=PARAM}
+    ${TOMBEXEC} forge ${tombdir}/${tombfile}.key
     { test $? = 0 } || { die "Failed to forge key, operation aborted." }
 
-    lock_tomb_with_key ${tombfile} -l ${tombfile}.key
+    ${TOMBEXEC} lock ${tombdir}/${tombfile} -k ${tombdir}/${tombfile}.key
     { test $? = 0 } || { die "Failed to lock tomb with key, operation aborted." }
 
     yes "Tomb $tombname succesfully created"
@@ -1212,6 +1221,7 @@ mount_tomb() {
     if [ $? != 0 ]; then
 	# is it a LUKS encrypted nest? see cryptsetup(1)
 	_warning "$tombfile is not a valid Luks encrypted storage file"
+        losetup -d ${nstloop}
 	return 1
     fi
     say "this tomb is a valid LUKS encrypted device"
@@ -1238,6 +1248,7 @@ mount_tomb() {
 
     tombpass=`ask_key_password $tombkey`
     { test $? = 0 } || {
+        losetup -d ${nstloop}
 	die "No valid password supplied" }
 
     get_lukskey "${tombpass}" ${tombkey} | \
@@ -1884,10 +1895,10 @@ main() {
     subcommands_opts[open]="f n -nohook=n k: -key=k o: -mount-options=o -ignore-swap -sudo-pwd: -tomb-pwd:"
     subcommands_opts[mount]=${subcommands_opts[open]}
 
-    subcommands_opts[create]="f s: -size=s -force k: -key=k -ignore-swap -kdf: -sudo-pwd: -tomb-pwd:  -use-urandom"
+    subcommands_opts[create]="f -force -ignore-swap s: -size=s k: -key=k -kdf: -sudo-pwd: -tomb-pwd: -use-urandom"
 
-    subcommands_opts[forge]="f -ignore-swap k: -key=k -kdf: -use-urandom"
-    subcommands_opts[dig]="f -ignore-swap s: -size=s"
+    subcommands_opts[forge]="f -force -ignore-swap k: -key=k -kdf: -tomb-pwd: -use-urandom"
+    subcommands_opts[dig]="f -forge -ignore-swap s: -size=s"
     subcommands_opts[lock]="f -force -ignore-swap s: -size=s k: -key=k -sudo-pwd: -tomb-pwd:"
 
     subcommands_opts[passwd]="f -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
