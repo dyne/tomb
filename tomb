@@ -58,6 +58,9 @@ typeset -A global_opts
 typeset -A opts
 typeset -h username
 
+typeset -h tombkeydir # global used if key comes from stdin
+tombkeydir=""
+
 typeset -h _uid
 typeset -h _gid
 typeset -h _tty
@@ -100,7 +103,7 @@ safe_dir() {
     while (( $tries < 3 )) ; do
 	tries+=1
 	if _have_shm; then
-	    xxx "safe_dir creating directory in RAM"
+	    xxx "safe_dir creating $1 dir in RAM"
 	    if (( $MKTEMP )); then
 		mktemp -d /dev/shm/$1.$$.XXXXXXX
 	    else
@@ -435,7 +438,6 @@ check_bin() {
 
 # {{{ Key operations
 
-typeset -h tombkeydir # global used if key comes from stdin
 
 # This function retrieves a tomb key specified on commandline or one
 # laying nearby the tomb if found, or from stdin if the option was
@@ -446,12 +448,14 @@ load_key() {
     # check if the key is set manually then use the one existing
     local tombdir="$1"
     local tombname="$2"
+    local tombkey=""
     if option_is_set -k ; then
 	if [[ "`option_value -k`" == "-" ]]; then
 	    # take key from stdin
-	    tombkeydir=`safe_dir`
+	    tombkeydir=`safe_dir tomb`
 	    cat > ${tombkeydir}/stdin.tmp
 	    tombkey=${tombkeydir}/stdin.tmp
+	    xxx " `ls -lh ${tombkey}`"
 	else
 	    # take key from a file
 	    tombkey=`option_value -k`
@@ -471,7 +475,7 @@ load_key() {
     # this does a check on the file header
     if ! is_valid_key ${tombkey}; then
 	_warning "The key seems invalid, the application/pgp header is missing"
-	return 1
+ 	return 1
     fi
     print "$tombkey"
     return 0
@@ -1146,6 +1150,7 @@ mount_tomb() {
     tombname=${tombfile%%\.*}
     xxx "tomb found: ${tombdir}/${tombfile}"
 
+    # load_key called here
     tombkey=`load_key ${tombdir} ${tombname}`
     { test $? = 0 } || {
 	die "Aborting operations: error loading key $tombkey" }
@@ -1211,6 +1216,8 @@ mount_tomb() {
     get_lukskey "${tombpass}" ${tombkey} | \
 	cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 
+
+    # key dropped here
     drop_key
     unset tombpass
 
