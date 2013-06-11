@@ -465,7 +465,7 @@ load_key() {
 	    tombfile=`basename $tombkey`
 	fi
     fi
-    
+
     tombkey=${tombdir}/${tombfile}
 
     xxx "load_key: `ls -lh ${tombkey}`"
@@ -865,10 +865,13 @@ print "-----END PGP MESSAGE-----"
 forge_key() {
     _message "Commanded to forge key $1"
 
-    if ! [ $1 ]; then
-	  _warning "no key name specified for creation"
-	return 1
-    fi
+    { test "$1" = "" } && {
+	_warning "no key name specified for creation"
+	return 1 }
+
+    { test -r "$1" } && {
+	_warning "Forging this key would overwrite an existing file. Operation aborted."
+	die "`ls -lh $1`"    }
 
     # if swap is on, we remind the user about possible data leaks to disk
     if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
@@ -1116,6 +1119,11 @@ create_tomb() {
 	_warning "no tomb name specified for creation"
 	return 1
     fi
+
+
+    { test -r "$1" } && {
+	_warning "Creating this tomb would overwrite an existing file. Operation aborted."
+	die "`ls -lh $1`"    }
 
     dig_tomb ${=PARAM}
     { test $? = 0 } || { die "Failed to dig tomb, operation aborted." }
