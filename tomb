@@ -1533,7 +1533,15 @@ BEGIN { main="" }
 # $1 is optional, to specify a tomb
 index_tombs() {
     { command -v updatedb > /dev/null } || {
-	die "Cannot index tombs on this system: updatedb not installed" }
+	die "Cannot index tombs on this system: updatedb (mlocate) not installed" }
+
+    updatedbver=`updatedb --version | grep '^updatedb'`
+    [[ "$updatedbver" =~ "GNU findutils" ]] && {
+	_warning "Cannot use GNU findutils for index/search commands" }
+    [[ "$updatedbver" =~ "mlocate" ]] || {
+	die "Index command needs 'mlocate' to be installed." }
+
+    xxx "$updatedbver"
 
     mounted_tombs=(`list_tomb_mounts $1`)
     { test ${#mounted_tombs} = 0 } && {
@@ -1557,14 +1565,22 @@ index_tombs() {
 }
 search_tombs() {
     { command -v locate > /dev/null } || {
-	die "Cannot index tombs on this system: updatedb not installed" }
+	die "Cannot index tombs on this system: updatedb (mlocate) not installed" }
+
+    updatedbver=`updatedb --version | grep '^updatedb'`
+    [[ "$updatedbver" =~ "GNU findutils" ]] && {
+	_warning "Cannot use GNU findutils for index/search commands" }
+    [[ "$updatedbver" =~ "mlocate" ]] || {
+	die "Index command needs 'mlocate' to be installed." }
+
+    xxx "$updatedbver"
 
     # list all open tombs
-    mounted_tombs=(`list_tomb_mounts $1`)
-    { test ${#mounted_tombs} = 0 } && {
-	die "I can't see any open tomb, may they all rest in peace." }
-    shift	
-    yes "Searching for: $fg_bold[white]${=@}$fg_no_bold[white]"
+    mounted_tombs=(`list_tomb_mounts`)
+    if [ ${#mounted_tombs} = 0 ]; then
+	die "I can't see any open tomb, may they all rest in peace."; fi
+
+    yes "Searching for: $fg_bold[white]${(f)@}$fg_no_bold[white]"
     for t in ${mounted_tombs}; do
 	xxx "checking for index: ${t}"
 	mapper=`basename ${t[(ws:;:)1]}`
@@ -1572,8 +1588,8 @@ search_tombs() {
 	tombmount=${t[(ws:;:)2]}
 	if [ -r ${tombmount}/.updatedb ]; then
 	    say "Searching in tomb $tombname"
-	    locate -d ${tombmount}/.updatedb -e -i ${=@}
-	    say "Matches found: `locate -d ${tombmount}/.updatedb -e -i -c ${=@}`"
+	    locate -d ${tombmount}/.updatedb -e -i "${(f)@}"
+	    say "Matches found: `locate -d ${tombmount}/.updatedb -e -i -c ${(f)@}`"
 	else
 	    no "skipping tomb $tombname: not indexed"
 	    no "run 'tomb index' to create indexes"
