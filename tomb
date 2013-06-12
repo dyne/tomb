@@ -2008,8 +2008,8 @@ main() {
 	    ;;
 	# backward compat
 	create)
-	    check_priv
-	    create_tomb ${=PARAM}
+	    _warning "The create command is deprecated, please use dig, forge and lock instead."
+	    _warning "For more informations see Tomb's manual page (man tomb)."
 	    ;;
 
 	mount|open)
