@@ -1,48 +1,46 @@
-#/usr/bin/env zsh 
+#!/usr/bin/zsh
 
 T="../../tomb"
 source utils.sh
+source ${T} source
+
+notice() { print; yes "${@}"; print; }
+error() { _warning "     ${@}"; }
+tt() {
+	start_loops=(`sudo losetup -a |cut -d: -f1`)
+	${T} ${=@}
+	res=$?
+	loops=(`sudo losetup -a |cut -d: -f1`)
+	{ test "${#start_loops}" = "${#loops}" } || { error "loop device limit change to ${#loops}" }
+	print "     Tomb command returns $res"
+	return $res
+}
+
+
 
 rm /tmp/test.tomb{,.key} -f || exit 1
 
-sudo -k
+notice "Testing creation"
 
-${T} dig -s 10 /tmp/test.tomb
+tt dig -s 10 /tmp/test.tomb
 
-sudo losetup -a
+tt --ignore-swap --unsecure-dev-mode --tomb-pwd f00za --use-urandom forge /tmp/test.tomb.key
 
-${T} --ignore-swap --unsecure-dev-mode --tomb-pwd f00za --use-urandom \
-	forge /tmp/test.tomb.key
 
-sudo losetup -a
-
-${T} --ignore-swap --unsecure-dev-mode --tomb-pwd f00za \
-	lock /tmp/test.tomb -k /tmp/test.tomb.key
-
-sudo losetup -a
+tt --ignore-swap --unsecure-dev-mode --tomb-pwd f00za lock /tmp/test.tomb -k /tmp/test.tomb.key
 
 # sanity_tomb /tmp/asd.tomb
-echo
-echo trying to open with wrong password
-echo
+notice "Testing open with wrong password"
 
-${T} --unsecure-dev-mode --tomb-pwd wrongpassword \
-	open /tmp/test.tomb
+tt --unsecure-dev-mode --tomb-pwd wrongpassword open /tmp/test.tomb
 
-sudo losetup -a
+notice "Testing open with good password"
 
-echo
-echo trying to open with good password
-echo
+tt --unsecure-dev-mode --tomb-pwd f00za open /tmp/test.tomb
 
-${T} --unsecure-dev-mode --tomb-pwd f00za \
-	open /tmp/test.tomb
+tt --unsecure-dev-mode close test
 
-sudo losetup -a
+notice "Testing resize to 20MiB"
+tt --unsecure-dev-mode --tomb-pwd f00za -k /tmp/test.tomb.key resize /tmp/test.tomb -s 20
 
-${T} --unsecure-dev-mode close test 
-
-sudo losetup -a
-
-rm /tmp/test.tomb{,.key} -f || exit 1
-
+# rm /tmp/test.tomb{,.key} -f || exit 1

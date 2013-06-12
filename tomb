@@ -214,7 +214,7 @@ EOF
     fi # are we root already
 
     # make sure necessary kernel modules are loaded
-    modprobe dm_mod 2>/dev/null 
+    modprobe dm_mod 2>/dev/null
     modprobe dm_crypt 2>/dev/null
 
     return 0
@@ -495,7 +495,7 @@ ask_key_password() {
     local tombpass=""
     if option_is_set --tomb-pwd; then
 	    tombpass=`option_value --tomb-pwd`
-            xxx "ask_key_password takes tombpass from CLI argument: $tombpass"
+	    xxx "ask_key_password takes tombpass from CLI argument: $tombpass"
 
 	    get_lukskey "$tombpass" ${tombkey} >/dev/null
 
@@ -686,7 +686,7 @@ gen_key() {
 	done
     else
 	tombpass="`option_value --tomb-pwd`"
-        xxx "gen_key takes tombpass from CLI argument: $tombpass"
+	xxx "gen_key takes tombpass from CLI argument: $tombpass"
     fi
 
 
@@ -1221,7 +1221,7 @@ mount_tomb() {
     if [ $? != 0 ]; then
 	# is it a LUKS encrypted nest? see cryptsetup(1)
 	_warning "$tombfile is not a valid Luks encrypted storage file"
-        losetup -d ${nstloop}
+	losetup -d ${nstloop}
 	return 1
     fi
     say "this tomb is a valid LUKS encrypted device"
@@ -1248,7 +1248,7 @@ mount_tomb() {
 
     tombpass=`ask_key_password $tombkey`
     { test $? = 0 } || {
-        losetup -d ${nstloop}
+	losetup -d ${nstloop}
 	die "No valid password supplied" }
 
     get_lukskey "${tombpass}" ${tombkey} | \
@@ -1648,16 +1648,13 @@ resize_tomb() {
 
     local tmp_resize=`safe_filename tmbrsz`
     local newtombsize=$opts[-s]
-    local oldtombsize=`stat -c %s "$1" 2>/dev/null`
+    local oldtombsize=$(( `stat -c %s "$1" 2>/dev/null` / 1048576 ))
     local mounted_tomb=`mount -l |
 	awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
 
     if [ "$mounted_tomb" ]; then
 	_failure "the tomb $tombname is open, to resize it it needs to be close."
     fi
-
-    # MB to bytes conversion
-    newtombsize=`expr \( $newtombsize \* 1024 \) \* 1024 2> /dev/null`
 
     if ! [ "$newtombsize" ] ; then
 	_failure "You must specify the new size of $tombname"
@@ -1667,12 +1664,12 @@ resize_tomb() {
 	_failure "the new size must be greater then old tomb size."
     fi
 
-    local delta=`expr $newtombsize \- $oldtombsize`
+    delta="$(( $newtombsize - $oldtombsize ))"
 
     act "Generating ${tombfile} of ${newtombsize}MiB"
 
     xxx "Data dump using ${DD[1]} from /dev/urandom"
-    ${=DD} if=/dev/urandom bs=1048576 count=${tombsize} of="${tmp_resize}"
+    ${=DD} if=/dev/urandom bs=1048576 count=${delta} of="${tmp_resize}"
 
     if [ $? = 0 -a -e "${tmp_resize}" ]; then
 	xxx "OK: `ls -lh ${tmp_resize}`"
@@ -1680,8 +1677,8 @@ resize_tomb() {
 	_failure "Error creating the extra resize $tmp_resize, operation aborted."
     fi
 
-    cat "${tmp_resize}" >> "$1"
-    ${=WIPE} "${tmp_resize}"
+    cat "${tmp_resize}" >> ${tombdir}/${tombfile}
+    rm "${tmp_resize}"
 
 
     tombpass=`ask_key_password $tombkey`
@@ -1693,7 +1690,7 @@ resize_tomb() {
 	_failure "too many tomb opened. Please close any of them to open another tomb"
     fi
 
-    losetup -f "$1"
+    losetup -f ${tombdir}/${tombfile}
 
     local mapdate=`date +%s`
     local mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
@@ -1919,7 +1916,7 @@ main() {
     subcommands_opts[askpass]=""
     subcommands_opts[mktemp]=""
     subcommands_opts[source]=""
-    subcommands_opts[resize]="s: -size=s k: -key=k"
+    subcommands_opts[resize]="f -force -ignore-swap s: -size=s k: -key=k -tomb-pwd:"
     subcommands_opts[check]="-ignore-swap"
 #    subcommands_opts[translate]=""
 
