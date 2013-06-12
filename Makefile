@@ -9,3 +9,6 @@ all:
 install:
 	@install -Dm755 ${PROG} ${DESTDIR}${PREFIX}/bin/${PROG}
 	@install -Dm666 doc/${PROG}.1 ${DESTDIR}${MANDIR}/man1/${PROG}.1
+
+test:
+	make -C extras/test
