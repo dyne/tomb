@@ -70,10 +70,10 @@ returns an error if its not found.
 
 .B
 .IP "index"
-Creates or updates the search index of a specific tomb (or all tombs)
+Creates or updates the search indexes of all tombs currently
 open: enables use of the \fIsearch\fR command using simple word
-patterns on file names. Indexes are created using updatedb(8) and
-stored in an .updatedb file inside the tomb's root. To avoid indexing
+patterns on file names. Indexes are created using mlocate updatedb(8) and
+stored in a file inside the tomb's root. To avoid indexing
 a specific tomb simply touch a \fI.noindex\fR file in its root.
 
 .B
@@ -148,32 +148,11 @@ file to use. Keys are created with the same name of the tomb file
 adding a '.key' suffix, but can be later renamed and transported on
 other media.  If \fI<keyfile>\fR is "-" (dash), it will read it from
 stdin.
-
 .B
-.IP "--kdf \fI<method>\fR"
-This will specify the KDF method to use for the tomb we're creating.
-Please note that no stable release of tomb supports KDF; if you use it,
-your tomb might be unusable with an older version of tomb.
-
-You can specify parameters with --kdf=method:param. That is, for example,
-\fI--kdf=pbkdf2:2.5\fR will use pbkdf2 with an itertime of 2.5 seconds
-
-Supported methods are: pbkdf2, null
-
-.B pbkdf2
-is probably the most used kdf in security applications, so it's a good choice.
-It accepts one parameter, that is the seconds it will take on this computer to
-derive the key. The default is 1.
-
-.B null
-is just the same as not using --kdf at all: it will stick to the "classic"
-behaviour
-
-.B
-.IP "--kdf \fI<method>\fR"
-This will specify the KDF method to use for the tomb we're creating.
-Please note that no stable release of tomb supports KDF; if you use it,
-your tomb might be unusable with an older version of tomb.
+.IP "--kdf \fI<seconds>\fR"
+Activate the KDF feature against dictionary attacks when creating a key: forces a
+delay of \fI<seconds>\fR every time this key is used. Floating point values
+are accepted, default is 1.
 .B
 .IP "-n"
 Skip processing of post-hooks and bind-hooks if found inside the tomb.
