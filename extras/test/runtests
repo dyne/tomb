@@ -9,19 +9,37 @@ notice() { print; yes "${@}"; print; }
 error() { _warning "     ${@}"; }
 tt() {
 	start_loops=(`sudo losetup -a |cut -d: -f1`)
+	start_temps=(`find /dev/shm -name 'tomb*'`)
 	${T} ${=@}
 	res=$?
 	loops=(`sudo losetup -a |cut -d: -f1`)
-	{ test "${#start_loops}" = "${#loops}" } || { error "loop device limit change to ${#loops}" }
+	temps=(`find /dev/shm -name 'tomb*'`)
+
+	{ test "${#start_loops}" = "${#loops}" } || {
+	    error "loop device usage change to ${#loops}" }
+	{ test "${#start_temps}" = "${#temps}" } || {
+	    error "temp files usage change to ${#temps}" }
 	print "     Tomb command returns $res"
 	return $res
 }
 
+# check for auxiliary programs
+KDF=1
+STEGHIDE=1
+RESIZER=1
+command -v steghide > /dev/null || STEGHIDE=0
+command -v e2fsck resize2fs > /dev/null || RESIZER=0
+command -v tomb-kdb-pbkdf2 > /dev/null || KDF=0
+
+
 typeset -A results
-tests=(dig forge lock badpass open close resize chksum bind)
+tests=(dig forge lock badpass open close chksum bind)
+{ test $RESIZER = 1 } && { tests+=(resize) }
+{ test $KDF = 1 } && { tests+=(kdforge kdfpass kdflock kdfopen) }
+{ test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen) }
 
+sudo rm -f /tmp/test.tomb{,.key}
 
-rm /tmp/test.tomb{,.key} -f || exit 1
 
 startloops=(`sudo losetup -a |cut -d: -f1`)
 
@@ -72,12 +90,16 @@ tt --unsecure-dev-mode close test
 { test $? = 0 } && { results+=(close SUCCESS) }
 
 
+{ test $RESIZER = 1 } && {
+    notice "Testing resize to 30 MiB"
+    
+    tt --unsecure-dev-mode --tomb-pwd f00za -k /tmp/test.tomb.key resize /tmp/test.tomb -s 30
+    
+    { test $? = 0 } && { results+=(resize SUCCESS) }
 
-notice "Testing resize to 30 MiB"
+}
 
-tt --unsecure-dev-mode --tomb-pwd f00za -k /tmp/test.tomb.key resize /tmp/test.tomb -s 30
-
-{ test $? = 0 } && { results+=(resize SUCCESS) }
+notice "Testing contents integrity"
 
 ${T} --unsecure-dev-mode --tomb-pwd f00za open /tmp/test.tomb
 
@@ -108,8 +130,58 @@ rm /media/test.tomb/bind-hooks
 rm /media/test.tomb/test-$rnd
 tt close test
 
-# rm /tmp/test.tomb{,.key} -f || exit 1
 
+{ test $KDF = 1 } && { 
+    
+    notice "Testing KDF key"
+    sudo rm -f /tmp/test.tomb.kdf /tmp/kdf.tomb
+    
+    tt --unsecure-dev-mode --tomb-pwd f00za --use-urandom --kdf 1 forge /tmp/test.tomb.kdf
+    
+    { test $? = 0 } && { results+=(kdforge SUCCESS) }
+    
+    tt --unsecure-dev-mode --tomb-pwd f00za --kdf 1 passwd /tmp/test.tomb.kdf
+    
+    { test $? = 0 } && { results+=(kdfpass SUCCESS) }
+    
+    ${T} dig -s 10 /tmp/kdf.tomb
+    
+    tt --ignore-swap --unsecure-dev-mode --tomb-pwd f00za lock /tmp/kdf.tomb -k /tmp/test.tomb.kdf
+    
+    { test $? = 0 } && { results+=(kdflock SUCCESS) }
+    
+    tt --ignore-swap --unsecure-dev-mode --tomb-pwd f00za open /tmp/kdf.tomb -k /tmp/test.tomb.kdf
+    
+    { test $? = 0 } && { results+=(kdfopen SUCCESS) }
+    
+    ${T} close kdf
+    
+}
+
+{ test $STEGHIDE = 1 } && {
+
+    notice "Testing steganographic hiding of keys"
+
+    cp -f arditi.jpg /tmp/tomb.jpg
+    sudo rm -f /tmp/test.steg.key
+    
+    tt --unsecure-dev-mode --tomb-pwd f00za bury -k /tmp/test.tomb.key /tmp/tomb.jpg
+
+    { test $? = 0 } && { results+=(stgin SUCCESS) }
+
+    tt --unsecure-dev-mode --tomb-pwd f00za exhume -k /tmp/test.steg.key /tmp/tomb.jpg
+
+    { test $? = 0 } && { results+=(stgout SUCCESS) }
+
+    tt --unsecure-dev-mode --tomb-pwd f00za open -k /tmp/test.steg.key /tmp/test.tomb
+
+    { test $? = 0 } && { results+=(stgopen SUCCESS) }
+
+    ${T} close test
+}
+
+# rm /tmp/test.tomb{,.key} -f || exit 1
+    
 endloops=(`sudo losetup -a |cut -d: -f1`)
 
 notice "Test results summary"
@@ -121,4 +193,6 @@ for t in $tests; do
 done
 
 print "${#endloops} loop devices busy at end"
-
+print "Done. You can remove temporary leftovers from /tmp :"
+for i in `find /tmp -name '*tomb*' 2>/dev/null`; do ls -lh $i; done
+return 0
