@@ -52,6 +52,7 @@ KDF=1
 STEGHIDE=1
 MKTEMP=1
 RESIZER=1
+SWISH=1
 MOUNTOPTS="rw,noatime,nodev"
 
 typeset -A global_opts
@@ -274,7 +275,7 @@ EOF
  --kdf  seconds generate passwords against dictionary attacks
 EOF
     }
-    
+
 cat <<EOF
 
  -h     print this help
@@ -427,10 +428,10 @@ check_bin() {
     command -v steghide > /dev/null || STEGHIDE=0
     # check for resize
     command -v e2fsck resize2fs > /dev/null || RESIZER=0
-
     # check for KDF auxiliary tools
     command -v tomb-kdb-pbkdf2 > /dev/null || KDF=0
-
+    # check for Swish-E file content indexer
+    command -v swish-e > /dev/null || SWISH=0
 }
 
 # }}} - Commandline interaction
@@ -478,7 +479,7 @@ load_key() {
     # this does a check on the file header
     if ! is_valid_key ${tombkey}; then
 	_warning "The key seems invalid, the application/pgp header is missing"
- 	return 1
+	return 1
     fi
     print "$tombkey"
     return 0
@@ -651,17 +652,17 @@ get_lukskey() {
     gpgver=`gpg --version | awk '/^gpg/ {print $3}'`
     if [ "$gpgver" = "1.4.11" ]; then
 	xxx "GnuPG is version 1.4.11 - adopting status fix"
-	
+
 	print ${tombpass} | \
 	    gpg --batch --passphrase-fd 0 --no-tty --no-options -d "${keyfile}"
 	ret=$?
 	unset tombpass
-	
+
     else # using status-file in gpg != 1.4.12
 
 	res=`safe_filename lukskey`
 	{ test $? = 0 } || { unset tombpass; die "Fatal error creating temp file." }
-	
+
 	print ${tombpass} | \
 	    gpg --batch --passphrase-fd 0 --no-tty --no-options --status-fd 2 \
 	    --no-mdc-warning --no-permission-warning --no-secmem-warning \
@@ -669,7 +670,7 @@ get_lukskey() {
 	unset tombpass
 	grep 'DECRYPTION_OKAY' $res
 	ret=$?; rm -f $res
-	
+
     fi
     xxx "get_lukskey returns $ret"
     return $ret
@@ -725,7 +726,7 @@ gen_key() {
 	pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
 	    # We use a length of 64bytes = 512bits (more than needed!?)
 	tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
-	
+
 	header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
     }
 
@@ -830,7 +831,7 @@ exhume_key() {
     res=$?
 
     unset tombpass
-    
+
     if [ $res = 0 ]; then
 	_success "${tombkey} succesfully decoded"
 	return 0
@@ -1556,7 +1557,15 @@ index_tombs() {
 	fi
     }
 
+
     yes "Creating and updating search indexes"
+
+    # start the LibreOffice document converter if installed
+    { command -v unoconv >/dev/null } && {
+	unoconv -l 2>/dev/null &
+	xxx "unoconv listener launched"
+	sleep 1 }
+
     for t in ${mounted_tombs}; do
 	mapper=`basename ${t[(ws:;:)1]}`
 	tombname=${t[(ws:;:)5]}
@@ -1564,8 +1573,40 @@ index_tombs() {
 	{ test -r ${tombmount}/.noindex } && {
 	    say "skipping $tombname (.noindex found)"
 	    continue }
-	say "indexing $tombname"
+	say "indexing $tombname filenames..."
 	updatedb -l 0 -o ${tombmount}/.updatedb -U ${tombmount}
+
+	# here we use swish to index file contents
+	{ test $SWISH = 1 } && {
+	    say "indexing $tombname contents..."
+	    swishrc=`safe_filename swish`
+
+	    cat <<EOF > $swishrc
+DefaultContents TXT*
+FileFilter .pdf pdftotext "'%p' -"
+
+FileFilterMatch unoconv "-d spreadsheet -f csv --stdout %P" /\.xls.*/
+FileFilterMatch unoconv "-d spreadsheet -f csv --stdout %P" /\.xlt.*/
+FileFilter .ods unoconv "-d spreadsheet -f csv --stdout %P"
+FileFilter .ots unoconv "-d spreadsheet -f csv --stdout %P"
+FileFilter .dbf unoconv "-d spreadsheet -f csv --stdout %P"
+FileFilter .dif unoconv "-d spreadsheet -f csv --stdout %P"
+FileFilter .uos unoconv "-d spreadsheet -f csv --stdout %P"
+FileFilter .sxc unoconv "-d spreadsheet -f csv --stdout %P"
+
+FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.doc.*/
+FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.odt.*/
+FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.rtf.*/
+
+IndexContents HTML* .htm .html .shtml
+IndexContents XML*  .xml
+IndexDir $tombmount
+IndexFile $tombmount/.swish
+EOF
+	    xxx "Using swish-e to create index"
+	    swish-e -c $swishrc -S fs -v3
+	    rm -f $swishrc
+	}
 	say "search index updated"
     done
 }
@@ -1593,15 +1634,23 @@ search_tombs() {
 	tombname=${t[(ws:;:)5]}
 	tombmount=${t[(ws:;:)2]}
 	if [ -r ${tombmount}/.updatedb ]; then
-	    say "Searching in tomb $tombname"
+
+	    # use mlocate to search hits on filenames
+	    say "Searching filenames in tomb $tombname"
 	    locate -d ${tombmount}/.updatedb -e -i "${(f)@}"
 	    say "Matches found: `locate -d ${tombmount}/.updatedb -e -i -c ${(f)@}`"
+
+	    # use swish-e to search over contents
+	    { test $SWISH = 1 } && { test -r $tombmount/.swish } && {
+		say "Searching contents in tomb $tombname"
+		swish-search -w ${=@} -f $tombmount/.swish -H0 }
+
 	else
 	    no "skipping tomb $tombname: not indexed"
 	    no "run 'tomb index' to create indexes"
 	fi
     done
-
+    say "Search completed."
 }
 
 # }}} - Index and search
