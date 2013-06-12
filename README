@@ -12,7 +12,7 @@ X~     `?888888hx~  ...ue888b   .888: x888  x888.   8888   .
 '    "*88888888*      'Y"         `~    "    `"`    `%888*%"
         ^"***"`                                        "`
 
-A minimalistic commandline tool to manage encrypted volumes  v.1.3
+A minimalistic commandline tool to manage encrypted volumes  v.1.3.1
 
                    http://tomb.dyne.org
 
@@ -79,15 +79,17 @@ CBC-ESSIV encryption algorithm.
 
 ** How can you help
 
+Donations are always welcome, see http://dyne.org/donate
+
 Code is pretty short and readable: start looking around it and the
 materials found in doc/ which are good pointers at security measures
 to be further implemented.
 
+For the bleeding edge visit https://github.com/dyne/Tomb
+
 Tomb's developers can be contacted via the "crypto" mailinglist on
-http://lists.dyne.org
+http://lists.dyne.org or via IRC on https://irc.dyne.org channel #dyne
 
-Enthusiastic ideas are in the TODO file.
-
-Donations are always welcome, see http://dyne.org/donate
+Some enthusiastic ideas are in the TODO file.
 
 Information on developers involved is found in the AUTHORS file.

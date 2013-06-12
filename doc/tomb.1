@@ -261,8 +261,11 @@ Create a 128MB large "secret" tomb and its keys, then open it:
 
 .EX
 	tomb dig -s 128 secret.tomb
+
 	tomb forge secret.tomb.key
+
 	tomb lock secret.tomb -k secret.tomb.key
+
 	tomb open secret.tomb -k secret.tomb.key
 .EE
 
@@ -280,10 +283,13 @@ makes it reachable from the standard $HOME/.gnupg location every time
 the tomb will be opened:
 
 .EX
-	tomb open GPG.tomb
+	tomb open GPG.tomb -k GPG.tomb.key
+
 	echo ".gnupg .gnupg" > /media/GPG.tomb/bind-hooks
+
 	mv ~/.gnupg /media/GPG.tomb/.gnupg && mkdir ~/.gnupg
-	tomb close GPG && tomb open GPG.tomb
+
+	tomb close GPG && tomb open GPG.tomb -k GPG.tomb.key
 .EE
 
 .IP \(bu
@@ -291,14 +297,22 @@ Create an exec post hook that launches a Firefox browser every time
 the tomb will be opened, keeping all its profile data inside it:
 
 .EX
-	tomb open FOX.tomb
+	tomb open FOX.tomb -k FOX.tomb.key
+
 	touch        /media/FOX.tomb/post-hooks
+
 	chmod +x     /media/FOX.tomb/post-hooks
+
 	cat <<EOF >> /media/FOX.tomb/post-hooks
+
 #!/usr/bin/env bash
+
 if [ "$1" == open ]; then
+
   firefox -no-remote -profile $(dirname $0)/firefox_prof &
+
 fi
+
 EOF
 .EE
 
@@ -307,12 +321,7 @@ Please report bugs on the tracker at
 .UR https://bugs.dyne.org
 .UE
 
-Get in touch with developers via mail by subscribing the "crypto" mailinglist
-.UR http://lists.dyne.org
-.UE
-or via the #dyne chat channel on
-.UR https://irc.dyne.org
-.UE
+Get in touch with developers via mail by subscribing the "crypto" mailinglist on \fIhttp://lists.dyne.org\fR or via the #dyne chat channel on \fIhttps://irc.dyne.org\fR.
 
 .SH AUTHORS
 
