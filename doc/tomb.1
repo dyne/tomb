@@ -31,9 +31,9 @@ harddisk and its key file on a USB stick.
 Generates a file that can be used as a tomb and will occupy as much
 space as its desired initial size, the unlocked \fI.tomb\fR file can
 then be locked using a \fI.tomb.key\fR. It takes a mandatory option
-which is the \fI--size\fR in megabytes. This generation is relatively
-simple: its a data dump (dd) of low-quality random data (from
-/dev/urandom) and does not require root privileges.
+which is the \fI--size\fR in megabytes (MiB). This generation is
+relatively simple: its a data dump (dd) of low-quality random data
+(from /dev/urandom) and does not require root privileges.
 
 .B
 .IP "forge"
@@ -48,18 +48,18 @@ around for entropy.
 Initializes and locks an empty tomb (made with \fIdig\fR) using a key
 (made with \fIforge\fR), making it ready for usage. After this
 operation, the tomb can only be open in possession of the key and
-knowing its password. This operation requires root privileges to
-loopback mount, format the tomb (using LUKS and Ext4), then set the
-key in its first LUKS slot.
+knowing its password. As in any other command requiring a key, the
+option \fI-k\fR should be used to specify a key file. This operation
+requires root privileges to loopback mount, format the tomb (using
+LUKS and Ext4), then set the key in its first LUKS slot.
 
 .B
 .IP "open"
-Opens an existing \fI.tomb\fR (first argument), if a second argument is
-given it will indicate the \fImountpoint\fR where the tomb should be
-made accessible, else the tomb is mounted in a directory inside
-/media. The option \fI-k\fR can be used to specify a key file if none
-is found besides the tomb and \fI-o\fR can be used to pass mount(8)
-options (default: rw,noatime,nodev).
+Opens an existing \fI.tomb\fR (first argument) using a key (\fI-k\fR),
+if a second argument is given it will indicate the \fImountpoint\fR
+where the tomb should be made accessible, else the tomb is mounted in
+a directory inside /media. The option \fI-o\fR can be used to pass
+mount(8) options (default: rw,noatime,nodev).
 
 .B
 .IP "list"
@@ -81,8 +81,7 @@ a specific tomb simply touch a \fI.noindex\fR file in its root.
 Searches through all tombs currently open for filenames matching one
 or more text patterns given as arguments. Search returns a list of
 files found in all open tombs on which the \fIindex\fR command was run
-at least once. The option \fI--regex\fR can be used to interpret all
-patterns as extended regexps.
+at least once.
 
 .B
 .IP "close"
@@ -103,37 +102,40 @@ situations.
 
 .B
 .IP "passwd"
-Changes the password protecting a \fIkey\fR file specified as first
-argument. The user will need to know the key's current password, then
+Changes the password protecting a \fIkey\fR file specified using
+\fI-k\fR. The user will need to know the key's current password, then
 its content will be decoded and reencoded using the new one. This
-action can't be forced if the current password is not known.
+action can't be forced if the current password is not known. If the
+key file is broken (missing headers) this function also attempts its
+recovery.
 
 
 .B
 .IP "resize"
 Increase the size of a tomb file to the amount specified by the
-\fI--size\fR option in megabytes. Tombs cannot be made smaller with
-this command, only bigger. This command makes use of the cryptsetup
-resize feature and the resize2fs command, hence it supports only tombs
-formatted with an Ext filesystem.
+\fI--size\fR option in megabytes (MiB). Full access to the tomb using
+a key (\fI-k\fR) and its password is requires. Tombs can only grow and
+can never be made smaller. This command makes use of the cryptsetup
+resize feature and the resize2fs command: its much more practical than
+creating a new tomb and moving everything into it.
 
 
 .B
 .IP "bury"
-Hides a tomb key (first argument) inside a \fIjpeg image\fR (second
-argument) using \fIsteganography\fR: the image will change in a way
-that cannot be noticed by human eye and hardly detected by data
-analysis. This option is useful to backup tomb keys in unsuspected
-places; it depends from the availability of \fIsteghide\fR.
+Hides a tomb key (\fI-k\fR) inside a \fIjpeg image\fR (first argument)
+using \fIsteganography\fR: the image will change in a way that cannot
+be noticed by human eye and hardly detected by data analysis. This
+option is useful to backup tomb keys in unsuspected places; it depends
+from the availability of \fIsteghide\fR.
 
 .B
 .IP "exhume"
 This command recovers from jpeg images the keys that were previously
 hidden into them using \fIbury\fR.  Exhume requires a key filename
-(first argument) and a \fIjpeg image\fR file (second argument) known
-to be containing it. If the right key password is given, the key will
-be exhumed, but if the password is not known, it is very hard to
-verify if a key is buried in the image or not.
+(\fI-k\fR) and a \fIjpeg image\fR file (first argument) known to be
+containing a key. If the right key password is given, the key will be
+exhumed. If the password is not known, it is very hard to verify if a
+key is buried in any image or not.
 
 .SH OPTIONS
 .B
@@ -260,8 +262,16 @@ Create a 128MB large "secret" tomb and its keys, then open it:
 .EX
 	tomb dig -s 128 secret.tomb
 	tomb forge secret.tomb.key
-	tomb lock secret.tomb secret.tomb.key
+	tomb lock secret.tomb -k secret.tomb.key
 	tomb open secret.tomb -k secret.tomb.key
+.EE
+
+.IP \(bu
+Open a Tomb using the key from a remote SSH shell, without saving any
+local copy of it:
+
+.EX
+	ssh user@my.shell.net 'cat .secrets/tomb.key' | tomb open secret.tomb -k -	
 .EE
 
 .IP \(bu
