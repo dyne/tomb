@@ -48,6 +48,7 @@ for arg in ${argv}; do OLDARGS+=($arg); done
 DD="dd"
 WIPE="rm -f"
 MKFS="mkfs.ext3 -q -F -j -L"
+KDF=1
 STEGHIDE=1
 MKTEMP=1
 RESIZER=1
@@ -65,8 +66,8 @@ typeset -h _gid
 typeset -h _tty
 
 # Set a sensible PATH
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-[[ "$TOMBEXEC" =~ "^/usr/local" ]] && PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+# PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+
 
 # }}}
 
@@ -104,9 +105,9 @@ safe_dir() {
 	if _have_shm; then
 	    xxx "safe_dir creating $1 dir in RAM"
 	    if (( $MKTEMP )); then
-		mktemp -d /dev/shm/$1.$$.XXXXXXX
+		mktemp -d /dev/shm/tomb.$1.$$.XXXXXXX
 	    else
-		dir="/dev/shm/$1.$$.$RANDOM$RANDOM"
+		dir="/dev/shm/tomb.$1.$$.$RANDOM$RANDOM"
 		mkdir -m 0700 -p "$dir"
 		print "$dir"
 	    fi
@@ -125,8 +126,8 @@ safe_dir() {
 safe_filename() {
     _have_shm || die "No access to shared memory on this system, sorry."
     (( $MKTEMP )) && \
-	mktemp -u /dev/shm/$1.$$.XXXXXXX || \
-	print "/dev/shm/$1.$$.$RANDOM$RANDOM"
+	mktemp -u /dev/shm/tomb.$1.$$.XXXXXXX || \
+	print "/dev/shm/tomb.$1.$$.$RANDOM$RANDOM"
 }
 
 # Check if swap is activated
@@ -267,6 +268,14 @@ Options:
  -n     don't process the hooks found in tomb
  -o     mount options used to open (default: rw,noatime,nodev)
  -f     force operation (i.e. even if swap is active)
+EOF
+    { test "$KDF" = 1 } && {
+	cat <<EOF
+ --kdf  seconds generate passwords against dictionary attacks
+EOF
+    }
+    
+cat <<EOF
 
  -h     print this help
  -v     print version, license and list of available ciphers
@@ -419,17 +428,8 @@ check_bin() {
     # check for resize
     command -v e2fsck resize2fs > /dev/null || RESIZER=0
 
-    if which tomb-kdf-pbkdf2 &> /dev/null; then
-	KDF_PBKDF2="tomb-kdf-pbkdf2"
-    else
-	local our_pbkdf2
-	our_pbkdf2="$(dirname $(readlink -f $TOMBEXEC))/kdf/tomb-kdf-pbkdf2"
-	if which $our_pbkdf2 &> /dev/null; then
-	    KDF_PBKDF2=$our_pbkdf2
-	else
-	    KDF_PBKDF2=
-	fi
-    fi
+    # check for KDF auxiliary tools
+    command -v tomb-kdb-pbkdf2 > /dev/null || KDF=0
 
 }
 
@@ -451,7 +451,7 @@ load_key() {
 	if [[ "`option_value -k`" == "-" ]]; then
 	    xxx "load_key reading from stdin"
 	    # take key from stdin
-	    tombkeydir=`safe_dir tomb`
+	    tombkeydir=`safe_dir load_key`
 	    xxx "tempdir is $tombkeydir"
 	    cat > ${tombkeydir}/stdin.tmp
 	    tombdir=${tombkeydir}
@@ -551,8 +551,8 @@ change_passwd() {
 
     local tmpnewkey lukskey c tombpass tombpasstmp
 
-    tmpnewkey=`safe_filename tombnew`
-    lukskey=`safe_filename tombluks`
+    tmpnewkey=`safe_filename passnew`
+    lukskey=`safe_filename passold`
 
     _success "Changing password for $keyfile"
 
@@ -594,9 +594,34 @@ drop_key() {
 #$1 is the keyfile we are checking
 is_valid_key() {
     # this header validity check is a virtuosism by Hellekin
-    [[ `file =(awk '/^-+BEGIN/,0' $1) -bi` =~ application/pgp ]]
-    return $?
+    [[ `file =(awk '/^-+BEGIN/,0' $1)` =~ PGP ]] && return 0
+    # if no BEGIN header found then we try to recover it
+    [[ `file $1 -bi` =~ text/plain ]] && {
+	_warning "Key data found with missing headers, attempting recovery"
+	local tmp_keyfix=`safe_filename keyfix`
+	touch $tmp_keyfix
+	# make sure KDF header comes first
+	local header=`grep '^_KDF_' $1`
+	print "$header" >> $tmp_keyfix
+	cat $1 | awk '
+BEGIN {
+print "-----BEGIN PGP MESSAGE-----"
+print
 }
+/^_KDF_/ { next }
+{ print $0 }
+END {
+print "-----END PGP MESSAGE-----"
+}' >> ${tmp_keyfix}
+	mv $tmp_keyfix $1
+	chown ${_uid}:${_gid} ${1}
+	chmod 0600 ${1}
+	return 0
+    }
+    _warning "Invalid key format: $1"
+    return 1
+}
+
 
 # Gets a key file and a password, prints out the decoded contents to
 # be used directly by Luks as a cryptographic key
@@ -611,11 +636,8 @@ get_lukskey() {
 	_verbose "KDF: `cut -d_ -f 3 <<<$firstline`"
 	case `cut -d_ -f 3 <<<$firstline` in
 	    pbkdf2sha1)
-		if [[ -z $KDF_PBKDF2 ]]; then
-		    die "The tomb use kdf method 'pbkdf2', which is unsupported on your system"
-		fi
 		pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
-		tombpass=$(${KDF_PBKDF2} ${=pbkdf2_param} 2> /dev/null <<<$tombpass)
+		tombpass=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2> /dev/null <<<$tombpass)
 		;;
 	    *)
 		_failure "No suitable program for KDF `cut -f 3 <<<$firstline`"
@@ -628,26 +650,26 @@ get_lukskey() {
     # fix for gpg 1.4.11 where the --status-* options don't work ;^/
     gpgver=`gpg --version | awk '/^gpg/ {print $3}'`
     if [ "$gpgver" = "1.4.11" ]; then
-    xxx "GnuPG is version 1.4.11 - adopting status fix"
-
-    print ${tombpass} | \
-	gpg --batch --passphrase-fd 0 --no-tty --no-options -d "${keyfile}"
-    unset tombpass
-    ret=$?
-
+	xxx "GnuPG is version 1.4.11 - adopting status fix"
+	
+	print ${tombpass} | \
+	    gpg --batch --passphrase-fd 0 --no-tty --no-options -d "${keyfile}"
+	ret=$?
+	unset tombpass
+	
     else # using status-file in gpg != 1.4.12
 
-    res=`safe_filename tomb.open`
-    { test $? = 0 } || { unset tombpass; die "Fatal error creating temp file." }
-
-    print ${tombpass} | \
-	gpg --batch --passphrase-fd 0 --no-tty --no-options --status-fd 2 \
-	--no-mdc-warning --no-permission-warning --no-secmem-warning \
-	-d "${keyfile}" 2>$res
-    unset tombpass
-    grep 'DECRYPTION_OKAY' $res
-    ret=$?; rm -f $res
-
+	res=`safe_filename lukskey`
+	{ test $? = 0 } || { unset tombpass; die "Fatal error creating temp file." }
+	
+	print ${tombpass} | \
+	    gpg --batch --passphrase-fd 0 --no-tty --no-options --status-fd 2 \
+	    --no-mdc-warning --no-permission-warning --no-secmem-warning \
+	    -d "${keyfile}" 2>$res
+	unset tombpass
+	grep 'DECRYPTION_OKAY' $res
+	ret=$?; rm -f $res
+	
     fi
     xxx "get_lukskey returns $ret"
     return $ret
@@ -689,42 +711,25 @@ gen_key() {
 	xxx "gen_key takes tombpass from CLI argument: $tombpass"
     fi
 
-
+    header=""
+    { option_is_set --kdf } && {
     # KDF is a new key strenghtening technique against brute forcing
     # see: https://github.com/dyne/Tomb/issues/82
-    _verbose "KDF method chosen is: '`option_value --kdf`'"
-    kdf_method=$(cut -d: -f1 <<<`option_value --kdf` )
-    case $kdf_method in
-	pbkdf2)
-	    if [[ -z $KDF_PBKDF2 ]]; then
-		die "The tomb use kdf method 'pbkdf2', which is unsupported on your system"
-	    fi
+	itertime="`option_value --kdf`"
+	_verbose "KDF itertime chosen: $itertime"
 	    # --kdf takes one parameter: iter time (on present machine) in seconds
-	    seconds=$(cut -d: -f2 -s <<<`option_value --kdf`)
-	    if [[ -z $seconds ]]; then
-		seconds=1
-	    fi
-	    local -i microseconds
-	    microseconds=$((seconds*1000000))
-	    _verbose "Microseconds: $microseconds"
-	    pbkdf2_salt=`${KDF_PBKDF2}-gensalt`
-	    pbkdf2_iter=`${KDF_PBKDF2}-getiter $microseconds`
+	local -i microseconds
+	microseconds=$((itertime*1000000))
+	_verbose "Microseconds: $microseconds"
+	pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
+	pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
 	    # We use a length of 64bytes = 512bits (more than needed!?)
-	    tombpass=`${KDF_PBKDF2} $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
+	tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
+	
+	header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+    }
 
-	    header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
-	    ;;
-	""|null)
-
-	    header=""
-	    ;;
-	*)
-	    _warning "KDF method non recognized"
-	    return 1
-	    header=""
-	    ;;
-    esac
-    echo -n $header
+    print -n $header
 
     print "${tombpass}" \
 	| gpg --openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
@@ -749,15 +754,14 @@ BEGIN { ciphers=0 }
 }
 
 # Steganographic function to bury a key inside an image.
+# Requires steghide(1) to be installed
 bury_key() {
-    tombkey=$1
-    imagefile=$2
+    tombkey="`option_value -k`"
+    imagefile=$1
 
-    file $tombkey | grep PGP > /dev/null
-    if [ $? != 0 ]; then
-	_warning "encode failed: $tombkey is not a tomb key"
-	return 1
-    fi
+    { is_valid_key ${tombkey} } || {
+	die "Bury failed: not a tomb key $tombkey" }
+
     file $imagefile | grep JPEG > /dev/null
     if [ $? != 0 ]; then
 	_warning "encode failed: $imagefile is not a jpeg image"
@@ -765,27 +769,16 @@ bury_key() {
     fi
 
     _success "Encoding key $tombkey inside image $imagefile"
-    _message "please choose a password for the encoding"
+    _message "please confirm the key password for the encoding"
+    tombpass=`ask_key_password $tombkey`
+    { test $? = 0 } || {
+	_warning "Wrong password supplied."
+	die "You shall not bury a key whose password is unknown to you."
+    }
 
-    # here user is prompted for key password
-    for c in 1 2 3; do
-	# 3 tries to write two times a matching password
-	tombpass=`exec_as_user ${TOMBEXEC} askpass "Steg password for ${tombkey}"`
-	tombpasstmp=$tombpass
-	tombpass=`exec_as_user ${TOMBEXEC} askpass "Steg password for ${tombkey} (again)"`
-	if [ "$tombpasstmp" = "$tombpass" ]; then
-	    break;
-	fi
-	unset tombpasstmp
-	unset tombpass
-    done
+    # we omit armor strings since having them as constants can give
+    # ground to effective attacks on steganography
 
-    if [ -z $tombpass ]; then
-	_warning "passwords don't match, aborting operation."
-	return 1
-    fi
-
-# Requires steghide to be installed
     awk '
 /^-----/ {next}
 /^Version/ {next}
@@ -806,8 +799,8 @@ bury_key() {
 }
 # Steganographic function to exhume a key buries into an image
 exhume_key() {
-    tombname=$1
-    imagefile=$2
+    tombkey="`option_value -k`"
+    imagefile=$1
     res=1
 
     file $imagefile | grep JPEG > /dev/null
@@ -816,44 +809,35 @@ exhume_key() {
 	return 1
     fi
 
-    keyfile=${tombname%%\.*}.tomb.key
-    if [[ -e "$keyfile" ]]; then
-	_warning "Key file $keyfile already exist."
-	return 1
+    if [[ -e "$tombkey" ]]; then
+	_warning "File exists: $tombkey"
+	{ option_is_set -f } || {
+	    _warning "Make explicit use of --force to overwrite"
+	    die "Refusing to overwrite file. Operation aborted." }
+	_warning "Use of --force selected: overwriting."
+	rm -f ${tombkey}
     fi
+
     _message "Trying to exhume a key out of image $imagefile"
-    for c in 1 2 3; do
-	if [ $c = 1 ]; then
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Steg password for ${keyfile}"`
-	else
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Steg password for $keyfile (retry $c)"`
-	fi
-
+    if option_is_set --tomb-pwd; then
+	    tombpass=`option_value --tomb-pwd`
+	    xxx "ask_key_password takes tombpass from CLI argument: $tombpass"
+    else
+	tombpass=`exec_as_user ${TOMBEXEC} askpass "Steg password for ${tombkey}"`
+    fi
 	# always steghide required
-	steghide extract -sf ${imagefile} -p ${tombpass} -xf - \
-	    | awk '
-BEGIN {
-print "-----BEGIN PGP MESSAGE-----"
-}
-{ print $0 }
-END {
-print "-----END PGP MESSAGE-----"
-}' > ${keyfile}
-
-	if [ "`cat ${keyfile} | wc -l`" != "3" ]; then
-	    _success "${keyfile} succesfully decoded"
-	    res=0
-	    break;
-	fi
-    done
+    steghide extract -sf ${imagefile} -p ${tombpass} -xf ${tombkey}
+    res=$?
 
     unset tombpass
-
-    if [ $res != 0 ]; then
-	_warning "nothing found."
+    
+    if [ $res = 0 ]; then
+	_success "${tombkey} succesfully decoded"
+	return 0
     fi
 
-    return $res
+    _warning "nothing found in $imagefile"
+    return 1
 }
 
 # }}} - Key handling
@@ -885,7 +869,7 @@ forge_key() {
 
 
     # create the keyfile in tmpfs so that we leave less traces in RAM
-    keytmp=`safe_dir tomb`
+    keytmp=`safe_dir forge`
     (( $? )) && die "error creating temp dir"
     xxx "safe_dir at $keytmp"
 
@@ -1646,7 +1630,7 @@ resize_tomb() {
 	die "Aborting operations: error loading key $tombkey" }
     # make sure to call drop_key later
 
-    local tmp_resize=`safe_filename tmbrsz`
+    local tmp_resize=`safe_filename resize`
     local newtombsize=$opts[-s]
     local oldtombsize=$(( `stat -c %s "$1" 2>/dev/null` / 1048576 ))
     local mounted_tomb=`mount -l |
@@ -1892,10 +1876,10 @@ main() {
     subcommands_opts[open]="f n -nohook=n k: -key=k o: -mount-options=o -ignore-swap -sudo-pwd: -tomb-pwd:"
     subcommands_opts[mount]=${subcommands_opts[open]}
 
-    subcommands_opts[create]="f -force -ignore-swap s: -size=s k: -key=k -kdf: -sudo-pwd: -tomb-pwd: -use-urandom"
+    subcommands_opts[create]="" # deprecated, will issue warning
 
     subcommands_opts[forge]="f -force -ignore-swap k: -key=k -kdf: -tomb-pwd: -use-urandom"
-    subcommands_opts[dig]="f -forge -ignore-swap s: -size=s"
+    subcommands_opts[dig]="f -force -ignore-swap s: -size=s"
     subcommands_opts[lock]="f -force -ignore-swap s: -size=s k: -key=k -sudo-pwd: -tomb-pwd:"
 
     subcommands_opts[passwd]="f -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
@@ -1908,8 +1892,8 @@ main() {
     subcommands_opts[search]=""
 
     subcommands_opts[help]=""
-    subcommands_opts[bury]=""
-    subcommands_opts[exhume]=""
+    subcommands_opts[bury]="f -force k: -key=k -tomb-pwd:"
+    subcommands_opts[exhume]="f -force k: -key=k -tomb-pwd:"
     subcommands_opts[decompose]=""
     subcommands_opts[recompose]=""
     subcommands_opts[install]=""
@@ -2055,24 +2039,18 @@ main() {
 	    usage
 	    ;;
 	bury)
-	    if [ "$STEGHIDE" = 0 ]; then
-		_warning "steghide not installed. Cannot bury your key"
-		return 1
-	    fi
-	    bury_key $PARAM[1] $PARAM[2]
+	    { test "$STEGHIDE" = 0 } && {
+		die "Steghide not installed: cannot bury keys into images." }
+	    bury_key $PARAM[1]
 	    ;;
 	exhume)
-	    if [ "$STEGHIDE" = 0 ]; then
-		_warning "steghide not installed. Cannot exhume your key"
-		return 1
-	    fi
-	    exhume_key $PARAM[1] $PARAM[2]
+	    { test "$STEGHIDE" = 0 } && {
+		die "Steghide not installed: cannot exhume keys from images." }
+	    exhume_key $PARAM[1]
 	    ;;
 	resize)
-	    if [ "$RESIZER" = 0 ]; then
-		_warning "resize2fs not installed. Cannot resize your tomb."
-		return 1
-	    fi
+	    { test "$RESIZER" = 0 } && {
+		die "Resize2fs not installed: cannot resize tombs." }
 	    check_priv
 	    resize_tomb $PARAM[1]
 	    ;;
