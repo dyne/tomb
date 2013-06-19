@@ -605,7 +605,11 @@ change_passwd() {
     drop_key
 
     {
-	gen_key $lukskey > ${tmpnewkey}
+
+	local algo
+	{ option_is_set -o } && { algopt="`option_value -o`" }
+
+	gen_key $lukskey $algopt > ${tmpnewkey}
 
 	if ! is_valid_key $tmpnewkey; then
 	    die "Error: the newly generated keyfile does not seem valid"
@@ -718,7 +722,7 @@ get_lukskey() {
 	    -d "${keyfile}" 2> $res
 
 	unset tombpass
-	grep 'DECRYPTION_OKAY' $res
+	grep 'DECRYPTION_OKAY' $res > /dev/null
 	ret=$?; rm -f $res
 
     fi
@@ -733,7 +737,7 @@ gen_key() {
 # $1 the lukskey to encrypt
 # $2 is the --cipher-algo to use (string taken by GnuPG)
     local lukskey="$1"
-    local algo="$2"
+    local algo="${2:-AES256}"
     # here user is prompted for key password
     local tombpass=""
     local tombpasstmp=""
