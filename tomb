@@ -53,6 +53,7 @@ STEGHIDE=1
 MKTEMP=1
 RESIZER=1
 SWISH=1
+QRENCODE=1
 MOUNTOPTS="rw,noatime,nodev"
 
 typeset -A global_opts
@@ -272,7 +273,15 @@ Commands:
  slam    slam a TOMB killing all programs using it
 
  passwd  change the password of a KEY
+ change  change the KEY locking a TOMB (needs old one)
 EOF
+
+    { test "$QRENCODE" = "1" } && {
+	cat <<EOF
+ backup  makes a QR code of a KEY to be saved on paper
+EOF
+    }
+
     if [ "$RESIZER" = 1 ]; then
 	cat <<EOF
  resize  resize a TOMB to a new --size (can only grow)
@@ -456,6 +465,8 @@ check_bin() {
     command -v tomb-kdb-pbkdf2 > /dev/null || KDF=0
     # check for Swish-E file content indexer
     command -v swish-e > /dev/null || SWISH=0
+    # check for QREncode for paper backups of keys
+    command -v qrencode > /dev/null || QRENCODE=0
 }
 
 # }}} - Commandline interaction
@@ -777,7 +788,7 @@ gen_key() {
     print "${tombpass}" \
 	| gpg --openpgp --force-mdc --cipher-algo ${algo} \
 	--batch --no-options --no-tty --passphrase-fd 0 --status-fd 2 \
-     	-o - -c -a ${lukskey}
+	-o - -c -a ${lukskey}
 
     unset tombpass
 }
@@ -882,6 +893,28 @@ exhume_key() {
 
     _warning "nothing found in $imagefile"
     return 1
+}
+
+# Produces a printable image of the key contents so that it can be
+# backuped on paper and hidden in books etc.
+backup_key() {
+    # load key from options
+    tombkey="`load_key $1`"
+    { test $? = 0 } || { die "No key specified." }
+    keyname=`basename $tombkey`
+    pngname="$keyname.qr.png"
+
+    yes "Rendering a printable QRCode for key: $tombkey"
+    # we omit armor strings to save space
+    awk '
+/^-----/ {next}
+/^Version/ {next}
+{print $0}' ${tombkey} | qrencode --size 4 -t PNG --level H \
+    --casesensitive -o "$pngname"
+    { test $? = 0 } || { die "QREncode reported an error." }
+    yes "Operation successful:"
+    _message "`ls -lh $pngname`"
+    _message "`file $pngname`"
 }
 
 # }}} - Key handling
@@ -1178,7 +1211,7 @@ change_tomb_key() {
     losetup -f "$2"
     cryptsetup isLuks ${nstloop}
     # is it a LUKS encrypted nest? we check one more timesee cryptsetup(1)
-    { test $? = 0 } || { 
+    { test $? = 0 } || {
 	losetup -d "$nstloop"
 	die "Not a valid LUKS encrypted volume: $2" }
 
@@ -1192,12 +1225,12 @@ change_tomb_key() {
     # save date of mount in minutes since 1970
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
 
-    
+
     # load the new key from the -k option
     tombkey=`load_key`
     { test $? = 0 } || {
 	die "Aborting operations: error loading new key $tombkey"    }
-    
+
     newkeypass=`ask_key_password $tombkey`
     { test $? = 0 } || {
 	die "No valid password supplied for the new key" }
@@ -1232,7 +1265,7 @@ change_tomb_key() {
     unset tombpass
     ${=WIPE} "$newkeyfile"
     losetup -d ${nstloop}
-    
+
     yes "Succesfully changed key for tomb: $2"
     _message "The new key is: $newkey"
 
@@ -2065,6 +2098,7 @@ main() {
     subcommands_opts[dig]="f -force -ignore-swap s: -size=s "
     subcommands_opts[lock]="f -force -ignore-swap k: -key=k o: -sudo-pwd: -tomb-pwd: "
     subcommands_opts[change]="f -force -ignore-swap k: -key=k -sudo-pwd: -tomb-pwd: "
+    subcommands_opts[backup]="k: -key=k "
 
     subcommands_opts[passwd]="f -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
     subcommands_opts[close]="-sudo-pwd: "
@@ -2194,6 +2228,12 @@ main() {
 	change)
 	    check_priv
 	    change_tomb_key ${=PARAM}
+	    ;;
+
+	backup)
+	    { test "$QRENCODE" = 0 } && {
+		die "QREncode not installed: cannot backup keys on paper." }
+	    backup_key ${=PARAM}
 	    ;;
 
 	# backward compat
