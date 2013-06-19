@@ -222,6 +222,30 @@ EOF
     return 0
 }
 
+# check if a filename is a valid tomb
+is_valid_tomb() {
+    xxx "is_valid_tomb $1"
+    # argument check
+    { test "$1" = "" } && {
+	_warning "Tomb file is missing from arguments"; return 1 }
+    # file checks
+    { test -r "$1" } || {
+	_warning "Tomb file not found: $1"; return 1 }
+    { test -f "$1" } || {
+	_warning "Tomb file is not a regular file: $1"; return 1 }
+    # check file type (if its a Luks fs)
+    file "$1" | grep -i 'luks encrypted file' >/dev/null
+    { test $? = 0 } || {
+	_warning "File is not a valid tomb: $1"; return 1 }
+    # check if its already open
+    tombfile=`basename $1`
+    tombname=${tombfile%%\.*}
+    mount -l | grep "${tombfile}.*\[$tombname\]$" > /dev/null
+    { test $? = 0 } && {
+	_warning "Tomb is currently in use: $tombname"; return 1 }
+    _message "Valid tomb file found: $1"
+    return 0
+}
 # }}}
 
 # {{{ Commandline interaction
@@ -438,16 +462,20 @@ check_bin() {
 
 # {{{ Key operations
 
-
 # This function retrieves a tomb key specified on commandline or one
 # laying nearby the tomb if found, or from stdin if the option was
 # selected.  It also runs validity checks on the file. Callers should
 # always use drop_key() when done with all key operations.
 # On success returns 0 and prints out the full path to the key
 load_key() {
-    tombdir=`dirname $1`
-    tombfile=`basename $1`
-    tombname=${tombfile%%\.*}
+    # take the name of a tomb file as argument
+    # this is used for guessing if the key is nearby
+    { test "$1" = "" } || {
+	tombdir=`dirname $1`
+	tombfile=`basename $1`
+	tombname=${tombfile%%\.*}
+    }
+
     if option_is_set -k ; then
 	if [[ "`option_value -k`" == "-" ]]; then
 	    xxx "load_key reading from stdin"
@@ -594,8 +622,18 @@ drop_key() {
 
 #$1 is the keyfile we are checking
 is_valid_key() {
+    xxx "is_valid_key $1"
+    # argument check
+    { test "$1" = "" } && {
+	_warning "Key file is missing from arguments"; return 1 }
+    # file checks
+    { test -r "$1" } || {
+	_warning "Key file not found: $1"; return 1 }
+    { test -f "$1" } || {
+	_warning "Key file is not a regular file: $1"; return 1 }
     # this header validity check is a virtuosism by Hellekin
-    [[ `file =(awk '/^-+BEGIN/,0' $1)` =~ PGP ]] && return 0
+    [[ `file =(awk '/^-+BEGIN/,0' $1)` =~ PGP ]] && {
+	_message "Valid key file found: $1"; return 0 }
     # if no BEGIN header found then we try to recover it
     [[ `file $1 -bi` =~ text/plain ]] && {
 	_warning "Key data found with missing headers, attempting recovery"
@@ -658,7 +696,7 @@ get_lukskey() {
 	ret=$?
 	unset tombpass
 
-    else # using status-file in gpg != 1.4.12
+    else # using status-file in gpg != 1.4.11
 
 	res=`safe_filename lukskey`
 	{ test $? = 0 } || { unset tombpass; die "Fatal error creating temp file." }
@@ -666,7 +704,8 @@ get_lukskey() {
 	print ${tombpass} | \
 	    gpg --batch --passphrase-fd 0 --no-tty --no-options --status-fd 2 \
 	    --no-mdc-warning --no-permission-warning --no-secmem-warning \
-	    -d "${keyfile}" 2>$res
+	    -d "${keyfile}" 2> $res
+
 	unset tombpass
 	grep 'DECRYPTION_OKAY' $res
 	ret=$?; rm -f $res
@@ -681,7 +720,9 @@ get_lukskey() {
 # honored options: --kdf  --tomb-pwd
 gen_key() {
 # $1 the lukskey to encrypt
-    local lukskey=$1
+# $2 is the --cipher-algo to use (string taken by GnuPG)
+    local lukskey="$1"
+    local algo="$2"
     # here user is prompted for key password
     local tombpass=""
     local tombpasstmp=""
@@ -730,11 +771,13 @@ gen_key() {
 	header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
     }
 
+
     print -n $header
 
     print "${tombpass}" \
-	| gpg --openpgp --batch --no-options --no-tty --passphrase-fd 0 2>/dev/null \
-	-o - -c -a ${lukskey}
+	| gpg --openpgp --force-mdc --cipher-algo ${algo} \
+	--batch --no-options --no-tty --passphrase-fd 0 --status-fd 2 \
+     	-o - -c -a ${lukskey}
 
     unset tombpass
 }
@@ -855,22 +898,24 @@ exhume_key() {
 
 
 forge_key() {
-    _message "Commanded to forge key $1"
+    xxx "forge_key()"
+    # can be specified both as simple argument or using -k
+    local destkey="$1"
+    { option_is_set -k } && { destkey="`option_value -k`" }
 
-    { test "$1" = "" } && {
+    { test "$destkey" = "" } && {
 	_warning "no key name specified for creation"
 	return 1 }
 
-    { test -r "$1" } && {
+    { test -r "$destkey" } && {
 	_warning "Forging this key would overwrite an existing file. Operation aborted."
-	die "`ls -lh $1`"    }
+	die "`ls -lh $destkey`"    }
 
     # if swap is on, we remind the user about possible data leaks to disk
     if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
 
-
     # create the keyfile in tmpfs so that we leave less traces in RAM
-    keytmp=`safe_dir forge`
+    local keytmp=`safe_dir forge`
     (( $? )) && die "error creating temp dir"
     xxx "safe_dir at $keytmp"
 
@@ -881,7 +926,13 @@ forge_key() {
 	die "operation aborted."
     fi
 
-    tombkey="$1"
+    local algo
+    { option_is_set -o } && { algopt="`option_value -o`" }
+    algo=${algopt:-AES256}
+
+    _message "Commanded to forge key $destkey with cipher algorithm $algo"
+
+    local tombkey="$destkey"
 
     _message "this operation takes time, keep using this computer on other tasks,"
     _message "once done you will be asked to choose a password for your tomb."
@@ -890,7 +941,7 @@ forge_key() {
 
     touch ${keytmp}/tomb.tmp
     chmod 0600 ${keytmp}/tomb.tmp
-    random_source=/dev/random
+    local random_source=/dev/random
     if option_is_set --use-urandom; then
 	random_source=/dev/urandom
     fi
@@ -913,8 +964,7 @@ forge_key() {
 
     tombname="$tombkey"
     # the gen_key() function takes care of the new key's encryption
-    gen_key ${keytmp}/tomb.tmp > ${tombkey}
-
+    gen_key "${keytmp}/tomb.tmp" "$algo" > ${tombkey}
     # this does a check on the file header
     if ! is_valid_key ${tombkey}; then
 	_warning "The key does not seem to be valid"
@@ -1044,7 +1094,7 @@ lock_tomb_with_key() {
 	die "Aborting operations: error loading key $tombkey" }
 	# make sure to call drop_key later
 
-    # the encryption cipher for a tomb can be set at creation using -o
+    # the encryption cipher for a tomb can be set when locking using -o
     if option_is_set -o; then
 	cipher="`option_value -o`"
     else
@@ -1103,6 +1153,90 @@ lock_tomb_with_key() {
     _message "done locking $tombname using Luks dm-crypt ${create_cipher}"
     _success "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
 
+}
+
+# This function changes the key that locks a tomb
+change_tomb_key() {
+    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
+
+    { option_is_set -k } || { die "Specify the new key with -k" }
+    newkey="`option_value -k`"
+
+    { is_valid_key "$newkey" } || {
+	die "New key invalid. Check your usage of the --key option." }
+
+    oldkey="$1"
+    { is_valid_key "$oldkey" } || {
+	die "Old key invalid. Check your usage of the first argument." }
+
+    { is_valid_tomb "$2" } || {
+	die "Specify the name of a tomb as second argument" }
+
+    nstloop=`losetup -f`
+    { test $? = 255 } && {
+	die "Too many tombs are open. Please close any of them to proceed." }
+    losetup -f "$2"
+    cryptsetup isLuks ${nstloop}
+    # is it a LUKS encrypted nest? we check one more timesee cryptsetup(1)
+    { test $? = 0 } || { 
+	losetup -d "$nstloop"
+	die "Not a valid LUKS encrypted volume: $2" }
+
+    # we have everything, prepare to mount
+    yes "Changing lock on tomb $tombname"
+    _message "old key: $oldkey"
+    _message "new key: $newkey"
+
+    # render the mapper
+    mapdate=`date +%s`
+    # save date of mount in minutes since 1970
+    mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
+
+    
+    # load the new key from the -k option
+    tombkey=`load_key`
+    { test $? = 0 } || {
+	die "Aborting operations: error loading new key $tombkey"    }
+    
+    newkeypass=`ask_key_password $tombkey`
+    { test $? = 0 } || {
+	die "No valid password supplied for the new key" }
+    newkeyfile="`safe_filename newkey`"
+    get_lukskey "$newkeypass" "$newkey" > $newkeyfile
+
+    # load the old key
+    oldkeypass="`ask_key_password $oldkey`"
+    { test $? = 0 } || {
+	die "No valid password supplied for the old key" }
+
+    # luksOpen the tomb (not really mounting, just on the loopback)
+    get_lukskey "$oldkeypass" "$oldkey" | \
+	cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+    { test $? = 0 } || {
+	losetup -d "$nstloop"
+	die "Unexpected error in luksOpen." }
+
+    get_lukskey "$oldkeypass" "$oldkey" | \
+	cryptsetup --key-file - luksChangeKey "$nstloop" "$newkeyfile"
+    { test $? = 0 } || {
+	losetup -d "$nstloop"
+	die "Unexpected error in luksChangeKey." }
+
+    cryptsetup luksClose "${mapper}"
+    { test $? = 0 } || {
+	losetup -d "$nstloop"
+	die "Unexpected error in luksClose." }
+
+
+    drop_key
+    unset tombpass
+    ${=WIPE} "$newkeyfile"
+    losetup -d ${nstloop}
+    
+    yes "Succesfully changed key for tomb: $2"
+    _message "The new key is: $newkey"
+
+    return 0
 }
 
 # backward compatibility
@@ -1922,35 +2056,36 @@ main() {
     #    -force and NOT -f
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v U: -uid=U G: -gid=G T: -tty=T -no-color -unsecure-dev-mode)
     subcommands_opts[__default]=""
-    subcommands_opts[open]="f n -nohook=n k: -key=k o: -mount-options=o -ignore-swap -sudo-pwd: -tomb-pwd:"
+    subcommands_opts[open]="f -force n -nohook=n k: -key=k o: -ignore-swap -sudo-pwd: -tomb-pwd: "
     subcommands_opts[mount]=${subcommands_opts[open]}
 
     subcommands_opts[create]="" # deprecated, will issue warning
 
-    subcommands_opts[forge]="f -force -ignore-swap k: -key=k -kdf: -tomb-pwd: -use-urandom"
-    subcommands_opts[dig]="f -force -ignore-swap s: -size=s"
-    subcommands_opts[lock]="f -force -ignore-swap s: -size=s k: -key=k -sudo-pwd: -tomb-pwd:"
+    subcommands_opts[forge]="f -force -ignore-swap k: -key=k -kdf: o: -tomb-pwd: -use-urandom "
+    subcommands_opts[dig]="f -force -ignore-swap s: -size=s "
+    subcommands_opts[lock]="f -force -ignore-swap k: -key=k o: -sudo-pwd: -tomb-pwd: "
+    subcommands_opts[change]="f -force -ignore-swap k: -key=k -sudo-pwd: -tomb-pwd: "
 
     subcommands_opts[passwd]="f -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
-    subcommands_opts[close]="-sudo-pwd:"
+    subcommands_opts[close]="-sudo-pwd: "
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
-    subcommands_opts[list]="-get-mountpoint"
+    subcommands_opts[list]="-get-mountpoint "
 
     subcommands_opts[index]=""
     subcommands_opts[search]=""
 
     subcommands_opts[help]=""
-    subcommands_opts[bury]="f -force k: -key=k -tomb-pwd:"
-    subcommands_opts[exhume]="f -force k: -key=k -tomb-pwd:"
-    subcommands_opts[decompose]=""
-    subcommands_opts[recompose]=""
-    subcommands_opts[install]=""
+    subcommands_opts[bury]="f -force k: -key=k -tomb-pwd: "
+    subcommands_opts[exhume]="f -force k: -key=k -tomb-pwd: "
+    # subcommands_opts[decompose]=""
+    # subcommands_opts[recompose]=""
+    # subcommands_opts[install]=""
     subcommands_opts[askpass]=""
     subcommands_opts[mktemp]=""
     subcommands_opts[source]=""
-    subcommands_opts[resize]="f -force -ignore-swap s: -size=s k: -key=k -tomb-pwd:"
-    subcommands_opts[check]="-ignore-swap"
+    subcommands_opts[resize]="f -force -ignore-swap s: -size=s k: -key=k -tomb-pwd: "
+    subcommands_opts[check]="-ignore-swap "
 #    subcommands_opts[translate]=""
 
     ### Detect subcommand
@@ -1973,7 +2108,7 @@ main() {
 	fi
 	unset discardme
     if ! zparseopts -M -E -D -Adiscardme ${every_opts}; then
-		error "error parsing"
+		die "error parsing"
 		return 127
 	fi
     unset discardme
@@ -2055,6 +2190,12 @@ main() {
 	    check_priv
 	    lock_tomb_with_key ${=PARAM}
 	    ;;
+
+	change)
+	    check_priv
+	    change_tomb_key ${=PARAM}
+	    ;;
+
 	# backward compat
 	create)
 	    _warning "The create command is deprecated, please use dig, forge and lock instead."
@@ -2122,7 +2263,7 @@ EOF
 	    option_is_set -v && {
 		cat <<EOF
 
-GnuPG available ciphers:
+Key forging algorithms (GnuPG symmetric ciphers):
 `list_gnupg_ciphers`
 EOF
 		return 0
