@@ -270,16 +270,18 @@ Commands:
  list    list of open TOMBs and information on them
  close   close a specific TOMB (or 'all')
  slam    slam a TOMB killing all programs using it
-
- // Operations on keys:
- passwd  change the password of a KEY
- change  change the KEY locking a TOMB (needs old one)
 EOF
     if [ "$RESIZER" = 1 ]; then
 	cat <<EOF
  resize  resize a TOMB to a new --size (can only grow)
 EOF
     fi
+cat <<EOF
+
+ // Operations on keys:
+ passwd  change the password of a KEY
+ setkey  change the KEY locking a TOMB (needs old one)
+EOF
 
     { test "$QRENCODE" = "1" } && {
 	cat <<EOF
@@ -769,22 +771,28 @@ gen_key() {
     fi
 
     header=""
-    { option_is_set --kdf } && {
+    { test "$KDF" = 1 } && {
+	{ option_is_set --kdf } && {
     # KDF is a new key strenghtening technique against brute forcing
     # see: https://github.com/dyne/Tomb/issues/82
-	itertime="`option_value --kdf`"
-	{ test "$itertime" = "" } && { itertime=".5" }
-	_verbose "KDF itertime chosen: $itertime"
+	    itertime="`option_value --kdf`"
+	# removing support of floating points because they can't be type checked well
+	    if [[ "$itertime" != <-> ]]; then
+		unset tombpass
+		unset tombpasstmp
+		die "Wrong argument for --kdf: must be an integer number (iteration seconds)"
+	    fi
 	    # --kdf takes one parameter: iter time (on present machine) in seconds
-	local -i microseconds
-	microseconds=$((itertime*1000000))
-	_verbose "Microseconds: $microseconds"
-	pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
-	pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
+	    local -i microseconds
+	    microseconds=$((itertime*10000))
+	    yes "Using KDF, iterations: $microseconds"
+	    pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
+	    pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
 	    # We use a length of 64bytes = 512bits (more than needed!?)
-	tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
-
-	header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+	    tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
+	    
+	    header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+	}
     }
 
 
@@ -796,6 +804,7 @@ gen_key() {
 	-o - -c -a ${lukskey}
 
     unset tombpass
+    unset tombpasstmp
 }
 
 # prints an array of ciphers available in gnupg (to encrypt keys)
@@ -2147,7 +2156,7 @@ main() {
     subcommands_opts[forge]="f -force -ignore-swap k: -key=k -kdf: o: -tomb-pwd: -use-urandom "
     subcommands_opts[dig]="f -force -ignore-swap s: -size=s "
     subcommands_opts[lock]="f -force -ignore-swap k: -key=k o: -sudo-pwd: -tomb-pwd: "
-    subcommands_opts[change]="f -force -ignore-swap k: -key=k -sudo-pwd: -tomb-pwd: "
+    subcommands_opts[setkey]="f -force -ignore-swap k: -key=k -sudo-pwd: -tomb-pwd: "
     subcommands_opts[engrave]="k: -key=k "
 
     subcommands_opts[passwd]="f -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
@@ -2275,7 +2284,7 @@ main() {
 	    lock_tomb_with_key ${=PARAM}
 	    ;;
 
-	change)
+	setkey)
 	    check_priv
 	    change_tomb_key ${=PARAM}
 	    ;;

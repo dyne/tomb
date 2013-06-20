@@ -57,7 +57,15 @@ notice "Testing creation: forge"
 
 tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypass} --use-urandom forge /tmp/test.tomb.key
 
-{ test $? = 0 } && { results+=(forge SUCCESS) }
+{ test $? = 0 } && { 
+    results+=(forge SUCCESS)
+    # 
+    say "Dump of clear key contents to examine them:"
+    print ${dummypass} \
+	| gpg --batch --passphrase-fd 0 --no-tty --no-options -d /tmp/test.tomb.key \
+	| hexdump -C
+    echo --
+}
 
 notice "Testing creation: lock"
 

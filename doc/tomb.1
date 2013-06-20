@@ -1,4 +1,4 @@
-.TH tomb 1 "May 25, 2013" "tomb"
+.TH tomb 1 "June 20, 2013" "tomb"
 
 .SH NAME
 Tomb \- the Crypto Undertaker
@@ -30,18 +30,23 @@ harddisk and its key file on a USB stick.
 .IP "dig"
 Generates a file that can be used as a tomb and will occupy as much
 space as its desired initial size, the unlocked \fI.tomb\fR file can
-then be locked using a \fI.tomb.key\fR. It takes a mandatory option
-which is the \fI--size\fR in megabytes (MiB). This generation is
-relatively simple: its a data dump (dd) of low-quality random data
-(from /dev/urandom) and does not require root privileges.
+then be locked using a \fIkey\fR. It takes a mandatory option which is
+the \fI--size\fR in megabytes (MiB). Tombs are digged using
+low-quality random data (/dev/urandom).
 
 .B
 .IP "forge"
 Creates a new \fIkey\fR and prompts the user for a \fIpassword\fR to
 protect its usage. This operation requires high quality random data
-(from /dev/random) which can take quite some time to be gathered on a
+(/dev/random) which can take quite some time to be gathered on a
 server: it works better on a desktop where the mouse can be moved
-around for entropy.
+around for entropy. The default cipher to protect the key is AES256, a
+custom one can be specified using the \fI-o\fR option, for a list of
+supported ciphers use \fI-v\fR. For additional protection against
+dictionary attacks on keys, the (experimental) \fI--kdf\fR option can
+be used when forging a key, making sure that the \fItomb-kdb-pbkdf2\fR
+binaries in \fIextras/kdf\fR were compiled and installed on the
+system.
 
 .B
 .IP "lock"
@@ -102,13 +107,20 @@ situations.
 
 .B
 .IP "passwd"
-Changes the password protecting a \fIkey\fR file specified using
+Changes the password protecting a key file specified using
 \fI-k\fR. The user will need to know the key's current password, then
 its content will be decoded and reencoded using the new one. This
 action can't be forced if the current password is not known. If the
 key file is broken (missing headers) this function also attempts its
 recovery.
 
+.B
+.IP "setkey"
+Changes the key file that locks a tomb, substituting the old one with
+a new one. Both the old and the new key files are needed for this
+operation and their passwords must be known. The new key must be
+specified using the \fI-k\fR option, the first argument should be the old
+key and the second and last argument the tomb file.
 
 .B
 .IP "resize"
@@ -119,6 +131,15 @@ can never be made smaller. This command makes use of the cryptsetup
 resize feature and the resize2fs command: its much more practical than
 creating a new tomb and moving everything into it.
 
+.B
+.IP "engrave"
+This command transforms a tomb key into an image that can be printed
+on paper and phisically stored as backup, i.e. hidden in a book. It
+Renders a QRCode of the tomb key, still protected by its password: a
+PNG image (extension \fI.qr.png\fR) will be created in the current
+directory and can be later printed (fits an A4 or Letter format).  To
+recover an engraved key one can use any QRCode reader on a smartphone:
+save it into a file and then use that file as a key (\fI-k\fR).
 
 .B
 .IP "bury"
@@ -152,9 +173,10 @@ other media.  If \fI<keyfile>\fR is "-" (dash), it will read it from
 stdin.
 .B
 .IP "--kdf \fI<seconds>\fR"
-Activate the KDF feature against dictionary attacks when creating a key: forces a
-delay of \fI<seconds>\fR every time this key is used. Floating point values
-are accepted, default is 1.
+Activate the KDF feature against dictionary attacks when creating a
+key: forces a delay of \fI<seconds>\fR every time this key is
+used. This feature is still \fIexperimental\fR and not recommended in
+production environments.
 .B
 .IP "-n"
 Skip processing of post-hooks and bind-hooks if found inside the tomb.

@@ -1,5 +1,17 @@
-June 2013 - 1.3.1
-	
+June 2013 - 1.4
+
+	This release fixes an important bug affecting Tomb 1.3.* which
+	breaks backward compatibility with older tombs and invalidates
+	keys created using 1.3 or 1.3.1. For more information about it
+	read the file KNOWN_BUGS.  New features are also included:
+	indexing and search of file contents, engraving of keys into paper
+	printable QRCodes for backup purposes and improvements in key
+	encryption. A setkey command is added to change the key file that
+	is locking a Tomb. This release restores backward compatibility
+	with tombs created before the 1.3 release series.
+
+June 2013 - 1.3.1 (DEPRECATED USAGE, see 1.4 and KNOWN_BUGS)
+
 	Major bugfixes following the recent refactoring. This release
 	fixes various advanced commands as search/index, KDF key
 	protection against dictionary attacks and steganographic hiding of
@@ -8,7 +20,7 @@ June 2013 - 1.3.1
 	consistent and full paths are honored. A new test suite is
 	included and documentation is updated accordingly.
 
-May 2013 - 1.3
+May 2013 - 1.3 (DEPRECATED USAGE, see 1.4 and KNOWN_BUGS)
 
 	A refactoring of Tomb's main script internals was made, including
 	a new messaging system, machine parsable output, cleaner code and
