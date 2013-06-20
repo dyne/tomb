@@ -11,7 +11,7 @@ error() { _warning "     ${@}"; }
 tt() {
 	start_loops=(`sudo losetup -a |cut -d: -f1`)
 	start_temps=(`find /dev/shm -name 'tomb*'`)
-	${T} ${=@}
+	${T} -D ${=@}
 	res=$?
 	loops=(`sudo losetup -a |cut -d: -f1`)
 	temps=(`find /dev/shm -name 'tomb*'`)
@@ -47,15 +47,19 @@ startloops=(`sudo losetup -a |cut -d: -f1`)
 
 
 
-notice "Testing creation"
+notice "Testing creation: dig"
 
 tt dig -s 20 /tmp/test.tomb
 
 { test $? = 0 } && { results+=(dig SUCCESS) }
 
+notice "Testing creation: forge"
+
 tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypass} --use-urandom forge /tmp/test.tomb.key
 
 { test $? = 0 } && { results+=(forge SUCCESS) }
+
+notice "Testing creation: lock"
 
 tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypass} lock /tmp/test.tomb -k /tmp/test.tomb.key
 
@@ -126,9 +130,6 @@ if [ "$rnd" = "$rnd2" ]; then
 else
 	error "Bind hook on file reports incongruence"
 fi
-sudo umount $HOME/test-$rnd
-rm /media/test.tomb/bind-hooks
-rm /media/test.tomb/test-$rnd
 tt close test
 
 

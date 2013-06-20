@@ -254,43 +254,43 @@ is_valid_tomb() {
 usage() {
     cat <<EOF
 
-Syntax: tomb [options] command [file] [place]
+Syntax: tomb [options] command [arguments]
 
 Commands:
 
+ // Creation:
  dig     create a new empty TOMB file of --size in MB
  forge   create a new KEY file and set its password
  lock    installs a lock on a TOMB to use it with KEY
 
+ // Operations on tombs:
  open    open an existing TOMB
-
  index   update the search indexes of tombs
  search  looks for filenames matching text patterns
-
- list    list open TOMBs
-
- close   close a TOMB (or all)
+ list    list of open TOMBs and information on them
+ close   close a specific TOMB (or 'all')
  slam    slam a TOMB killing all programs using it
 
+ // Operations on keys:
  passwd  change the password of a KEY
  change  change the KEY locking a TOMB (needs old one)
 EOF
-
-    { test "$QRENCODE" = "1" } && {
-	cat <<EOF
- backup  makes a QR code of a KEY to be saved on paper
-EOF
-    }
-
     if [ "$RESIZER" = 1 ]; then
 	cat <<EOF
  resize  resize a TOMB to a new --size (can only grow)
 EOF
     fi
+
+    { test "$QRENCODE" = "1" } && {
+	cat <<EOF
+ engrave makes a QR code of a KEY to be saved on paper
+EOF
+    }
+
     if [ "$STEGHIDE" = 1 ]; then
 	cat <<EOF
- bury       hide a KEY inside a JPEG image
- exhume     extract a KEY from a JPEG image
+ bury    hide a KEY inside a JPEG image
+ exhume  extract a KEY from a JPEG image
 EOF
     fi
     cat <<EOF
@@ -305,7 +305,7 @@ Options:
 EOF
     { test "$KDF" = 1 } && {
 	cat <<EOF
- --kdf  seconds generate passwords against dictionary attacks
+ --kdf  generate passwords armored against dictionary attacks
 EOF
     }
 
@@ -773,6 +773,7 @@ gen_key() {
     # KDF is a new key strenghtening technique against brute forcing
     # see: https://github.com/dyne/Tomb/issues/82
 	itertime="`option_value --kdf`"
+	{ test "$itertime" = "" } && { itertime=".5" }
 	_verbose "KDF itertime chosen: $itertime"
 	    # --kdf takes one parameter: iter time (on present machine) in seconds
 	local -i microseconds
@@ -901,7 +902,7 @@ exhume_key() {
 
 # Produces a printable image of the key contents so that it can be
 # backuped on paper and hidden in books etc.
-backup_key() {
+engrave_key() {
     # load key from options
     tombkey="`load_key $1`"
     { test $? = 0 } || { die "No key specified." }
@@ -2102,7 +2103,7 @@ main() {
     subcommands_opts[dig]="f -force -ignore-swap s: -size=s "
     subcommands_opts[lock]="f -force -ignore-swap k: -key=k o: -sudo-pwd: -tomb-pwd: "
     subcommands_opts[change]="f -force -ignore-swap k: -key=k -sudo-pwd: -tomb-pwd: "
-    subcommands_opts[backup]="k: -key=k "
+    subcommands_opts[engrave]="k: -key=k "
 
     subcommands_opts[passwd]="f -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
     subcommands_opts[close]="-sudo-pwd: "
@@ -2234,10 +2235,10 @@ main() {
 	    change_tomb_key ${=PARAM}
 	    ;;
 
-	backup)
+	engrave)
 	    { test "$QRENCODE" = 0 } && {
-		die "QREncode not installed: cannot backup keys on paper." }
-	    backup_key ${=PARAM}
+		die "QREncode not installed: cannot engrave keys on paper." }
+	    engrave_key ${=PARAM}
 	    ;;
 
 	# backward compat
@@ -2306,8 +2307,17 @@ Tomb $VERSION - a strong and gentle undertaker for your secrets
 EOF
 	    option_is_set -v && {
 		cat <<EOF
+ This source code is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ Please refer to the GNU Public License for more details.
 
-Key forging algorithms (GnuPG symmetric ciphers):
+System utils:
+
+ `sudo -V | head -n1`
+ `cryptsetup --version`
+ `pinentry --version`
+ `gpg --version | head -n1` - key forging algorithms (GnuPG symmetric ciphers):
 `list_gnupg_ciphers`
 EOF
 		return 0
