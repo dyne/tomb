@@ -216,6 +216,15 @@ EOF
 	exit $?
     fi # are we root already
 
+    # check if we have support for loop mounting
+    losetup -f > /dev/null
+    { test "$?" = "0" } || {
+	no "Loop mount of volumes is not supported on this machine, this error"
+	no "often occurs on VPS and kernels that don't provide the loop module."
+	no "It is impossible to use Tomb on this machine at this conditions."
+	die "Operation aborted."
+    }
+
     # make sure necessary kernel modules are loaded
     modprobe dm_mod 2>/dev/null
     modprobe dm_crypt 2>/dev/null
