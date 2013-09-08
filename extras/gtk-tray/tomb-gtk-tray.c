@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
   else snprintf(mountpoint,255, "%s", argv[3]);
 
   // libnotify
-  notify_init(PACKAGE);
+  notify_init("Tomb");
 
   // set and show the status icon
   pb_monmort = gdk_pixbuf_new_from_xpm_data(monmort);
@@ -293,10 +293,10 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e) {
 			    "Asbesto Molesto - http://freaknet.org/asbesto",
 			    NULL};
   GtkWidget *dialog = gtk_about_dialog_new();
-  gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(dialog), PACKAGE);
-  gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION); 
+  gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(dialog), "Tomb GTK Tray");
+  gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), "1.4"); 
   gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog), 
-				 "(C)2007-2011 Jaromil @ Dyne.org Foundation");
+				 "(C)2007-2013 Jaromil @ Dyne.org Foundation");
   gtk_about_dialog_set_artists(GTK_ABOUT_DIALOG(dialog), artists);
   gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dialog), authors);
 
@@ -309,7 +309,7 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e) {
 "Tomb also encourages users to separate keys from data, for instance storing them on USB.\n"
 "\n"
 );
-  gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog), PACKAGE_URL);
+  gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog), "http://tomb.dyne.org");
   gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog), pb_monmort);
   gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(dialog), "monmort");
   // this below is active since gtk 3.0 so too early for it now

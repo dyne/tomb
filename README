@@ -68,7 +68,7 @@ Tomb is an evolution of the 'mknest' tool developed for the dyne:bolic
 GNU/Linux distribution, which is used by its 'nesting' mechanism to
 encrypt the Home directory of users, a system implemented already in
 2001. Since then, the same shell routines kept being maintained and in
-2007 they were adapted to work on Debian and Arch distributions.
+2007 they were adapted to work on various other GNU/Linux distributions.
 
 As of today, Tomb is a well stable tool also used in mission critical
 situations by a number of activists in endangered zones. It has been
@@ -93,3 +93,4 @@ http://lists.dyne.org or via IRC on https://irc.dyne.org channel #dyne
 Some enthusiastic ideas are in the TODO file.
 
 Information on developers involved is found in the AUTHORS file.
+
