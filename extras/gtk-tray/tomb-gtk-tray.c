@@ -64,23 +64,20 @@ int main(int argc, char **argv) {
   char tomb_file[512];
   char tooltip[256];
 
-  gtk_set_locale();
+//  gtk_set_locale();
   gtk_init(&argc, &argv);
 
   // get the information from commandline
   if(argc<2) {
-    fprintf(stderr, "error: need at least one argument, the path to a dm-crypt device mapper\n");
+    fprintf(stderr, "error: need at least one argument, the name of an open tomb.\n");
     exit(1);
   } else {
     // TODO: check if mapper really exists
     snprintf(mapper,255, "%s", argv[1]);
   }
 
-  if(argc<3) sprintf(filename, "unknown");
-  else snprintf(filename,255, "%s", argv[2]);
-
-  if(argc<4) sprintf(mountpoint,"unknown");
-  else snprintf(mountpoint,255, "%s", argv[3]);
+  snprintf(filename,255, "%s", argv[1]);
+  snprintf(mountpoint,255, "/media/%s.tomb", argv[1]);
 
   // libnotify
   notify_init("Tomb");
@@ -91,7 +88,7 @@ int main(int argc, char **argv) {
   //  gtk_status_icon_set_name(status_tomb, "tomb");
   gtk_status_icon_set_title(status_tomb, "Tomb");
 
-  snprintf(tooltip,255,"%s",mountpoint);
+  snprintf(tooltip,255,"%s",filename);
   gtk_status_icon_set_tooltip_text (status_tomb, tooltip);
 
   // LEFT click menu
@@ -181,7 +178,7 @@ gboolean cb_view(GtkWidget *w, GdkEvent *e) {
       map[c] = buf;
     close(pipefd[0]);
     map[c] = 0;
-    execlp("tomb-open", "tomb-open", map, (char*)NULL);
+    execlp("xdg-open", "xdg-open", map, (char*)NULL);
     _exit(1);
   }
   close(pipefd[0]); // close unused read end
@@ -293,7 +290,7 @@ gboolean cb_about(GtkWidget *w, GdkEvent *e) {
 			    "Asbesto Molesto - http://freaknet.org/asbesto",
 			    NULL};
   GtkWidget *dialog = gtk_about_dialog_new();
-  gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(dialog), "Tomb GTK Tray");
+//  gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(dialog), "Tomb GTK Tray");
   gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), "1.4"); 
   gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog), 
 				 "(C)2007-2013 Jaromil @ Dyne.org Foundation");
