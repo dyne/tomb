@@ -932,7 +932,7 @@ engrave_key() {
     awk '
 /^-----/ {next}
 /^Version/ {next}
-{print $0}' ${tombkey} | qrencode --size 4 -t PNG --level H \
+{print $0}' ${tombkey} | qrencode --size 4 --level H \
     --casesensitive -o "$pngname"
     { test $? = 0 } || { die "QREncode reported an error." }
     yes "Operation successful:"
