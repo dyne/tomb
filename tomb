@@ -1553,7 +1553,7 @@ exec_safe_post_hooks() {
     cat ${mnt}/post-hooks | head -n1 | grep '^#!/'
     if [ $? = 0 ]; then
 	_success "post hooks found, executing as user $SUDO_USER"
-	exec_as_user ${mnt}/post-hooks $2
+	exec_as_user ${mnt}/post-hooks "$2" "$1"
     fi
 }
 

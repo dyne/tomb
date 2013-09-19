@@ -237,8 +237,11 @@ example:
 .B
 .IP "post-hooks"
 This hook file gets executed as user by tomb right after opening it;
-it can consist of a shell script of a binary executable that performs
-batch operations every time a tomb is opened.
+it should be a regular shell script, starting with a shell bang. Tomb
+executes this hook as user (dropping root priviledges) and giving it
+two arguments: "$1" is "open" or "close" depending from the tomb
+command given, "$2" is the full path to the mountpoint where the tomb
+is open.
 
 .SH PRIVILEGE ESCALATION
 
@@ -306,36 +309,44 @@ the tomb will be opened:
 
 .EX
 	tomb open GPG.tomb -k GPG.tomb.key
-
 	echo ".gnupg .gnupg" > /media/GPG.tomb/bind-hooks
-
 	mv ~/.gnupg /media/GPG.tomb/.gnupg && mkdir ~/.gnupg
-
 	tomb close GPG && tomb open GPG.tomb -k GPG.tomb.key
 .EE
 
 .IP \(bu
-Create an exec post hook that launches a Firefox browser every time
-the tomb will be opened, keeping all its profile data inside it:
+Script a tomb to launch the Firefox browser every time is opened,
+keeping all its profile data inside it:
 
 .EX
 	tomb open FOX.tomb -k FOX.tomb.key
-
-	touch        /media/FOX.tomb/post-hooks
-
-	chmod +x     /media/FOX.tomb/post-hooks
-
-	cat <<EOF >> /media/FOX.tomb/post-hooks
-
-#!/usr/bin/env bash
-
-if [ "$1" == open ]; then
-
-  firefox -no-remote -profile $(dirname $0)/firefox_prof &
-
+	cat <<EOF > /media/FOX.tomb/post-hooks
+#!/bin/sh
+if [ "$1" = "open" ]; then
+  firefox -no-remote -profile "$2"/firefox-pro &
 fi
-
 EOF
+	chmod +x     /media/FOX.tomb/post-hooks
+.EE
+
+.IP \(bu
+Script a tomb to archive Pictures using Shotwell, launching it on open:
+
+.EX
+	tomb open Pictures.tomb -k Pictures.tomb.key
+	cat <<EOF > /media/Pictures.tomb/bind-hooks
+Pictures Pictures
+EOF
+        cat <<EOF > /media/Pictures.tomb/post-hooks
+#!/bin/sh
+if [ "$1" = "open" ]; then
+  which shotwell > /dev/null
+  if [ "$?" = "0" ]; then
+    shotwell -d "$2"/Pictures/.shotwell &
+  fi
+fi
+EOF
+	chmod +x /media/Pictures.tomb/post-hooks
 .EE
 
 .SH BUGS
