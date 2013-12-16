@@ -136,7 +136,7 @@ safe_filename() {
 check_swap() {
     # Return 0 if NO swap is used, 1 if swap is used
     # Return 2 if swap(s) is(are) used, but ALL encrypted
-    local swaps=$(awk '/^\// { print $1 }' /proc/swaps 2>/dev/null)
+    local swaps="$(awk '/^\// { print $1 }' /proc/swaps 2>/dev/null)"
     [[ -z "$swaps" ]] && return 0                # No swap partition is active
     # Check whether all swaps are encrypted, and return 2
     # If any of the swaps is not encrypted, we bail out and return 1.
