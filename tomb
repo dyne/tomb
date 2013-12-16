@@ -181,6 +181,22 @@ check_swap() {
     return $ret
 }
 
+# Wrapper to allow encrypted swap and remind the user about
+# possible data leaks to disk if swap is on, and not to be ignored
+_check_swap() {
+    if ! option_is_set -f && ! option_is_set --ignore-swap; then
+	check_swap
+	case $? in
+	    0|2)     # No, or encrypted swap
+		return 0
+		;;
+	    *)       # Unencrypted swap
+		return 1
+		;;
+	esac
+    fi
+}
+
 # Ask user for a password
 ask_password() {
 # we use pinentry now
@@ -619,7 +635,7 @@ ask_key_password() {
 # change tomb key password
 change_passwd() {
     _message "Commanded to change password for tomb key $1"
-    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
+    _check_swap
 
     local keyfile="$1" # $1 is the tomb key path
 
@@ -991,6 +1007,8 @@ engrave_key() {
 
 forge_key() {
     xxx "forge_key()"
+    _check_swap
+
     # can be specified both as simple argument or using -k
     local destkey="$1"
     { option_is_set -k } && { destkey="`option_value -k`" }
@@ -1002,9 +1020,6 @@ forge_key() {
     { test -r "$destkey" } && {
 	_warning "Forging this key would overwrite an existing file. Operation aborted."
 	die "`ls -lh $destkey`"    }
-
-    # if swap is on, we remind the user about possible data leaks to disk
-    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
 
     # create the keyfile in tmpfs so that we leave less traces in RAM
     local keytmp=`safe_dir forge`
@@ -1084,9 +1099,7 @@ forge_key() {
 # taken from /dev/urandom which improves the tomb's overall security
 dig_tomb() {
     _message "Commanded to dig tomb $1"
-
-    # if swap is on, we remind the user about possible data leaks to disk
-    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
+    _check_swap
 
     if ! [ $1 ]; then
 	_warning "no tomb name specified for creation"
@@ -1249,7 +1262,7 @@ lock_tomb_with_key() {
 
 # This function changes the key that locks a tomb
 change_tomb_key() {
-    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
+    _check_swap
 
     { option_is_set -k } || { die "Specify the new key with -k" }
     newkey="`option_value -k`"
@@ -1370,8 +1383,7 @@ create_tomb() {
 # $1 = tombfile $2(optional) = mountpoint
 mount_tomb() {
     _message "Commanded to open tomb $1"
-
-    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
+    _check_swap
 
     if ! [ ${1} ]; then
 	_warning "no tomb name specified for creation"
