@@ -1969,7 +1969,6 @@ resize_tomb() {
     { test -r "$tombkey" } || {
 	die "Aborting operations: key not found, use -k" }
 
-    local tmp_resize=`safe_filename resize`
     local oldtombsize=$(( `stat -c %s "$1" 2>/dev/null` / 1048576 ))
     local mounted_tomb=`mount -l |
 	awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
@@ -1991,17 +1990,10 @@ resize_tomb() {
     act "Generating ${tombfile} of ${newtombsize}MiB"
 
     xxx "Data dump using ${DD[1]} from /dev/urandom"
-    ${=DD} if=/dev/urandom bs=1048576 count=${delta} of="${tmp_resize}"
+    ${=DD} if=/dev/urandom bs=1048576 count=${delta} >> ${tombdir}/${tombfile}
 
-    if [ $? = 0 -a -e "${tmp_resize}" ]; then
-	xxx "OK: `ls -lh ${tmp_resize}`"
-    else
-	_failure "Error creating the extra resize $tmp_resize, operation aborted."
-    fi
-
-    cat "${tmp_resize}" >> ${tombdir}/${tombfile}
-    rm "${tmp_resize}"
-
+    { test $? = 0 } || {
+	_failure "Error creating the extra resize $tmp_resize, operation aborted." }
 
     tombpass=`ask_key_password $tombkey`
     { test $? = 0 } || {
