@@ -320,7 +320,7 @@ Syntax: tomb [options] command [arguments]
 Commands:
 
  // Creation:
- dig     create a new empty TOMB file of --size in MB
+ dig     create a new empty TOMB file of size -s in MB
  forge   create a new KEY file and set its password
  lock    installs a lock on a TOMB to use it with KEY
 
@@ -334,7 +334,7 @@ Commands:
 EOF
     if [ "$RESIZER" = 1 ]; then
 	cat <<EOF
- resize  resize a TOMB to a new --size (can only grow)
+ resize  resize a TOMB to a new size -s (can only grow)
 EOF
     fi
 cat <<EOF
@@ -1117,7 +1117,7 @@ dig_tomb() {
     # require the specification of the size of the tomb (-s) in MB
     tombsize="`option_value -s`"
 
-    [ $tombsize ] || die "Size argument missing, use --size"
+    [ $tombsize ] || die "Size argument missing, use -s"
 
     [[ $tombsize != <-> ]] && die "Size argument is not an integer"
 

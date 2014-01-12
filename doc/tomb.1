@@ -30,8 +30,8 @@ harddisk and its key file on a USB stick.
 .IP "dig"
 Generates a file that can be used as a tomb and will occupy as much
 space as its desired initial size, the unlocked \fI.tomb\fR file can
-then be locked using a \fIkey\fR. It takes a mandatory option which is
-the \fI--size\fR in megabytes (MiB). Tombs are digged using
+then be locked using a \fIkey\fR. It takes a mandatory \fI-s\fR option which is
+the size in megabytes (MiB). Tombs are digged using
 low-quality random data (/dev/urandom).
 
 .B
@@ -127,7 +127,7 @@ key and the second and last argument the tomb file.
 .B
 .IP "resize"
 Increase the size of a tomb file to the amount specified by the
-\fI--size\fR option in megabytes (MiB). Full access to the tomb using
+\fI-s\fR option, which is the new size in megabytes (MiB). Full access to the tomb using
 a key (\fI-k\fR) and its password is requires. Tombs can only grow and
 can never be made smaller. This command makes use of the cryptsetup
 resize feature and the resize2fs command: its much more practical than
