@@ -1154,7 +1154,9 @@ lock_tomb_with_key() {
     if option_is_set -o; then
 	cipher="`option_value -o`"
     else
-	cipher="aes-cbc-essiv:sha256"
+	cipher="aes-xts-plain64:sha256"
+	# old default was aes-cbc-essiv:sha256
+	# for more alternatives refer to cryptsetup(8)
     fi
     _message "locking using cipher: $cipher"
 

@@ -54,8 +54,10 @@ Initializes and locks an empty tomb (made with \fIdig\fR) using a key
 (made with \fIforge\fR), making it ready for usage. After this
 operation, the tomb can only be open in possession of the key and
 knowing its password. As in any other command requiring a key, the
-option \fI-k\fR should be used to specify a key file. This operation
-requires root privileges to loopback mount, format the tomb (using
+option \fI-k\fR should be used to specify a key file. The \fI-o\fR
+option can be used to specify the cipher specification: default is
+"aes-xts-plain64:sha256", old versions of Tomb used "aes-cbc-essiv:sha256".
+This operation requires root privileges to loopback mount, format the tomb (using
 LUKS and Ext4), then set the key in its first LUKS slot.
 
 .B
