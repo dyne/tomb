@@ -136,13 +136,65 @@ safe_filename() {
 check_swap() {
     # Return 0 if NO swap is used, 1 if swap is used
     # Return 2 if swap(s) is(are) used, but ALL encrypted
-    local swaps=$(awk '/partition/ { print $1 }' /proc/swaps 2>/dev/null)
+    local swaps="$(awk '/^\// { print $1 }' /proc/swaps 2>/dev/null)"
     [[ -z "$swaps" ]] && return 0                # No swap partition is active
+    # Check whether all swaps are encrypted, and return 2
+    # If any of the swaps is not encrypted, we bail out and return 1.
+    ret=1
+    for s in $=swaps; do
+	bone=`sudo file $s`
+	if `echo "$bone" | grep 'swap file' &>/dev/null`; then
+	    # It's a regular (unencrypted) swap file
+	    ret=1
+	    break
+        elif `echo "$bone" | grep 'symbolic link' &>/dev/null`; then
+	    # Might link to a block
+	    ret=1
+	    if [ "/dev/mapper" = "${s%/*}" ]; then
+		is_crypt=`sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
+		if [ "crypt" = "$is_crypt" ]; then
+		    ret=2
+		fi
+	    else
+		break
+	    fi
+	elif `echo "$bone" | grep 'block special' &>/dev/null`; then
+	    # Is a block
+	    ret=1
+            is_crypt=`sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
+	    if [ "crypt" = "$is_crypt" ]; then
+		ret=2
+	    else
+		break
+	    fi
+	fi
+    done
     no  "An active swap partition is detected, this poses security risks."
-    no  "You can deactivate all swap partitions using the command:"
-    no  " swapoff -a"
-    no  "But if you want to proceed like this, use the -f (force) flag."
-    die "Operation aborted."
+    if [[ $ret -eq 2 ]]; then
+	yes "All your swaps are belong to crypt.  Good."
+    else
+	no  "You can deactivate all swap partitions using the command:"
+	no  " swapoff -a"
+	no  "But if you want to proceed like this, use the -f (force) flag."
+	die "Operation aborted."
+    fi
+    return $ret
+}
+
+# Wrapper to allow encrypted swap and remind the user about
+# possible data leaks to disk if swap is on, and not to be ignored
+_check_swap() {
+    if ! option_is_set -f && ! option_is_set --ignore-swap; then
+	check_swap
+	case $? in
+	    0|2)     # No, or encrypted swap
+		return 0
+		;;
+	    *)       # Unencrypted swap
+		return 1
+		;;
+	esac
+    fi
 }
 
 # Ask user for a password
@@ -583,7 +635,7 @@ ask_key_password() {
 # change tomb key password
 change_passwd() {
     _message "Commanded to change password for tomb key $1"
-    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
+    _check_swap
 
     local keyfile="$1" # $1 is the tomb key path
 
@@ -955,6 +1007,8 @@ engrave_key() {
 
 forge_key() {
     xxx "forge_key()"
+    _check_swap
+
     # can be specified both as simple argument or using -k
     local destkey="$1"
     { option_is_set -k } && { destkey="`option_value -k`" }
@@ -966,9 +1020,6 @@ forge_key() {
     { test -r "$destkey" } && {
 	_warning "Forging this key would overwrite an existing file. Operation aborted."
 	die "`ls -lh $destkey`"    }
-
-    # if swap is on, we remind the user about possible data leaks to disk
-    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
 
     # create the keyfile in tmpfs so that we leave less traces in RAM
     local keytmp=`safe_dir forge`
@@ -1048,9 +1099,7 @@ forge_key() {
 # taken from /dev/urandom which improves the tomb's overall security
 dig_tomb() {
     _message "Commanded to dig tomb $1"
-
-    # if swap is on, we remind the user about possible data leaks to disk
-    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
+    _check_swap
 
     if ! [ $1 ]; then
 	_warning "no tomb name specified for creation"
@@ -1215,7 +1264,7 @@ lock_tomb_with_key() {
 
 # This function changes the key that locks a tomb
 change_tomb_key() {
-    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
+    _check_swap
 
     { option_is_set -k } || { die "Specify the new key with -k" }
     newkey="`option_value -k`"
@@ -1336,8 +1385,7 @@ create_tomb() {
 # $1 = tombfile $2(optional) = mountpoint
 mount_tomb() {
     _message "Commanded to open tomb $1"
-
-    if ! option_is_set -f && ! option_is_set --ignore-swap; then check_swap; fi
+    _check_swap
 
     if ! [ ${1} ]; then
 	_warning "no tomb name specified for creation"
