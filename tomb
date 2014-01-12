@@ -566,15 +566,16 @@ load_key() {
 	    tombdir=`dirname $tombkey`
 	    tombfile=`basename $tombkey`
 	fi
+    else
+	tombkey=${tombdir}/${tombfile}.key
     fi
 
-    tombkey=${tombdir}/${tombfile}
-
-    xxx "load_key: `ls -lh ${tombkey}`"
+    xxx "load_key: ${tombkey}"
 
     if [ -r "${tombkey}" ]; then
 	_message "We'll use this key: ${tombkey}"
     else
+	_warning "Key not found, specify one using -k"
 	return 1
     fi
 
@@ -1193,7 +1194,7 @@ lock_tomb_with_key() {
     fi
 
     # load key from options or file
-    tombkey=`load_key ${tombdir}/${tombfile}.key`
+    tombkey=`load_key ${tombdir}/${tombfile}`
     { test $? = 0 } || {
 	losetup -d $nstloop
 	die "Aborting operations: error loading key $tombkey" }
@@ -1412,7 +1413,7 @@ mount_tomb() {
     xxx "tomb found: ${tombdir}/${tombfile}"
 
     # load_key called here
-    tombkey=`load_key ${tombdir}/${tombfile}.key`
+    tombkey=`load_key ${tombdir}/${tombfile}`
     { test $? = 0 } || {
 	die "Aborting operations: error loading key $tombkey"    }
 
@@ -1952,6 +1953,10 @@ resize_tomb() {
     fi
     # $1 is the tomb file path
 
+    local newtombsize="`option_value -s`"
+    { test "$newtombsize" = "" } && {
+	die "Aborting operations: new size was not specified, use -s" }
+
     local c tombpass tombkey
 
     tombdir=`dirname $1`
@@ -1959,13 +1964,12 @@ resize_tomb() {
     tombname=${tombfile%%\.*}
 
     # load key from options or file
-    tombkey=`load_key ${tombdir}/${tombfile}`
-    { test $? = 0 } || {
-	die "Aborting operations: error loading key $tombkey" }
+    local tombkey="`load_key ${tombdir}/${tombfile}`"
     # make sure to call drop_key later
+    { test -r "$tombkey" } || {
+	die "Aborting operations: key not found, use -k" }
 
     local tmp_resize=`safe_filename resize`
-    local newtombsize=$opts[-s]
     local oldtombsize=$(( `stat -c %s "$1" 2>/dev/null` / 1048576 ))
     local mounted_tomb=`mount -l |
 	awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
@@ -2016,8 +2020,8 @@ resize_tomb() {
     get_lukskey "${tombpass}" ${tombkey} | \
 	cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 
-    unset tombpass
     drop_key # cleanup after load_key
+    unset tombpass
 
     if ! [ -r /dev/mapper/${mapper} ]; then
 	losetup -d ${nstloop}
