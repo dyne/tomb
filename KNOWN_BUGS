@@ -1,4 +1,4 @@
-* Compatibility broken in Tomb 1.3 and 1.3.1
+* Compatibility broken in old Tomb 1.3 and 1.3.1
 
  Due to an error in the creation and decoding of key files, release
  versions 1.3 and 1.3.1 cannot open older tombs, plus the tombs created
@@ -16,4 +16,5 @@
 
  This bug was due to a typo in the code which appended a GnuPG status
  string to the content of keys.  All users of Tomb 1.3.* should pay
- particular attention to this issue.
+ particular attention to this issue, however that release series was
+ out as latest for less than a month.

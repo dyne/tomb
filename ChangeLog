@@ -1,3 +1,11 @@
+January 2014 - 1.5
+	Minor bugfixes to documentation, error handling, support for
+	multiple and encrypted swap partitions and qr code engraving.
+	This release also includes some minor code refactoring of
+	load_key() and loop mount checks. Also the tray app is updated
+	to gtk-3 and works simply with a tomb name as argument.
+	Documentation was updated accordingly.
+
 June 2013 - 1.4
 
 	This release fixes an important bug affecting Tomb 1.3.* which
