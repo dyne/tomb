@@ -8,7 +8,7 @@
 
 # {{{ License
 
-# Copyright (C) 2007-2013 Dyne.org Foundation
+# Copyright (C) 2007-2014 Dyne.org Foundation
 #
 # Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
 #
@@ -40,8 +40,8 @@
 
 # {{{ Global variables
 
-VERSION=1.5
-DATE="Jun/2013"
+VERSION=1.5.1
+DATE="Feb/2014"
 TOMBEXEC=$0
 typeset -a OLDARGS
 for arg in ${argv}; do OLDARGS+=($arg); done
@@ -2421,7 +2421,7 @@ main() {
 	    cat <<EOF
 Tomb $VERSION - a strong and gentle undertaker for your secrets
 
- Copyright (C) 2007-2013 Dyne.org Foundation, License GNU GPL v3+
+ Copyright (C) 2007-2014 Dyne.org Foundation, License GNU GPL v3+
  This is free software: you are free to change and redistribute it
  The latest Tomb sourcecode is published on <http://tomb.dyne.org>
 EOF

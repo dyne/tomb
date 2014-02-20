@@ -1,3 +1,8 @@
+February 2014 - 1.5.1
+	Fix to stdin piping of keys, which were not correctly processed
+	nor were deleted from volatile memory (tmpfs). Version is now
+	updated accordingly.
+
 January 2014 - 1.5
 	Minor bugfixes to documentation, error handling, support for
 	multiple and encrypted swap partitions and qr code engraving.

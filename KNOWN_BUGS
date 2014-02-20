@@ -1,3 +1,10 @@
+* Versioning and stdin key piping in 1.5
+ Due to distraction tomb version 1.5 displays its version as 1.4.
+ Also version 1.5 did not work when using -k - to pipe keys from
+ stdin, plus left the encrypted keys laying around in RAM (tmpfs).
+ This was a minor vulnerability fixed in 1.5.1.
+
+
 * Compatibility broken in old Tomb 1.3 and 1.3.1
 
  Due to an error in the creation and decoding of key files, release
