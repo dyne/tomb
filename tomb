@@ -540,22 +540,17 @@ check_bin() {
 # On success returns 0 and prints out the full path to the key
 load_key() {
     # take the name of a tomb file as argument
-    # this is used for guessing if the key is nearby
-    { test "$1" = "" } || {
-	tombdir=`dirname $1`
-	tombfile=`basename $1`
-	tombname=${tombfile%%\.*}
-    }
-
     if option_is_set -k ; then
 	if [[ "`option_value -k`" == "-" ]]; then
 	    xxx "load_key reading from stdin"
 	    # take key from stdin
 	    tombkeydir=`safe_dir load_key_stdin` # global used to check if key from stdin
 	    xxx "tempdir is $tombkeydir"
+	    act "waiting for the key to be piped from stdin... "
 	    cat > ${tombkeydir}/stdin.tmp.key
+	    print ok >&2
 	    tombdir=${tombkeydir}
-	    tombfile=stdin.tmp
+	    tombfile=stdin.tmp.key
 	    tombname="stdin"
 	elif [[ "`option_value -k`" != "" ]]; then
 	    xxx "load_key argument: `option_value -k`"
@@ -564,23 +559,19 @@ load_key() {
 	    tombdir=`dirname $tombkey`
 	    tombfile=`basename $tombkey`
 	fi
-    fi
 
-    tombkey=${tombdir}/${tombfile}.key
-
-    xxx "load_key: ${tombkey}"
-
-    if [ -r "${tombkey}" ]; then
-	if [ "$tombkeydir" = "" ]; then
-	    _message "We'll use this key: ${tombkey}"
-        else
-	    _message "We'll use the key piped from stdin"
-        fi
-    else
-	_warning "Key not found, specify one using -k"
-	drop_key
+    else # no -k specified
+	die "this operation requires a key file to be specified using the -k option"
 	return 1
     fi
+
+    tombkey=${tombdir}/${tombfile}
+
+    xxx "load_key: ${tombkey}"
+    { test -r "${tombkey}" } || {
+	_warning "Key not found, specify one using -k"
+	drop_key
+	return 1 }
 
     # this does a check on the file header
     if ! is_valid_key ${tombkey}; then
@@ -1452,6 +1443,7 @@ mount_tomb() {
     if [ $? = 255 ]; then
 	die "too many tomb opened. Please close any of them to open another tomb"
     fi
+    xxx "next free loop device: $nstloop"
     losetup -f ${tombdir}/${tombfile}
 
     cryptsetup isLuks ${nstloop}
@@ -1481,6 +1473,8 @@ mount_tomb() {
     mapdate=`date +%s`
 
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
+    xxx "dev mapper device: $mapper"
+    xxx "tomb key: $tombkey"
     keyname=`basename $tombkey | cut -d. -f1`
 
     tombpass=`ask_key_password $tombkey`
