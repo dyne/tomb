@@ -1,4 +1,12 @@
+February 2014 - 1.5.2
+
+	Removed automatic guessing of key file besides tomb to encourage
+	users to keep tomb and key separated, but also to simplify the
+	code in key retrieval and avoid a bug occurring in the previous
+	version.
+
 February 2014 - 1.5.1
+
 	Fix to stdin piping of keys, which were not correctly processed
 	nor were deleted from volatile memory (tmpfs). Version is now
 	updated accordingly.
