@@ -1019,6 +1019,11 @@ forge_key() {
 	_warning "no key name specified for creation"
 	return 1 }
 
+    # make sure that gnupg doesn't quits with an error before first run
+    { test -r $HOME/.gnupg/pubring.gpg } && {
+	mkdir $HOME/.gnupg
+	touch $HOME/.gnupg/pubring.gpg }
+
     { test -r "$destkey" } && {
 	_warning "Forging this key would overwrite an existing file. Operation aborted."
 	die "`ls -lh $destkey`"    }
