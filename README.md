@@ -1,21 +1,24 @@
 
-    .....                                                ..
- .H8888888h.  ~-.                                  . uW8"
- 888888888888x  `>        u.      ..    .     :    `t888
-X~     `?888888hx~  ...ue888b   .888: x888  x888.   8888   .
-'      x8.^"*88*"   888R Y888r ~`8888~'888X`?888f`  9888.z88N
- `-:- X8888x        888R I888>   X888  888X '888>   9888  888E
-      488888>       888R I888>   X888  888X '888>   9888  888E
-    .. `"88*        888R I888>   X888  888X '888>   9888  888E
-  x88888nX"      . u8888cJ888    X888  888X '888>   9888  888E
- !"*8888888n..  :   "*888*P"    "*88%""*88" '888!` .8888  888"
-'    "*88888888*      'Y"         `~    "    `"`    `%888*%"
-        ^"***"`                                        "`
+        .....                                                ..
+     .H8888888h.  ~-.                                  . uW8"
+     888888888888x  `>        u.      ..    .     :    `t888
+    X~     `?888888hx~  ...ue888b   .888: x888  x888.   8888   .
+    '      x8.^"*88*"   888R Y888r ~`8888~'888X`?888f`  9888.z88N
+     `-:- X8888x        888R I888>   X888  888X '888>   9888  888E
+          488888>       888R I888>   X888  888X '888>   9888  888E
+        .. `"88*        888R I888>   X888  888X '888>   9888  888E
+      x88888nX"      . u8888cJ888    X888  888X '888>   9888  888E
+     !"*8888888n..  :   "*888*P"    "*88%""*88" '888!` .8888  888"
+    '    "*88888888*      'Y"         `~    "    `"`    `%888*%"
+            ^"***"`                                        "`
 
-A minimalistic commandline tool to manage encrypted volumes  v1.5.2
+*A minimalistic commandline tool to manage encrypted volumes*
 
-                   http://dyne.org/software/tomb
+Latest version: **1.5.3**
 
+http://dyne.org/software/tomb
+
+# What is Tomb, the crypto undertaker
 
 Tomb aims to be a free and open source system for easy encryption and
 backup of personal files, written in code that is easy to review and
@@ -26,7 +29,9 @@ standard filesystem tools (GNU) and the cryptographic API of the Linux
 kernel (cryptsetup and LUKS). Tomb can also produce machine parsable
 output to facilitate its use inside graphical applications.
 
-** How does it works
+# How does it works
+
+For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md).
 
 This tool can be used to dig .tomb files (Luks volumes), forge keys
 protected by a password (GnuPG symmetric encryption) and use the keys
@@ -47,7 +52,7 @@ facilitating the storage of backup keys using image steganography,
 listing open tombs and selectively closing them, warning the user
 about their size and last time they were used, etc.
 
-** How secure is this?
+# How secure is this?
 
 Death is the only sure thing in life. Said that, Tomb is a pretty
 secure tool especially because it keeps minimal, its source is always
@@ -62,7 +67,7 @@ usability.
 The code of Tomb can be read in a literate programming style on
 http://tomb.dyne.org/literate
 
-** Stage of development
+# Stage of development
 
 Tomb is an evolution of the 'mknest' tool developed for the dyne:bolic
 GNU/Linux distribution, which is used by its 'nesting' mechanism to
@@ -74,10 +79,10 @@ As of today, Tomb is a well stable tool also used in mission critical
 situations by a number of activists in endangered zones. It has been
 reviewed by forensics analysts and it can be considered to be safe for
 military grade use, where the integrity of informations stored depend
-from the user's behaviour and the strenght of a standard AES256
-CBC-ESSIV encryption algorithm.
+from the user's behaviour and the strenght of a standard AES-256
+(XTS plain) encryption algorithm.
 
-** How can you help
+# How can you help
 
 Donations are always welcome, see https://dyne.org/donate
 
@@ -90,7 +95,7 @@ For the bleeding edge visit https://github.com/dyne/Tomb
 Tomb's developers can be contacted via the "crypto" mailinglist on
 http://lists.dyne.org or via IRC on https://irc.dyne.org channel #dyne
 
-Some enthusiastic ideas are in the TODO file.
+Some enthusiastic ideas are in the [TODO](doc/TODO.org) file.
 
-Information on developers involved is found in the AUTHORS file.
+Information on developers involved is found in the [AUTHORS](AUTHORS.md) file.
 

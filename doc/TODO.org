@@ -7,6 +7,47 @@ Issue tracking is now handled via GitHub, see http://github.com/dyne/Tomb
 
 Old roadmap notes:
 
+
+
+* TODO Release 2.0							:00%:
+
+Must be 100% backward compatible with tombs created with 1.0 
+
+
+** New features
+*** [#A] support for ZFS filesystem (revisioning, bitrot)
+*** [#A] support for partition-based tombs
+*** [#B] system to split keys in parts (ssss)
+*** [#A] udev rules to avoid usb automount of keyplug in gnome
+*** [#B] sign and verify tomb script integrity (executed as root)
+*** TODO [#B] Internationalization using gettext 		    :jaromil:
+
+    Started generating the strings, still need to figure out how to
+    install it
+
+*** [#B] make a gnome tomb undertaker using gnome-druid in glade
+*** DONE [#B] tomb locksmith for key management
+    a graphical tool or text wizard to move keys in/out steganography
+    as well split them
+
+*** DONE [#B] transport keys and integrity checksums on qrcodes
+*** [#B] analyse and show tomb entropy using libdisorder
+*** [#B] indeep security analysis of possible vulnerabilities
+*** [#C] use inotify on tomb
+
+    inotify can also count when was the last time tomb was used and
+    unmount it automatically after a timeout, see how much free space
+    is left and warn when the space is almost finished
+*** [#C] more gtk dialogs for configurations? keep it minimal!
+
+
+* Notes from #CybRes
+
+*** mlocall per swap )vecna) rompigli il caz su github
+*** steganografia migliore con outguess? (vecna)
+*** velocita' creazione : fallocate -l 10G (scuall8907@gm)
+
+
 * DONE Release 1.0							:100%:
 
 ** TODO [#C] make one single status handle more tombs
@@ -54,41 +95,6 @@ Old roadmap notes:
 ** DONE [#B] debian packaging with desktop integration 		    :jaromil:
 ** DONE [#A] Avoid overwriting key on exhume on same filename
 ** DONE [#A] Should refuse opening a tomb that is already open	    :jaromil:
-
-
-
-* TODO Release 2.0							:00%:
-
-Must be 100% backward compatible with tombs created with 1.0 
-
-** New features
-
-*** [#A] system to split keys in parts (ssss)
-*** [#A] use inotify on tomb
-
-    inotify can also count when was the last time tomb was used and
-    unmount it automatically after a timeout, see how much free space
-    is left and warn when the space is almost finished
-
-*** [#A] udev rules to avoid usb automount of keyplug in gnome
-
-*** [#A] sign and verify tomb script integrity (executed as root)
-*** TODO [#B] Internationalization using gettext 		    :jaromil:
-
-    Started generating the strings, still need to figure out how to
-    install it
-
-*** [#B] make a gnome tomb undertaker using gnome-druid in glade
-*** [#B] tomb locksmith for key management
-    a graphical tool or text wizard to move keys in/out steganography
-    as well split them
-
-*** [#B] transport keys and integrity checksums on qrcodes
-
-*** [#B] analyse and show tomb entropy using libdisorder
-
-*** [#B] indeep security analysis of possible vulnerabilities
-*** [#C] more gtk dialogs for configurations? keep it minimal!
 
 
 * TODO Porting to Win$loth
