@@ -1020,7 +1020,7 @@ forge_key() {
 	return 1 }
 
     # make sure that gnupg doesn't quits with an error before first run
-    { test -r $HOME/.gnupg/pubring.gpg } && {
+    { test -r $HOME/.gnupg/pubring.gpg } || {
 	mkdir $HOME/.gnupg
 	touch $HOME/.gnupg/pubring.gpg }
 
