@@ -1000,9 +1000,9 @@ engrave_key() {
 
 # This is a new way to create tombs which dissects the whole create_tomb() into 3 clear steps:
 #
-# * dig a .tomb (the large file) using /dev/random (takes some minutes at least)
+# * dig a .tomb (the large file) using /dev/urandom (takes some minutes at least)
 #
-# * forge a .key (the small file) using /dev/urandom (good entropy needed)
+# * forge a .key (the small file) using /dev/random (good entropy needed)
 #
 # * lock the .tomb file with the key, binding the key to the tomb (requires dm_crypt format)
 
