@@ -73,20 +73,20 @@ typeset -h _tty
 
 _have_shm() {
     # Check availability of 1MB of SHM
-    xxx "_have_shm 0 We need only 1 MB of RAM"
+    _verbose "_have_shm 0 We need only 1 MB of RAM."
     [[ -k /dev/shm ]] || return 1
 
     local -i SHM RAM
 
     SHM=$(df -k -B 4K -a -t tmpfs /dev/shm | awk '/\/dev\/shm/ { print $4; }')
     (( $? )) && return 1
-    xxx "_have_shm 1 SHM $SHM KB are available"
+    _verbose "_have_shm 1 SHM $SHM KB are available."
 
     RAM=$(awk '/MemFree/ { print $2 }' /proc/meminfo)
-    xxx "_have_shm 2 RAM $RAM KB are free"
+    _verbose "_have_shm 2 RAM $RAM KB are free."
     (( $RAM >= 1024 )) && return 0
 
-    xxx "_have_shm 3 RAM $RAM KB left only :("
+    _verbose "_have_shm 3 RAM $RAM KB left only :("
     # Now we have more RAM than affected to SHM, so we can expect some for our little needs.
     # Does that work when SHM is disabled from kernel config?
     return 1
@@ -101,7 +101,7 @@ safe_dir() {
     while (( $tries < 3 )) ; do
 	tries+=1
 	if _have_shm; then
-	    xxx "safe_dir creating $1 dir in RAM"
+	    _verbose "safe_dir creating $1 dir in RAM."
 	    if (( $MKTEMP )); then
 		mktemp -d /dev/shm/tomb.$1.$$.XXXXXXX
 	    else
@@ -112,7 +112,7 @@ safe_dir() {
 	    return 0
 	else
 	    _warning "WARNING: we cannot ensure we're running in RAM."
-		 xxx "Wait a bit before retrying... (attempt $tries)"
+            _verbose "Wait a bit before retrying... (attempt $tries)."
 	    sync && sleep 0.5
 	fi
     done
@@ -122,7 +122,7 @@ safe_dir() {
 
 # Provide a random filename in shared memory
 safe_filename() {
-    _have_shm || die "No access to shared memory on this system, sorry."
+    _have_shm || _failure "No access to shared memory on this system, sorry."
     (( $MKTEMP )) && \
 	mktemp -u /dev/shm/tomb.$1.$$.XXXXXXX || \
 	print "/dev/shm/tomb.$1.$$.$RANDOM$RANDOM"
@@ -165,14 +165,14 @@ check_swap() {
 	    fi
 	fi
     done
-    no  "An active swap partition is detected, this poses security risks."
+    _warning  "An active swap partition is detected, this poses security risks."
     if [[ $ret -eq 2 ]]; then
-	yes "All your swaps are belong to crypt.  Good."
+	_success "All your swaps are belong to crypt.  Good."
     else
-	no  "You can deactivate all swap partitions using the command:"
-	no  " swapoff -a"
-	no  "But if you want to proceed like this, use the -f (force) flag."
-	die "Operation aborted."
+	_warning  "You can deactivate all swap partitions using the command:"
+	_warning  " swapoff -a"
+	_warning  "But if you want to proceed like this, use the -f (force) flag."
+	_failure "Operation aborted."
     fi
     return $ret
 }
@@ -207,7 +207,7 @@ ask_password() {
 	GTK2_RC=/usr/share/themes/tomb/gtk-2.0-key/gtkrc
     fi
 
-    title="Insert tomb password"
+    title="Insert tomb password."
     if [ $2 ]; then title="$2"; fi
 
     output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>/dev/null | tail -n +7
@@ -231,7 +231,7 @@ exec_as_user() {
 	exec $@[@]
 	return $?
     fi
-    xxx "exec_as_user '$SUDO_USER': ${(f)@}"
+    _verbose "exec_as_user '$SUDO_USER': ${(f)@}"
     sudo -u $SUDO_USER "${@[@]}"
     return $?
 }
@@ -241,7 +241,7 @@ check_priv() {
     # save original user
     username=$USER
     if [ $UID != 0 ]; then
-	xxx "Using sudo for root execution of '${TOMBEXEC} ${(f)OLDARGS}'"
+	_verbose "Using sudo for root execution of '${TOMBEXEC} ${(f)OLDARGS}'."
 	# check if sudo has a timestamp active
 	sudok=false
 
@@ -257,7 +257,7 @@ GETPIN
 EOF
 	    fi
 	else
-	    _verbose "Escalating privileges using sudo-pwd"
+	    _verbose "Escalating privileges using sudo-pwd."
 	    sudo -S -v <<<`option_value --sudo-pwd`
 	fi
 	sudo "${TOMBEXEC}" -U ${UID} -G ${GID} -T ${TTY} "${(@)OLDARGS}"
@@ -267,10 +267,10 @@ EOF
     # check if we have support for loop mounting
     losetup -f > /dev/null
     { test "$?" = "0" } || {
-	no "Loop mount of volumes is not supported on this machine, this error"
-	no "often occurs on VPS and kernels that don't provide the loop module."
-	no "It is impossible to use Tomb on this machine at this conditions."
-	die "Operation aborted."
+	_warning "Loop mount of volumes is not supported on this machine, this error"
+	_warning "often occurs on VPS and kernels that don't provide the loop module."
+	_warning "It is impossible to use Tomb on this machine at this conditions."
+	_failure "Operation aborted."
     }
 
     # make sure necessary kernel modules are loaded
@@ -282,10 +282,10 @@ EOF
 
 # check if a filename is a valid tomb
 is_valid_tomb() {
-    xxx "is_valid_tomb $1"
+    _verbose "is_valid_tomb $1"
     # argument check
     { test "$1" = "" } && {
-	_warning "Tomb file is missing from arguments"; return 1 }
+	_warning "Tomb file is missing from arguments."; return 1 }
     # file checks
     { test -r "$1" } || {
 	_warning "Tomb file not found: $1"; return 1 }
@@ -498,7 +498,7 @@ progress() {
 check_bin() {
     # check for required programs
     for req in cryptsetup pinentry sudo gpg; do
-	command -v $req >/dev/null || die "Cannot find $req. It's a requirement to use Tomb, please install it." 1
+	command -v $req >/dev/null || _failure "Cannot find $req. It's a requirement to use Tomb, please install it." 1
     done
 
     export PATH=/sbin:/usr/sbin:$PATH
@@ -542,18 +542,18 @@ load_key() {
     # take the name of a tomb file as argument
     if option_is_set -k ; then
 	if [[ "`option_value -k`" == "-" ]]; then
-	    xxx "load_key reading from stdin"
+	    _verbose "load_key reading from stdin."
 	    # take key from stdin
 	    tombkeydir=`safe_dir load_key_stdin` # global used to check if key from stdin
-	    xxx "tempdir is $tombkeydir"
-	    act "waiting for the key to be piped from stdin... "
+	    _verbose "tempdir is $tombkeydir"
+	    act "Waiting for the key to be piped from stdin... "
 	    cat > ${tombkeydir}/stdin.tmp.key
 	    print ok >&2
 	    tombdir=${tombkeydir}
 	    tombfile=stdin.tmp.key
 	    tombname="stdin"
 	elif [[ "`option_value -k`" != "" ]]; then
-	    xxx "load_key argument: `option_value -k`"
+	    _verbose "load_key argument: `option_value -k`"
 	    # take key from a file
 	    tombkey=`option_value -k`
 	    tombdir=`dirname $tombkey`
@@ -561,21 +561,21 @@ load_key() {
 	fi
 
     else # no -k specified
-	die "this operation requires a key file to be specified using the -k option"
+	_failure "This operation requires a key file to be specified using the -k option."
 	return 1
     fi
 
     tombkey=${tombdir}/${tombfile}
 
-    xxx "load_key: ${tombkey}"
+    _verbose "load_key: ${tombkey}"
     { test -r "${tombkey}" } || {
-	_warning "Key not found, specify one using -k"
+	_warning "Key not found, specify one using -k."
 	drop_key
 	return 1 }
 
     # this does a check on the file header
     if ! is_valid_key ${tombkey}; then
-	_warning "The key seems invalid, the application/pgp header is missing"
+	_warning "The key seems invalid, the application/pgp header is missing."
 	drop_key
 	return 1
     fi
@@ -589,12 +589,12 @@ load_key() {
 ask_key_password() {
     tombkey="$1"
     local keyname=`basename $tombkey`
-    _message "a password is required to use key ${keyname}"
+    _message "A password is required to use key ${keyname}"
     local passok=0
     local tombpass=""
     if option_is_set --tomb-pwd; then
 	    tombpass=`option_value --tomb-pwd`
-	    xxx "ask_key_password takes tombpass from CLI argument: $tombpass"
+	    _verbose "ask_key_password takes tombpass from CLI argument: $tombpass"
 
 	    get_lukskey "$tombpass" ${tombkey} >/dev/null
 
@@ -609,7 +609,7 @@ ask_key_password() {
 		tombpass=`exec_as_user ${TOMBEXEC} askpass "Insert password to use key: $keyname (retry $c)"`
 	    fi
 	    if [[ $? != 0 ]]; then
-		_warning "User aborted password dialog"
+		_warning "User aborted password dialog."
 		return 1
 	    fi
 
@@ -638,13 +638,13 @@ change_passwd() {
 
     # check the keyfile
     if ! [ -r $keyfile ]; then
-	_warning "key not found: $keyfile"
+	_warning "Key not found: $keyfile"
 	return 1
     fi
 
     if ! is_valid_key $keyfile ; then
-	_warning "file doesn't seems to be a tomb key: $keyfile"
-	_warning "operation aborted."
+	_warning "File doesn't seems to be a tomb key: $keyfile"
+	_warning "Operation aborted."
 	return 1
     fi
 
@@ -657,7 +657,7 @@ change_passwd() {
 
     tombpass=`ask_key_password $keyfile`
     { test $? = 0 } || {
-	die "No valid password supplied" }
+	_failure "No valid password supplied." }
 
     get_lukskey "${tombpass}" ${keyfile} > ${lukskey};
 
@@ -671,14 +671,14 @@ change_passwd() {
 	gen_key $lukskey $algopt > ${tmpnewkey}
 
 	if ! is_valid_key $tmpnewkey; then
-	    die "Error: the newly generated keyfile does not seem valid"
+	    _failure "Error: the newly generated keyfile does not seem valid."
 	else
 	    # copy the new key as the original keyfile name
 	    cp "${tmpnewkey}" "${keyfile}"
 	    _success "Your passphrase was successfully updated."
 	fi
     } always {
-	_verbose "cleanup: $tmpnewkey $lukskey"
+	_verbose "Cleanup: $tmpnewkey $lukskey"
 	# wipe all temp file
 	${=WIPE} "${tmpnewkey}"
 	${=WIPE} "${lukskey}"
@@ -689,21 +689,21 @@ change_passwd() {
 
 # To be called after load_key()
 drop_key() {
-    xxx "drop_key $tombkey"
+    _verbose "drop_key $tombkey"
     # delete key if temp stored from stdin
     if [[ "$tombkey" =~ "/dev/shm/tomb.load_key_stdin" ]]; then
 	{ test -r ${tombkey} } && {
-	    _message "removing key temporarily stored from stdin"
+	    _message "Removing key temporarily stored from stdin"
 	    ${=WIPE} ${tombkey}; rmdir `dirname ${tombkey}` }
     fi
 }
 
 #$1 is the keyfile we are checking
 is_valid_key() {
-    xxx "is_valid_key $1"
+    _verbose "is_valid_key $1"
     # argument check
     { test "$1" = "" } && {
-	_warning "Key file is missing from arguments"; return 1 }
+	_warning "Key file is missing from arguments."; return 1 }
     # file checks
     { test -r "$1" } || {
 	_warning "Key file not found: $1"; return 1 }
@@ -716,7 +716,7 @@ is_valid_key() {
 	return 0 }
     # if no BEGIN header found then we try to recover it
     [[ `file $1 -bi` =~ text/plain ]] && {
-	_warning "Key data found with missing headers, attempting recovery"
+	_warning "Key data found with missing headers, attempting recovery."
 	local tmp_keyfix=`safe_filename keyfix`
 	touch $tmp_keyfix
 	# make sure KDF header comes first
@@ -750,7 +750,7 @@ get_lukskey() {
     local tombpass=$1
     local keyfile=$2
     firstline=`head -n1 $keyfile`
-    xxx "get_lukskey XXX $keyfile"
+    _verbose "get_lukskey XXX $keyfile"
     if [[ $firstline =~ '^_KDF_' ]]; then
 	_verbose "KDF: `cut -d_ -f 3 <<<$firstline`"
 	case `cut -d_ -f 3 <<<$firstline` in
@@ -759,7 +759,7 @@ get_lukskey() {
 		tombpass=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2> /dev/null <<<$tombpass)
 		;;
 	    *)
-		_failure "No suitable program for KDF `cut -f 3 <<<$firstline`"
+		_failure "No suitable program for KDF `cut -f 3 <<<$firstline`."
 		unset tombpass
 		return 1
 		;;
@@ -769,7 +769,7 @@ get_lukskey() {
     # fix for gpg 1.4.11 where the --status-* options don't work ;^/
     gpgver=`gpg --version | awk '/^gpg/ {print $3}'`
     if [ "$gpgver" = "1.4.11" ]; then
-	xxx "GnuPG is version 1.4.11 - adopting status fix"
+	_verbose "GnuPG is version 1.4.11 - adopting status fix."
 
 	print ${tombpass} | \
 	    gpg --batch --passphrase-fd 0 --no-tty --no-options -d "${keyfile}"
@@ -779,7 +779,7 @@ get_lukskey() {
     else # using status-file in gpg != 1.4.11
 
 	res=`safe_filename lukskey`
-	{ test $? = 0 } || { unset tombpass; die "Fatal error creating temp file." }
+	{ test $? = 0 } || { unset tombpass; _failure "Fatal error creating temp file." }
 
 	print ${tombpass} | \
 	    gpg --batch --passphrase-fd 0 --no-tty --no-options --status-fd 2 \
@@ -791,7 +791,7 @@ get_lukskey() {
 	ret=$?; rm -f $res
 
     fi
-    xxx "get_lukskey returns $ret"
+    _verbose "get_lukskey returns $ret"
     return $ret
 }
 
@@ -811,16 +811,16 @@ gen_key() {
 	    # 3 tries to write two times a matching password
 	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname}"`
 	    if [[ $? != 0 ]]; then
-		die "User aborted"
+		_failure "User aborted."
 	    fi
 	    if [ -z $tombpass ]; then
-		_warning "you set empty password, which is not possible"
+		_warning "You set empty password, which is not possible."
 		continue
 	    fi
 	    tombpasstmp=$tombpass
 	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname} (again)"`
 	    if [[ $? != 0 ]]; then
-		die "User aborted"
+		_failure "User aborted."
 	    fi
 	    if [ "$tombpasstmp" = "$tombpass" ]; then
 		break;
@@ -830,7 +830,7 @@ gen_key() {
 	done
     else
 	tombpass="`option_value --tomb-pwd`"
-	xxx "gen_key takes tombpass from CLI argument: $tombpass"
+	_verbose "gen_key takes tombpass from CLI argument: $tombpass"
     fi
 
     header=""
@@ -843,12 +843,12 @@ gen_key() {
 	    if [[ "$itertime" != <-> ]]; then
 		unset tombpass
 		unset tombpasstmp
-		die "Wrong argument for --kdf: must be an integer number (iteration seconds)"
+		_failure "Wrong argument for --kdf: must be an integer number (iteration seconds)."
 	    fi
 	    # --kdf takes one parameter: iter time (on present machine) in seconds
 	    local -i microseconds
 	    microseconds=$((itertime*10000))
-	    yes "Using KDF, iterations: $microseconds"
+	    _success "Using KDF, iterations: $microseconds"
 	    pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
 	    pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
 	    # We use a length of 64bytes = 512bits (more than needed!?)
@@ -873,7 +873,7 @@ gen_key() {
 # prints an array of ciphers available in gnupg (to encrypt keys)
 list_gnupg_ciphers() {
     # prints an error if GnuPG is not found
-    which gpg > /dev/null || die "gpg (GnuPG) is not found, Tomb cannot function without it."
+    which gpg > /dev/null || _failure "gpg (GnuPG) is not found, Tomb cannot function without it."
 
     ciphers=(`gpg --version | awk '
 BEGIN { ciphers=0 }
@@ -892,20 +892,20 @@ bury_key() {
     imagefile=$1
 
     { is_valid_key ${tombkey} } || {
-	die "Bury failed: not a tomb key $tombkey" }
+	_failure "Bury failed: not a tomb key $tombkey" }
 
     file $imagefile | grep JPEG > /dev/null
     if [ $? != 0 ]; then
-	_warning "encode failed: $imagefile is not a jpeg image"
+	_warning "Encode failed: $imagefile is not a jpeg image."
 	return 1
     fi
 
     _success "Encoding key $tombkey inside image $imagefile"
-    _message "please confirm the key password for the encoding"
+    _message "Please confirm the key password for the encoding"
     tombpass=`ask_key_password $tombkey`
     { test $? = 0 } || {
 	_warning "Wrong password supplied."
-	die "You shall not bury a key whose password is unknown to you."
+	_failure "You shall not bury a key whose password is unknown to you."
     }
 
     # we omit armor strings since having them as constants can give
@@ -918,10 +918,10 @@ bury_key() {
     | steghide embed --embedfile - --coverfile ${imagefile} \
     -p ${tombpass} -z 9 -e serpent cbc
     if [ $? != 0 ]; then
-	_warning "encoding error: steghide reports problems"
+	_warning "Encoding error: steghide reports problems."
 	res=1
     else
-	_success "tomb key encoded succesfully into image ${imagefile}"
+	_success "Tomb key encoded succesfully into image ${imagefile}"
 	res=0
     fi
 
@@ -937,15 +937,15 @@ exhume_key() {
 
     file $imagefile | grep JPEG > /dev/null
     if [ $? != 0 ]; then
-	_warning "encode failed: $imagefile is not a jpeg image"
+	_warning "Encode failed: $imagefile is not a jpeg image."
 	return 1
     fi
 
     if [[ -e "$tombkey" ]]; then
 	_warning "File exists: $tombkey"
 	{ option_is_set -f } || {
-	    _warning "Make explicit use of --force to overwrite"
-	    die "Refusing to overwrite file. Operation aborted." }
+	    _warning "Make explicit use of --force to overwrite."
+	    _failure "Refusing to overwrite file. Operation aborted." }
 	_warning "Use of --force selected: overwriting."
 	rm -f ${tombkey}
     fi
@@ -953,7 +953,7 @@ exhume_key() {
     _message "Trying to exhume a key out of image $imagefile"
     if option_is_set --tomb-pwd; then
 	    tombpass=`option_value --tomb-pwd`
-	    xxx "ask_key_password takes tombpass from CLI argument: $tombpass"
+	    _verbose "ask_key_password takes tombpass from CLI argument: $tombpass"
     else
 	tombpass=`exec_as_user ${TOMBEXEC} askpass "Steg password for ${tombkey}"`
     fi
@@ -964,11 +964,11 @@ exhume_key() {
     unset tombpass
 
     if [ $res = 0 ]; then
-	_success "${tombkey} succesfully decoded"
+	_success "${tombkey} succesfully decoded."
 	return 0
     fi
 
-    _warning "nothing found in $imagefile"
+    _warning "Nothing found in $imagefile"
     return 1
 }
 
@@ -977,19 +977,19 @@ exhume_key() {
 engrave_key() {
     # load key from options
     tombkey="`load_key $1`"
-    { test $? = 0 } || { die "No key specified." }
+    { test $? = 0 } || { _failure "No key specified." }
     keyname=`basename $tombkey`
     pngname="$keyname.qr.png"
 
-    yes "Rendering a printable QRCode for key: $tombkey"
+    _success "Rendering a printable QRCode for key: $tombkey"
     # we omit armor strings to save space
     awk '
 /^-----/ {next}
 /^Version/ {next}
 {print $0}' ${tombkey} | qrencode --size 4 --level H \
     --casesensitive -o "$pngname"
-    { test $? = 0 } || { die "QREncode reported an error." }
-    yes "Operation successful:"
+    { test $? = 0 } || { _failure "QREncode reported an error." }
+    _success "Operation successful:"
     _message "`ls -lh $pngname`"
     _message "`file $pngname`"
 }
@@ -1008,7 +1008,7 @@ engrave_key() {
 
 
 forge_key() {
-    xxx "forge_key()"
+    _verbose "forge_key()"
     _check_swap
 
     # can be specified both as simple argument or using -k
@@ -1016,7 +1016,7 @@ forge_key() {
     { option_is_set -k } && { destkey="`option_value -k`" }
 
     { test "$destkey" = "" } && {
-	_warning "no key name specified for creation"
+	_warning "No key name specified for creation."
 	return 1 }
 
     # make sure that gnupg doesn't quits with an error before first run
@@ -1026,18 +1026,18 @@ forge_key() {
 
     { test -r "$destkey" } && {
 	_warning "Forging this key would overwrite an existing file. Operation aborted."
-	die "`ls -lh $destkey`"    }
+	_failure "`ls -lh $destkey`"    }
 
     # create the keyfile in tmpfs so that we leave less traces in RAM
     local keytmp=`safe_dir forge`
-    (( $? )) && die "error creating temp dir"
-    xxx "safe_dir at $keytmp"
+    (( $? )) && _failure "Error creating temp dir."
+    _verbose "safe_dir at $keytmp"
 
     mount tmpfs "${keytmp}" -t tmpfs -o size=1m
     if [ $? != 0 ]; then
-	_warning "cannot mount tmpfs filesystem in volatile memory"
+	_warning "Cannot mount tmpfs filesystem in volatile memory."
 	rm -r "${keytmp}"
-	die "operation aborted."
+	_failure "Operation aborted."
     fi
 
     local algo
@@ -1048,7 +1048,7 @@ forge_key() {
 
     local tombkey="$destkey"
 
-    _message "this operation takes time, keep using this computer on other tasks,"
+    _message "This operation takes time, keep using this computer on other tasks,"
     _message "once done you will be asked to choose a password for your tomb."
     _message "To make it faster you can move the mouse around."
     _message "If you are on a server, you can use an Entropy Generation Daemon."
@@ -1060,18 +1060,18 @@ forge_key() {
 	random_source=/dev/urandom
     fi
 
-    xxx "Data dump using ${DD[1]} from $random_source"
+    _verbose "Data dump using ${DD[1]} from $random_source"
     ${=DD} bs=1 count=256 if=$random_source of=${keytmp}/tomb.tmp
 
     if ! [ -r ${keytmp}/tomb.tmp ]; then
-	_warning "cannot generate encryption key"
+	_warning "Cannot generate encryption key."
 	umount ${keytmp}
 	rm -r $keytmp
-	die "operation aborted."
+	_failure "Operation aborted."
     fi
 
     _success "Choose the password of your key: ${tombkey}"
-    _message "(you can also change it later using 'tomb passwd')"
+    _message "(You can also change it later using 'tomb passwd')"
     touch ${tombkey}
     chown ${_uid}:${_gid} ${tombkey}
     chmod 0600 ${tombkey}
@@ -1081,13 +1081,13 @@ forge_key() {
     gen_key "${keytmp}/tomb.tmp" "$algo" > ${tombkey}
     # this does a check on the file header
     if ! is_valid_key ${tombkey}; then
-	_warning "The key does not seem to be valid"
+	_warning "The key does not seem to be valid."
 	_warning "Dumping contents to screen:"
 	cat ${tombkey}
 	_warning "--"
 	umount ${keytmp}
 	rm -r $keytmp
-	die "operation aborted."
+	_failure "Operation aborted."
     fi
 
     ${=WIPE} ${keytmp}/tomb.tmp # no need really, but anyway
@@ -1096,7 +1096,7 @@ forge_key() {
 
     chown ${_uid}:${_gid} ${tombkey}
 
-    _message "done forging $tombkey"
+    _message "Done forging $tombkey"
     _success "Your key is ready:"
     ls -lh ${tombkey}
 }
@@ -1109,7 +1109,7 @@ dig_tomb() {
     _check_swap
 
     if ! [ $1 ]; then
-	_warning "no tomb name specified for creation"
+	_warning "No tomb name specified for creation."
 	return 1
     fi
 
@@ -1124,11 +1124,11 @@ dig_tomb() {
     # require the specification of the size of the tomb (-s) in MB
     tombsize="`option_value -s`"
 
-    [ $tombsize ] || die "Size argument missing, use -s"
+    [ $tombsize ] || _failure "Size argument missing, use -s"
 
-    [[ $tombsize != <-> ]] && die "Size argument is not an integer"
+    [[ $tombsize != <-> ]] && _failure "Size argument is not an integer."
 
-    [[ $tombsize -lt 10 ]] && die "Tombs can't be smaller than 10 megabytes"
+    [[ $tombsize -lt 10 ]] && _failure "Tombs can't be smaller than 10 megabytes."
 
     if [ -e ${tombdir}/${tombfile} ]; then
 	_warning "A tomb exists already. I'm not digging here:"
@@ -1144,17 +1144,17 @@ dig_tomb() {
     chmod 0600 "${tombdir}/${tombfile}"
     chown $_uid:$_gid "${tombdir}/${tombfile}"
 
-    xxx "Data dump using ${DD[1]} from /dev/urandom"
+    _verbose "Data dump using ${DD[1]} from /dev/urandom"
     ${=DD} if=/dev/urandom bs=1048576 count=${tombsize} of=${tombdir}/${tombfile}
 
     if [ $? = 0 -a -e ${tombdir}/${tombfile} ]; then
 	_message " `ls -lh ${tombdir}/${tombfile}`"
     else
-	die "Error creating the tomb ${tombdir}/${tombfile}, operation aborted."
+	_failure "Error creating the tomb ${tombdir}/${tombfile}, operation aborted."
     fi
 
     _success "Done digging $tombname"
-    _message "your tomb is not yet ready, you need to forge a key and lock it:"
+    _message "Your tomb is not yet ready, you need to forge a key and lock it:"
     _message "tomb forge ${tombname}.tomb.key"
     _message "tomb lock ${tombname}.tomb ${tombname}.tomb.key"
 }
@@ -1165,8 +1165,8 @@ dig_tomb() {
 # it take arguments as the LUKS cipher to be used
 lock_tomb_with_key() {
     if ! [ $1 ]; then
-	_warning "no tomb specified for locking"
-	_warning "usage: tomb lock file.tomb file.tomb.key"
+	_warning "No tomb specified for locking."
+	_warning "Usage: tomb lock file.tomb file.tomb.key"
 	return 1
     fi
 
@@ -1178,32 +1178,32 @@ lock_tomb_with_key() {
     tombname=${tombfile%%\.*}
 
     { test -f ${tombdir}/${tombfile} } || {
-	die "There is no tomb here. You have to it dig first."
+	_failure "There is no tomb here. You have to it dig first."
 	return 1 }
 
-    xxx "tomb found: ${tombdir}/${tombfile}"
+    _verbose "Tomb found: ${tombdir}/${tombfile}"
 
     nstloop=`losetup -f` # get the number for next loopback device
     losetup -f ${tombdir}/${tombfile} # allocates the next loopback for our file
 
-    xxx "loop mounted on ${nstloop}"
+    _verbose "Loop mounted on ${nstloop}"
 
-    _message "checking if the tomb is empty (we never step on somebody else's bones)"
+    _message "Checking if the tomb is empty (we never step on somebody else's bones)."
     cryptsetup isLuks ${nstloop}
     if [ $? = 0 ]; then
 	# is it a LUKS encrypted nest? then bail out and avoid reformatting it
-	_warning "The tomb was already locked with another key"
+	_warning "The tomb was already locked with another key."
 	losetup -d ${nstloop}
-	die "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
+	_failure "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
     else
-	_message "fine, this tomb seems empty."
+	_message "Fine, this tomb seems empty."
     fi
 
     # load key from options or file
     tombkey=`load_key ${tombdir}/${tombfile}`
     { test $? = 0 } || {
 	losetup -d $nstloop
-	die "Aborting operations: error loading key $tombkey" }
+	_failure "Aborting operations: error loading key $tombkey" }
 	# make sure to call drop_key later
 
     # the encryption cipher for a tomb can be set when locking using -o
@@ -1214,48 +1214,48 @@ lock_tomb_with_key() {
 	# old default was aes-cbc-essiv:sha256
 	# for more alternatives refer to cryptsetup(8)
     fi
-    _message "locking using cipher: $cipher"
+    _message "Locking using cipher: $cipher"
 
     # get the pass from the user and check it
     tombpass=`ask_key_password "$tombkey"`
     { test $? = 0 } || {
 	losetup -d ${nstloop}
-	die "No valid password supplied" }
+	_failure "No valid password supplied." }
 
     _success "Locking ${tombfile} with ${tombkey}"
 
-    _message "formatting Luks mapped device"
+    _message "Formatting Luks mapped device."
     get_lukskey "${tombpass}" ${tombkey} | \
 	cryptsetup --key-file -   --batch-mode \
 	--cipher ${cipher} --key-size 256 --key-slot 0 \
 	luksFormat ${nstloop}
     if ! [ $? = 0 ]; then
-	_warning "cryptsetup luksFormat returned an error"
+	_warning "cryptsetup luksFormat returned an error."
 	unset tombpass
 	losetup -d $nstloop
-	die "Operation aborted."
+	_failure "Operation aborted."
     fi
 
     get_lukskey "${tombpass}" ${tombkey} | \
 	cryptsetup --key-file - \
 	--cipher ${cipher} luksOpen ${nstloop} tomb.tmp
     if ! [ $? = 0 ]; then
-	_warning "cryptsetup luksOpen returned an error"
+	_warning "cryptsetup luksOpen returned an error."
 	unset tombpass
 	losetup -d $nstloop
-	die "Operation aborted."
+	_failure "Operation aborted."
     fi
 
     # cleanup tombs
     unset tombpass
     drop_key # make sure all temp files are out
 
-    _message "formatting your Tomb with Ext3/Ext4 filesystem"
+    _message "Formatting your Tomb with Ext3/Ext4 filesystem."
     ${=MKFS} ${tombname} /dev/mapper/tomb.tmp
 
     if [ $? != 0 ]; then
-	_warning "Tomb format returned an error"
-	_warning "your tomb ${tombfile} may be corrupted."
+	_warning "Tomb format returned an error."
+	_warning "Your tomb ${tombfile} may be corrupted."
     fi
 
     sync
@@ -1264,7 +1264,7 @@ lock_tomb_with_key() {
     losetup -d ${nstloop}
 
 
-    _message "done locking $tombname using Luks dm-crypt ${create_cipher}"
+    _message "Done locking $tombname using Luks dm-crypt ${create_cipher}"
     _success "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
 
 }
@@ -1273,33 +1273,33 @@ lock_tomb_with_key() {
 change_tomb_key() {
     _check_swap
 
-    { option_is_set -k } || { die "Specify the new key with -k" }
+    { option_is_set -k } || { _failure "Specify the new key with -k" }
     newkey="`option_value -k`"
 
     { is_valid_key "$newkey" } || {
-	die "New key invalid. Check your usage of the --key option." }
+	_failure "New key invalid. Check your usage of the --key option." }
 
     oldkey="$1"
     { is_valid_key "$oldkey" } || {
-	die "Old key invalid. Check your usage of the first argument." }
+	_failure "Old key invalid. Check your usage of the first argument." }
 
     { is_valid_tomb "$2" } || {
-	die "Specify the name of a tomb as second argument" }
+	_failure "Specify the name of a tomb as second argument." }
 
     nstloop=`losetup -f`
     { test $? = 255 } && {
-	die "Too many tombs are open. Please close any of them to proceed." }
+	_failure "Too many tombs are open. Please close any of them to proceed." }
     losetup -f "$2"
     cryptsetup isLuks ${nstloop}
     # is it a LUKS encrypted nest? we check one more timesee cryptsetup(1)
     { test $? = 0 } || {
 	losetup -d "$nstloop"
-	die "Not a valid LUKS encrypted volume: $2" }
+	_failure "Not a valid LUKS encrypted volume: $2" }
 
     # we have everything, prepare to mount
-    yes "Changing lock on tomb $tombname"
-    _message "old key: $oldkey"
-    _message "new key: $newkey"
+    _success "Changing lock on tomb $tombname"
+    _message "Old key: $oldkey"
+    _message "New key: $newkey"
 
     # render the mapper
     mapdate=`date +%s`
@@ -1310,36 +1310,36 @@ change_tomb_key() {
     # load the new key from the -k option
     tombkey=`load_key`
     { test $? = 0 } || {
-	die "Aborting operations: error loading new key $tombkey"    }
+	_failure "Aborting operations: error loading new key $tombkey"    }
 
     newkeypass=`ask_key_password $tombkey`
     { test $? = 0 } || {
-	die "No valid password supplied for the new key" }
+	_failure "No valid password supplied for the new key." }
     newkeyfile="`safe_filename newkey`"
     get_lukskey "$newkeypass" "$newkey" > $newkeyfile
 
     # load the old key
     oldkeypass="`ask_key_password $oldkey`"
     { test $? = 0 } || {
-	die "No valid password supplied for the old key" }
+	_failure "No valid password supplied for the old key." }
 
     # luksOpen the tomb (not really mounting, just on the loopback)
     get_lukskey "$oldkeypass" "$oldkey" | \
 	cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
     { test $? = 0 } || {
 	losetup -d "$nstloop"
-	die "Unexpected error in luksOpen." }
+	_failure "Unexpected error in luksOpen." }
 
     get_lukskey "$oldkeypass" "$oldkey" | \
 	cryptsetup --key-file - luksChangeKey "$nstloop" "$newkeyfile"
     { test $? = 0 } || {
 	losetup -d "$nstloop"
-	die "Unexpected error in luksChangeKey." }
+	_failure "Unexpected error in luksChangeKey." }
 
     cryptsetup luksClose "${mapper}"
     { test $? = 0 } || {
 	losetup -d "$nstloop"
-	die "Unexpected error in luksClose." }
+	_failure "Unexpected error in luksClose." }
 
 
     drop_key
@@ -1347,7 +1347,7 @@ change_tomb_key() {
     ${=WIPE} "$newkeyfile"
     losetup -d ${nstloop}
 
-    yes "Succesfully changed key for tomb: $2"
+    _success "Succesfully changed key for tomb: $2"
     _message "The new key is: $newkey"
 
     return 0
@@ -1355,18 +1355,18 @@ change_tomb_key() {
 
 # backward compatibility
 create_tomb() {
-    xxx "create_tomb(): ${=@} ${=OLDARGS}"
+    _verbose "create_tomb(): ${=@} ${=OLDARGS}"
     if ! [ $1 ]; then
-	_warning "no tomb name specified for creation"
+	_warning "No tomb name specified for creation."
 	return 1
     fi
 
 
     { test -r "$1" } && {
 	_warning "Creating this tomb would overwrite an existing file. Operation aborted."
-	die "`ls -lh $1`"    }
+	_failure "`ls -lh $1`"    }
 
-    { test $? = 0 } || { die "Failed to dig tomb, operation aborted." }
+    { test $? = 0 } || { _failure "Failed to dig tomb, operation aborted." }
 
 
     tombfile=`basename $1`
@@ -1377,12 +1377,12 @@ create_tomb() {
 
     ${TOMBEXEC} dig ${=PARAM}
     ${TOMBEXEC} forge ${tombdir}/${tombfile}.key
-    { test $? = 0 } || { die "Failed to forge key, operation aborted." }
+    { test $? = 0 } || { _failure "Failed to forge key, operation aborted." }
 
     ${TOMBEXEC} lock ${tombdir}/${tombfile} -k ${tombdir}/${tombfile}.key
-    { test $? = 0 } || { die "Failed to lock tomb with key, operation aborted." }
+    { test $? = 0 } || { _failure "Failed to lock tomb with key, operation aborted." }
 
-    yes "Tomb $tombname succesfully created"
+    _success "Tomb $tombname succesfully created."
     ls -l ${tombfile}*
 }
 
@@ -1396,7 +1396,7 @@ mount_tomb() {
     _check_swap
 
     if ! [ ${1} ]; then
-	_warning "no tomb name specified for creation"
+	_warning "No tomb name specified for creation."
 	return 1
     fi
 
@@ -1413,21 +1413,21 @@ mount_tomb() {
     # check file type (if its a Luks fs)
     file ${tombdir}/${tombfile} | grep -i 'luks encrypted file' 2>&1 >/dev/null
     if [ $? != 0 ]; then
-	_warning "$1 is not a valid tomb file, operation aborted"
+	_warning "$1 is not a valid tomb file, operation aborted."
 	return 1
     fi
     tombname=${tombfile%%\.*}
-    xxx "tomb found: ${tombdir}/${tombfile}"
+    _verbose "Tomb found: ${tombdir}/${tombfile}"
 
     # load_key called here
     tombkey=`load_key ${tombdir}/${tombfile}`
     { test $? = 0 } || {
-	die "Aborting operations: error loading key $tombkey"    }
+	_failure "Aborting operations: error loading key $tombkey"    }
 
 
     if [ "$2" = "" ]; then
 	tombmount=/media/${tombfile}
-	_message "mountpoint not specified, using default: $tombmount"
+	_message "Mountpoint not specified, using default: $tombmount"
     else
 	tombmount=$2
     fi
@@ -1436,7 +1436,7 @@ mount_tomb() {
     mount -l | grep "${tombfile}.*\[$tombname\]$" 2>&1 > /dev/null
     if [ $? = 0 ]; then
 	_warning "$tombname is already open."
-	_message "here below its status is reported:"
+	_message "Here below its status is reported:"
 	list_tombs ${tombname}
 	return 0
     fi
@@ -1446,26 +1446,26 @@ mount_tomb() {
 
     nstloop=`losetup -f`
     if [ $? = 255 ]; then
-	die "too many tomb opened. Please close any of them to open another tomb"
+	_failure "Too many tombs open. Please close any of them to open another tomb."
     fi
-    xxx "next free loop device: $nstloop"
+    _verbose "Next free loop device: $nstloop"
     losetup -f ${tombdir}/${tombfile}
 
     cryptsetup isLuks ${nstloop}
     if [ $? != 0 ]; then
 	# is it a LUKS encrypted nest? see cryptsetup(1)
-	_warning "$tombfile is not a valid Luks encrypted storage file"
+	_warning "$tombfile is not a valid Luks encrypted storage file."
 	losetup -d ${nstloop}
 	return 1
     fi
-    say "this tomb is a valid LUKS encrypted device"
+    _message "This tomb is a valid LUKS encrypted device."
 
     luksdump="`cryptsetup luksDump ${nstloop}`"
     tombdump=(`print $luksdump | awk '
 	/^Cipher name/ {print $3}
 	/^Cipher mode/ {print $3}
 	/^Hash spec/   {print $3}'`)
-    say "cipher is \"$tombdump[1]\" mode \"$tombdump[2]\" hash \"$tombdump[3]\""
+    _message "Cipher is \"$tombdump[1]\" mode \"$tombdump[2]\" hash \"$tombdump[3]\""
 
     slotwarn=`print $luksdump | awk '
 	BEGIN { zero=0 }
@@ -1478,14 +1478,14 @@ mount_tomb() {
     mapdate=`date +%s`
 
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
-    xxx "dev mapper device: $mapper"
-    xxx "tomb key: $tombkey"
+    _verbose "dev mapper device: $mapper"
+    _verbose "Tomb key: $tombkey"
     keyname=`basename $tombkey | cut -d. -f1`
 
     tombpass=`ask_key_password $tombkey`
     { test $? = 0 } || {
 	losetup -d ${nstloop}
-	die "No valid password supplied" }
+	_failure "No valid password supplied." }
 
     get_lukskey "${tombpass}" ${tombkey} | \
 	cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
@@ -1497,7 +1497,7 @@ mount_tomb() {
 
     if ! [ -r /dev/mapper/${mapper} ]; then
 	losetup -d ${nstloop}
-	die "failure mounting the encrypted file"
+	_failure "Failure mounting the encrypted file."
     fi
 
     # array: [ cipher, keysize, loopdevice ]
@@ -1505,12 +1505,12 @@ mount_tomb() {
     /cipher:/  {print $2}
     /keysize:/ {print $2}
     /device:/  {print $2}'`)
-    yes "Success unlocking tomb $tombname"
-    xxx "key size is $tombstat[2] for cipher $tombstat[1]"
+    _success "Success unlocking tomb $tombname"
+    _verbose "Key size is $tombstat[2] for cipher $tombstat[1]"
 
-    _message "checking filesystem via $tombstat[3]"
+    _message "Checking filesystem via $tombstat[3]"
     fsck -p -C0 /dev/mapper/${mapper}
-    xxx "tomb engraved as $tombname"
+    _verbose "Tomb engraved as $tombname"
     tune2fs -L ${tombname} /dev/mapper/${mapper} > /dev/null
 
     # we need root from here on
@@ -1521,7 +1521,7 @@ mount_tomb() {
     chown ${_uid}:${_gid} ${tombmount}
     chmod 0750 ${tombmount}
 
-    _success "Success opening $tombfile on $fg_bold[white]$tombmount$fg_no_bold[white]"
+    _success "Success opening $tombfile on $fg_bold[white]$tombmount$fg_no_bold[white]."
 
     # print out when was opened the last time, by whom and where
     { test -r ${tombmount}/.last } && {
@@ -1530,8 +1530,8 @@ mount_tomb() {
 	tombuid="`cat ${tombmount}/.uid`"
 	tomblast="`cat ${tombmount}/.last`"
 	tombuser=`awk -F: '/:'"$tombuid"':/ {print $1}' /etc/passwd`
-	say "last visit by $fg_bold[white]$tombuser($tombuid)$fg_no_bold[white] from $fg_bold[white]$tombtty$fg_no_bold[white] on $fg_bold[white]$tombhost$fg_no_bold[white]"
-	say "on date $fg_bold[white]`date --date @${tomblast} +%c`$fg_no_bold[white]"
+	_message "Last visit by $fg_bold[white]$tombuser($tombuid)$fg_no_bold[white] from $fg_bold[white]$tombtty$fg_no_bold[white] on $fg_bold[white]$tombhost$fg_no_bold[white]"
+	_message "on date $fg_bold[white]`date --date @${tomblast} +%c`$fg_no_bold[white]"
     }
     # write down the UID and TTY that opened the tomb
     rm -f ${tombmount}/.uid
@@ -1566,15 +1566,15 @@ exec_safe_bind_hooks() {
     local ME=${SUDO_USER:-$(whoami)}
     local HOME=$(awk -v a="$ME" -F ':' '{if ($1 == a) print $6}' /etc/passwd 2>/dev/null)
     if [ $? -ne 0 ]; then
-	_warning "how pitiful!  A tomb, and no HOME"
+	_warning "How pitiful!  A tomb, and no HOME."
 	return 1
     fi
     if [ -z "$MOUNTPOINT" -o ! -d "$MOUNTPOINT" ]; then
-	_warning "cannot exec bind hooks without a mounted tomb."
+	_warning "Cannot exec bind hooks without a mounted tomb."
 	return 1
     fi
     if ! [ -r "$MOUNTPOINT/bind-hooks" ]; then
-	xxx "bind-hooks not found in $MOUNTPOINT"
+	_verbose "bind-hooks not found in $MOUNTPOINT"
 	return 1
     fi
     typeset -al mounted
@@ -1613,7 +1613,7 @@ exec_safe_post_hooks() {
     # make encrypted executables.
     cat ${mnt}/post-hooks | head -n1 | grep '^#!/'
     if [ $? = 0 ]; then
-	_success "post hooks found, executing as user $SUDO_USER"
+	_success "Post hooks found, executing as user $SUDO_USER."
 	exec_as_user ${mnt}/post-hooks "$2" "$1"
     fi
 }
@@ -1629,7 +1629,7 @@ list_tombs() {
     # list all open tombs
     mounted_tombs=(`list_tomb_mounts $1`)
     { test ${#mounted_tombs} = 0 } && {
-	die "I can't see any ${1:-open} tomb, may they all rest in peace." }
+	_failure "I can't see any ${1:-open} tomb, may they all rest in peace." }
 
     for t in ${mounted_tombs}; do
 	mapper=`basename ${t[(ws:;:)1]}`
@@ -1759,7 +1759,7 @@ BEGIN { main="" }
 # needs an argument: name of tomb whose hooks belong
 list_tomb_binds() {
     if [ "$1" = "" ]; then
-	_failure "internal error: list_tomb_binds called without argument."; fi
+	_failure "Internal error: list_tomb_binds called without argument."; fi
 
     # list bind hooks on util-linux 2.20 (Debian 7)
     mount -l \
@@ -1791,30 +1791,30 @@ BEGIN { main="" }
 # $1 is optional, to specify a tomb
 index_tombs() {
     { command -v updatedb > /dev/null } || {
-	die "Cannot index tombs on this system: updatedb (mlocate) not installed" }
+	_failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
 
     updatedbver=`updatedb --version | grep '^updatedb'`
     [[ "$updatedbver" =~ "GNU findutils" ]] && {
-	_warning "Cannot use GNU findutils for index/search commands" }
+	_warning "Cannot use GNU findutils for index/search commands." }
     [[ "$updatedbver" =~ "mlocate" ]] || {
-	die "Index command needs 'mlocate' to be installed." }
+	_failure "Index command needs 'mlocate' to be installed." }
 
-    xxx "$updatedbver"
+    _verbose "$updatedbver"
 
     mounted_tombs=(`list_tomb_mounts $1`)
     { test ${#mounted_tombs} = 0 } && {
-	if [ $1 ]; then die "There seems to be no open tomb engraved as [$1]"
-	else die "I can't see any open tomb, may they all rest in peace."
+	if [ $1 ]; then _failure "There seems to be no open tomb engraved as [$1]"
+	else _failure "I can't see any open tomb, may they all rest in peace."
 	fi
     }
 
 
-    yes "Creating and updating search indexes"
+    _success "Creating and updating search indexes."
 
     # start the LibreOffice document converter if installed
     { command -v unoconv >/dev/null } && {
 	unoconv -l 2>/dev/null &
-	xxx "unoconv listener launched"
+	_verbose "unoconv listener launched."
 	sleep 1 }
 
     for t in ${mounted_tombs}; do
@@ -1822,14 +1822,14 @@ index_tombs() {
 	tombname=${t[(ws:;:)5]}
 	tombmount=${t[(ws:;:)2]}
 	{ test -r ${tombmount}/.noindex } && {
-	    say "skipping $tombname (.noindex found)"
+	    _message "Skipping $tombname (.noindex found)."
 	    continue }
-	say "indexing $tombname filenames..."
+	_message "Indexing $tombname filenames..."
 	updatedb -l 0 -o ${tombmount}/.updatedb -U ${tombmount}
 
 	# here we use swish to index file contents
 	{ test $SWISH = 1 } && {
-	    say "indexing $tombname contents..."
+	    _message "Indexing $tombname contents..."
 	    swishrc=`safe_filename swish`
 
 	    cat <<EOF > $swishrc
@@ -1898,55 +1898,55 @@ IndexContents HTML* .htm .html .shtml
 IndexContents XML*  .xml
 EOF
 
-	    xxx "Using swish-e to create index"
+	    _verbose "Using swish-e to create index."
 	    swish-e -c $swishrc -S fs -v3
 	    rm -f $swishrc
 	}
 
-	say "search index updated"
+	_message "Search index updated."
     done
 }
 search_tombs() {
     { command -v locate > /dev/null } || {
-	die "Cannot index tombs on this system: updatedb (mlocate) not installed" }
+	_failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
 
     updatedbver=`updatedb --version | grep '^updatedb'`
     [[ "$updatedbver" =~ "GNU findutils" ]] && {
-	_warning "Cannot use GNU findutils for index/search commands" }
+	_warning "Cannot use GNU findutils for index/search commands." }
     [[ "$updatedbver" =~ "mlocate" ]] || {
-	die "Index command needs 'mlocate' to be installed." }
+	_failure "Index command needs 'mlocate' to be installed." }
 
-    xxx "$updatedbver"
+    _verbose "$updatedbver"
 
     # list all open tombs
     mounted_tombs=(`list_tomb_mounts`)
     if [ ${#mounted_tombs} = 0 ]; then
-	die "I can't see any open tomb, may they all rest in peace."; fi
+	_failure "I can't see any open tomb, may they all rest in peace."; fi
 
-    yes "Searching for: $fg_bold[white]${(f)@}$fg_no_bold[white]"
+    _success "Searching for: $fg_bold[white]${(f)@}$fg_no_bold[white]"
     for t in ${mounted_tombs}; do
-	xxx "checking for index: ${t}"
+	_verbose "Checking for index: ${t}"
 	mapper=`basename ${t[(ws:;:)1]}`
 	tombname=${t[(ws:;:)5]}
 	tombmount=${t[(ws:;:)2]}
 	if [ -r ${tombmount}/.updatedb ]; then
 
 	    # use mlocate to search hits on filenames
-	    say "Searching filenames in tomb $tombname"
+	    _message "Searching filenames in tomb $tombname"
 	    locate -d ${tombmount}/.updatedb -e -i "${(f)@}"
-	    say "Matches found: `locate -d ${tombmount}/.updatedb -e -i -c ${(f)@}`"
+	    _message "Matches found: `locate -d ${tombmount}/.updatedb -e -i -c ${(f)@}`"
 
 	    # use swish-e to search over contents
 	    { test $SWISH = 1 } && { test -r $tombmount/.swish } && {
-		say "Searching contents in tomb $tombname"
+		_message "Searching contents in tomb $tombname"
 		swish-search -w ${=@} -f $tombmount/.swish -H0 }
 
 	else
-	    no "skipping tomb $tombname: not indexed"
-	    no "run 'tomb index' to create indexes"
+	    _warning "Skipping tomb $tombname: not indexed."
+	    _warning "Run 'tomb index' to create indexes."
 	fi
     done
-    say "Search completed."
+    _message "Search completed."
 }
 
 # }}} - Index and search
@@ -1955,9 +1955,9 @@ search_tombs() {
 
 # resize tomb file size
 resize_tomb() {
-    _message "Commanded to resize tomb $1 to $opts[-s] megabytes"
+    _message "Commanded to resize tomb $1 to $opts[-s] megabytes."
     if ! [ $1 ]; then
-	_failure "No tomb name specified for resizing"
+	_failure "No tomb name specified for resizing."
     elif ! [ -r "$1" ]; then
 	_failure "Cannot find $1"
     fi
@@ -1965,7 +1965,7 @@ resize_tomb() {
 
     local newtombsize="`option_value -s`"
     { test "$newtombsize" = "" } && {
-	die "Aborting operations: new size was not specified, use -s" }
+	_failure "Aborting operations: new size was not specified, use -s" }
 
     local c tombpass tombkey
 
@@ -1977,29 +1977,29 @@ resize_tomb() {
     local tombkey="`load_key ${tombdir}/${tombfile}`"
     # make sure to call drop_key later
     { test -r "$tombkey" } || {
-	die "Aborting operations: key not found, use -k" }
+	_failure "Aborting operations: key not found, use -k" }
 
     local oldtombsize=$(( `stat -c %s "$1" 2>/dev/null` / 1048576 ))
     local mounted_tomb=`mount -l |
 	awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
 
     if [ "$mounted_tomb" ]; then
-	_failure "the tomb $tombname is open, to resize it it needs to be close."
+	_failure "The tomb $tombname is open, to resize it it needs to be closed."
     fi
 
     if ! [ "$newtombsize" ] ; then
 	_failure "You must specify the new size of $tombname"
     elif [[ $newtombsize != <-> ]]; then
-	_failure "Size is not an integer"
+	_failure "Size is not an integer."
     elif [ "$newtombsize" -le "$oldtombsize" ]; then
-	_failure "the new size must be greater then old tomb size."
+	_failure "The new size must be greater then old tomb size."
     fi
 
     delta="$(( $newtombsize - $oldtombsize ))"
 
     act "Generating ${tombfile} of ${newtombsize}MiB"
 
-    xxx "Data dump using ${DD[1]} from /dev/urandom"
+    _verbose "Data dump using ${DD[1]} from /dev/urandom"
     ${=DD} if=/dev/urandom bs=1048576 count=${delta} >> ${tombdir}/${tombfile}
 
     { test $? = 0 } || {
@@ -2007,11 +2007,11 @@ resize_tomb() {
 
     tombpass=`ask_key_password $tombkey`
     { test $? = 0 } || {
-	die "No valid password supplied" }
+	_failure "No valid password supplied." }
 
     local nstloop=`losetup -f`
     if [ $? = 255 ]; then
-	_failure "too many tomb opened. Please close any of them to open another tomb"
+	_failure "Too many tombs opened. Please close any of them to open another tomb."
     fi
 
     losetup -f ${tombdir}/${tombfile}
@@ -2027,7 +2027,7 @@ resize_tomb() {
 
     if ! [ -r /dev/mapper/${mapper} ]; then
 	losetup -d ${nstloop}
-	_failure "failure mounting the encrypted file"
+	_failure "Failure mounting the encrypted file."
     fi
 
     cryptsetup resize "${mapper}"
@@ -2073,7 +2073,7 @@ umount_tomb() {
     fi
 
     { test ${#mounted_tombs} = 0 } && {
-	    _warning "There is no open tomb to be closed"
+	    _warning "There is no open tomb to be closed."
 	    return 1 }
 
     { test ${#mounted_tombs} -gt 1 } && { test "$1" = "" } && {
@@ -2081,7 +2081,7 @@ umount_tomb() {
 	    _warning "or issue the command 'tomb close all' to close them all."
 	    return 1 }
 
-    say "Tomb close $1"
+    _message "Tomb close $1"
 
     for t in ${mounted_tombs}; do
 	mapper=`basename ${t[(ws:;:)1]}`
@@ -2091,9 +2091,9 @@ umount_tomb() {
 	tombfsopts=${t[(ws:;:)4]}
 	tombloop=${mapper[(ws:.:)4]}
 
-	xxx "name: $tombname"
-	xxx "mount: $tombmount"
-	xxx "mapper: $mapper"
+	_verbose "Name: $tombname"
+	_verbose "Mount: $tombmount"
+	_verbose "Mapper: $mapper"
 
 	{ test -e "$mapper" } && {
 	    _warning "Tomb not found: $1"
@@ -2102,13 +2102,13 @@ umount_tomb() {
 
 	if [ $SLAM ]; then
 	    _success "Slamming tomb $tombname mounted on $tombmount"
-	    _message "Kill all processes busy inside the tomb"
+	    _message "Kill all processes busy inside the tomb."
 	    if ! slam_tomb "$tombmount"; then
 		_warning "Cannot slam the tomb $tombname"
 		return 1
 	    fi
 	else
-	    say "Closing tomb $tombname mounted on $tombmount"
+	    _message "Closing tomb $tombname mounted on $tombmount"
 	fi
 
     # check if there are binded dirs and close them
@@ -2116,11 +2116,11 @@ umount_tomb() {
 	for b in ${bind_tombs}; do
 	    bind_mapper="${b[(ws:;:)1]}"
 	    bind_mount="${b[(ws:;:)2]}"
-	    _message "closing tomb bind hook: $bind_mount"
+	    _message "Closing tomb bind hook: $bind_mount"
 	    umount $bind_mount
 	    if [[ $? != 0 ]]; then
 		if [ $SLAM ]; then
-		    _success "Slamming tomb: killing all processes using this hook"
+		    _success "Slamming tomb: killing all processes using this hook."
 		    slam_tomb "$bind_mount"
 		    if [[ $? == 1 ]]; then
 			_warning "Cannot slam the bind hook $bind_mount"
@@ -2138,7 +2138,7 @@ umount_tomb() {
 	    exec_safe_post_hooks ${tombmount%%/} close
 	fi
 
-	xxx "performing umount of $tombmount"
+	_verbose "Performing umount of $tombmount"
 	umount ${tombmount}
 	if ! [ $? = 0 ]; then _warning "Tomb is busy, cannot umount!"
 	else
@@ -2149,7 +2149,7 @@ umount_tomb() {
 
 	cryptsetup luksClose $mapper
 	{ test $? = 0 } || {
-	    _warning "error occurred in cryptsetup luksClose ${mapper}"
+	    _warning "Error occurred in cryptsetup luksClose ${mapper}"
 	    return 1 }
 
 	losetup -d "/dev/$tombloop"
@@ -2169,11 +2169,11 @@ slam_tomb() {
     fi
     #Note: shells are NOT killed by INT or TERM, but they are killed by HUP
     for s in TERM HUP KILL; do
-	xxx "Sending $s to processes inside the tomb:"
+	_verbose "Sending $s to processes inside the tomb:"
 	if option_is_set -D; then
 	    ps -fp `fuser -m /media/a.tomb 2> /dev/null`|
 	    while read line; do
-		xxx $line
+		_verbose $line
 	    done
 	fi
 	fuser -s -m "$1" -k -M -$s
@@ -2266,7 +2266,7 @@ main() {
 	fi
 	unset discardme
     if ! zparseopts -M -E -D -Adiscardme ${every_opts}; then
-		die "error parsing"
+		_failure "Error parsing."
 		return 127
 	fi
     unset discardme
@@ -2277,8 +2277,8 @@ main() {
 
     if [[ -z ${(k)subcommands_opts[$subcommand]} ]]; then
 	_warning "There's no such command \"$subcommand\"."
-	_failure "Please try -h for help" 127
-#        die "Subcommand '$subcommand' doesn't exist" 127
+	_failure "Please try -h for help." 127
+#        _failure "Subcommand '$subcommand' doesn't exist" 127
     fi
     argv=(${oldstar})
     unset oldstar
@@ -2291,7 +2291,7 @@ main() {
 	zparseopts -M -E -D -Aopts ${cmd_opts}
 	if [[ $? != 0 ]]; then
 	    _warning "Some error occurred during option processing."
-	    die "See \"tomb help\" for more info" 127
+	    _failure "See \"tomb help\" for more info." 127
 	fi
     fi
     #build PARAM (array of arguments) and check if there are unrecognized options
@@ -2303,7 +2303,7 @@ main() {
 	    continue #it shouldnt be appended to PARAM
 	elif [[ $arg[1] == '-'  ]]; then
 	    if [[ $ok == 0 ]]; then
-		die "unrecognized option $arg for subcommand $subcommand" 127
+		_failure "Unrecognized option $arg for subcommand $subcommand" 127
 	    fi
 	fi
 	PARAM+=$arg
@@ -2320,7 +2320,7 @@ main() {
     if ! option_is_set --unsecure-dev-mode; then
 	for opt in --sudo-pwd --tomb-pwd --use-urandom --tomb-old-pwd; do
 	    if option_is_set $opt; then
-		die "You specified option $opt, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsecure-dev-mode" 127
+		_failure "You specified option $opt, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsecure-dev-mode" 127
 	    fi
 	done
     fi
@@ -2331,8 +2331,8 @@ main() {
     if option_is_set -G; then _gid="`option_value -G`"; fi
     if option_is_set -T; then _tty="`option_value -T`"; fi
 
-    xxx "Tomb command: $subcommand ${PARAM}"
-    xxx "caller uid[$_uid] gid[$_gid] tty[$_tty]"
+    _verbose "Tomb command: $subcommand ${PARAM}"
+    _verbose "caller uid[$_uid] gid[$_gid] tty[$_tty]"
 
     case "$subcommand" in
 
@@ -2356,7 +2356,7 @@ main() {
 
 	engrave)
 	    { test "$QRENCODE" = 0 } && {
-		die "QREncode not installed: cannot engrave keys on paper." }
+		_failure "QREncode not installed: cannot engrave keys on paper." }
 	    engrave_key ${=PARAM}
 	    ;;
 
@@ -2394,17 +2394,17 @@ main() {
 	    ;;
 	bury)
 	    { test "$STEGHIDE" = 0 } && {
-		die "Steghide not installed: cannot bury keys into images." }
+		_failure "Steghide not installed: cannot bury keys into images." }
 	    bury_key $PARAM[1]
 	    ;;
 	exhume)
 	    { test "$STEGHIDE" = 0 } && {
-		die "Steghide not installed: cannot exhume keys from images." }
+		_failure "Steghide not installed: cannot exhume keys from images." }
 	    exhume_key $PARAM[1]
 	    ;;
 	resize)
 	    { test "$RESIZER" = 0 } && {
-		die "Resize2fs not installed: cannot resize tombs." }
+		_failure "Resize2fs not installed: cannot resize tombs." }
 	    check_priv
 	    resize_tomb $PARAM[1]
 	    ;;
@@ -2444,8 +2444,8 @@ EOF
 	    usage
 	    ;;
 	*)
-	    _warning "command \"$subcommand\" not recognized"
-	    _message "try -h for help"
+	    _warning "Command \"$subcommand\" not recognized."
+	    _message "Try -h for help."
 	    return 1
 	    ;;
     esac
