@@ -1156,7 +1156,7 @@ dig_tomb() {
     _success "Done digging $tombname"
     _message "your tomb is not yet ready, you need to forge a key and lock it:"
     _message "tomb forge ${tombname}.tomb.key"
-    _message "tomb lock ${tombname}.tomb ${tombname}.tomb.key"
+    _message "tomb lock ${tombname}.tomb -k ${tombname}.tomb.key"
 }
 
 
