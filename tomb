@@ -1071,7 +1071,7 @@ forge_key() {
     fi
 
     _success "Choose the password of your key: ${tombkey}"
-    _message "(You can also change it later using 'tomb passwd')"
+    _message "(You can also change it later using 'tomb passwd'.)"
     touch ${tombkey}
     chown ${_uid}:${_gid} ${tombkey}
     chmod 0600 ${tombkey}
@@ -1521,7 +1521,7 @@ mount_tomb() {
     chown ${_uid}:${_gid} ${tombmount}
     chmod 0750 ${tombmount}
 
-    _success "Success opening $tombfile on $fg_bold[white]$tombmount$fg_no_bold[white]."
+    _success "Success opening $tombfile on $fg_bold[white]$tombmount$fg_no_bold[white]"
 
     # print out when was opened the last time, by whom and where
     { test -r ${tombmount}/.last } && {
@@ -2332,7 +2332,7 @@ main() {
     if option_is_set -T; then _tty="`option_value -T`"; fi
 
     _verbose "Tomb command: $subcommand ${PARAM}"
-    _verbose "caller uid[$_uid] gid[$_gid] tty[$_tty]"
+    _verbose "Caller: uid[$_uid], gid[$_gid], tty[$_tty]."
 
     case "$subcommand" in
 
