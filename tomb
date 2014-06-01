@@ -64,8 +64,8 @@ typeset -h _uid
 typeset -h _gid
 typeset -h _tty
 
-# Set a sensible PATH
-# PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+# Make sure sbin is in PATH
+PATH+=:/sbin:/usr/sbin
 
 # }}}
 
