@@ -1025,16 +1025,17 @@ engrave_key() {
 
 
 forge_key() {
-    _verbose "forge_key()"
-    _check_swap
-
     # can be specified both as simple argument or using -k
     local destkey="$1"
     { option_is_set -k } && { destkey="`option_value -k`" }
 
     { test "$destkey" = "" } && {
-	_warning "No key name specified for creation."
+	_warning "A filename needs to be specified using -k to forge a new key."
 	return 1 }
+
+    _message "Commanded to forge key $destkey"
+    _check_swap
+
 
     # make sure that gnupg doesn't quits with an error before first run
     { test -r $HOME/.gnupg/pubring.gpg } || {
@@ -1130,20 +1131,18 @@ forge_key() {
 # taken from /dev/urandom which improves the tomb's overall security
 dig_tomb() {
     _message "Commanded to dig tomb $1"
-    _check_swap
-
-    if ! [ $1 ]; then
+    if [ "$1" = "" ]; then
 	_warning "No tomb name specified for creation."
 	return 1
     fi
 
+    _check_swap
 
     tombfile=`basename $1`
     tombdir=`dirname $1`
     # make sure the file has a .tomb extension
     tombname=${tombfile%%\.*}
     tombfile=${tombname}.tomb
-
 
     # require the specification of the size of the tomb (-s) in MB
     tombsize="`option_value -s`"
@@ -1301,20 +1300,19 @@ lock_tomb_with_key() {
 
 # This function changes the key that locks a tomb
 change_tomb_key() {
+    _message "Commanded to reset key for tomb $2"
     _check_swap
 
-    { option_is_set -k } || { _failure "Specify the new key with -k" }
-    newkey="`option_value -k`"
-
-    { is_valid_key "$newkey" } || {
-	_failure "New key invalid. Check your usage of the --key option." }
+    newkey="`load_key`"
+    { test $? = 0 } || {
+	_failure "Aborting operations: error loading new key from -k" }
 
     oldkey="$1"
     { is_valid_key "$oldkey" } || {
-	_failure "Old key invalid. Check your usage of the first argument." }
+	_failure "Old key invalid. 1st argument of setkey must be a valid key file." }
 
     { is_valid_tomb "$2" } || {
-	_failure "Specify the name of a tomb as second argument." }
+	_failure "Tomb invalid. 2nd argument of setkey must be a valid tomb file." }
 
     nstloop=`losetup -f`
     { test $? = 255 } && {
@@ -1336,25 +1334,27 @@ change_tomb_key() {
     # save date of mount in minutes since 1970
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
 
-
-    # load the new key from the -k option
-    tombkey=`load_key`
-    { test $? = 0 } || {
-	_failure "Aborting operations: error loading new key $tombkey"    }
-
-    newkeypass=`ask_key_password $tombkey`
+    if option_is_set --tomb-pwd; then
+	tomb_new_pwd="`option_value --tomb-pwd`"
+	_verbose "--tomb-pwd = $tomb_new_pwd"
+	newkeypass=`ask_key_password "$newkey" "$tomb_new_pwd"`
+    else
+	newkeypass=`ask_key_password "$newkey"`
+    fi
     { test $? = 0 } || {
 	_failure "No valid password supplied for the new key." }
     newkeyfile="`safe_filename newkey`"
     get_lukskey "$newkeypass" "$newkey" > $newkeyfile
 
-    # honor the -tomb-old-pwd by setting it to --tomb-pwd for the next
-    # ask_key_password
-    {  option_is_set --tomb-old-pwd} && {
-	${opts["--tomb-pwd"]}="`option_value --tomb-old-pwd`" }
 
     # load the old key
-    oldkeypass="`ask_key_password $oldkey`"
+    if option_is_set --tomb-old-pwd; then
+	tomb_old_pwd="`option_value --tomb-old-pwd`"
+	_verbose "--tomb-old-pwd = $tomb_old_pwd"
+	oldkeypass=`ask_key_password "$oldkey" "$tomb_old_pwd"`
+    else
+	oldkeypass=`ask_key_password "$oldkey"`
+    fi
     { test $? = 0 } || {
 	_failure "No valid password supplied for the old key." }
 
@@ -1371,15 +1371,16 @@ change_tomb_key() {
 	losetup -d "$nstloop"
 	_failure "Unexpected error in luksChangeKey." }
 
+    ${=WIPE} "$newkeyfile"
+
     cryptsetup luksClose "${mapper}"
     { test $? = 0 } || {
 	losetup -d "$nstloop"
 	_failure "Unexpected error in luksClose." }
 
-
     drop_key
-    unset tombpass
-    ${=WIPE} "$newkeyfile"
+    unset oldkeypass
+    unset newkeypass
     losetup -d ${nstloop}
 
     _success "Succesfully changed key for tomb: $2"
@@ -1428,13 +1429,12 @@ create_tomb() {
 # $1 = tombfile $2(optional) = mountpoint
 mount_tomb() {
     _message "Commanded to open tomb $1"
-    _check_swap
-
-    if ! [ ${1} ]; then
+    if [ "$1" = "" ]; then
 	_warning "No tomb name specified for creation."
 	return 1
     fi
 
+    _check_swap
 
     # set up variables to be used
     # the full path is made with $tombdir/$tombfile
@@ -2260,16 +2260,16 @@ main() {
     #    -force and NOT -f
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v U: -uid=U G: -gid=G T: -tty=T -no-color -unsecure-dev-mode)
     subcommands_opts[__default]=""
-    subcommands_opts[open]="f -force n -nohook=n k: -key=k o: -ignore-swap -sudo-pwd: -tomb-pwd: "
+    subcommands_opts[open]="f -force n -nohook=n k: -key=k -kdf: o: -ignore-swap -sudo-pwd: -tomb-pwd: "
     subcommands_opts[mount]=${subcommands_opts[open]}
 
     subcommands_opts[create]="" # deprecated, will issue warning
 
     subcommands_opts[forge]="f -force -ignore-swap k: -key=k -kdf: o: -tomb-pwd: -use-urandom "
     subcommands_opts[dig]="f -force -ignore-swap s: -size=s "
-    subcommands_opts[lock]="f -force -ignore-swap k: -key=k o: -sudo-pwd: -tomb-pwd: "
+    subcommands_opts[lock]="f -force -ignore-swap k: -key=k -kdf: o: -sudo-pwd: -tomb-pwd: "
     subcommands_opts[setkey]="k: -key=k f -force -ignore-swap -kdf: -sudo-pwd: -tomb-old-pwd: -tomb-pwd: "
-    subcommands_opts[engrave]="k: -key=k -tomb-pwd: "
+    subcommands_opts[engrave]="k: -key=k "
 
     subcommands_opts[passwd]="k: -key=k f -force -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
     subcommands_opts[close]="-sudo-pwd: "
