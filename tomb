@@ -533,11 +533,11 @@ check_bin() {
 
 # {{{ Key operations
 
-# This function retrieves a tomb key specified on commandline or one
-# laying nearby the tomb if found, or from stdin if the option was
-# selected.  It also runs validity checks on the file. Callers should
-# always use drop_key() when done with all key operations.
-# On success returns 0 and prints out the full path to the key
+# This function retrieves a tomb key specified on commandline or from
+# stdin if -k - was selected.  It also runs validity checks on the
+# file. Callers should always use drop_key() when done with all key
+# operations.  On success returns 0 and prints out the full path to
+# the key.
 load_key() {
     # take the name of a tomb file as argument
     if option_is_set -k ; then
@@ -587,21 +587,12 @@ load_key() {
 # it against the return code of gpg on success returns 0 and prints
 # the password (be careful about where you save it!)
 ask_key_password() {
-    tombkey="$1"
+    local tombkey="$1"
     local keyname=`basename $tombkey`
     _message "A password is required to use key ${keyname}"
     local passok=0
     local tombpass=""
-    if option_is_set --tomb-pwd; then
-	    tombpass=`option_value --tomb-pwd`
-	    _verbose "ask_key_password takes tombpass from CLI argument: $tombpass"
-
-	    get_lukskey "$tombpass" ${tombkey} >/dev/null
-
-	    if [ $? = 0 ]; then
-		passok=1; _message "Password OK."; fi
-
-    else
+    if [ "$2" = "" ]; then
 	for c in 1 2 3; do
 	    if [ $c = 1 ]; then
 		tombpass=`exec_as_user ${TOMBEXEC} askpass "Insert password to use key: $keyname"`
@@ -613,18 +604,29 @@ ask_key_password() {
 		return 1
 	    fi
 
-	    get_lukskey "$tombpass" ${tombkey} >/dev/null
+	    get_lukskey "$tombpass" "$tombkey" >/dev/null
 
 	    if [ $? = 0 ]; then
 		passok=1; _message "Password OK."
 		break;
 	    fi
 	done
+
+    else
+	# if a second argument is present then the password is already known
+	tombpass="$2"
+	_verbose "ask_key_password with tombpass: $tombpass"
+	
+	get_lukskey "$tombpass" "$tombkey" >/dev/null
+	
+	if [ $? = 0 ]; then
+	    passok=1; _message "Password OK."; fi
+	
     fi
 
     { test "$passok" = "1" } || { return 1 }
     print "$tombpass"
-    unset $tombpass
+    unset tombpass
     return 0
 }
 
@@ -633,20 +635,7 @@ change_passwd() {
     _message "Commanded to change password for tomb key $1"
     _check_swap
 
-    local keyfile="$1" # $1 is the tomb key path
-
-
-    # check the keyfile
-    if ! [ -r $keyfile ]; then
-	_warning "Key not found: $keyfile"
-	return 1
-    fi
-
-    if ! is_valid_key $keyfile ; then
-	_warning "File doesn't seems to be a tomb key: $keyfile"
-	_warning "Operation aborted."
-	return 1
-    fi
+    keyfile="`load_key`"
 
     local tmpnewkey lukskey c tombpass tombpasstmp
 
@@ -655,37 +644,48 @@ change_passwd() {
 
     _success "Changing password for $keyfile"
 
-    tombpass=`ask_key_password $keyfile`
+    
+    if option_is_set --tomb-old-pwd; then
+	tomb_old_pwd="`option_value --tomb-old-pwd`"
+	_verbose "--tomb-old-pwd = $tomb_old_pwd"
+	tombpass=`ask_key_password "$keyfile" "$tomb_old_pwd"`
+    else
+	tombpass=`ask_key_password "$keyfile"`
+    fi
+
     { test $? = 0 } || {
 	_failure "No valid password supplied." }
 
-    get_lukskey "${tombpass}" ${keyfile} > ${lukskey};
-
+    # danger zone in which the key is written in clear
+    
+    get_lukskey "$tombpass" "$keyfile" > "$lukskey"
+    
     drop_key
+    
+    if option_is_set --tomb-pwd; then
+	tomb_new_pwd="`option_value --tomb-pwd`"
+	_verbose "--tomb-pwd = $tomb_new_pwd"
+	gen_key "$lukskey" "$tomb_new_pwd" > "$tmpnewkey"
+    else
+	gen_key "$lukskey" > "$tmpnewkey"
+    fi
+    
+    ${=WIPE} "$lukskey" 
+    
+    if ! is_valid_key "$tmpnewkey"; then
+	_failure "Error: the newly generated keyfile does not seem valid."
+    else
+	# copy the new key as the original keyfile name
+	cp -f "${tmpnewkey}" "${keyfile}"
+	_success "Your passphrase was successfully updated."
 
-    {
+    fi
 
-	local algo
-	{ option_is_set -o } && { algopt="`option_value -o`" }
+    _verbose "Cleanup: $tmpnewkey"
+    ${=WIPE} "${tmpnewkey}"
 
-	gen_key $lukskey $algopt > ${tmpnewkey}
-
-	if ! is_valid_key $tmpnewkey; then
-	    _failure "Error: the newly generated keyfile does not seem valid."
-	else
-	    # copy the new key as the original keyfile name
-	    cp "${tmpnewkey}" "${keyfile}"
-	    _success "Your passphrase was successfully updated."
-	fi
-    } always {
-	_verbose "Cleanup: $tmpnewkey $lukskey"
-	# wipe all temp file
-	${=WIPE} "${tmpnewkey}"
-	${=WIPE} "${lukskey}"
-    }
-
-    return $?
 }
+
 
 # To be called after load_key()
 drop_key() {
@@ -802,14 +802,16 @@ gen_key() {
 # $1 the lukskey to encrypt
 # $2 is the --cipher-algo to use (string taken by GnuPG)
     local lukskey="$1"
-    local algo="${2:-AES256}"
+    local algopt="`option_value -o`"
+    local algo="${algopt:-AES256}"
     # here user is prompted for key password
     local tombpass=""
     local tombpasstmp=""
-    if ! option_is_set --tomb-pwd; then
+    local tombpassarg="$2"
+    if [ "$tombpassarg" = "" ]; then
 	while true; do
 	    # 3 tries to write two times a matching password
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname}"`
+	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Type the new password to secure your key"`
 	    if [[ $? != 0 ]]; then
 		_failure "User aborted."
 	    fi
@@ -818,7 +820,7 @@ gen_key() {
 		continue
 	    fi
 	    tombpasstmp=$tombpass
-	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Secure key for ${tombname} (again)"`
+	    tombpass=`exec_as_user ${TOMBEXEC} askpass "Type the new password to secure your key (again)"`
 	    if [[ $? != 0 ]]; then
 		_failure "User aborted."
 	    fi
@@ -829,7 +831,7 @@ gen_key() {
 	    unset tombpass
 	done
     else
-	tombpass="`option_value --tomb-pwd`"
+	tombpass="$tombpassarg"
 	_verbose "gen_key takes tombpass from CLI argument: $tombpass"
     fi
 
@@ -888,24 +890,32 @@ BEGIN { ciphers=0 }
 # Steganographic function to bury a key inside an image.
 # Requires steghide(1) to be installed
 bury_key() {
-    tombkey="`option_value -k`"
+    tombkey="`load_key`"
+    { test "$tombkey" = "" } && {
+       _failure "Bury failed: invalid key $tombkey" }
+
     imagefile=$1
 
-    { is_valid_key ${tombkey} } || {
-	_failure "Bury failed: not a tomb key $tombkey" }
-
-    file $imagefile | grep JPEG > /dev/null
+    file $imagefile | grep -i JPEG > /dev/null
     if [ $? != 0 ]; then
-	_warning "Encode failed: $imagefile is not a jpeg image."
-	return 1
+       _warning "Encode failed: $imagefile is not a jpeg image."
+       return 1
     fi
-
+ 
     _success "Encoding key $tombkey inside image $imagefile"
     _message "Please confirm the key password for the encoding"
-    tombpass=`ask_key_password $tombkey`
+
+    if option_is_set --tomb-pwd; then
+	tomb_pwd="`option_value --tomb-pwd`"
+	_verbose "--tomb-pwd = $tomb_pwd"
+	tombpass=`ask_key_password "$tombkey" "$tomb_pwd"`
+    else
+	tombpass=`ask_key_password "$tombkey"`
+    fi
     { test $? = 0 } || {
-	_warning "Wrong password supplied."
-	_failure "You shall not bury a key whose password is unknown to you."
+	drop_key
+       _warning "Wrong password supplied."
+       _failure "You shall not bury a key whose password is unknown to you."
     }
 
     # we omit armor strings since having them as constants can give
@@ -918,27 +928,28 @@ bury_key() {
     | steghide embed --embedfile - --coverfile ${imagefile} \
     -p ${tombpass} -z 9 -e serpent cbc
     if [ $? != 0 ]; then
-	_warning "Encoding error: steghide reports problems."
-	res=1
+       _warning "Encoding error: steghide reports problems."
+       res=1
     else
-	_success "Tomb key encoded succesfully into image ${imagefile}"
-	res=0
+       _success "Tomb key encoded succesfully into image ${imagefile}"
+       res=0
     fi
 
     unset tombpass
+    drop_key
 
     return $res
 }
-# Steganographic function to exhume a key buries into an image
 exhume_key() {
     tombkey="`option_value -k`"
-    imagefile=$1
+    { test "$tombkey" = "" } && { tombkey=stdout }
+
+    imagefile="$1"
     res=1
 
-    file $imagefile | grep JPEG > /dev/null
+    file $imagefile | grep -i JPEG > /dev/null
     if [ $? != 0 ]; then
-	_warning "Encode failed: $imagefile is not a jpeg image."
-	return 1
+	_failure "Encode failed: $imagefile is not a jpeg image."
     fi
 
     if [[ -e "$tombkey" ]]; then
@@ -952,12 +963,17 @@ exhume_key() {
 
     _message "Trying to exhume a key out of image $imagefile"
     if option_is_set --tomb-pwd; then
-	    tombpass=`option_value --tomb-pwd`
-	    _verbose "ask_key_password takes tombpass from CLI argument: $tombpass"
+	tombpass="`option_value --tomb-pwd`"
+	_verbose "--tomb-pwd = $tombpass"
     else
-	tombpass=`exec_as_user ${TOMBEXEC} askpass "Steg password for ${tombkey}"`
+	tombpass=`exec_as_user ${TOMBEXEC} askpass "Insert password to exhume key from $imagefile"`
+	if [[ $? != 0 ]]; then
+	    _warning "User aborted password dialog."
+	    return 1
+	fi
     fi
-	# always steghide required
+
+    # always steghide required
     steghide extract -sf ${imagefile} -p ${tombpass} -xf ${tombkey}
     res=$?
 
@@ -965,18 +981,18 @@ exhume_key() {
 
     if [ $res = 0 ]; then
 	_success "${tombkey} succesfully decoded."
-	return 0
+    else
+	_warning "Nothing found in $imagefile"
     fi
 
-    _warning "Nothing found in $imagefile"
-    return 1
+    return $res
 }
 
 # Produces a printable image of the key contents so that it can be
 # backuped on paper and hidden in books etc.
 engrave_key() {
     # load key from options
-    tombkey="`load_key $1`"
+    tombkey="`load_key`"
     { test $? = 0 } || { _failure "No key specified." }
     keyname=`basename $tombkey`
     pngname="$keyname.qr.png"
@@ -992,6 +1008,7 @@ engrave_key() {
     _success "Operation successful:"
     _message "`ls -lh $pngname`"
     _message "`file $pngname`"
+    drop_key
 }
 
 # }}} - Key handling
@@ -1078,7 +1095,14 @@ forge_key() {
 
     tombname="$tombkey"
     # the gen_key() function takes care of the new key's encryption
-    gen_key "${keytmp}/tomb.tmp" "$algo" > ${tombkey}
+    if option_is_set --tomb-pwd; then
+	tomb_new_pwd="`option_value --tomb-pwd`"
+	_verbose "--tomb-pwd = $tomb_new_pwd"
+	gen_key "${keytmp}/tomb.tmp" "$tomb_new_pwd" > "$tombkey"
+    else
+	gen_key "${keytmp}/tomb.tmp" > "$tombkey"
+    fi
+
     # this does a check on the file header
     if ! is_valid_key ${tombkey}; then
 	_warning "The key does not seem to be valid."
@@ -1170,12 +1194,12 @@ lock_tomb_with_key() {
 	return 1
     fi
 
-    tombfile="$1"
+    tombpath="$1"
     _message "Commanded to lock tomb ${tombfile}"
 
-    tombdir=`dirname $1`
-    tombfile=`basename $1`
-    tombname=${tombfile%%\.*}
+    tombdir=`dirname "$tombpath"`
+    tombfile=`basename "$tombpath"`
+    tombname="${tombfile%%\.*}"
 
     { test -f ${tombdir}/${tombfile} } || {
 	_failure "There is no tomb here. You have to it dig first."
@@ -1200,10 +1224,10 @@ lock_tomb_with_key() {
     fi
 
     # load key from options or file
-    tombkey=`load_key ${tombdir}/${tombfile}`
+    tombkey=`load_key`
     { test $? = 0 } || {
 	losetup -d $nstloop
-	_failure "Aborting operations: error loading key $tombkey" }
+	_failure "Aborting operations: error loading key." }
 	# make sure to call drop_key later
 
     # the encryption cipher for a tomb can be set when locking using -o
@@ -1217,7 +1241,13 @@ lock_tomb_with_key() {
     _message "Locking using cipher: $cipher"
 
     # get the pass from the user and check it
-    tombpass=`ask_key_password "$tombkey"`
+    if option_is_set --tomb-pwd; then
+	tomb_pwd="`option_value --tomb-pwd`"
+	_verbose "--tomb-pwd = $tomb_pwd"
+	tombpass=`ask_key_password "$tombkey" "$tomb_pwd"`
+    else
+	tombpass=`ask_key_password "$tombkey"`
+    fi
     { test $? = 0 } || {
 	losetup -d ${nstloop}
 	_failure "No valid password supplied." }
@@ -1317,6 +1347,11 @@ change_tomb_key() {
 	_failure "No valid password supplied for the new key." }
     newkeyfile="`safe_filename newkey`"
     get_lukskey "$newkeypass" "$newkey" > $newkeyfile
+
+    # honor the -tomb-old-pwd by setting it to --tomb-pwd for the next
+    # ask_key_password
+    {  option_is_set --tomb-old-pwd} && {
+	${opts["--tomb-pwd"]}="`option_value --tomb-old-pwd`" }
 
     # load the old key
     oldkeypass="`ask_key_password $oldkey`"
@@ -1482,7 +1517,13 @@ mount_tomb() {
     _verbose "Tomb key: $tombkey"
     keyname=`basename $tombkey | cut -d. -f1`
 
-    tombpass=`ask_key_password $tombkey`
+    if option_is_set --tomb-pwd; then
+	tomb_pwd="`option_value --tomb-pwd`"
+	_verbose "--tomb-pwd = $tomb_pwd"
+	tombpass=`ask_key_password "$tombkey" "$tomb_pwd"`
+    else
+	tombpass=`ask_key_password "$tombkey"`
+    fi
     { test $? = 0 } || {
 	losetup -d ${nstloop}
 	_failure "No valid password supplied." }
@@ -2005,7 +2046,13 @@ resize_tomb() {
     { test $? = 0 } || {
 	_failure "Error creating the extra resize $tmp_resize, operation aborted." }
 
-    tombpass=`ask_key_password $tombkey`
+    if option_is_set --tomb-pwd; then
+	tomb_pwd="`option_value --tomb-pwd`"
+	_verbose "--tomb-pwd = $tomb_pwd"
+	tombpass=`ask_key_password "$tombkey" "$tomb_pwd"`
+    else
+	tombpass=`ask_key_password "$tombkey"`
+    fi
     { test $? = 0 } || {
 	_failure "No valid password supplied." }
 
@@ -2221,10 +2268,10 @@ main() {
     subcommands_opts[forge]="f -force -ignore-swap k: -key=k -kdf: o: -tomb-pwd: -use-urandom "
     subcommands_opts[dig]="f -force -ignore-swap s: -size=s "
     subcommands_opts[lock]="f -force -ignore-swap k: -key=k o: -sudo-pwd: -tomb-pwd: "
-    subcommands_opts[setkey]="f -force -ignore-swap k: -key=k -sudo-pwd: -tomb-pwd: "
-    subcommands_opts[engrave]="k: -key=k "
+    subcommands_opts[setkey]="k: -key=k f -force -ignore-swap -kdf: -sudo-pwd: -tomb-old-pwd: -tomb-pwd: "
+    subcommands_opts[engrave]="k: -key=k -tomb-pwd: "
 
-    subcommands_opts[passwd]="f -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
+    subcommands_opts[passwd]="k: -key=k f -force -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
     subcommands_opts[close]="-sudo-pwd: "
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
