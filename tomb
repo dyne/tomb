@@ -2083,7 +2083,7 @@ resize_tomb() {
 	_failure "cryptsetup failed to resize $mapper"
     fi
 
-    e2fsck -f /dev/mapper/${mapper}
+    e2fsck -p -f /dev/mapper/${mapper}
     if [ $? != 0 ]; then
 	losetup -d ${nstloop}
 	_failure "e2fsck failed to check $mapper"
