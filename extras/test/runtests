@@ -5,6 +5,7 @@
 T="../../tomb"
 source ${T} source
 dummypass=test
+dummypassnew=changetest
 
 notice() { print; yes "${@}"; print; }
 error() { _warning "     ${@}"; }
@@ -31,13 +32,15 @@ RESIZER=1
 command -v steghide > /dev/null || STEGHIDE=0
 command -v e2fsck resize2fs > /dev/null || RESIZER=0
 command -v tomb-kdb-pbkdf2 > /dev/null || KDF=0
+command -v qrencode > /dev/null || QRENCODE=0
 
 
 typeset -A results
-tests=(dig forge lock badpass open close chksum bind)
+tests=(dig forge lock badpass open close passwd chksum bind setkey)
 { test $RESIZER = 1 } && { tests+=(resize) }
 { test $KDF = 1 } && { tests+=(kdforge kdfpass kdflock kdfopen) }
 { test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen) }
+{ test $QRENCODE = 1 } && { tests+=(qrenc) }
 
 sudo rm -f /tmp/test.tomb{,.key}
 
@@ -89,9 +92,21 @@ tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypass} open /tmp/t
 
 { test $? = 0 } && { results+=(open SUCCESS) }
 
+tt close test
+
+
+
+notice "Testing changing tomb password"
+
+tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-old-pwd ${dummypass} --tomb-pwd ${dummypassnew} passwd /tmp/test.tomb
+
+{ test $? = 0 } && { results+=(passwd SUCCESS) }
+
 
 
 notice "Generating content for file integrity test"
+
+tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypassnew} open /tmp/test.tomb
 
 ${T} dig -s 10 /media/test.tomb/datacheck.raw
 
@@ -106,7 +121,7 @@ tt --unsecure-dev-mode close test
 { test $RESIZER = 1 } && {
     notice "Testing resize to 30 MiB"
     
-    tt --unsecure-dev-mode --tomb-pwd ${dummypass} -k /tmp/test.tomb.key resize /tmp/test.tomb -s 30
+    tt --unsecure-dev-mode --tomb-pwd ${dummypassnew} -k /tmp/test.tomb.key resize /tmp/test.tomb -s 30
     
     { test $? = 0 } && { results+=(resize SUCCESS) }
 
@@ -114,11 +129,15 @@ tt --unsecure-dev-mode close test
 
 notice "Testing contents integrity"
 
-${T} -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypass} open /tmp/test.tomb
+${T} -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypassnew} open /tmp/test.tomb
 
-crc2="sha256 /media/test.tomb/datacheck.raw"
+{ test $? = 0 } && {
+    
+    crc2="sha256 /media/test.tomb/datacheck.raw"
+    
+    { test "$crc" = "$crc2" } && { results+=(chksum SUCCESS) }
 
-{ test "$crc" = "$crc2" } && { results+=(chksum SUCCESS) }
+}
 
 
 
@@ -129,7 +148,7 @@ echo $rnd > /media/test.tomb/test-$rnd
 echo "test-$rnd test-$rnd" > /media/test.tomb/bind-hooks
 touch $HOME/test-$rnd
 tt close test
-tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypass} open /tmp/test.tomb
+tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypassnew} open /tmp/test.tomb
 rnd2=`cat $HOME/test-$rnd`
 if [ "$rnd" = "$rnd2" ]; then
 	notice "Bind hook on file matches"
@@ -141,26 +160,42 @@ fi
 tt close test
 
 
+notice "Testing set key"
+
+sudo rm -f /tmp/test.tomb.new.key
+
+tt -k /tmp/test.tomb.new.key --force --unsecure-dev-mode --tomb-pwd ${dummypass} --use-urandom forge
+
+tt -k /tmp/test.tomb.new.key --unsecure-dev-mode --tomb-pwd ${dummypass} --tomb-old-pwd ${dummypassnew} setkey /tmp/test.tomb.key /tmp/test.tomb
+
+if [ $? = 0 ]; then
+    notice "Setkey succesfully swapped tomb key"
+    results+=(setkey SUCCESS)
+    mv /tmp/test.tomb.new.key /tmp/test.tomb.key 
+fi
+
+
+
 { test $KDF = 1 } && { 
     
     notice "Testing KDF key"
     sudo rm -f /tmp/test.tomb.kdf /tmp/kdf.tomb
     
-    tt --unsecure-dev-mode --tomb-pwd ${dummypass} --use-urandom --kdf 1 forge /tmp/test.tomb.kdf
+    tt --unsecure-dev-mode --tomb-pwd ${dummypass} --use-urandom --kdf 1 forge -k /tmp/test.tomb.kdf
     
     { test $? = 0 } && { results+=(kdforge SUCCESS) }
     
-    tt --unsecure-dev-mode --tomb-pwd ${dummypass} --kdf 1 passwd /tmp/test.tomb.kdf
+    tt --unsecure-dev-mode --tomb-old-pwd ${dummypass} --tomb-pwd ${dummypassnew} --kdf 1 passwd -k /tmp/test.tomb.kdf
     
     { test $? = 0 } && { results+=(kdfpass SUCCESS) }
     
     ${T} dig -s 10 /tmp/kdf.tomb
     
-    tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypass} lock /tmp/kdf.tomb -k /tmp/test.tomb.kdf
+    tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypassnew} --kdf 1 lock /tmp/kdf.tomb -k /tmp/test.tomb.kdf
     
     { test $? = 0 } && { results+=(kdflock SUCCESS) }
     
-    tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypass} open /tmp/kdf.tomb -k /tmp/test.tomb.kdf
+    tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypassnew} --kdf 1 open /tmp/kdf.tomb -k /tmp/test.tomb.kdf
     
     { test $? = 0 } && { results+=(kdfopen SUCCESS) }
     
@@ -179,6 +214,8 @@ tt close test
 
     { test $? = 0 } && { results+=(stgin SUCCESS) }
 
+    rm -f /tmp/test.steg.key
+
     tt --unsecure-dev-mode --tomb-pwd ${dummypass} exhume -k /tmp/test.steg.key /tmp/tomb.jpg
 
     { test $? = 0 } && { results+=(stgout SUCCESS) }
@@ -188,6 +225,14 @@ tt close test
     { test $? = 0 } && { results+=(stgopen SUCCESS) }
 
     ${T} close test
+}
+
+{ test $QRENCODE = 1 } && {
+
+    tt engrave -k /tmp/test.tomb.key
+
+    { test $? = 0 } && { results+=(qrenc SUCCESS) }
+
 }
 
 # rm /tmp/test.tomb{,.key} -f || exit 1
