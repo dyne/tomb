@@ -96,6 +96,10 @@ from the user's behaviour and the strenght of a standard AES-256
 
 Donations are always welcome, see https://dyne.org/donate
 
+Translations are also needed: they can be contributed via this website
+https://poeditor.com/join/project?hash=33bdefea2e46b26f512a0caae55fbbb5
+or simply sending the .po file. Start from `extras/po/tomb.pot`.
+
 Code is pretty short and readable: start looking around it and the
 materials found in doc/ which are good pointers at security measures
 to be further implemented.
