@@ -73,7 +73,9 @@ mount(8) options (default: rw,noatime,nodev).
 List all the tombs found open, including information about the time
 they were opened and the hooks that they mounted. If the first
 argument is present, then shows only the tomb named that way or
-returns an error if its not found.
+returns an error if its not found. If the option
+\fI--get-mountpoint\fR is used then print a simple list of currently
+open tomb mountpoint paths.
 
 .B
 .IP "index"
@@ -174,11 +176,10 @@ adding a '.key' suffix, but can be later renamed and transported on
 other media.  If \fI<keyfile>\fR is "-" (dash), it will read it from
 stdin.
 .B
-.IP "--kdf \fI<seconds>\fR"
+.IP "--kdf \fI<iterations>\fR"
 Activate the KDF feature against dictionary attacks when creating a
-key: forces a delay of \fI<seconds>\fR every time this key is
-used. This feature is still \fIexperimental\fR and not recommended in
-production environments.
+key: forces a delay of \fI<iterations>\fR (integer multiplied by 10k)
+every time this key is used.
 .B
 .IP "-n"
 Skip processing of post-hooks and bind-hooks if found inside the tomb.
@@ -186,32 +187,62 @@ See the \fIHOOKS\fR section in this manual for more information.
 .B
 .IP "-o"
 Manually specify mount options to be used when opening a tomb instead
-of the default \fIrw,noatime,nodev\fR. This option can be used to
-mount a tomb read-only (ro) to prevent any modification of its data,
-or to experiment with other settings (if you really know what you are
-doing) see the mount(8) man page.
+of the default \fIrw,noatime,nodev\fR, i.e. to mount a tomb read-only
+(ro) to prevent any modification of its data. Can also be used to
+change the symmetric encryption algorithm for keys during \fIforge\fR
+operations (default \fIAES256\fR) or the LUKS encryption method during
+\fIlock\fR operations (default \fIaes-xts-plain64:sha256\fR).
 .B
 .IP "-f"
 Force flag, currently used to override swap checks, might be
 overriding more wimpy behaviours in future, but make sure you know
-what you are doing if you force an operation...
+what you are doing if you force an operation.
 .B
 .IP "-h"
-Display a help text and quit
+Display a help text and quit.
 .B
 .IP "-v"
-Display version and quit
+Display version and quit.
 .B
 .IP "-q"
 Run more quietly
 .B
 .IP "-D"
 Print more information while running, for debugging purposes
+
+.SH DEV MODE
 .B
 .IP "--no-color"
-Don't use colors; useful for old terminals or integration in other
-scripts parsers
-
+Suppress colors in console output (needed for string parsing by
+wrappers).
+.B
+.IP "--unsecure-dev-mode"
+Enable using dev-mode arguments, i.e. to pass passwords from
+commandline options. This is mostly used needed for execution by
+wrappers and testing suite.
+.B
+.IP "--use-urandom"
+Use an inferior quality random source to improve the speed of key
+generation at the cost of security (neede for the testing suite).
+.B
+.IP "--sudo-pwd <string>"
+Use string as password when needed for privilege escalation via sudo.
+.B
+.IP "--tomb-pwd <string>"
+Use string as password when needed on tomb.
+.B
+.IP "--tomb-old-pwd <string>"
+Use string as old password when needed in tomb commands requiring
+multiple keys, like \fIpasswd\fR or \fIsetkey\fR.
+.B
+.IP "-U --uid"
+Switch to this user ID when dropping privileges.
+.B
+.IP "-G --gid"
+Switch to this group ID when dropping privileges.
+.B
+.IP "-T --tty"
+Switch to this TTY terminal when dropping privileges.
 
 .SH HOOKS
 

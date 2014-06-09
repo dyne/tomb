@@ -1,5 +1,13 @@
 # Tomb ChangeLog
 
+## 1.5.3
+### June 2014
+
+Various usability fixes and documentation updates. Password changing
+and key changing procedures have been refactored and dev-mode
+operation from scripts has been tested against a few new wrappers
+being developed. A strings file is made available for translators.
+
 ## 1.5.2
 ### February 2014
 

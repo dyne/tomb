@@ -5,8 +5,9 @@ Tomb includes code by Anathema, Boyska and Hellekin O. Wolf.
 
 Tomb's artwork is contributed by Jordi aka Mon Mort
 
-Testing and reviews are contributed by Dreamer, Shining, Mancausoft,
-Asbesto Molesto and Nignux.
+Testing, reviews and documentation are contributed by Dreamer,
+Shining, Mancausoft, Asbesto Molesto, Nignux, Vlax, Reiven and
+GDrooid.
 
 Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth
 

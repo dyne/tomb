@@ -16,7 +16,7 @@
 
 Latest version: **1.5.3**
 
-http://dyne.org/software/tomb
+Updates on website: http://dyne.org/software/tomb
 
 # What is Tomb, the crypto undertaker
 
@@ -28,6 +28,16 @@ At present time, Tomb consists of a simple shell script (Zsh) using
 standard filesystem tools (GNU) and the cryptographic API of the Linux
 kernel (cryptsetup and LUKS). Tomb can also produce machine parsable
 output to facilitate its use inside graphical applications.
+
+# Plea for support
+
+If you like to support the development of this project, please rate it
+and endorse it on the CHEST funding platform:
+
+http://ideas.chest-project.eu/?q=node/3433
+
+We are seeking funding to continue this free and open source development.
+It does not require much, just a registration and rating. Thanks.
 
 # How does it works
 

@@ -132,11 +132,13 @@ Later on we've felt the urgency to publishing this mechanism for other
 operating systems than dyne:bolic since the current situation in
 personal desktop encryption is far from optimal. Let's have a look.
 
-\index{truecrypt}
-[[http://en.wikipedia.org/wiki/TrueCrypt][TrueCrypt]] makes use of statically linked libraries so that its code is
-hard to audit, plus is [[http://lists.freedesktop.org/archives/distributions/2008-October/000276.html][not considered free]] by free operating system
-distributors because of liability reasons, see [[http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=364034][Debian]], [[https://bugs.edge.launchpad.net/ubuntu/+bug/109701][Ubuntu]], [[http://lists.opensuse.org/opensuse-buildservice/2008-10/msg00055.html][Suse]],
-[[http://bugs.gentoo.org/show_bug.cgi?id=241650][Gentoo]] and [[https://fedoraproject.org/wiki/ForbiddenItems#TrueCrypt][Fedora]].
+\index{truecrypt} [[http://en.wikipedia.org/wiki/TrueCrypt][TrueCrypt]] makes use of statically linked libraries
+so that its code is hard to audit, plus is [[http://lists.freedesktop.org/archives/distributions/2008-October/000276.html][not considered free]] by free
+operating system distributors because of liability reasons, see
+[[http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=364034][Debian]], [[https://bugs.edge.launchpad.net/ubuntu/+bug/109701][Ubuntu]], [[http://lists.opensuse.org/opensuse-buildservice/2008-10/msg00055.html][Suse]], [[http://bugs.gentoo.org/show_bug.cgi?id=241650][Gentoo]] and [[https://fedoraproject.org/wiki/ForbiddenItems#TrueCrypt][Fedora]]. For these and other reasons -
+presumably very sad ones for its users - Truecrypt has also been
+discontinued.
+
 
 \index{cryptkeeper}
 [[http://tom.noflag.org.uk/cryptkeeper.html][Cryptkeeper]] is the best alternative to Tomb out there and its main
