@@ -616,12 +616,12 @@ ask_key_password() {
 	# if a second argument is present then the password is already known
 	tombpass="$2"
 	_verbose "ask_key_password with tombpass: $tombpass"
-	
+
 	get_lukskey "$tombpass" "$tombkey" >/dev/null
-	
+
 	if [ $? = 0 ]; then
 	    passok=1; _message "Password OK."; fi
-	
+
     fi
 
     { test "$passok" = "1" } || { return 1 }
@@ -644,7 +644,7 @@ change_passwd() {
 
     _success "Changing password for $keyfile"
 
-    
+
     if option_is_set --tomb-old-pwd; then
 	tomb_old_pwd="`option_value --tomb-old-pwd`"
 	_verbose "--tomb-old-pwd = $tomb_old_pwd"
@@ -657,11 +657,11 @@ change_passwd() {
 	_failure "No valid password supplied." }
 
     # danger zone in which the key is written in clear
-    
+
     get_lukskey "$tombpass" "$keyfile" > "$lukskey"
-    
+
     drop_key
-    
+
     if option_is_set --tomb-pwd; then
 	tomb_new_pwd="`option_value --tomb-pwd`"
 	_verbose "--tomb-pwd = $tomb_new_pwd"
@@ -669,9 +669,9 @@ change_passwd() {
     else
 	gen_key "$lukskey" > "$tmpnewkey"
     fi
-    
-    ${=WIPE} "$lukskey" 
-    
+
+    ${=WIPE} "$lukskey"
+
     if ! is_valid_key "$tmpnewkey"; then
 	_failure "Error: the newly generated keyfile does not seem valid."
     else
@@ -855,7 +855,7 @@ gen_key() {
 	    pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
 	    # We use a length of 64bytes = 512bits (more than needed!?)
 	    tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
-	    
+
 	    header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
 	}
     }
@@ -901,7 +901,7 @@ bury_key() {
        _warning "Encode failed: $imagefile is not a jpeg image."
        return 1
     fi
- 
+
     _success "Encoding key $tombkey inside image $imagefile"
     _message "Please confirm the key password for the encoding"
 
