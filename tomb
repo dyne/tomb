@@ -1560,7 +1560,7 @@ mount_tomb() {
     mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
 
     chown ${_uid}:${_gid} ${tombmount}
-    chmod 0750 ${tombmount}
+    chmod 0711 ${tombmount}
 
     _success "Success opening $tombfile on $fg_bold[white]$tombmount$fg_no_bold[white]"
 
