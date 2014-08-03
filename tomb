@@ -942,7 +942,10 @@ bury_key() {
 }
 exhume_key() {
     tombkey="`option_value -k`"
-    { test "$tombkey" = "" } && { tombkey=stdout }
+    { test "$tombkey" = "" } && {
+        tombkey="-"
+        _message "printing exhumed key on stdout"
+    }
 
     imagefile="$1"
     res=1
@@ -952,14 +955,16 @@ exhume_key() {
         _failure "Encode failed: $imagefile is not a jpeg image."
     fi
 
-    if [[ -e "$tombkey" ]]; then
-        _warning "File exists: $tombkey"
-        { option_is_set -f } || {
-            _warning "Make explicit use of --force to overwrite."
-            _failure "Refusing to overwrite file. Operation aborted." }
-        _warning "Use of --force selected: overwriting."
-        rm -f ${tombkey}
-    fi
+    { test "$tombkey" = "-" } || {
+        if [[ -e "$tombkey" ]]; then
+            _warning "File exists: $tombkey"
+            { option_is_set -f } || {
+                _warning "Make explicit use of --force to overwrite."
+                _failure "Refusing to overwrite file. Operation aborted." }
+            _warning "Use of --force selected: overwriting."
+            rm -f ${tombkey}
+        fi
+    }
 
     _message "Trying to exhume a key out of image $imagefile"
     if option_is_set --tomb-pwd; then
