@@ -539,30 +539,34 @@ check_bin() {
 # operations.  On success returns 0 and prints out the full path to
 # the key.
 load_key() {
-    # take the name of a tomb file as argument
-    if option_is_set -k ; then
-        if [[ "`option_value -k`" == "-" ]]; then
-            _verbose "load_key reading from stdin."
-            # take key from stdin
-            tombkeydir=`safe_dir load_key_stdin` # global used to check if key from stdin
-            _verbose "tempdir is $tombkeydir"
-            act "Waiting for the key to be piped from stdin... "
-            cat > ${tombkeydir}/stdin.tmp.key
-            print ok >&2
-            tombdir=${tombkeydir}
-            tombfile=stdin.tmp.key
-            tombname="stdin"
-        elif [[ "`option_value -k`" != "" ]]; then
-            _verbose "load_key argument: `option_value -k`"
-            # take key from a file
-            tombkey=`option_value -k`
-            tombdir=`dirname $tombkey`
-            tombfile=`basename $tombkey`
-        fi
+    # take the name of a tomb file as argument to option -k
+    # if no argument is given, tomb{key|dir|file} are set by caller
 
-    else # no -k specified
+    { option_is_set -k } || {
         _failure "This operation requires a key file to be specified using the -k option."
-        return 1
+        return 1 }
+
+    local keyopt
+    keyopt="`option_value -k`"
+
+    if [[ "$keyopt" == "-" ]]; then
+        _verbose "load_key reading from stdin."
+        # take key from stdin
+        tombkeydir=`safe_dir load_key_stdin`
+        # tombkeydir is a global used to check if key from stdin
+        _verbose "tempdir is $tombkeydir"
+        act "Waiting for the key to be piped from stdin... "
+        cat > ${tombkeydir}/stdin.tmp.key
+        print ok >&2
+        tombdir=${tombkeydir}
+        tombfile=stdin.tmp.key
+        tombname="stdin"
+    elif [[ "$keyopt" != "" ]]; then
+        _verbose "load_key argument: `option_value -k`"
+        # take key from a file
+        tombkey=`option_value -k`
+        tombdir=`dirname $tombkey`
+        tombfile=`basename $tombkey`
     fi
 
     tombkey=${tombdir}/${tombfile}
@@ -573,14 +577,57 @@ load_key() {
         drop_key
         return 1 }
 
-    # this does a check on the file header
-    if ! is_valid_key ${tombkey}; then
-        _warning "The key seems invalid, the application/pgp header is missing."
-        drop_key
-        return 1
-    fi
+    # TODO: move this condition for JPEG steg into is_valid_key
+    [[ `file "$tombkey"` =~ "JP.G" ]] || {
+        # if the key file is an image don't check file header
+        if ! is_valid_key ${tombkey}; then
+            _warning "The key seems invalid or its format is not known by this version of Tomb."
+            drop_key
+            return 1
+        fi
+    }
+
     print "$tombkey"
     return 0
+}
+
+# takes two args just like get_lukskey
+# prints out the decrypted content
+# contains tweaks for different gpg versions
+gpg_decrypt() {
+    # fix for gpg 1.4.11 where the --status-* options don't work ;^/
+    gpgver=`gpg --version --no-permission-warning | awk '/^gpg/ {print $3}'`
+    local lukspass="$1"
+    local keyfile="$2"
+
+    if [ "$gpgver" = "1.4.11" ]; then
+        _verbose "GnuPG is version 1.4.11 - adopting status fix."
+
+        print "$lukspass" | \
+            gpg --batch --passphrase-fd 0 --no-tty --no-options \
+            -d "${keyfile}"
+        ret=$?
+        unset lukspass
+
+    else # using status-file in gpg != 1.4.11
+
+        res=`safe_filename lukskey`
+        [[ $? = 0 ]] || {
+            unset lukspass;
+            _failure "Fatal error creating temp file." }
+
+        print "$lukspass" | \
+            gpg --batch --passphrase-fd 0 --no-tty --no-options \
+            --status-fd 2 --no-mdc-warning --no-permission-warning \
+            --no-secmem-warning -d "${keyfile}" 2> $res
+
+        unset lukspass
+        grep 'DECRYPTION_OKAY' $res > /dev/null
+        ret=$?; rm -f $res
+
+    fi
+    return $ret
+
 }
 
 # This function asks the user for the password to use the key it tests
@@ -604,7 +651,7 @@ ask_key_password() {
                 return 1
             fi
 
-            get_lukskey "$tombpass" "$tombkey" >/dev/null
+            check_lukskey "$tombpass" "$tombkey"
 
             if [ $? = 0 ]; then
                 passok=1; _message "Password OK."
@@ -617,7 +664,7 @@ ask_key_password() {
         tombpass="$2"
         _verbose "ask_key_password with tombpass: $tombpass"
 
-        get_lukskey "$tombpass" "$tombkey" >/dev/null
+        check_lukskey "$tombpass" "$tombkey"
 
         if [ $? = 0 ]; then
             passok=1; _message "Password OK."; fi
@@ -742,55 +789,100 @@ print "-----END PGP MESSAGE-----"
 }
 
 
-# Gets a key file and a password, prints out the decoded contents to
-# be used directly by Luks as a cryptographic key
-get_lukskey() {
-# $1 is the password, $2 is the keyfile
+# This function checks if the password effectively works to decrypt
+# the key. It is used by the password prompt to verify validity and
+# it resembles get_lukskey(). 1st arg the password, 2nd the keyfile
+check_lukskey() {
+    local lukspass="$1"
+    local keyfile="$2"
+    local exhumedkey
 
-    local tombpass=$1
-    local keyfile=$2
     firstline=`head -n1 $keyfile`
-    _verbose "get_lukskey XXX $keyfile"
+    _verbose "check_lukskey XXX $keyfile"
+
+
+    # key is KDF encoded
     if [[ $firstline =~ '^_KDF_' ]]; then
         _verbose "KDF: `cut -d_ -f 3 <<<$firstline`"
         case `cut -d_ -f 3 <<<$firstline` in
             pbkdf2sha1)
                 pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
-                tombpass=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2> /dev/null <<<$tombpass)
+                lukspass=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2> /dev/null <<<$lukspass)
                 ;;
             *)
                 _failure "No suitable program for KDF `cut -f 3 <<<$firstline`."
-                unset tombpass
+                unset lukspass
                 return 1
                 ;;
         esac
+
+    # key needs to be exhumed from an image
+    elif [[ `file "$keyfile"` =~ "JP.G" ]]; then
+        exhumedkey="`safe_filename exhumedkey`"
+        _verbose "lukspass in check_lukskey: $lukspass"
+
+        exhume_key "$keyfile" "$lukspass" "$exhumedkey"
+        keyfile="$exhumedkey"
     fi
+    _verbose "lukspass in check_lukskey: $lukspass"
 
-    # fix for gpg 1.4.11 where the --status-* options don't work ;^/
-    gpgver=`gpg --version | awk '/^gpg/ {print $3}'`
-    if [ "$gpgver" = "1.4.11" ]; then
-        _verbose "GnuPG is version 1.4.11 - adopting status fix."
+    # check validity, eventually repair adding headers
+    is_valid_key "$keyfile" || {
+        _failure "This key is unusable: $keyfile" }
 
-        print ${tombpass} | \
-            gpg --batch --passphrase-fd 0 --no-tty --no-options -d "${keyfile}"
-        ret=$?
-        unset tombpass
+    # prints out decrypted content to stdout
+    gpg_decrypt "$lukspass" "$keyfile" > /dev/null
+    ret="$?"
+    _verbose "check_lukskey returns $ret"
+    return $ret
+}
 
-    else # using status-file in gpg != 1.4.11
 
-        res=`safe_filename lukskey`
-        { test $? = 0 } || { unset tombpass; _failure "Fatal error creating temp file." }
+# Gets a key file and a password, prints out the decoded contents to
+# be used directly by Luks as a cryptographic key
+get_lukskey() {
+# $1 is the password, $2 is the keyfile
 
-        print ${tombpass} | \
-            gpg --batch --passphrase-fd 0 --no-tty --no-options --status-fd 2 \
-            --no-mdc-warning --no-permission-warning --no-secmem-warning \
-            -d "${keyfile}" 2> $res
+    local lukspass="$1"
+    local keyfile="$2"
+    local exhumedkey
 
-        unset tombpass
-        grep 'DECRYPTION_OKAY' $res > /dev/null
-        ret=$?; rm -f $res
+    firstline=`head -n1 $keyfile`
+    _verbose "get_lukskey XXX $keyfile"
 
+    # key is KDF encoded
+    if [[ $firstline =~ '^_KDF_' ]]; then
+        _verbose "KDF: `cut -d_ -f 3 <<<$firstline`"
+        case `cut -d_ -f 3 <<<$firstline` in
+            pbkdf2sha1)
+                pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
+                lukspass=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2> /dev/null <<<$lukspass)
+                ;;
+            *)
+                _failure "No suitable program for KDF `cut -f 3 <<<$firstline`."
+                unset lukspass
+                return 1
+                ;;
+        esac
+
+    # key needs to be exhumed from an image
+    elif [[ `file "$keyfile"` =~ "JP.G" ]]; then
+        exhumedkey="`safe_filename exhumedkey`"
+        _verbose "lukspass in get_lukskey: $lukspass"
+
+        exhume_key "$keyfile" "$lukspass" "$exhumedkey"
+        keyfile="$exhumedkey"
     fi
+    _verbose "lukspass in get_lukskey: $lukspass"
+
+    # check validity, eventually repair adding headers
+    is_valid_key "$keyfile" || {
+        _failure "This key is unusable: $keyfile" }
+
+    # prints out decrypted content to stdout
+    gpg_decrypt "$lukspass" "$keyfile"
+
+    ret="$?"
     _verbose "get_lukskey returns $ret"
     return $ret
 }
@@ -849,10 +941,13 @@ gen_key() {
             fi
             # --kdf takes one parameter: iter time (on present machine) in seconds
             local -i microseconds
-            microseconds=$((itertime*10000))
+            microseconds=$(( itertime * 10000 ))
             _success "Using KDF, iterations: $microseconds"
+            _message "generating salt"
             pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
+            _message "calculating iterations"
             pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
+            _message "encoding the password"
             # We use a length of 64bytes = 512bits (more than needed!?)
             tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
 
@@ -904,6 +999,12 @@ bury_key() {
 
     _success "Encoding key $tombkey inside image $imagefile"
     _message "Please confirm the key password for the encoding"
+    # We ask the password and test if it is the same encoding the
+    # base key, to insure that the same password is used for the
+    # encryption and the steganography. This is a standard enforced
+    # by Tomb, but its not strictly necessary (and having different
+    # password would enhance security). Nevertheless here we prefer
+    # usability.
 
     if option_is_set --tomb-pwd; then
         tomb_pwd="`option_value --tomb-pwd`"
@@ -940,20 +1041,36 @@ bury_key() {
 
     return $res
 }
+
+# mandatory 1st arg: the image file where key is supposed to be
+# optional 2nd arg: the password to use (same as key, internal use)
+# optional 3rd arg: the key where to save the result (- for stdout)
 exhume_key() {
-    tombkey="`option_value -k`"
-    { test "$tombkey" = "" } && {
-        tombkey="-"
-        _message "printing exhumed key on stdout"
-    }
 
     imagefile="$1"
     res=1
 
-    file $imagefile | grep -i JPEG > /dev/null
-    if [ $? != 0 ]; then
-        _failure "Encode failed: $imagefile is not a jpeg image."
-    fi
+    knownpass="$2"
+
+    tombkey="$3"
+    [[ "$tombkey" = "" ]] && {
+        tombkey="`option_value -k`"
+        { test "$tombkey" = "" } && {
+            # no key output specified: fallback to stdout
+            tombkey="-"
+            _message "printing exhumed key on stdout" }
+    }
+
+    [[ `file "$imagefile"` =~ "JP.G" ]] || {
+        _failure "Encode failed: $imagefile is not a jpeg image." }
+
+    # when a password is passed as argument then always print out
+    # the exhumed key on stdout without further checks (internal use)
+    { test "$knownpass" = "" } || {
+        steghide extract -sf "$imagefile" -p "$knownpass" -xf -
+        { test $? = 0 } || {
+            _failure "Wrong password or no steganographic key found" }
+    }
 
     { test "$tombkey" = "-" } || {
         if [[ -e "$tombkey" ]]; then
@@ -1448,6 +1565,7 @@ mount_tomb() {
     local tombfile
     local tombdir
     local tombname
+    local tombpass
     tombfile=`basename ${1}`
     tombdir=`dirname ${1}`
     # check file type (if its a Luks fs)
@@ -1460,7 +1578,7 @@ mount_tomb() {
     _verbose "Tomb found: ${tombdir}/${tombfile}"
 
     # load_key called here
-    tombkey=`load_key ${tombdir}/${tombfile}`
+    tombkey=`load_key`
     { test $? = 0 } || {
         _failure "Aborting operations: error loading key $tombkey"    }
 
@@ -1519,7 +1637,10 @@ mount_tomb() {
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
     _verbose "dev mapper device: $mapper"
     _verbose "Tomb key: $tombkey"
-    keyname=`basename $tombkey | cut -d. -f1`
+
+    # take the name only, strip extensions
+    keyname=${tombkey%%.*}
+    _verbose "Tomb name: $keyname (to be engraved)"
 
     if option_is_set --tomb-pwd; then
         tomb_pwd="`option_value --tomb-pwd`"
@@ -1534,7 +1655,6 @@ mount_tomb() {
 
     get_lukskey "${tombpass}" ${tombkey} | \
         cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
-
 
     # key dropped here
     drop_key
@@ -1748,8 +1868,8 @@ list_tombs() {
         for h in ${mounted_hooks}; do
             print -n "$fg_no_bold[green]$tombname"
             print -n "$fg_no_bold[white] hooks "
-#	    print -n "$fg_bold[white]`basename ${h[(ws:;:)1]}`"
-#	    print -n "$fg_no_bold[white] on "
+#       print -n "$fg_bold[white]`basename ${h[(ws:;:)1]}`"
+#       print -n "$fg_no_bold[white] on "
             print "$fg_bold[white]${h[(ws:;:)2]}$fg_no_bold[white]"
         done
     done
@@ -2019,7 +2139,7 @@ resize_tomb() {
     tombname=${tombfile%%\.*}
 
     # load key from options or file
-    local tombkey="`load_key ${tombdir}/${tombfile}`"
+    local tombkey="`load_key`"
     # make sure to call drop_key later
     { test -r "$tombkey" } || {
         _failure "Aborting operations: key not found, use -k" }
