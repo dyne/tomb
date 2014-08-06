@@ -39,7 +39,7 @@ typeset -A results
 tests=(dig forge lock badpass open close passwd chksum bind setkey)
 { test $RESIZER = 1 } && { tests+=(resize) }
 { test $KDF = 1 } && { tests+=(kdforge kdfpass kdflock kdfopen) }
-{ test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen) }
+{ test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen stgpipe stgimpl) }
 { test $QRENCODE = 1 } && { tests+=(qrenc) }
 
 sudo rm -f /tmp/test.tomb{,.key}
@@ -225,9 +225,26 @@ fi
     { test $? = 0 } && { results+=(stgopen SUCCESS) }
 
     ${T} close test
+
+    # test piping keys using -k -
+    tkey=`tt --unsecure-dev-mode --tomb-pwd ${dummypass} exhume /tmp/tomb.jpg`
+    print "$tkey" | tt --unsecure-dev-mode --tomb-pwd ${dummypass} open -k - /tmp/test.tomb
+    { test $? = 0 } && { results+=(stgpipe SUCCESS) }
+
+    ${T} close test
+
+
+    notice "test using open -k image.jpeg"
+
+    tt --unsecure-dev-mode --tomb-pwd ${dummypass} open -k /tmp/tomb.jpg /tmp/test.tomb 
+    { test $? = 0 } && { results+=(stgimpl SUCCESS) }
+
+    ${T} close test
 }
 
 { test $QRENCODE = 1 } && {
+
+    notice "test rendering a QR printable key backup"
 
     tt engrave -k /tmp/test.tomb.key
 
