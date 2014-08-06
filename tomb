@@ -634,6 +634,58 @@ gpg_decrypt() {
 
 }
 
+
+# Gets a key file and a password, prints out the decoded contents to
+# be used directly by Luks as a cryptographic key
+get_lukskey() {
+# $1 is the password, $2 is the keyfile
+
+    local lukspass="$1"
+    local keyfile="$2"
+    local exhumedkey
+
+    firstline=`head -n1 $keyfile`
+    _verbose "get_lukskey XXX $keyfile"
+
+    # key is KDF encoded
+    if [[ $firstline =~ '^_KDF_' ]]; then
+        _verbose "KDF: `cut -d_ -f 3 <<<$firstline`"
+        case `cut -d_ -f 3 <<<$firstline` in
+            pbkdf2sha1)
+                pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
+                lukspass=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2> /dev/null <<<$lukspass)
+                ;;
+            *)
+                _failure "No suitable program for KDF `cut -f 3 <<<$firstline`."
+                unset lukspass
+                return 1
+                ;;
+        esac
+
+    # key needs to be exhumed from an image
+    elif [[ `file "$keyfile"` =~ "JP.G" ]]; then
+        exhumedkey="`safe_filename exhumedkey`"
+        _verbose "lukspass in get_lukskey: $lukspass"
+
+        exhume_key "$keyfile" "$lukspass" "$exhumedkey"
+        keyfile="$exhumedkey"
+    fi
+    _verbose "lukspass in get_lukskey: $lukspass"
+
+    # check validity, eventually repair adding headers
+    is_valid_key "$keyfile" || {
+        _failure "This key is unusable: $keyfile" }
+
+    # saves decrypted content into $tomb_secret
+    gpg_decrypt "$lukspass" "$keyfile"
+    ret="$?"
+
+    { test "$exhumedkey" = "" } || { ${=WIPE} "$exhumedkey" }
+
+    _verbose "get_lukskey returns $ret"
+    return $ret
+}
+
 # This function asks the user for the password to use the key it tests
 # it against the return code of gpg on success returns 0 and prints
 # the password (be careful about where you save it!)
@@ -793,55 +845,6 @@ print "-----END PGP MESSAGE-----"
 }
 
 
-
-# Gets a key file and a password, prints out the decoded contents to
-# be used directly by Luks as a cryptographic key
-get_lukskey() {
-# $1 is the password, $2 is the keyfile
-
-    local lukspass="$1"
-    local keyfile="$2"
-    local exhumedkey
-
-    firstline=`head -n1 $keyfile`
-    _verbose "get_lukskey XXX $keyfile"
-
-    # key is KDF encoded
-    if [[ $firstline =~ '^_KDF_' ]]; then
-        _verbose "KDF: `cut -d_ -f 3 <<<$firstline`"
-        case `cut -d_ -f 3 <<<$firstline` in
-            pbkdf2sha1)
-                pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
-                lukspass=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2> /dev/null <<<$lukspass)
-                ;;
-            *)
-                _failure "No suitable program for KDF `cut -f 3 <<<$firstline`."
-                unset lukspass
-                return 1
-                ;;
-        esac
-
-    # key needs to be exhumed from an image
-    elif [[ `file "$keyfile"` =~ "JP.G" ]]; then
-        exhumedkey="`safe_filename exhumedkey`"
-        _verbose "lukspass in get_lukskey: $lukspass"
-
-        exhume_key "$keyfile" "$lukspass" "$exhumedkey"
-        keyfile="$exhumedkey"
-    fi
-    _verbose "lukspass in get_lukskey: $lukspass"
-
-    # check validity, eventually repair adding headers
-    is_valid_key "$keyfile" || {
-        _failure "This key is unusable: $keyfile" }
-
-    # saves decrypted content into $tomb_secret
-    gpg_decrypt "$lukspass" "$keyfile"
-
-    ret="$?"
-    _verbose "get_lukskey returns $ret"
-    return $ret
-}
 
 
 # takes care to encrypt a key
