@@ -1524,7 +1524,7 @@ create_tomb() {
 mount_tomb() {
     _message "Commanded to open tomb $1"
     if [ "$1" = "" ]; then
-        _warning "No tomb name specified for creation."
+        _warning "No tomb name specified for opening."
         return 1
     fi
 
@@ -2552,10 +2552,8 @@ main() {
 
         # internal commands useful to developers
         'source')   return 0 ;;
-        install)    check_priv ; install_tomb ;;
         askpass)    ask_password $PARAM[1] $PARAM[2] ;;
         mktemp)     safe_dir $PARAM[1] ;;
-        translate)  generate_translatable_strings ;;
 
         __default)
             cat <<EOF
