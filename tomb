@@ -73,6 +73,23 @@ PATH+=:/sbin:/usr/sbin
 
 # {{{ Safety functions
 
+endgame() {
+    # here clear all temp files and flush all pipes
+    _verbose "Signal trap: $1"
+    unset tomb_secret
+}
+
+# trap functions for the endgame event
+TRAPINT()  {  endgame INT   }
+TRAPEXIT() {  endgame EXIT  }
+TRAPHUP()  {  endgame HUP   }
+TRAPQUIT() {  endgame QUIT  }
+TRAPABRT() {  endgame ABORT }
+TRAPKILL() {  endgame KILL  }
+TRAPPIPE() {  endgame PIPE  }
+TRAPTERM() {  endgame TERM  }
+TRAPSTOP() {  endgame STOP  }
+
 _have_shm() {
     # Check availability of 1MB of SHM
     _verbose "_have_shm 0 We need only 1 MB of RAM."
@@ -1249,6 +1266,7 @@ dig_tomb() {
     chown $_uid:$_gid "${tombdir}/${tombfile}"
 
     _verbose "Data dump using ${DD[1]} from /dev/urandom"
+
     ${=DD} if=/dev/urandom bs=1048576 count=${tombsize} of=${tombdir}/${tombfile}
 
     if [ $? = 0 -a -e ${tombdir}/${tombfile} ]; then
@@ -1415,7 +1433,7 @@ change_tomb_key() {
     if option_is_set --tomb-pwd; then
         tomb_new_pwd="`option_value --tomb-pwd`"
         _verbose "--tomb-pwd = $tomb_new_pwd"
-        ask_key_password "$newkey" "$tomb_new_pwd" > /dev/null 
+        ask_key_password "$newkey" "$tomb_new_pwd" > /dev/null
     else
         ask_key_password "$newkey" > /dev/null
     fi
@@ -2313,8 +2331,8 @@ slam_tomb() {
 # }}} - Tomb close
 
 # {{{ Main routine
-
 main() {
+
     local -A subcommands_opts
     ### Options configuration
 
@@ -2579,6 +2597,7 @@ EOF
 
 # {{{ Run
 check_bin
+
 
 main $@
 ret=$?
