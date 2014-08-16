@@ -29,15 +29,21 @@ standard filesystem tools (GNU) and the cryptographic API of the Linux
 kernel (cryptsetup and LUKS). Tomb can also produce machine parsable
 output to facilitate its use inside graphical applications.
 
-# Plea for support
+# Use stable releases in production
 
-If you like to support the development of this project, please rate it
-and endorse it on the CHEST funding platform:
+Anyone planning to use Tomb to store and access secrets should not use
+the latest development version in Git, but use instead the .tar.gz
+release on https://files.dyne.org/tomb . The stable version will
+always insure backward compatibility with older tombs: we make sure it
+creates sane tombs and keys by running various tests before releasing
+it. The development version in Git might introduce sudden bugs and is
+not granted to produce backward or forward compatible tombs and keys.
+Only developers and testers should use the Git version to report bugs,
+test new features and develop patches.
 
-http://ideas.chest-project.eu/?q=node/3433
-
-We are seeking funding to continue this free and open source development.
-It does not require much, just a registration and rating. Thanks.
+So be warned: do not use the latest Git version in production
+environments, but use a stable release versioned and packed as
+tarball on https://files.dyne.org/tomb
 
 # How does it works
 
