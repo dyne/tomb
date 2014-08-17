@@ -682,12 +682,9 @@ get_lukskey() {
     # key needs to be exhumed from an image
     elif [[ `file "$keyfile"` =~ "JP.G" ]]; then
         exhumedkey="`safe_filename exhumedkey`"
-        _verbose "lukspass in get_lukskey: $lukspass"
-
         exhume_key "$keyfile" "$lukspass" "$exhumedkey"
         keyfile="$exhumedkey"
     fi
-    _verbose "lukspass in get_lukskey: $lukspass"
 
     # check validity, eventually repair adding headers
     is_valid_key "$keyfile" || {
@@ -1625,7 +1622,7 @@ mount_tomb() {
         losetup -d ${nstloop}
         _failure "No valid password supplied." }
 
-    print "$tomb_secret" | \
+    print -n "$tomb_secret" | \
         cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
 
     # key dropped here
