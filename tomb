@@ -151,18 +151,18 @@ safe_filename() {
 check_swap() {
     # Return 0 if NO swap is used, 1 if swap is used
     # Return 2 if swap(s) is(are) used, but ALL encrypted
-    local swaps="$(awk '/^\// { print $1 }' /proc/swaps 2>/dev/null)"
+    local swaps="$(awk '/^\// { print $1 }' /proc/swaps 2>-)"
     [[ -z "$swaps" ]] && return 0                # No swap partition is active
     # Check whether all swaps are encrypted, and return 2
     # If any of the swaps is not encrypted, we bail out and return 1.
     ret=1
     for s in $=swaps; do
         bone=`sudo file $s`
-        if `echo "$bone" | grep 'swap file' &>/dev/null`; then
+        if `echo "$bone" | grep 'swap file' &>-`; then
             # It's a regular (unencrypted) swap file
             ret=1
             break
-        elif `echo "$bone" | grep 'symbolic link' &>/dev/null`; then
+        elif `echo "$bone" | grep 'symbolic link' &>-`; then
             # Might link to a block
             ret=1
             if [ "/dev/mapper" = "${s%/*}" ]; then
@@ -173,7 +173,7 @@ check_swap() {
             else
                 break
             fi
-        elif `echo "$bone" | grep 'block special' &>/dev/null`; then
+        elif `echo "$bone" | grep 'block special' &>-`; then
             # Is a block
             ret=1
             is_crypt=`sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
@@ -229,7 +229,7 @@ ask_password() {
     title="Insert tomb password."
     if [ $2 ]; then title="$2"; fi
 
-    output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>/dev/null | tail -n +7
+    output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>- | tail -n +7
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE $title
@@ -266,7 +266,7 @@ check_priv() {
 
         if ! option_is_set --sudo-pwd; then
             if [ $? != 0 ]; then # if not then ask a password
-                cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
+                cat <<EOF | pinentry 2>- | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE Super user privileges required
@@ -284,7 +284,7 @@ EOF
     fi # are we root already
 
     # check if we have support for loop mounting
-    losetup -f > /dev/null
+    losetup -f >-
     { test "$?" = "0" } || {
         _warning "Loop mount of volumes is not supported on this machine, this error"
         _warning "often occurs on VPS and kernels that don't provide the loop module."
@@ -293,8 +293,8 @@ EOF
     }
 
     # make sure necessary kernel modules are loaded
-    modprobe dm_mod 2>/dev/null
-    modprobe dm_crypt 2>/dev/null
+    modprobe dm_mod 2>-
+    modprobe dm_crypt 2>-
 
     return 0
 }
@@ -311,13 +311,13 @@ is_valid_tomb() {
     { test -f "$1" } || {
         _warning "Tomb file is not a regular file: $1"; return 1 }
     # check file type (if its a Luks fs)
-    file "$1" | grep -i 'luks encrypted file' >/dev/null
+    file "$1" | grep -i 'luks encrypted file' >-
     { test $? = 0 } || {
         _warning "File is not a valid tomb: $1"; return 1 }
     # check if its already open
     tombfile=`basename $1`
     tombname=${tombfile%%\.*}
-    mount -l | grep "${tombfile}.*\[$tombname\]$" > /dev/null
+    mount -l | grep "${tombfile}.*\[$tombname\]$" >-
     { test $? = 0 } && {
         _warning "Tomb is currently in use: $tombname"; return 1 }
     _message "Valid tomb file found: $1"
@@ -519,35 +519,35 @@ progress() {
 check_bin() {
     # check for required programs
     for req in cryptsetup pinentry sudo gpg; do
-        command -v $req >/dev/null || _failure "Cannot find $req. It's a requirement to use Tomb, please install it." 1
+        command -v $req >- || _failure "Cannot find $req. It's a requirement to use Tomb, please install it." 1
     done
 
     export PATH=/sbin:/usr/sbin:$PATH
 
     # which dd command to use
-    command -v dcfldd > /dev/null
+    command -v dcfldd >-
     { test $? = 0 } && { DD="dcfldd statusinterval=1" }
 
     # which wipe command to use
-    command -v wipe > /dev/null && WIPE="wipe -f -s" || WIPE="rm -f"
+    command -v wipe >- && WIPE="wipe -f -s" || WIPE="rm -f"
 
     # check for filesystem creation progs
-    command -v mkfs.ext4 > /dev/null && \
+    command -v mkfs.ext4 >- && \
         MKFS="mkfs.ext4 -q -F -j -L" || \
         MKFS="mkfs.ext3 -q -F -j -L"
 
     # check for mktemp
-    command -v mktemp > /dev/null || MKTEMP=0
+    command -v mktemp >- || MKTEMP=0
     # check for steghide
-    command -v steghide > /dev/null || STEGHIDE=0
+    command -v steghide >- || STEGHIDE=0
     # check for resize
-    command -v e2fsck resize2fs > /dev/null || RESIZER=0
+    command -v e2fsck resize2fs >- || RESIZER=0
     # check for KDF auxiliary tools
-    command -v tomb-kdb-pbkdf2 > /dev/null || KDF=0
+    command -v tomb-kdb-pbkdf2 >- || KDF=0
     # check for Swish-E file content indexer
-    command -v swish-e > /dev/null || SWISH=0
+    command -v swish-e >- || SWISH=0
     # check for QREncode for paper backups of keys
-    command -v qrencode > /dev/null || QRENCODE=0
+    command -v qrencode >- || QRENCODE=0
 }
 
 # }}} - Commandline interaction
@@ -643,7 +643,7 @@ gpg_decrypt() {
             --no-secmem-warning -d "${keyfile}" 2> $res`
 
         unset lukspass
-        grep 'DECRYPTION_OKAY' $res > /dev/null
+        grep 'DECRYPTION_OKAY' $res >-
         ret=$?; rm -f $res
 
     fi
@@ -670,7 +670,7 @@ get_lukskey() {
         case `cut -d_ -f 3 <<<$firstline` in
             pbkdf2sha1)
                 pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
-                lukspass=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2> /dev/null <<<$lukspass)
+                lukspass=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2>- <<<$lukspass)
                 ;;
             *)
                 _failure "No suitable program for KDF `cut -f 3 <<<$firstline`."
@@ -765,9 +765,9 @@ change_passwd() {
     if option_is_set --tomb-old-pwd; then
         tomb_old_pwd="`option_value --tomb-old-pwd`"
         _verbose "--tomb-old-pwd = $tomb_old_pwd"
-        ask_key_password "$keyfile" "$tomb_old_pwd" > /dev/null
+        ask_key_password "$keyfile" "$tomb_old_pwd" >-
     else
-        ask_key_password "$keyfile" > /dev/null
+        ask_key_password "$keyfile" >-
     fi
 
     { test $? = 0 } || {
@@ -943,7 +943,7 @@ gen_key() {
 # prints an array of ciphers available in gnupg (to encrypt keys)
 list_gnupg_ciphers() {
     # prints an error if GnuPG is not found
-    which gpg > /dev/null || _failure "gpg (GnuPG) is not found, Tomb cannot function without it."
+    which gpg >- || _failure "gpg (GnuPG) is not found, Tomb cannot function without it."
 
     ciphers=(`gpg --version | awk '
 BEGIN { ciphers=0 }
@@ -964,7 +964,7 @@ bury_key() {
 
     imagefile=$1
 
-    file $imagefile | grep -i JPEG > /dev/null
+    file $imagefile | grep -i JPEG >-
     if [ $? != 0 ]; then
        _warning "Encode failed: $imagefile is not a jpeg image."
        return 1
@@ -1339,9 +1339,9 @@ lock_tomb_with_key() {
     if option_is_set --tomb-pwd; then
         tomb_pwd="`option_value --tomb-pwd`"
         _verbose "--tomb-pwd = $tomb_pwd"
-        ask_key_password "$tombkey" "$tomb_pwd" > /dev/null
+        ask_key_password "$tombkey" "$tomb_pwd" >-
     else
-        ask_key_password "$tombkey" > /dev/null
+        ask_key_password "$tombkey" >-
     fi
     { test $? = 0 } || {
         losetup -d ${nstloop}
@@ -1430,9 +1430,9 @@ change_tomb_key() {
     if option_is_set --tomb-pwd; then
         tomb_new_pwd="`option_value --tomb-pwd`"
         _verbose "--tomb-pwd = $tomb_new_pwd"
-        ask_key_password "$newkey" "$tomb_new_pwd" > /dev/null
+        ask_key_password "$newkey" "$tomb_new_pwd" >-
     else
-        ask_key_password "$newkey" > /dev/null
+        ask_key_password "$newkey" >-
     fi
     { test $? = 0 } || {
         _failure "No valid password supplied for the new key." }
@@ -1444,9 +1444,9 @@ change_tomb_key() {
     if option_is_set --tomb-old-pwd; then
         tomb_old_pwd="`option_value --tomb-old-pwd`"
         _verbose "--tomb-old-pwd = $tomb_old_pwd"
-        ask_key_password "$oldkey" "$tomb_old_pwd" > /dev/null
+        ask_key_password "$oldkey" "$tomb_old_pwd" >-
     else
-        ask_key_password "$oldkey" > /dev/null
+        ask_key_password "$oldkey" >-
     fi
     { test $? = 0 } || {
         _failure "No valid password supplied for the old key." }
@@ -1521,7 +1521,7 @@ create_tomb() {
 mount_tomb() {
     _message "Commanded to open tomb $1"
     if [ "$1" = "" ]; then
-        _warning "No tomb name specified for creation."
+        _warning "No tomb name specified for opening."
         return 1
     fi
 
@@ -1538,7 +1538,7 @@ mount_tomb() {
     tombfile=`basename ${1}`
     tombdir=`dirname ${1}`
     # check file type (if its a Luks fs)
-    file ${tombdir}/${tombfile} | grep -i 'luks encrypted file' 2>&1 >/dev/null
+    file ${tombdir}/${tombfile} | grep -i 'luks encrypted file' 2>&1 >-
     if [ $? != 0 ]; then
         _warning "$1 is not a valid tomb file, operation aborted."
         return 1
@@ -1559,7 +1559,7 @@ mount_tomb() {
     fi
 
     # check if its already open
-    mount -l | grep "${tombfile}.*\[$tombname\]$" 2>&1 > /dev/null
+    mount -l | grep "${tombfile}.*\[$tombname\]$" 2>&1 >-
     if [ $? = 0 ]; then
         _warning "$tombname is already open."
         _message "Here below its status is reported:"
@@ -1614,9 +1614,9 @@ mount_tomb() {
     if option_is_set --tomb-pwd; then
         tomb_pwd="`option_value --tomb-pwd`"
         _verbose "--tomb-pwd = $tomb_pwd"
-        ask_key_password "$tombkey" "$tomb_pwd" > /dev/null
+        ask_key_password "$tombkey" "$tomb_pwd" >-
     else
-        ask_key_password "$tombkey" > /dev/null
+        ask_key_password "$tombkey" >-
     fi
     { test $? = 0 } || {
         losetup -d ${nstloop}
@@ -1644,7 +1644,7 @@ mount_tomb() {
     _message "Checking filesystem via $tombstat[3]"
     fsck -p -C0 /dev/mapper/${mapper}
     _verbose "Tomb engraved as $tombname"
-    tune2fs -L ${tombname} /dev/mapper/${mapper} > /dev/null
+    tune2fs -L ${tombname} /dev/mapper/${mapper} >-
 
     # we need root from here on
     mkdir -p $tombmount
@@ -1697,7 +1697,7 @@ exec_safe_bind_hooks() {
     fi
     local MOUNTPOINT="${1}"
     local ME=${SUDO_USER:-$(whoami)}
-    local HOME=$(awk -v a="$ME" -F ':' '{if ($1 == a) print $6}' /etc/passwd 2>/dev/null)
+    local HOME=$(awk -v a="$ME" -F ':' '{if ($1 == a) print $6}' /etc/passwd 2>-)
     if [ $? -ne 0 ]; then
         _warning "How pitiful!  A tomb, and no HOME."
         return 1
@@ -1923,7 +1923,7 @@ BEGIN { main="" }
 # index files in all tombs for search
 # $1 is optional, to specify a tomb
 index_tombs() {
-    { command -v updatedb > /dev/null } || {
+    { command -v updatedb >- } || {
         _failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
 
     updatedbver=`updatedb --version | grep '^updatedb'`
@@ -1945,8 +1945,8 @@ index_tombs() {
     _success "Creating and updating search indexes."
 
     # start the LibreOffice document converter if installed
-    { command -v unoconv >/dev/null } && {
-        unoconv -l 2>/dev/null &
+    { command -v unoconv >- } && {
+        unoconv -l 2>- &
         _verbose "unoconv listener launched."
         sleep 1 }
 
@@ -2040,7 +2040,7 @@ EOF
     done
 }
 search_tombs() {
-    { command -v locate > /dev/null } || {
+    { command -v locate >- } || {
         _failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
 
     updatedbver=`updatedb --version | grep '^updatedb'`
@@ -2112,7 +2112,7 @@ resize_tomb() {
     { test -r "$tombkey" } || {
         _failure "Aborting operations: key not found, use -k" }
 
-    local oldtombsize=$(( `stat -c %s "$1" 2>/dev/null` / 1048576 ))
+    local oldtombsize=$(( `stat -c %s "$1" 2>-` / 1048576 ))
     local mounted_tomb=`mount -l |
         awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
 
@@ -2141,9 +2141,9 @@ resize_tomb() {
     if option_is_set --tomb-pwd; then
         tomb_pwd="`option_value --tomb-pwd`"
         _verbose "--tomb-pwd = $tomb_pwd"
-        ask_key_password "$tombkey" "$tomb_pwd" > /dev/null
+        ask_key_password "$tombkey" "$tomb_pwd" >-
     else
-        ask_key_password "$tombkey" > /dev/null
+        ask_key_password "$tombkey" >-
     fi
     { test $? = 0 } || {
         _failure "No valid password supplied." }
@@ -2302,20 +2302,20 @@ umount_tomb() {
 # Kill all processes using the tomb
 slam_tomb() {
     # $1 = tomb mount point
-    if [[ -z `fuser -m "$1" 2> /dev/null` ]]; then
+    if [[ -z `fuser -m "$1" 2>-` ]]; then
         return 0
     fi
     #Note: shells are NOT killed by INT or TERM, but they are killed by HUP
     for s in TERM HUP KILL; do
         _verbose "Sending $s to processes inside the tomb:"
         if option_is_set -D; then
-            ps -fp `fuser -m /media/a.tomb 2> /dev/null`|
+            ps -fp `fuser -m /media/a.tomb 2>-`|
             while read line; do
                 _verbose $line
             done
         fi
         fuser -s -m "$1" -k -M -$s
-        if [[ -z `fuser -m "$1" 2> /dev/null` ]]; then
+        if [[ -z `fuser -m "$1" 2>-` ]]; then
             return 0
         fi
         if ! option_is_set -f; then
@@ -2549,10 +2549,8 @@ main() {
 
         # internal commands useful to developers
         'source')   return 0 ;;
-        install)    check_priv ; install_tomb ;;
         askpass)    ask_password $PARAM[1] $PARAM[2] ;;
         mktemp)     safe_dir $PARAM[1] ;;
-        translate)  generate_translatable_strings ;;
 
         __default)
             cat <<EOF
