@@ -63,3 +63,11 @@ Once any of the above is installed Tomb will find the tool automatically.
 Tomb comes with a bunch of extra tools that contribute to enhance its
 functionality or integrate it into particular system environments.
 
+### Install translations
+
+There are translations available for Tomb. If you wish to install them
+navigate to extras/po and run 'make install' as root:
+
+    cd extras/po
+    sudo make install
+

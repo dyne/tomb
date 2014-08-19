@@ -69,6 +69,9 @@ typeset -H tomb_secret
 # Make sure sbin is in PATH
 PATH+=:/sbin:/usr/sbin
 
+# For gettext
+export TEXTDOMAIN=tomb
+
 # }}}
 
 # {{{ Safety functions
@@ -427,9 +430,10 @@ option_value() {
 
 # Messaging function with pretty coloring
 function _msg() {
+    local msg="$(gettext -s "$2")"
     local command="print -P"
     local progname="$fg[magenta]${TOMBEXEC##*/}$reset_color"
-    local message="$fg_bold[normal]$fg_no_bold[normal]${2}$reset_color"
+    local message="$fg_bold[normal]$fg_no_bold[normal]$msg$reset_color"
     local -i returncode
 
     case "$1" in
@@ -437,19 +441,19 @@ function _msg() {
             command+=" -n"; pchars=" > "; pcolor="yellow"
             ;;
         message)
-            pchars=" . "; pcolor="white"; message="$fg_no_bold[$pcolor]${2}$reset_color"
+            pchars=" . "; pcolor="white"; message="$fg_no_bold[$pcolor]$msg$reset_color"
             ;;
         verbose)
             pchars="[D]"; pcolor="blue"
             ;;
         success)
-            pchars="(*)"; pcolor="green"; message="$fg_no_bold[$pcolor]${2}$reset_color"
+            pchars="(*)"; pcolor="green"; message="$fg_no_bold[$pcolor]$msg$reset_color"
             ;;
         warning)
-            pchars="[W]"; pcolor="yellow"; message="$fg_no_bold[$pcolor]${2}$reset_color"
+            pchars="[W]"; pcolor="yellow"; message="$fg_no_bold[$pcolor]$msg$reset_color"
             ;;
         failure)
-            pchars="[E]"; pcolor="red"; message="$fg_no_bold[$pcolor]${2}$reset_color"
+            pchars="[E]"; pcolor="red"; message="$fg_no_bold[$pcolor]$msg$reset_color"
             returncode=1
             ;;
         *)
