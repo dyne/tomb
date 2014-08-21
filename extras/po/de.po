@@ -94,11 +94,11 @@ msgstr "Syntax : tomb [Optionen] Befehl [Argumente]\n"
 #. tomb internal messages
 #: _warning
 msgid "WARNING: we cannot ensure we're running in RAM."
-msgstr "ACHTUNG : Das Ausführen im RAM kann nicht garantiert werden."
+msgstr "ACHTUNG : Das Ausführen im Wechselspeicher kann nicht garantiert werden."
 
 #: _warning
 msgid "WARNING: no RAM available for me to run safely."
-msgstr "ACHTUNG : Unzureichender RAM verfügbar zur sicheren Ausführung"
+msgstr "ACHTUNG : Unzureichender Wechselspeicher verfügbar zur sicheren Ausführung"
 
 #: _failure
 msgid "No access to shared memory on this system, sorry."
@@ -134,7 +134,7 @@ msgstr "Warten auf den Schlüssel auf der Standarteingabe... "
 
 #: _failure
 msgid "This operation requires a key file to be specified using the -k option."
-msgstr "Diese Operation benötigt das angeben eines Schlüssels durch die -k Option -k."
+msgstr "Diese Operation benötigt das angeben eines Schlüssels durch die -k Option."
 
 #: _warning
 msgid "Key not found, specify one using -k."
@@ -142,135 +142,135 @@ msgstr "Schlüssel nicht gefunden, bitte mit -k einen Schlüssel angeben."
 
 #: _warning
 msgid "The key seems invalid, the application/pgp header is missing."
-msgstr "Der Schlüssel scheint ungültig. Datei-Header \"application/pgp\" fehlt."
+msgstr "Der Schlüssel scheint ungültig. Dateikopf \"application/pgp\" fehlt."
 
 #: _message
 msgid "A password is required to use key ${keyname}"
-msgstr "Un mot de passe est nécessaire pour utiliser la clé ${keyname}"
+msgstr "Ein Passwort ist zur Benutzung des Schlüssels ${keyname} erforderlich"
 
 #: _warning
 msgid "User aborted password dialog."
-msgstr "L'utilisateur a interrompu le dialogue du mot de passe."
+msgstr "Benutzer hat den Passwortdialog abgebrochen."
 
 #: _message
 msgid "Password OK."
-msgstr "Le mot de passe est valide."
+msgstr "Passwort OK."
 
 #: _message
 msgid "Commanded to change password for tomb key $1"
-msgstr "L'utilisateur a requis un changement du mot de passe de la clé $1."
+msgstr "Benutzer hat Passwort für Schlüssel $1 gewechselt."
 
 #: _success
 msgid "Changing password for $keyfile"
-msgstr "Mise à jour du mot de passe de $keyfile."
+msgstr "Passwort gewechselt für $keyfile."
 
 #: _failure
 msgid "Error: the newly generated keyfile does not seem valid."
-msgstr "Erreur : le fichier de clé nouvellement créé semble invalide."
+msgstr "Fehler : Der neu erstellte Schlüssel scheint nicht gültig zu sein."
 
 #: _success
 msgid "Your passphrase was successfully updated."
-msgstr "Votre mot de passe a été mis à jour correctement."
+msgstr "Ihr Passwort wurde erfolgreich geändert."
 
 #: _message
 msgid "Removing key temporarily stored from stdin"
-msgstr "Effacement de la clé temporaire passée par l'entrée standard."
+msgstr "Temporär gespeicherter. von Standarteingebe übernommener Schlüssel, wurde gelöscht."
 
 #: _message
 msgid "Valid key file found: $1"
-msgstr "Une clé valide a été trouvée : $1"
+msgstr "Gültiger Schlüssel wurde gefunden : $1"
 
 #: _warning
 msgid "Key data found with missing headers, attempting recovery."
-msgstr "Les données d'une clé ont été trouvées sans en-têtes, tentative de récupération en cours."
+msgstr "Schlüsseldatei ohne Dateikopf gefunden, versuche Wiederherstellung."
 
 #: _warning
 msgid "Invalid key format: $1"
-msgstr "Format de clé invalide : $1"
+msgstr "Ungültiges Dateiformat für Schlüssel : $1"
 
 #: _failure
 msgid "No suitable program for KDF `cut -f 3 <<<$firstline`."
-msgstr "Pas de programme approprié pour la dérivation de clé `cut -f 3 <<<$firstline`."
+msgstr "Kein gültiges Programm zur Schlüsselableitung `cut -f 3 <<<$firstline`."
 
 #: _failure
 msgid "User aborted."
-msgstr "L'utilisateur a interrompu l'opération."
+msgstr "Vom Benutzer abgebrochen."
 
 #: _warning
 msgid "You set empty password, which is not possible."
-msgstr "Vous ne pouvez pas saisir un mot de passe vide."
+msgstr "Fehler: Passwort nicht gesetzt."
 
 #: _failure
 msgid "Wrong argument for --kdf: must be an integer number (iteration seconds)."
-msgstr "Argument invalide pour --kdf : ce doit être un nombre entier (de secondes d'itérations)."
+msgstr "Ungültiges Argument für --kdf : dies muss eine Ganzzahl sein."
 
 #: _success
 msgid "Using KDF, iterations: $microseconds"
-msgstr "$microsecondes itérations pour la dérivation de clé."
+msgstr "$microsecondes Wiederholungen zur Schlüsselableitung."
 
 #: _failure
 msgid "gpg (GnuPG) is not found, Tomb cannot function without it."
-msgstr "gpg (GnuPG) n'est pas disponible, mais il est requis pour le fonctionnement de Tomb."
+msgstr "gpg (GnuPG) welches zur Funktion von Tomb notwendig ist, nicht gefunden."
 
 #: _warning
 msgid "Encode failed: $imagefile is not a jpeg image."
-msgstr "L'encodage a échoué : $imagefile n'est pas une image JPEG."
+msgstr "Verschlüsselung fehlgeschlagen : $imagefile ist keine JPEG-Datei."
 
 #: _success
 msgid "Encoding key $tombkey inside image $imagefile"
-msgstr "Inscription de la clé $tombkey dans l'image $imagefile"
+msgstr "Verschlüssleung des Schlüssels $tombkey im Bild $imagefile"
 
 #: _message
 msgid "Please confirm the key password for the encoding"
-msgstr "Merci de confirmer le mot de passe de la clé en vue de l'encodage"
+msgstr "Bitte bestätigen Sie das Passwort zur Verschlüsselung"
 
 #: _warning
 msgid "Wrong password supplied."
-msgstr "Le mot de passe fourni est invalide."
+msgstr "Das eingegebene Passwort ist falsch."
 
 #: _failure
 msgid "You shall not bury a key whose password is unknown to you."
-msgstr "Vous ne pouvez pas enterrer une clé dont vous ignorez le mot de passe."
+msgstr "Sie dürfen keinen Schlüssel vergraben, von dem Sie das Passwort nicht kennen."
 
 #: _warning
 msgid "Encoding error: steghide reports problems."
-msgstr "Erreur à l'encodage : steghide rapporte des problèmes."
+msgstr "Fehler beim Verschlüsseln : steghide meldet Fehler."
 
 #: _success
 msgid "Tomb key encoded succesfully into image ${imagefile}"
-msgstr "La clé a été correctement inscrite dans l'image ${imagefile}"
+msgstr "Der Schlüssel des Grabes wurde erfolgreich im Bild ${imagefile} verschlüsselt."
 
 #: _warning
 msgid "File exists: $tombkey"
-msgstr "Le fichier existe : $tombkey"
+msgstr "Datei existiert : $tombkey"
 
 #: _warning
 msgid "Make explicit use of --force to overwrite."
-msgstr "Pour l'ignorer et l'écrire de nouveau, utiliser --force."
+msgstr "Benutzen sie --force um ein Überschreiben zu erzwingen."
 
 #: _warning
 msgid "Use of --force selected: overwriting."
-msgstr "L'option --force est sélectionnée : ré-écriture en cours."
+msgstr "--force wurde benutzt, wird überschrieben."
 
 #: _message
 msgid "Trying to exhume a key out of image $imagefile"
-msgstr "Tentative d'exhumer une clé de l'image $imagefile"
+msgstr "Versuche Schlüssel aus $imagefile zu exhumieren"
 
 #: _success
 msgid "${tombkey} succesfully decoded."
-msgstr "${tombkey} a été décodée avec succès."
+msgstr "${tombkey} wurde erfolgreich decodiert."
 
 #: _warning
 msgid "Nothing found in $imagefile"
-msgstr "Aucune clé n'a été trouvée dans $imagefile"
+msgstr "Nichts gefunden in $imagefile"
 
 #: _success
 msgid "Rendering a printable QRCode for key: $tombkey"
-msgstr "Conversion en QR code imprimable de la clé : $tombkey"
+msgstr "$tomkey wird in QR-Code umgewandelt"
 
 #: _success
 msgid "Operation successful:"
-msgstr "Succès : "
+msgstr "Vorgang erfolgreich : "
 
 #: _message
 msgid "`ls -lh $pngname`"
@@ -282,63 +282,63 @@ msgstr "`file $pngname`"
 
 #: _warning
 msgid "A filename needs to be specified using -k to forge a new key."
-msgstr "Pour forger une nouvelle clé, vous devez préciser un nom de fichier avec -k."
+msgstr "Um einen neuen Schlüssel anzugeben muss ein Dateiname mit -k angegeben werden."
 
 #: _message
 msgid "Commanded to forge key $destkey"
-msgstr "Forge de la clé $destkey"
+msgstr "$destkey wird geschmiedet"
 
 #: _warning
 msgid "Forging this key would overwrite an existing file. Operation aborted."
-msgstr "Forger cette clé détruirait un fichier existant.  Opération annulée."
+msgstr "Diesen Schlüssel zu schmieden würde eine existierende Datei überschreiben. Aktion abgebrochen."
 
 #: _failure
 msgid "Error creating temp dir."
-msgstr "Erreur lors de la création du répertoire temporaire."
+msgstr "Fehler beim Erstellen eines temporären Ordners."
 
 #: _warning
 msgid "Cannot mount tmpfs filesystem in volatile memory."
-msgstr "Le système de fichier temporaire ne peut être monté en mémoire vive."
+msgstr "Temporärer Ordner kann nicht in den Zwischenpeicher geladen werden."
 
 #: _message
 msgid "Commanded to forge key $destkey with cipher algorithm $algo"
-msgstr "Forge de la clé $destkey avec l'algorithme de chiffrement $algo"
+msgstr "Der Schlüssel $destkey wird mit dem Verschlüsselungsalgorithmus $algo geschmiedet."
 
 #: _message
 msgid "This operation takes time, keep using this computer on other tasks,"
-msgstr "Cette opération prend du temps, continuez à utiliser l'ordinateur pour d'autres tâches,"
+msgstr "Dieser Vorgang braucht Zeit, benutzen Sie den Computer für andere Aufgaben,"
 
 #: _message
 msgid "once done you will be asked to choose a password for your tomb."
-msgstr "une fois l'opération terminée, vous devrez choisir un mot de passe pour votre tombe."
+msgstr "wenn der Vorgang einmal abgeschlossen ist, werden Sie gefragt ein Passwort für ihr Grab anzugeben."
 
 #: _message
 msgid "To make it faster you can move the mouse around."
-msgstr "Vous pouvez accélérer l'opération en bougeant la souris."
+msgstr "Um den Vorgang zu Beschleunigen können sie die Maus hin und her bewegen."
 
 #: _message
 msgid "If you are on a server, you can use an Entropy Generation Daemon."
-msgstr "Si vous effectuez l'opération sur un serveur, vous pouvez utiliser un démon générateur d'entropie."
+msgstr "Falls sie auf einem Server sind können sie einen Daemon benutzen um Entropie zu erstellen."
 
 #: _warning
 msgid "Cannot generate encryption key."
-msgstr "La clé de chiffrement ne peut être générée."
+msgstr "Verschlüsselungsschlüssel konnte nicht erstellt werden."
 
 #: _success
 msgid "Choose the password of your key: ${tombkey}"
-msgstr "Saisir un mot de passe pour votre clé : ${tombkey}"
+msgstr "Wählen sie ein Passwort für ihren Schlüssel : ${tombkey}"
 
 #: _message
 msgid "(You can also change it later using 'tomb passwd'.)"
-msgstr "(Vous pouvez le modifier ultérieurement avec la commande 'tomb passwd'.)"
+msgstr "(Sie können ihn auch später mit 'tomb passwd' wechseln.)"
 
 #: _warning
 msgid "The key does not seem to be valid."
-msgstr "La clé semble être invalide."
+msgstr "Der Schlüssel scheint ungültig zu sein."
 
 #: _warning
 msgid "Dumping contents to screen:"
-msgstr "Capture des contenus à l'écran :"
+msgstr "Inhalte werden am Bildschirm angezeigt :"
 
 #: _warning
 msgid "--"
@@ -346,35 +346,35 @@ msgstr "--"
 
 #: _message
 msgid "Done forging $tombkey"
-msgstr "La clé $tombkey a été forgée"
+msgstr "Der Schlüssel $tombkey wurde geschmiedet"
 
 #: _success
 msgid "Your key is ready:"
-msgstr "Votre clé est prête :"
+msgstr "Ihr Schlüssel ist bereit :"
 
 #: _message
 msgid "Commanded to dig tomb $1"
-msgstr "Creusement de la tombe $1"
+msgstr "Das Grab $1 wird ausgehoben"
 
 #: _warning
 msgid "No tomb name specified for creation."
-msgstr "La tombe n'a pas été nommée lors de sa création."
+msgstr "Dem Grab wurde bei seiner Erstellung kein Name zugeteilt."
 
 #: _failure
 msgid "Size argument missing, use -s"
-msgstr "Utiliser -s pour préciser la taille de la tombe en Mo."
+msgstr "Benutzen Sie -s um die Größe in Mb anzugeben."
 
 #: _failure
 msgid "Size argument is not an integer."
-msgstr "L'argument de la taille doit être un nombre entier."
+msgstr "Die Größe muss eine Ganzzahl sein."
 
 #: _failure
 msgid "Tombs can't be smaller than 10 megabytes."
-msgstr "La taille minimale d'une tombe est de 10 megaoctets."
+msgstr "Die minimale Größe ist 10 Mb."
 
 #: _warning
 msgid "A tomb exists already. I'm not digging here:"
-msgstr "Une tombe existe déjà à cet endroit. Je n'y creuse pas !"
+msgstr "Es existiert bereits ein Grab. Hier grabe ich nicht:"
 
 #: _warning
 msgid " `ls -lh ${tombdir}/${tombfile}`"
@@ -382,23 +382,23 @@ msgstr " `ls -lh ${tombdir}/${tombfile}`"
 
 #: _success
 msgid "Creating a new tomb in ${tombdir}/${tombfile}"
-msgstr "Nouvelle tombe à ${tombdir}/${tombfile}"
+msgstr "Neues Grab in ${tombdir}/${tombfile}"
 
 #: _message
 msgid "Generating ${tombfile} of ${tombsize}MiB"
-msgstr "Tombe en cours de création ${tombfile}, de taille ${tombsize}Mo"
+msgstr "Grab ${tombfile} wird erstellt, mit der Größe ${tombsize}Mb"
 
 #: _failure
 msgid "Error creating the tomb ${tombdir}/${tombfile}, operation aborted."
-msgstr "Erreur lors de la création de la tombe ${tombdir}/${tombsize}. Opération annulée."
+msgstr "Fehler beim erstellen des Grabes ${tombdir}/${tombsize}. Vorgang abgebrochen."
 
 #: _success
 msgid "Done digging $tombname"
-msgstr "La tombe $tombname est creusée."
+msgstr "Das Grab $tombname wurde ausgehoben."
 
 #: _message
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
-msgstr "Votre tombe n'est pas encore prête, vous devez en forger la clé et la vérouiller :"
+msgstr "Ihr Grab ist noch nicht bereit, erst müssen sie einen Schlüssel schmieden und es abschließen :"
 
 #: _message
 msgid "tomb forge ${tombname}.tomb.key"
@@ -410,385 +410,385 @@ msgstr "tomb lock ${tombname}.tomb -k ${tombname}.tomb.key"
 
 #: _warning
 msgid "No tomb specified for locking."
-msgstr "Quelle tombe dois-je vérouiller ?"
+msgstr "Kein Grab zum verschließen angegeben"
 
 #: _warning
 msgid "Usage: tomb lock file.tomb file.tomb.key"
-msgstr "Usage : tomb lock file.tomb file.tomb.key"
+msgstr "Gebrauch : tomb lock file.tomb file.tomb.key"
 
 #: _message
 msgid "Commanded to lock tomb ${tombfile}"
-msgstr "Vérouillage de la tombe ${tombfile} en cours"
+msgstr "Grab ${tombfile} wird verschlossen"
 
 #: _failure
 msgid "There is no tomb here. You have to it dig first."
-msgstr "Il n'y a pas de tombe à cet endroit. Vous devez d'abord la creuser ('dig')."
+msgstr "Es ist kein Grab an diesem Ort. Sie müssen erst eins graben ('dig')."
 
 #: _message
 msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
-msgstr "Sondage de la tombe (nous ne piétinons jamais les os d'autrui)."
+msgstr "Am kontrollieren ob Grab leer ist (wir würden nie fremde Knochen stören)."
 
 #: _warning
 msgid "The tomb was already locked with another key."
-msgstr "La tombe est déjà vérouillée avec une autre clé."
+msgstr "Grab ist schon mit anderem Schlüssel verschlossen."
 
 #: _failure
 msgid "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
-msgstr "Opération abandonnée. Je ne peux pas vérouiller une tombe déjà vérouillée. Vous pouvez en creuser une autre (avec 'dig')."
+msgstr "Vorgang abgebrochen. Ich kann kein bereits abgeschlossenes Grab nochmal abschließen. Graben Sie ein neues (mit 'dig')."
 
 #: _message
 msgid "Fine, this tomb seems empty."
-msgstr "Bien, la tombe semble être vide."
+msgstr "Gut, dieses Grab scheint leer."
 
 #: _message
 msgid "Locking using cipher: $cipher"
-msgstr "Vérouillage avec l'algorithme de chiffrement : $cipher"
+msgstr "Abschließen mit Chiffre : $cipher"
 
 #: _success
 msgid "Locking ${tombfile} with ${tombkey}"
-msgstr "Vérouillage de ${tombfile} avec ${tombkey}"
+msgstr "Abschließen von ${tombfile} mit ${tombkey}"
 
 #: _message
 msgid "Formatting Luks mapped device."
-msgstr "Formatage du dispositif LUKS désigné."
+msgstr "Formatieren des Luks Gerätes."
 
 #: _warning
 msgid "cryptsetup luksFormat returned an error."
-msgstr "Une erreur s'est produite à l'exécution de cryptsetup luksFormat"
+msgstr "'cryptsetup luksFormat' hat einen Fehler ausgegeben"
 
 #: _message
 msgid "Formatting your Tomb with Ext3/Ext4 filesystem."
-msgstr "Formatage de votre tombe avec un système de fichier Ext3/Ext4."
+msgstr "Ihr Grab wird mit Ext3/Ext4 formatiert."
 
 #: _warning
 msgid "Tomb format returned an error."
-msgstr "Une erreur s'est produite à l'exécution du formatage."
+msgstr "Beim Formatieren ist ein Fehler aufgetreten."
 
 #: _warning
 msgid "Your tomb ${tombfile} may be corrupted."
-msgstr "Votre tombe ${tombfile} pourrait être corrompu."
+msgstr "Ihr Grab ${tombfile} könnte korrumpiert sein."
 
 #: _message
 msgid "Done locking $tombname using Luks dm-crypt ${create_cipher}"
-msgstr "Vérouillage accompli de ${tombname} avec LUKS dm-crypt ${create_cipher}"
+msgstr "Grab ${tombname} wurde erfolgreich verschlüsselt mit LUKS dm-crypt ${create_cipher}"
 
 #: _success
 msgid "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
-msgstr "Votre tombe est disponible à ${tombdir}/${tombfile} et protégée par la clé ${tombkey}"
+msgstr "Ihr Grab ist unter ${tombdir}/${tombfile} bereit und mit Schlüssel ${tombkey} geschützt"
 
 #: _message
 msgid "Commanded to reset key for tomb $2"
-msgstr "Changement du verrou sur la tombe $2"
+msgstr "Schlüssel wird geändert für Grab $2"
 
 #: _success
 msgid "Changing lock on tomb $tombname"
-msgstr "Changement du verrou en cours sur $tombname"
+msgstr "Ändern des Schlosses für das Grab $tombname"
 
 #: _message
 msgid "Old key: $oldkey"
-msgstr "Clé précédente : $oldkey"
+msgstr "Alter Schlüssel : $oldkey"
 
 #: _message
 msgid "New key: $newkey"
-msgstr "Nouvelle clé : $newkey"
+msgstr "Neuer Schlüssel : $newkey"
 
 #: _success
 msgid "Succesfully changed key for tomb: $2"
-msgstr "Le verrou est changé sur la tombe $2"
+msgstr "Das Schloss wurde erfolgreich gewechselt am Grab $2"
 
 #: _message
 msgid "The new key is: $newkey"
-msgstr "La nouvelle clé est : $newkey"
+msgstr "Der neue Schlüssel ist : $newkey"
 
 #: _warning
 msgid "Creating this tomb would overwrite an existing file. Operation aborted."
-msgstr "La création de cette tombe écraserait un fichier existant. Opération annulée."
+msgstr "Das ausheben dieses Grabes würde eine existierende Datei überschreiben. Vorgang abgebrochen."
 
 #: _success
 msgid "Tomb $tombname succesfully created."
-msgstr "La tombe $tombname a été créée avec succès."
+msgstr "Das Grab $tombname wurde erfolgreich erstellt."
 
 #: _message
 msgid "Commanded to open tomb $1"
-msgstr "Ouverture de la tombe $1"
+msgstr "Grab $1 wird geöffnet"
 
 #: _message
 msgid "Mountpoint not specified, using default: $tombmount"
-msgstr "Le point de montage n'a pas été précisé, nous utilisons donc $tombmount"
+msgstr "Mountpoint nicht angegeben, $tombmount wird benutzt"
 
 #: _warning
 msgid "$tombname is already open."
-msgstr "$tombname est déjà ouverte."
+msgstr "$tombname ist bereits geöffnet."
 
 #: _message
 msgid "Here below its status is reported:"
-msgstr "L'état de la tombe suit :"
+msgstr "Zustand des Grabes wie folgt :"
 
 #: _success
 msgid "Opening $tombfile on $tombmount"
-msgstr "Ouverture de $tombfile sur $tombmount"
+msgstr "$tombfile geöffnet in $tombmount"
 
 #: _failure
 msgid "Too many tombs open. Please close any of them to open another tomb."
-msgstr "Trop de tombes sont ouvertes. Merci d'en fermer une pour pouvoir ouvrir celle-ci."
+msgstr "Zu viele Gräber stehen offen. Bitte schließen sie eins damit ein anderes geöffnet werden kann."
 
 #: _warning
 msgid "$tombfile is not a valid Luks encrypted storage file."
-msgstr "$tombfile n'est pas un fichier chiffré de stockage LUKS valide."
+msgstr "$tombfile ist kein gültiges Luks verschlüsseltes Gerät."
 
 #: _message
 msgid "This tomb is a valid LUKS encrypted device."
-msgstr "Cette tombe est un dispositif chiffré LUKS valide."
+msgstr "Dieses Grab ist ein gültiges LUKS verschlüsseltes Gerät."
 
 #: _message
 msgid "Cipher is \"$tombdump[1]\" mode \"$tombdump[2]\" hash \"$tombdump[3]\""
-msgstr "Algorithme de chiffrement \"$tombdump[1]\" en mode \"$tombdump[2]\" et la fonction de hachage \"$tombdump[3]\"."
+msgstr "Verschlüsselung \"$tombdump[1]\" im Modus \"$tombdump[2]\" und der Hashfunktion \"$tombdump[3]\"."
 
 #: _failure
 msgid "Failure mounting the encrypted file."
-msgstr "Le montage du fichier chiffré a échoué."
+msgstr "Fehler beim Einhängen des verschlüsselten Gerätes."
 
 #: _success
 msgid "Success unlocking tomb $tombname"
-msgstr "La tombe $tombname est à présent dévérouillée."
+msgstr "$tombname wurde erfolgreich aufgeschlossen."
 
 #: _message
 msgid "Checking filesystem via $tombstat[3]"
-msgstr "Vérification du système de fichiers avec $tombstat[3]"
+msgstr "Dateisystem kontrollieren mit $tombstat[3]"
 
 #: _success
 msgid "Success opening $tombfile on $fg_bold[white]$tombmount$fg_no_bold[white]"
-msgstr "La tombe $tombfile est ouverte sur $fg_bold[white]$tombmount$fg_no_bold[white]"
+msgstr "Das Grab $tombfile ist geöffnet in $fg_bold[white]$tombmount$fg_no_bold[white]"
 
 #: _message
 msgid "Last visit by $fg_bold[white]$tombuser($tombuid)$fg_no_bold[white] from $fg_bold[white]$tombtty$fg_no_bold[white] on $fg_bold[white]$tombhost$fg_no_bold[white]"
-msgstr "Dernière visite par $fg_bold[white]$tombuser($tombuid)$fg_no_bold[white] depuis $fg_bold[white]$tombtty$fg_no_bold[white] sur $fg_bold[white]$tombhost$fg_no_bold[white]"
+msgstr "Letzter Besuch von $fg_bold[white]$tombuser($tombuid)$fg_no_bold[white] seit $fg_bold[white]$tombtty$fg_no_bold[white] auf $fg_bold[white]$tombhost$fg_no_bold[white]"
 
 #: _message
 msgid "on date $fg_bold[white]`date --date @${tomblast} +%c`$fg_no_bold[white]"
-msgstr "à la date  $fg_bold[white]`date --date @${tomblast} +%c`$fg_no_bold[white]"
+msgstr "am Datum  $fg_bold[white]`date --date @${tomblast} +%c`$fg_no_bold[white]"
 
 #: _warning
 msgid "How pitiful!  A tomb, and no HOME."
-msgstr "C'est pitoyable ! Une tombe, mais sans abri (HOME n'est pas défini)."
+msgstr "Wie bedaurndswert ! Ein Grab aber kein Zuhause (HOME ist nicht definiert)."
 
 #: _warning
 msgid "Cannot exec bind hooks without a mounted tomb."
-msgstr "L'exécution des ordres de montage ne peut se faire que si la tombe est montée."
+msgstr "'Bind hooks' kann nicht benutzt werden ohne eingehängtes Grab."
 
 #: _warning
 msgid "bind-hooks map format: local/to/tomb local/to/HOME"
-msgstr "La correspondance de montage suit le format : local/à/la/tombe local/à/HOME"
+msgstr "'bind hooks' format : lokal/zu/Grab lokal/zu/HOME"
 
 #: _warning
 msgid "bind-hooks map format: local/to/tomb local/to/HOME.  Rolling back"
-msgstr "Les montages doivent s'annoncer localement : local/à/la/tombe local/à/HOME. Annulation."
+msgstr "'bind-hooks' format : lokal/zu/Grab lokal/zu/HOME.  Wird rückgängig gemacht"
 
 #: _warning
 msgid "bind-hook target not existent, skipping $HOME/${maps[$dir]}"
-msgstr "La cible du point de montage n'existe pas. Le chemin $HOME/${maps[$dir]} est ignoré."
+msgstr "'bind-hooks' Ziel ungültig,  $HOME/${maps[$dir]} wird ignoriert."
 
 #: _warning
 msgid "bind-hook source not found in tomb, skipping ${MOUNTPOINT}/${dir}"
-msgstr "L'origine du point de montage n'est pas relatif à la tombe : le chemin ${MOUNTPOINT}/${dir} est ignoré."
+msgstr "'bind-hooks' Quelle nicht in Grab gefunden, ${MOUNTPOINT}/${dir} wird ignoriert."
 
 #: _success
 msgid "Post hooks found, executing as user $SUDO_USER."
-msgstr "Des hooks post-montage sont présents, et exécutés en tant que $SUDO_USER."
+msgstr "'Post hooks' gefunden, werden als $SUDO_USER ausgeführt."
 
 #: _failure
 msgid "There seems to be no open tomb engraved as [$1]"
-msgstr "Il ne semble pas y avoir de tombe ouverte comme [$1]"
+msgstr "Es scheint kein Grab [$1] offen zu sein"
 
 #: _failure
 msgid "I can't see any open tomb, may they all rest in peace."
-msgstr "Je ne vois aucune tombe ouverte, qu'ils reposent tous en paix."
+msgstr "Kein Grab geöffnet. Mögen sie alle in Frieden ruhen."
 
 #: _success
 msgid "Creating and updating search indexes."
-msgstr "Création et mise à jour des index de recherche."
+msgstr "Erstellen und aktualisieren des Such-Indexes."
 
 #: _message
 msgid "Skipping $tombname (.noindex found)."
-msgstr "$tombname comporte in fichier .noindex : ses fichiers n'apparaîtront pas dans les résultats de recherche."
+msgstr "Überspringen von $tombname (.noindex gefunden)."
 
 #: _message
 msgid "Indexing $tombname filenames..."
-msgstr "Index des fichiers dans $tombname en cours..."
+msgstr "Indexieren der Dateinamen von $tombname im Gange..."
 
 #: _message
 msgid "Indexing $tombname contents..."
-msgstr "Index des contenus de $tombname en cours..."
+msgstr "Indexieren der Inhalte von $tombname im Gange..."
 
 #: _message
 msgid "Search index updated."
-msgstr "L'index de recherche a été mis à jour."
+msgstr "Such-Index aktualisiert."
 
 #: _success
 msgid "Searching for: $fg_bold[white]${(f)@}$fg_no_bold[white]"
-msgstr "Recherche en cours : $fg_bold[white]${(f)@}$fg_no_bold[white]"
+msgstr "Suche läuft : $fg_bold[white]${(f)@}$fg_no_bold[white]"
 
 #: _message
 msgid "Searching filenames in tomb $tombname"
-msgstr "Recherche parmi les fichiers dans la tombe $tombname"
+msgstr "Suche in den Dateinamen von $tombname"
 
 #: _message
 msgid "Matches found: `locate -d ${tombmount}/.updatedb -e -i -c ${(f)@}`"
-msgstr "Résultats trouvés : `locate -d ${tombmount}/.updatedb -e -i -c ${(f)@}`"
+msgstr "Ergebnisse : `locate -d ${tombmount}/.updatedb -e -i -c ${(f)@}`"
 
 #: _message
 msgid "Searching contents in tomb $tombname"
-msgstr "Recherche parmi les contenus de la tombe $tombname"
+msgstr "Suche in den Inhalten von $tombname"
 
 #: _warning
 msgid "Skipping tomb $tombname: not indexed."
-msgstr "La tombe $tombname n'est pas indexée, et donc ignorée."
+msgstr "Das Grab $tombname ist nicht indexiert und wird ignoriert."
 
 #: _warning
 msgid "Run 'tomb index' to create indexes."
-msgstr "Exécuter 'tomb index' pour générer les index."
+msgstr "Führen Sie 'tomb index' aus um Suchindexe zu erstellen."
 
 #: _message
 msgid "Search completed."
-msgstr "La recherche est terminée."
+msgstr "Suche abgeschlossen."
 
 #: _message
 msgid "Commanded to resize tomb $1 to $opts[-s] megabytes."
-msgstr "Agrandissement de la tombe $1 à $opts[-s] Mo."
+msgstr "Grab $1 wird auf $opts[-s] Mb vergrössert."
 
 #: _failure
 msgid "No tomb name specified for resizing."
-msgstr "Merci de spécifier le nom de la tombe à agrandir."
+msgstr "Bitte geben sie den Namen des zu vergrössernden Grabes an."
 
 #: _failure
 msgid "Cannot find $1"
-msgstr "$1 reste introuvable."
+msgstr "$1 nicht gefunden."
 
 #: _failure
 msgid "The tomb $tombname is open, to resize it it needs to be closed."
-msgstr "La tombe $tombname est ouverte, mais elle doit être fermée pour être agrandie."
+msgstr "Grab $tombname ist geöffnet, zum Vergrössern bitte schließen."
 
 #: _failure
 msgid "You must specify the new size of $tombname"
-msgstr "Vous devez spécifier la nouvelle taille de $tombname"
+msgstr "Sie müssen die neue Grösse von $tombname angeben"
 
 #: _failure
 msgid "Size is not an integer."
-msgstr "La taille doit être un nombre entier."
+msgstr "Die Grösse muss eine Ganzzahl sein."
 
 #: _failure
 msgid "The new size must be greater then old tomb size."
-msgstr "La nouvelle taille doit être supérieure à l'ancienne."
+msgstr "Die neue Grösse muss grösser sein als die alte."
 
 #: _message -n
 msgid "Generating ${tombfile} of ${newtombsize}MiB"
-msgstr "Génération de ${tombfile} d'une taille de ${newtombsize}Mo."
+msgstr "Erstelle ${tombfile} mit der Grösse ${newtombsize}Mo."
 
 #: _failure
 msgid "Too many tombs opened. Please close any of them to open another tomb."
-msgstr "Trop de tombes sont ouvertes. Merci d'en fermer une avant d'ouvrir celle-ci."
+msgstr "Zu viele Gräber geöffnet. Bitte schließen sie eins um dieses zu öffnen."
 
 #: _failure
 msgid "e2fsck failed to check $mapper"
-msgstr "e2fsck n'a pas pu vérifier $mapper"
+msgstr "e2fsck konnte $mapper nicht verifizieren"
 
 #: _failure
 msgid "resize2fs failed to resize $mapper"
-msgstr "resize2fs n'a pas pu redimensionner $mapper"
+msgstr "resize2fs konnte $mapper nicht vergrössern"
 
 #: _warning
 msgid "There is no open tomb to be closed."
-msgstr "Il n'y a pas de tombe à fermer."
+msgstr "Es gibt kein zu schließendes Grab."
 
 #: _warning
 msgid "Too many tombs mounted, please specify one (see tomb list)"
-msgstr "Trop de tombes sont montées, merci d'en choisir une (voir 'tomb list')"
+msgstr "Zu viele Gräber geöffnet, bitte geben sie ein Grab an (siehe 'tomb list')"
 
 #: _warning
 msgid "or issue the command 'tomb close all' to close them all."
-msgstr "ou bien exécuter 'tomb close all' pour les fermer toutes."
+msgstr "oder 'tomb close all' ausführen um alle zu schließen."
 
 #: _message
 msgid "Tomb close $1"
-msgstr "Fermons la tombe $1"
+msgstr "Schließen des Grabes $1"
 
 #: _warning
 msgid "Tomb not found: $1"
-msgstr "Tombe introuvable : $1"
+msgstr "Grab unauffindbar : $1"
 
 #: _warning
 msgid "Please specify an existing tomb."
-msgstr "Merci d'indiquer une tombe existante."
+msgstr "Bitte geben sie ein existierendes Grab an."
 
 #: _success
 msgid "Slamming tomb $tombname mounted on $tombmount"
-msgstr "Fermeture soudaine de la tombe $tombname montée sur $tombmount."
+msgstr "Das Grab $tombname eingehängt auf $tombmount wurde abrupt geschlossen."
 
 #: _message
 msgid "Kill all processes busy inside the tomb."
-msgstr "Exécution (sommaire) de tous les processus en cours dans la tombe."
+msgstr "Abbrechen aller laufender Prozesse im Grab."
 
 #: _warning
 msgid "Cannot slam the tomb $tombname"
-msgstr "La tombe $tombname ne peut pas être fermée !"
+msgstr "$tombname kann nicht abrupt geschlossen werden !"
 
 #: _message
 msgid "Closing tomb $tombname mounted on $tombmount"
-msgstr "Fermeture de la tombe $tombname montée sur $tombmount."
+msgstr "Grab $tombname eingehängt in $tombmount wird geschlossen."
 
 #: _message
 msgid "Closing tomb bind hook: $bind_mount"
-msgstr "Retrait du point de montage : $bind_hook"
+msgstr "Schliessen des Einhängepunkts : $bind_hook"
 
 #: _success
 msgid "Slamming tomb: killing all processes using this hook."
-msgstr "Fermeture soudaine : interruption des processus utilisant ce hook."
+msgstr "Abruptes Schließen, abbrechen aller Prozesse die diesen Hook benutzen."
 
 #: _warning
 msgid "Cannot slam the bind hook $bind_mount"
-msgstr "Quelque chose coince à $bind_mount."
+msgstr "$bind_mount kann nicht abrupt geschlossen werden."
 
 #: _warning
 msgid "Tomb bind hook $bind_mount is busy, cannot close tomb."
-msgstr "Le point de montage $bind_mount est occupé et ne peut pas être fermé."
+msgstr "Der Einhängepunkt $bind_mount ist beschäftigt und kann nicht geschlossen werden."
 
 #: _warning
 msgid "Tomb is busy, cannot umount!"
-msgstr "La tombe est occupée et ne peut pas être démontée !"
+msgstr "Grab ist beschäftigt und kann nicht ausgehänkt werden !"
 
 #: _warning
 msgid "Error occurred in cryptsetup luksClose ${mapper}"
-msgstr "Une erreur s'est produite lors de l'exécution de cryptsetup luksClose ${mapper}."
+msgstr "Ein Fehler ist beim Ausführen von 'cryptsetup luksClose ${mapper}' aufgetreten."
 
 #: _success
 msgid "Tomb $tombname closed: your bones will rest in peace."
-msgstr "La tombe $tombname est refermée : vos ossements vont reposer en paix."
+msgstr "Das Grab $tombname ist abgeschlossen, mögen ihre Knochen in Frieden ruhen."
 
 #: _failure
 msgid "Error parsing."
-msgstr "Erreur de syntaxe."
+msgstr "Syntax-Fehler."
 
 #: _warning
 msgid "There's no such command \"$subcommand\"."
-msgstr "La commande \"$subcommand\" n'est pas implémentée."
+msgstr "Der Befehl \"$subcommand\" existiert nicht."
 
 #: _warning
 msgid "Some error occurred during option processing."
-msgstr "L'interprétation des options a échoué."
+msgstr "Fehler beim interpretieren der Optionen"
 
 #: _warning
 msgid "The create command is deprecated, please use dig, forge and lock instead."
-msgstr "La commande \"create\" est obsolète : il convient à présent d'utiliser \"dig\", \"forge\", et \"lock\"."
+msgstr "Der Befehl \"create\" ist veraltet, benutzen Sie \"dig\", \"forge\", und \"lock\"."
 
 #: _warning
 msgid "For more informations see Tomb's manual page (man tomb)."
-msgstr "Pour de plus amples informations, se référer au manuel de Tomb (man tomb)."
+msgstr "Für mehr Informationen siehe Benutzerhandbuch (man tomb)."
 
 #: _warning
 msgid "Command \"$subcommand\" not recognized."
-msgstr "La command \"$subcommand\" n'est pas reconnue."
+msgstr "Der befehl \"$subcommand\" wurde nicht erkannt."
 
 #: _message
 msgid "Try -h for help."
-msgstr "Essayer -h pour obtenir l'aide."
+msgstr "Versuchen Sie -h um Hilfe zu erhalten."
 
