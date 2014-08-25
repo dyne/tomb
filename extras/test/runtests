@@ -76,8 +76,6 @@ tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypass} lock /tmp/test.tomb
 
 { test $? = 0 } && { results+=(lock SUCCESS) }
 
-
-
 notice "Testing open with wrong password"
 
 tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd wrongpassword open /tmp/test.tomb
@@ -93,6 +91,8 @@ tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypass} open /tmp/t
 { test $? = 0 } && { results+=(open SUCCESS) }
 
 tt close test
+
+{ test $? = 0 } && { results+=(close SUCCESS) }
 
 
 
@@ -114,9 +114,6 @@ crc="sha256 /media/test.tomb/datacheck.raw"
 echo "$crc" > /media/test.tomb/datacheck.sha
 
 tt --unsecure-dev-mode close test
-
-{ test $? = 0 } && { results+=(close SUCCESS) }
-
 
 { test $RESIZER = 1 } && {
     notice "Testing resize to 30 MiB"
