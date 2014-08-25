@@ -58,6 +58,9 @@ MOUNTOPTS="rw,noatime,nodev"
 # prefix for temporary files
 TMPPREFIX="/dev/shm/$$.$RANDOM."
 
+# makes glob matching case insensitive
+unsetopt CASE_MATCH
+
 typeset -A global_opts
 typeset -A opts
 typeset -h username
@@ -615,6 +618,42 @@ check_bin() {
 
 # {{{ Key operations
 
+# $1 is the encrypted key contents we are checking
+is_valid_key() {
+    _verbose "is_valid_key"
+    _key="$1"
+    # argument check
+    { test "$_key" = "" } && { _key="$tomb_key" }
+    { test "$_key" = "" } && {
+        _warning "is_valid_key() called without argument."; return 1 }
+
+    # if the key file is an image don't check file header
+    { test -r "$tomb_key_file" } \
+        && [[ `file "$tomb_key_file"` =~ "JP.G" ]] \
+        && {
+        _message "Key is an image, it might be valid."; return 0 }
+
+    [[ "$_key" =~ "BEGIN PGP" ]] && {
+        _message "Key is valid."; return 0 }
+
+    return 1
+}
+
+# $1 is a string containing an encrypted key
+recover_key() {
+    _warning "Attempting key recovery."
+    _key="$tomb_key"
+    tomb_key=""
+
+    [[ "$_key" =~ "_KDF_" ]] && {
+        tomb_key+="`print - $_key | $head -n 1`\n" }
+
+    tomb_key+="-----BEGIN PGP MESSAGE-----\n"
+    tomb_key+="$_key\n"
+    tomb_key+="-----END PGP MESSAGE-----\n"
+    return 0
+}
+
 # This function retrieves a tomb key specified on commandline or from
 # stdin if -k - was selected.  It also runs validity checks on the
 # file. On success returns 0 and prints out the full path to
@@ -648,26 +687,13 @@ load_key() {
 
     _verbose "load_key: ${tomb_key_file}"
 
-    # TODO: move this condition for JPEG steg into is_valid_key
-    [[ `file "$tomb_key_file"` =~ "JP.G" ]] || {
-        # if the key file is an image don't check file header
-        is_valid_key "${tomb_key}" || {
-            _warning "The key seems invalid or its format is not known by this version of Tomb."
-
-            # if no BEGIN header found then we try to recover it
-            _warning "Attempting recovery."
-            _key="$tomb_key"
-            tomb_key=""
-            [[ "$_key" =~ "_KDF_" ]] && {
-                tomb_key+=`print - $_key | $head -n 1` }
-            tomb_key+="-----BEGIN PGP MESSAGE-----"
-            tomb_key+="$_key"
-            tomb_key+="-----END PGP MESSAGE-----"
-        }
+    is_valid_key "${tomb_key}" || {
+        _warning "The key seems invalid or its format is not known by this version of Tomb."
+        recover_key "$tomb_key"
     }
 
-    tomb_key="$tomb_key"
-    tomb_key_file="$tomb_key_file"
+    # declared tomb_key (contents)
+    # declared tomb_key_file (path)
     return 0
 }
 
@@ -689,11 +715,9 @@ gpg_decrypt() {
 
     else # using status-file in gpg != 1.4.11
 
+        # TODO: use mkfifo
         tmp_create
         _status=`tmp_new`
-        # [[ $? = 0 ]] || {
-        #     unset gpgpass;
-        #     _failure "Fatal error creating temp file." }
 
         tomb_secret=`print - "$gpgpass" | \
             gpg --batch --passphrase-fd 0 --no-tty --no-options \
@@ -738,16 +762,12 @@ get_lukskey() {
         esac
 
     # key needs to be exhumed from an image
-    elif [[ "$tomb_key_file" =~ "JP.G" ]]; then
-        tmp_create
-        exhumedkey=`tmp_new`
-        exhume_key "$tomb_key_file" "$_password" "$exhumedkey"
-        tomb_key=`cat $exhumedkey`
-    fi
+    elif [ -r "$tomb_key_file" ] \
+        && [[ `file "$tomb_key_file"` =~ "JP.G" ]]; then
 
-    # check validity, eventually repair adding headers
-    is_valid_key || {
-        _failure "This key is unusable: $tomb_key_file" }
+        exhume_key "$tomb_key_file" "$_password"
+
+    fi
 
     gpg_decrypt "$_password" # saves decrypted content into $tomb_secret
 
@@ -853,24 +873,6 @@ change_passwd() {
     fi
     return 0
 }
-
-# $1 is the encrypted key contents we are checking
-is_valid_key() {
-    _verbose "is_valid_key"
-    _key="$1"
-    # argument check
-    { test "$_key" = "" } && { _key="$tomb_key" }
-    { test "$_key" = "" } && {
-        _warning "is_valid_key() called without argument."; return 1 }
-
-    [[ "$_key" =~ "BEGIN PGP" ]] && {
-        _message "Key is valid"
-        return 0 }
-
-    return 1
-}
-
-
 
 
 # takes care to encrypt a key
@@ -1048,19 +1050,25 @@ exhume_key() {
             _message "printing exhumed key on stdout" }
     }
 
+    { test -r "$imagefile" } || {
+        _failure "Exhume failed, image file not found: $imagefile" }
+
     [[ `file "$imagefile"` =~ "JP.G" ]] || {
-        _failure "Encode failed: $imagefile is not a jpeg image." }
+        _failure "Exhume failed: $imagefile is not a jpeg image." }
 
     # when a password is passed as argument then always print out
     # the exhumed key on stdout without further checks (internal use)
     { test "$knownpass" = "" } || {
-        steghide extract -sf "$imagefile" -p "$knownpass" -xf -
+        tomb_key=`steghide extract -sf "$imagefile" -p "$knownpass" -xf -`
         { test $? = 0 } || {
             _failure "Wrong password or no steganographic key found" }
+
+        recover_key "$tomb_key"
+        return 0
     }
 
     { test "$tombkey" = "-" } || {
-        if [[ -e "$tombkey" ]]; then
+        if [[ -s "$tombkey" ]]; then
             _warning "File exists: $tombkey"
             { option_is_set -f } || {
                 _warning "Make explicit use of --force to overwrite."
