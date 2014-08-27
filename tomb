@@ -61,23 +61,23 @@ TMPPREFIX="/dev/shm/$$.$RANDOM."
 # makes glob matching case insensitive
 unsetopt CASE_MATCH
 
-typeset -A global_opts
-typeset -A opts
-typeset -h username
+typeset -AH global_opts
+typeset -AH opts
+typeset -H username
 
-typeset -h _uid
-typeset -h _gid
-typeset -h _tty
+typeset -H _uid
+typeset -H _gid
+typeset -H _tty
 
-typeset -gH tomb_file
+typeset -H tomb_file
 
-typeset -gH tomb_key
-typeset -gH tomb_key_file
-typeset -gH tomb_secret
-typeset -gH tomb_password
+typeset -H tomb_key
+typeset -H tomb_key_file
+typeset -H tomb_secret
+typeset -H tomb_password
 
-typeset -ah tomb_tempfiles
-typeset -ah tomb_loopdevs
+typeset -aH tomb_tempfiles
+typeset -aH tomb_loopdevs
 
 # Make sure sbin is in PATH
 PATH+=:/sbin:/usr/sbin
@@ -91,18 +91,20 @@ export TEXTDOMAIN=tomb
 
 endgame() {
     # here clear all temp files and flush all pipes
-    unset tomb_file
-    unset tomb_key
-    unset tomb_key_file
-    unset tomb_secret
-    unset tomb_password
 
-    for d in $tomb_tempdirs; do
-        rm -f "$d/*"; rmdir "$d"; done
-    unset tomb_tempdirs
+    # prepare some random material to overwrite vars
+    rr="$RANDOM"
+    while [[ ${#rr} -lt 500 ]]; do
+        rr+="$RANDOM"; done
+    # we make sure no info is left in unallocated mem
+    tomb_file="$rr";     unset tomb_file
+    tomb_key="$rr";      unset tomb_key
+    tomb_key_file="$rr"; unset tomb_key_file
+    tomb_secret="$rr";   unset tomb_secret
+    tomb_password="$rr"; unset tomb_password
 
     for f in $tomb_tempfiles; do
-        rm -f "$f"; done
+        ${=WIPE} "$f"; done
     unset tomb_tempfiles
 
     for l in $tomb_loopdevs; do
@@ -304,15 +306,6 @@ EOF
         exit $?
     fi # are we root already
 
-    # check if we have support for loop mounting
-    losetup -f >& -
-    { test "$?" = "0" } || {
-        _warning "Loop mount of volumes is not supported on this machine, this error"
-        _warning "often occurs on VPS and kernels that don't provide the loop module."
-        _warning "It is impossible to use Tomb on this machine at this conditions."
-        _failure "Operation aborted."
-    }
-
     # make sure necessary kernel modules are loaded
     modprobe dm_mod
     modprobe dm_crypt
@@ -331,8 +324,12 @@ is_valid_tomb() {
         _warning "Tomb file not found: $1"; return 1 }
     { test -f "$1" } || {
         _warning "Tomb file is not a regular file: $1"; return 1 }
-    # check file type (if its a Luks fs)
+    { test -s "$1" } || {
+        _warning "Tomb file is empty (zero length): $1"; return 1 }
+    { test -w "$1" } || {
+        _warning "Tomb file is not writable: $1"; return 1 }
 
+    # check file type (if its a Luks fs)
     file "$1" | grep -i "luks encrypted file" > /dev/null || {
         _warning "File is not yet a tomb: $1" }
 
@@ -352,12 +349,14 @@ lo_mount() {
     is_valid_tomb "$tpath" || {
         _failure "Loopback mount called on invalid tomb: $tpath" }
 
+    # check if we have support for loop mounting
     losetup -f >& -
     [[ $? = 0 ]] || {
-        # if [ $? = 255 ]; then
-        #     _failure "Too many tombs open. Please close any of them to open another tomb."
-        # fi
-        _failure "Loopback device not available" }
+        _warning "Loop mount of volumes is not possible on this machine, this error"
+        _warning "often occurs on VPS and kernels that don't provide the loop module."
+        _warning "It is impossible to use Tomb on this machine at this conditions."
+        _failure "Operation aborted."
+    }
 
     _nstloop=`losetup -f` # get the number for next loopback device
 
@@ -492,7 +491,7 @@ option_value() {
 
 # Messaging function with pretty coloring
 function _msg() {
-    local msg="$(gettext -s - "$2")"
+    local msg="$(gettext -s "$2")"
     local command="print -P"
     local progname="$fg[magenta]${TOMBEXEC##*/}$reset_color"
     local message="$fg_bold[normal]$fg_no_bold[normal]$msg$reset_color"
@@ -534,7 +533,6 @@ function _message say() {
     option_is_set -q || _msg "$notice" "$1"
     return 0
 }
-alias act="_message -n"
 
 function _verbose xxx() {
     option_is_set -D && _msg verbose "$1"
@@ -555,7 +553,6 @@ function _failure die() {
     typeset -i exitcode=${2:-1}
     option_is_set -q || _msg failure "$1"
     # be sure we forget the secrets we were told
-    unset tomb_secret
     exit $exitcode
 }
 
@@ -661,12 +658,11 @@ recover_key() {
 load_key() {
     # take the name of a tomb file as argument to option -k
     # if no argument is given, tomb{key|dir|file} are set by caller
-
-    { option_is_set -k } || {
-        _failure "This operation requires a key file to be specified using the -k option."
-        return 1 }
-
-    keyopt="`option_value -k`"
+    local keyopt
+    [[ "$1" = "" ]]      || { keyopt="$1" }
+    [[ "$keyopt" = "" ]] && { keyopt="`option_value -k`" }
+    [[ "$keyopt" = "" ]] && {
+        _failure "This operation requires a key file to be specified using the -k option." }
 
     if [[ "$keyopt" == "-" ]]; then
         _verbose "load_key reading from stdin."
@@ -674,9 +670,8 @@ load_key() {
         _message "Waiting for the key to be piped from stdin... "
         tomb_key_file=stdin
         tomb_key=`cat`
-#        print ok >&2
-    elif [[ "$keyopt" != "" ]]; then
-        _verbose "load_key argument: `option_value -k`"
+    else
+        _verbose "load_key argument: $keyopt"
         # take key from a file
         tomb_key_file="$keyopt"
         { test -r "${tomb_key_file}" } || {
@@ -689,6 +684,7 @@ load_key() {
 
     is_valid_key "${tomb_key}" || {
         _warning "The key seems invalid or its format is not known by this version of Tomb."
+        # try recovering the key
         recover_key "$tomb_key"
     }
 
@@ -942,8 +938,9 @@ gen_key() {
     }
 
 
-    print -n - $header
+    print $header
 
+    # TODO: check result of gpg operation
     cat <<EOF | gpg --openpgp --force-mdc --cipher-algo ${algo} \
         --batch --no-options --no-tty --passphrase-fd 0 --status-fd 2 \
         -o - -c -a
@@ -1041,12 +1038,12 @@ exhume_key() {
 
     knownpass="$2"
 
-    tombkey="$3"
-    [[ "$tombkey" = "" ]] && {
-        tombkey="`option_value -k`"
-        { test "$tombkey" = "" } && {
+    destkey="$3"
+    [[ "$destkey" = "" ]] && {
+        destkey="`option_value -k`"
+        { test "$destkey" = "" } && {
             # no key output specified: fallback to stdout
-            tombkey="-"
+            destkey="-"
             _message "printing exhumed key on stdout" }
     }
 
@@ -1067,14 +1064,14 @@ exhume_key() {
         return 0
     }
 
-    { test "$tombkey" = "-" } || {
-        if [[ -s "$tombkey" ]]; then
-            _warning "File exists: $tombkey"
+    { test "$destkey" = "-" } || {
+        if [[ -s "$destkey" ]]; then
+            _warning "File exists: $destkey"
             { option_is_set -f } || {
                 _warning "Make explicit use of --force to overwrite."
                 _failure "Refusing to overwrite file. Operation aborted." }
             _warning "Use of --force selected: overwriting."
-            rm -f ${tombkey}
+            rm -f ${destkey}
         fi
     }
 
@@ -1094,15 +1091,16 @@ exhume_key() {
     fi
 
     # always steghide required
-    steghide extract -sf ${imagefile} -p ${tombpass} -xf ${tombkey}
+    steghide extract -sf ${imagefile} -p ${tombpass} -xf ${destkey}
     res=$?
 
     unset tombpass
 
+    [[ "$destkey" = "-" ]] && { destkey="stdout" }
     if [ $res = 0 ]; then
-        _success "${tombkey} succesfully decoded."
+        _success "Key succesfully exhumed to ${destkey}."
     else
-        _warning "Nothing found in $imagefile"
+        _warning "Nothing found in ${imagefile}."
     fi
 
     return $res
@@ -1127,8 +1125,8 @@ engrave_key() {
     --casesensitive -o "$pngname"
     { test $? = 0 } || { _failure "QREncode reported an error." }
     _success "Operation successful:"
-    _message "`ls -lh $pngname`"
-    _message "`file $pngname`"
+    ls -lh $pngname
+    file $pngname
 }
 
 # }}} - Key handling
@@ -1390,83 +1388,94 @@ lock_tomb_with_key() {
 # This function changes the key that locks a tomb
 change_tomb_key() {
     _message "Commanded to reset key for tomb $2"
+
     _check_swap
 
-    load_key
-    newkey="$tomb_key_file"
-    { test $? = 0 } || {
-        _failure "Aborting operations: error loading new key from -k" }
-
-    oldkey="$1"
-    { is_valid_key "`cat $oldkey`" } || {
-        _failure "Old key invalid. 1st argument of setkey must be a valid key file." }
-
-    { is_valid_tomb "$2" } || {
-        _failure "Tomb invalid. 2nd argument of setkey must be a valid tomb file." }
+    [[ "$2" = "" ]] && {
+        _warning "Command 'setkey' needs two arguments: the old key file and the tomb."
+        _warning "I.e:  tomb -k new.tomb.key old.tomb.key secret.tomb"
+        _failure "Execution aborted."
+    }
 
     lo_mount "$2"
     nstloop=`lo_new`
-
     cryptsetup isLuks ${nstloop}
-    # is it a LUKS encrypted nest? we check one more timesee cryptsetup(1)
+    # is it a LUKS encrypted nest? we check one more time
     { test $? = 0 } || {
         _failure "Not a valid LUKS encrypted volume: $2" }
 
+
+    load_key "$1"
+    { test $? = 0 } || {
+        _failure "Aborting operations: error loading old key from arguments" }
+    old_key="$tomb_key"
+    old_key_file="$tomb_key_file"
+
     # we have everything, prepare to mount
     _success "Changing lock on tomb $tombname"
-    _message "Old key: $oldkey"
-    _message "New key: $newkey"
+    _message "Old key: $old_key_file"
 
     # render the mapper
     mapdate=`date +%s`
     # save date of mount in minutes since 1970
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
 
-    if option_is_set --tomb-pwd; then
-        tomb_new_pwd="`option_value --tomb-pwd`"
-        _verbose "tomb-pwd = $tomb_new_pwd"
-        ask_key_password "$newkey" "$tomb_new_pwd"
-    else
-        ask_key_password "$newkey"
-    fi
-    { test $? = 0 } || {
-        _failure "No valid password supplied for the new key." }
-
-    tmp_create
-    newkeyfile=`tmp_new`
-    print -n - "$tomb_secret" > $newkeyfile
-
 
     # load the old key
     if option_is_set --tomb-old-pwd; then
         tomb_old_pwd="`option_value --tomb-old-pwd`"
         _verbose "tomb-old-pwd = $tomb_old_pwd"
-        ask_key_password "$oldkey" "$tomb_old_pwd"
+        ask_key_password "$tomb_old_pwd"
     else
-        ask_key_password "$oldkey"
+        ask_key_password
     fi
     { test $? = 0 } || {
         _failure "No valid password supplied for the old key." }
+    old_secret="$tomb_secret"
 
     # luksOpen the tomb (not really mounting, just on the loopback)
-    print -n - "$tomb_secret" | \
+    print -n - "$old_secret" | \
         cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
     { test $? = 0 } || {
         _failure "Unexpected error in luksOpen." }
 
-    print -n - "$tomb_secret"| \
-        cryptsetup --key-file - luksChangeKey "$nstloop" "$newkeyfile"
+    load_key
+    { test $? = 0 } || {
+        _failure "Aborting operations: error loading new key from -k" }
+    new_key="$tomb_key"
+    new_key_file="$tomb_key_file"
+    _message "New key: $new_key_file"
+
+    if option_is_set --tomb-pwd; then
+        tomb_new_pwd="`option_value --tomb-pwd`"
+        _verbose "tomb-pwd = $tomb_new_pwd"
+        ask_key_password "$tomb_new_pwd"
+    else
+        ask_key_password
+    fi
+    { test $? = 0 } || {
+        _failure "No valid password supplied for the new key." }
+    new_secret="$tomb_secret"
+
+    # danger zone: due to cryptsetup limitations, in setkey we need
+    # to write the bare unencrypted key on the tmpfs.
+    tmp_create
+    new_secret_file=`tmp_new`
+    print -n - "$new_secret" >> $new_secret_file
+    print -n - "$old_secret"| \
+        cryptsetup --key-file - luksChangeKey "$nstloop" "$new_secret_file"
     { test $? = 0 } || {
         _failure "Unexpected error in luksChangeKey." }
 
-    ${=WIPE} "$newkeyfile"
+    unset old_key
+    unset new_key
 
     cryptsetup luksClose "${mapper}"
     { test $? = 0 } || {
         _failure "Unexpected error in luksClose." }
 
     _success "Succesfully changed key for tomb: $2"
-    _message "The new key is: $newkey"
+    _message "The new key is: $new_key_file"
 
     return 0
 }
@@ -1535,10 +1544,10 @@ mount_tomb() {
 
     # load_key called here
     load_key
-    tombkey="$tomb_key_file"
+    ########
 
     { test $? = 0 } || {
-        _failure "Aborting operations: error loading key $tombkey"    }
+        _failure "Aborting operations: error loading key $tomb_key_file"    }
 
     if [ "$2" = "" ]; then
         tombmount=/media/${tombfile}
@@ -1588,7 +1597,7 @@ mount_tomb() {
 
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
     _verbose "dev mapper device: $mapper"
-    _verbose "Tomb key: $tombkey"
+    _verbose "Tomb key: $tomb_key_file"
 
     # take the name only, strip extensions
     _verbose "Tomb name: $tombname (to be engraved)"
@@ -2077,11 +2086,10 @@ resize_tomb() {
     fi
     # $1 is the tomb file path
 
-    local newtombsize="`option_value -s`"
+    newtombsize="`option_value -s`"
     { test "$newtombsize" = "" } && {
         _failure "Aborting operations: new size was not specified, use -s" }
 
-    local c tombpass tombkey
 
     tombdir=`dirname $1`
     tombfile=`basename $1`
@@ -2089,10 +2097,7 @@ resize_tomb() {
 
     # load key from options or file
     load_key
-    tombkey="$tomb_key_file"
-    # make sure to call drop_key later
-    { test -r "$tombkey" } || {
-        _failure "Aborting operations: key not found, use -k" }
+    ########
 
     local oldtombsize=$(( `stat -c %s "$1" 2>-` / 1048576 ))
     local mounted_tomb=`mount -l |
