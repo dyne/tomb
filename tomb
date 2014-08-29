@@ -321,24 +321,24 @@ is_valid_tomb() {
         _warning "Tomb file is missing from arguments."; return 1 }
     # file checks
     { test -r "$1" } || {
-        _warning "Tomb file not found: $1"; return 1 }
+        _warning "Tomb file not found: ::1 tomb file::" $1; return 1 }
     { test -f "$1" } || {
-        _warning "Tomb file is not a regular file: $1"; return 1 }
+        _warning "Tomb file is not a regular file: ::1 tomb file::" $1; return 1 }
     { test -s "$1" } || {
-        _warning "Tomb file is empty (zero length): $1"; return 1 }
+        _warning "Tomb file is empty (zero length): ::1 tomb file::" $1; return 1 }
     { test -w "$1" } || {
-        _warning "Tomb file is not writable: $1"; return 1 }
+        _warning "Tomb file is not writable: ::1 tomb file::" $1; return 1 }
 
     # check file type (if its a Luks fs)
     file "$1" | grep -i "luks encrypted file" > /dev/null || {
-        _warning "File is not yet a tomb: $1" }
+        _warning "File is not yet a tomb: ::1 tomb file::" $1}
 
     # check if its already open
     tombfile=`basename $1`
     tombname=${tombfile%%\.*}
     mount -l | grep "${tombfile}.*\[$tombname\]$" > /dev/null
     { test $? = 0 } && {
-        _warning "Tomb is currently in use: $tombname"; return 1 }
+        _warning "Tomb is currently in use: ::1 tomb name::" $tombname; return 1 }
     _message "Valid tomb file found: $1"
     return 0
 }
@@ -546,7 +546,7 @@ function _success yes() {
 }
 
 function _warning  no() {
-    option_is_set -q || _msg warning "$1"
+    option_is_set -q || _msg warning "$1" "$2" "$3" "$4"
     return 1
 }
 
@@ -985,7 +985,7 @@ bury_key() {
 
     file $imagefile | grep -i JPEG > /dev/null
     if [ $? != 0 ]; then
-       _warning "Encode failed: $imagefile is not a jpeg image."
+       _warning "Encode failed: ::1 image file:: is not a jpeg image." $imagefile
        return 1
     fi
 
@@ -1067,7 +1067,7 @@ exhume_key() {
 
     { test "$destkey" = "-" } || {
         if [[ -s "$destkey" ]]; then
-            _warning "File exists: $destkey"
+            _warning "File exists: ::1 tomb key::" $tombkey
             { option_is_set -f } || {
                 _warning "Make explicit use of --force to overwrite."
                 _failure "Refusing to overwrite file. Operation aborted." }
@@ -1101,7 +1101,7 @@ exhume_key() {
     if [ $res = 0 ]; then
         _success "Key succesfully exhumed to ::1 key::." $destkey
     else
-        _warning "Nothing found in ${imagefile}."
+        _warning "Nothing found in ::1 image file::" $imagefile
     fi
 
     return $res
@@ -1374,7 +1374,7 @@ lock_tomb_with_key() {
 
     if [ $? != 0 ]; then
         _warning "Tomb format returned an error."
-        _warning "Your tomb ${tombfile} may be corrupted."
+        _warning "Your tomb ::1 tomb file:: may be corrupted." $tombfile
     fi
 
     # sync
@@ -1533,7 +1533,7 @@ mount_tomb() {
     file ${tombdir}/${tombfile} | \
         grep -i 'luks encrypted file' 2>&1 > /dev/null
     if [ $? != 0 ]; then
-        _warning "$1 is not a valid tomb file, operation aborted."
+        _warning "::1 tomb file:: is not a valid tomb file, operation aborted." $1
         return 1
     fi
     tombname=${tombfile%%\.*}
@@ -1556,7 +1556,7 @@ mount_tomb() {
     # check if its already open
     mount -l | grep "${tombfile}.*\[$tombname\]$" 2>&1 > /dev/null
     if [ $? = 0 ]; then
-        _warning "$tombname is already open."
+        _warning "::1 tomb name:: is already open." $tombname
         _message "Here below its status is reported:"
         list_tombs ${tombname}
         return 0
@@ -1570,7 +1570,7 @@ mount_tomb() {
     cryptsetup isLuks ${nstloop}
     if [ $? != 0 ]; then
         # is it a LUKS encrypted nest? see cryptsetup(1)
-        _warning "$tombfile is not a valid Luks encrypted storage file."
+        _warning "::1 tomb file:: is not a valid Luks encrypted storage file." $tombfile
         return 1
     fi
     _message "This tomb is a valid LUKS encrypted device."
@@ -1711,9 +1711,9 @@ exec_safe_bind_hooks() {
             return 1
         fi
         if [ ! -r "$HOME/${maps[$dir]}" ]; then
-            _warning "bind-hook target not existent, skipping $HOME/${maps[$dir]}"
+            _warning "bind-hook target not existent, skipping ::1 home::/::2 subdir::" $HOME ${maps[$dir]}
         elif [ ! -r "$MOUNTPOINT/$dir" ]; then
-            _warning "bind-hook source not found in tomb, skipping ${MOUNTPOINT}/${dir}"
+            _warning "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::" $MOUNTPOINT $dir
         else
             mount -o bind,$MOUNTOPTS $MOUNTPOINT/$dir $HOME/${maps[$dir]}
             mounted+=("$HOME/${maps[$dir]}")
@@ -2064,7 +2064,7 @@ search_tombs() {
             swish-search -w ${=@} -f $tombmount/.swish -H0 }
 
         else
-            _warning "Skipping tomb $tombname: not indexed."
+            _warning "Skipping tomb ::1 tomb name::: not indexed." $tombname
             _warning "Run 'tomb index' to create indexes."
         fi
     done
@@ -2209,7 +2209,7 @@ umount_tomb() {
         _verbose "Mapper: $mapper"
 
         { test -e "$mapper" } && {
-            _warning "Tomb not found: $1"
+            _warning "Tomb not found: ::1 tomb file::" $1
             _warning "Please specify an existing tomb."
             return 0 }
 
@@ -2217,7 +2217,7 @@ umount_tomb() {
             _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" $tombname $tombmount
             _message "Kill all processes busy inside the tomb."
             if ! slam_tomb "$tombmount"; then
-                _warning "Cannot slam the tomb $tombname"
+                _warning "Cannot slam the tomb ::1 tomb name::" $tombname
                 return 1
             fi
         else
@@ -2236,12 +2236,12 @@ umount_tomb() {
                     _success "Slamming tomb: killing all processes using this hook."
                     slam_tomb "$bind_mount"
                     if [[ $? == 1 ]]; then
-                        _warning "Cannot slam the bind hook $bind_mount"
+                        _warning "Cannot slam the bind hook ::1 hook::" $bind_mount
                         return 1
                     fi
                     umount $bind_mount
                 else
-                    _warning "Tomb bind hook $bind_mount is busy, cannot close tomb."
+                    _warning "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount
                 fi
             fi
         done
@@ -2262,7 +2262,7 @@ umount_tomb() {
 
         cryptsetup luksClose $mapper
         { test $? = 0 } || {
-            _warning "Error occurred in cryptsetup luksClose ${mapper}"
+            _warning "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper
             return 1 }
 
         losetup -d "/dev/$tombloop"
@@ -2388,7 +2388,7 @@ main() {
     fi
 
     if [[ -z ${(k)subcommands_opts[$subcommand]} ]]; then
-        _warning "There's no such command \"$subcommand\"."
+        _warning "There's no such command \"::1 subcommand::\"." $subcommand
         _failure "Please try -h for help." 127
 #        _failure "Subcommand '$subcommand' doesn't exist" 127
     fi
@@ -2553,7 +2553,7 @@ EOF
             usage
             ;;
         *)
-            _warning "Command \"$subcommand\" not recognized."
+            _warning "Command \"::1 subcommand::\" not recognized." $subcommand
             _message "Try -h for help."
             return 1
             ;;
