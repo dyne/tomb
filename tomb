@@ -541,7 +541,7 @@ function _verbose xxx() {
 }
 
 function _success yes() {
-    option_is_set -q || _msg success "$1"
+    option_is_set -q || _msg success "$1" "$2" "$3" "$4"
     return 0
 }
 
@@ -836,7 +836,7 @@ change_passwd() {
     tmp_create
     tmpnewkey=`tmp_new`
 
-    _success "Changing password for $keyfile"
+    _success "Changing password for ::1 key file::" $keyfile
 
 
     if option_is_set --tomb-old-pwd; then
@@ -925,7 +925,7 @@ gen_key() {
             # --kdf takes one parameter: iter time (on present machine) in seconds
             local -i microseconds
             microseconds=$(( itertime * 10000 ))
-            _success "Using KDF, iterations: $microseconds"
+            _success "Using KDF, iterations: ::1 microseconds::" $microseconds
             _message "generating salt"
             pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
             _message "calculating iterations"
@@ -989,7 +989,7 @@ bury_key() {
        return 1
     fi
 
-    _success "Encoding key $tombkey inside image $imagefile"
+    _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $tombkey $imagefile
     _message "Please confirm the key password for the encoding"
     # We ask the password and test if it is the same encoding the
     # base key, to insure that the same password is used for the
@@ -1022,7 +1022,7 @@ bury_key() {
        _warning "Encoding error: steghide reports problems."
        res=1
     else
-       _success "Tomb key encoded succesfully into image ${imagefile}"
+       _success "Tomb key encoded succesfully into image ::1 image file::" $imagefile
        res=0
     fi
 
@@ -1099,7 +1099,7 @@ exhume_key() {
 
     [[ "$destkey" = "-" ]] && { destkey="stdout" }
     if [ $res = 0 ]; then
-        _success "Key succesfully exhumed to ${destkey}."
+        _success "Key succesfully exhumed to ::1 key::." $destkey
     else
         _warning "Nothing found in ${imagefile}."
     fi
@@ -1117,7 +1117,7 @@ engrave_key() {
     keyname=`basename $tombkey`
     pngname="$keyname.qr.png"
 
-    _success "Rendering a printable QRCode for key: $tombkey"
+    _success "Rendering a printable QRCode for key: ::1 tomb key::" $tombkey
     # we omit armor strings to save space
     awk '
 /^-----/ {next}
@@ -1190,7 +1190,7 @@ forge_key() {
 
     # here the global var tomb_secret contains the nude secret
 
-    _success "Choose the  password of your key: ${tomb_key_file}"
+    _success "Choose the  password of your key: ::1 tomb key::" $tomb_key_file
     _message "(You can also change it later using 'tomb passwd'.)"
     touch ${tomb_key_file}
     chown ${_uid}:${_gid} ${tomb_key_file}
@@ -1258,7 +1258,7 @@ dig_tomb() {
         return 1
     fi
 
-    _success "Creating a new tomb in ${tombdir}/${tombfile}"
+    _success "Creating a new tomb in ::1 tomb dir::/::2 tomb file::" $tombdir $tombfile
 
     _message "Generating ${tombfile} of ${tombsize}MiB"
     # we will first touch the file and set permissions: this way, even if interrupted, permissions are right
@@ -1276,7 +1276,7 @@ dig_tomb() {
         _failure "Error creating the tomb ${tombdir}/${tombfile}, operation aborted."
     fi
 
-    _success "Done digging $tombname"
+    _success "Done digging ::1 tomb name::" $tombname
     _message "Your tomb is not yet ready, you need to forge a key and lock it:"
     _message "tomb forge ${tombname}.tomb.key"
     _message "tomb lock ${tombname}.tomb -k ${tombname}.tomb.key"
@@ -1349,7 +1349,7 @@ lock_tomb_with_key() {
     { test $? = 0 } || {
         _failure "No valid password supplied." }
 
-    _success "Locking ${tombfile} with ${tombkey}"
+    _success "Locking ::1 tomb file:: with ::2 tomb key::" $tombfile $tombkey
 
     _message "Formatting Luks mapped device."
     print -n - "$tomb_secret" | \
@@ -1382,7 +1382,7 @@ lock_tomb_with_key() {
     cryptsetup luksClose tomb.tmp
 
     _message "Done locking $tombname using Luks dm-crypt ${create_cipher}"
-    _success "Your tomb is ready in ${tombdir}/${tombfile} and secured with key ${tombkey}"
+    _success "Your tomb is ready in ::1 tomb dir::/::2 tomb file:: and secured with key ::3 tomb key::" $tombdir $tombfile $tombkey
 
 }
 
@@ -1413,7 +1413,7 @@ change_tomb_key() {
     old_key_file="$tomb_key_file"
 
     # we have everything, prepare to mount
-    _success "Changing lock on tomb $tombname"
+    _success "Changing lock on tomb ::1 tomb name::" $tombname
     _message "Old key: $old_key_file"
 
     # render the mapper
@@ -1475,7 +1475,7 @@ change_tomb_key() {
     { test $? = 0 } || {
         _failure "Unexpected error in luksClose." }
 
-    _success "Succesfully changed key for tomb: $2"
+    _success "Succesfully changed key for tomb: ::1 tomb file::" $2
     _message "The new key is: $new_key_file"
 
     return 0
@@ -1506,7 +1506,7 @@ create_tomb() {
     ${TOMBEXEC} lock ${tombdir}/${tombfile} -k ${tombdir}/${tombfile}.key
     { test $? = 0 } || { _failure "Failed to lock tomb with key, operation aborted." }
 
-    _success "Tomb $tombname succesfully created."
+    _success "Tomb ::1 tomb name:: succesfully created." $tombname
     ls -l ${tombfile}*
 }
 
@@ -1562,7 +1562,7 @@ mount_tomb() {
         return 0
     fi
 
-    _success "Opening $tombfile on $tombmount"
+    _success "Opening ::1 tomb file:: on ::2 mount point::" $tombfile $tombmount
 
     lo_mount "${tombdir}/${tombfile}"
     nstloop=`lo_new`
@@ -1624,7 +1624,7 @@ mount_tomb() {
     /cipher:/  {print $2}
     /keysize:/ {print $2}
     /device:/  {print $2}'`)
-    _success "Success unlocking tomb $tombname"
+    _success "Success unlocking tomb ::1 tomb name::" $tombname
     _verbose "Key size is $tombstat[2] for cipher $tombstat[1]"
 
     _message "Checking filesystem via $tombstat[3]"
@@ -1640,7 +1640,8 @@ mount_tomb() {
     chown ${_uid}:${_gid} ${tombmount}
     chmod 0711 ${tombmount}
 
-    _success "Success opening $tombfile on $fg_bold[white]$tombmount$fg_no_bold[white]"
+    # TODO: Fix string
+    _success "Success opening ::1 tomb file:: on $fg_bold[white]::2 mount point::$fg_no_bold[white]" $tombfile $tombmount
 
     # print out when was opened the last time, by whom and where
     { test -r ${tombmount}/.last } && {
@@ -1732,7 +1733,7 @@ exec_safe_post_hooks() {
     # make encrypted executables.
     cat ${mnt}/post-hooks | head -n1 | grep '^#!/'
     if [ $? = 0 ]; then
-        _success "Post hooks found, executing as user $SUDO_USER."
+        _success "Post hooks found, executing as user ::1 user name::." $SUDO_USER
         exec_as_user ${mnt}/post-hooks "$2" "$1"
     fi
 }
@@ -2043,7 +2044,8 @@ search_tombs() {
     if [ ${#mounted_tombs} = 0 ]; then
         _failure "I can't see any open tomb, may they all rest in peace."; fi
 
-    _success "Searching for: $fg_bold[white]${(f)@}$fg_no_bold[white]"
+    # TODO: Fix string
+    _success "Searching for: $fg_bold[white]::1::$fg_no_bold[white]" ${(f)@}
     for t in ${mounted_tombs}; do
         _verbose "Checking for index: ${t}"
         mapper=`basename ${t[(ws:;:)1]}`
@@ -2212,7 +2214,7 @@ umount_tomb() {
             return 0 }
 
         if [ $SLAM ]; then
-            _success "Slamming tomb $tombname mounted on $tombmount"
+            _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" $tombname $tombmount
             _message "Kill all processes busy inside the tomb."
             if ! slam_tomb "$tombmount"; then
                 _warning "Cannot slam the tomb $tombname"
@@ -2265,7 +2267,7 @@ umount_tomb() {
 
         losetup -d "/dev/$tombloop"
 
-        _success "Tomb $tombname closed: your bones will rest in peace."
+        _success "Tomb ::1 tomb name:: closed: your bones will rest in peace." $tombname
 
     done # loop across mounted tombs
 
