@@ -1,18 +1,23 @@
 
 Tomb is designed and written by Denis Roio aka Jaromil.
 
-Tomb includes code by Anathema, Boyska and Hellekin O. Wolf.
+Tomb includes code by Anathema, Boyska, Hellekin O. Wolf and GDrooid.
 
-Tomb's artwork is contributed by Jordi aka Mon Mort
+Tomb's artwork is contributed by Jordi aka Mon Mort.
 
-Testing, reviews and documentation are contributed by Dreamer,
-Shining, Mancausoft, Asbesto Molesto, Nignux, Vlax, Reiven and
-GDrooid.
+Gettext internationalization and Spanish translation is contributed by
+GDrooid, French translation by Hellekin, Russian translation by fsLeg,
+German translation by x3nu.
 
-Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth
+Testing, reviews and documentation are contributed by Dreamer, Shining
+the Translucent, Mancausoft, Asbesto Molesto, Nignux, Vlax, The Grugq,
+Reiven, GDrooid and the Linux Action Show!
+
+Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth.
 
 Tomb includes an implementation of the "Password-Based Key Derivation
-Function v2" based on GCrypt and written by by Anthony Thyssen
+Function v2" based on GCrypt and written by Anthony Thyssen.
 
-Tomb's developers can be contacted via the "crypto" mailinglist on
-http://lists.dyne.org or on IRC https://irc.dyne.org channel #dyne
+Tomb's developers can be contacted via GitHub issues on
+https://www.github.com/dyne/Tomb or over IRC https://irc.dyne.org
+channel **#dyne**.

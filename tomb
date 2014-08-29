@@ -40,8 +40,8 @@
 
 # {{{ Global variables
 
-VERSION=1.5.3
-DATE="Jun/2014"
+VERSION=1.6
+DATE="Sept/2014"
 TOMBEXEC=$0
 typeset -a OLDARGS
 for arg in ${argv}; do OLDARGS+=($arg); done
@@ -1483,18 +1483,14 @@ change_tomb_key() {
 # backward compatibility
 create_tomb() {
     _verbose "create_tomb(): ${=@} ${=OLDARGS}"
-    if ! [ $1 ]; then
+    [[ "$1" = "" ]] && {
         _warning "No tomb name specified for creation."
-        return 1
-    fi
+        return 1 }
 
-
-    { test -r "$1" } && {
-        _warning "Creating this tomb would overwrite an existing file. Operation aborted."
-        _failure "`ls -lh $1`"    }
-
-    { test $? = 0 } || { _failure "Failed to dig tomb, operation aborted." }
-
+    { test -s "$1" } && {
+        _warning "Creating this tomb would overwrite an existing file."
+        ls -lh "$1"
+        _failure " Operation aborted." }
 
     tombfile=`basename $1`
     tombdir=`dirname $1`

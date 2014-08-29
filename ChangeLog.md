@@ -1,5 +1,16 @@
 # Tomb ChangeLog
 
+## 1.6
+### September 2014
+
+The way secrets are handled internally has been refactored to avoid
+writing anything on the filesystem, improving security and speed.
+Steganography functions have fixes and improved usability: it is now
+possible to use an image directly as key i.e. `tomb open -k
+image.jpg`. Four translations have been contributed: Spanish, French,
+Russian and German.
+
+
 ## 1.5.3
 ### June 2014
 

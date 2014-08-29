@@ -12,11 +12,14 @@
     '    "*88888888*      'Y"         `~    "    `"`    `%888*%"
             ^"***"`                                        "`
 
-*A minimalistic commandline tool to manage encrypted volumes*
+*A minimalistic commandline tool to manage encrypted volumes* aka **The Crypto Undertaker**
 
-Latest version: **1.5.3**
+Latest stable version: **1.5.3**
 
 Updates on website: http://dyne.org/software/tomb
+
+Get the stable .tar.gz signed release for production use!
+Download it from https://files.dyne.org/tomb
 
 # What is Tomb, the crypto undertaker
 
@@ -28,22 +31,6 @@ At present time, Tomb consists of a simple shell script (Zsh) using
 standard filesystem tools (GNU) and the cryptographic API of the Linux
 kernel (cryptsetup and LUKS). Tomb can also produce machine parsable
 output to facilitate its use inside graphical applications.
-
-# Use stable releases in production
-
-Anyone planning to use Tomb to store and access secrets should not use
-the latest development version in Git, but use instead the .tar.gz
-release on https://files.dyne.org/tomb . The stable version will
-always insure backward compatibility with older tombs: we make sure it
-creates sane tombs and keys by running various tests before releasing
-it. The development version in Git might introduce sudden bugs and is
-not granted to produce backward or forward compatible tombs and keys.
-Only developers and testers should use the Git version to report bugs,
-test new features and develop patches.
-
-So be warned: do not use the latest Git version in production
-environments, but use a stable release versioned and packed as
-tarball on https://files.dyne.org/tomb
 
 # How does it works
 
@@ -98,9 +85,25 @@ military grade use, where the integrity of informations stored depend
 from the user's behaviour and the strenght of a standard AES-256
 (XTS plain) encryption algorithm.
 
+# Use stable releases in production
+
+Anyone planning to use Tomb to store and access secrets should not use
+the latest development version in Git, but use instead the .tar.gz
+release on https://files.dyne.org/tomb . The stable version will
+always insure backward compatibility with older tombs: we make sure it
+creates sane tombs and keys by running various tests before releasing
+it. The development version in Git might introduce sudden bugs and is
+not granted to produce backward or forward compatible tombs and keys.
+Only developers and testers should use the Git version to report bugs,
+test new features and develop patches.
+
+So be warned: do not use the latest Git version in production
+environments, but use a stable release versioned and packed as
+tarball on https://files.dyne.org/tomb
+
 # How can you help
 
-Donations are always welcome, see https://dyne.org/donate
+Donations are always welcome, see https://www.dyne.org/donate
 
 Translations are also needed: they can be contributed via this website
 https://poeditor.com/join/project?hash=33bdefea2e46b26f512a0caae55fbbb5
@@ -112,10 +115,9 @@ to be further implemented.
 
 For the bleeding edge visit https://github.com/dyne/Tomb
 
-Tomb's developers can be contacted via the "crypto" mailinglist on
-http://lists.dyne.org or via IRC on https://irc.dyne.org channel #dyne
+Tomb's developers can be contacted using the issues on GitHub or over
+IRC on https://irc.dyne.org channel **#dyne**
 
 Some enthusiastic ideas are in the [TODO](doc/TODO.org) file.
 
 Information on developers involved is found in the [AUTHORS](AUTHORS.md) file.
-

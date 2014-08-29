@@ -45,10 +45,10 @@ Tomb can use some optional tools to extend its functionalities:
 
 executable | function
 ---------- | ---------------------------------------------------
-  dcfldd   | show progress while executing long operations
+  dcfldd   | show progress while digging tombs and keys
   steghide | bury and exhume keys inside images
   resizefs | extend the size of existing tomb volumes
-  qrencode | engrave keys into printable qrcode tags
+  qrencode | engrave keys into printable qrcode sheets
   mlocate  | have fast search of file names inside tombs
   swish++  | have fast search of file contents inside tombs
   unoconv  | have fast search of contents in PDF and DOC files
@@ -58,12 +58,40 @@ the packages provided by each distribution.
 
 Once any of the above is installed Tomb will find the tool automatically.
 
-## Install Tomb extras
+## Install Tomb Extras
 
 Tomb comes with a bunch of extra tools that contribute to enhance its
 functionality or integrate it into particular system environments.
 
-### Install translations
+### extras/gtk-tray
+
+The Gtk3 tray adds a nifty tomb skull into the desktop toolbar: one can use it to close, slam and explore the open tomb represented by it.
+
+To have it enter `extras/gtk-tray` then
+
+ 1- make sure libnotify and gtk+-3.0 dev packages are available
+ 2- run `make` inside the directory to build `tomb-gtk-tray`
+ 3- optionally copy tomb-gtk-tray into your PATH (/usr/local/bin)
+ 4- start `tomb-gtk-tray tombname` for each tomb
+
+One can include the launch of tomb-gtk-tray from scripts.
+
+### extras/kdf-keys
+
+The KDF wrapper programs allows one to use KDF rounds on passwords in order to obstruct dictionary based and similar brute-forcing attacks.
+
+In case an attacker comes in possession of both a tomb and its key, the easy to memorize password can be guessed by rapidly trying different combinations. With KDF every try will require a significant amount of computation that will slow down the process avoiding tight loops and in fact making such attacks very onerous and almost impossible.
+
+To have it enter `extras/kdf-keys` then
+
+ 1- make sure libgcrypt dev packages are available
+ 2- run `make` inside the directory to build tomb-kdb-* executables
+ 3- optionally copy tomb-kdb-* into your PATH (/usr/local/bin)
+ 4- always use tomb using the `--kdf` flag: forge, lock, open etc.
+
+In case one creates and uses KDF keys then the --kdf flag must be always present for tomb to work correctly. It might be handy to create an alias tomb=`tomb --kdf`.
+
+### extras/po (translations)
 
 There are translations available for Tomb. If you wish to install them
 navigate to extras/po and run 'make install' as root:
