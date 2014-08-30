@@ -347,7 +347,7 @@ is_valid_tomb() {
 lo_mount() {
     tpath="$1"
     is_valid_tomb "$tpath" || {
-        _failure "Loopback mount called on invalid tomb: $tpath" }
+        _failure "Loopback mount called on invalid tomb: ::1 path::" $tpath }
 
     # check if we have support for loop mounting
     losetup -f >& -
@@ -551,8 +551,8 @@ function _warning  no() {
 }
 
 function _failure die() {
-    typeset -i exitcode=${2:-1}
-    option_is_set -q || _msg failure "$1"
+    typeset -i exitcode=${exitv:-1}
+    option_is_set -q || _msg failure "$1" "$2" "$3" "$4"
     # be sure we forget the secrets we were told
     exit $exitcode
 }
@@ -583,7 +583,7 @@ progress() {
 check_bin() {
     # check for required programs
     for req in cryptsetup pinentry sudo gpg; do
-        command -v $req >& - || _failure "Cannot find $req. It's a requirement to use Tomb, please install it." 1
+        command -v $req >& - || exitv=1 _failure "Cannot find ::1::. It's a requirement to use Tomb, please install it." $req
     done
 
     export PATH=/sbin:/usr/sbin:$PATH
@@ -752,7 +752,7 @@ get_lukskey() {
                 _password=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2>- <<<$_password)
                 ;;
             *)
-                _failure "No suitable program for KDF `cut -f 3 <<<$firstline`."
+                _failure "No suitable program for KDF ::1 program::." $(cut -f 3 <<<$firstline)
                 unset _password
                 return 1
                 ;;
@@ -979,7 +979,7 @@ BEGIN { ciphers=0 }
 bury_key() {
     load_key
     [[ $? = 0 ]] || {
-       _failure "Bury failed for invalid key: $tomb_key_file" }
+       _failure "Bury failed for invalid key: ::1 key::" $tomb_key_file }
 
     imagefile=$1
 
@@ -1049,10 +1049,10 @@ exhume_key() {
     }
 
     { test -r "$imagefile" } || {
-        _failure "Exhume failed, image file not found: $imagefile" }
+        _failure "Exhume failed, image file not found: ::1 image file::" $imagefile }
 
     [[ `file "$imagefile"` =~ "JP.G" ]] || {
-        _failure "Exhume failed: $imagefile is not a jpeg image." }
+        _failure "Exhume failed: ::1 image file:: is not a jpeg image." $imagefile }
 
     # when a password is passed as argument then always print out
     # the exhumed key on stdout without further checks (internal use)
@@ -1273,7 +1273,7 @@ dig_tomb() {
     if [ $? = 0 -a -e ${tombdir}/${tombfile} ]; then
         _message " `ls -lh ${tombdir}/${tombfile}`"
     else
-        _failure "Error creating the tomb ${tombdir}/${tombfile}, operation aborted."
+        _failure "Error creating the tomb ::1 tomb dir::/::2 tomb file::, operation aborted." $tombdir $tombfile
     fi
 
     _success "Done digging ::1 tomb name::" $tombname
@@ -1403,7 +1403,7 @@ change_tomb_key() {
     cryptsetup isLuks ${nstloop}
     # is it a LUKS encrypted nest? we check one more time
     { test $? = 0 } || {
-        _failure "Not a valid LUKS encrypted volume: $2" }
+        _failure "Not a valid LUKS encrypted volume: ::1 volume::" $2 }
 
 
     load_key "$1"
@@ -1543,7 +1543,7 @@ mount_tomb() {
     ########
 
     { test $? = 0 } || {
-        _failure "Aborting operations: error loading key $tomb_key_file"    }
+        _failure "Aborting operations: error loading key ::1 key::" $tombkey }
 
     if [ "$2" = "" ]; then
         tombmount=/media/${tombfile}
@@ -1749,7 +1749,7 @@ list_tombs() {
     # list all open tombs
     mounted_tombs=(`list_tomb_mounts $1`)
     { test ${#mounted_tombs} = 0 } && {
-        _failure "I can't see any ${1:-open} tomb, may they all rest in peace." }
+        _failure "I can't see any ::1 status:: tomb, may they all rest in peace." ${1:-open} }
 
     for t in ${mounted_tombs}; do
         mapper=`basename ${t[(ws:;:)1]}`
@@ -1923,7 +1923,7 @@ index_tombs() {
 
     mounted_tombs=(`list_tomb_mounts $1`)
     { test ${#mounted_tombs} = 0 } && {
-        if [ $1 ]; then _failure "There seems to be no open tomb engraved as [$1]"
+        if [ $1 ]; then _failure "There seems to be no open tomb engraved as [::1::]" $1
         else _failure "I can't see any open tomb, may they all rest in peace."
         fi
     }
@@ -2081,7 +2081,7 @@ resize_tomb() {
     if ! [ $1 ]; then
         _failure "No tomb name specified for resizing."
     elif ! [ -r "$1" ]; then
-        _failure "Cannot find $1"
+        _failure "Cannot find ::1::" $1
     fi
     # $1 is the tomb file path
 
@@ -2103,11 +2103,11 @@ resize_tomb() {
         awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
 
     if [ "$mounted_tomb" ]; then
-        _failure "The tomb $tombname is open, to resize it it needs to be closed."
+        _failure "The tomb ::1 tomb name:: is open, to resize it it needs to be closed." $tombname
     fi
 
     if ! [ "$newtombsize" ] ; then
-        _failure "You must specify the new size of $tombname"
+        _failure "You must specify the new size of ::1 tomb name::" $tombname
     elif [[ $newtombsize != <-> ]]; then
         _failure "Size is not an integer."
     elif [ "$newtombsize" -le "$oldtombsize" ]; then
@@ -2122,7 +2122,7 @@ resize_tomb() {
     ${=DD} if=/dev/urandom bs=1048576 count=${delta} >> ${tombdir}/${tombfile}
 
     { test $? = 0 } || {
-        _failure "Error creating the extra resize $tmp_resize, operation aborted." }
+        _failure "Error creating the extra resize ::1 size::, operation aborted." $tmp_resize }
 
     if option_is_set --tomb-pwd; then
         tomb_pwd="`option_value --tomb-pwd`"
@@ -2149,17 +2149,17 @@ resize_tomb() {
 
     cryptsetup resize "${mapper}"
     if [ $? != 0 ]; then
-        _failure "cryptsetup failed to resize $mapper"
+        _failure "cryptsetup failed to resize ::1 mapper::" $mapper
     fi
 
     e2fsck -p -f /dev/mapper/${mapper}
     if [ $? != 0 ]; then
-        _failure "e2fsck failed to check $mapper"
+        _failure "e2fsck failed to check ::1 mapper::" $mapper
     fi
 
     resize2fs /dev/mapper/${mapper}
     if [ $? != 0 ]; then
-        _failure "resize2fs failed to resize $mapper"
+        _failure "resize2fs failed to resize ::1 mapper::" $mapper
     fi
 
     sleep 1 # needs to settle a bit
@@ -2389,8 +2389,7 @@ main() {
 
     if [[ -z ${(k)subcommands_opts[$subcommand]} ]]; then
         _warning "There's no such command \"::1 subcommand::\"." $subcommand
-        _failure "Please try -h for help." 127
-#        _failure "Subcommand '$subcommand' doesn't exist" 127
+        exitv=127 _failure "Please try -h for help."
     fi
     argv=(${oldstar})
     unset oldstar
@@ -2403,7 +2402,7 @@ main() {
         zparseopts -M -E -D -Aopts ${cmd_opts}
         if [[ $? != 0 ]]; then
             _warning "Some error occurred during option processing."
-            _failure "See \"tomb help\" for more info." 127
+            exitv=127 _failure "See \"tomb help\" for more info."
         fi
     fi
     #build PARAM (array of arguments) and check if there are unrecognized options
@@ -2415,7 +2414,7 @@ main() {
             continue #it shouldnt be appended to PARAM
         elif [[ $arg[1] == '-'  ]]; then
             if [[ $ok == 0 ]]; then
-                _failure "Unrecognized option $arg for subcommand $subcommand" 127
+                exitv=127 _failure "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::" $arg $subcommand
             fi
         fi
         PARAM+=$arg
@@ -2432,7 +2431,7 @@ main() {
     if ! option_is_set --unsecure-dev-mode; then
         for opt in --sudo-pwd --tomb-pwd --use-urandom --tomb-old-pwd; do
             if option_is_set $opt; then
-                _failure "You specified option $opt, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsecure-dev-mode" 127
+                exitv=127 _failure "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsecure-dev-mode" $opt
             fi
         done
     fi
