@@ -35,22 +35,40 @@ msgstr ""
 EOF
 
     cat ../../tomb | awk '
-/(_verbose|xxx) ".*"$/ { sub( /^(_verbose|xxx)/ , "");
-		 print "#: _verbose"; shift; print "msgid " substr($0, index($0,$2)); print "msgstr \"\"\n" }
+/_verbose ".*"/ {
+    split($0, arr, "\"");
+    print "#: _verbose";
+    print "msgid \"" arr[2] "\"";
+    print "msgstr \"\"\n" }
 
-/(_success|yes) ".*"$/ { sub( /^(_success|yes)/ , "");
-		 print "#: _success"; print "msgid " substr($0, index($0,$2)); print "msgstr \"\"\n" }
+/_success ".*"/ {
+    split($0, arr, "\"");
+    print "#: _success";
+    print "msgid \"" arr[2] "\"";
+    print "msgstr \"\"\n" }
 
-/(_warning|no) ".*"$/ { sub( /^(_warning|no)/ , "");
-		 print "#: _warning"; print "msgid " substr($0, index($0,$2)); print "msgstr \"\"\n" }
+/_warning ".*"/ {
+    split($0, arr, "\"");
+    print "#: _warning";
+    print "msgid \"" arr[2] "\"";
+    print "msgstr \"\"\n" }
 
-/(_failure|die) ".*"$/ { sub( /^(_failure|die)/ , "");
-		 print "#: _failure"; print "msgid " substr($0, index($0,$2)); print "msgstr \"\"\n" }
+/_failure ".*"/ {
+    split($0, arr, "\"");
+    print "#: _failure";
+    print "msgid \"" arr[2] "\"";
+    print "msgstr \"\"\n" }
 
-/(_message|say) ".*"$/ { sub( /^(_message|say)/ , "");
-	      print "#: _message"; print "msgid " substr($0, index($0,$2)); print "msgstr \"\"\n" }
+/_message ".*"/ {
+    split($0, arr, "\"");
+    print "#: _message";
+    print "msgid \"" arr[2] "\"";
+    print "msgstr \"\"\n" }
 
-/(_message -n|act) ".*"$/ { sub( /^(_message -n|act)/ , "");
-	      print "#: _message -n"; print "msgid " substr($0, index($0,$2)); print "msgstr \"\"\n" }
+/_message -n ".*"/ {
+    split($0, arr, "\"");
+    print "#: _message -n";
+    print "msgid \"" arr[2] "\"";
+    print "msgstr \"\"\n" }
 '
 
