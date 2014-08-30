@@ -491,7 +491,7 @@ option_value() {
 
 # Messaging function with pretty coloring
 function _msg() {
-    local tmp_msg="$(gettext -s - "$2")"
+    local tmp_msg="$(gettext -s "$2")"
     local msg="${(S)${(S)${(S)tmp_msg//::3*::/$5}//::2*::/$4}//::1*::/$3}"
     local command="print -P"
     local progname="$fg[magenta]${TOMBEXEC##*/}$reset_color"

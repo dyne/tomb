@@ -423,7 +423,7 @@ msgid "Cannot generate encryption key."
 msgstr ""
 
 #: _success
-msgid "Choose the  password of your key: ::1 tomb key::"
+msgid "Choose the password of your key: ::1 tomb key::"
 msgstr ""
 
 #: _message

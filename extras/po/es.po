@@ -431,7 +431,7 @@ msgid "Cannot generate encryption key."
 msgstr "No se puede generar la clave de encriptación."
 
 #: _success
-msgid "Choose the  password of your key: ::1 tomb key::"
+msgid "Choose the password of your key: ::1 tomb key::"
 msgstr "Elige una contraseña para tu clave: ::1 clave::"
 
 #: _message
@@ -606,7 +606,7 @@ msgid ""
 "key ::3 tomb key::"
 msgstr ""
 "Tu tumba está preparada en ::1 directorio::/::2 tumba:: y asegurada con la "
-"clave ::1 clave::"
+"clave ::3 clave::"
 
 #: _message
 msgid "Commanded to reset key for tomb ::1 tomb name::"
@@ -854,10 +854,6 @@ msgstr ""
 
 #: _failure
 msgid "Index command needs 'mlocate' to be installed."
-msgstr ""
-
-#: _verbose
-msgid "$updatedbver"
 msgstr ""
 
 #: _failure
