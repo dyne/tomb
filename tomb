@@ -2116,7 +2116,7 @@ resize_tomb() {
 
     delta="$(( $newtombsize - $oldtombsize ))"
 
-    _message "Generating ::1 tomb file:: of MiB" $tombfile $newtombsize
+    _message "Generating ::1 tomb file:: of ::2 size::MiB" $tombfile $newtombsize
 
     _verbose "Data dump using ::1:: from /dev/urandom" ${DD[1]}
     ${=DD} if=/dev/urandom bs=1048576 count=${delta} >> ${tombdir}/${tombfile}

@@ -926,10 +926,6 @@ msgstr ""
 msgid "The new size must be greater then old tomb size."
 msgstr ""
 
-#: _message
-msgid "Generating ::1 tomb file:: of MiB"
-msgstr ""
-
 #: _failure
 msgid "Error creating the extra resize ::1 size::, operation aborted."
 msgstr ""
