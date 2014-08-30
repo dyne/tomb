@@ -172,18 +172,18 @@ tmp_new() {
 check_swap() {
     # Return 0 if NO swap is used, 1 if swap is used
     # Return 2 if swap(s) is(are) used, but ALL encrypted
-    local swaps="$(awk '/^\// { print $1 }' /proc/swaps 2>-)"
+    local swaps="$(awk '/^\// { print $1 }' /proc/swaps 2>/dev/null)"
     [[ -z "$swaps" ]] && return 0                # No swap partition is active
     # Check whether all swaps are encrypted, and return 2
     # If any of the swaps is not encrypted, we bail out and return 1.
     ret=1
     for s in $=swaps; do
         bone=`sudo file $s`
-        if `echo "$bone" | grep 'swap file' &>-`; then
+        if `echo "$bone" | grep 'swap file' &>/dev/null`; then
             # It's a regular (unencrypted) swap file
             ret=1
             break
-        elif `echo "$bone" | grep 'symbolic link' &>-`; then
+        elif `echo "$bone" | grep 'symbolic link' &>/dev/null`; then
             # Might link to a block
             ret=1
             if [ "/dev/mapper" = "${s%/*}" ]; then
@@ -194,7 +194,7 @@ check_swap() {
             else
                 break
             fi
-        elif `echo "$bone" | grep 'block special' &>-`; then
+        elif `echo "$bone" | grep 'block special' &>/dev/null`; then
             # Is a block
             ret=1
             is_crypt=`sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
@@ -250,7 +250,7 @@ ask_password() {
     title="Insert tomb password."
     if [ $2 ]; then title="$2"; fi
 
-    output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>- | tail -n +7
+    output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>/dev/null | tail -n +7
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE $title
@@ -287,7 +287,7 @@ check_priv() {
 
         if ! option_is_set --sudo-pwd; then
             if [ $? != 0 ]; then # if not then ask a password
-                cat <<EOF | pinentry 2>- | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
+                cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE Super user privileges required
@@ -305,7 +305,7 @@ EOF
     fi # are we root already
 
     # check if we have support for loop mounting
-    losetup -f >& -
+    losetup -f > /dev/null
     { test "$?" = "0" } || {
         _warning "Loop mount of volumes is not supported on this machine, this error"
         _warning "often occurs on VPS and kernels that don't provide the loop module."
@@ -332,7 +332,6 @@ is_valid_tomb() {
     { test -f "$1" } || {
         _warning "Tomb file is not a regular file: $1"; return 1 }
     # check file type (if its a Luks fs)
-
     file "$1" | grep -i "luks encrypted file" > /dev/null || {
         _warning "File is not yet a tomb: $1" }
 
@@ -352,7 +351,7 @@ lo_mount() {
     is_valid_tomb "$tpath" || {
         _failure "Loopback mount called on invalid tomb: $tpath" }
 
-    losetup -f >& -
+    losetup -f > /dev/null
     [[ $? = 0 ]] || {
         # if [ $? = 255 ]; then
         #     _failure "Too many tombs open. Please close any of them to open another tomb."
@@ -361,7 +360,7 @@ lo_mount() {
 
     _nstloop=`losetup -f` # get the number for next loopback device
 
-    losetup -f "$tpath" >& - # allocates the next loopback for our file
+    losetup -f "$tpath" > /dev/null # allocates the next loopback for our file
 
     tomb_loopdevs+=("$_nstloop") # add to array of lodevs used
 
@@ -585,33 +584,33 @@ progress() {
 check_bin() {
     # check for required programs
     for req in cryptsetup pinentry sudo gpg; do
-        command -v $req >& - || _failure "Cannot find $req. It's a requirement to use Tomb, please install it." 1
+        command -v $req > /dev/null || _failure "Cannot find $req. It's a requirement to use Tomb, please install it." 1
     done
 
     export PATH=/sbin:/usr/sbin:$PATH
 
     # which dd command to use
-    command -v dcfldd >& -
+    command -v dcfldd > /dev/null
     { test $? = 0 } && { DD="dcfldd statusinterval=1" }
 
     # which wipe command to use
-    command -v wipe >& - && WIPE="wipe -f -s" || WIPE="rm -f"
+    command -v wipe > /dev/null && WIPE="wipe -f -s" || WIPE="rm -f"
 
     # check for filesystem creation progs
-    command -v mkfs.ext4 >& - && \
+    command -v mkfs.ext4 > /dev/null && \
         MKFS="mkfs.ext4 -q -F -j -L" || \
         MKFS="mkfs.ext3 -q -F -j -L"
 
     # check for steghide
-    command -v steghide >& - || STEGHIDE=0
+    command -v steghide > /dev/null || STEGHIDE=0
     # check for resize
-    command -v e2fsck resize2fs >& - || RESIZER=0
+    command -v e2fsck resize2fs > /dev/null || RESIZER=0
     # check for KDF auxiliary tools
-    command -v tomb-kdb-pbkdf2 >& - || KDF=0
+    command -v tomb-kdb-pbkdf2 > /dev/null || KDF=0
     # check for Swish-E file content indexer
-    command -v swish-e >& - || SWISH=0
+    command -v swish-e > /dev/null || SWISH=0
     # check for QREncode for paper backups of keys
-    command -v qrencode >& - || QRENCODE=0
+    command -v qrencode > /dev/null || QRENCODE=0
 }
 
 # }}} - Commandline interaction
@@ -752,7 +751,7 @@ get_lukskey() {
         case `cut -d_ -f 3 <<<$firstline` in
             pbkdf2sha1)
                 pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
-                _password=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2>- <<<$_password)
+                _password=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2> /dev/null <<<$_password)
                 ;;
             *)
                 _failure "No suitable program for KDF `cut -f 3 <<<$firstline`."
@@ -964,7 +963,7 @@ EOF
 # prints an array of ciphers available in gnupg (to encrypt keys)
 list_gnupg_ciphers() {
     # prints an error if GnuPG is not found
-    which gpg >& - || _failure "gpg (GnuPG) is not found, Tomb cannot function without it."
+    which gpg > /dev/null || _failure "gpg (GnuPG) is not found, Tomb cannot function without it."
 
     ciphers=(`gpg --version | awk '
 BEGIN { ciphers=0 }
@@ -1677,7 +1676,7 @@ exec_safe_bind_hooks() {
     fi
     local MOUNTPOINT="${1}"
     local ME=${SUDO_USER:-$(whoami)}
-    local HOME=$(awk -v a="$ME" -F ':' '{if ($1 == a) print $6}' /etc/passwd 2>-)
+    local HOME=$(awk -v a="$ME" -F ':' '{if ($1 == a) print $6}' /etc/passwd 2>/dev/null)
     if [ $? -ne 0 ]; then
         _warning "How pitiful!  A tomb, and no HOME."
         return 1
@@ -1903,7 +1902,7 @@ BEGIN { main="" }
 # index files in all tombs for search
 # $1 is optional, to specify a tomb
 index_tombs() {
-    { command -v updatedb >& - } || {
+    { command -v updatedb > /dev/null } || {
         _failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
 
     updatedbver=`updatedb --version | grep '^updatedb'`
@@ -1925,8 +1924,8 @@ index_tombs() {
     _success "Creating and updating search indexes."
 
     # start the LibreOffice document converter if installed
-    { command -v unoconv >& - } && {
-        unoconv -l 2>- &
+    { command -v unoconv > /dev/null } && {
+        unoconv -l 2> /dev/null &
         _verbose "unoconv listener launched."
         sleep 1 }
 
@@ -2021,7 +2020,7 @@ EOF
     done
 }
 search_tombs() {
-    { command -v locate >& - } || {
+    { command -v locate > /dev/null } || {
         _failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
 
     updatedbver=`updatedb --version | grep '^updatedb'`
@@ -2094,7 +2093,7 @@ resize_tomb() {
     { test -r "$tombkey" } || {
         _failure "Aborting operations: key not found, use -k" }
 
-    local oldtombsize=$(( `stat -c %s "$1" 2>-` / 1048576 ))
+    local oldtombsize=$(( `stat -c %s "$1" 2>/dev/null` / 1048576 ))
     local mounted_tomb=`mount -l |
         awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
 
@@ -2273,20 +2272,20 @@ umount_tomb() {
 # Kill all processes using the tomb
 slam_tomb() {
     # $1 = tomb mount point
-    if [[ -z `fuser -m "$1" 2>-` ]]; then
+    if [[ -z `fuser -m "$1" 2> /dev/null` ]]; then
         return 0
     fi
     #Note: shells are NOT killed by INT or TERM, but they are killed by HUP
     for s in TERM HUP KILL; do
         _verbose "Sending $s to processes inside the tomb:"
         if option_is_set -D; then
-            ps -fp `fuser -m /media/a.tomb 2>-`|
+            ps -fp `fuser -m /media/a.tomb 2> /dev/null`|
             while read line; do
                 _verbose $line
             done
         fi
         fuser -s -m "$1" -k -M -$s
-        if [[ -z `fuser -m "$1" 2>-` ]]; then
+        if [[ -z `fuser -m "$1" 2> /dev/null` ]]; then
             return 0
         fi
         if ! option_is_set -f; then
@@ -2519,6 +2518,7 @@ main() {
 
         # internal commands useful to developers
         'source')   return 0 ;;
+        install)    check_priv ; install_tomb ;;
         askpass)    ask_password $PARAM[1] $PARAM[2] ;;
 
         __default)
