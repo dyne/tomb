@@ -154,14 +154,14 @@ tmp_create() {
     local tfile="${TMPPREFIX}${RANDOM}"
     touch "$tfile"
     [[ $? = 0 ]] || {
-        fatal "Fatal error creating a temporary file: $tfile"
+        fatal "Fatal error creating a temporary file: ::1 temp file::" $tfile
         return 1 }
     chown "$_uid":"$_gid" "$tfile"
     chmod 0600 "$tfile"
     [[ $? = 0 ]] || {
-        fatal "Fatal error setting permissions on temporary file: $tfile"
+        fatal "Fatal error setting permissions on temporary file: ::1 temp file::" $tfile
         return 1 }
-    _verbose "created tempfile: ::1 temp file::" $tfile
+    _verbose "Created tempfile: ::1 temp file::" $tfile
     tomb_tempfiles+=($tfile)
     return 0
 }
@@ -672,7 +672,7 @@ load_key() {
         tomb_key_file=stdin
         tomb_key=`cat`
     else
-        _verbose "load_key argument: $keyopt"
+        _verbose "load_key argument: ::1 opt::" $keyopt
         # take key from a file
         tomb_key_file="$keyopt"
         { test -r "${tomb_key_file}" } || {
@@ -745,7 +745,7 @@ get_lukskey() {
 
     # key is KDF encoded
     if [[ $firstline =~ '^_KDF_' ]]; then
-        _verbose "KDF: `cut -d_ -f 3 <<<$firstline`"
+        _verbose "KDF: ::1 kdf::" $(cut -d_ -f 3 <<<$firstline)
         case `cut -d_ -f 3 <<<$firstline` in
             pbkdf2sha1)
                 pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
@@ -1444,11 +1444,11 @@ change_tomb_key() {
         _failure "Aborting operations: error loading new key from -k" }
     new_key="$tomb_key"
     new_key_file="$tomb_key_file"
-    _message "New key: $new_key_file"
+    _message "New key: ::1 key::" $new_key_file
 
     if option_is_set --tomb-pwd; then
         tomb_new_pwd="`option_value --tomb-pwd`"
-        _verbose "tomb-pwd = $tomb_new_pwd"
+        _verbose "tomb-pwd = ::1 tomb pass::" $tomb_new_pwd
         ask_key_password "$tomb_new_pwd"
     else
         ask_key_password
@@ -1482,7 +1482,7 @@ change_tomb_key() {
 
 # backward compatibility
 create_tomb() {
-    _verbose "create_tomb(): ${=@} ${=OLDARGS}"
+    _verbose "create_tomb(): ::1:: ::2::" ${=@} ${=OLDARGS}
     [[ "$1" = "" ]] && {
         _warning "No tomb name specified for creation."
         return 1 }
@@ -2056,7 +2056,7 @@ search_tombs() {
         # use mlocate to search hits on filenames
         _message "Searching filenames in tomb ::1 tomb name::" $tombname
         locate -d ${tombmount}/.updatedb -e -i "${(f)@}"
-        _message "Matches found: `locate -d ${tombmount}/.updatedb -e -i -c ${(f)@}`"
+        _message "Matches found: ::1 matches::" $(locate -d ${tombmount}/.updatedb -e -i -c ${(f)@})
 
         # use swish-e to search over contents
         { test $SWISH = 1 } && { test -r $tombmount/.swish } && {
