@@ -10,12 +10,13 @@ msgstr ""
 "Last-Translator: Dani \"GDrooid\" <gdrooid@openmailbox.org>"
 "Language: Spanish\n"
 "Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: commandline help _verbose
-msgid "created tempfile: ::1 temp file::"
+#: _verbose
+msgid "Created tempfile: ::1 temp file::"
 msgstr ""
 
 #: _success
@@ -38,21 +39,6 @@ msgstr ""
 msgid "Escalating privileges using sudo-pwd."
 msgstr ""
 
-#: _warning
-msgid "Loop mount of volumes is not supported on this machine, this error"
-msgstr ""
-"No hay soporte para el montaje en loop de volúmenes en esta máquina, este "
-"error"
-
-#: _warning
-msgid "often occurs on VPS and kernels that don't provide the loop module."
-msgstr ""
-"ocurre frecuentemente en VPS y kernels que no proveen el módulo 'loop'."
-
-#: _warning
-msgid "It is impossible to use Tomb on this machine at this conditions."
-msgstr "Es imposible usar Tomb en esta máquina en estas condiciones."
-
 #: _verbose
 msgid "is_valid_tomb ::1 tomb file::"
 msgstr ""
@@ -67,6 +53,14 @@ msgstr "No se encontró la tumba: ::1 tumba::"
 
 #: _warning
 msgid "Tomb file is not a regular file: ::1 tomb file::"
+msgstr ""
+
+#: _warning
+msgid "Tomb file is empty (zero length): ::1 tomb file::"
+msgstr ""
+
+#: _warning
+msgid "Tomb file is not writable: ::1 tomb file::"
 msgstr ""
 
 #: _warning
@@ -85,15 +79,20 @@ msgstr "Fichero tomb válido encontrado: ::1 fichero::"
 msgid "Loopback mount called on invalid tomb: ::1 path::"
 msgstr ""
 
-#: _failure
-msgid "Too many tombs open. Please close any of them to open another tomb."
+#: _warning
+msgid "Loop mount of volumes is not possible on this machine, this error"
 msgstr ""
-"Demasiadas tumbas abiertas. Por favor, cierra cualquiera de ellas para abrir "
-"otra tumba."
+"No hay soporte para el montaje en loop de volúmenes en esta máquina, este "
+"error"
 
-#: _failure
-msgid "Loopback device not available"
+#: _warning
+msgid "often occurs on VPS and kernels that don't provide the loop module."
 msgstr ""
+"ocurre frecuentemente en VPS y kernels que no proveen el módulo 'loop'."
+
+#: _warning
+msgid "It is impossible to use Tomb on this machine at this conditions."
+msgstr "Es imposible usar Tomb en esta máquina en estas condiciones."
 
 #: _verbose
 msgid "lo_preserve on ::1 path::"
@@ -165,7 +164,7 @@ msgid "Waiting for the key to be piped from stdin... "
 msgstr "Esperando a recibir la clave a través de un pipe de stdin... "
 
 #: _verbose
-msgid "load_key argument: `option_value -k`"
+msgid "load_key argument: ::1 opt::"
 msgstr ""
 
 #: _warning
@@ -190,7 +189,7 @@ msgid "get_lukskey"
 msgstr ""
 
 #: _verbose
-msgid "KDF: `cut -d_ -f 3 <<<$firstline`"
+msgid "KDF: ::1 kdf::"
 msgstr ""
 
 #: _failure
@@ -350,7 +349,8 @@ msgstr "Usa --force para sobreescribir."
 
 #: _failure
 msgid "Refusing to overwrite file. Operation aborted."
-msgstr "Crear esta tumba sobreescribiría un fichero existente. Operación abortada."
+msgstr ""
+"Crear esta tumba sobreescribiría un fichero existente. Operación abortada."
 
 #: _warning
 msgid "Use of --force selected: overwriting."
@@ -361,8 +361,8 @@ msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr "Intentando exhumar una clave de la imagen ::1 fichero::"
 
 #: _success
-msgid "::1 tomb key:: succesfully decoded."
-msgstr "::1 clave:: decodificada con éxito."
+msgid "Key succesfully exhumed to ::1 key::."
+msgstr ""
 
 #: _warning
 msgid "Nothing found in ::1 image file::"
@@ -399,6 +399,10 @@ msgid "Forging this key would overwrite an existing file. Operation aborted."
 msgstr ""
 "Forjar esta clave sobreescribiría un fichero existente. Operación abortada."
 
+#: _failure
+msgid "`ls -lh $destkey`"
+msgstr ""
+
 #: _message
 msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
 msgstr ""
@@ -431,8 +435,8 @@ msgid "Cannot generate encryption key."
 msgstr "No se puede generar la clave de encriptación."
 
 #: _success
-msgid "Choose the password of your key: ::1 tomb key::"
-msgstr "Elige una contraseña para tu clave: ::1 clave::"
+msgid "Choose the  password of your key: ::1 tomb key::"
+msgstr "Elige la contraseña para tu clave: ::1 clave::"
 
 #: _message
 msgid "(You can also change it later using 'tomb passwd'.)"
@@ -482,6 +486,10 @@ msgstr "Las tumbas no pueden ser menores de 10 megabytes."
 msgid "A tomb exists already. I'm not digging here:"
 msgstr "Ya existe una tumba. No voy a cavar aquí:"
 
+#: _warning
+msgid " `ls -lh ${tombdir}/${tombfile}`"
+msgstr ""
+
 #: _success
 msgid "Creating a new tomb in ::1 tomb dir::/::2 tomb file::"
 msgstr "Creando una nueva tumba en ::1 directorio::/::2 fichero::"
@@ -495,8 +503,10 @@ msgid "Data dump using ::1:: from /dev/urandom"
 msgstr ""
 
 #: _failure
-msgid "Error creating the tomb ::1 tomb dir::/::2 tomb file::, operation aborted."
-msgstr "Error al crear la tumba ::1 directorio::/::2 fichero::, operación abortada."
+msgid ""
+"Error creating the tomb ::1 tomb dir::/::2 tomb file::, operation aborted."
+msgstr ""
+"Error al crear la tumba ::1 directorio::/::2 fichero::, operación abortada."
 
 #: _success
 msgid "Done digging ::1 tomb name::"
@@ -612,20 +622,24 @@ msgstr ""
 msgid "Commanded to reset key for tomb ::1 tomb name::"
 msgstr "Se ordenó resetear la clave para la tumba ::1 tumba::"
 
-#: _failure
-msgid "Aborting operations: error loading new key from -k"
+#: _warning
+msgid "Command 'setkey' needs two arguments: the old key file and the tomb."
+msgstr ""
+
+#: _warning
+msgid "I.e:  tomb -k new.tomb.key old.tomb.key secret.tomb"
 msgstr ""
 
 #: _failure
-msgid "Old key invalid. 1st argument of setkey must be a valid key file."
-msgstr ""
-
-#: _failure
-msgid "Tomb invalid. 2nd argument of setkey must be a valid tomb file."
-msgstr ""
+msgid "Execution aborted."
+msgstr "Ejecución abortada."
 
 #: _failure
 msgid "Not a valid LUKS encrypted volume: ::1 volume::"
+msgstr ""
+
+#: _failure
+msgid "Aborting operations: error loading old key from arguments"
 msgstr ""
 
 #: _success
@@ -636,20 +650,24 @@ msgstr "Cambiando el candado de la tumba ::1 tumba::"
 msgid "Old key: ::1 old key::"
 msgstr "Clave vieja: ::1 clave::"
 
-#: _message
-msgid "New key: ::1 new key::"
-msgstr "Clave nueva: ::1 clave::"
-
-#: _failure
-msgid "No valid password supplied for the new key."
-msgstr ""
-
 #: _failure
 msgid "No valid password supplied for the old key."
 msgstr ""
 
 #: _failure
 msgid "Unexpected error in luksOpen."
+msgstr ""
+
+#: _failure
+msgid "Aborting operations: error loading new key from -k"
+msgstr ""
+
+#: _message
+msgid "New key: ::1 key::"
+msgstr "Clave nueva: ::1 clave::"
+
+#: _failure
+msgid "No valid password supplied for the new key."
 msgstr ""
 
 #: _failure
@@ -669,17 +687,13 @@ msgid "The new key is: ::1 new key::"
 msgstr "La nueva clave es: ::1 clave::"
 
 #: _verbose
-msgid "create_tomb(): ${=@} ${=OLDARGS}"
+msgid "create_tomb(): ::1:: ::2::"
 msgstr ""
 
 #: _warning
-msgid "Creating this tomb would overwrite an existing file. Operation aborted."
+msgid "Creating this tomb would overwrite an existing file."
 msgstr ""
 "Crear esta tumba sobreescribiría un fichero existente. Operación abortada."
-
-#: _failure
-msgid "Failed to dig tomb, operation aborted."
-msgstr ""
 
 #: _failure
 msgid "Failed to forge key, operation aborted."
@@ -755,10 +769,6 @@ msgstr "Clave de la tumba: ::1 clave::"
 #: _verbose
 msgid "Tomb name: ::1 tomb name:: (to be engraved)"
 msgstr ""
-
-#: _failure
-msgid "Failure mounting the encrypted file."
-msgstr "Fallé montando el fichero encriptado."
 
 #: _success
 msgid "Success unlocking tomb ::1 tomb name::"
@@ -856,6 +866,10 @@ msgstr ""
 msgid "Index command needs 'mlocate' to be installed."
 msgstr ""
 
+#: _verbose
+msgid "$updatedbver"
+msgstr ""
+
 #: _failure
 msgid "There seems to be no open tomb engraved as [::1::]"
 msgstr "Parece que existe una tumba con el grabado [::1::]"
@@ -905,7 +919,7 @@ msgid "Searching filenames in tomb ::1 tomb name::"
 msgstr "Buscando nombres de fichero en la tumba ::1 tumba::"
 
 #: _message
-msgid "Matches found: `locate -d ${tombmount}/.updatedb -e -i -c ${(f)@}`"
+msgid "Matches found: ::1 matches::"
 msgstr ""
 
 #: _message
@@ -942,10 +956,6 @@ msgid "Aborting operations: new size was not specified, use -s"
 msgstr ""
 
 #: _failure
-msgid "Aborting operations: key not found, use -k"
-msgstr ""
-
-#: _failure
 msgid "The tomb ::1 tomb name:: is open, to resize it it needs to be closed."
 msgstr ""
 "La tumba ::1 tumba:: está abierta, necesita estar cerrada para el cambio de "
@@ -966,6 +976,10 @@ msgstr "El nuevo tamaño debe ser mayor que el viejo tamaño de la tumba."
 #: _failure
 msgid "Error creating the extra resize ::1 size::, operation aborted."
 msgstr ""
+
+#: _failure
+msgid "Failure mounting the encrypted file."
+msgstr "Fallé montando el fichero encriptado."
 
 #: _failure
 msgid "cryptsetup failed to resize ::1 mapper::"
@@ -1142,6 +1156,14 @@ msgstr "No se reconoció el commando \"::1 comando::\"."
 #: _message
 msgid "Try -h for help."
 msgstr "Prueba -h para obtener ayuda."
+
+#~ msgid "Too many tombs open. Please close any of them to open another tomb."
+#~ msgstr ""
+#~ "Demasiadas tumbas abiertas. Por favor, cierra cualquiera de ellas para "
+#~ "abrir otra tumba."
+
+#~ msgid "::1 tomb key:: succesfully decoded."
+#~ msgstr "::1 clave:: decodificada con éxito."
 
 #~ msgid "WARNING: we cannot ensure we're running in RAM."
 #~ msgstr "ADVERTENCIA: no podemos asegurar que estemos corriendo en RAM."
