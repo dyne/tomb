@@ -23,8 +23,8 @@ msgstr ""
 msgid ""
 EOF
 
-    ../../tomb help | awk '
-{ print "\"" $0 "\"" }'
+#    ../../tomb help | awk '
+#{ print "\"" $0 "\"" }'
     cat <<EOF
 msgstr ""
 
