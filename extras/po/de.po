@@ -537,7 +537,7 @@ msgstr ""
 msgid ""
 "Error creating the tomb ::1 tomb dir::/::2 tomb file::, operation aborted."
 msgstr ""
-"Fehler beim erstellen des Grabes ::1 dir::/::2 tomb file::. Vorgang "
+"Fehler beim Erstellen des Grabes ::1 dir::/::2 tomb file::. Vorgang "
 "abgebrochen."
 
 #: _success
@@ -1040,11 +1040,8 @@ msgid "The new size must be greater then old tomb size."
 msgstr "Die neue Grösse muss grösser sein als die alte."
 
 #: _failure
-#, fuzzy
 msgid "Error creating the extra resize ::1 size::, operation aborted."
 msgstr ""
-"Fehler beim erstellen des Grabes ::1 dir::/::2 tomb file::. Vorgang "
-"abgebrochen."
 
 #: _failure
 msgid "Failure mounting the encrypted file."
@@ -1111,7 +1108,7 @@ msgstr ""
 
 #: _message
 msgid "Kill all processes busy inside the tomb."
-msgstr "Abbrechen aller laufender Prozesse im Grab."
+msgstr "Abbrechen aller laufenden Prozesse im Grab."
 
 #: _warning
 msgid "Cannot slam the tomb ::1 tomb name::"
@@ -1163,9 +1160,8 @@ msgstr ""
 "ruhen."
 
 #: _verbose
-#, fuzzy
 msgid "Sending ::1:: to processes inside the tomb:"
-msgstr "Abbrechen aller laufender Prozesse im Grab."
+msgstr ""
 
 #: _failure
 msgid "Error parsing."
@@ -1237,7 +1233,7 @@ msgstr ""
 
 #: _warning
 msgid "Command \"::1 subcommand::\" not recognized."
-msgstr "Der befehl \"::1 subcommand::\" wurde nicht erkannt."
+msgstr "Der Befehl \"::1 subcommand::\" wurde nicht erkannt."
 
 #: _message
 msgid "Try -h for help."
