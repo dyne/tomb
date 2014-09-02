@@ -1,0 +1,41 @@
+Sintaxis: tomb [opciones] comando [argumentos]\n
+\n
+Comandos:\n
+\n
+// Creación:\n
+dig   crear una nueva TUMBA vacía de tamaño -s en MB\n
+forge   crear una nueva  CLAVE y especificar su contraseña\n
+lock   instala un candado en una TUMBA para usarlo con la CLAVE\n
+\n
+// Operaciones en tumbas:\n
+open   abrir una TUMBA existente\n
+index   actualiza los índices de búsqueda de las tumbas\n
+search   busca nombres de fichero que coincidan con patrones de texto\n
+list   lista de TUMBAs abierta e información acerca de ellas\n
+close   cerrar una TUMBA específica o todas ('all')\n
+slam   cerrar una TUMBA de un portazo, matando todos los programas que la usan\n
+resize   cambia el tamaño de una TUMBA al tamaño -s (sólo puede aumentar)\n
+\n
+// Operaciones en claves:\n
+passwd   cambia la contraseña de una CLAVE\n
+setkey   cambia la CLAVE que asegura una TUMBA (necesita la vieja)\n
+engrave   crea un código QR de una CLAVE para guardarla en un papel\n
+bury   esconde una CLAVE dentro de una imagen JPEG\n
+exhume   extrae una CLAVE de una imagen JPEG\n
+\n
+Opciones:\n
+\n
+-s     tamaño de la fichero tumba al crearlo o cambiar su tamaño (en MB)\n
+-k     ruta a la clave a utilizar ('-k -' para leerla de stdin)\n
+-n     no procesar los hooks encontrados en la tumba\n
+-o     opciones de montaje usadas al abrir (por defecto: rw,noatime,nodev)\n
+-f     forzar operación (incluso si la memoria de intercambio está activa)\n
+--kdf  generar contraseñas blindadas contra ataques de diccionario\n
+\n
+-h     imprimir este mensaje de ayuda\n
+-v     imprimir versión, licencia y lista de cifrados disponibles\n
+-q     correr silenciosamente sin imprimir información\n
+-D     imprimir información de debugging al correr\n
+\n
+Para más información acerca de Tomb lee el manual: man tomb\n
+Por favor, reporta los bugs en <http://github.com/dyne/tomb/issues>.

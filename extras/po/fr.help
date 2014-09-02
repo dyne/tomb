@@ -1,0 +1,40 @@
+Syntaxe : tomb [options] commande [arguments]
+
+Commandes :
+
+// Création :
+dig        (creuser)   Créer une nouvelle TOMBE de taille -s Mo
+forge    (forger)      Créer une nouvelle CLÉ et lui assigner un mot de passe
+lock      (vérouiller) Vérouiller une TOMBE avec une CLÉ
+
+// Opérations sur les tombes :
+open    (ouvrir)         Ouvrir une TOMBE existante
+index   (indéxer)       Mettre à jour les indices de recherche des tombes
+search (rechercher) Rechercher des noms de fichiers selon des motifs textuels
+list       (énumérer)   Établir une liste informative des TOMBES ouvertes
+close   (fermer)        Sceller une TOMBE en fermant tous les programmes associés
+resize  (élargir)        Augmenter la taille d'une TOMBE à -s Mo
+
+// Opération sur les clés :
+passwd                    Modifier le mot de passe d'une CLÉ
+setkey                      Changer le verrou d'une TOMBE (à l'aide de la CLÉ existante)
+engrave (graver)     Grave une empreinte de la CLÉ pour impression papier au format QR code
+bury       (enterrer)   Cacher la CLÉ dans une image JPEG (stéganographie)
+exhume (exhumer)  Extraire une CLÉ cachée dans une image JPEG (stéganographie)
+
+Options :
+
+-s        taille de la tombe lors de sa création ou son agrandissement (en Mo)
+-k        chemin de la clé à utiliser ('-k -' pour la lire depuis l'entrée standard)
+-n        ne pas utiliser les 'crochets' trouvés dans la tombe
+-o        options de montage à l'ouverture (par défaut : rw,noatime,nodev)
+-f         forcer l'opération (c-à-d même si la partition d'échange est activée)
+--kdf    générer des mots de passe protégés contre les attaques par dictionnaire
+
+-h        imprimer cette aide
+-v        imprimer la version, la licence, et la liste des codes disponibles
+-q       exécuter silencieusement sans imprimer les informations
+-D       imprimer les information de débogage durant l'exécution
+
+Pour de plus amples information sur Tomb, se reporter au manuel : man tomb
+Merci de rapporter les erreurs sur <https://github.com/dyne/tomb/issues>.

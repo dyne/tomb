@@ -1,0 +1,41 @@
+Syntax : tomb [Optionen] Befehl [Argumente]
+
+Befehle :
+
+// Erstellen :
+dig     Neues GRAB erstellen mit der Größe -s Mb
+forge   Neuen SCHLÜSSEL erstellen und Passwort zuweisen
+lock    GRAB mit einem SCHLÜSSEL zusperren
+
+// Gräber bearbeiten :
+open    Vorhandenens GRAB öffnen
+index   Den Suchindex der Gräber aktualisieren
+search  Sucht nach Dateinamen welche Textmustern entsprechen
+list    Liste geöffneter GRÄBER mit Infos
+close   Schliesst das angegebene GRAB (oder \"all\")
+ slam    Knallt ein GRAB zu und bricht alle dazugehörende Programme ab"
+resize  Größe eines Grabes ändern zu -s Mb (nur vergrößern möglich)
+
+// Schlüssel bearbeiten :
+passwd  Passwort eines SCHLÜSSELS ändern
+setkey  SCHLÜSSEL eines GRABES ändern
+engrave Erstellt einen QR-Code eines SCHLÜSSELS zum ausdrucken
+bury    versteckt einen SCHLÜSSEL in einer JPEG Datei
+exhume  extrahiert den SCHLÜSSEL aus einer JPEG-Datei
+
+Optionen :
+
+-s        Größe eines Grabes (beim Erstellen/neue Größe zuweisen) (in Mb)
+-k        Dateipfad zum Schlüssel ('-k -' um ihn aus der Standarteingabe einzulesen)
+-n        'Hooks' im Grab nicht benutzen
+-o        Mount Optionen beim Öffnen (Standart : rw,noatime,nodev)
+-f        Vorgang erzwingen (z.B. falls Swap-Datei aktiv)
+--kdf     Gegen Wörterbuchattacken gefeite Passwörter erstellen
+
+-h        Anzeigen dieses Hilfetextes
+-v        Anzeigen der Version, Lizenzen und vorhandeners Verschlüsslungsmethoden
+-q        Still ablaufen lassen ohne Infos anzuzeigen
+-D        Debug-Infos beim Ablauf anzeigen
+
+Für mehr Informationen siehe : man tomb
+Bug-Reports bitte an <https://github.com/dyne/tomb/issues>..
