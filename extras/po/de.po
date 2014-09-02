@@ -390,7 +390,7 @@ msgstr "Grab ${tombfile} wird erstellt, mit der Größe ${tombsize}Mb"
 
 #: _failure
 msgid "Error creating the tomb ${tombdir}/${tombfile}, operation aborted."
-msgstr "Fehler beim erstellen des Grabes ${tombdir}/${tombsize}. Vorgang abgebrochen."
+msgstr "Fehler beim Erstellen des Grabes ${tombdir}/${tombsize}. Vorgang abgebrochen."
 
 #: _success
 msgid "Done digging $tombname"
@@ -726,7 +726,7 @@ msgstr "Das Grab $tombname eingehängt auf $tombmount wurde abrupt geschlossen."
 
 #: _message
 msgid "Kill all processes busy inside the tomb."
-msgstr "Abbrechen aller laufender Prozesse im Grab."
+msgstr "Abbrechen aller laufenden Prozesse im Grab."
 
 #: _warning
 msgid "Cannot slam the tomb $tombname"
@@ -786,7 +786,7 @@ msgstr "Für mehr Informationen siehe Benutzerhandbuch (man tomb)."
 
 #: _warning
 msgid "Command \"$subcommand\" not recognized."
-msgstr "Der befehl \"$subcommand\" wurde nicht erkannt."
+msgstr "Der Befehl \"$subcommand\" wurde nicht erkannt."
 
 #: _message
 msgid "Try -h for help."
