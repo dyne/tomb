@@ -174,18 +174,18 @@ tmp_new() {
 check_swap() {
     # Return 0 if NO swap is used, 1 if swap is used
     # Return 2 if swap(s) is(are) used, but ALL encrypted
-    local swaps="$(awk '/^\// { print $1 }' /proc/swaps 2>-)"
+    local swaps="$(awk '/^\// { print $1 }' /proc/swaps 2>/dev/null)"
     [[ -z "$swaps" ]] && return 0                # No swap partition is active
     # Check whether all swaps are encrypted, and return 2
     # If any of the swaps is not encrypted, we bail out and return 1.
     ret=1
     for s in $=swaps; do
         bone=`sudo file $s`
-        if `echo "$bone" | grep 'swap file' &>-`; then
+        if [[ "$bone" =~ "swap file" ]]; then
             # It's a regular (unencrypted) swap file
             ret=1
             break
-        elif `echo "$bone" | grep 'symbolic link' &>-`; then
+        elif [[ "$bone" =~ "symbolic link" ]]; then
             # Might link to a block
             ret=1
             if [ "/dev/mapper" = "${s%/*}" ]; then
@@ -196,7 +196,7 @@ check_swap() {
             else
                 break
             fi
-        elif `echo "$bone" | grep 'block special' &>-`; then
+        elif [[ "$bone" =~ "block special" ]]; then
             # Is a block
             ret=1
             is_crypt=`sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
@@ -252,7 +252,7 @@ ask_password() {
     title="Insert tomb password."
     if [ $2 ]; then title="$2"; fi
 
-    output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>- | tail -n +7
+    output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>/dev/null | tail -n +7
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE $title
@@ -289,7 +289,7 @@ check_priv() {
 
         if ! option_is_set --sudo-pwd; then
             if [ $? != 0 ]; then # if not then ask a password
-                cat <<EOF | pinentry 2>- | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
+                cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE Super user privileges required
@@ -748,7 +748,7 @@ get_lukskey() {
         case `cut -d_ -f 3 <<<$firstline` in
             pbkdf2sha1)
                 pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
-                _password=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2>- <<<$_password)
+                _password=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2>/dev/null <<<$_password)
                 ;;
             *)
                 _failure "No suitable program for KDF `cut -f 3 <<<$firstline`."
@@ -1682,7 +1682,7 @@ exec_safe_bind_hooks() {
     fi
     local MOUNTPOINT="${1}"
     local ME=${SUDO_USER:-$(whoami)}
-    local HOME=$(awk -v a="$ME" -F ':' '{if ($1 == a) print $6}' /etc/passwd 2>-)
+    local HOME=$(awk -v a="$ME" -F ':' '{if ($1 == a) print $6}' /etc/passwd 2>/dev/null)
     if [ $? -ne 0 ]; then
         _warning "How pitiful!  A tomb, and no HOME."
         return 1
@@ -1931,7 +1931,7 @@ index_tombs() {
 
     # start the LibreOffice document converter if installed
     { command -v unoconv >& - } && {
-        unoconv -l 2>- &
+        unoconv -l 2>/dev/null &
         _verbose "unoconv listener launched."
         sleep 1 }
 
@@ -2095,7 +2095,7 @@ resize_tomb() {
     load_key
     ########
 
-    local oldtombsize=$(( `stat -c %s "$1" 2>-` / 1048576 ))
+    local oldtombsize=$(( `stat -c %s "$1" 2>/dev/null` / 1048576 ))
     local mounted_tomb=`mount -l |
         awk -vtomb="[$tombname]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
 
@@ -2274,20 +2274,20 @@ umount_tomb() {
 # Kill all processes using the tomb
 slam_tomb() {
     # $1 = tomb mount point
-    if [[ -z `fuser -m "$1" 2>-` ]]; then
+    if [[ -z `fuser -m "$1" 2>/dev/null` ]]; then
         return 0
     fi
     #Note: shells are NOT killed by INT or TERM, but they are killed by HUP
     for s in TERM HUP KILL; do
         _verbose "Sending $s to processes inside the tomb:"
         if option_is_set -D; then
-            ps -fp `fuser -m /media/a.tomb 2>-`|
+            ps -fp `fuser -m /media/a.tomb 2>/dev/null`|
             while read line; do
                 _verbose $line
             done
         fi
         fuser -s -m "$1" -k -M -$s
-        if [[ -z `fuser -m "$1" 2>-` ]]; then
+        if [[ -z `fuser -m "$1" 2>/dev/null` ]]; then
             return 0
         fi
         if ! option_is_set -f; then
