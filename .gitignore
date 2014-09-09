@@ -8,3 +8,4 @@ doc/web/public
 doc/web/dyne
 share/gtkrc
 .*.sw?
+*.mo
