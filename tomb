@@ -491,8 +491,12 @@ option_value() {
 
 # Messaging function with pretty coloring
 function _msg() {
-    local tmp_msg="$(gettext -s "$2")"
-    local msg="${(S)${(S)${(S)tmp_msg//::3*::/$5}//::2*::/$4}//::1*::/$3}"
+    local msg="$(gettext -s "$2")"
+    for i in $(seq 3 ${#});
+    do
+        msg=${(S)msg//::$(($i - 2))*::/$*[$i]}
+    done
+
     local command="print -P"
     local progname="$fg[magenta]${TOMBEXEC##*/}$reset_color"
     local message="$fg_bold[normal]$fg_no_bold[normal]$msg$reset_color"
@@ -531,28 +535,28 @@ function _msg() {
 function _message say() {
     local notice="message"
     [[ "$1" = "-n" ]] && shift && notice="inline"
-    option_is_set -q || _msg "$notice" "$1" "$2" "$3" "$4"
+    option_is_set -q || _msg "$notice" $@
     return 0
 }
 
 function _verbose xxx() {
-    option_is_set -D && _msg verbose "$1" "$2" "$3" "$4"
+    option_is_set -D && _msg verbose $@
     return 0
 }
 
 function _success yes() {
-    option_is_set -q || _msg success "$1" "$2" "$3" "$4"
+    option_is_set -q || _msg success $@
     return 0
 }
 
 function _warning  no() {
-    option_is_set -q || _msg warning "$1" "$2" "$3" "$4"
+    option_is_set -q || _msg warning $@
     return 1
 }
 
 function _failure die() {
     typeset -i exitcode=${exitv:-1}
-    option_is_set -q || _msg failure "$1" "$2" "$3" "$4"
+    option_is_set -q || _msg failure $@
     # be sure we forget the secrets we were told
     exit $exitcode
 }
