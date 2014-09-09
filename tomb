@@ -1643,8 +1643,7 @@ mount_tomb() {
     chown ${_uid}:${_gid} ${tombmount}
     chmod 0711 ${tombmount}
 
-    # TODO: Fix string
-    _success "Success opening ::1 tomb file:: on $fg_bold[white]::2 mount point::$fg_no_bold[white]" $tombfile $tombmount
+    _success "Success opening ::1 tomb file:: on ::2 mount point::" $tombfile $tombmount
 
     # print out when was opened the last time, by whom and where
     { test -r ${tombmount}/.last } && {
@@ -1653,9 +1652,8 @@ mount_tomb() {
         tombuid="`cat ${tombmount}/.uid`"
         tomblast="`cat ${tombmount}/.last`"
         tombuser=`awk -F: '/:'"$tombuid"':/ {print $1}' /etc/passwd`
-        # TODO: Fix strings
-        _message "Last visit by $fg_bold[white]::1 user::(::2 tomb build::)$fg_no_bold[white] from $fg_bold[white]::3 tty::$fg_no_bold[white] on $fg_bold[white]$tombhost$fg_no_bold[white]" $tombuser $tombuid $tombtty
-        _message "on date $fg_bold[white]::1 date::$fg_no_bold[white]" $(date --date @$tomblast +%c)
+        _message "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::" $tombuser $tombuid $tombtty $tombhost
+        _message "on date ::1 date::" $(date --date @$tomblast +%c)
     }
     # write down the UID and TTY that opened the tomb
     rm -f ${tombmount}/.uid
@@ -2048,8 +2046,7 @@ search_tombs() {
     if [ ${#mounted_tombs} = 0 ]; then
         _failure "I can't see any open tomb, may they all rest in peace."; fi
 
-    # TODO: Fix string
-    _success "Searching for: $fg_bold[white]::1::$fg_no_bold[white]" ${(f)@}
+    _success "Searching for: ::1::" ${(f)@}
     for t in ${mounted_tombs}; do
         _verbose "Checking for index: ::1::" ${t}
         mapper=`basename ${t[(ws:;:)1]}`
