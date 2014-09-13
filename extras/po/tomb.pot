@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb \n"
-"PO-Revision-Date: Mon Sep  1 10:42:49 CEST 2014\n"
+"PO-Revision-Date: Sat Sep 13 17:17:32 CEST 2014\n"
 "Last-Translator: Denis Roio <jaromil@dyne.org>\n"
 "Language: English\n"
 "Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
@@ -14,40 +14,112 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: _print
-msgid "Tomb ::1 version:: - a strong and gentle undertaker for your secrets"
+#: _verbose
+msgid "Created tempfile: ::1 temp file::"
 msgstr ""
 
-#: _print
-msgid " Copyright (C) 2007-2014 Dyne.org Foundation, License GNU GPL v3+"
+#: _success
+msgid "All your swaps are belong to crypt.  Good."
 msgstr ""
 
-#: _print
-msgid " This is free software: you are free to change and redistribute it"
+#: _failure
+msgid "Operation aborted."
 msgstr ""
 
-#: _print
-msgid " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
+#: _verbose
+msgid "exec_as_user '::1 user::': ::2::"
 msgstr ""
 
-#: _print
-msgid " This source code is distributed in the hope that it will be useful,"
+#: _verbose
+msgid "Using sudo for root execution of '::1 exec:: ::2 args::'."
 msgstr ""
 
-#: _print
-msgid " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+#: _verbose
+msgid "Escalating privileges using sudo-pwd."
 msgstr ""
 
-#: _print
-msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+#: _verbose
+msgid "is_valid_tomb ::1 tomb file::"
 msgstr ""
 
-#: _print
-msgid " Please refer to the GNU Public License for more details."
+#: _warning
+msgid "Tomb file is missing from arguments."
 msgstr ""
 
-#: _print
-msgid " System utils:"
+#: _warning
+msgid "Tomb file not found: ::1 tomb file::"
+msgstr ""
+
+#: _warning
+msgid "Tomb file is not a regular file: ::1 tomb file::"
+msgstr ""
+
+#: _warning
+msgid "Tomb file is empty (zero length): ::1 tomb file::"
+msgstr ""
+
+#: _warning
+msgid "Tomb file is not writable: ::1 tomb file::"
+msgstr ""
+
+#: _warning
+msgid "File is not yet a tomb: ::1 tomb file::"
+msgstr ""
+
+#: _warning
+msgid "Tomb is currently in use: ::1 tomb name::"
+msgstr ""
+
+#: _message
+msgid "Valid tomb file found: ::1 tomb file::"
+msgstr ""
+
+#: _failure
+msgid "Loopback mount called on invalid tomb: ::1 path::"
+msgstr ""
+
+#: _warning
+msgid "Loop mount of volumes is not possible on this machine, this error"
+msgstr ""
+
+#: _warning
+msgid "often occurs on VPS and kernels that don't provide the loop module."
+msgstr ""
+
+#: _warning
+msgid "It is impossible to use Tomb on this machine at this conditions."
+msgstr ""
+
+#: _verbose
+msgid "lo_preserve on ::1 path::"
+msgstr ""
+
+#: _verbose
+msgid "tomb_file: ::1 tomb file::"
+msgstr ""
+
+#: _verbose
+msgid "tomb_key: ::1 key:: chars long"
+msgstr ""
+
+#: _verbose
+msgid "tomb_key_file: ::1 key::"
+msgstr ""
+
+#: _verbose
+msgid "tomb_secret: ::1 secret:: chars long"
+msgstr ""
+
+#: _verbose
+msgid "tomb_password: ::1 tomb pass::"
+msgstr ""
+
+#: _verbose
+msgid "tomb_tempfiles: ::1 temp files::"
+msgstr ""
+
+#: _verbose
+msgid "tomb_loopdevs: ::1 loopdevs::"
 msgstr ""
 
 #: _print
@@ -180,114 +252,6 @@ msgstr ""
 
 #: _print
 msgid "Please report bugs on <http://github.com/dyne/tomb/issues>."
-msgstr ""
-
-#: _verbose
-msgid "Created tempfile: ::1 temp file::"
-msgstr ""
-
-#: _success
-msgid "All your swaps are belong to crypt.  Good."
-msgstr ""
-
-#: _failure
-msgid "Operation aborted."
-msgstr ""
-
-#: _verbose
-msgid "exec_as_user '::1 user::': ::2::"
-msgstr ""
-
-#: _verbose
-msgid "Using sudo for root execution of '::1 exec:: ::2 args::'."
-msgstr ""
-
-#: _verbose
-msgid "Escalating privileges using sudo-pwd."
-msgstr ""
-
-#: _verbose
-msgid "is_valid_tomb ::1 tomb file::"
-msgstr ""
-
-#: _warning
-msgid "Tomb file is missing from arguments."
-msgstr ""
-
-#: _warning
-msgid "Tomb file not found: ::1 tomb file::"
-msgstr ""
-
-#: _warning
-msgid "Tomb file is not a regular file: ::1 tomb file::"
-msgstr ""
-
-#: _warning
-msgid "Tomb file is empty (zero length): ::1 tomb file::"
-msgstr ""
-
-#: _warning
-msgid "Tomb file is not writable: ::1 tomb file::"
-msgstr ""
-
-#: _warning
-msgid "File is not yet a tomb: ::1 tomb file::"
-msgstr ""
-
-#: _warning
-msgid "Tomb is currently in use: ::1 tomb name::"
-msgstr ""
-
-#: _message
-msgid "Valid tomb file found: ::1 tomb file::"
-msgstr ""
-
-#: _failure
-msgid "Loopback mount called on invalid tomb: ::1 path::"
-msgstr ""
-
-#: _warning
-msgid "Loop mount of volumes is not possible on this machine, this error"
-msgstr ""
-
-#: _warning
-msgid "often occurs on VPS and kernels that don't provide the loop module."
-msgstr ""
-
-#: _warning
-msgid "It is impossible to use Tomb on this machine at this conditions."
-msgstr ""
-
-#: _verbose
-msgid "lo_preserve on ::1 path::"
-msgstr ""
-
-#: _verbose
-msgid "tomb_file: ::1 tomb file::"
-msgstr ""
-
-#: _verbose
-msgid "tomb_key: ::1 key:: chars long"
-msgstr ""
-
-#: _verbose
-msgid "tomb_key_file: ::1 key::"
-msgstr ""
-
-#: _verbose
-msgid "tomb_secret: ::1 secret:: chars long"
-msgstr ""
-
-#: _verbose
-msgid "tomb_password: ::1 tomb pass::"
-msgstr ""
-
-#: _verbose
-msgid "tomb_tempfiles: ::1 temp files::"
-msgstr ""
-
-#: _verbose
-msgid "tomb_loopdevs: ::1 loopdevs::"
 msgstr ""
 
 #: _failure
@@ -518,7 +482,6 @@ msgstr ""
 msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr ""
 
-#: _success
 msgid "Key succesfully exhumed to ::1 key::."
 msgstr ""
 
@@ -906,6 +869,10 @@ msgstr ""
 msgid "Tomb name: ::1 tomb name:: (to be engraved)"
 msgstr ""
 
+#: _failure
+msgid "Failure mounting the encrypted file."
+msgstr ""
+
 #: _success
 msgid "Success unlocking tomb ::1 tomb name::"
 msgstr ""
@@ -923,15 +890,15 @@ msgid "Tomb engraved as ::1 tomb name::"
 msgstr ""
 
 #: _success
-msgid "Success opening ::1 tomb file:: on $fg_bold[white]::2 mount point::$fg_no_bold[white]"
+msgid "Success opening ::1 tomb file:: on ::2 mount point::"
 msgstr ""
 
 #: _message
-msgid "Last visit by $fg_bold[white]::1 user::(::2 tomb build::)$fg_no_bold[white] from $fg_bold[white]::3 tty::$fg_no_bold[white] on $fg_bold[white]$tombhost$fg_no_bold[white]"
+msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
 msgstr ""
 
 #: _message
-msgid "on date $fg_bold[white]::1 date::$fg_no_bold[white]"
+msgid "on date ::1 date::"
 msgstr ""
 
 #: _warning
@@ -1027,7 +994,7 @@ msgid "Search index updated."
 msgstr ""
 
 #: _success
-msgid "Searching for: $fg_bold[white]::1::$fg_no_bold[white]"
+msgid "Searching for: ::1::"
 msgstr ""
 
 #: _verbose
@@ -1092,10 +1059,6 @@ msgstr ""
 
 #: _failure
 msgid "Error creating the extra resize ::1 size::, operation aborted."
-msgstr ""
-
-#: _failure
-msgid "Failure mounting the encrypted file."
 msgstr ""
 
 #: _failure
@@ -1256,6 +1219,42 @@ msgstr ""
 
 #: _failure
 msgid "Resize2fs not installed: cannot resize tombs."
+msgstr ""
+
+#: _print
+msgid "Tomb ::1 version:: - a strong and gentle undertaker for your secrets"
+msgstr ""
+
+#: _print
+msgid " Copyright (C) 2007-2014 Dyne.org Foundation, License GNU GPL v3+"
+msgstr ""
+
+#: _print
+msgid " This is free software: you are free to change and redistribute it"
+msgstr ""
+
+#: _print
+msgid " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
+msgstr ""
+
+#: _print
+msgid " This source code is distributed in the hope that it will be useful,"
+msgstr ""
+
+#: _print
+msgid " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+msgstr ""
+
+#: _print
+msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+msgstr ""
+
+#: _print
+msgid " Please refer to the GNU Public License for more details."
+msgstr ""
+
+#: _print
+msgid "System utils:"
 msgstr ""
 
 #: _warning

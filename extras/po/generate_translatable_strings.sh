@@ -9,28 +9,13 @@ cat <<EOF
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb $VERSION\n"
-"PO-Revision-Date: `date`\n"
+"PO-Revision-Date: `LANG=en date`\n"
 "Last-Translator: Denis Roio <jaromil@dyne.org>\n"
+"Language: English\n"
 "Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-
-#
-#: commandline help
-#
-
-msgid ""
-EOF
-
-#    ../../tomb help | awk '
-#{ print "\"" $0 "\"" }'
-    cat <<EOF
-msgstr ""
-
-#
-# tomb internal messages
-#
 
 EOF
 
@@ -70,5 +55,10 @@ EOF
     print "#: _message -n";
     print "msgid \"" arr[2] "\"";
     print "msgstr \"\"\n" }
-'
 
+/_print ".*"/ {
+    split($0, arr, "\"");
+    print "#: _print";
+    print "msgid \"" arr[2] "\"";
+    print "msgstr \"\"\n" }
+'
