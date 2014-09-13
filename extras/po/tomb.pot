@@ -14,9 +14,173 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#
-# tomb internal messages
-#
+#: _print
+msgid "Tomb ::1 version:: - a strong and gentle undertaker for your secrets"
+msgstr ""
+
+#: _print
+msgid " Copyright (C) 2007-2014 Dyne.org Foundation, License GNU GPL v3+"
+msgstr ""
+
+#: _print
+msgid " This is free software: you are free to change and redistribute it"
+msgstr ""
+
+#: _print
+msgid " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
+msgstr ""
+
+#: _print
+msgid " This source code is distributed in the hope that it will be useful,"
+msgstr ""
+
+#: _print
+msgid " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+msgstr ""
+
+#: _print
+msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+msgstr ""
+
+#: _print
+msgid " Please refer to the GNU Public License for more details."
+msgstr ""
+
+#: _print
+msgid " System utils:"
+msgstr ""
+
+#: _print
+msgid "Syntax: tomb [options] command [arguments]"
+msgstr ""
+
+#: _print
+msgid "Commands:"
+msgstr ""
+
+#: _print
+msgid " // Creation:"
+msgstr ""
+
+#: _print
+msgid " dig     create a new empty TOMB file of size -s in MB"
+msgstr ""
+
+#: _print
+msgid " forge   create a new KEY file and set its password"
+msgstr ""
+
+#: _print
+msgid " lock    installs a lock on a TOMB to use it with KEY"
+msgstr ""
+
+#: _print
+msgid " // Operations on tombs:"
+msgstr ""
+
+#: _print
+msgid " open    open an existing TOMB"
+msgstr ""
+
+#: _print
+msgid " index   update the search indexes of tombs"
+msgstr ""
+
+#: _print
+msgid " search  looks for filenames matching text patterns"
+msgstr ""
+
+#: _print
+msgid " list    list of open TOMBs and information on them"
+msgstr ""
+
+#: _print
+msgid " close   close a specific TOMB (or 'all')"
+msgstr ""
+
+#: _print
+msgid " slam    slam a TOMB killing all programs using it"
+msgstr ""
+
+#: _print
+msgid " resize  resize a TOMB to a new size -s (can only grow)"
+msgstr ""
+
+#: _print
+msgid " // Operations on keys:"
+msgstr ""
+
+#: _print
+msgid " passwd  change the password of a KEY"
+msgstr ""
+
+#: _print
+msgid " setkey  change the KEY locking a TOMB (needs old one)"
+msgstr ""
+
+#: _print
+msgid " engrave makes a QR code of a KEY to be saved on paper"
+msgstr ""
+
+#: _print
+msgid " bury    hide a KEY inside a JPEG image"
+msgstr ""
+
+#: _print
+msgid " exhume  extract a KEY from a JPEG image"
+msgstr ""
+
+#: _print
+msgid "Options:"
+msgstr ""
+
+#: _print
+msgid " -s     size of the tomb file when creating/resizing one (in MB)"
+msgstr ""
+
+#: _print
+msgid " -k     path to the key to be used ('-k -' to read from stdin)"
+msgstr ""
+
+#: _print
+msgid " -n     don't process the hooks found in tomb"
+msgstr ""
+
+#: _print
+msgid " -o     mount options used to open (default: rw,noatime,nodev)"
+msgstr ""
+
+#: _print
+msgid " -f     force operation (i.e. even if swap is active)"
+msgstr ""
+
+#: _print
+msgid " --kdf  generate passwords armored against dictionary attacks"
+msgstr ""
+
+#: _print
+msgid " -h     print this help"
+msgstr ""
+
+#: _print
+msgid " -v     print version, license and list of available ciphers"
+msgstr ""
+
+#: _print
+msgid " -q     run quietly without printing informations"
+msgstr ""
+
+#: _print
+msgid " -D     print debugging information at runtime"
+msgstr ""
+
+#: _print
+msgid "For more informations on Tomb read the manual: man tomb"
+msgstr ""
+
+#: _print
+msgid "Please report bugs on <http://github.com/dyne/tomb/issues>."
+msgstr ""
 
 #: _verbose
 msgid "Created tempfile: ::1 temp file::"

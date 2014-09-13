@@ -7,6 +7,174 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 
+#: _print
+msgid "Tomb ::1 version:: - a strong and gentle undertaker for your secrets"
+msgstr ""
+
+#: _print
+msgid " Copyright (C) 2007-2014 Dyne.org Foundation, License GNU GPL v3+"
+msgstr ""
+
+#: _print
+msgid " This is free software: you are free to change and redistribute it"
+msgstr ""
+
+#: _print
+msgid " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
+msgstr ""
+
+#: _print
+msgid " This source code is distributed in the hope that it will be useful,"
+msgstr ""
+
+#: _print
+msgid " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+msgstr ""
+
+#: _print
+msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+msgstr ""
+
+#: _print
+msgid " Please refer to the GNU Public License for more details."
+msgstr ""
+
+#: _print
+msgid " System utils:"
+msgstr ""
+
+#: _print
+msgid "Syntax: tomb [options] command [arguments]"
+msgstr "Syntax : tomb [Optionen] Befehl [Argumente]"
+
+#: _print
+msgid "Commands:"
+msgstr "Befehle :"
+
+#: _print
+msgid " // Creation:"
+msgstr " // Erstellen :"
+
+#: _print
+msgid " dig     create a new empty TOMB file of size -s in MB"
+msgstr " dig     Neues GRAB erstellen mit der Größe -s Mb"
+
+#: _print
+msgid " forge   create a new KEY file and set its password"
+msgstr " forge   Neuen SCHLÜSSEL erstellen und Passwort zuweisen"
+
+#: _print
+msgid " lock    installs a lock on a TOMB to use it with KEY"
+msgstr " lock    GRAB mit einem SCHLÜSSEL zusperren"
+
+#: _print
+msgid " // Operations on tombs:"
+msgstr " // Gräber bearbeiten :"
+
+#: _print
+msgid " open    open an existing TOMB"
+msgstr " open    Vorhandenens GRAB öffnen"
+
+#: _print
+msgid " index   update the search indexes of tombs"
+msgstr " index   Den Suchindex der Gräber aktualisieren"
+
+#: _print
+msgid " search  looks for filenames matching text patterns"
+msgstr " search  Sucht nach Dateinamen welche Textmustern entsprechen"
+
+#: _print
+msgid " list    list of open TOMBs and information on them"
+msgstr " list    Liste geöffneter GRÄBER mit Infos"
+
+#: _print
+msgid " close   close a specific TOMB (or 'all')"
+msgstr " close   Schliesst das angegebene GRAB (oder \"all\")"
+
+#: _print
+msgid " slam    slam a TOMB killing all programs using it"
+msgstr " slam    Knallt ein GRAB zu und bricht alle dazugehörende Programme ab"
+
+#: _print
+msgid " resize  resize a TOMB to a new size -s (can only grow)"
+msgstr " resize  Größe eines Grabes ändern zu -s Mb (nur vergrößern möglich)"
+
+#: _print
+msgid " // Operations on keys:"
+msgstr " // Schlüssel bearbeiten :"
+
+#: _print
+msgid " passwd  change the password of a KEY"
+msgstr " passwd  Passwort eines SCHLÜSSELS ändern"
+
+#: _print
+msgid " setkey  change the KEY locking a TOMB (needs old one)"
+msgstr " setkey  SCHLÜSSEL eines GRABES ändern"
+
+#: _print
+msgid " engrave makes a QR code of a KEY to be saved on paper"
+msgstr " engrave Erstellt einen QR-Code eines SCHLÜSSELS zum ausdrucken"
+
+#: _print
+msgid " bury    hide a KEY inside a JPEG image"
+msgstr " bury    versteckt einen SCHLÜSSEL in einer JPEG Datei"
+
+#: _print
+msgid " exhume  extract a KEY from a JPEG image"
+msgstr " exhume  extrahiert den SCHLÜSSEL aus einer JPEG-Datei"
+
+#: _print
+msgid "Options:"
+msgstr "Optionen :"
+
+#: _print
+msgid " -s     size of the tomb file when creating/resizing one (in MB)"
+msgstr " -s        Größe eines Grabes (beim Erstellen/neue Größe zuweisen) (in Mb)"
+
+#: _print
+msgid " -k     path to the key to be used ('-k -' to read from stdin)"
+msgstr " -k        Dateipfad zum Schlüssel ('-k -' um ihn aus der Standarteingabe einzulesen)"
+
+#: _print
+msgid " -n     don't process the hooks found in tomb"
+msgstr " -n        'Hooks' im Grab nicht benutzen"
+
+#: _print
+msgid " -o     mount options used to open (default: rw,noatime,nodev)"
+msgstr " -o        Mount Optionen beim Öffnen (Standart : rw,noatime,nodev)"
+
+#: _print
+msgid " -f     force operation (i.e. even if swap is active)"
+msgstr " -f        Vorgang erzwingen (z.B. falls Swap-Datei aktiv)"
+
+#: _print
+msgid " --kdf  generate passwords armored against dictionary attacks"
+msgstr " --kdf     Gegen Wörterbuchattacken gefeite Passwörter erstellen"
+
+#: _print
+msgid " -h     print this help"
+msgstr " -h        Anzeigen dieses Hilfetextes"
+
+#: _print
+msgid " -v     print version, license and list of available ciphers"
+msgstr " -v        Anzeigen der Version, Lizenzen und vorhandeners Verschlüsslungsmethoden"
+
+#: _print
+msgid " -q     run quietly without printing informations"
+msgstr " -q        Still ablaufen lassen ohne Infos anzuzeigen"
+
+#: _print
+msgid " -D     print debugging information at runtime"
+msgstr " -D        Debug-Infos beim Ablauf anzeigen"
+
+#: _print
+msgid "For more informations on Tomb read the manual: man tomb"
+msgstr "Für mehr Informationen siehe Benutzerhandbuch (man tomb)."
+
+#: _print
+msgid "Please report bugs on <http://github.com/dyne/tomb/issues>."
+msgstr "Bug-Reports bitte an <https://github.com/dyne/tomb/issues>.."
+
 #: _verbose
 #, fuzzy
 msgid "Created tempfile: ::1 temp file::"

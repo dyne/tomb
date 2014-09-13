@@ -393,75 +393,58 @@ dump_secrets() {
 # {{{ Commandline interaction
 
 usage() {
-    cat <<EOF
-
-Syntax: tomb [options] command [arguments]
-
-Commands:
-
- // Creation:
- dig     create a new empty TOMB file of size -s in MB
- forge   create a new KEY file and set its password
- lock    installs a lock on a TOMB to use it with KEY
-
- // Operations on tombs:
- open    open an existing TOMB
- index   update the search indexes of tombs
- search  looks for filenames matching text patterns
- list    list of open TOMBs and information on them
- close   close a specific TOMB (or 'all')
- slam    slam a TOMB killing all programs using it
-EOF
+_print "Syntax: tomb [options] command [arguments]"
+_print "\000"
+_print "Commands:"
+_print "\000"
+_print " // Creation:"
+_print " dig     create a new empty TOMB file of size -s in MB"
+_print " forge   create a new KEY file and set its password"
+_print " lock    installs a lock on a TOMB to use it with KEY"
+_print "\000"
+_print " // Operations on tombs:"
+_print " open    open an existing TOMB"
+_print " index   update the search indexes of tombs"
+_print " search  looks for filenames matching text patterns"
+_print " list    list of open TOMBs and information on them"
+_print " close   close a specific TOMB (or 'all')"
+_print " slam    slam a TOMB killing all programs using it"
     if [ "$RESIZER" = 1 ]; then
-        cat <<EOF
- resize  resize a TOMB to a new size -s (can only grow)
-EOF
+_print " resize  resize a TOMB to a new size -s (can only grow)"
     fi
-cat <<EOF
-
- // Operations on keys:
- passwd  change the password of a KEY
- setkey  change the KEY locking a TOMB (needs old one)
-EOF
-
+_print "\000"
+_print " // Operations on keys:"
+_print " passwd  change the password of a KEY"
+_print " setkey  change the KEY locking a TOMB (needs old one)"
+_print "\000"
     { test "$QRENCODE" = "1" } && {
-        cat <<EOF
- engrave makes a QR code of a KEY to be saved on paper
-EOF
+_print " engrave makes a QR code of a KEY to be saved on paper"
     }
-
+_print "\000"
     if [ "$STEGHIDE" = 1 ]; then
-        cat <<EOF
- bury    hide a KEY inside a JPEG image
- exhume  extract a KEY from a JPEG image
-EOF
+_print " bury    hide a KEY inside a JPEG image"
+_print " exhume  extract a KEY from a JPEG image"
     fi
-    cat <<EOF
-
-Options:
-
- -s     size of the tomb file when creating/resizing one (in MB)
- -k     path to the key to be used ('-k -' to read from stdin)
- -n     don't process the hooks found in tomb
- -o     mount options used to open (default: rw,noatime,nodev)
- -f     force operation (i.e. even if swap is active)
-EOF
+_print "\000"
+_print "Options:"
+_print "\000"
+_print " -s     size of the tomb file when creating/resizing one (in MB)"
+_print " -k     path to the key to be used ('-k -' to read from stdin)"
+_print " -n     don't process the hooks found in tomb"
+_print " -o     mount options used to open (default: rw,noatime,nodev)"
+_print " -f     force operation (i.e. even if swap is active)"
     { test "$KDF" = 1 } && {
-        cat <<EOF
- --kdf  generate passwords armored against dictionary attacks
-EOF
+_print " --kdf  generate passwords armored against dictionary attacks"
     }
 
-cat <<EOF
-
- -h     print this help
- -v     print version, license and list of available ciphers
- -q     run quietly without printing informations
- -D     print debugging information at runtime
-
-For more informations on Tomb read the manual: man tomb
-Please report bugs on <http://github.com/dyne/tomb/issues>.
-EOF
+_print "\000"
+_print " -h     print this help"
+_print " -v     print version, license and list of available ciphers"
+_print " -q     run quietly without printing informations"
+_print " -D     print debugging information at runtime"
+_print "\000"
+_print "For more informations on Tomb read the manual: man tomb"
+_print "Please report bugs on <http://github.com/dyne/tomb/issues>."
 }
 
 
@@ -522,6 +505,9 @@ function _msg() {
             pchars="[E]"; pcolor="red"; message="$fg_no_bold[$pcolor]$msg$reset_color"
             returncode=1
             ;;
+        print)
+            progname=""
+            ;;
         *)
             pchars="[F]"; pcolor="red"
             message="Developer oops!  Usage: _msg MESSAGE_TYPE \"MESSAGE_CONTENT\""
@@ -559,6 +545,11 @@ function _failure die() {
     option_is_set -q || _msg failure $@
     # be sure we forget the secrets we were told
     exit $exitcode
+}
+
+function _print() {
+    option_is_set -q || _msg print $@
+    return 0
 }
 
 # Print out progress to inform GUI caller applications (--batch mode)
@@ -2526,22 +2517,21 @@ main() {
         askpass)    ask_password $PARAM[1] $PARAM[2] ;;
 
         __default)
-            cat <<EOF
-Tomb $VERSION - a strong and gentle undertaker for your secrets
-
- Copyright (C) 2007-2014 Dyne.org Foundation, License GNU GPL v3+
- This is free software: you are free to change and redistribute it
- The latest Tomb sourcecode is published on <http://tomb.dyne.org>
-EOF
+_print "Tomb ::1 version:: - a strong and gentle undertaker for your secrets" $VERSION
+_print "\000"
+_print " Copyright (C) 2007-2014 Dyne.org Foundation, License GNU GPL v3+"
+_print " This is free software: you are free to change and redistribute it"
+_print " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
+_print "\000"
             option_is_set -v && {
-                cat <<EOF
- This source code is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- Please refer to the GNU Public License for more details.
-
-System utils:
-
+_print " This source code is distributed in the hope that it will be useful,"
+_print " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+_print " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+_print " Please refer to the GNU Public License for more details."
+_print "\000"
+_print "System utils:"
+_print "\000"
+cat <<EOF
  `sudo -V | head -n1`
  `cryptsetup --version`
  `pinentry --version`

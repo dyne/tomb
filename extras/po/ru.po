@@ -7,6 +7,174 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 
+#: _print
+msgid "Tomb ::1 version:: - a strong and gentle undertaker for your secrets"
+msgstr ""
+
+#: _print
+msgid " Copyright (C) 2007-2014 Dyne.org Foundation, License GNU GPL v3+"
+msgstr ""
+
+#: _print
+msgid " This is free software: you are free to change and redistribute it"
+msgstr ""
+
+#: _print
+msgid " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
+msgstr ""
+
+#: _print
+msgid " This source code is distributed in the hope that it will be useful,"
+msgstr ""
+
+#: _print
+msgid " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+msgstr ""
+
+#: _print
+msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+msgstr ""
+
+#: _print
+msgid " Please refer to the GNU Public License for more details."
+msgstr ""
+
+#: _print
+msgid " System utils:"
+msgstr ""
+
+#: _print
+msgid "Syntax: tomb [options] command [arguments]"
+msgstr "Синтаксис: tomb [опции] команда [аргументы]"
+
+#: _print
+msgid "Commands:"
+msgstr "Команды:"
+
+#: _print
+msgid " // Creation:"
+msgstr " // Создание: "
+
+#: _print
+msgid " dig     create a new empty TOMB file of size -s in MB"
+msgstr " dig     создать новый пустой файл ГРОБНИЦЫ размером -s Мб "
+
+#: _print
+msgid " forge   create a new KEY file and set its password"
+msgstr " forge   создать новый файл КЛЮЧА и задать его пароль "
+
+#: _print
+msgid " lock    installs a lock on a TOMB to use it with KEY"
+msgstr " lock    установить замок на ГРОБНИЦУ, используя КЛЮЧ "
+
+#: _print
+msgid " // Operations on tombs:"
+msgstr " // Операции над гробницами: "
+
+#: _print
+msgid " open    open an existing TOMB"
+msgstr " open    открыть существующую ГРОБНИЦУ "
+
+#: _print
+msgid " index   update the search indexes of tombs"
+msgstr " index   обновить поисковый индекс гробниц "
+
+#: _print
+msgid " search  looks for filenames matching text patterns"
+msgstr " search  ищет имена файлов, соответствующие шаблону "
+
+#: _print
+msgid " list    list of open TOMBs and information on them"
+msgstr " list    список открытых ГРОБНИЦ и информация о них "
+
+#: _print
+msgid " close   close a specific TOMB (or 'all')"
+msgstr " close   закрыть определенную ГРОБНИЦУ (или 'all' для всех) "
+
+#: _print
+msgid " slam    slam a TOMB killing all programs using it"
+msgstr " slam    захлопнуть ГРОБНИЦУ, убив все программы, использующие ее "
+
+#: _print
+msgid " resize  resize a TOMB to a new size -s (can only grow)"
+msgstr " resize  привести размер гробницы к -s Мб (можно только увеличить) "
+
+#: _print
+msgid " // Operations on keys:"
+msgstr " // Операции с ключами: "
+
+#: _print
+msgid " passwd  change the password of a KEY"
+msgstr " passwd  изменить пароль КЛЮЧА "
+
+#: _print
+msgid " setkey  change the KEY locking a TOMB (needs old one)"
+msgstr " setkey  изменить КЛЮЧ для закрытия ГРОБНИЦЫ (нужен старый ключ) "
+
+#: _print
+msgid " engrave makes a QR code of a KEY to be saved on paper"
+msgstr " engrave создает штрих-код для хранения КЛЮЧА на бумаге "
+
+#: _print
+msgid " bury    hide a KEY inside a JPEG image"
+msgstr " bury    спрятать КЛЮЧ в JPEG изображении exhume  извлечь КЛЮЧ из JPEG изображения "
+
+#: _print
+msgid " exhume  extract a KEY from a JPEG image"
+msgstr ""
+
+#: _print
+msgid "Options:"
+msgstr "Опции: "
+
+#: _print
+msgid " -s     size of the tomb file when creating/resizing one (in MB)"
+msgstr " -s     размер файла гробницы при создании/изменении размера (в Мб) "
+
+#: _print
+msgid " -k     path to the key to be used ('-k -' to read from stdin)"
+msgstr " -k     путь к ключу ('-k -' для чтения из stdin) "
+
+#: _print
+msgid " -n     don't process the hooks found in tomb"
+msgstr " -n     не обрабатывать события, найденные в гробнице "
+
+#: _print
+msgid " -o     mount options used to open (default: rw,noatime,nodev)"
+msgstr " -o     параметры монтирования при открытии (по умолчанию rw,noatime,nodev) "
+
+#: _print
+msgid " -f     force operation (i.e. even if swap is active)"
+msgstr " -f     форсировать операцию (например, даже при активном swap) "
+
+#: _print
+msgid " --kdf  generate passwords armored against dictionary attacks"
+msgstr " --kdf  сгенерировать пароли, устойчивые к атакам по словарю "
+
+#: _print
+msgid " -h     print this help"
+msgstr " -h     показать эту справку "
+
+#: _print
+msgid " -v     print version, license and list of available ciphers"
+msgstr " -v     показать версию, лицензию и доступные шифры "
+
+#: _print
+msgid " -q     run quietly without printing informations"
+msgstr " -q     выполнение без вывода информации на экран "
+
+#: _print
+msgid " -D     print debugging information at runtime"
+msgstr " -D     вывести отладочную информацию при запуске"
+
+#: _print
+msgid "For more informations on Tomb read the manual: man tomb"
+msgstr "Больше информации по Tomb вы можете найти в руководстве: man tomb"
+
+#: _print
+msgid "Please report bugs on <http://github.com/dyne/tomb/issues>."
+msgstr "Пожалуйста, сообщайте о найденных ошибках на <http://github.com/dyne/tomb/issues>."
+
 #: _verbose
 #, fuzzy
 msgid "Created tempfile: ::1 temp file::"
