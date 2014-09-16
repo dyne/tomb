@@ -1,3 +1,5 @@
+stop @ 337
+
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
@@ -10,7 +12,7 @@ msgstr ""
 #: _verbose
 #, fuzzy
 msgid "Created tempfile: ::1 temp file::"
-msgstr "Gültige Grab-Datei gefunden : ::1 tomb file::"
+msgstr "Temporäre Datei erstellt : ::1 temp file::"
 
 #: _success
 msgid "All your swaps are belong to crypt.  Good."
@@ -22,39 +24,39 @@ msgstr "Vorgang abgebrochen."
 
 #: _verbose
 msgid "exec_as_user '::1 user::': ::2::"
-msgstr ""
+msgstr "exec_as_user '::1 user::': ::2::"
 
 #: _verbose
 msgid "Using sudo for root execution of '::1 exec:: ::2 args::'."
-msgstr ""
+msgstr "Benutzen von sudo um '::1 exec:: ::2 args::' als root auszuführen."
 
 #: _verbose
 msgid "Escalating privileges using sudo-pwd."
-msgstr ""
+msgstr "Berechtigungskonflikte beim Benutzen von sudo-pwd."
 
 #: _verbose
 #, fuzzy
 msgid "is_valid_tomb ::1 tomb file::"
-msgstr "Gültige Grab-Datei gefunden : ::1 tomb file::"
+msgstr "is_valid_tomb : ::1 tomb file::"
 
 #: _warning
 msgid "Tomb file is missing from arguments."
-msgstr ""
+msgstr "Grab Datei fehlen Argumente."
 
 #: _warning
 #, fuzzy
 msgid "Tomb file not found: ::1 tomb file::"
-msgstr "Gültige Grab-Datei gefunden : ::1 tomb file::"
+msgstr "Grab Datei nicht gefunden: : ::1 tomb file::"
 
 #: _warning
 #, fuzzy
 msgid "Tomb file is not a regular file: ::1 tomb file::"
-msgstr "Gültige Grab-Datei gefunden : ::1 tomb file::"
+msgstr "Tom File ist keine reguläre Datei: : ::1 tomb file::"
 
 #: _warning
 #, fuzzy
 msgid "Tomb file is empty (zero length): ::1 tomb file::"
-msgstr "Gültige Grab-Datei gefunden : ::1 tomb file::"
+msgstr "Grab Datei ist leer (Länge: 0) : ::1 tomb file::"
 
 #: _warning
 #, fuzzy
@@ -64,12 +66,12 @@ msgstr "Gültige Grab-Datei gefunden : ::1 tomb file::"
 #: _warning
 #, fuzzy
 msgid "File is not yet a tomb: ::1 tomb file::"
-msgstr "Grab ::1 tomb file:: wird geöffnet"
+msgstr "Datei ist noch kein Grab: ::1 tomb file::"
 
 #: _warning
 #, fuzzy
 msgid "Tomb is currently in use: ::1 tomb name::"
-msgstr "Schließen des Grabes ::1 tomb name::"
+msgstr "Grab wird schon benutzt ::1 tomb name::"
 
 #: _message
 msgid "Valid tomb file found: ::1 tomb file::"
@@ -77,7 +79,7 @@ msgstr "Gültige Grab-Datei gefunden : ::1 tomb file::"
 
 #: _failure
 msgid "Loopback mount called on invalid tomb: ::1 path::"
-msgstr ""
+msgstr "Loopback Einhängen mit ungültiger Datei versucht: ::1 path::"
 
 #: _warning
 #, fuzzy
@@ -86,49 +88,47 @@ msgstr "Loop-Mount der Laufwerke nicht unterstützt, dieser Fehler"
 
 #: _warning
 msgid "often occurs on VPS and kernels that don't provide the loop module."
-msgstr ""
-"tritt oft in virtuellen Maschinen auf oder mit Kerneln ohne Loop-Modul."
+msgstr "tritt oft in virtuellen Maschinen auf oder mit Kerneln ohne Loop-Modul."
 
 #: _warning
 msgid "It is impossible to use Tomb on this machine at this conditions."
-msgstr ""
-"Es ist unmöglich Tomb unter diesen Umständen auf dieser Maschine zu benutzen."
+msgstr "Es ist unmöglich Tomb unter diesen Umständen auf dieser Maschine zu benutzen."
 
 #: _verbose
 msgid "lo_preserve on ::1 path::"
-msgstr ""
+msgstr "lo_preserve on ::1 path::"
 
 #: _verbose
 #, fuzzy
 msgid "tomb_file: ::1 tomb file::"
-msgstr "Gültige Grab-Datei gefunden : ::1 tomb file::"
+msgstr "tomb_file: ::1 tomb file::"
 
 #: _verbose
 msgid "tomb_key: ::1 key:: chars long"
-msgstr ""
+msgstr "tomb_key: ::1 key:: Zeichen lang"
 
 #: _verbose
 #, fuzzy
 msgid "tomb_key_file: ::1 key::"
-msgstr "Alter Schlüssel : ::1 key::"
+msgstr "tomb_key_file: ::1 key::"
 
 #: _verbose
 msgid "tomb_secret: ::1 secret:: chars long"
-msgstr ""
+msgstr "tomb_secret: ::1 secret:: Zeichen lang"
 
 #: _verbose
 #, fuzzy
 msgid "tomb_password: ::1 tomb pass::"
-msgstr "Grab unauffindbar : ::1 tomb name::"
+msgstr "tomb_password: ::1 tomb pass::"
 
 #: _verbose
 #, fuzzy
 msgid "tomb_tempfiles: ::1 temp files::"
-msgstr "Gültige Grab-Datei gefunden : ::1 tomb file::"
+msgstr "tomb_tempfiles: ::1 temp files::"
 
 #: _verbose
 msgid "tomb_loopdevs: ::1 loopdevs::"
-msgstr ""
+msgstr "tomb_loopdevs: ::1 loopdevs::"
 
 #: _print
 msgid "Syntax: tomb [options] command [arguments]"
@@ -136,11 +136,11 @@ msgstr "Syntax : tomb [Optionen] Befehl [Argumente]"
 
 #: _print
 msgid "Commands:"
-msgstr "Befehle :"
+msgstr "Befehle:"
 
 #: _print
 msgid " // Creation:"
-msgstr " // Erstellen :"
+msgstr " // Erstellen:"
 
 #: _print
 msgid " dig     create a new empty TOMB file of size -s in MB"
@@ -156,7 +156,7 @@ msgstr " lock    GRAB mit einem SCHLÜSSEL zusperren"
 
 #: _print
 msgid " // Operations on tombs:"
-msgstr " // Gräber bearbeiten :"
+msgstr " // Gräber bearbeiten:"
 
 #: _print
 msgid " open    open an existing TOMB"
@@ -188,7 +188,7 @@ msgstr " resize  Größe eines Grabes ändern zu -s Mb (nur vergrößern möglic
 
 #: _print
 msgid " // Operations on keys:"
-msgstr " // Schlüssel bearbeiten :"
+msgstr " // Schlüssel bearbeiten:"
 
 #: _print
 msgid " passwd  change the password of a KEY"
@@ -212,18 +212,15 @@ msgstr " exhume  extrahiert den SCHLÜSSEL aus einer JPEG-Datei"
 
 #: _print
 msgid "Options:"
-msgstr "Optionen :"
+msgstr "Optionen:"
 
 #: _print
 msgid " -s     size of the tomb file when creating/resizing one (in MB)"
-msgstr ""
-" -s        Größe eines Grabes (beim Erstellen/neue Größe zuweisen) (in Mb)"
+msgstr " -s        Größe eines Grabes (beim Erstellen/neue Größe zuweisen) (in Mb)"
 
 #: _print
 msgid " -k     path to the key to be used ('-k -' to read from stdin)"
-msgstr ""
-" -k        Dateipfad zum Schlüssel ('-k -' um ihn aus der Standarteingabe "
-"einzulesen)"
+msgstr " -k        Dateipfad zum Schlüssel ('-k -' um ihn aus der Standarteingabe einzulesen)"
 
 #: _print
 msgid " -n     don't process the hooks found in tomb"
@@ -247,9 +244,7 @@ msgstr " -h        Anzeigen dieses Hilfetextes"
 
 #: _print
 msgid " -v     print version, license and list of available ciphers"
-msgstr ""
-" -v        Anzeigen der Version, Lizenzen und vorhandeners "
-"Verschlüsslungsmethoden"
+msgstr " -v        Anzeigen der Version, Lizenzen und vorhandeners Verschlüsslungsmethoden"
 
 #: _print
 msgid " -q     run quietly without printing informations"
@@ -269,36 +264,35 @@ msgstr "Bug-Reports bitte an <https://github.com/dyne/tomb/issues>.."
 
 #: _failure
 msgid "Cannot find ::1::. It's a requirement to use Tomb, please install it."
-msgstr ""
+msgstr "Kann ::1:: nicht finden. Bitte installieren, da es zum Funktionement von Tomb benötigt wird."
 
 #: _verbose
 msgid "is_valid_key"
-msgstr ""
+msgstr "is_valid_key"
 
 #: _warning
 msgid "is_valid_key() called without argument."
-msgstr ""
+msgstr "is_valid_key() ohne Argumente aufgerufen."
 
 #: _message
 msgid "Key is an image, it might be valid."
-msgstr ""
+msgstr "Schlüssel ist ein Bild, es könnte gültig sein"
 
 #: _message
 msgid "Key is valid."
-msgstr ""
+msgstr "Schlüssel ist gültig"
 
 #: _warning
 msgid "Attempting key recovery."
-msgstr ""
+msgstr "Versuche Schlüssel wieder herzustellen"
 
 #: _failure
 msgid "This operation requires a key file to be specified using the -k option."
-msgstr ""
-"Diese Operation benötigt das angeben eines Schlüssels durch die -k Option."
+msgstr "Diese Operation benötigt das angeben eines Schlüssels durch die -k Option."
 
 #: _verbose
 msgid "load_key reading from stdin."
-msgstr ""
+msgstr "load_key liest von der Standarteingabe"
 
 #: _message
 msgid "Waiting for the key to be piped from stdin... "
@@ -306,7 +300,7 @@ msgstr "Warten auf den Schlüssel auf der Standarteingabe... "
 
 #: _verbose
 msgid "load_key argument: ::1 opt::"
-msgstr ""
+msgstr "load_key argument: ::1 opt::"
 
 #: _warning
 msgid "Key not found, specify one using -k."
@@ -315,24 +309,23 @@ msgstr "Schlüssel nicht gefunden, bitte mit -k einen Schlüssel angeben."
 #: _verbose
 #, fuzzy
 msgid "load_key: ::1 key::"
-msgstr "Alter Schlüssel : ::1 key::"
+msgstr "load_key : ::1 key::"
 
 #: _warning
-msgid ""
-"The key seems invalid or its format is not known by this version of Tomb."
-msgstr ""
+msgid "The key seems invalid or its format is not known by this version of Tomb."
+msgstr "Der Schlüssel scheint ungültig zu sein, oder sein Format ist dieser Tomb Version unbekannt."
 
 #: _verbose
 msgid "GnuPG is version 1.4.11 - adopting status fix."
-msgstr ""
+msgstr "GnuPG Version 1.4.11 - bessere Status aus"
 
 #: _verbose
 msgid "get_lukskey"
-msgstr ""
+msgstr "get_lukskey"
 
 #: _verbose
 msgid "KDF: ::1 kdf::"
-msgstr ""
+msgstr "Schlüsselableitungsfunktion: ::1 kdf::"
 
 #: _failure
 #, fuzzy
@@ -341,7 +334,7 @@ msgstr "Kein gültiges Programm zur Schlüsselableitung ::1 kdf::."
 
 #: _verbose
 msgid "get_lukskey returns ::1::"
-msgstr ""
+msgstr "get_lukskey gibt ::1:: zurück"
 
 #: _failure
 msgid "Internal error: ask_key_password() called before load_key()."
