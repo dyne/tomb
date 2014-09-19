@@ -1,4 +1,4 @@
-stop @ 337
+stop @ 701
 
 msgid ""
 msgstr ""
@@ -338,7 +338,7 @@ msgstr "get_lukskey gibt ::1:: zurück"
 
 #: _failure
 msgid "Internal error: ask_key_password() called before load_key()."
-msgstr ""
+msgstr "Interner Fehler: ask_key_password() vor load_key gestartet"
 
 #: _message
 msgid "A password is required to use key ::1 key::"
@@ -354,7 +354,7 @@ msgstr "Passwort OK."
 
 #: _verbose
 msgid "ask_key_password with tombpass: ::1 tomb pass::"
-msgstr ""
+msgstr "ask_key_password mit Grabschlüssel: ::1 tomb pass::"
 
 #: _message
 msgid "Commanded to change password for tomb key ::1 key::"
@@ -363,20 +363,20 @@ msgstr "Benutzer hat Passwort für Schlüssel ::1 key:: gewechselt."
 #: _success
 #, fuzzy
 msgid "Changing password for ::1 key file::"
-msgstr "Passwort gewechselt für ::1 key::."
+msgstr "Passwort gewechselt für ::1 key file::."
 
 #: _verbose
 msgid "tomb-old-pwd = ::1 old pass::"
-msgstr ""
+msgstr "tomb-old-pwd = ::1 old pass::"
 
 #: _failure
 #, fuzzy
 msgid "No valid password supplied."
-msgstr "Das eingegebene Passwort ist falsch."
+msgstr "Kein gültiges Passwort angegeben"
 
 #: _verbose
 msgid "tomb-pwd = ::1 new pass::"
-msgstr ""
+msgstr "tomb-pwd = ::1 new pass::"
 
 #: _failure
 msgid "Error: the newly generated keyfile does not seem valid."
@@ -396,43 +396,40 @@ msgstr "Fehler: Passwort nicht gesetzt."
 
 #: _verbose
 msgid "gen_key takes tombpass from CLI argument: ::1 tomb pass::"
-msgstr ""
+msgstr "gen_key nimmt Passwort von der Kommandozeile an: ::1 tomb pass::"
 
 #: _failure
-msgid ""
-"Wrong argument for --kdf: must be an integer number (iteration seconds)."
+msgid "Wrong argument for --kdf: must be an integer number (iteration seconds)."
 msgstr "Ungültiges Argument für --kdf : dies muss eine Ganzzahl sein."
 
 #: _success
 msgid "Using KDF, iterations: ::1 microseconds::"
-msgstr "::1 microseconds:: Wiederholungen zur Schlüsselableitung."
+msgstr "::1 microseconds:: Iterationen zur Schlüsselableitung."
 
 #: _message
 msgid "generating salt"
-msgstr ""
+msgstr "generiere Salt"
 
 #: _message
 msgid "calculating iterations"
-msgstr ""
+msgstr "berechne Iterationen"
 
 #: _message
 msgid "encoding the password"
-msgstr ""
+msgstr "Passwort verschlüsseln"
 
 #: _failure
 msgid "gpg (GnuPG) is not found, Tomb cannot function without it."
-msgstr ""
-"gpg (GnuPG) welches zur Funktion von Tomb notwendig ist, nicht gefunden."
+msgstr "gpg (GnuPG) welches zur Funktion von Tomb notwendig ist, nicht gefunden."
 
 #: _failure
 #, fuzzy
 msgid "Bury failed for invalid key: ::1 key::"
-msgstr "Gültiger Schlüssel wurde gefunden : ::1 key::"
+msgstr "Vergraben für ungültiges Passwort fehlgeschlagen : ::1 key::"
 
 #: _warning
 msgid "Encode failed: ::1 image file:: is not a jpeg image."
-msgstr ""
-"Verschlüsselung fehlgeschlagen : ::1 image file:: ist keine JPEG-Datei."
+msgstr "Verschlüsselung fehlgeschlagen : ::1 image file:: ist keine JPEG-Datei."
 
 #: _success
 #, fuzzy
@@ -446,7 +443,7 @@ msgstr "Bitte bestätigen Sie das Passwort zur Verschlüsselung"
 #: _verbose
 #, fuzzy
 msgid "tomb-pwd = ::1 tomb pass::"
-msgstr "Schließen des Grabes ::1 tomb name::"
+msgstr "tomb-pwd = ::1 tomb pass::"
 
 #: _warning
 msgid "Wrong password supplied."
@@ -454,8 +451,7 @@ msgstr "Das eingegebene Passwort ist falsch."
 
 #: _failure
 msgid "You shall not bury a key whose password is unknown to you."
-msgstr ""
-"Sie dürfen keinen Schlüssel vergraben, von dem Sie das Passwort nicht kennen."
+msgstr "Sie dürfen keinen Schlüssel vergraben, von dem Sie das Passwort nicht kennen."
 
 #: _warning
 msgid "Encoding error: steghide reports problems."
@@ -463,33 +459,30 @@ msgstr "Fehler beim Verschlüsseln : steghide meldet Fehler."
 
 #: _success
 msgid "Tomb key encoded succesfully into image ::1 image file::"
-msgstr ""
-"Der Schlüssel des Grabes wurde erfolgreich im Bild ::1 image file:: "
-"verschlüsselt."
+msgstr "Der Schlüssel des Grabes wurde erfolgreich im Bild ::1 image file:: verschlüsselt."
 
 #: _message
 msgid "printing exhumed key on stdout"
-msgstr ""
+msgstr "Gebe exhumierten Schlüssel auf stdout aus"
 
 #: _failure
 #, fuzzy
 msgid "Exhume failed, image file not found: ::1 image file::"
-msgstr "Gültige Grab-Datei gefunden : ::1 tomb file::"
+msgstr "Exhumieren fehlgeschlagen, Bilddatei nicht gefunden : ::1 image file::"
 
 #: _failure
 #, fuzzy
 msgid "Exhume failed: ::1 image file:: is not a jpeg image."
-msgstr ""
-"Verschlüsselung fehlgeschlagen : ::1 image file:: ist keine JPEG-Datei."
+msgstr "Verschlüsselung fehlgeschlagen : ::1 image file:: ist keine JPEG-Datei."
 
 #: _failure
 msgid "Wrong password or no steganographic key found"
-msgstr ""
+msgstr "Falsches Passwort, oder kein steganographischer Schlüssel gefunden"
 
 #: _warning
 #, fuzzy
 msgid "File exists: ::1 tomb key::"
-msgstr "Datei existiert : ::1 key::"
+msgstr "Datei existiert: ::1 tomb key::"
 
 #: _warning
 msgid "Make explicit use of --force to overwrite."
@@ -498,9 +491,7 @@ msgstr "Benutzen sie --force um ein Überschreiben zu erzwingen."
 #: _failure
 #, fuzzy
 msgid "Refusing to overwrite file. Operation aborted."
-msgstr ""
-"Das ausheben dieses Grabes würde eine existierende Datei überschreiben. "
-"Vorgang abgebrochen."
+msgstr "Überschreiben verweigert. Operation abgebrochen."
 
 #: _warning
 msgid "Use of --force selected: overwriting."
@@ -511,7 +502,7 @@ msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr "Versuche Schlüssel aus ::1 image file:: zu exhumieren"
 
 msgid "Key succesfully exhumed to ::1 key::."
-msgstr ""
+msgstr "Schlüssel erfolgreich nach ::1 key:: exhumiert."
 
 #: _warning
 msgid "Nothing found in ::1 image file::"
@@ -519,7 +510,7 @@ msgstr "Nichts gefunden in ::1 image file::"
 
 #: _failure
 msgid "No key specified."
-msgstr ""
+msgstr "Kein Schlüssel angegeben"
 
 #: _success
 #, fuzzy
@@ -528,7 +519,7 @@ msgstr "::1 key:: wird in QR-Code umgewandelt"
 
 #: _failure
 msgid "QREncode reported an error."
-msgstr ""
+msgstr "QREncode meldet einen Fehler"
 
 #: _success
 msgid "Operation successful:"
@@ -536,8 +527,7 @@ msgstr "Vorgang erfolgreich : "
 
 #: _warning
 msgid "A filename needs to be specified using -k to forge a new key."
-msgstr ""
-"Um einen neuen Schlüssel anzugeben muss ein Dateiname mit -k angegeben "
+msgstr "Mit -k muss ein Dateiname angegeben werden, um einen neuen Schlüssel zu schmieden"
 "werden."
 
 #: _message
@@ -546,45 +536,35 @@ msgstr "::1 key:: wird geschmiedet"
 
 #: _warning
 msgid "Forging this key would overwrite an existing file. Operation aborted."
-msgstr ""
-"Diesen Schlüssel zu schmieden würde eine existierende Datei überschreiben. "
-"Aktion abgebrochen."
+msgstr "Diesen Schlüssel zu schmieden würde eine existierende Datei überschreiben. Aktion abgebrochen."
 
 #: _failure
 msgid "`ls -lh $destkey`"
-msgstr ""
+msgstr "`ls -lh $destkey`"
 
 #: _message
 msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
-msgstr ""
-"Der Schlüssel ::1 key:: wird mit dem Verschlüsselungsalgorithmus ::2 "
-"algorithm:: geschmiedet."
+msgstr "Der Schlüssel ::1 key:: wird mit dem Verschlüsselungsalgorithmus ::2 algorithm:: geschmiedet."
 
 #: _message
 msgid "This operation takes time, keep using this computer on other tasks,"
-msgstr ""
-"Dieser Vorgang braucht Zeit, benutzen Sie den Computer für andere Aufgaben,"
+msgstr "Dieser Vorgang braucht Zeit, benutzen Sie den Computer für andere Aufgaben,"
 
 #: _message
 msgid "once done you will be asked to choose a password for your tomb."
-msgstr ""
-"wenn der Vorgang einmal abgeschlossen ist, werden Sie gefragt ein Passwort "
-"für ihr Grab anzugeben."
+msgstr "wenn der Vorgang einmal abgeschlossen ist, werden Sie gefragt ein Passwort für ihr Grab anzugeben."
 
 #: _message
 msgid "To make it faster you can move the mouse around."
-msgstr ""
-"Um den Vorgang zu Beschleunigen können sie die Maus hin und her bewegen."
+msgstr "Um den Vorgang zu Beschleunigen können sie die Maus hin und her bewegen."
 
 #: _message
 msgid "If you are on a server, you can use an Entropy Generation Daemon."
-msgstr ""
-"Falls sie auf einem Server sind können sie einen Daemon benutzen um Entropie "
-"zu erstellen."
+msgstr "Falls sie auf einem Server sind können sie einen Daemon benutzen um Entropie zu erstellen."
 
 #: _verbose
 msgid "Data dump using ::1:: from ::2 source::"
-msgstr ""
+msgstr "Datenausgabe mit ::1:: von ::2 source::"
 
 #: _warning
 msgid "Cannot generate encryption key."
@@ -593,7 +573,7 @@ msgstr "Verschlüsselungsschlüssel konnte nicht erstellt werden."
 #: _success
 #, fuzzy
 msgid "Choose the  password of your key: ::1 tomb key::"
-msgstr "Wählen sie ein Passwort für ihren Schlüssel : ::1 key::"
+msgstr "Wählen sie ein Passwort für ihren Schlüssel : ::1 tomb key::"
 
 #: _message
 msgid "(You can also change it later using 'tomb passwd'.)"
@@ -622,7 +602,7 @@ msgstr "Ihr Schlüssel ist bereit :"
 #: _message
 #, fuzzy
 msgid "Commanded to dig tomb ::1 tomb name::"
-msgstr "Das Grab ::1 tomb file:: wird ausgehoben"
+msgstr "Das Grab ::1 tomb name:: wird ausgehoben"
 
 #: _warning
 msgid "No tomb name specified for creation."
@@ -630,7 +610,7 @@ msgstr "Dem Grab wurde bei seiner Erstellung kein Name zugeteilt."
 
 #: _failure
 msgid "Size argument missing, use -s"
-msgstr "Benutzen Sie -s um die Größe in Mb anzugeben."
+msgstr "Größenangabe fehlt, benutzen sie -s."
 
 #: _failure
 msgid "Size argument is not an integer."
@@ -646,12 +626,12 @@ msgstr "Es existiert bereits ein Grab. Hier grabe ich nicht:"
 
 #: _warning
 msgid " `ls -lh ${tombdir}/${tombfile}`"
-msgstr ""
+msgstr " `ls -lh ${tombdir}/${tombfile}`"
 
 #: _success
 #, fuzzy
 msgid "Creating a new tomb in ::1 tomb dir::/::2 tomb file::"
-msgstr "Neues Grab in ::1 dir::/::2 tomb file::"
+msgstr "Neues Grab in ::1 tomb dir::/::2 tomb file::"
 
 #: _message
 msgid "Generating ::1 tomb file:: of ::2 size::MiB"
@@ -659,15 +639,12 @@ msgstr "Grab ::1 tomb file:: wird erstellt, mit der Größe ::2 size::Mb"
 
 #: _verbose
 msgid "Data dump using ::1:: from /dev/urandom"
-msgstr ""
+msgstr "Datenausgabe mit ::1:: von /dev/urandom"
 
 #: _failure
 #, fuzzy
-msgid ""
-"Error creating the tomb ::1 tomb dir::/::2 tomb file::, operation aborted."
-msgstr ""
-"Fehler beim Erstellen des Grabes ::1 dir::/::2 tomb file::. Vorgang "
-"abgebrochen."
+msgid "Error creating the tomb ::1 tomb dir::/::2 tomb file::, operation aborted."
+msgstr "Fehler beim Erstellen des Grabes ::1 tomb dir::/::2 tomb file::. Vorgang abgebrochen."
 
 #: _success
 msgid "Done digging ::1 tomb name::"
@@ -675,9 +652,7 @@ msgstr "Das Grab ::1 tomb name:: wurde ausgehoben."
 
 #: _message
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
-msgstr ""
-"Ihr Grab ist noch nicht bereit, erst müssen sie einen Schlüssel schmieden "
-"und es abschließen :"
+msgstr "Ihr Grab ist noch nicht bereit, erst müssen sie einen Schlüssel schmieden und es abschließen:"
 
 #: _message
 msgid "tomb forge ::1 tomb name::.tomb.key"
@@ -701,33 +676,29 @@ msgstr "Grab ::1 tomb file:: wird verschlossen"
 
 #: _failure
 msgid "There is no tomb here. You have to it dig first."
-msgstr "Es ist kein Grab an diesem Ort. Sie müssen erst eins graben ('dig')."
+msgstr "Es ist kein Grab an diesem Ort. Sie müssen erst eins graben."
 
 #: _verbose
 #, fuzzy
 msgid "Tomb found: ::1 tomb dir::/::2 tomb file::"
-msgstr "Neues Grab in ::1 dir::/::2 tomb file::"
+msgstr "Grab gefunden in ::1 tomb dir::/::2 tomb file::"
 
 #: _verbose
 #, fuzzy
 msgid "Loop mounted on ::1 mount point::"
-msgstr "::1 mount point:: kann nicht abrupt geschlossen werden."
+msgstr "Loop mount in::1 mount point::"
 
 #: _message
 msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
-msgstr ""
-"Am kontrollieren ob Grab leer ist (wir würden nie fremde Knochen stören)."
+msgstr "Am kontrollieren ob Grab leer ist (wir würden nie fremde Knochen stören)."
 
 #: _warning
 msgid "The tomb was already locked with another key."
 msgstr "Grab ist schon mit anderem Schlüssel verschlossen."
 
 #: _failure
-msgid ""
-"Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
-msgstr ""
-"Vorgang abgebrochen. Ich kann kein bereits abgeschlossenes Grab nochmal "
-"abschließen. Graben Sie ein neues (mit 'dig')."
+msgid "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
+msgstr "Vorgang abgebrochen. Ich kann kein bereits abgeschlossenes Grab nochmal abschließen. Graben Sie ein neues."
 
 #: _message
 msgid "Fine, this tomb seems empty."
