@@ -21,21 +21,12 @@ msgid "Operation aborted."
 msgstr "L'opération est interrompue."
 
 #: _verbose
-msgid "exec_as_user '::1 user::': ::2::"
-msgstr ""
-
-#: _verbose
 msgid "Using sudo for root execution of '::1 exec:: ::2 args::'."
 msgstr ""
 
 #: _verbose
 msgid "Escalating privileges using sudo-pwd."
 msgstr ""
-
-#: _verbose
-#, fuzzy
-msgid "is_valid_tomb ::1 tomb file::"
-msgstr "Le fichier valide d'une tombe a été trouvé : ::1 tomb file::"
 
 #: _warning
 msgid "Tomb file is missing from arguments."
@@ -103,35 +94,11 @@ msgid "lo_preserve on ::1 path::"
 msgstr ""
 
 #: _verbose
-#, fuzzy
-msgid "tomb_file: ::1 tomb file::"
-msgstr "Le fichier valide d'une tombe a été trouvé : ::1 tomb file::"
-
-#: _verbose
 msgid "tomb_key: ::1 key:: chars long"
 msgstr ""
 
 #: _verbose
-#, fuzzy
-msgid "tomb_key_file: ::1 key::"
-msgstr "Clé précédente : ::1 key::"
-
-#: _verbose
 msgid "tomb_secret: ::1 secret:: chars long"
-msgstr ""
-
-#: _verbose
-#, fuzzy
-msgid "tomb_password: ::1 tomb pass::"
-msgstr "Tombe introuvable : ::1 tomb name::"
-
-#: _verbose
-#, fuzzy
-msgid "tomb_tempfiles: ::1 temp files::"
-msgstr "Le fichier valide d'une tombe a été trouvé : ::1 tomb file::"
-
-#: _verbose
-msgid "tomb_loopdevs: ::1 loopdevs::"
 msgstr ""
 
 #: _print
@@ -297,10 +264,6 @@ msgstr ""
 msgid "Cannot find ::1::. It's a requirement to use Tomb, please install it."
 msgstr ""
 
-#: _verbose
-msgid "is_valid_key"
-msgstr ""
-
 #: _warning
 msgid "is_valid_key() called without argument."
 msgstr ""
@@ -339,11 +302,6 @@ msgstr ""
 msgid "Key not found, specify one using -k."
 msgstr "Aucune clé n'a été trouvée, merci d'en spécifier une avec -k."
 
-#: _verbose
-#, fuzzy
-msgid "load_key: ::1 key::"
-msgstr "Clé précédente : ::1 key::"
-
 #: _warning
 msgid ""
 "The key seems invalid or its format is not known by this version of Tomb."
@@ -351,14 +309,6 @@ msgstr ""
 
 #: _verbose
 msgid "GnuPG is version 1.4.11 - adopting status fix."
-msgstr ""
-
-#: _verbose
-msgid "get_lukskey"
-msgstr ""
-
-#: _verbose
-msgid "KDF: ::1 kdf::"
 msgstr ""
 
 #: _failure
@@ -400,18 +350,10 @@ msgstr ""
 msgid "Changing password for ::1 key file::"
 msgstr "Mise à jour du mot de passe de ::1 key::."
 
-#: _verbose
-msgid "tomb-old-pwd = ::1 old pass::"
-msgstr ""
-
 #: _failure
 #, fuzzy
 msgid "No valid password supplied."
 msgstr "Le mot de passe fourni est invalide."
-
-#: _verbose
-msgid "tomb-pwd = ::1 new pass::"
-msgstr ""
 
 #: _failure
 msgid "Error: the newly generated keyfile does not seem valid."
@@ -479,11 +421,6 @@ msgstr "Inscription de la clé ::1 key:: dans l'image ::2 image file::"
 #: _message
 msgid "Please confirm the key password for the encoding"
 msgstr "Merci de confirmer le mot de passe de la clé en vue de l'encodage"
-
-#: _verbose
-#, fuzzy
-msgid "tomb-pwd = ::1 tomb pass::"
-msgstr "Fermons la tombe ::1 tomb name::"
 
 #: _warning
 msgid "Wrong password supplied."
@@ -579,10 +516,6 @@ msgstr "Forge de la clé ::1 key::"
 msgid "Forging this key would overwrite an existing file. Operation aborted."
 msgstr "Forger cette clé détruirait un fichier existant.  Opération annulée."
 
-#: _failure
-msgid "`ls -lh $destkey`"
-msgstr ""
-
 #: _message
 msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
 msgstr ""
@@ -636,10 +569,6 @@ msgstr "La clé semble être invalide."
 msgid "Dumping contents to screen:"
 msgstr "Capture des contenus à l'écran :"
 
-#: _warning
-msgid "--"
-msgstr "--"
-
 #: _message
 msgid "Done forging ::1 key::"
 msgstr "La clé ::1 key:: a été forgée"
@@ -673,10 +602,6 @@ msgstr "La taille minimale d'une tombe est de 10 megaoctets."
 msgid "A tomb exists already. I'm not digging here:"
 msgstr "Une tombe existe déjà à cet endroit. Je n'y creuse pas !"
 
-#: _warning
-msgid " `ls -lh ${tombdir}/${tombfile}`"
-msgstr ""
-
 #: _success
 #, fuzzy
 msgid "Creating a new tomb in ::1 tomb dir::/::2 tomb file::"
@@ -707,14 +632,6 @@ msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
 msgstr ""
 "Votre tombe n'est pas encore prête, vous devez en forger la clé et la "
 "vérouiller :"
-
-#: _message
-msgid "tomb forge ::1 tomb name::.tomb.key"
-msgstr "tomb forge ::1 tomb name::.tomb.key"
-
-#: _message
-msgid "tomb lock ::1 tomb name::.tomb -k ::1 tomb name::.tomb.key"
-msgstr "tomb lock ::1 tomb name::.tomb -k ::1 tomb name::.tomb.key"
 
 #: _warning
 msgid "No tomb specified for locking."
@@ -887,10 +804,6 @@ msgstr "Le verrou est changé sur la tombe ::1 tomb file::"
 #, fuzzy
 msgid "The new key is: ::1 new key::"
 msgstr "La nouvelle clé est : ::1 key::"
-
-#: _verbose
-msgid "create_tomb(): ::1:: ::2::"
-msgstr ""
 
 #: _warning
 #, fuzzy
@@ -1085,10 +998,6 @@ msgstr ""
 
 #: _failure
 msgid "Index command needs 'mlocate' to be installed."
-msgstr ""
-
-#: _verbose
-msgid "$updatedbver"
 msgstr ""
 
 #: _failure
