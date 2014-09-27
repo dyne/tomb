@@ -27,19 +27,11 @@ msgid "Operation aborted."
 msgstr ""
 
 #: _verbose
-msgid "exec_as_user '::1 user::': ::2::"
-msgstr ""
-
-#: _verbose
 msgid "Using sudo for root execution of '::1 exec:: ::2 args::'."
 msgstr ""
 
 #: _verbose
 msgid "Escalating privileges using sudo-pwd."
-msgstr ""
-
-#: _verbose
-msgid "is_valid_tomb ::1 tomb file::"
 msgstr ""
 
 #: _warning
@@ -95,31 +87,11 @@ msgid "lo_preserve on ::1 path::"
 msgstr ""
 
 #: _verbose
-msgid "tomb_file: ::1 tomb file::"
-msgstr ""
-
-#: _verbose
 msgid "tomb_key: ::1 key:: chars long"
 msgstr ""
 
 #: _verbose
-msgid "tomb_key_file: ::1 key::"
-msgstr ""
-
-#: _verbose
 msgid "tomb_secret: ::1 secret:: chars long"
-msgstr ""
-
-#: _verbose
-msgid "tomb_password: ::1 tomb pass::"
-msgstr ""
-
-#: _verbose
-msgid "tomb_tempfiles: ::1 temp files::"
-msgstr ""
-
-#: _verbose
-msgid "tomb_loopdevs: ::1 loopdevs::"
 msgstr ""
 
 #: _print
@@ -258,10 +230,6 @@ msgstr ""
 msgid "Cannot find ::1::. It's a requirement to use Tomb, please install it."
 msgstr ""
 
-#: _verbose
-msgid "is_valid_key"
-msgstr ""
-
 #: _warning
 msgid "is_valid_key() called without argument."
 msgstr ""
@@ -298,24 +266,12 @@ msgstr ""
 msgid "Key not found, specify one using -k."
 msgstr ""
 
-#: _verbose
-msgid "load_key: ::1 key::"
-msgstr ""
-
 #: _warning
 msgid "The key seems invalid or its format is not known by this version of Tomb."
 msgstr ""
 
 #: _verbose
 msgid "GnuPG is version 1.4.11 - adopting status fix."
-msgstr ""
-
-#: _verbose
-msgid "get_lukskey"
-msgstr ""
-
-#: _verbose
-msgid "KDF: ::1 kdf::"
 msgstr ""
 
 #: _failure
@@ -354,16 +310,8 @@ msgstr ""
 msgid "Changing password for ::1 key file::"
 msgstr ""
 
-#: _verbose
-msgid "tomb-old-pwd = ::1 old pass::"
-msgstr ""
-
 #: _failure
 msgid "No valid password supplied."
-msgstr ""
-
-#: _verbose
-msgid "tomb-pwd = ::1 new pass::"
 msgstr ""
 
 #: _failure
@@ -424,10 +372,6 @@ msgstr ""
 
 #: _message
 msgid "Please confirm the key password for the encoding"
-msgstr ""
-
-#: _verbose
-msgid "tomb-pwd = ::1 tomb pass::"
 msgstr ""
 
 #: _warning
@@ -517,10 +461,6 @@ msgstr ""
 msgid "Forging this key would overwrite an existing file. Operation aborted."
 msgstr ""
 
-#: _failure
-msgid "`ls -lh $destkey`"
-msgstr ""
-
 #: _message
 msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
 msgstr ""
@@ -565,10 +505,6 @@ msgstr ""
 msgid "Dumping contents to screen:"
 msgstr ""
 
-#: _warning
-msgid "--"
-msgstr ""
-
 #: _message
 msgid "Done forging ::1 key::"
 msgstr ""
@@ -601,10 +537,6 @@ msgstr ""
 msgid "A tomb exists already. I'm not digging here:"
 msgstr ""
 
-#: _warning
-msgid " `ls -lh ${tombdir}/${tombfile}`"
-msgstr ""
-
 #: _success
 msgid "Creating a new tomb in ::1 tomb dir::/::2 tomb file::"
 msgstr ""
@@ -627,14 +559,6 @@ msgstr ""
 
 #: _message
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
-msgstr ""
-
-#: _message
-msgid "tomb forge ::1 tomb name::.tomb.key"
-msgstr ""
-
-#: _message
-msgid "tomb lock ::1 tomb name::.tomb -k ::1 tomb name::.tomb.key"
 msgstr ""
 
 #: _warning
@@ -787,10 +711,6 @@ msgstr ""
 
 #: _message
 msgid "The new key is: ::1 new key::"
-msgstr ""
-
-#: _verbose
-msgid "create_tomb(): ::1:: ::2::"
 msgstr ""
 
 #: _warning
@@ -951,10 +871,6 @@ msgstr ""
 
 #: _failure
 msgid "Index command needs 'mlocate' to be installed."
-msgstr ""
-
-#: _verbose
-msgid "$updatedbver"
 msgstr ""
 
 #: _failure

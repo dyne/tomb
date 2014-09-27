@@ -8,9 +8,8 @@ msgstr ""
 "Project-Id-Version: Tomb \n"
 "PO-Revision-Date: sáb ago 30 20:56:52 CEST 2014\n"
 "Last-Translator: Dani \"GDrooid\" <gdrooid@openmailbox.org>\n"
-"Language: Spanish\n"
 "Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
-"Language: \n"
+"Language: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -28,20 +27,13 @@ msgid "Operation aborted."
 msgstr "Operación abortada."
 
 #: _verbose
-msgid "exec_as_user '::1 user::': ::2::"
-msgstr "exec_as_user '::1 usuario::': ::2::"
-
-#: _verbose
 msgid "Using sudo for root execution of '::1 exec:: ::2 args::'."
-msgstr "Usando sudo para la ejecución como root de '::1 comando:: ::2 argumentos::'."
+msgstr ""
+"Usando sudo para la ejecución como root de '::1 comando:: ::2 argumentos::'."
 
 #: _verbose
 msgid "Escalating privileges using sudo-pwd."
 msgstr "Escalando privilegios usando sudo-pwd."
-
-#: _verbose
-msgid "is_valid_tomb ::1 tomb file::"
-msgstr "is_valid_tomb ::1 tumba::"
 
 #: _warning
 msgid "Tomb file is missing from arguments."
@@ -99,28 +91,12 @@ msgid "lo_preserve on ::1 path::"
 msgstr "lo_preserve en ::1 ruta::"
 
 #: _verbose
-msgid "tomb_file: ::1 tomb file::"
-msgstr "tomb_file ::1 tumba::"
-
-#: _verbose
 msgid "tomb_key: ::1 key:: chars long"
 msgstr "tomb_key: ::1:: carácteres de largo"
 
 #: _verbose
-msgid "tomb_key_file: ::1 key::"
-msgstr "tomb_key_file: ::1 llave::"
-
-#: _verbose
 msgid "tomb_secret: ::1 secret:: chars long"
 msgstr "tomb_secret: ::1:: carácteres de largo"
-
-#: _verbose
-msgid "tomb_password: ::1 tomb pass::"
-msgstr "tomb_password: ::1 contraseña::"
-
-#: _verbose
-msgid "tomb_tempfiles: ::1 temp files::"
-msgstr "tomb_tempfiles: ::1 ficheros::"
 
 #: _print
 msgid "Syntax: tomb [options] command [arguments]"
@@ -211,8 +187,7 @@ msgstr "Opciones:"
 
 #: _print
 msgid " -s     size of the tomb file when creating/resizing one (in MB)"
-msgstr ""
-" -s     tamaño de la tumba al crearla o cambiar su tamaño (en MB)"
+msgstr " -s     tamaño de la tumba al crearla o cambiar su tamaño (en MB)"
 
 #: _print
 msgid " -k     path to the key to be used ('-k -' to read from stdin)"
@@ -262,7 +237,9 @@ msgstr "Por favor, reporta los bugs en <http://github.com/dyne/tomb/issues>."
 
 #: _failure
 msgid "Cannot find ::1::. It's a requirement to use Tomb, please install it."
-msgstr "No se pudo encontrar ::1::. Es necesario para usar Tomb, por favor, instálalo."
+msgstr ""
+"No se pudo encontrar ::1::. Es necesario para usar Tomb, por favor, "
+"instálalo."
 
 #: _warning
 msgid "is_valid_key() called without argument."
@@ -282,8 +259,7 @@ msgstr "Intentando recuperar la llave."
 
 #: _failure
 msgid "This operation requires a key file to be specified using the -k option."
-msgstr ""
-"Esta operación requiere que se especifique una llave con la opción -k."
+msgstr "Esta operación requiere que se especifique una llave con la opción -k."
 
 #: _verbose
 msgid "load_key reading from stdin."
@@ -302,8 +278,11 @@ msgid "Key not found, specify one using -k."
 msgstr "Llave no encontrada, especifica una usando -k."
 
 #: _warning
-msgid "The key seems invalid or its format is not known by this version of Tomb."
-msgstr "La llave parece inválida, o este formato no es reconocido por esta versión de Tomb."
+msgid ""
+"The key seems invalid or its format is not known by this version of Tomb."
+msgstr ""
+"La llave parece inválida, o este formato no es reconocido por esta versión "
+"de Tomb."
 
 #: _verbose
 msgid "GnuPG is version 1.4.11 - adopting status fix."
@@ -370,7 +349,8 @@ msgid "gen_key takes tombpass from CLI argument: ::1 tomb pass::"
 msgstr ""
 
 #: _failure
-msgid "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+msgid ""
+"Wrong argument for --kdf: must be an integer number (iteration seconds)."
 msgstr ""
 "Argumento incorrecto para --kdf: debe ser un número entero (segundos por "
 "iteración)."
@@ -594,8 +574,10 @@ msgid "Data dump using ::1:: from /dev/urandom"
 msgstr "Volcado de datos usando ::1:: de /dev/urandom"
 
 #: _failure
-msgid "Error creating the tomb ::1 tomb dir::/::2 tomb file::, operation aborted."
-msgstr "Error al crear la tumba ::1 directorio::/::2 fichero::, operación abortada."
+msgid ""
+"Error creating the tomb ::1 tomb dir::/::2 tomb file::, operation aborted."
+msgstr ""
+"Error al crear la tumba ::1 directorio::/::2 fichero::, operación abortada."
 
 #: _success
 msgid "Done digging ::1 tomb name::"
@@ -603,7 +585,8 @@ msgstr "He terminado de cavar ::1 tumba::"
 
 #: _message
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
-msgstr "Tu tumba no está lista todavía, tienes que forjar una llave y asegurarla:"
+msgstr ""
+"Tu tumba no está lista todavía, tienes que forjar una llave y asegurarla:"
 
 #: _warning
 msgid "No tomb specified for locking."
@@ -704,7 +687,8 @@ msgstr "Se ha ordenado resetear la llave para la tumba ::1 tumba::"
 
 #: _warning
 msgid "Command 'setkey' needs two arguments: the old key file and the tomb."
-msgstr "El comando 'setkey' necesita dos argumentos: la vieja llave y la tumba."
+msgstr ""
+"El comando 'setkey' necesita dos argumentos: la vieja llave y la tumba."
 
 #: _warning
 msgid "I.e:  tomb -k new.tomb.key old.tomb.key secret.tomb"
@@ -720,7 +704,8 @@ msgstr "No es un volumen LUKS encriptado válido: ::1 volumen::"
 
 #: _failure
 msgid "Aborting operations: error loading old key from arguments"
-msgstr "Abortando operaciones: error al cargar la vieja llave de los argumentos"
+msgstr ""
+"Abortando operaciones: error al cargar la vieja llave de los argumentos"
 
 #: _success
 msgid "Changing lock on tomb ::1 tomb name::"
@@ -830,8 +815,11 @@ msgstr ""
 "El cifrado es \"::1 cifrado::\" en modo \"::2 modo::\" y hash \"::3 hash::\""
 
 #: _warning
-msgid "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
-msgstr "Hay múltiples rarunas para la llave en esta tumba. Cuidado: puede haber una puerta trasera."
+msgid ""
+"Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
+msgstr ""
+"Hay múltiples rarunas para la llave en esta tumba. Cuidado: puede haber una "
+"puerta trasera."
 
 #: _verbose
 msgid "dev mapper device: ::1 mapper::"
@@ -871,7 +859,9 @@ msgstr "::1 tumba:: ha sido abierta en ::2 punto de montaje::"
 
 #: _message
 msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
-msgstr "Última visita de ::1 usuario::(::2 versión de tomb::) desde ::3 tty:: en ::4 host::"
+msgstr ""
+"Última visita de ::1 usuario::(::2 versión de tomb::) desde ::3 tty:: en ::4 "
+"host::"
 
 #: _message
 msgid "on date ::1 date::"
@@ -895,15 +885,21 @@ msgstr "Formato de mapeo de los bind-hooks: local/to/tomb local/to/$HOME"
 
 #: _warning
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.  Rolling back"
-msgstr "Formato de mapeo de los bind-hooks: local/to/tomb local/to/HOME. Restaurando"
+msgstr ""
+"Formato de mapeo de los bind-hooks: local/to/tomb local/to/HOME. Restaurando"
 
 #: _warning
 msgid "bind-hook target not existent, skipping ::1 home::/::2 subdir::"
-msgstr "No existe un objetivo para el bind-hook, omitiendo ::1 hogar::/::2 directorio::"
+msgstr ""
+"No existe un objetivo para el bind-hook, omitiendo ::1 hogar::/::2 "
+"directorio::"
 
 #: _warning
-msgid "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
-msgstr "No se ha encontrado la fuente para el bind-hook en la tumba, omitiendo ::1 punto de montaje::/::2 directorio::"
+msgid ""
+"bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
+msgstr ""
+"No se ha encontrado la fuente para el bind-hook en la tumba, omitiendo ::1 "
+"punto de montaje::/::2 directorio::"
 
 #: _success
 msgid "Post hooks found, executing as user ::1 user name::."
@@ -919,7 +915,9 @@ msgstr "Error interno: se ha llamado a list_tomb_binds sin argumento."
 
 #: _failure
 msgid "Cannot index tombs on this system: updatedb (mlocate) not installed."
-msgstr "No se pueden indexar la tumbas en este sistema: updatedb (mlocate) no está instalado."
+msgstr ""
+"No se pueden indexar la tumbas en este sistema: updatedb (mlocate) no está "
+"instalado."
 
 #: _warning
 msgid "Cannot use GNU findutils for index/search commands."
@@ -928,10 +926,6 @@ msgstr "No se puede usar GNU findutils para los comandos index/search."
 #: _failure
 msgid "Index command needs 'mlocate' to be installed."
 msgstr "El comando index necesita que 'mlocate' esté instalado."
-
-#: _verbose
-msgid "$updatedbver"
-msgstr ""
 
 #: _failure
 msgid "There seems to be no open tomb engraved as [::1::]"
@@ -1003,11 +997,14 @@ msgstr "Búsqueda completada."
 
 #: _message
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes."
-msgstr "Se ha ordenado cambiar el tamaño de la tumba ::1 tumba:: a ::2 tamaño:: megabytes."
+msgstr ""
+"Se ha ordenado cambiar el tamaño de la tumba ::1 tumba:: a ::2 tamaño:: "
+"megabytes."
 
 #: _failure
 msgid "No tomb name specified for resizing."
-msgstr "No se ha especificado el nombre de la tumba a la que cambiar el tamaño."
+msgstr ""
+"No se ha especificado el nombre de la tumba a la que cambiar el tamaño."
 
 #: _failure
 msgid "Cannot find ::1::"
@@ -1089,7 +1086,8 @@ msgstr "Por favor, especifica una tumba existente."
 
 #: _success
 msgid "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::"
-msgstr "Cerrando de un portazo la tumba ::1 tumba:: montada en ::2 punto de montaje::"
+msgstr ""
+"Cerrando de un portazo la tumba ::1 tumba:: montada en ::2 punto de montaje::"
 
 #: _message
 msgid "Kill all processes busy inside the tomb."
@@ -1109,7 +1107,8 @@ msgstr "Cerrando el bind-hook: ::1::"
 
 #: _success
 msgid "Slamming tomb: killing all processes using this hook."
-msgstr "Cerrando tumba de un portazo: matando todos los procesos que usan este hook."
+msgstr ""
+"Cerrando tumba de un portazo: matando todos los procesos que usan este hook."
 
 #: _warning
 msgid "Cannot slam the bind hook ::1 hook::"
@@ -1161,12 +1160,18 @@ msgstr "Véase \"tomb help\" par más información."
 
 #: _failure
 msgid "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::"
-msgstr "No se reconoce la opción ::1 argumento:: para el subcomando ::2 subcomando::"
+msgstr ""
+"No se reconoce la opción ::1 argumento:: para el subcomando ::2 subcomando::"
 
 #: _failure
-msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\n"
+msgid ""
+"You specified option ::1 option::, which is DANGEROUS and should only be "
+"used for testing\n"
 "If you really want so, add --unsecure-dev-mode"
-msgstr "Has especificado la opción ::1 opción::, que es PELIGROSA y sólo se debería usar para el testeo\nSi realmente quieres usarla, añade --unsecure-dev-mode"
+msgstr ""
+"Has especificado la opción ::1 opción::, que es PELIGROSA y sólo se debería "
+"usar para el testeo\n"
+"Si realmente quieres usarla, añade --unsecure-dev-mode"
 
 #: _verbose
 msgid "Tomb command: ::1 subcommand:: ::2 param::"
@@ -1181,8 +1186,11 @@ msgid "QREncode not installed: cannot engrave keys on paper."
 msgstr "QREncode no está instalado: no se pueden grabar las llave en papel."
 
 #: _warning
-msgid "The create command is deprecated, please use dig, forge and lock instead."
-msgstr "El comando create está obsoleto, por favor, usa dig, forge y lock en su lugar."
+msgid ""
+"The create command is deprecated, please use dig, forge and lock instead."
+msgstr ""
+"El comando create está obsoleto, por favor, usa dig, forge y lock en su "
+"lugar."
 
 #: _warning
 msgid "For more informations see Tomb's manual page (man tomb)."
@@ -1190,15 +1198,18 @@ msgstr "Para más información mira el manual de Tomb (man tomb)."
 
 #: _failure
 msgid "Steghide not installed: cannot bury keys into images."
-msgstr "Steghide no está instalado: no se pueden enterrar llaves en las imágenes."
+msgstr ""
+"Steghide no está instalado: no se pueden enterrar llaves en las imágenes."
 
 #: _failure
 msgid "Steghide not installed: cannot exhume keys from images."
-msgstr "Setghide no está instalado: no se pueden exhumar llaves de las imágenes."
+msgstr ""
+"Setghide no está instalado: no se pueden exhumar llaves de las imágenes."
 
 #: _failure
 msgid "Resize2fs not installed: cannot resize tombs."
-msgstr "Resize2fs no está instalado: no se puede cambiar el tamaño de las tumbas."
+msgstr ""
+"Resize2fs no está instalado: no se puede cambiar el tamaño de las tumbas."
 
 #: _print
 msgid "Tomb ::1 version:: - a strong and gentle undertaker for your secrets"
