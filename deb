@@ -18,5 +18,5 @@ Description: the crypto undertaker
  Tomb relies on dm-crypt (and cryptsetup) as an encryption backend
  using the aes-cbc-essiv:sha256 cypher.
 Files: tomb /usr/bin
- tomb.xml /usr/share/mime/packages/
+ dyne-tomb.xml /usr/share/mime/packages/
  tomb.1 /usr/share/man/man1
