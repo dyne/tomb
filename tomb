@@ -2299,23 +2299,25 @@ main() {
 
     local -A subcommands_opts
     ### Options configuration
-
-    # Hi, dear developer! Are you trying to add a new subcommand, or
-    # to add some options?  Well, keep in mind that an option CAN'T
-    # have differente meanings/behaviour in different subcommands.
-
-    # For example, "-s" means "size" and accept an argument. If you are tempted to add
-    # an option "-s" (that means, for example "silent", and doesn't accept an argument)
-    #           DON'T DO IT!
-
-    #  There are two reasons for that:
-    #       I. usability; user expect that "-s" is "size"
-    #    II. Option parsing WILL EXPLODE if you do this kind of bad things
-    #            (it will say "option defined more than once, and he's right")
     #
-    #    If you want to use the same option in multiple commands then
-    #    you can only use the non-abbreviated long-option version like:
-    #    -force and NOT -f
+    # Hi, dear developer!  Are you trying to add a new subcommand, or
+    # to add some options?  Well, keep in mind that option names are
+    # global: they cannot bear a different meaning or behaviour across
+    # subcommands.
+    #
+    # For example, "-s" means "size" and accepts one argument. If you
+    # are tempted to add an alternate option "-s" (e.g., to mean
+    # "silent", and that doesn't accept any argument) DON'T DO IT!
+    #
+    # There are two reasons for that:
+    #    I. Usability; users expect that "-s" is "size"
+    #   II. Option parsing WILL EXPLODE if you do this kind of bad
+    #       things (it will complain: "option defined more than once")
+    #
+    # If you want to use the same option in multiple commands then you
+    # can only use the non-abbreviated long-option version like:
+    # -force and NOT -f
+    #
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v U: -uid=U G: -gid=G T: -tty=T -no-color -unsecure-dev-mode)
     subcommands_opts[__default]=""
     subcommands_opts[open]="f -force n -nohook=n k: -key=k -kdf: o: -ignore-swap -sudo-pwd: -tomb-pwd: "
