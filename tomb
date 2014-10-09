@@ -820,19 +820,17 @@ ask_key_password() {
 
 # change tomb key password
 change_passwd() {
-    _message "Commanded to change password for tomb key ::1 key::" $1
     _check_swap
 
     load_key
     keyfile="$tomb_key_file"
 
+    _message "Commanded to change password for tomb key ::1 key::" $keyfile
+
     local tmpnewkey lukskey c tombpass tombpasstmp
 
     tmp_create
     tmpnewkey=`tmp_new`
-
-    _success "Changing password for ::1 key file::" $keyfile
-
 
     if option_is_set --tomb-old-pwd; then
         tomb_old_pwd="`option_value --tomb-old-pwd`"
@@ -844,6 +842,8 @@ change_passwd() {
 
     { test $? = 0 } || {
         _failure "No valid password supplied." }
+
+    _success "Changing password for ::1 key file::" $keyfile
 
     # here $tomb_secret contains the key material in clear
 
@@ -976,7 +976,7 @@ bury_key() {
     [[ $? = 0 ]] || {
        _failure "Bury failed for invalid key: ::1 key::" $tomb_key_file }
 
-    imagefile=$1
+    imagefile=$PARAM
 
     file $imagefile | grep -i JPEG > /dev/null
     if [ $? != 0 ]; then
@@ -984,7 +984,7 @@ bury_key() {
        return 1
     fi
 
-    _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $tombkey $imagefile
+    _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $tomb_key $imagefile
     _message "Please confirm the key password for the encoding"
     # We ask the password and test if it is the same encoding the
     # base key, to insure that the same password is used for the
@@ -1062,7 +1062,7 @@ exhume_key() {
 
     { test "$destkey" = "-" } || {
         if [[ -s "$destkey" ]]; then
-            _warning "File exists: ::1 tomb key::" $tombkey
+            _warning "File exists: ::1 tomb key::" $destkey
             { option_is_set -f } || {
                 _warning "Make explicit use of --force to overwrite."
                 _failure "Refusing to overwrite file. Operation aborted." }
@@ -1289,11 +1289,11 @@ lock_tomb_with_key() {
     fi
 
     tombpath="$1"
-    _message "Commanded to lock tomb ::1 tomb file::" $tombfile
-
     tombdir=`dirname "$tombpath"`
     tombfile=`basename "$tombpath"`
     tombname="${tombfile%%\.*}"
+
+    _message "Commanded to lock tomb ::1 tomb file::" $tombfile
 
     { test -f ${tombdir}/${tombfile} } || {
         _failure "There is no tomb here. You have to it dig first."
@@ -1344,7 +1344,7 @@ lock_tomb_with_key() {
     { test $? = 0 } || {
         _failure "No valid password supplied." }
 
-    _success "Locking ::1 tomb file:: with ::2 tomb key::" $tombfile $tombkey
+    _success "Locking ::1 tomb file:: with ::2 tomb key::" $tombfile $tomb_key
 
     _message "Formatting Luks mapped device."
     print -n - "$tomb_secret" | \
@@ -1376,8 +1376,8 @@ lock_tomb_with_key() {
 
     cryptsetup luksClose tomb.tmp
 
-    _message "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::" $tombname $create_cipher
-    _success "Your tomb is ready in ::1 tomb dir::/::2 tomb file:: and secured with key ::3 tomb key::" $tombdir $tombfile $tombkey
+    _message "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::" $tombname $cipher
+    _success "Your tomb is ready in ::1 tomb dir::/::2 tomb file:: and secured with key ::3 tomb key::" $tombdir $tombfile $tomb_key
 
 }
 
@@ -1409,7 +1409,7 @@ change_tomb_key() {
 
     # we have everything, prepare to mount
     _success "Changing lock on tomb ::1 tomb name::" $tombname
-    _message "Old key: ::1 old key::" $oldkey
+    _message "Old key: ::1 old key::" $old_key
 
     # render the mapper
     mapdate=`date +%s`
@@ -1463,14 +1463,15 @@ change_tomb_key() {
         _failure "Unexpected error in luksChangeKey." }
 
     unset old_key
-    unset new_key
 
     cryptsetup luksClose "${mapper}"
     { test $? = 0 } || {
         _failure "Unexpected error in luksClose." }
 
     _success "Succesfully changed key for tomb: ::1 tomb file::" $2
-    _message "The new key is: ::1 new key::" $newkey
+    _message "The new key is: ::1 new key::" $new_key
+
+    unset new_key
 
     return 0
 }
@@ -1588,7 +1589,7 @@ mount_tomb() {
 
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
     _verbose "dev mapper device: ::1 mapper::" $mapper
-    _verbose "Tomb key: ::1 key::" $tombkey
+    _verbose "Tomb key: ::1 key::" $tomb_key
 
     # take the name only, strip extensions
     _verbose "Tomb name: ::1 tomb name:: (to be engraved)" $tombname
@@ -2436,8 +2437,15 @@ main() {
     if option_is_set -G; then _gid="`option_value -G`"; fi
     if option_is_set -T; then _tty="`option_value -T`"; fi
 
-    _verbose "Tomb command: ::1 subcommand:: ::2 param::" $subcommand $PARAM
-    _verbose "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]." $_uid $_gid $_tty
+    [[ "$PARAM" == "" ]] && {
+        _verbose "Tomb command: ::1 subcommand::" $subcommand
+    } || {
+        _verbose "Tomb command: ::1 subcommand:: ::2 param::" $subcommand $PARAM
+    }
+
+    [[ "$_uid" == "" ]] || {
+        _verbose "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]." $_uid $_gid $_tty
+    }
 
     case "$subcommand" in
 
