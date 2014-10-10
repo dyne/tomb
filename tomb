@@ -1344,7 +1344,7 @@ lock_tomb_with_key() {
     { test $? = 0 } || {
         _failure "No valid password supplied." }
 
-    _success "Locking ::1 tomb file:: with ::2 tomb key::" $tombfile $tomb_key
+    _success "Locking ::1 tomb file:: with ::2 tomb key::" $tombfile $tomb_key_file
 
     _message "Formatting Luks mapped device."
     print -n - "$tomb_secret" | \
@@ -1377,7 +1377,7 @@ lock_tomb_with_key() {
     cryptsetup luksClose tomb.tmp
 
     _message "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::" $tombname $cipher
-    _success "Your tomb is ready in ::1 tomb dir::/::2 tomb file:: and secured with key ::3 tomb key::" $tombdir $tombfile $tomb_key
+    _success "Your tomb is ready in ::1 tomb dir::/::2 tomb file:: and secured with key ::3 tomb key::" $tombdir $tombfile $tomb_key_file
 
 }
 
@@ -1589,7 +1589,7 @@ mount_tomb() {
 
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
     _verbose "dev mapper device: ::1 mapper::" $mapper
-    _verbose "Tomb key: ::1 key::" $tomb_key
+    _verbose "Tomb key: ::1 key::" $tomb_key_file
 
     # take the name only, strip extensions
     _verbose "Tomb name: ::1 tomb name:: (to be engraved)" $tombname
