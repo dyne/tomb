@@ -1,3 +1,0 @@
-#!/bin/sh
-cp -f doc/tomb.1 extras/desktop/dyne-tomb.xml .
-equivs-build -f deb

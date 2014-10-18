@@ -1,11 +1,13 @@
 Source: tomb
 Section: misc
 Priority: optional
+Maintainer: boyska <piuttosto@logorroici.org>, paskao <paskao@hacari.org>, vinc3nt <vinc3nt@riseup.net>
 Homepage: http://tomb.dyne.org/
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.9.2
 
 Package: tomb
-Version: 1.5.3
-Maintainer: boyska <piuttosto@logorroici.org>, paskao <paskao@hacari.org>, vinc3nt <vinc3nt@riseup.net>
+Architecture: all
 Depends: zsh, cryptsetup, pinentry-gtk2 | pinentry, gnupg, sudo
 Suggests: wipe, dcfldd, steghide
 Description: the crypto undertaker
@@ -17,6 +19,3 @@ Description: the crypto undertaker
  in your computer's harddisk and its key file on a USB stick.
  Tomb relies on dm-crypt (and cryptsetup) as an encryption backend
  using the aes-cbc-essiv:sha256 cypher.
-Files: tomb /usr/bin
- dyne-tomb.xml /usr/share/mime/packages/
- tomb.1 /usr/share/man/man1
