@@ -56,7 +56,7 @@ QRENCODE=1
 MOUNTOPTS="rw,noatime,nodev"
 
 # prefix for temporary files
-TMPPREFIX="/dev/shm/$$.$RANDOM."
+TMPPREFIX="/dev/shm/$RANDOM.$RANDOM."
 
 # makes glob matching case insensitive
 unsetopt CASE_MATCH
@@ -145,7 +145,7 @@ check_shm() {
 
     # setup a special env var for zsh to create temp files that will
     # then be deleted at the exit of each function using them.
-    TMPPREFIX="$SHMPREFIX/$$.$RANDOM."
+    TMPPREFIX="$SHMPREFIX/$RANDOM.$RANDOM."
     return 0
 }
 
