@@ -35,6 +35,8 @@
 
 #+LATEX: \newpage
 
+* This user manual is obsolete, please refer to *man tomb*
+
 * Why Tomb?
 
 ** Privacy and freedom
