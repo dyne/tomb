@@ -42,9 +42,13 @@ DATE="Sept/2014"
 TOMBEXEC=$0
 typeset -a OLDARGS
 for arg in ${argv}; do OLDARGS+=($arg); done
-DD="dd"
-WIPE="rm -f"
-MKFS="mkfs.ext3 -q -F -j -L"
+
+# Special command requirements
+typeset -a DD WIPE MKFS
+DD=(dd)
+WIPE=(rm -f)
+MKFS=(mkfs.ext3 -q -F -j -L)
+
 KDF=1
 STEGHIDE=1
 RESIZER=1
@@ -576,16 +580,13 @@ check_bin() {
     export PATH=/sbin:/usr/sbin:$PATH
 
     # which dd command to use
-    command -v dcfldd >& -
-    { test $? = 0 } && { DD="dcfldd statusinterval=1" }
+    command -v dcfldd >& - && DD=(dcfldd statusinterval=1)
 
     # which wipe command to use
-    command -v wipe >& - && WIPE="wipe -f -s" || WIPE="rm -f"
+    command -v wipe >& - && WIPE=(wipe -f -s)
 
     # check for filesystem creation progs
-    command -v mkfs.ext4 >& - && \
-        MKFS="mkfs.ext4 -q -F -j -L" || \
-        MKFS="mkfs.ext3 -q -F -j -L"
+    command -v mkfs.ext4 >& - && MKFS=(mkfs.ext4 -q -F -j -L)
 
     # check for steghide
     command -v steghide >& - || STEGHIDE=0
