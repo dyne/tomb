@@ -49,11 +49,14 @@ DD=(dd)
 WIPE=(rm -f)
 MKFS=(mkfs.ext3 -q -F -j -L)
 
-KDF=1
-STEGHIDE=1
-RESIZER=1
-SWISH=1
-QRENCODE=1
+# Flag optional commands if available
+typeset -i 2 KDF=1
+typeset -i 2 STEGHIDE=1
+typeset -i 2 RESIZER=1
+typeset -i 2 SWISH=1
+typeset -i 2 QRENCODE=1
+
+# Default mount options
 MOUNTOPTS="rw,noatime,nodev"
 
 # prefix for temporary files
@@ -405,22 +408,22 @@ _print " search  looks for filenames matching text patterns"
 _print " list    list of open TOMBs and information on them"
 _print " close   close a specific TOMB (or 'all')"
 _print " slam    slam a TOMB killing all programs using it"
-    if [ "$RESIZER" = 1 ]; then
+    [[ $RESIZER == 1 ]] && {
 _print " resize  resize a TOMB to a new size -s (can only grow)"
-    fi
+    }
 _print "\000"
 _print " // Operations on keys:"
 _print " passwd  change the password of a KEY"
 _print " setkey  change the KEY locking a TOMB (needs old one)"
 _print "\000"
-    { test "$QRENCODE" = "1" } && {
+    [[ $QRENCODE == 1 ]] && {
 _print " engrave makes a QR code of a KEY to be saved on paper"
     }
 _print "\000"
-    if [ "$STEGHIDE" = 1 ]; then
+    [[ $STEGHIDE == 1 ]] && {
 _print " bury    hide a KEY inside a JPEG image"
 _print " exhume  extract a KEY from a JPEG image"
-    fi
+    }
 _print "\000"
 _print "Options:"
 _print "\000"
@@ -429,7 +432,7 @@ _print " -k     path to the key to be used ('-k -' to read from stdin)"
 _print " -n     don't process the hooks found in tomb"
 _print " -o     mount options used to open (default: rw,noatime,nodev)"
 _print " -f     force operation (i.e. even if swap is active)"
-    { test "$KDF" = 1 } && {
+    [[ $KDF == 1 ]] && {
 _print " --kdf  generate passwords armored against dictionary attacks"
     }
 
@@ -899,12 +902,12 @@ gen_key() {
     fi
 
     header=""
-    { test "$KDF" = 1 } && {
+    [[ $KDF == 1 ]] && {
         { option_is_set --kdf } && {
-    # KDF is a new key strenghtening technique against brute forcing
-    # see: https://github.com/dyne/Tomb/issues/82
+	    # KDF is a new key strenghtening technique against brute forcing
+	    # see: https://github.com/dyne/Tomb/issues/82
             itertime="`option_value --kdf`"
-        # removing support of floating points because they can't be type checked well
+            # removing support of floating points because they can't be type checked well
             if [[ "$itertime" != <-> ]]; then
                 unset tombpass
                 unset tombpasstmp
@@ -1935,7 +1938,7 @@ index_tombs() {
         updatedb -l 0 -o ${tombmount}/.updatedb -U ${tombmount}
 
         # here we use swish to index file contents
-        { test $SWISH = 1 } && {
+        [[ $SWISH == 1 ]] && {
             _message "Indexing ::1 tomb name:: contents..." $tombname
             tmp_create
             swishrc=`tmp_new`
@@ -2045,7 +2048,7 @@ search_tombs() {
         _message "Matches found: ::1 matches::" $(locate -d ${tombmount}/.updatedb -e -i -c ${(f)@})
 
         # use swish-e to search over contents
-        { test $SWISH = 1 } && { test -r $tombmount/.swish } && {
+        [[ $SWISH == 1 && -r $tombmount/.swish ]] && {
             _message "Searching contents in tomb ::1 tomb name::" $tombname
             swish-e -w ${=@} -f $tombmount/.swish -H0 }
 
@@ -2461,7 +2464,7 @@ main() {
             ;;
 
         engrave)
-            { test "$QRENCODE" = 0 } && {
+            [[ $QRENCODE == 0 ]] && {
                 _failure "QREncode not installed: cannot engrave keys on paper." }
             engrave_key ${=PARAM}
             ;;
@@ -2499,17 +2502,17 @@ main() {
             usage
             ;;
         bury)
-            { test "$STEGHIDE" = 0 } && {
+            [[ $STEGHIDE == 0 ]] && {
                 _failure "Steghide not installed: cannot bury keys into images." }
             bury_key $PARAM[1]
             ;;
         exhume)
-            { test "$STEGHIDE" = 0 } && {
+            [[ $STEGHIDE == 0 ]] && {
                 _failure "Steghide not installed: cannot exhume keys from images." }
             exhume_key $PARAM[1]
             ;;
         resize)
-            { test "$RESIZER" = 0 } && {
+            [[ $RESIZER == 0 ]] && {
                 _failure "Resize2fs not installed: cannot resize tombs." }
             check_priv
             resize_tomb $PARAM[1]
