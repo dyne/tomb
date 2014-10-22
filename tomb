@@ -62,14 +62,15 @@ MOUNTOPTS="rw,noatime,nodev"
 # prefix for temporary files
 TMPPREFIX="/dev/shm/$RANDOM.$RANDOM."
 
-# makes glob matching case insensitive
+# Makes glob matching case insensitive
 unsetopt CASE_MATCH
 
-typeset -AH  OPTS             # command line options (see main())
+typeset -AH  OPTS             # Command line options (see main())
 
-typeset -H _uid
-typeset -H _gid
-typeset -H _tty
+# Command context
+typeset -H _UID               # Running user identifier
+typeset -H _GID               # Running user group identifier
+typeset -H _TTY               # Connected input terminal
 
 typeset -H tomb_file
 
@@ -136,7 +137,7 @@ check_shm() {
         (( $? )) && _failure "Fatal error creating a directory for temporary files"
 
         mount -t tmpfs tmpfs /run/shm \
-            -o nosuid,noexec,nodev,mode=0600,uid="$_uid",gid="$_gid"
+            -o nosuid,noexec,nodev,mode=0600,uid=$_UID,gid=$_GID
         (( $? )) && _failure "Fatal error mounting tmpfs in /run/shm for temporary files"
 
         SHMPREFIX=/run/shm
@@ -154,7 +155,7 @@ tmp_create() {
     touch "$tfile"
     (( $? )) && _failure "Fatal error creating a temporary file: ::1 temp file::" $tfile
 
-    chown "$_uid":"$_gid" "$tfile"
+    chown $_UID:$_GID "$tfile"
     chmod 0600 "$tfile"
     (( $? )) && _failure "Fatal error setting permissions on temporary file: ::1 temp file::" $tfile
 
@@ -1180,7 +1181,7 @@ forge_key() {
     _success "Choose the  password of your key: ::1 tomb key::" $tomb_key_file
     _message "(You can also change it later using 'tomb passwd'.)"
     touch ${tomb_key_file}
-    chown ${_uid}:${_gid} ${tomb_key_file}
+    chown $_UID:$_GID ${tomb_key_file}
     chmod 0600 ${tomb_key_file}
 
     tombname="$tomb_key_file"
@@ -1251,7 +1252,7 @@ dig_tomb() {
     # we will first touch the file and set permissions: this way, even if interrupted, permissions are right
     touch ${tombdir}/${tombfile}
     chmod 0600 "${tombdir}/${tombfile}"
-    chown $_uid:$_gid "${tombdir}/${tombfile}"
+    chown $_UID:$_GID "${tombdir}/${tombfile}"
 
     _verbose "Data dump using ::1:: from /dev/urandom" ${DD[1]}
 
@@ -1624,7 +1625,7 @@ mount_tomb() {
 
     mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
 
-    chown ${_uid}:${_gid} ${tombmount}
+    chown $_UID:$_GID ${tombmount}
     chmod 0711 ${tombmount}
 
     _success "Success opening ::1 tomb file:: on ::2 mount point::" $tombfile $tombmount
@@ -1641,9 +1642,9 @@ mount_tomb() {
     }
     # write down the UID and TTY that opened the tomb
     rm -f ${tombmount}/.uid
-    echo ${_uid} > ${tombmount}/.uid
+    echo $_UID > ${tombmount}/.uid
     rm -f ${tombmount}/.tty
-    echo ${_tty} > ${tombmount}/.tty
+    echo $_TTY > ${tombmount}/.tty
     # also the hostname
     rm -f ${tombmount}/.host
     echo `hostname` > ${tombmount}/.host
@@ -2425,9 +2426,9 @@ main() {
 
     # when we run as root, we remember the original uid:gid
     # to set permissions for the calling user and drop privileges
-    if option_is_set -U; then _uid="`option_value -U`"; fi
-    if option_is_set -G; then _gid="`option_value -G`"; fi
-    if option_is_set -T; then _tty="`option_value -T`"; fi
+    if option_is_set -U; then _UID="`option_value -U`"; fi
+    if option_is_set -G; then _GID="`option_value -G`"; fi
+    if option_is_set -T; then _TTY="`option_value -T`"; fi
 
     [[ "$PARAM" == "" ]] && {
         _verbose "Tomb command: ::1 subcommand::" $subcommand
@@ -2435,8 +2436,8 @@ main() {
         _verbose "Tomb command: ::1 subcommand:: ::2 param::" $subcommand $PARAM
     }
 
-    [[ "$_uid" == "" ]] || {
-        _verbose "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]." $_uid $_gid $_tty
+    [[ $_UID == "" ]] || {
+        _verbose "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]." $_UID $_GID $_TTY
     }
 
     case "$subcommand" in
