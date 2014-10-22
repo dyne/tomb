@@ -66,7 +66,6 @@ TMPPREFIX="/dev/shm/$RANDOM.$RANDOM."
 unsetopt CASE_MATCH
 
 typeset -AH  OPTS             # command line options (see main())
-typeset -H username
 
 typeset -H _uid
 typeset -H _gid
@@ -276,10 +275,8 @@ exec_as_user() {
     return $?
 }
 
-#Escalate privileges
+# Escalate privileges
 check_priv() {
-    # save original user
-    username=$USER
     if [ $UID != 0 ]; then
         _verbose "Using sudo for root execution of '::1 exec:: ::2 args::'." $TOMBEXEC ${(f)OLDARGS}
         # check if sudo has a timestamp active
