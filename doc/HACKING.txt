@@ -3,6 +3,7 @@ Style guidelines
 
 Indentation
 -----------
+
 Code must be indented using four spaces.
 In vim, this can be accomplished using
 
@@ -12,13 +13,64 @@ In vim, this can be accomplished using
 Naming
 ------
 
-global variables should be `$UPPERCASE`.
+Short version: $GLOBAL, $local, func_name()
 
-local variables should be `$lowercase`, best if it can be written without underscores.
-If you feel the need to name a variable `$longdescriptionofwhatthisisusefulfor`,
-then you're allowed to use underscores. But do you really need?
+Variables must be declared and scoped.
 
-functions should be lowercase+underscores: `do_this()`
+GLOBAL_VARIABLES # are uppercase unless there's a good reason not to.
+                 # (e.g., path as a special meaning in Zsh)
+
+local samplevar  # are lowercase and scoped to the function # name
+                 # should be readable.  Do not make unnecessary
+                 # shortcuts that would impede others to read fluidly
+
+# Please comment your functions before coding them: it helps 
+# clear the mind on the objective.  If it does too much, you
+# probably want to split it.  Any reusable code should be
+# isolated.
+any_function() {}
+
+_internals() {}  # Prepend an _ if the function is clearly internal,
+                 # that is, if it's only called within the scope of
+                 # another function.
+
+
+Sample code:
+
+# Sample public command.
+#
+# It shows developers how to write readable code.
+# Returns 0 on success, or fails 
+public_command() {
+    local tombpath="$1"             # First argument is the path to the tomb
+    local orientation="${2:-South}" # Second optional argument
+    local something is happening
+
+    [[ -z $tombpath ]] && {
+        _failure "Usage public_command tombpath [orientation=South]" }
+
+    case $orientation in
+        (South|North|East|West) break;;
+        (*)
+            _failure "orientation must be one of South, North, East, or West."
+            ;;
+    esac
+
+    _check_swap     # Ensure the available memory is safe
+    _plot $tombpath # Set TOMB{PATH,DIR,FILE,NAME}
+
+    for is in $TOMBLOOPDEVS; do
+        [[ -k $is ]] && {
+            happening+="$is "
+        } || {
+            something+="$is "
+        }
+    done
+
+    _message "You gotta sort your bones."
+
+    return 0
+}
 
 
 Reporting to the user
@@ -37,20 +89,22 @@ Here is the deal:
 
 Name (Shortcut)  Return    When to use
 =================================================================================
-_failure (die)   exit 1    You want to exit the program with a fatal error.
-                           You may pass a different exit code as second argument.
-
-_warning (no)              You want to inform the user about an error condition.
+_verbose (xxx)             You need to check the current state of the program.
 
 _message (say)             You want to tell the user about what's going on.
                            You can pass -n (shortcut: act) for inline messages.
 
-_verbose (xxx)             You need to check the current state of the program.
+_warning (no)              You want to inform the user about an error condition.
 
 _success (yes)             You want to tell the user about a successful result.
 
+_failure (die)   exit 1    You want to exit the program with a fatal error.
+                           You may pass a different exit code as exitval.
+
 All messaging function take a single "message" argument.
-_failure takes an exit code as an optional second argument.
+_failure takes an exit code as an optional exitval environment variable.
+
+Additionally you can use _print to pass translatable string without decoration.
 
 Examples:
 
@@ -61,9 +115,10 @@ Examples:
     echo "are useful"
     _success "All is fine"
     _warning "Something's wrong"
+    _print   "Did I really say that?"
     _failure "Fatal error: exiting with default exit code 1"
     _message "This is not reached, nor the next 'die' command"
-         die "I am Jack's dead corpse." 127
+    exitval=127 die "I am Jack's dead corpse."
 
 Will display something like:
 
@@ -73,4 +128,5 @@ Will display something like:
     tomb  >  Inline messages are useful
     tomb (*) All is fine
     tomb [W] Something's wrong
+    Did I really say that?
     tomb [E] Fatal error: exiting with default exit code 1
