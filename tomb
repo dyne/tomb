@@ -65,8 +65,7 @@ TMPPREFIX="/dev/shm/$RANDOM.$RANDOM."
 # makes glob matching case insensitive
 unsetopt CASE_MATCH
 
-typeset -AH global_opts
-typeset -AH opts
+typeset -AH  OPTS             # command line options (see main())
 typeset -H username
 
 typeset -H _uid
@@ -453,7 +452,7 @@ option_is_set() {
     # Second (optional) argument: if "out", command will print it out 'set'/'unset'
     # (useful for if conditions).
     # Return 0 if is set, 1 otherwise
-    [[ -n ${(k)opts[$1]} ]];
+    [[ -n ${(k)OPTS[$1]} ]];
     r=$?
     if [[ $2 == out ]]; then
         if [[ $r == 0 ]]; then
@@ -468,7 +467,7 @@ option_is_set() {
 # Get an option value
 option_value() {
     # First argument, the commandline flag (i.e. "-s").
-    print -n - "${opts[$1]}"
+    print -n - "${OPTS[$1]}"
 }
 
 # Messaging function with pretty coloring
@@ -1669,8 +1668,8 @@ mount_tomb() {
 
 # ## Hooks execution
 exec_safe_bind_hooks() {
-    if [[ -n ${(k)opts[-o]} ]]; then
-        MOUNTOPTS=${opts[-o]}
+    if [[ -n ${(k)OPTS[-o]} ]]; then
+        MOUNTOPTS=${OPTS[-o]}
     fi
     local MOUNTPOINT="${1}"
     local ME=${SUDO_USER:-$(whoami)}
@@ -2066,7 +2065,7 @@ search_tombs() {
 
 # resize tomb file size
 resize_tomb() {
-    _message "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes." $1 $opts[-s]
+    _message "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes." $1 $OPTS[-s]
     if ! [ $1 ]; then
         _failure "No tomb name specified for resizing."
     elif ! [ -r "$1" ]; then
@@ -2390,7 +2389,7 @@ main() {
     set -A cmd_opts ${main_opts} ${=subcommands_opts[$subcommand]}
     # if there is no option, we don't need parsing
     if [[ -n $cmd_opts ]]; then
-        zparseopts -M -E -D -Aopts ${cmd_opts}
+        zparseopts -M -E -D -AOPTS ${cmd_opts}
         if [[ $? != 0 ]]; then
             _warning "Some error occurred during option processing."
             exitv=127 _failure "See \"tomb help\" for more info."
