@@ -8,7 +8,7 @@ Standards-Version: 3.9.2
 
 Package: tomb
 Architecture: all
-Depends: zsh, cryptsetup, pinentry-gtk2 | pinentry, gnupg, sudo
+Depends: zsh, cryptsetup, pinentry-gtk2 | pinentry, gnupg, sudo, file, gettext-base
 Suggests: wipe, dcfldd, steghide
 Description: the crypto undertaker
  Derived from the dyne:bolic nesting mechanism, Tomb is a free and
