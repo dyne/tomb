@@ -78,8 +78,9 @@ typeset -H TOMBDIR            # Directory where the tomb is
 typeset -H TOMBFILE           # File name of the tomb
 typeset -H TOMBNAME           # Name of the tomb
 
-typeset -H tomb_key
-typeset -H tomb_key_file
+# Tomb secrets
+typeset -H TOMBKEY            # Key contents (see forge_key(), recover_key())
+typeset -H TOMBKEYFILE        # Key file     (ditto)
 typeset -H tomb_secret
 typeset -H tomb_password
 
@@ -108,8 +109,8 @@ endgame() {
     TOMBDIR="$rr";       unset TOMBDIR
     TOMBFILE="$rr";      unset TOMBFILE
     TOMBNAME="$rr";      unset TOMBNAME
-    tomb_key="$rr";      unset tomb_key
-    tomb_key_file="$rr"; unset tomb_key_file
+    TOMBKEY="$rr";       unset TOMBKEY
+    TOMBKEYFILE="$rr";   unset TOMBKEYFILE
     tomb_secret="$rr";   unset tomb_secret
     tomb_password="$rr"; unset tomb_password
 
@@ -412,8 +413,8 @@ lo_preserve() {
 dump_secrets() {
     _verbose "TOMBFILE: ::1 tomb file::" $TOMBPATH
     _verbose "TOMBFILE: ::1 tomb file::" $TOMBFILE
-    _verbose "tomb_key: ::1 key:: chars long" ${#tomb_key}
-    _verbose "tomb_key_file: ::1 key::" $tomb_key_file
+    _verbose "TOMBKEY: ::1 key:: chars long" ${#TOMBKEY}
+    _verbose "TOMBKEYFILE: ::1 key file::" $TOMBKEYFILE
     _verbose "tomb_secret: ::1 secret:: chars long" ${#tomb_secret}
     _verbose "tomb_password: ::1 tomb pass::" $tomb_password
 
@@ -642,79 +643,80 @@ check_bin() {
 
 # $1 is the encrypted key contents we are checking
 is_valid_key() {
+    local key="$1"       # Unique argument is an encrypted key to test
+
     _verbose "is_valid_key"
-    _key="$1"
-    # argument check
-    { test "$_key" = "" } && { _key="$tomb_key" }
-    { test "$_key" = "" } && {
-        _warning "is_valid_key() called without argument."; return 1 }
 
-    # if the key file is an image don't check file header
-    { test -r "$tomb_key_file" } \
-        && [[ `file "$tomb_key_file"` =~ "JP.G" ]] \
+    [[ -z $key ]] && key=$TOMBKEY
+    [[ -z $key ]] && {
+	_warning "is_valid_key() called without an argument."
+	return 1
+    }
+
+    # If the key file is an image don't check file header
+    [[ -r $TOMBKEYFILE ]] \
+	&& [[ $(file $TOMBKEYFILE) =~ "JP.G" ]] \
         && {
-        _message "Key is an image, it might be valid."; return 0 }
+        _message "Key is an image, it might be valid."
+	return 0 }
 
-    [[ "$_key" =~ "BEGIN PGP" ]] && {
-        _message "Key is valid."; return 0 }
+    [[ $key =~ "BEGIN PGP" ]] && {
+        _message "Key is valid."
+	return 0 }
 
     return 1
 }
 
 # $1 is a string containing an encrypted key
-recover_key() {
+_tomb_key_recover recover_key() {
+    local key="$1"    # Unique argument is an encrypted key
+
     _warning "Attempting key recovery."
-    _key="$tomb_key"
-    tomb_key=""
 
-    [[ "$_key" =~ "_KDF_" ]] && {
-        tomb_key+="`print - $_key | $head -n 1`\n" }
+    TOMBKEY=""        # Reset global variable
 
-    tomb_key+="-----BEGIN PGP MESSAGE-----\n"
-    tomb_key+="$_key\n"
-    tomb_key+="-----END PGP MESSAGE-----\n"
+    [[ $key =~ "_KDF_" ]] && TOMBKEY+="`print - $key | $head -n 1`\n"
+
+    TOMBKEY+="-----BEGIN PGP MESSAGE-----\n"
+    TOMBKEY+="$key\n"
+    TOMBKEY+="-----END PGP MESSAGE-----\n"
+
     return 0
 }
 
-# This function retrieves a tomb key specified on commandline or from
-# stdin if -k - was selected.  It also runs validity checks on the
-# file. On success returns 0 and prints out the full path to
-# the key, setting globals: $tomb_key_file and $tomb_key
-load_key() {
-    # take the name of a tomb file as argument to option -k
-    # if no argument is given, tomb{key|dir|file} are set by caller
-    local keyopt
-    [[ "$1" = "" ]]      || { keyopt="$1" }
-    [[ "$keyopt" = "" ]] && { keyopt="`option_value -k`" }
-    [[ "$keyopt" = "" ]] && {
+# Retrieve the tomb key from the file specified from the command line,
+# or from stdin if -k - was selected.  Run validity checks on the
+# file.  On success, return 0 and print out the full path of the key.
+# Set global variables TOMBKEY and TOMBKEYFILE.
+_load_key load_key() {
+    local keyfile="$1"    # Unique argument is a keyfile
+
+    [[ -z $keyfile ]] && keyfile=$(option_value -k)
+    [[ -z $keyfile ]] && {
         _failure "This operation requires a key file to be specified using the -k option." }
 
-    if [[ "$keyopt" == "-" ]]; then
+    [[ $keyfile == "-" ]] && {
         _verbose "load_key reading from stdin."
-        # take key from stdin
         _message "Waiting for the key to be piped from stdin... "
-        tomb_key_file=stdin
-        tomb_key=`cat`
-    else
-        _verbose "load_key argument: ::1 opt::" $keyopt
-        # take key from a file
-        tomb_key_file="$keyopt"
-        { test -r "${tomb_key_file}" } || {
-            _warning "Key not found, specify one using -k."
-            return 1}
-        tomb_key=`cat $tomb_key_file`
-    fi
-
-    _verbose "load_key: ::1 key::" $tomb_key_file
-
-    is_valid_key "${tomb_key}" || {
-        _warning "The key seems invalid or its format is not known by this version of Tomb."
-        # try recovering the key
-        recover_key "$tomb_key"
+        TOMBKEYFILE=stdin
+        TOMBKEY=$(cat)
+    } || {
+        _verbose "load_key argument: ::1 key file::" $keyfile
+	[[ -r $keyfile ]] || _failure "Key not found, specify one using -k."
+        TOMBKEYFILE=$keyfile
+        TOMBKEY=$(cat $TOMBKEYFILE)
     }
 
-    # declared tomb_key (contents)
-    # declared tomb_key_file (path)
+    _verbose "load_key: ::1 key::" $TOMBKEYFILE
+
+    is_valid_key $TOMBKEY || {
+        _warning "The key seems invalid or its format is not known by this version of Tomb."
+        _tomb_key_recover $TOMBKEY
+    }
+
+    # Declared TOMBKEYFILE (path)
+    # Declared TOMBKEY (contents)
+
     return 0
 }
 
@@ -724,7 +726,7 @@ load_key() {
 gpg_decrypt() {
     # fix for gpg 1.4.11 where the --status-* options don't work ;^/
     gpgver=`gpg --version --no-permission-warning | awk '/^gpg/ {print $3}'`
-    gpgpass="$1\n$tomb_key"
+    gpgpass="$1\n$TOMBKEY"
 
     if [ "$gpgver" = "1.4.11" ]; then
         _verbose "GnuPG is version 1.4.11 - adopting status fix."
@@ -765,7 +767,7 @@ get_lukskey() {
 
     exhumedkey=""
 
-    firstline=`head -n1 <<< "$tomb_key"`
+    firstline=$(head -n1 <<< $TOMBKEY)
 
     # key is KDF encoded
     if [[ $firstline =~ '^_KDF_' ]]; then
@@ -783,10 +785,9 @@ get_lukskey() {
         esac
 
     # key needs to be exhumed from an image
-    elif [ -r "$tomb_key_file" ] \
-        && [[ `file "$tomb_key_file"` =~ "JP.G" ]]; then
+    elif [[ -r $TOMBKEYFILE && $(file $TOMBKEYFILE) =~ "JP.G" ]]; then
 
-        exhume_key "$tomb_key_file" "$_password"
+        exhume_key $TOMBKEYFILE "$_password"
 
     fi
 
@@ -802,19 +803,20 @@ get_lukskey() {
 # it against the return code of gpg on success returns 0 and saves
 # the password in the global variable $tomb_password
 ask_key_password() {
-    [[ "$tomb_key_file" = "" ]] && {
+    [[ -z $TOMBKEYFILE ]] && {
         _failure "Internal error: ask_key_password() called before load_key()." }
 
-    keyname="$tomb_key_file"
-    _message "A password is required to use key ::1 key::" $keyname
+    _message "A password is required to use key ::1 key::" $TOMBKEYFILE
     passok=0
     tombpass=""
     if [[ "$1" = "" ]]; then
         for c in 1 2 3; do
-            if [[ $c = 1 ]]; then
-                tombpass=`exec_as_user ${TOMBEXEC} askpass "Insert password to use key: $keyname"`
+            if [[ $c == 1 ]]; then
+                tombpass=$(exec_as_user ${TOMBEXEC} askpass \
+		    "Insert password to use key: $TOMBKEYFILE")
             else
-                tombpass=`exec_as_user ${TOMBEXEC} askpass "Insert password to use key: $keyname (retry $c)"`
+                tombpass=$(exec_as_user ${TOMBEXEC} askpass \
+		    "Insert password to use key: $TOMBKEYFILE (attempt $c)")
             fi
             if [[ $? != 0 ]]; then
                 _warning "User aborted password dialog."
@@ -841,20 +843,19 @@ ask_key_password() {
 
     fi
     # print the password out in case caller needs to know it
-    { test "$passok" = "1" } || { return 1 }
+    [[ $passok == 1 ]] || return 1
 
-    tomb_password="$tombpass"
+    TOMBPASSWORD=$tombpass
     return 0
 }
 
 # change tomb key password
 change_passwd() {
+
     _check_swap
-
     load_key
-    keyfile="$tomb_key_file"
 
-    _message "Commanded to change password for tomb key ::1 key::" $keyfile
+    _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
 
     local tmpnewkey lukskey c tombpass tombpasstmp
 
@@ -872,7 +873,7 @@ change_passwd() {
     { test $? = 0 } || {
         _failure "No valid password supplied." }
 
-    _success "Changing password for ::1 key file::" $keyfile
+    _success "Changing password for ::1 key file::" $TOMBKEYFILE
 
     # here $tomb_secret contains the key material in clear
 
@@ -888,7 +889,7 @@ change_passwd() {
         _failure "Error: the newly generated keyfile does not seem valid."
     else
         # copy the new key as the original keyfile name
-        cp -f "${tmpnewkey}" "${keyfile}"
+        cp -f "${tmpnewkey}" $TOMBKEYFILE
         _success "Your passphrase was successfully updated."
 
     fi
@@ -1003,7 +1004,7 @@ BEGIN { ciphers=0 }
 bury_key() {
     load_key
     [[ $? = 0 ]] || {
-       _failure "Bury failed for invalid key: ::1 key::" $tomb_key_file }
+       _failure "Bury failed for invalid key: ::1 key::" $TOMBKEYFILE }
 
     imagefile=$PARAM
 
@@ -1013,7 +1014,7 @@ bury_key() {
        return 1
     fi
 
-    _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $tomb_key $imagefile
+    _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $TOMBKEY $imagefile
     _message "Please confirm the key password for the encoding"
     # We ask the password and test if it is the same encoding the
     # base key, to insure that the same password is used for the
@@ -1036,7 +1037,7 @@ bury_key() {
 
     # we omit armor strings since having them as constants can give
     # ground to effective attacks on steganography
-    print - "$tomb_key" | awk '
+    print - "$TOMBKEY" | awk '
 /^-----/ {next}
 /^Version/ {next}
 {print $0}' \
@@ -1081,11 +1082,11 @@ exhume_key() {
     # when a password is passed as argument then always print out
     # the exhumed key on stdout without further checks (internal use)
     { test "$knownpass" = "" } || {
-        tomb_key=`steghide extract -sf "$imagefile" -p "$knownpass" -xf -`
+        TOMBKEY=`steghide extract -sf "$imagefile" -p "$knownpass" -xf -`
         { test $? = 0 } || {
             _failure "Wrong password or no steganographic key found" }
 
-        recover_key "$tomb_key"
+        recover_key $TOMBKEY
         return 0
     }
 
@@ -1135,18 +1136,16 @@ exhume_key() {
 # backuped on paper and hidden in books etc.
 engrave_key() {
     # load key from options
-    load_key
-    tombkey="$tomb_key_file"
-    { test $? = 0 } || { _failure "No key specified." }
-    keyname=`basename $tombkey`
+    load_key || _failure "No key specified."
+    local keyname=$(basename $TOMBKEYFILE)
     pngname="$keyname.qr.png"
 
-    _success "Rendering a printable QRCode for key: ::1 tomb key::" $tombkey
+    _success "Rendering a printable QRCode for key: ::1 tomb key file::" $TOMBKEYFILE
     # we omit armor strings to save space
     awk '
 /^-----/ {next}
 /^Version/ {next}
-{print $0}' ${tombkey} | qrencode --size 4 --level H \
+{print $0}' $TOMBKEYFILE | qrencode --size 4 --level H \
     --casesensitive -o "$pngname"
     { test $? = 0 } || { _failure "QREncode reported an error." }
     _success "Operation successful:"
@@ -1252,7 +1251,7 @@ forge_key() {
 
     _message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" $destkey $algo
 
-    tomb_key_file="$destkey"
+    TOMBKEYFILE="$destkey"    # Set global variable
 
     _message "This operation takes time, keep using this computer on other tasks,"
     _message "once done you will be asked to choose a password for your tomb."
@@ -1272,39 +1271,39 @@ forge_key() {
 
     # here the global var tomb_secret contains the nude secret
 
-    _success "Choose the  password of your key: ::1 tomb key::" $tomb_key_file
+    _success "Choose the  password of your key: ::1 tomb key::" $TOMBKEYFILE
     _message "(You can also change it later using 'tomb passwd'.)"
-    touch ${tomb_key_file}
-    chown $_UID:$_GID ${tomb_key_file}
-    chmod 0600 ${tomb_key_file}
+    touch $TOMBKEYFILE
+    chown $_UID:$_GID $TOMBKEYFILE
+    chmod 0600 $TOMBKEYFILE
 
-    tombname="$tomb_key_file"
+    tombname="$TOMBKEYFILE" # XXX ???
     # the gen_key() function takes care of the new key's encryption
     if option_is_set --tomb-pwd; then
         tomb_new_pwd="`option_value --tomb-pwd`"
         _verbose "tomb-pwd = ::1 new pass::" $tomb_new_pwd
-        gen_key "$tomb_new_pwd" >> "$tomb_key_file"
+        gen_key "$tomb_new_pwd" >> $TOMBKEYFILE
     else
-        gen_key >> "$tomb_key_file"
+        gen_key >> $TOMBKEYFILE
     fi
 
-    # load the key contents
-    tomb_key=`cat "$tomb_key_file"`
+    # load the key contents (set global variable)
+    TOMBKEY=$(cat $TOMBKEYFILE)
 
     # this does a check on the file header
-    is_valid_key "${tomb_key}" || {
+    is_valid_key $TOMBKEY || {
         _warning "The key does not seem to be valid."
         _warning "Dumping contents to screen:"
-        cat ${tombkey}
+        cat $TOMBKEY
         _warning "--"
         umount ${keytmp}
         rm -r $keytmp
         _failure "Operation aborted."
     }
 
-    _message "Done forging ::1 key::" $tomb_key_file
+    _message "Done forging ::1 key file::" $TOMBKEYFILE
     _success "Your key is ready:"
-    ls -lh ${tomb_key_file}
+    ls -lh $TOMBKEYFILE
 }
 
 # Step three -- Lock tomb
@@ -1377,7 +1376,7 @@ lock_tomb_with_key() {
     { test $? = 0 } || {
         _failure "No valid password supplied." }
 
-    _success "Locking ::1 tomb file:: with ::2 tomb key::" $TOMBFILE $tomb_key_file
+    _success "Locking ::1 tomb file:: with ::2 tomb key file::" $TOMBFILE $TOMBKEYFILE
 
     _message "Formatting Luks mapped device."
     print -n - "$tomb_secret" | \
@@ -1411,7 +1410,7 @@ lock_tomb_with_key() {
 
     _message "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::" $TOMBNAME $cipher
     _success "Your tomb is ready in ::1 tomb path:: and secured with key ::3 tomb key::" \
-	$TOMBPATH $tomb_key_file
+	$TOMBPATH $TOMBKEYFILE
 
 }
 
@@ -1442,12 +1441,12 @@ change_tomb_key() {
     load_key $tombkey
     { test $? = 0 } || {
         _failure "Aborting operations: error loading old key from arguments" }
-    old_key="$tomb_key"
-    old_key_file="$tomb_key_file"
+    local oldkey=$TOMBKEY
+    local oldkeyfile=$TOMBKEYFILE
 
     # we have everything, prepare to mount
     _success "Changing lock on tomb ::1 tomb name::" $TOMBNAME
-    _message "Old key: ::1 old key::" $old_key
+    _message "Old key: ::1 old key::" $oldkey
 
     # render the mapper
     mapdate=`date +%s`
@@ -1475,9 +1474,8 @@ change_tomb_key() {
     load_key
     { test $? = 0 } || {
         _failure "Aborting operations: error loading new key from -k" }
-    new_key="$tomb_key"
-    new_key_file="$tomb_key_file"
-    _message "New key: ::1 key::" $new_key_file
+
+    _message "New key: ::1 key file::" $TOMBKEYFILE
 
     if option_is_set --tomb-pwd; then
         tomb_new_pwd="`option_value --tomb-pwd`"
@@ -1500,16 +1498,12 @@ change_tomb_key() {
     { test $? = 0 } || {
         _failure "Unexpected error in luksChangeKey." }
 
-    unset old_key
-
     cryptsetup luksClose "${mapper}"
     { test $? = 0 } || {
         _failure "Unexpected error in luksClose." }
 
     _success "Succesfully changed key for tomb: ::1 tomb file::" $TOMBFILE
-    _message "The new key is: ::1 new key::" $new_key
-
-    unset new_key
+    _message "The new key is: ::1 new key::" $newkey
 
     return 0
 }
@@ -1622,7 +1616,7 @@ mount_tomb() {
 
     mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
     _verbose "dev mapper device: ::1 mapper::" $mapper
-    _verbose "Tomb key: ::1 key::" $tomb_key_file
+    _verbose "Tomb key: ::1 key file::" $TOMBKEYFILE
 
     # take the name only, strip extensions
     _verbose "Tomb name: ::1 tomb name:: (to be engraved)" $TOMBNAME
