@@ -291,6 +291,15 @@ whole system's security: just add such a line to \fI/etc/sudoers\fR:
 	username ALL=NOPASSWD: /usr/local/bin/tomb
 .EE
 
+Password input is handled by the pinentry program: it can be text
+based or graphical and is usually configured with a symlink. When
+using Tomb in X11 it is better to use a graphical pinentry-gtk2 or
+pinentry-qt because it helps preventing keylogging by other X
+clients. When using it from a remote ssh connection it might be
+necessary to force use of pinentry-curses for instance by unsetting
+the DISPLAY environment var.
+
+
 .SH SWAP
 
 On execution of certain commands Tomb will complain about swap memory
