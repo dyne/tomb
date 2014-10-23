@@ -7,6 +7,8 @@ source ${T} source
 dummypass=test
 dummypassnew=changetest
 
+GLOBAL_RESULT=0
+
 notice() { print; yes "${@}"; print; }
 error() { _warning "     ${@}"; }
 tt() {
@@ -261,7 +263,11 @@ for t in $tests; do
     echo "$t\t${results[$t]:-FAIL}"
 done
 
+for r in ${(v)results}; do
+    [[ "$r" == "SUCCESS" ]] || GLOBAL_RESULT=1
+done
+
 print "${#endloops} loop devices busy at end"
 print "Done. You can remove temporary leftovers from /tmp :"
 for i in `find /tmp -name '*tomb*' 2>/dev/null`; do ls -lh $i; done
-return 0
+return $GLOBAL_RESULT
