@@ -97,14 +97,16 @@ export TEXTDOMAIN=tomb
 
 # {{{ Safety functions
 
-endgame() {
-    # here clear all temp files and flush all pipes
+# Cleanup anything sensitive before exiting.
+_endgame() {
 
-    # prepare some random material to overwrite vars
-    rr="$RANDOM"
+    # Prepare some random material to overwrite vars
+    local rr="$RANDOM"
     while [[ ${#rr} -lt 500 ]]; do
-        rr+="$RANDOM"; done
-    # we make sure no info is left in unallocated mem
+        rr+="$RANDOM"
+    done
+
+    # Ensure no information is left in unallocated memory
     TOMBPATH="$rr";      unset TOMBPATH
     TOMBDIR="$rr";       unset TOMBDIR
     TOMBFILE="$rr";      unset TOMBFILE
@@ -115,24 +117,26 @@ endgame() {
     TOMBPASSWORD="$rr";  unset TOMBPASSWORD
 
     for f in $TOMBTMPFILES; do
-        ${=WIPE} "$f"; done
+        ${=WIPE} "$f"
+    done
     unset TOMBTMPFILES
 
     for l in $TOMBLOOPDEVS; do
-        losetup -d "$l"; done
+        losetup -d "$l"
+    done
     unset TOMBLOOPDEVS
 }
 
-# trap functions for the endgame event
-TRAPINT()  {  endgame INT   }
-TRAPEXIT() {  endgame EXIT  }
-TRAPHUP()  {  endgame HUP   }
-TRAPQUIT() {  endgame QUIT  }
-TRAPABRT() {  endgame ABORT }
-TRAPKILL() {  endgame KILL  }
-TRAPPIPE() {  endgame PIPE  }
-TRAPTERM() {  endgame TERM  }
-TRAPSTOP() {  endgame STOP  }
+# Trap functions for the _endgame event
+TRAPINT()  { _endgame INT   }
+TRAPEXIT() { _endgame EXIT  }
+TRAPHUP()  { _endgame HUP   }
+TRAPQUIT() { _endgame QUIT  }
+TRAPABRT() { _endgame ABORT }
+TRAPKILL() { _endgame KILL  }
+TRAPPIPE() { _endgame PIPE  }
+TRAPTERM() { _endgame TERM  }
+TRAPSTOP() { _endgame STOP  }
 
 check_shm() {
     # TODO: configure which tmp dir to use from a cli flag
