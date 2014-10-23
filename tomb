@@ -85,7 +85,7 @@ typeset -H TOMBSECRET         # Raw deciphered key     (see forge_key(), gpg_dec
 typeset -H TOMBPASSWORD       # Raw tomb passphrase    (see gen_key(), ask_key_password())
 
 typeset -aH TOMBTMPFILES      # Keep track of temporary files
-typeset -aH tomb_loopdevs
+typeset -aH TOMBLOOPDEVS      # Keep track of used loop devices
 
 # Make sure sbin is in PATH
 PATH+=:/sbin:/usr/sbin
@@ -118,9 +118,9 @@ endgame() {
         ${=WIPE} "$f"; done
     unset TOMBTMPFILES
 
-    for l in $tomb_loopdevs; do
+    for l in $TOMBLOOPDEVS; do
         losetup -d "$l"; done
-    unset tomb_loopdevs
+    unset TOMBLOOPDEVS
 }
 
 # trap functions for the endgame event
@@ -394,19 +394,19 @@ lo_mount() {
 
     losetup -f "$tpath" >& - # allocates the next loopback for our file
 
-    tomb_loopdevs+=("$_nstloop") # add to array of lodevs used
+    TOMBLOOPDEVS+=("$_nstloop") # add to array of lodevs used
 
     return 0
 }
 
 # print out latest loopback mounted
-lo_new() { print - "${tomb_loopdevs[${#tomb_loopdevs}]}" }
+lo_new() { print - "${TOMBLOOPDEVS[${#TOMBLOOPDEVS}]}" }
 
 # $1 is the path to the lodev to be preserved after quit
 lo_preserve() {
     _verbose "lo_preserve on ::1 path::" $1
     # remove the lodev from the tomb_lodevs array
-    tomb_loopdevs=("${(@)tomb_loopdevs:#$1}")
+    TOMBLOOPDEVS=("${(@)TOMBLOOPDEVS:#$1}")
 }
 
 # eventually used for debugging
@@ -419,7 +419,7 @@ dump_secrets() {
     _verbose "TOMBPASSWORD: ::1 tomb pass::" $TOMBPASSWORD
 
     _verbose "TOMBTMPFILES: ::1 temp files::" ${(@)TOMBTMPFILES}
-    _verbose "tomb_loopdevs: ::1 loopdevs::" ${(@)tomb_loopdevs}
+    _verbose "TOMBLOOPDEVS: ::1 loop devices::" ${(@)TOMBLOOPDEVS}
 }
 # }}}
 
