@@ -84,7 +84,7 @@ typeset -H TOMBKEYFILE        # Key file               (ditto)
 typeset -H TOMBSECRET         # Raw deciphered key     (see forge_key(), gpg_decrypt())
 typeset -H TOMBPASSWORD       # Raw tomb passphrase    (see gen_key(), ask_key_password())
 
-typeset -aH tomb_tempfiles
+typeset -aH TOMBTMPFILES      # Keep track of temporary files
 typeset -aH tomb_loopdevs
 
 # Make sure sbin is in PATH
@@ -114,9 +114,9 @@ endgame() {
     TOMBSECRET="$rr";    unset TOMBSECRET
     TOMBPASSWORD="$rr";  unset TOMBPASSWORD
 
-    for f in $tomb_tempfiles; do
+    for f in $TOMBTMPFILES; do
         ${=WIPE} "$f"; done
-    unset tomb_tempfiles
+    unset TOMBTMPFILES
 
     for l in $tomb_loopdevs; do
         losetup -d "$l"; done
@@ -197,12 +197,12 @@ tmp_create() {
     (( $? )) && _failure "Fatal error setting permissions on temporary file: ::1 temp file::" $tfile
 
     _verbose "Created tempfile: ::1 temp file::" $tfile
-    tomb_tempfiles+=($tfile)
+    TOMBTMPFILES+=($tfile)
     return 0
 }
 tmp_new() {
     # print out the latest tempfile
-    print - "${tomb_tempfiles[${#tomb_tempfiles}]}"
+    print - "${TOMBTMPFILES[${#TOMBTMPFILES}]}"
 }
 
 # Check if swap is activated
@@ -418,7 +418,7 @@ dump_secrets() {
     _verbose "TOMBSECRET: ::1 secret:: chars long" ${#TOMBSECRET}
     _verbose "TOMBPASSWORD: ::1 tomb pass::" $TOMBPASSWORD
 
-    _verbose "tomb_tempfiles: ::1 temp files::" ${(@)tomb_tempfiles}
+    _verbose "TOMBTMPFILES: ::1 temp files::" ${(@)TOMBTMPFILES}
     _verbose "tomb_loopdevs: ::1 loopdevs::" ${(@)tomb_loopdevs}
 }
 # }}}
