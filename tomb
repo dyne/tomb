@@ -37,9 +37,15 @@
 
 # {{{ Global variables
 
-VERSION=1.6
-DATE="Sept/2014"
-TOMBEXEC=$0
+typeset -r VERSION="1.7"
+typeset -r DATE="Oct/2014"
+typeset -r TOMBEXEC=$0
+
+# Tomb is using some global variables set by the shell:
+# TMPPREFIX, UID, GID, PATH, TTY, USERNAME
+# You can grep 'global variable' to see where they are used.
+
+# Keep a reference of the original command line arguments
 typeset -a OLDARGS
 for arg in ${argv}; do OLDARGS+=($arg); done
 
@@ -49,7 +55,7 @@ DD=(dd)
 WIPE=(rm -f)
 MKFS=(mkfs.ext3 -q -F -j -L)
 
-# Flag optional commands if available
+# Flag optional commands if available (see _ensure_dependencies())
 typeset -i 2 KDF=1
 typeset -i 2 STEGHIDE=1
 typeset -i 2 RESIZER=1
@@ -57,20 +63,18 @@ typeset -i 2 SWISH=1
 typeset -i 2 QRENCODE=1
 
 # Default mount options
-MOUNTOPTS="rw,noatime,nodev"
-
-# prefix for temporary files
-TMPPREFIX="/dev/shm/$RANDOM.$RANDOM."
+typeset      MOUNTOPTS="rw,noatime,nodev"
 
 # Makes glob matching case insensitive
 unsetopt CASE_MATCH
 
-typeset -AH  OPTS             # Command line options (see main())
+typeset -AH OPTS              # Command line options (see main())
 
-# Command context
-typeset -H _UID               # Running user identifier
-typeset -H _GID               # Running user group identifier
-typeset -H _TTY               # Connected input terminal
+# Command context (see _whoami())
+typeset -H  _USER             # Running username
+typeset -Hi _UID              # Running user identifier
+typeset -Hi _GID              # Running user group identifier
+typeset -H  _TTY              # Connected input terminal
 
 # Tomb context (see _plot())
 typeset -H TOMBPATH           # Full path to the tomb
@@ -87,8 +91,8 @@ typeset -H TOMBPASSWORD       # Raw tomb passphrase    (see gen_key(), ask_key_p
 typeset -aH TOMBTMPFILES      # Keep track of temporary files
 typeset -aH TOMBLOOPDEVS      # Keep track of used loop devices
 
-# Make sure sbin is in PATH
-PATH+=:/sbin:/usr/sbin
+# Make sure sbin is in PATH (man zshparam)
+path+=( /sbin /usr/sbin )
 
 # For gettext
 export TEXTDOMAIN=tomb
@@ -116,15 +120,18 @@ _endgame() {
     TOMBSECRET="$rr";    unset TOMBSECRET
     TOMBPASSWORD="$rr";  unset TOMBPASSWORD
 
+    # Clear temporary files
     for f in $TOMBTMPFILES; do
         ${=WIPE} "$f"
     done
     unset TOMBTMPFILES
 
+    # Detach loop devices
     for l in $TOMBLOOPDEVS; do
         losetup -d "$l"
     done
     unset TOMBLOOPDEVS
+
 }
 
 # Trap functions for the _endgame event
@@ -138,52 +145,111 @@ TRAPPIPE() { _endgame PIPE  }
 TRAPTERM() { _endgame TERM  }
 TRAPSTOP() { _endgame STOP  }
 
-check_shm() {
-    # TODO: configure which tmp dir to use from a cli flag
-    SHMPREFIX=/dev/shm
+# Identify the running user
+# Set global variables _UID, _GID, _TTY, and _USER, either from the
+# command line, -U, -G, -T, respectively, or from the environment.
+# Also update USERNAME and HOME to maintain consistency.
+_whoami() {
+    # Set global variables
+    typeset -gi _GID _UID
+    typeset -g  _TTY _USER
 
-    [[ -k /dev/shm ]] || [[ -k /run/shm ]] && { SHMPREFIX=/run/shm } \
-        || {
-        # mount the tmpfs if the SO doesn't already
-        mkdir /run/shm
-        (( $? )) && _failure "Fatal error creating a directory for temporary files"
+    # Get GID from option -G or the environment
+    option_is_set -G \
+	&& _GID=$(option_value -G) || _GID=$(id -g)
 
-        mount -t tmpfs tmpfs /run/shm \
-            -o nosuid,noexec,nodev,mode=0600,uid=$_UID,gid=$_GID
-        (( $? )) && _failure "Fatal error mounting tmpfs in /run/shm for temporary files"
+    # Get UID from option -U or the environment
+    option_is_set -U \
+	&& _UID=$(option_value -U) || _UID=$(id -u)
 
-        SHMPREFIX=/run/shm
+    # Set username from UID or environment
+    [[ -n $SUDO_USER ]]             && _USER=$SUDO_USER
+    [[ -z $_USER && -n $USERNAME ]] && _USER=$USERNAME
+    [[ -z $_USER ]]                 && _USER=$(id -u)
+#    _verbose "Identified caller: ::1 username:: (::2 UID:::::3  GID::)" \
+#	$_USER $_UID $_GID
+
+    # Update USERNAME accordingly if we can
+    [[ EUID == 0 && $_USER != $USERNAME ]] && {
+#	_verbose "Updating USERNAME from '::1 USERNAME::' to '::2 _USER::')" \
+#	    $USERNAME $_USER
+	USERNAME=$_USER
     }
 
-    # setup a special env var for zsh to create temp files that will
-    # then be deleted at the exit of each function using them.
-    TMPPREFIX="$SHMPREFIX/$RANDOM.$RANDOM."
+    # Force HOME to _USER's HOME if necessary
+    local home=$(awk -F: "/$_USER/ { print \$6 }" /etc/passwd 2>/dev/null)
+    [[ $home == $HOME ]] || {
+	_verbose "Updating HOME to match user's: ::1 home:: (was ::2 HOME::)" \
+	    $home $HOME
+	HOME=$home }
+
+    # Get connecting TTY from option -T or the environment
+    option_is_set -T && _TTY=$(option_value -T)
+    [[ -z $_TTY ]]   && {
+	_TTY=$TTY
+	_verbose "Identified caller from tty ::1 TTY::)" $_TTY }
+}
+
+# Ensure temporary files remain in RAM
+# Set global variable TMPPREFIX
+# TODO: configure which tmp dir to use from a cli flag
+_ensure_safe_memory check_shm() {
+    local shmprefix=""
+
+    # Set $shmprefix to something sensible
+    [[ -z $shmprefix && -k /dev/shm ]] \
+	&& shmprefix=/dev/shm || shmprefix=/run/shm
+
+    _whoami    # Set _UID, _GID, _TTY, _USER
+
+    # Mount the tmpfs if the OS doesn't already
+    [[ -k $shmprefix ]] || {
+	mkdir -p $shmprefix/$_UID || {
+	    _failure "Fatal error creating a directory for temporary files" }
+
+        mount -t tmpfs tmpfs $shmprefix/$_UID \
+            -o nosuid,noexec,nodev,mode=0700,uid=$_UID,gid=$_GID
+        [[ $? == 0 ]] || {
+	    _failure "Cannot mount tmpfs in ::1 shm path::" $shmprefix }
+    }
+
+    # Ensure all temporary files go into a user-specific directory for
+    # additional safety
+    mkdir -m 0700 -p $shmprefix/$_UID || {
+	_failure "Fatal error creating a directory for temporary files" }
+
+    # Set a global environment variable to ensure zsh will use that
+    # directory in RAM to keep temporary files by setting an.  They
+    # will be created on demand and deleted as soon as the function
+    # using them ends.
+    TMPPREFIX="$shmprefix/$_UID/$RANDOM$RANDOM."
+
     return 0
 }
 
 # Define sepulture's plot (setup tomb-related arguments)
-# Synopsis: _plot "/path/to/the.tomb"
+# Synopsis: _plot /path/to/the.tomb
 _plot() {
     # We set global variables
     typeset -g TOMBPATH TOMBDIR TOMBFILE TOMBNAME
     
     TOMBPATH="$1"
-    _verbose '_plot TOMBPATH = ::1 tomb path::' $TOMBPATH
+#    _verbose '_plot TOMBPATH = ::1 tomb path::' $TOMBPATH
 
     TOMBDIR=$(dirname $TOMBPATH)
-    _verbose '_plot TOMBDIR  = ::1 tomb dir::'  $TOMBDIR
+#    _verbose '_plot TOMBDIR  = ::1 tomb dir::'  $TOMBDIR
 
     TOMBFILE=$(basename $TOMBPATH)
-    _verbose '_plot TOMBFILE = ::1 tomb file::' $TOMBFILE
+#    _verbose '_plot TOMBFILE = ::1 tomb file::' $TOMBFILE
 
     # The tomb name is TOMBFILE without an extension.
     # It can start with dots: ..foo.tomb -> ..foo
     TOMBNAME="${TOMBFILE%\.[^\.]*}"
-    _verbose '_plot TOMBNAME = ::1 tomb name::' $TOMBNAME
+#    _verbose '_plot TOMBNAME = ::1 tomb name::' $TOMBNAME
 
     # Normalize TOMBFILE name
     TOMBFILE="${TOMBNAME}.tomb"
-    _verbose '_plot TOMBFILE = ::1 tomb file:: (normalized)' $TOMBFILE
+#    _verbose '_plot TOMBFILE = ::1 tomb file:: (normalized)' $TOMBFILE
 
     # Normalize TOMBPATH
     TOMBPATH="${TOMBDIR}/${TOMBFILE}"
@@ -415,8 +481,9 @@ lo_preserve() {
 
 # eventually used for debugging
 dump_secrets() {
-    _verbose "TOMBFILE: ::1 tomb file::" $TOMBPATH
-    _verbose "TOMBFILE: ::1 tomb file::" $TOMBFILE
+    _verbose "TOMBPATH: ::1 tomb path::" $TOMBPATH
+    _verbose "TOMBNAME: ::1 tomb name::" $TOMBNAME
+
     _verbose "TOMBKEY: ::1 key:: chars long" ${#TOMBKEY}
     _verbose "TOMBKEYFILE: ::1 key file::" $TOMBKEYFILE
     _verbose "TOMBSECRET: ::1 secret:: chars long" ${#TOMBSECRET}
@@ -611,33 +678,47 @@ progress() {
 
 }
 
-# Check what's installed
-check_bin() {
-    # check for required programs
+# Check program dependencies
+#
+# Tomb depends on system utilities that must be present, and other
+# functionality that can be provided by various programs according to
+# what's available on the system.  If some required commands are
+# missing, bail out.
+_ensure_dependencies check_bin() {
+
+    # The messages system requires gettext
+    command -v gettext >& - || {
+	echo "Missing required dependency: gettext.  Please install it."
+	exit 1
+    }
+
+    # Check for required programs
     for req in cryptsetup pinentry sudo gpg; do
-        command -v $req >& - || exitv=1 _failure "Cannot find ::1::. It's a requirement to use Tomb, please install it." $req
+        command -v $req >& - || {
+	    _failure "Missing required dependency ::1 command::.  Please install it." $req }
     done
 
-    export PATH=/sbin:/usr/sbin:$PATH
+    # Ensure system binaries are available in the PATH
+    path+=(/sbin /usr/sbin) # zsh magic
 
-    # which dd command to use
+    # Which dd command to use
     command -v dcfldd >& - && DD=(dcfldd statusinterval=1)
 
-    # which wipe command to use
+    # Which wipe command to use
     command -v wipe >& - && WIPE=(wipe -f -s)
 
-    # check for filesystem creation progs
+    # Check for filesystem creation programs
     command -v mkfs.ext4 >& - && MKFS=(mkfs.ext4 -q -F -j -L)
 
-    # check for steghide
+    # Check for steghide
     command -v steghide >& - || STEGHIDE=0
-    # check for resize
+    # Check for resize
     command -v e2fsck resize2fs >& - || RESIZER=0
-    # check for KDF auxiliary tools
+    # Check for KDF auxiliary tools
     command -v tomb-kdb-pbkdf2 >& - || KDF=0
-    # check for Swish-E file content indexer
+    # Check for Swish-E file content indexer
     command -v swish-e >& - || SWISH=0
-    # check for QREncode for paper backups of keys
+    # Check for QREncode for paper backups of keys
     command -v qrencode >& - || QRENCODE=0
 }
 
@@ -1701,65 +1782,87 @@ mount_tomb() {
     return 0
 }
 
-# ## Hooks execution
+## HOOKS EXECUTION
+#
+# Execution of code inside a tomb may present a security risk, e.g.,
+# if the tomb is shared or compromised, an attacker could embed
+# malicious code.  When in doubt, open the tomb with the -n switch in
+# order to skip this feature and verify the files mount-hooks and
+# bind-hooks inside the tomb yourself before letting them run.
+
+# Mount files and directories from the tomb to the current user's HOME.
+#
+# Synopsis: exec_safe_bind_hooks /path/to/mounted/tomb
+#
+# This can be a security risk if you share tombs with untrusted people.
+# In that case, use the -n switch to turn off this feature.
 exec_safe_bind_hooks() {
-    if [[ -n ${(k)OPTS[-o]} ]]; then
-        MOUNTOPTS=${OPTS[-o]}
-    fi
-    local MOUNTPOINT="${1}"
-    local ME=${SUDO_USER:-$(whoami)}
-    local HOME=$(awk -v a="$ME" -F ':' '{if ($1 == a) print $6}' /etc/passwd 2>/dev/null)
-    if [ $? -ne 0 ]; then
-        _warning "How pitiful!  A tomb, and no HOME."
-        return 1
-    fi
-    if [ -z "$MOUNTPOINT" -o ! -d "$MOUNTPOINT" ]; then
-        _warning "Cannot exec bind hooks without a mounted tomb."
-        return 1
-    fi
-    if ! [ -r "$MOUNTPOINT/bind-hooks" ]; then
-        _verbose "bind-hooks not found in ::1 mount point::" $MOUNTPOINT
-        return 1
-    fi
-    typeset -al mounted
-    typeset -Al maps
-    maps=($(<"$MOUNTPOINT/bind-hooks"))
+    local mnt="$1"   # First argument is the mount point of the tomb
+
+    # Default mount options are overridden with the -o switch
+    [[ -n ${(k)OPTS[-o]} ]] && MOUNTOPTS=${OPTS[-o]}
+
+    # No HOME set? Note: this should never happen again.
+    [[ -z $HOME ]] && {
+	_warning "How pitiful!  A tomb, and no HOME."
+	return 1 }
+
+    [[ -z $mnt || ! -d $mnt ]] && {
+        _warning "Cannot exec bind hooks without a mounted tomb." 
+        return 1 }
+
+    [[ ! -r "$mnt/bind-hooks" ]] && {
+        _verbose "bind-hooks not found in ::1 mount point::" $mnt
+        return 1 }
+
+    typeset -Al maps        # Maps of files and directories to mount
+    typeset -al mounted     # Track already mounted files and directories
+
+    maps=($(<"$mnt/bind-hooks"))
     for dir in ${(k)maps}; do
-        if [ "${dir[1]}" = "/" -o "${dir[1,2]}" = ".." ]; then
+        [[ "${dir[1]}" == "/" || "${dir[1,2]}" == ".." ]] && {
             _warning "bind-hooks map format: local/to/tomb local/to/\$HOME"
-            continue
-        fi
-        if [ "${${maps[$dir]}[1]}" = "/" -o "${${maps[$dir]}[1,2]}" = ".." ]; then
+            continue }
+
+        [[ "${${maps[$dir]}[1]}" == "/" || "${${maps[$dir]}[1,2]}" == ".." ]] && {
             _warning "bind-hooks map format: local/to/tomb local/to/\$HOME.  Rolling back"
             for dir in ${mounted}; do umount $dir; done
-            return 1
-        fi
+            return 1 }
+
         if [ ! -r "$HOME/${maps[$dir]}" ]; then
             _warning "bind-hook target not existent, skipping ::1 home::/::2 subdir::" $HOME ${maps[$dir]}
-        elif [ ! -r "$MOUNTPOINT/$dir" ]; then
-            _warning "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::" $MOUNTPOINT $dir
+        elif [ ! -r "$mnt/$dir" ]; then
+            _warning "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::" $mnt $dir
         else
-            mount -o bind,$MOUNTOPTS $MOUNTPOINT/$dir $HOME/${maps[$dir]}
+            mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]}
             mounted+=("$HOME/${maps[$dir]}")
         fi
     done
 }
 
-# Post mount hooks
+# Execute automated actions configured in the tomb.
+#
+# Synopsis: exec_safe_post_hooks /path/to/mounted/tomb [open|close]
+#
+# If an executable file named 'post-hooks' is found inside the tomb,
+# run it as a user.  This might need a dialog for security on what is
+# being run, however we expect you know well what is inside your tomb.
+# If you're mounting an untrusted tomb, be safe and use the -n switch
+# to verify what it would run if you let it.  This feature opens the
+# possibility to make encrypted executables.
 exec_safe_post_hooks() {
-    local mnt=$1 # first argument is where the tomb is mounted
-    local ME=${SUDO_USER:-$(whoami)}
-    if ! [ -x ${mnt}/post-hooks ]; then return; fi
-    # if 'post-hooks' is found inside the tomb, check it: if it is an
-    # executable, launch it as a user this might need a dialog for
-    # security on what is being run, however we expect you know well
-    # what is inside your tomb.  this feature opens the possibility to
-    # make encrypted executables.
-    cat ${mnt}/post-hooks | head -n1 | grep '^#!/'
-    if [ $? = 0 ]; then
-        _success "Post hooks found, executing as user ::1 user name::." $SUDO_USER
-        exec_as_user ${mnt}/post-hooks "$2" "$1"
-    fi
+    local mnt=$1     # First argument is where the tomb is mounted
+    local act=$2     # Either 'open' or 'close'
+
+    # Only run if post-hooks has the executable bit set
+    [[ -x $mnt/post-hooks ]] || return
+
+    # If the file starts with a shebang, run it.
+    cat $mnt/post-hooks | head -n1 | grep '^#!\s*/' &> /dev/null
+    [[ $? == 0 ]] && {
+        _success "Post hooks found, executing as user ::1 user name::." $USERNAME
+        exec_as_user $mnt/post-hooks $act $mnt
+    }
 }
 
 # }}} - Tomb open
@@ -2322,7 +2425,11 @@ slam_tomb() {
 # }}} - Tomb close
 
 # {{{ Main routine
+
 main() {
+
+    _ensure_dependencies  # Check dependencies are present or bail out
+    _ensure_safe_memory   # Check available memory can be used safely
 
     local -A subcommands_opts
     ### Options configuration
@@ -2457,11 +2564,9 @@ main() {
         done
     fi
 
-    # when we run as root, we remember the original uid:gid
-    # to set permissions for the calling user and drop privileges
-    if option_is_set -U; then _UID="`option_value -U`"; fi
-    if option_is_set -G; then _GID="`option_value -G`"; fi
-    if option_is_set -T; then _TTY="`option_value -T`"; fi
+    # When we run as root, we remember the original uid:gid to set
+    # permissions for the calling user and drop privileges
+    _whoami # Reset _UID, _GID, _TTY
 
     [[ "$PARAM" == "" ]] && {
         _verbose "Tomb command: ::1 subcommand::" $subcommand
@@ -2469,8 +2574,9 @@ main() {
         _verbose "Tomb command: ::1 subcommand:: ::2 param::" $subcommand $PARAM
     }
 
-    [[ $_UID == "" ]] || {
-        _verbose "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]." $_UID $_GID $_TTY
+    [[ -z $_UID ]] || {
+        _verbose "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]." \
+	    $_UID $_GID $_TTY
     }
 
     case "$subcommand" in
@@ -2590,15 +2696,9 @@ EOF
 # }}}
 
 # {{{ Run
-check_bin
 
-check_shm
+main $@ || exit $?   # Prevent `tomb source tomb` from exiting
 
-main $@
-ret=$?
-if [[ $ret != 0 ]]; then #this "if" seems useless, but avoid source tomb source from exiting
-    exit $ret
-fi
 # }}}
 
 # -*- tab-width: 4; indent-tabs-mode:nil; -*-
