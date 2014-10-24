@@ -552,27 +552,31 @@ _print "Please report bugs on <http://github.com/dyne/tomb/issues>."
 }
 
 
-# Check an option
+# Check whether a commandline option is set.
+#
+# Synopsis: option_is_set -flag [out]
+#
+# First argument is the commandline flag (e.g., "-s").
+# If the second argument is present and set to 'out', print out the
+# result: either 'set' or 'unset' (useful for if conditions).
+#
+# Return 0 if is set, 1 otherwise
 option_is_set() {
-    # First argument, the commandline flag (i.e. "-s").
-    # Second (optional) argument: if "out", command will print it out 'set'/'unset'
-    # (useful for if conditions).
-    # Return 0 if is set, 1 otherwise
+    local -i r   # the return code (0 = set, 1 = unset)
+
     [[ -n ${(k)OPTS[$1]} ]];
     r=$?
-    if [[ $2 == out ]]; then
-        if [[ $r == 0 ]]; then
-            echo 'set'
-        else
-            echo 'unset'
-        fi
-    fi
+
+    [[ $2 == "out" ]] && {
+        [[ $r == 0 ]] && { echo 'set' } || { echo 'unset' }
+    }
+
     return $r;
 }
 
-# Get an option value
+# Print the option value matching the given flag
+# Unique argument is the commandline flag (e.g., "-s").
 option_value() {
-    # First argument, the commandline flag (i.e. "-s").
     print -n - "${OPTS[$1]}"
 }
 
