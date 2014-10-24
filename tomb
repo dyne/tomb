@@ -5,6 +5,8 @@
 # A commandline tool to easily operate encryption of secret data
 #
 # Homepage on: [tomb.dyne.org](http://tomb.dyne.org)
+#
+# In Emacs, you can use C-c @ C-q to (un)fold code using folding.el
 
 # {{{ License
 
@@ -150,6 +152,7 @@ TRAPSTOP() { _endgame STOP  }
 # command line, -U, -G, -T, respectively, or from the environment.
 # Also update USERNAME and HOME to maintain consistency.
 _whoami() {
+
     # Set global variables
     typeset -gi _GID _UID
     typeset -g  _TTY _USER
@@ -185,22 +188,22 @@ _whoami() {
 
     # Get connecting TTY from option -T or the environment
     option_is_set -T && _TTY=$(option_value -T)
-    [[ -z $_TTY ]]   && {
-	_TTY=$TTY
-	_verbose "Identified caller from tty ::1 TTY::)" $_TTY }
+    [[ -z $_TTY ]]   && _TTY=$TTY
+
 }
 
 # Ensure temporary files remain in RAM
 # Set global variable TMPPREFIX
 # TODO: configure which tmp dir to use from a cli flag
 _ensure_safe_memory check_shm() {
-    local shmprefix=""
+
+    local shmprefix=""     # Path prefix for safe temporary files
 
     # Set $shmprefix to something sensible
-    [[ -z $shmprefix && -k /dev/shm ]] \
-	&& shmprefix=/dev/shm || shmprefix=/run/shm
+    [[ -z $shmprefix && -k "/dev/shm" ]] \
+	&& shmprefix="/dev/shm" || shmprefix="/run/shm"
 
-    _whoami    # Set _UID, _GID, _TTY, _USER
+    _whoami    # Set _UID and _GID for later
 
     # Mount the tmpfs if the OS doesn't already
     [[ -k $shmprefix ]] || {
@@ -225,116 +228,126 @@ _ensure_safe_memory check_shm() {
     TMPPREFIX="$shmprefix/$_UID/$RANDOM$RANDOM."
 
     return 0
+
 }
 
 # Define sepulture's plot (setup tomb-related arguments)
 # Synopsis: _plot /path/to/the.tomb
 _plot() {
+
     # We set global variables
     typeset -g TOMBPATH TOMBDIR TOMBFILE TOMBNAME
     
     TOMBPATH="$1"
-#    _verbose '_plot TOMBPATH = ::1 tomb path::' $TOMBPATH
 
     TOMBDIR=$(dirname $TOMBPATH)
-#    _verbose '_plot TOMBDIR  = ::1 tomb dir::'  $TOMBDIR
 
     TOMBFILE=$(basename $TOMBPATH)
-#    _verbose '_plot TOMBFILE = ::1 tomb file::' $TOMBFILE
 
     # The tomb name is TOMBFILE without an extension.
     # It can start with dots: ..foo.tomb -> ..foo
     TOMBNAME="${TOMBFILE%\.[^\.]*}"
-#    _verbose '_plot TOMBNAME = ::1 tomb name::' $TOMBNAME
 
-    # Normalize TOMBFILE name
-    TOMBFILE="${TOMBNAME}.tomb"
-#    _verbose '_plot TOMBFILE = ::1 tomb file:: (normalized)' $TOMBFILE
+    # Normalize tomb name
+    TOMBFILE="$TOMBNAME.tomb"
 
-    # Normalize TOMBPATH
-    TOMBPATH="${TOMBDIR}/${TOMBFILE}"
-    _verbose '_plot TOMBPATH = ::1 tomb path:: (normalized)' $TOMBPATH
+    # Normalize tomb path
+    TOMBPATH="$TOMBDIR/$TOMBFILE"
+
 }
 
 # Provide a random filename in shared memory
 tmp_create() {
-    local tfile="${TMPPREFIX}${RANDOM}"
-    touch "$tfile"
-    (( $? )) && _failure "Fatal error creating a temporary file: ::1 temp file::" $tfile
 
-    chown $_UID:$_GID "$tfile"
-    chmod 0600 "$tfile"
-    (( $? )) && _failure "Fatal error setting permissions on temporary file: ::1 temp file::" $tfile
+    local tfile="${TMPPREFIX}${RANDOM}"   # Temporary file
+
+    touch $tfile
+    [[ $? == 0 ]] || {
+	_failure "Fatal error creating a temporary file: ::1 temp file::" $tfile }
+
+    chown $_UID:$_GID $tfile && chmod 0600 $tfile
+    [[ $? == 0 ]] || {
+	_failure "Fatal error setting permissions on temporary file: ::1 temp file::" $tfile }
 
     _verbose "Created tempfile: ::1 temp file::" $tfile
     TOMBTMPFILES+=($tfile)
+
     return 0
+
 }
+
+# Print the name of the latest temporary file created
 tmp_new() {
-    # print out the latest tempfile
+
     print - "${TOMBTMPFILES[${#TOMBTMPFILES}]}"
+
 }
 
 # Check if swap is activated
-check_swap() {
-    # Return 0 if NO swap is used, 1 if swap is used
-    # Return 2 if swap(s) is(are) used, but ALL encrypted
-    local swaps="$(awk '/^\// { print $1 }' /proc/swaps 2>/dev/null)"
-    [[ -z "$swaps" ]] && return 0                # No swap partition is active
-    # Check whether all swaps are encrypted, and return 2
-    # If any of the swaps is not encrypted, we bail out and return 1.
-    ret=1
+# Return 0 if NO swap is used, 1 if swap is used.
+# Return 1 if any of the swaps is not encrypted.
+# Return 2 if swap(s) is(are) used, but ALL encrypted.
+# Use _check_swap in functions, that will call this function but will
+# exit if unsafe swap is present.
+_ensure_safe_swap() {
+
+    local -i r=1    # Return code: 0 no swap, 1 unsafe swap, 2 encrypted
+    local -a swaps  # List of swap partitions
+    local    bone is_crypt
+
+    swaps="$(awk '/^\// { print $1 }' /proc/swaps 2>/dev/null)"
+    [[ -z "$swaps" ]] && return 0 # No swap partition is active
+
     for s in $=swaps; do
-        bone=`sudo file $s`
+        bone=$(sudo file $s)
         if [[ "$bone" =~ "swap file" ]]; then
             # It's a regular (unencrypted) swap file
-            ret=1
+            r=1
             break
-        elif [[ "$bone" =~ "symbolic link" ]]; then
+
+	elif [[ "$bone" =~ "symbolic link" ]]; then
             # Might link to a block
-            ret=1
-            if [ "/dev/mapper" = "${s%/*}" ]; then
-                is_crypt=`sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
-                if [ "crypt" = "$is_crypt" ]; then
-                    ret=2
-                fi
-            else
-                break
-            fi
+            r=1
+            [[ "/dev/mapper" == "${s%/*}" ]] || { break }
+            is_crypt=$(sudo dmsetup status "$s" | awk '/crypt/ {print $3}')
+            [[ $is_crypt == "crypt" ]] && { r=2 }
+
         elif [[ "$bone" =~ "block special" ]]; then
-            # Is a block
-            ret=1
+            # It's a block
+            r=1
             is_crypt=`sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
-            if [ "crypt" = "$is_crypt" ]; then
-                ret=2
-            else
-                break
-            fi
+            [[ $is_crypt == "crypt" ]] && { r=2 } || { break }
+
         fi
     done
-    _warning  "An active swap partition is detected, this poses security risks."
-    if [[ $ret -eq 2 ]]; then
+    _warning  "An active swap partition is detected."
+    if [[ $r -eq 2 ]]; then
         _success "All your swaps are belong to crypt.  Good."
     else
-        _warning  "You can deactivate all swap partitions using the command:"
-        _warning  " swapoff -a"
-        _warning  "But if you want to proceed like this, use the -f (force) flag."
-        _failure "Operation aborted."
+	_warning "This poses security risks."
+        _warning "You can deactivate all swap partitions using the command:"
+        _warning " swapoff -a"
+        _warning "But if you want to proceed like this, use the -f (force) flag."
     fi
-    return $ret
+    return $r
+
 }
 
-# Wrapper to allow encrypted swap and remind the user about
-# possible data leaks to disk if swap is on, and not to be ignored
+# Wrapper to allow encrypted swap and remind the user about possible
+# data leaks to disk if swap is on, and not to be ignored.  It could
+# be run once in main(), but as swap evolves, it's better to run it
+# whenever swap may be needed.
+# Exit if unencrypted swap is active on the system.
 _check_swap() {
     if ! option_is_set -f && ! option_is_set --ignore-swap; then
-        check_swap
+        _ensure_safe_swap
         case $? in
             0|2)     # No, or encrypted swap
                 return 0
                 ;;
             *)       # Unencrypted swap
                 return 1
+		_failure "Operation aborted."
                 ;;
         esac
     fi
