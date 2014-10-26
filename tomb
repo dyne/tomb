@@ -1853,8 +1853,8 @@ exec_safe_bind_hooks() {
         elif [ ! -r "$mnt/$dir" ]; then
             _warning "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::" $mnt $dir
         else
-            mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]}
-            mounted+=("$HOME/${maps[$dir]}")
+            mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]} \
+		  && mounted+=("$HOME/${maps[$dir]}")
         fi
     done
 }
@@ -2606,6 +2606,7 @@ main() {
             forge_key ${=PARAM}
             ;;
         dig)
+            check_priv
             dig_tomb ${=PARAM}
             ;;
         lock)
@@ -2640,6 +2641,7 @@ main() {
             umount_tomb $PARAM[1]
             ;;
         passwd)
+            check_priv
             change_passwd $PARAM[1]
             ;;
         list)
