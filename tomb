@@ -247,6 +247,8 @@ _plot() {
     # The tomb name is TOMBFILE without an extension.
     # It can start with dots: ..foo.tomb -> ..foo
     TOMBNAME="${TOMBFILE%\.[^\.]*}"
+    [[ -z $TOMBNAME ]] && {
+	_failure "Tomb won't work without a TOMBNAME." }
 
     # Normalize tomb name
     TOMBFILE="$TOMBNAME.tomb"
