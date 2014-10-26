@@ -143,12 +143,13 @@ ${T} -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypassnew} open /
 notice "Testing bind hooks"
 
 rnd=$RANDOM
-echo $rnd > /media/test.tomb/test-$rnd
-echo "test-$rnd test-$rnd" > /media/test.tomb/bind-hooks
-touch $HOME/test-$rnd
+bindtest="dyne-tomb-bind-test-$rnd"
+echo $rnd > /media/test.tomb/$bindtest
+echo "$bindtestfile $bindtest" > /media/test.tomb/bind-hooks
+touch $HOME/$bindtest
 tt close test
 tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypassnew} open /tmp/test.tomb
-rnd2=`cat $HOME/test-$rnd`
+rnd2=`cat $HOME/$bindtest`
 if [ "$rnd" = "$rnd2" ]; then
 	notice "Bind hook on file matches"
 	results+=(bind SUCCESS)
@@ -157,7 +158,8 @@ else
 	error "Bind hook on file reports incongruence"
 fi
 tt close test
-
+# Remove all test files in case some previous tests failed.
+rm -f $HOME/dyne-tomb-bind-test-* 
 
 notice "Testing set key"
 
