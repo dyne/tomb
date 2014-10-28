@@ -429,29 +429,38 @@ EOF
 # Check if a filename is a valid tomb
 is_valid_tomb() {
     _verbose "is_valid_tomb ::1 tomb file::" $1
-    # argument check
-    { test "$1" = "" } && {
-        _warning "Tomb file is missing from arguments."; return 1 }
-    # file checks
-    { test -r "$1" } || {
-        _warning "Tomb file not found: ::1 tomb file::" $1; return 1 }
-    { test -f "$1" } || {
-        _warning "Tomb file is not a regular file: ::1 tomb file::" $1; return 1 }
-    { test -s "$1" } || {
-        _warning "Tomb file is empty (zero length): ::1 tomb file::" $1; return 1 }
-    { test -w "$1" } || {
-        _warning "Tomb file is not writable: ::1 tomb file::" $1; return 1 }
 
-    # check file type (if its a Luks fs)
+    # First argument must be the path to a tomb
+    [[ -z "$1" ]] && {
+        _failure "Tomb file is missing from arguments." }
+
+    # Tomb file must be a readable, writable, not-empty regular file.
+    [[ ! -r "$1" ]] && {
+        _failure "Tomb file not found: ::1 tomb file::" $1 }
+    [[ ! -f "$1" ]] && {
+        _failure "Tomb file is not a regular file: ::1 tomb file::" $1 }
+    [[ ! -s "$1" ]] && {
+        _failure "Tomb file is empty (zero length): ::1 tomb file::" $1 }
+    [[ ! -w "$1" ]] && {
+        _failure "Tomb file is not writable: ::1 tomb file::" $1 }
+
+    # TODO: split the rest of that function out.
+    # We already have a valid tomb, now we're checking
+    # whether we can alter it.
+
+    # Tomb file may be a LUKS FS (or we are creating it)
     file "$1" | grep -i "luks encrypted file" > /dev/null || {
-        _warning "File is not yet a tomb: ::1 tomb file::" $1}
+        _warning "File is not yet a tomb: ::1 tomb file::" $1 }
 
     _plot $1     # Set TOMB{PATH,DIR,FILE,NAME}
 
+    # Tomb cannot be already mounted (or we cannot alter it)
     mount -l | grep "${TOMBFILE}.*\[$TOMBNAME\]$" > /dev/null
-    { test $? = 0 } && {
-        _warning "Tomb is currently in use: ::1 tomb name::" $TOMBNAME; return 1 }
+    [[ $? == 0 ]] && {
+        _failure "Tomb is currently in use: ::1 tomb name::" $TOMBNAME }
+
     _message "Valid tomb file found: ::1 tomb path::" $TOMBPATH
+
     return 0
 }
 
@@ -502,6 +511,7 @@ dump_secrets() {
     _verbose "TOMBTMPFILES: ::1 temp files::" ${(@)TOMBTMPFILES}
     _verbose "TOMBLOOPDEVS: ::1 loop devices::" ${(@)TOMBLOOPDEVS}
 }
+
 # }}}
 
 # {{{ Commandline interaction
@@ -1115,19 +1125,18 @@ bury_key() {
     # password would enhance security). Nevertheless here we prefer
     # usability.
 
-    if option_is_set --tomb-pwd; then
-        tomb_pwd="`option_value --tomb-pwd`"
-        _verbose "tomb-pwd = ::1 tomb pass::" $tomb_pwd
-        ask_key_password "$tomb_pwd"
-    else
+    { option_is_set --tomb-pwd } && {
+        local tombpwd="`option_value --tomb-pwd`"
+        _verbose "tomb-pwd = ::1 tomb pass::" $tombpwd
+        ask_key_password "$tombpwd"
+    } || {
         ask_key_password
-    fi
-    { test $? = 0 } || {
-        _warning "Wrong password supplied."
-        _failure "You shall not bury a key whose password is unknown to you."
     }
+    [[ $? != 0 ]] && {
+        _warning "Wrong password supplied."
+        _failure "You shall not bury a key whose password is unknown to you." }
 
-    # we omit armor strings since having them as constants can give
+    # We omit armor strings since having them as constants can give
     # ground to effective attacks on steganography
     print - "$TOMBKEY" | awk '
 /^-----/ {next}
@@ -1150,78 +1159,75 @@ bury_key() {
 # optional 2nd arg: the password to use (same as key, internal use)
 # optional 3rd arg: the key where to save the result (- for stdout)
 exhume_key() {
+    local imagefile="$1"  # The image file where to look for the key
+    local tombpass="$2"   # (Optional) the password to use (internal use)
+    local destkey="$3"    # (Optional) the key file where to save the
+			  # result (- for stdout)
+    local r=1             # Return code (default: fail)
 
-    imagefile="$1"
-    res=1
-
-    knownpass="$2"
-
-    destkey="$3"
-    [[ "$destkey" = "" ]] && {
-        destkey="`option_value -k`"
-        { test "$destkey" = "" } && {
-            # no key output specified: fallback to stdout
-            destkey="-"
-            _message "printing exhumed key on stdout" }
-    }
-
-    { test -r "$imagefile" } || {
+    # Ensure the image file is a readable JPEG
+    [[ ! -r $imagefile ]] && {
         _failure "Exhume failed, image file not found: ::1 image file::" $imagefile }
-
-    [[ `file "$imagefile"` =~ "JP.G" ]] || {
+    [[ ! $(file "$imagefile") =~ "JP.G" ]] && {
         _failure "Exhume failed: ::1 image file:: is not a jpeg image." $imagefile }
 
-    # when a password is passed as argument then always print out
+    # When a password is passed as argument then always print out
     # the exhumed key on stdout without further checks (internal use)
-    { test "$knownpass" = "" } || {
-        TOMBKEY=`steghide extract -sf "$imagefile" -p "$knownpass" -xf -`
-        { test $? = 0 } || {
+    [[ -n "$tombpass" ]] && {
+        TOMBKEY=$(steghide extract -sf $imagefile -p $tombpass -xf -)
+	[[ $? != 0 ]] && {
             _failure "Wrong password or no steganographic key found" }
 
         recover_key $TOMBKEY
+
         return 0
     }
 
-    { test "$destkey" = "-" } || {
-        if [[ -s "$destkey" ]]; then
-            _warning "File exists: ::1 tomb key::" $destkey
-            { option_is_set -f } || {
-                _warning "Make explicit use of --force to overwrite."
-                _failure "Refusing to overwrite file. Operation aborted." }
+    # Ensure we have a valid destination for the key
+    [[ -z $destkey ]] && { option_is_set -k } && destkey=$(option_value -k)
+    [[ -z $destkey ]] && {
+	destkey="-" # No key was specified: fallback to stdout
+	_message "printing exhumed key on stdout" }
+
+    # Bail out if destination exists, unless -f (force) was passed
+    [[ $destkey != "-" && -s $destkey ]] && {
+	_warning "File exists: ::1 tomb key::" $destkey
+        { option_is_set -f } && {
             _warning "Use of --force selected: overwriting."
-            rm -f ${destkey}
-        fi
+            rm -f $destkey
+	} || {
+            _warning "Make explicit use of --force to overwrite."
+            _failure "Refusing to overwrite file. Operation aborted." }
     }
 
     _message "Trying to exhume a key out of image ::1 image file::" $imagefile
-    if option_is_set --tomb-pwd; then
-        tombpass="`option_value --tomb-pwd`"
+    { option_is_set --tomb-pwd } && {
+        tombpass=$(option_value --tomb-pwd)
         _verbose "tomb-pwd = ::1 tomb pass::" $tombpass
-    elif [[ -n $TOMBPASSWORD ]]; then
-        # password is known already
-        tombpass=$TOMBPASSWORD
-    else
-        tombpass=`exec_as_user ${TOMBEXEC} askpass "Insert password to exhume key from $imagefile"`
-        if [[ $? != 0 ]]; then
-            _warning "User aborted password dialog."
+    } || {
+	[[ -n $TOMBPASSWORD ]] && tombpass=$TOMBPASSWORD
+    } || {
+        tombpass=$(exec_as_user ${TOMBEXEC} askpass \
+				"Insert password to exhume key from $imagefile")
+        [[ $? != 0 ]] && {
+	    _warning "User aborted password dialog."
             return 1
-        fi
-    fi
+        }
+    }
 
-    # always steghide required
-    steghide extract -sf ${imagefile} -p ${tombpass} -xf ${destkey}
-    res=$?
+    # Extract the key from the image
+    steghide extract -sf $imagefile -p ${tombpass} -xf $destkey
+    r=$?
 
-    unset tombpass
-
-    [[ "$destkey" = "-" ]] && { destkey="stdout" }
-    if [ $res = 0 ]; then
+    # Report to the user
+    [[ "$destkey" = "-" ]] && destkey="stdout"
+    [[ $r == 0 ]] && {
         _success "Key succesfully exhumed to ::1 key::." $destkey
-    else
+    } || {
         _warning "Nothing found in ::1 image file::" $imagefile
-    fi
+    }
 
-    return $res
+    return $r
 }
 
 # Produces a printable image of the key contents so that it can be
@@ -1229,18 +1235,19 @@ exhume_key() {
 engrave_key() {
     # load key from options
     load_key || _failure "No key specified."
+
     local keyname=$(basename $TOMBKEYFILE)
-    pngname="$keyname.qr.png"
+    local pngname="$keyname.qr.png"
 
     _success "Rendering a printable QRCode for key: ::1 tomb key file::" $TOMBKEYFILE
     # we omit armor strings to save space
-    awk '
-/^-----/ {next}
-/^Version/ {next}
-{print $0}' $TOMBKEYFILE | qrencode --size 4 --level H \
-    --casesensitive -o "$pngname"
-    { test $? = 0 } || { _failure "QREncode reported an error." }
+    awk '/^-----/ {next}; /^Version/ {next}; {print $0}' $TOMBKEYFILE \
+	| qrencode --size 4 --level H --casesensitive -o $pngname
+    [[ $? != 0 ]] && {
+	_failure "QREncode reported an error." }
+
     _success "Operation successful:"
+    # TODO: only if verbose and/or not silent
     ls -lh $pngname
     file $pngname
 }
@@ -1318,30 +1325,34 @@ dig_tomb() {
 
 forge_key() {
     # can be specified both as simple argument or using -k
-    destkey="$1"
-    { option_is_set -k } && { destkey="`option_value -k`" }
+    local destkey="$1"
+    { option_is_set -k } && { destkey=$(option_value -k) }
 
-    { test "$destkey" = "" } && {
-        _warning "A filename needs to be specified using -k to forge a new key."
-        return 1 }
+    local algo="AES256"  # Default encryption algorithm
+
+    [[ -z "$destkey" ]] && {
+        _failure "A filename needs to be specified using -k to forge a new key." }
 
     _message "Commanded to forge key ::1 key::" $destkey
-    _check_swap
 
+    _check_swap # Ensure the available memory is safe to use
 
-    # make sure that gnupg doesn't quits with an error before first run
-    { test -r $HOME/.gnupg/pubring.gpg } || {
-        mkdir $HOME/.gnupg
+    # Ensure GnuPG won't exit with an error before first run
+    [[ -r $HOME/.gnupg/pubring.gpg ]] || {
+        mkdir -m 0700 $HOME/.gnupg
         touch $HOME/.gnupg/pubring.gpg }
 
-    { test -r "$destkey" } && {
+    # Do not overwrite any files accidentally
+    [[ -r "$destkey" ]] && {
         _warning "Forging this key would overwrite an existing file. Operation aborted."
-        _failure "`ls -lh $destkey`"    }
+        _failure "`ls -lh $destkey`" }
 
-    { option_is_set -o } && { algopt="`option_value -o`" }
-    algo=${algopt:-AES256}
+    # Update algorithm if it was passed on the command line with -o
+    { option_is_set -o } && { algopt="$(option_value -o)" }
+    [[ -n "$algopt" ]] && algo=$algopt
 
-    _message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" $destkey $algo
+    _message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" \
+	     $destkey $algo
 
     TOMBKEYFILE="$destkey"    # Set global variable
 
@@ -1350,13 +1361,12 @@ forge_key() {
     _message "To make it faster you can move the mouse around."
     _message "If you are on a server, you can use an Entropy Generation Daemon."
 
+    # Use /dev/random as the entropy source, unless --use-random is specified
     local random_source=/dev/random
-    if option_is_set --use-urandom; then
-        random_source=/dev/urandom
-    fi
+    { option_is_set --use-urandom } && random_source=/dev/urandom
 
     _verbose "Data dump using ::1:: from ::2 source::" ${DD[1]} $random_source
-    TOMBSECRET=`${=DD} bs=1 count=256 if=$random_source`
+    TOMBSECRET=$(${=DD} bs=1 count=256 if=$random_source)
     [[ $? == 0 ]] || {
         _warning "Cannot generate encryption key."
         _failure "Operation aborted." }
@@ -1365,19 +1375,20 @@ forge_key() {
 
     _success "Choose the  password of your key: ::1 tomb key::" $TOMBKEYFILE
     _message "(You can also change it later using 'tomb passwd'.)"
+    # _user_file $TOMBKEYFILE
     touch $TOMBKEYFILE
     chown $_UID:$_GID $TOMBKEYFILE
     chmod 0600 $TOMBKEYFILE
 
     tombname="$TOMBKEYFILE" # XXX ???
     # the gen_key() function takes care of the new key's encryption
-    if option_is_set --tomb-pwd; then
-        tomb_new_pwd="`option_value --tomb-pwd`"
-        _verbose "tomb-pwd = ::1 new pass::" $tomb_new_pwd
-        gen_key "$tomb_new_pwd" >> $TOMBKEYFILE
-    else
+    { option_is_set --tomb-pwd } && {
+        local tombpwd="`option_value --tomb-pwd`"
+        _verbose "tomb-pwd = ::1 new pass::" $tombpwd
+        gen_key "$tombpwd" >> $TOMBKEYFILE
+    } || {
         gen_key >> $TOMBKEYFILE
-    fi
+    }
 
     # load the key contents (set global variable)
     TOMBKEY=$(cat $TOMBKEYFILE)
