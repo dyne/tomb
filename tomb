@@ -259,7 +259,7 @@ _plot() {
 }
 
 # Provide a random filename in shared memory
-tmp_create() {
+_tmp_create tmp_create() {
 
     local tfile="${TMPPREFIX}${RANDOM}"   # Temporary file
 
@@ -274,14 +274,9 @@ tmp_create() {
     _verbose "Created tempfile: ::1 temp file::" $tfile
     TOMBTMPFILES+=($tfile)
 
+    print - $tfile # Print it so it can be stored into a variable
+
     return 0
-
-}
-
-# Print the name of the latest temporary file created
-tmp_new() {
-
-    print - "${TOMBTMPFILES[${#TOMBTMPFILES}]}"
 
 }
 
@@ -829,10 +824,10 @@ _load_key load_key() {
 # contains tweaks for different gpg versions
 gpg_decrypt() {
     # fix for gpg 1.4.11 where the --status-* options don't work ;^/
-    gpgver=`gpg --version --no-permission-warning | awk '/^gpg/ {print $3}'`
-    gpgpass="$1\n$TOMBKEY"
+    local gpgver=$(gpg --version --no-permission-warning | awk '/^gpg/ {print $3}')
+    local gpgpass="$1\n$TOMBKEY"
 
-    if [ "$gpgver" = "1.4.11" ]; then
+    [[ $gpgver == "1.4.11" ]] && {
         _verbose "GnuPG is version 1.4.11 - adopting status fix."
 
         TOMBSECRET=`print - "$gpgpass" | \
@@ -840,22 +835,21 @@ gpg_decrypt() {
         ret=$?
         unset gpgpass
 
-    else # using status-file in gpg != 1.4.11
+    } || { # using status-file in gpg != 1.4.11
 
         # TODO: use mkfifo
-        tmp_create
-        _status=`tmp_new`
+	local statusfile=$(_tmp_create)
 
         TOMBSECRET=`print - "$gpgpass" | \
             gpg --batch --passphrase-fd 0 --no-tty --no-options \
             --status-fd 2 --no-mdc-warning --no-permission-warning \
-            --no-secmem-warning 2> $_status`
+            --no-secmem-warning 2> $statusfile`
 
         unset gpgpass
-        grep 'DECRYPTION_OKAY' $_status > /dev/null
+        grep 'DECRYPTION_OKAY' $statusfile > /dev/null
         ret=$?
 
-    fi
+    }
     return $ret
 
 }
@@ -955,48 +949,43 @@ ask_key_password() {
 
 # change tomb key password
 change_passwd() {
+    local tmpnewkey lukskey c tombpass tombpasstmp
 
     _check_swap
     load_key
 
     _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
 
-    local tmpnewkey lukskey c tombpass tombpasstmp
-
-    tmp_create
-    tmpnewkey=`tmp_new`
+    tmpnewkey=$(_tmp_create)
 
     if option_is_set --tomb-old-pwd; then
-        tomb_old_pwd="`option_value --tomb-old-pwd`"
-        _verbose "tomb-old-pwd = ::1 old pass::" $tomb_old_pwd
-        ask_key_password "$tomb_old_pwd"
+        local tomboldpwd="`option_value --tomb-old-pwd`"
+        _verbose "tomb-old-pwd = ::1 old pass::" $tomboldpwd
+        ask_key_password "$tomboldpwd"
     else
         ask_key_password
     fi
-
-    { test $? = 0 } || {
-        _failure "No valid password supplied." }
+    [[ $? == 0 ]] || _failure "No valid password supplied."
 
     _success "Changing password for ::1 key file::" $TOMBKEYFILE
 
     # Here $TOMBSECRET contains the key material in clear
 
-    if option_is_set --tomb-pwd; then
-        tomb_new_pwd="`option_value --tomb-pwd`"
-        _verbose "tomb-pwd = ::1 new pass::" $tomb_new_pwd
-        gen_key "$tomb_new_pwd" >> "$tmpnewkey"
-    else
+    { option_is_set --tomb-pwd } && {
+        local tombpwd="`option_value --tomb-pwd`"
+        _verbose "tomb-pwd = ::1 new pass::" $tombpwd
+        gen_key "$tombpwd" >> "$tmpnewkey"
+    } || {
         gen_key >> "$tmpnewkey"
-    fi
+    }
 
-    if ! is_valid_key "`cat $tmpnewkey`"; then
-        _failure "Error: the newly generated keyfile does not seem valid."
-    else
-        # copy the new key as the original keyfile name
-        cp -f "${tmpnewkey}" $TOMBKEYFILE
-        _success "Your passphrase was successfully updated."
+    { is_valid_key "$(cat $tmpnewkey)" } || {
+        _failure "Error: the newly generated keyfile does not seem valid." }
 
-    fi
+    # Copy the new key as the original keyfile name
+    cp -f "${tmpnewkey}" $TOMBKEYFILE
+    _success "Your passphrase was successfully updated."
+
     return 0
 }
 
@@ -1591,19 +1580,16 @@ change_tomb_key() {
         _failure "No valid password supplied for the new key." }
     new_secret=$TOMBSECRET
 
-    # danger zone: due to cryptsetup limitations, in setkey we need
+    # Danger zone: due to cryptsetup limitations, in setkey we need
     # to write the bare unencrypted key on the tmpfs.
-    tmp_create
-    new_secret_file=`tmp_new`
-    print -n - "$new_secret" >> $new_secret_file
-    print -n - "$old_secret"| \
-        cryptsetup --key-file - luksChangeKey "$nstloop" "$new_secret_file"
-    { test $? = 0 } || {
-        _failure "Unexpected error in luksChangeKey." }
+    local newsecretfile=$(_tmp_create)
 
-    cryptsetup luksClose "${mapper}"
-    { test $? = 0 } || {
-        _failure "Unexpected error in luksClose." }
+    print -n - "$new_secret" >> $newsecretfile
+    print -n - "$old_secret" | \
+        cryptsetup --key-file - luksChangeKey "$nstloop" "$newsecretfile"
+    [[ $? == 0 ]] || _failure "Unexpected error in luksChangeKey."
+
+    cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
 
     _success "Succesfully changed key for tomb: ::1 tomb file::" $TOMBFILE
     _message "The new key is: ::1 new key::" $newkey
@@ -2096,8 +2082,7 @@ index_tombs() {
         # here we use swish to index file contents
         [[ $SWISH == 1 ]] && {
             _message "Indexing ::1 tomb name:: contents..." $tombname
-            tmp_create
-            swishrc=`tmp_new`
+            local swishrc=$(_tmp_create)
 
             cat <<EOF > $swishrc
 # index directives
