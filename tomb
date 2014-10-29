@@ -58,11 +58,11 @@ WIPE=(rm -f)
 MKFS=(mkfs.ext3 -q -F -j -L)
 
 # Flag optional commands if available (see _ensure_dependencies())
-typeset -i 2 KDF=1
-typeset -i 2 STEGHIDE=1
-typeset -i 2 RESIZER=1
-typeset -i 2 SWISH=1
-typeset -i 2 QRENCODE=1
+typeset -i KDF=1
+typeset -i STEGHIDE=1
+typeset -i RESIZER=1
+typeset -i SWISH=1
+typeset -i QRENCODE=1
 
 # Default mount options
 typeset      MOUNTOPTS="rw,noatime,nodev"
