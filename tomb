@@ -351,33 +351,37 @@ _check_swap() {
 }
 
 # Ask user for a password
+# Wraps around the pinentry command, from the GnuPG project, as it
+# provides better security and conveniently use the right toolkit.
 ask_password() {
-# we use pinentry now
-# comes from gpg project and is much more secure
-# it also conveniently uses the right toolkit
 
-    # pinentry has no custom icon setting
-    # so we need to temporary modify the gtk theme
-    if [ -r /usr/local/share/themes/tomb/gtk-2.0-key/gtkrc ]; then
-        GTK2_RC=/usr/local/share/themes/tomb/gtk-2.0-key/gtkrc
-    elif [ -r /usr/share/themes/tomb/gtk-2.0-key/gtkrc ]; then
-        GTK2_RC=/usr/share/themes/tomb/gtk-2.0-key/gtkrc
-    fi
+    local description=$1
+    local title=${2:-Enter tomb password.}
+    local gtkrc="share/themes/tomb/gtk-2.0-key/gtkrc"
+    local output
 
-    title="Insert tomb password."
-    if [ $2 ]; then title="$2"; fi
+    # Force pinentry to use a custom icon by overriding the GTK theme
+    # temporarily.
+    for prefix in /usr/local /usr; do
+	[[ -r "$prefix/$gtkrc" ]] && {
+	    GTK2_RC="$prefix/$gtkrc"
+	    break
+	}
+    done
 
     output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>/dev/null | tail -n +7
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE $title
-SETDESC $1
+SETDESC $description
 SETPROMPT Password:
 GETPIN
 EOF`
-    if [[ `tail -n1 <<<$output` =~ ERR ]]; then
-        return 1
-    fi
+
+    # Return 1 on error
+    [[ `tail -n1 <<<$output` =~ ERR ]] && return 1
+
+    # Print out the typed password and return 0
     head -n1 <<<$output | awk '/^D / { sub(/^D /, ""); print }'
     return 0
 }
