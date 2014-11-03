@@ -157,18 +157,19 @@ _whoami() {
     typeset -gi _GID _UID
     typeset -g  _TTY _USER
 
-    # Get GID from option -G or the environment
-    option_is_set -G \
-	&& _GID=$(option_value -G) || _GID=$(id -g)
-
-    # Get UID from option -U or the environment
-    option_is_set -U \
-	&& _UID=$(option_value -U) || _UID=$(id -u)
-
     # Set username from UID or environment
     [[ -n $SUDO_USER ]]             && _USER=$SUDO_USER
     [[ -z $_USER && -n $USERNAME ]] && _USER=$USERNAME
     [[ -z $_USER ]]                 && _USER=$(id -u)
+
+    # Get GID from option -G or the environment
+    option_is_set -G \
+	&& _GID=$(option_value -G) || _GID=$(id -g $_USER)
+
+    # Get UID from option -U or the environment
+    option_is_set -U \
+	&& _UID=$(option_value -U) || _UID=$(id -u $_USER)
+
 #    _verbose "Identified caller: ::1 username:: (::2 UID:::::3  GID::)" \
 #	$_USER $_UID $_GID
 
