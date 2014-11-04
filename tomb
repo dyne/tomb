@@ -2183,7 +2183,7 @@ search_tombs() {
             # Use swish-e to search over contents
             [[ $SWISH == 1 && -r $tombmount/.swish ]] && {
 		_message "Searching contents in tomb ::1 tomb name::" $tombname
-		swish-search -w ${=@} -f $tombmount/.swish -H0 }
+		swish-e -w ${=@} -f $tombmount/.swish -H0 }
 	} || {
             _warning "Skipping tomb ::1 tomb name::: not indexed." $tombname
             _warning "Run 'tomb index' to create indexes." }
