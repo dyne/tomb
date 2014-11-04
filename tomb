@@ -1597,36 +1597,6 @@ change_tomb_key() {
     return 0
 }
 
-# backward compatibility
-# TODO DEPRECATED remove in 2.0
-create_tomb() {
-    _verbose "create_tomb(): ::1:: ::2::" ${=@} ${=OLDARGS}
-    [[ "$1" = "" ]] && {
-        _warning "No tomb name specified for creation."
-        return 1 }
-
-    { test -s "$1" } && {
-        _warning "Creating this tomb would overwrite an existing file."
-        ls -lh "$1"
-        _failure " Operation aborted." }
-
-    tombfile=`basename $1`
-    tombdir=`dirname $1`
-    # make sure the file has a .tomb extension
-    tombname=${tombfile%%\.*}
-    tombfile=${tombname}.tomb
-
-    ${TOMBEXEC} dig ${=PARAM}
-    ${TOMBEXEC} forge ${tombdir}/${tombfile}.key
-    { test $? = 0 } || { _failure "Failed to forge key, operation aborted." }
-
-    ${TOMBEXEC} lock ${tombdir}/${tombfile} -k ${tombdir}/${tombfile}.key
-    { test $? = 0 } || { _failure "Failed to lock tomb with key, operation aborted." }
-
-    _success "Tomb ::1 tomb name:: succesfully created." $tombname
-    ls -l ${tombfile}*
-}
-
 # }}} - Creation
 
 # {{{ Open
@@ -2561,8 +2531,7 @@ main() {
             usage
             ;;
 
-	# DEPRECATED!
-	# TODO: remove in 2.0
+	# DEPRECATION notice (leave here as 'create' is still present in old docs)
         create)
             _warning "The create command is deprecated, please use dig, forge and lock instead."
             _warning "For more informations see Tomb's manual page (man tomb)."
