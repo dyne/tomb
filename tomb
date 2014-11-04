@@ -318,11 +318,10 @@ _ensure_safe_swap() {
 
         fi
     done
-    _warning  "An active swap partition is detected."
+    _warning  "An active swap partition is detected, this poses security risks."
     if [[ $r -eq 2 ]]; then
         _success "All your swaps are belong to crypt.  Good."
     else
-	_warning "This poses security risks."
         _warning "You can deactivate all swap partitions using the command:"
         _warning " swapoff -a"
         _warning "But if you want to proceed like this, use the -f (force) flag."
@@ -1866,60 +1865,30 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
             tombuser=`awk -F: '/:'"$tombuid"':/ {print $1}' /etc/passwd`
         }
 
-	{ option_is_set --get-mountpoint } && { echo $tombmount; continue }
+        { option_is_set --get-mountpoint } && { echo $tombmount; continue }
 
-        ## Breaking up such strings is good for translation
+        _message "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::" \
+            $tombname $tombmount $tombfsopts
 
-	# $tombname open on $tombmount using $tombfs $tombfsopts
-	print -n "$fg[green]$tombname"
-        print -n "$fg[white] open on "
-        print -n "$fg_bold[white]$tombmount"
-        print -n "$fg_no_bold[white] using "
-        print "$fg_bold[white]$tombfs $tombfsopts"
-
-	# $tombname open since $tombsince
-        print -n "$fg_no_bold[green]$tombname"
-        print -n "$fg_no_bold[white] open since "
-        print "$fg_bold[white]$tombsince$fg_no_bold[white]"
+        _message "::1 tombname:: open since ::2 tombsince::" $tombname $tombsince
 
         [[ -z "$tombtty" ]] || {
-	    # $tombname open by $tombuser from $tombtty on $tombhost
-            print -n "$fg_no_bold[green]$tombname"
-            print -n "$fg_no_bold[white] open by "
-            print -n "$fg_bold[white]$tombuser"
-            print -n "$fg_no_bold[white] from "
-            print -n "$fg_bold[white]$tombtty"
-            print -n "$fg_no_bold[white] on "
-            print "$fg_bold[white]$tombhost"
+            _message "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::" \
+                $tombname $tombuser $tombtty $tombhost
         }
 
-	# $tombname size $tombtot of which $tombused used: $tombavail
-	# free ($tombpercent full)
-        print -n "$fg_no_bold[green]$tombname"
-        print -n "$fg[white] size "
-        print -n "$fg_bold[white]$tombtot"
-        print -n "$fg_no_bold[white] of which "
-        print -n "$fg_bold[white]$tombused"
-        print -n "$fg_no_bold[white] used: "
-        print -n "$fg_bold[white]$tombavail"
-        print -n "$fg_no_bold[white] free ("
-        print -n "$fg_bold[white]$tombpercent"
-        print "$fg_no_bold[white] full)"
+        _message "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::%) is used: ::4 tombavail:: free " \
+            $tombname $tombtot $tombused $tombavail $tombpercent
 
         [[ ${tombp} -ge 90 ]] && {
-	    # $tombname Your tomb is almost full!
-            print -n "$fg_no_bold[green]$tombname"
-            print "$fg_bold[red] Your tomb is almost full!" }
+            _warning "::1 tombname:: warning: your tomb is almost full!" $tombname
+        }
 
         # Now check hooks
         mounted_hooks=(`list_tomb_binds $tombname`)
         for h in ${mounted_hooks}; do
-	    # $tombname hooks
-            print -n "$fg_no_bold[green]$tombname"
-            print -n "$fg_no_bold[white] hooks "
-#       print -n "$fg_bold[white]`basename ${h[(ws:;:)1]}`"
-#       print -n "$fg_no_bold[white] on "
-            print "$fg_bold[white]${h[(ws:;:)2]}$fg_no_bold[white]"
+            _message "::1 tombname:: hooks ::2 hookname:: on ::3 hookdest::" \
+                $tombname "`basename ${h[(ws:;:)1]}`" ${h[(ws:;:)2]}
         done
     done
 }
