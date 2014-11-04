@@ -2553,76 +2553,55 @@ main() {
 	    $_UID $_GID $_TTY
     }
 
+    # Process subcommand
     case "$subcommand" in
 
-        # new creation in three steps
-        forge)
-            check_priv
-            forge_key ${=PARAM}
+	# USAGE
+        help)
+            usage
             ;;
+
+	# DEPRECATED!
+	# TODO: remove in 2.0
+        create)
+            _warning "The create command is deprecated, please use dig, forge and lock instead."
+            _warning "For more informations see Tomb's manual page (man tomb)."
+	    _failure "Operation aborted."
+            ;;
+
+	# CREATE Step 1: dig -s NN file.tomb 
         dig)
             check_priv
             dig_tomb ${=PARAM}
             ;;
+
+	# CREATE Step 2: forge file.tomb.key
+        forge)
+            check_priv
+            forge_key ${=PARAM}
+            ;;
+
+	# CREATE Step 2: lock -k file.tomb.key file.tomb
         lock)
             check_priv
             lock_tomb_with_key ${=PARAM}
             ;;
 
-        setkey)
-            check_priv
-            change_tomb_key ${=PARAM}
-            ;;
-
-        engrave)
-            [[ $QRENCODE == 0 ]] && {
-                _failure "QREncode not installed: cannot engrave keys on paper." }
-            engrave_key ${=PARAM}
-            ;;
-
-        # backward compat
-        create)
-            _warning "The create command is deprecated, please use dig, forge and lock instead."
-            _warning "For more informations see Tomb's manual page (man tomb)."
-            ;;
-
+	# Open the tomb
         mount|open)
             check_priv
             mount_tomb $PARAM[1] $PARAM[2]
             ;;
+
+	# Close the tomb
+	# `slam` is used to force closing.
         umount|close|slam)
             check_priv
-            [ "$subcommand" =  "slam" ] && SLAM=1
+            [[ "$subcommand" ==  "slam" ]] && SLAM=1
             umount_tomb $PARAM[1]
             ;;
-        passwd)
-            check_priv
-            change_passwd $PARAM[1]
-            ;;
-        list)
-            list_tombs $PARAM[1]
-            ;;
 
-        index)
-            index_tombs $PARAM[1]
-            ;;
-        search)
-            search_tombs ${=PARAM}
-            ;;
-
-        help)
-            usage
-            ;;
-        bury)
-            [[ $STEGHIDE == 0 ]] && {
-                _failure "Steghide not installed: cannot bury keys into images." }
-            bury_key $PARAM[1]
-            ;;
-        exhume)
-            [[ $STEGHIDE == 0 ]] && {
-                _failure "Steghide not installed: cannot exhume keys from images." }
-            exhume_key $PARAM[1]
-            ;;
+	# Grow tomb's size
         resize)
             [[ $RESIZER == 0 ]] && {
                 _failure "Resize2fs not installed: cannot resize tombs." }
@@ -2630,10 +2609,67 @@ main() {
             resize_tomb $PARAM[1]
             ;;
 
-        # internal commands useful to developers
+	## Contents manipulation
+
+	# Index tomb contents
+        index)
+            index_tombs $PARAM[1]
+	    ;;
+
+	# List tombs
+        list)
+            list_tombs $PARAM[1]
+            ;;
+
+	# Search tomb contents
+        search)
+            search_tombs ${=PARAM}
+            ;;
+
+	## Locking operations
+
+	# Export key to QR Code
+        engrave)
+            [[ $QRENCODE == 0 ]] && {
+                _failure "QREncode not installed: cannot engrave keys on paper." }
+            engrave_key ${=PARAM}
+            ;;
+
+	# Change password on existing key
+        passwd)
+            check_priv
+            change_passwd $PARAM[1]
+            ;;
+
+	# Change tomb key
+        setkey)
+            check_priv
+            change_tomb_key ${=PARAM}
+            ;;
+
+	# STEGANOGRAPHY: hide key inside an image
+        bury)
+            [[ $STEGHIDE == 0 ]] && {
+                _failure "Steghide not installed: cannot bury keys into images." }
+            bury_key $PARAM[1]
+            ;;
+
+	# STEGANOGRAPHY: read key hidden in an image
+	exhume)
+            [[ $STEGHIDE == 0 ]] && {
+                _failure "Steghide not installed: cannot exhume keys from images." }
+            exhume_key $PARAM[1]
+            ;;
+
+        ## Internal commands useful to developers
+
+	# Make tomb functions available to the calling shell or script
         'source')   return 0 ;;
+
+	# Ask user for a password interactively
         askpass)    ask_password $PARAM[1] $PARAM[2] ;;
 
+	# Default operation: presentation, or version information with -v
         __default)
 _print "Tomb ::1 version:: - a strong and gentle undertaker for your secrets" $VERSION
 _print "\000"
@@ -2660,6 +2696,8 @@ EOF
             }
             usage
             ;;
+
+	# Reject unknown command and suggest help
         *)
             _warning "Command \"::1 subcommand::\" not recognized." $subcommand
             _message "Try -h for help."
