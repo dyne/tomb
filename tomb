@@ -802,8 +802,8 @@ _tomb_key_recover recover_key() {
 # or from stdin if -k - was selected.  Run validity checks on the
 # file.  On success, return 0 and print out the full path of the key.
 # Set global variables TOMBKEY and TOMBKEYFILE.
-_load_key load_key() {
-    local keyfile="$1"    # Unique argument is a keyfile
+_load_key() {
+    local keyfile="$1"    # Unique argument is an optional keyfile
 
     [[ -z $keyfile ]] && keyfile=$(option_value -k)
     [[ -z $keyfile ]] && {
@@ -917,7 +917,7 @@ get_lukskey() {
 # the password in the global variable $TOMBPASSWORD
 ask_key_password() {
     [[ -z $TOMBKEYFILE ]] && {
-        _failure "Internal error: ask_key_password() called before load_key()." }
+        _failure "Internal error: ask_key_password() called before _load_key()." }
 
     _message "A password is required to use key ::1 key::" $TOMBKEYFILE
     passok=0
@@ -966,8 +966,8 @@ ask_key_password() {
 change_passwd() {
     local tmpnewkey lukskey c tombpass tombpasstmp
 
-    _check_swap
-    load_key
+    _check_swap  # Ensure swap is secure, if any
+    _load_key    # Try loading key from option -k and set TOMBKEYFILE
 
     _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
 
@@ -1109,9 +1109,8 @@ BEGIN { ciphers=0 }
 # Steganographic function to bury a key inside an image.
 # Requires steghide(1) to be installed
 bury_key() {
-    load_key
-    [[ $? = 0 ]] || {
-       _failure "Bury failed for invalid key: ::1 key::" $TOMBKEYFILE }
+
+    _load_key    # Try loading key from option -k and set TOMBKEY
 
     imagefile=$PARAM
 
@@ -1238,8 +1237,8 @@ exhume_key() {
 # Produces a printable image of the key contents so that it can be
 # backuped on paper and hidden in books etc.
 engrave_key() {
-    # load key from options
-    load_key || _failure "No key specified."
+
+    _load_key    # Try loading key from option -k and set TOMBKEYFILE
 
     local keyname=$(basename $TOMBKEYFILE)
     local pngname="$keyname.qr.png"
@@ -1456,12 +1455,7 @@ lock_tomb_with_key() {
         _message "Fine, this tomb seems empty."
     fi
 
-    # load key from options or file
-    load_key
-
-    { test $? = 0 } || {
-        _failure "Aborting operations: error loading key." }
-        # make sure to call drop_key later
+    _load_key    # Try loading key from option -k and set TOMBKEYFILE
 
     # the encryption cipher for a tomb can be set when locking using -o
     if option_is_set -o; then
@@ -1545,10 +1539,8 @@ change_tomb_key() {
     { test $? = 0 } || {
         _failure "Not a valid LUKS encrypted volume: ::1 volume::" $TOMBPATH }
 
-
-    load_key $tombkey
-    { test $? = 0 } || {
-        _failure "Aborting operations: error loading old key from arguments" }
+    _load_key $tombkey    # Try loading given key and set TOMBKEY and
+                          # TOMBKEYFILE
     local oldkey=$TOMBKEY
     local oldkeyfile=$TOMBKEYFILE
 
@@ -1579,9 +1571,7 @@ change_tomb_key() {
     { test $? = 0 } || {
         _failure "Unexpected error in luksOpen." }
 
-    load_key
-    { test $? = 0 } || {
-        _failure "Aborting operations: error loading new key from -k" }
+    _load_key # Try loading new key from option -k and set TOMBKEYFILE
 
     _message "New key: ::1 key file::" $TOMBKEYFILE
 
@@ -1666,12 +1656,7 @@ mount_tomb() {
 
     _verbose "Tomb found: ::1 tomb path::" $TOMBPATH
 
-    # load_key called here
-    load_key
-    ########
-
-    { test $? = 0 } || {
-        _failure "Aborting operations: error loading key ::1 key::" $tombkey }
+    _load_key # Try loading new key from option -k and set TOMBKEYFILE
 
     if [ "$2" = "" ]; then
         tombmount=/media/$TOMBFILE
@@ -2236,9 +2221,7 @@ resize_tomb() {
 
     _plot $tombpath        # Set TOMB{PATH,DIR,FILE,NAME}
 
-    # load key from options or file
-    load_key
-    ########
+    _load_key # Try loading new key from option -k and set TOMBKEYFILE
 
     local oldtombsize=$(( `stat -c %s "$TOMBPATH" 2>/dev/null` / 1048576 ))
     local mounted_tomb=`mount -l |
