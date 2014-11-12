@@ -36,7 +36,7 @@ EOF
 #
 # 5. awk reads the column-formatted input and outputs valid pot lines.
 
-PRINTFUNC="_\(verbose\|sucess\|warning\|failure\|message\|print\)"
+PRINTFUNC="_\(sucess\|warning\|failure\|message\|print\)"
 
 sed -n -e "s/^.*$PRINTFUNC \(\".*\"\).*$/\1\t\2/p" ../../tomb \
     | cat -n | sort -uk3 | sort -nk1 | cut -f2- | awk \

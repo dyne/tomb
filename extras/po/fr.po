@@ -7,11 +7,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 
-#: _verbose
-#, fuzzy
-msgid "Created tempfile: ::1 temp file::"
-msgstr "Le fichier valide d'une tombe a été trouvé : ::1 tomb file::"
-
 #: _success
 msgid "All your swaps are belong to crypt.  Good."
 msgstr "Toutes les partitions d'échange sont chiffrées.  C'est bien."
@@ -19,14 +14,6 @@ msgstr "Toutes les partitions d'échange sont chiffrées.  C'est bien."
 #: _failure
 msgid "Operation aborted."
 msgstr "L'opération est interrompue."
-
-#: _verbose
-msgid "Using sudo for root execution of '::1 exec:: ::2 args::'."
-msgstr ""
-
-#: _verbose
-msgid "Escalating privileges using sudo-pwd."
-msgstr ""
 
 #: _warning
 msgid "Tomb file is missing from arguments."
@@ -88,18 +75,6 @@ msgid "It is impossible to use Tomb on this machine at this conditions."
 msgstr ""
 "Il est impossible d'utiliser Tomb dans les conditions offertes par cette "
 "machine."
-
-#: _verbose
-msgid "lo_preserve on ::1 path::"
-msgstr ""
-
-#: _verbose
-msgid "tomb_key: ::1 key:: chars long"
-msgstr ""
-
-#: _verbose
-msgid "tomb_secret: ::1 secret:: chars long"
-msgstr ""
 
 #: _print
 msgid "Syntax: tomb [options] command [arguments]"
@@ -286,17 +261,9 @@ msgstr ""
 "Cette opération requiert la spécification du chemin de la clé par l'option -"
 "k."
 
-#: _verbose
-msgid "load_key reading from stdin."
-msgstr ""
-
 #: _message
 msgid "Waiting for the key to be piped from stdin... "
 msgstr "En attente d'une clé à lire sur l'entrée standard... "
-
-#: _verbose
-msgid "load_key argument: ::1 opt::"
-msgstr ""
 
 #: _warning
 msgid "Key not found, specify one using -k."
@@ -307,18 +274,10 @@ msgid ""
 "The key seems invalid or its format is not known by this version of Tomb."
 msgstr ""
 
-#: _verbose
-msgid "GnuPG is version 1.4.11 - adopting status fix."
-msgstr ""
-
 #: _failure
 #, fuzzy
 msgid "No suitable program for KDF ::1 program::."
 msgstr "Pas de programme approprié pour la dérivation de clé ::1 kdf::."
-
-#: _verbose
-msgid "get_lukskey returns ::1::"
-msgstr ""
 
 #: _failure
 msgid "Internal error: ask_key_password() called before load_key()."
@@ -335,10 +294,6 @@ msgstr "L'utilisateur a interrompu le dialogue du mot de passe."
 #: _message
 msgid "Password OK."
 msgstr "Le mot de passe est valide."
-
-#: _verbose
-msgid "ask_key_password with tombpass: ::1 tomb pass::"
-msgstr ""
 
 #: _message
 msgid "Commanded to change password for tomb key ::1 key::"
@@ -370,10 +325,6 @@ msgstr "L'utilisateur a interrompu l'opération."
 #: _warning
 msgid "You set empty password, which is not possible."
 msgstr "Vous ne pouvez pas saisir un mot de passe vide."
-
-#: _verbose
-msgid "gen_key takes tombpass from CLI argument: ::1 tomb pass::"
-msgstr ""
 
 #: _failure
 msgid ""
@@ -543,10 +494,6 @@ msgstr ""
 "Si vous effectuez l'opération sur un serveur, vous pouvez utiliser un démon "
 "générateur d'entropie."
 
-#: _verbose
-msgid "Data dump using ::1:: from ::2 source::"
-msgstr ""
-
 #: _warning
 msgid "Cannot generate encryption key."
 msgstr "La clé de chiffrement ne peut être générée."
@@ -611,10 +558,6 @@ msgstr "Nouvelle tombe à ::1 dir::/::2 tomb file::"
 msgid "Generating ::1 tomb file:: of ::2 size::MiB"
 msgstr "Tombe en cours de création ::1 tomb file::, de taille ::2 size::Mo"
 
-#: _verbose
-msgid "Data dump using ::1:: from /dev/urandom"
-msgstr ""
-
 #: _failure
 #, fuzzy
 msgid ""
@@ -649,16 +592,6 @@ msgstr "Vérouillage de la tombe ::1 tomb file:: en cours"
 msgid "There is no tomb here. You have to it dig first."
 msgstr ""
 "Il n'y a pas de tombe à cet endroit. Vous devez d'abord la creuser ('dig')."
-
-#: _verbose
-#, fuzzy
-msgid "Tomb found: ::1 tomb dir::/::2 tomb file::"
-msgstr "Nouvelle tombe à ::1 dir::/::2 tomb file::"
-
-#: _verbose
-#, fuzzy
-msgid "Loop mounted on ::1 mount point::"
-msgstr "Quelque chose coince à ::1 mount point::."
 
 #: _message
 msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
@@ -879,21 +812,6 @@ msgid ""
 "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
 msgstr ""
 
-#: _verbose
-#, fuzzy
-msgid "dev mapper device: ::1 mapper::"
-msgstr "e2fsck n'a pas pu vérifier ::1 mapper::"
-
-#: _verbose
-#, fuzzy
-msgid "Tomb key: ::1 key::"
-msgstr "Clé précédente : ::1 key::"
-
-#: _verbose
-#, fuzzy
-msgid "Tomb name: ::1 tomb name:: (to be engraved)"
-msgstr "La tombe ::1 tomb name:: a été créée avec succès."
-
 #: _failure
 msgid "Failure mounting the encrypted file."
 msgstr "Le montage du fichier chiffré a échoué."
@@ -902,18 +820,9 @@ msgstr "Le montage du fichier chiffré a échoué."
 msgid "Success unlocking tomb ::1 tomb name::"
 msgstr "La tombe ::1 tomb name:: est à présent dévérouillée."
 
-#: _verbose
-msgid "Key size is ::1 size:: for cipher ::2 cipher::"
-msgstr ""
-
 #: _message
 msgid "Checking filesystem via ::1::"
 msgstr "Vérification du système de fichiers avec ::1::"
-
-#: _verbose
-#, fuzzy
-msgid "Tomb engraved as ::1 tomb name::"
-msgstr "Fermons la tombe ::1 tomb name::"
 
 #: _success
 #, fuzzy
@@ -937,13 +846,6 @@ msgid "Cannot exec bind hooks without a mounted tomb."
 msgstr ""
 "L'exécution des ordres de montage ne peut se faire que si la tombe est "
 "montée."
-
-#: _verbose
-#, fuzzy
-msgid "bind-hooks not found in ::1 mount point::"
-msgstr ""
-"L'origine du point de montage n'est pas relatif à la tombe : le chemin ::1 "
-"mount point::/::2 dir:: est ignoré."
 
 #: _warning
 #, fuzzy
@@ -1013,10 +915,6 @@ msgstr "Je ne vois aucune tombe ouverte, qu'ils reposent tous en paix."
 msgid "Creating and updating search indexes."
 msgstr "Création et mise à jour des index de recherche."
 
-#: _verbose
-msgid "unoconv listener launched."
-msgstr ""
-
 #: _message
 msgid "Skipping ::1 tomb name:: (.noindex found)."
 msgstr ""
@@ -1031,11 +929,6 @@ msgstr "Index des fichiers dans ::1 tomb name:: en cours..."
 msgid "Indexing ::1 tomb name:: contents..."
 msgstr "Index des contenus de ::1 tomb name:: en cours..."
 
-#: _verbose
-#, fuzzy
-msgid "Using swish-e to create index."
-msgstr "Exécuter 'tomb index' pour générer les index."
-
 #: _message
 msgid "Search index updated."
 msgstr "L'index de recherche a été mis à jour."
@@ -1043,11 +936,6 @@ msgstr "L'index de recherche a été mis à jour."
 #: _success
 #, fuzzy
 msgid "Searching for: ::1::"
-msgstr "Vérification du système de fichiers avec ::1::"
-
-#: _verbose
-#, fuzzy
-msgid "Checking for index: ::1::"
 msgstr "Vérification du système de fichiers avec ::1::"
 
 #: _message
@@ -1146,19 +1034,6 @@ msgstr "ou bien exécuter 'tomb close all' pour les fermer toutes."
 msgid "Tomb close ::1::"
 msgstr "Fermons la tombe ::1 tomb name::"
 
-#: _verbose
-#, fuzzy
-msgid "Name: ::1 tomb name::"
-msgstr "Fermons la tombe ::1 tomb name::"
-
-#: _verbose
-msgid "Mount: ::1 mount point::"
-msgstr ""
-
-#: _verbose
-msgid "Mapper: ::1 mapper::"
-msgstr ""
-
 #: _warning
 #, fuzzy
 msgid "Tomb not found: ::1 tomb file::"
@@ -1204,11 +1079,6 @@ msgid "Tomb bind hook ::1 hook:: is busy, cannot close tomb."
 msgstr ""
 "Le point de montage ::1 mount point:: est occupé et ne peut pas être fermé."
 
-#: _verbose
-#, fuzzy
-msgid "Performing umount of ::1 mount point::"
-msgstr "Quelque chose coince à ::1 mount point::."
-
 #: _warning
 msgid "Tomb is busy, cannot umount!"
 msgstr "La tombe est occupée et ne peut pas être démontée !"
@@ -1223,11 +1093,6 @@ msgstr ""
 msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
 msgstr ""
 "La tombe ::1 tomb name:: est refermée : vos ossements vont reposer en paix."
-
-#: _verbose
-#, fuzzy
-msgid "Sending ::1:: to processes inside the tomb:"
-msgstr "Exécution (sommaire) de tous les processus en cours dans la tombe."
 
 #: _failure
 msgid "Error parsing."
@@ -1259,15 +1124,6 @@ msgid ""
 "You specified option ::1 option::, which is DANGEROUS and should only be "
 "used for testing\n"
 "If you really want so, add --unsecure-dev-mode"
-msgstr ""
-
-#: _verbose
-#, fuzzy
-msgid "Tomb command: ::1 subcommand:: ::2 param::"
-msgstr "La commande \"::1 subcommand::\" n'est pas implémentée."
-
-#: _verbose
-msgid "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]."
 msgstr ""
 
 #: _failure
