@@ -19,46 +19,29 @@ msgstr ""
 
 EOF
 
-    cat ../../tomb | awk '
-/_verbose ".*"/ {
-    split($0, arr, "\"");
-    print "#: _verbose";
-    print "msgid \"" arr[2] "\"";
-    print "msgstr \"\"\n" }
+# This is how we get the strings to be translated:
+#
+# 1. sed filters the tomb file and only shows the lines containing a print
+#    function, e.g. warning. It outputs two columns separated by a tab.
+#    The first column contains the function that is called, and the second one
+#    contains the message.
+#
+# 2. cat adds the line number as a new first column.
+#
+# 3. sort orders the lines using the third column and removes contiguous 
+#    duplicate lines. The third column is the string to be translated, removing
+#    duplicates even if they are printed by different functions.
+#
+# 4. sort reorders the lines numerically using the first column.
+#
+# 5. awk reads the column-formatted input and outputs valid pot lines.
 
-/_success ".*"/ {
-    split($0, arr, "\"");
-    print "#: _success";
-    print "msgid \"" arr[2] "\"";
-    print "msgstr \"\"\n" }
+PRINTFUNC="_\(verbose\|sucess\|warning\|failure\|message\|print\)"
 
-/_warning ".*"/ {
-    split($0, arr, "\"");
-    print "#: _warning";
-    print "msgid \"" arr[2] "\"";
-    print "msgstr \"\"\n" }
-
-/_failure ".*"/ {
-    split($0, arr, "\"");
-    print "#: _failure";
-    print "msgid \"" arr[2] "\"";
-    print "msgstr \"\"\n" }
-
-/_message ".*"/ {
-    split($0, arr, "\"");
-    print "#: _message";
-    print "msgid \"" arr[2] "\"";
-    print "msgstr \"\"\n" }
-
-/_message -n ".*"/ {
-    split($0, arr, "\"");
-    print "#: _message -n";
-    print "msgid \"" arr[2] "\"";
-    print "msgstr \"\"\n" }
-
-/_print ".*"/ {
-    split($0, arr, "\"");
-    print "#: _print";
-    print "msgid \"" arr[2] "\"";
-    print "msgstr \"\"\n" }
-'
+sed -n -e "s/^.*$PRINTFUNC \(\".*\"\).*$/\1\t\2/p" ../../tomb \
+    | cat -n | sort -uk3 | sort -nk1 | cut -f2- | awk \
+'BEGIN { FS = "\t" }
+{ print "#:", $1;
+  print "msgid", $2;
+  print "msgstr \"\"\n"
+}'
