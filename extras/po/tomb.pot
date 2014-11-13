@@ -14,24 +14,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: _verbose
-msgid "Created tempfile: ::1 temp file::"
-msgstr ""
-
 #: _success
 msgid "All your swaps are belong to crypt.  Good."
 msgstr ""
 
 #: _failure
 msgid "Operation aborted."
-msgstr ""
-
-#: _verbose
-msgid "Using sudo for root execution of '::1 exec:: ::2 args::'."
-msgstr ""
-
-#: _verbose
-msgid "Escalating privileges using sudo-pwd."
 msgstr ""
 
 #: _warning
@@ -80,18 +68,6 @@ msgstr ""
 
 #: _warning
 msgid "It is impossible to use Tomb on this machine at this conditions."
-msgstr ""
-
-#: _verbose
-msgid "lo_preserve on ::1 path::"
-msgstr ""
-
-#: _verbose
-msgid "tomb_key: ::1 key:: chars long"
-msgstr ""
-
-#: _verbose
-msgid "tomb_secret: ::1 secret:: chars long"
 msgstr ""
 
 #: _print
@@ -250,16 +226,8 @@ msgstr ""
 msgid "This operation requires a key file to be specified using the -k option."
 msgstr ""
 
-#: _verbose
-msgid "load_key reading from stdin."
-msgstr ""
-
 #: _message
 msgid "Waiting for the key to be piped from stdin... "
-msgstr ""
-
-#: _verbose
-msgid "load_key argument: ::1 opt::"
 msgstr ""
 
 #: _warning
@@ -270,16 +238,8 @@ msgstr ""
 msgid "The key seems invalid or its format is not known by this version of Tomb."
 msgstr ""
 
-#: _verbose
-msgid "GnuPG is version 1.4.11 - adopting status fix."
-msgstr ""
-
 #: _failure
 msgid "No suitable program for KDF ::1 program::."
-msgstr ""
-
-#: _verbose
-msgid "get_lukskey returns ::1::"
 msgstr ""
 
 #: _failure
@@ -296,10 +256,6 @@ msgstr ""
 
 #: _message
 msgid "Password OK."
-msgstr ""
-
-#: _verbose
-msgid "ask_key_password with tombpass: ::1 tomb pass::"
 msgstr ""
 
 #: _message
@@ -328,10 +284,6 @@ msgstr ""
 
 #: _warning
 msgid "You set empty password, which is not possible."
-msgstr ""
-
-#: _verbose
-msgid "gen_key takes tombpass from CLI argument: ::1 tomb pass::"
 msgstr ""
 
 #: _failure
@@ -481,10 +433,6 @@ msgstr ""
 msgid "If you are on a server, you can use an Entropy Generation Daemon."
 msgstr ""
 
-#: _verbose
-msgid "Data dump using ::1:: from ::2 source::"
-msgstr ""
-
 #: _warning
 msgid "Cannot generate encryption key."
 msgstr ""
@@ -545,10 +493,6 @@ msgstr ""
 msgid "Generating ::1 tomb file:: of ::2 size::MiB"
 msgstr ""
 
-#: _verbose
-msgid "Data dump using ::1:: from /dev/urandom"
-msgstr ""
-
 #: _failure
 msgid "Error creating the tomb ::1 tomb dir::/::2 tomb file::, operation aborted."
 msgstr ""
@@ -575,14 +519,6 @@ msgstr ""
 
 #: _failure
 msgid "There is no tomb here. You have to it dig first."
-msgstr ""
-
-#: _verbose
-msgid "Tomb found: ::1 tomb dir::/::2 tomb file::"
-msgstr ""
-
-#: _verbose
-msgid "Loop mounted on ::1 mount point::"
 msgstr ""
 
 #: _message
@@ -777,18 +713,6 @@ msgstr ""
 msgid "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
 msgstr ""
 
-#: _verbose
-msgid "dev mapper device: ::1 mapper::"
-msgstr ""
-
-#: _verbose
-msgid "Tomb key: ::1 key::"
-msgstr ""
-
-#: _verbose
-msgid "Tomb name: ::1 tomb name:: (to be engraved)"
-msgstr ""
-
 #: _failure
 msgid "Failure mounting the encrypted file."
 msgstr ""
@@ -797,16 +721,8 @@ msgstr ""
 msgid "Success unlocking tomb ::1 tomb name::"
 msgstr ""
 
-#: _verbose
-msgid "Key size is ::1 size:: for cipher ::2 cipher::"
-msgstr ""
-
 #: _message
 msgid "Checking filesystem via ::1::"
-msgstr ""
-
-#: _verbose
-msgid "Tomb engraved as ::1 tomb name::"
 msgstr ""
 
 #: _success
@@ -827,10 +743,6 @@ msgstr ""
 
 #: _warning
 msgid "Cannot exec bind hooks without a mounted tomb."
-msgstr ""
-
-#: _verbose
-msgid "bind-hooks not found in ::1 mount point::"
 msgstr ""
 
 #: _warning
@@ -885,10 +797,6 @@ msgstr ""
 msgid "Creating and updating search indexes."
 msgstr ""
 
-#: _verbose
-msgid "unoconv listener launched."
-msgstr ""
-
 #: _message
 msgid "Skipping ::1 tomb name:: (.noindex found)."
 msgstr ""
@@ -901,20 +809,12 @@ msgstr ""
 msgid "Indexing ::1 tomb name:: contents..."
 msgstr ""
 
-#: _verbose
-msgid "Using swish-e to create index."
-msgstr ""
-
 #: _message
 msgid "Search index updated."
 msgstr ""
 
 #: _success
 msgid "Searching for: ::1::"
-msgstr ""
-
-#: _verbose
-msgid "Checking for index: ::1::"
 msgstr ""
 
 #: _message
@@ -1005,18 +905,6 @@ msgstr ""
 msgid "Tomb close ::1::"
 msgstr ""
 
-#: _verbose
-msgid "Name: ::1 tomb name::"
-msgstr ""
-
-#: _verbose
-msgid "Mount: ::1 mount point::"
-msgstr ""
-
-#: _verbose
-msgid "Mapper: ::1 mapper::"
-msgstr ""
-
 #: _warning
 msgid "Tomb not found: ::1 tomb file::"
 msgstr ""
@@ -1057,10 +945,6 @@ msgstr ""
 msgid "Tomb bind hook ::1 hook:: is busy, cannot close tomb."
 msgstr ""
 
-#: _verbose
-msgid "Performing umount of ::1 mount point::"
-msgstr ""
-
 #: _warning
 msgid "Tomb is busy, cannot umount!"
 msgstr ""
@@ -1071,10 +955,6 @@ msgstr ""
 
 #: _success
 msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
-msgstr ""
-
-#: _verbose
-msgid "Sending ::1:: to processes inside the tomb:"
 msgstr ""
 
 #: _failure
@@ -1103,14 +983,6 @@ msgstr ""
 
 #: _failure
 msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsecure-dev-mode"
-msgstr ""
-
-#: _verbose
-msgid "Tomb command: ::1 subcommand:: ::2 param::"
-msgstr ""
-
-#: _verbose
-msgid "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]."
 msgstr ""
 
 #: _failure

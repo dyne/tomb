@@ -7,10 +7,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 
-#: _verbose
-msgid "Created tempfile: ::1 temp file::"
-msgstr "Temporäre Datei erstellt: ::1 temp file::"
-
 #: _success
 msgid "All your swaps are belong to crypt.  Good."
 msgstr "Alle geteilten Speicher gehören crypt.  Gut."
@@ -18,14 +14,6 @@ msgstr "Alle geteilten Speicher gehören crypt.  Gut."
 #: _failure
 msgid "Operation aborted."
 msgstr "Vorgang abgebrochen."
-
-#: _verbose
-msgid "Using sudo for root execution of '::1 exec:: ::2 args::'."
-msgstr "Benutzen von sudo um '::1 exec:: ::2 args::' als root auszuführen."
-
-#: _verbose
-msgid "Escalating privileges using sudo-pwd."
-msgstr "Berechtigungskonflikte beim Benutzen von sudo-pwd."
 
 #: _warning
 msgid "Tomb file is missing from arguments."
@@ -76,18 +64,6 @@ msgstr ""
 msgid "It is impossible to use Tomb on this machine at this conditions."
 msgstr ""
 "Es ist unmöglich Tomb unter diesen Umständen auf dieser Maschine zu benutzen."
-
-#: _verbose
-msgid "lo_preserve on ::1 path::"
-msgstr "lo_preserve on ::1 path::"
-
-#: _verbose
-msgid "tomb_key: ::1 key:: chars long"
-msgstr "tomb_key: ::1 key:: Zeichen lang"
-
-#: _verbose
-msgid "tomb_secret: ::1 secret:: chars long"
-msgstr "tomb_secret: ::1 secret:: Zeichen lang"
 
 #: _print
 msgid "Syntax: tomb [options] command [arguments]"
@@ -253,17 +229,9 @@ msgid "This operation requires a key file to be specified using the -k option."
 msgstr ""
 "Diese Operation benötigt das angeben eines Schlüssels durch die -k Option."
 
-#: _verbose
-msgid "load_key reading from stdin."
-msgstr "load_key liest von der Standarteingabe"
-
 #: _message
 msgid "Waiting for the key to be piped from stdin... "
 msgstr "Warten auf den Schlüssel auf der Standarteingabe... "
-
-#: _verbose
-msgid "load_key argument: ::1 opt::"
-msgstr "load_key argument: ::1 opt::"
 
 #: _warning
 msgid "Key not found, specify one using -k."
@@ -276,17 +244,9 @@ msgstr ""
 "Der Schlüssel scheint ungültig zu sein, oder sein Format ist dieser Tomb "
 "Version unbekannt."
 
-#: _verbose
-msgid "GnuPG is version 1.4.11 - adopting status fix."
-msgstr "GnuPG Version 1.4.11 - bessere Status aus"
-
 #: _failure
 msgid "No suitable program for KDF ::1 program::."
 msgstr "Kein gültiges Programm zur Schlüsselableitung ::1 program::."
-
-#: _verbose
-msgid "get_lukskey returns ::1::"
-msgstr "get_lukskey gibt ::1:: zurück"
 
 #: _failure
 msgid "Internal error: ask_key_password() called before load_key()."
@@ -303,10 +263,6 @@ msgstr "Benutzer hat den Passwortdialog abgebrochen."
 #: _message
 msgid "Password OK."
 msgstr "Passwort OK."
-
-#: _verbose
-msgid "ask_key_password with tombpass: ::1 tomb pass::"
-msgstr "ask_key_password mit Grabschlüssel: ::1 tomb pass::"
 
 #: _message
 msgid "Commanded to change password for tomb key ::1 key::"
@@ -335,10 +291,6 @@ msgstr "Vom Benutzer abgebrochen."
 #: _warning
 msgid "You set empty password, which is not possible."
 msgstr "Fehler: Passwort nicht gesetzt."
-
-#: _verbose
-msgid "gen_key takes tombpass from CLI argument: ::1 tomb pass::"
-msgstr "gen_key nimmt Passwort von der Kommandozeile an: ::1 tomb pass::"
 
 #: _failure
 msgid ""
@@ -504,10 +456,6 @@ msgstr ""
 "Falls Sie auf einem Server sind können Sie einen Daemon benutzen um Entropie "
 "zu erstellen."
 
-#: _verbose
-msgid "Data dump using ::1:: from ::2 source::"
-msgstr "Datenausgabe mit ::1:: von ::2 source::"
-
 #: _warning
 msgid "Cannot generate encryption key."
 msgstr "Verschlüsselungsschlüssel konnte nicht erstellt werden."
@@ -568,10 +516,6 @@ msgstr "Neues Grab in ::1 tomb dir::/::2 tomb file::"
 msgid "Generating ::1 tomb file:: of ::2 size::MiB"
 msgstr "Grab ::1 tomb file:: wird erstellt, mit der Größe ::2 size::Mb"
 
-#: _verbose
-msgid "Data dump using ::1:: from /dev/urandom"
-msgstr "Datenausgabe mit ::1:: von /dev/urandom"
-
 #: _failure
 msgid ""
 "Error creating the tomb ::1 tomb dir::/::2 tomb file::, operation aborted."
@@ -604,14 +548,6 @@ msgstr "Grab ::1 tomb file:: wird verschlossen"
 #: _failure
 msgid "There is no tomb here. You have to it dig first."
 msgstr "Es ist kein Grab an diesem Ort. Sie müssen erst eins graben."
-
-#: _verbose
-msgid "Tomb found: ::1 tomb dir::/::2 tomb file::"
-msgstr "Grab gefunden in ::1 tomb dir::/::2 tomb file::"
-
-#: _verbose
-msgid "Loop mounted on ::1 mount point::"
-msgstr "Loop mount in::1 mount point::"
 
 #: _message
 msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
@@ -828,18 +764,6 @@ msgstr ""
 "Mehrere Schlüssellöcher sind an diesem Grab angebracht. Achtung, es könnte "
 "eine Hintertür geben."
 
-#: _verbose
-msgid "dev mapper device: ::1 mapper::"
-msgstr "dev mapper device: ::1 mapper::"
-
-#: _verbose
-msgid "Tomb key: ::1 key::"
-msgstr "Grab Schlüssel: ::1 key::"
-
-#: _verbose
-msgid "Tomb name: ::1 tomb name:: (to be engraved)"
-msgstr "Grabname: ::1 tomb name:: (wird eingraviert werden)."
-
 #: _failure
 msgid "Failure mounting the encrypted file."
 msgstr "Fehler beim Einhängen der verschlüsselten Datei."
@@ -848,17 +772,9 @@ msgstr "Fehler beim Einhängen der verschlüsselten Datei."
 msgid "Success unlocking tomb ::1 tomb name::"
 msgstr "::1 tomb name:: wurde erfolgreich aufgeschlossen."
 
-#: _verbose
-msgid "Key size is ::1 size:: for cipher ::2 cipher::"
-msgstr "Schlüsselgröße: ::1 size:: für Chiffre ::2 cipher::"
-
 #: _message
 msgid "Checking filesystem via ::1::"
 msgstr "Dateisystem kontrollieren mit ::1::"
-
-#: _verbose
-msgid "Tomb engraved as ::1 tomb name::"
-msgstr "Grab graviert als ::1 tomb name::"
 
 #: _success
 msgid "Success opening ::1 tomb file:: on ::2 mount point::"
@@ -880,10 +796,6 @@ msgstr "Wie bedaurndswert ! Ein Grab aber kein Zuhause."
 #: _warning
 msgid "Cannot exec bind hooks without a mounted tomb."
 msgstr "'Bind hooks' kann nicht benutzt werden ohne eingehängtes Grab."
-
-#: _verbose
-msgid "bind-hooks not found in ::1 mount point::"
-msgstr "'bind-hooks' nicht gefunden in ::1 mount point::"
 
 #: _warning
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
@@ -944,10 +856,6 @@ msgstr "Ich sehe kein geöffnetes Grab. Mögen sie alle in Frieden ruhen."
 msgid "Creating and updating search indexes."
 msgstr "Erstellen und aktualisieren des Such-Indexes."
 
-#: _verbose
-msgid "unoconv listener launched."
-msgstr "unoconv listener gestartet"
-
 #: _message
 msgid "Skipping ::1 tomb name:: (.noindex found)."
 msgstr "Überspringen von ::1 tomb name:: (.noindex gefunden)."
@@ -960,10 +868,6 @@ msgstr "Indexieren der Dateinamen von ::1 tomb name:: im Gange..."
 msgid "Indexing ::1 tomb name:: contents..."
 msgstr "Indexieren der Inhalte von ::1 tomb name:: im Gange..."
 
-#: _verbose
-msgid "Using swish-e to create index."
-msgstr "Benutzen Sie swish-e um Suchindexe zu erstellen."
-
 #: _message
 msgid "Search index updated."
 msgstr "Such-Index aktualisiert."
@@ -971,10 +875,6 @@ msgstr "Such-Index aktualisiert."
 #: _success
 msgid "Searching for: ::1::"
 msgstr "Suchen nach  ::1::"
-
-#: _verbose
-msgid "Checking for index: ::1::"
-msgstr "Suchen nach Index: ::1::"
 
 #: _message
 msgid "Searching filenames in tomb ::1 tomb name::"
@@ -1067,18 +967,6 @@ msgstr "oder 'tomb close all' ausführen um alle zu schließen."
 msgid "Tomb close ::1::"
 msgstr "Tomb close ::1::"
 
-#: _verbose
-msgid "Name: ::1 tomb name::"
-msgstr "Name: ::1 tomb name::"
-
-#: _verbose
-msgid "Mount: ::1 mount point::"
-msgstr "Mount: ::1 mount point::"
-
-#: _verbose
-msgid "Mapper: ::1 mapper::"
-msgstr "Mapper: ::1 mapper::"
-
 #: _warning
 msgid "Tomb not found: ::1 tomb file::"
 msgstr "Grab unauffindbar: ::1 tomb file::"
@@ -1122,10 +1010,6 @@ msgid "Tomb bind hook ::1 hook:: is busy, cannot close tomb."
 msgstr ""
 "Der 'bind hook' ::1 hook:: ist beschäftigt und kann nicht geschlossen werden."
 
-#: _verbose
-msgid "Performing umount of ::1 mount point::"
-msgstr "::1 mount point:: wird ausgehängt."
-
 #: _warning
 msgid "Tomb is busy, cannot umount!"
 msgstr "Grab ist beschäftigt und kann nicht ausgehänkt werden !"
@@ -1141,10 +1025,6 @@ msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
 msgstr ""
 "Das Grab ::1 tomb name:: ist abgeschlossen, mögen ihre Knochen in Frieden "
 "ruhen."
-
-#: _verbose
-msgid "Sending ::1:: to processes inside the tomb:"
-msgstr "Sende ::1:: an die im Grab laufenden Prozesse:"
 
 #: _failure
 msgid "Error parsing."
@@ -1179,14 +1059,6 @@ msgstr ""
 "Sie haben die Option ::1 option:: gewählt welche GEFÄHRLICH ist, und nur für "
 "Tests verwendet werden soll\n"
 "Wenn Sie sie wirklich benutzen wollen, fügen Sie --unsecure-dev-mode hinzu"
-
-#: _verbose
-msgid "Tomb command: ::1 subcommand:: ::2 param::"
-msgstr "Befehl ::1 subcommand:: ::2 param::"
-
-#: _verbose
-msgid "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]."
-msgstr "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]."
 
 #: _failure
 msgid "QREncode not installed: cannot engrave keys on paper."
