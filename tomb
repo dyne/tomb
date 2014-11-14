@@ -89,6 +89,7 @@ typeset -H TOMBKEY            # Encrypted key contents (see forge_key(), recover
 typeset -H TOMBKEYFILE        # Key file               (ditto)
 typeset -H TOMBSECRET         # Raw deciphered key     (see forge_key(), gpg_decrypt())
 typeset -H TOMBPASSWORD       # Raw tomb passphrase    (see gen_key(), ask_key_password())
+typeset -H TOMBTMP            # Filename of secure temp just created (see _tmp_create())
 
 typeset -aH TOMBTMPFILES      # Keep track of temporary files
 typeset -aH TOMBLOOPDEVS      # Keep track of used loop devices
@@ -260,9 +261,9 @@ _plot() {
 }
 
 # Provide a random filename in shared memory
-_tmp_create tmp_create() {
+_tmp_create() {
 
-    local tfile="${TMPPREFIX}${RANDOM}"   # Temporary file
+    tfile="${TMPPREFIX}${RANDOM}"   # Temporary file
 
     touch $tfile
     [[ $? == 0 ]] || {
@@ -273,12 +274,10 @@ _tmp_create tmp_create() {
 	_failure "Fatal error setting permissions on temporary file: ::1 temp file::" $tfile }
 
     _verbose "Created tempfile: ::1 temp file::" $tfile
-    TOMBTMPFILES+=($tfile)
-
-    print - $tfile # Print it so it can be stored into a variable
+    TOMBTMP="$tfile"
+    TOMBTMPFILES+=("$tfile")
 
     return 0
-
 }
 
 # Check if swap is activated
@@ -504,16 +503,16 @@ lo_preserve() {
 
 # eventually used for debugging
 dump_secrets() {
-    _verbose "TOMBPATH: ::1 tomb path::" $TOMBPATH
-    _verbose "TOMBNAME: ::1 tomb name::" $TOMBNAME
+    print "TOMBPATH: $TOMBPATH"
+    print "TOMBNAME: $TOMBNAME"
 
-    _verbose "TOMBKEY: ::1 key:: chars long" ${#TOMBKEY}
-    _verbose "TOMBKEYFILE: ::1 key file::" $TOMBKEYFILE
-    _verbose "TOMBSECRET: ::1 secret:: chars long" ${#TOMBSECRET}
-    _verbose "TOMBPASSWORD: ::1 tomb pass::" $TOMBPASSWORD
+    print "TOMBKEY len: ${#TOMBKEY}"
+    print "TOMBKEYFILE: $TOMBKEYFILE"
+    print "TOMBSECRET len: ${#TOMBSECRET}"
+    print "TOMBPASSWORD: $TOMBPASSWORD"
 
-    _verbose "TOMBTMPFILES: ::1 temp files::" ${(@)TOMBTMPFILES}
-    _verbose "TOMBLOOPDEVS: ::1 loop devices::" ${(@)TOMBLOOPDEVS}
+    print "TOMBTMPFILES: ${(@)TOMBTMPFILES}"
+    print "TOMBLOOPDEVS: ${(@)TOMBLOOPDEVS}"
 }
 
 # }}}
@@ -852,7 +851,8 @@ gpg_decrypt() {
     } || { # using status-file in gpg != 1.4.11
 
         # TODO: use mkfifo
-	local statusfile=$(_tmp_create)
+        _tmp_create
+	    local statusfile=$TOMBTMP
 
         TOMBSECRET=`print - "$gpgpass" | \
             gpg --batch --passphrase-fd 0 --no-tty --no-options \
@@ -970,7 +970,8 @@ change_passwd() {
 
     _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
 
-    tmpnewkey=$(_tmp_create)
+    _tmp_create
+    tmpnewkey=$TOMBTMP
 
     if option_is_set --tomb-old-pwd; then
         local tomboldpwd="`option_value --tomb-old-pwd`"
@@ -1539,7 +1540,7 @@ change_tomb_key() {
 
     # we have everything, prepare to mount
     _success "Changing lock on tomb ::1 tomb name::" $TOMBNAME
-    _message "Old key: ::1 old key::" $oldkey
+    _message "Old key: ::1 old key::" $oldkeyfile
 
     # render the mapper
     mapdate=`date +%s`
@@ -1580,7 +1581,8 @@ change_tomb_key() {
 
     # Danger zone: due to cryptsetup limitations, in setkey we need
     # to write the bare unencrypted key on the tmpfs.
-    local newsecretfile=$(_tmp_create)
+    _tmp_create
+    local newsecretfile=$TOMBTMP
 
     print -n - "$new_secret" >> $newsecretfile
     print -n - "$old_secret" | \
@@ -1590,7 +1592,7 @@ change_tomb_key() {
     cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
 
     _success "Succesfully changed key for tomb: ::1 tomb file::" $TOMBFILE
-    _message "The new key is: ::1 new key::" $newkey
+    _message "The new key is: ::1 new key::" $TOMBKEYFILE
 
     return 0
 }
@@ -2024,7 +2026,8 @@ index_tombs() {
         # here we use swish to index file contents
         [[ $SWISH == 1 ]] && {
             _message "Indexing ::1 tomb name:: contents..." $tombname
-            local swishrc=$(_tmp_create)
+            _tmp_create
+            local swishrc=$TOMBTMP
 
             cat <<EOF > $swishrc
 # index directives
