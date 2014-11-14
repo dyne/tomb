@@ -2200,7 +2200,7 @@ resize_tomb() {
     }
     [[ $? == 0 ]] || _failure "No valid password supplied."
 
-    lo_mount "${tombdir}/${tombfile}"
+    lo_mount "$TOMBPATH"
     nstloop=`lo_new`
 
     mapdate=`date +%s`
