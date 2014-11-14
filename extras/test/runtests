@@ -28,7 +28,7 @@ tt() {
 }
 
 # check for auxiliary programs
-KDF=0
+KDF=1
 STEGHIDE=1
 RESIZER=1
 command -v steghide > /dev/null || STEGHIDE=0
