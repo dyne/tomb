@@ -1505,7 +1505,7 @@ lock_tomb_with_key() {
     cryptsetup luksClose tomb.tmp
 
     _message "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::" $TOMBNAME $cipher
-    _success "Your tomb is ready in ::1 tomb path:: and secured with key ::3 tomb key::" \
+    _success "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::" \
 	$TOMBPATH $TOMBKEYFILE
 
 }
