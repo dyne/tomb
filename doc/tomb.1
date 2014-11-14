@@ -1,4 +1,4 @@
-.TH tomb 1 "June 20, 2013" "tomb"
+.TH tomb 1 "November 14, 2014" "tomb"
 
 .SH NAME
 Tomb \- the Crypto Undertaker
@@ -345,6 +345,14 @@ local copy of it:
 .EE
 
 .IP \(bu
+Open a Tomb on a remote server using the local key on stdin to SSH,
+without saving any remote copy of it:
+
+.EX
+	cat .secrets/tomb.key | ssh server tomb open secret.tomb -k -
+.EE
+
+.IP \(bu
 Create a bind hook that places your GnuPG folder inside the tomb, but
 makes it reachable from the standard $HOME/.gnupg location every time
 the tomb will be opened:
@@ -392,11 +400,11 @@ EOF
 .EE
 
 .SH BUGS
-Please report bugs on the tracker at
-.UR https://bugs.dyne.org
+Please report bugs on the Github issue tracker at
+.UR https://github.com/dyne/Tomb/issues
 .UE
 
-Get in touch with developers via mail by subscribing the "crypto" mailinglist on \fIhttp://lists.dyne.org\fR or via the #dyne chat channel on \fIhttps://irc.dyne.org\fR.
+One can also try to get in touch with developers via the #dyne chat channel on \fIhttps://irc.dyne.org\fR.
 
 .SH AUTHORS
 
