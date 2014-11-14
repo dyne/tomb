@@ -49,7 +49,7 @@ typeset TOMBEXEC=$0
 
 # Keep a reference of the original command line arguments
 typeset -a OLDARGS
-for arg in ${argv}; do OLDARGS+=($arg); done
+for arg in "${(@)argv}"; do OLDARGS+=("$arg"); done
 
 # Special command requirements
 typeset -a DD WIPE MKFS
@@ -418,7 +418,7 @@ EOF
             _verbose "Escalating privileges using sudo-pwd."
             sudo -S -v <<<`option_value --sudo-pwd`
         fi
-        sudo "${TOMBEXEC}" -U ${UID} -G ${GID} -T ${TTY} "${(@)OLDARGS}"
+        sudo "${TOMBEXEC}" -U "${UID}" -G "${GID}" -T "${TTY:-SSH_TTY}" "${(@)OLDARGS}"
         exit $?
     fi # are we root already
 
@@ -2425,7 +2425,7 @@ main() {
         done
     done
     local -a oldstar
-    oldstar=($argv)
+    oldstar=("${(@)argv}")
         #### detect early: useful for --optiion-parsing
     zparseopts -M -D -Adiscardme ${every_opts}
         if [[ -n ${(k)discardme[--option-parsing]} ]]; then
@@ -2450,7 +2450,7 @@ main() {
         _warning "There's no such command \"::1 subcommand::\"." $subcommand
         exitv=127 _failure "Please try -h for help."
     fi
-    argv=(${oldstar})
+    argv=("${(@)oldstar}")
     unset oldstar
 
     ### Parsing global + command-specific options
@@ -2665,7 +2665,7 @@ EOF
 
 # {{{ Run
 
-main $@ || exit $?   # Prevent `tomb source tomb` from exiting
+main "$@" || exit $?   # Prevent `tomb source tomb` from exiting
 
 # }}}
 
