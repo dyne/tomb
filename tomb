@@ -1291,7 +1291,7 @@ dig_tomb() {
     [[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 megabytes"
 
     _check_swap              # Ensure the available memory is safe to use
-    _plot $tombpath          # Set TOMB{PATH,DIR,FILE,NAME}
+    is_valid_tomb $tombpath          # Set TOMB{PATH,DIR,FILE,NAME}
 
     [[ -e $TOMBPATH ]] && {
         _warning "A tomb exists already. I'm not digging here:"
@@ -1430,7 +1430,7 @@ lock_tomb_with_key() {
         return 1
     }
 
-    _plot $tombpath
+    is_valid_tomb $tombpath
 
     _message "Commanded to lock tomb ::1 tomb file::" $TOMBFILE
 
@@ -1524,7 +1524,7 @@ change_tomb_key() {
     }
 
     _check_swap
-    _plot $tombpath
+    is_valid_tomb $tombpath
 
     lo_mount $TOMBPATH
     nstloop=`lo_new`
@@ -1609,7 +1609,7 @@ mount_tomb() {
     _message "Commanded to open tomb ::1 tomb name::" $1
 
     _check_swap
-    _plot $tombpath
+    is_valid_tomb $tombpath
 
     # check file type (if its a Luks fs)
     file $TOMBPATH | grep -i 'luks encrypted file' 2>&1 > /dev/null
@@ -1662,7 +1662,8 @@ mount_tomb() {
     # save date of mount in minutes since 1970
     mapdate=`date +%s`
 
-    mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
+    mapper="tomb.$TOMBNAME.$mapdate.$(basename $nstloop)"
+
     _verbose "dev mapper device: ::1 mapper::" $mapper
     _verbose "Tomb key: ::1 key file::" $TOMBKEYFILE
 
@@ -2161,7 +2162,7 @@ resize_tomb() {
     [[ -z "$newtombsize" ]] && {
         _failure "Aborting operations: new size was not specified, use -s" }
 
-    _plot $tombpath        # Set TOMB{PATH,DIR,FILE,NAME}
+    is_valid_tomb $tombpath        # Set TOMB{PATH,DIR,FILE,NAME}
 
     _load_key # Try loading new key from option -k and set TOMBKEYFILE
 
@@ -2204,7 +2205,7 @@ resize_tomb() {
     nstloop=`lo_new`
 
     mapdate=`date +%s`
-    mapper="tomb.${tombname}.${mapdate}.`basename $nstloop`"
+    mapper="tomb.$TOMBNAME.$mapdate.$(basename $nstloop)"
 
     print -n - $TOMBSECRET | \
         cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
