@@ -39,9 +39,9 @@
 
 # {{{ Global variables
 
-typeset -r VERSION="1.7"
-typeset -r DATE="Oct/2014"
-typeset -r TOMBEXEC=$0
+typeset VERSION="1.7"
+typeset DATE="Oct/2014"
+typeset TOMBEXEC=$0
 
 # Tomb is using some global variables set by the shell:
 # TMPPREFIX, UID, GID, PATH, TTY, USERNAME
@@ -1422,7 +1422,6 @@ forge_key() {
 
 lock_tomb_with_key() {
     local tombpath="$1"      # First argument is the path to the tomb
-    local tombkey="$2"       # Second argument is the path to the key file
 
     [[ -n $tombpath ]] || {
         _warning "No tomb specified for locking."
@@ -1772,14 +1771,26 @@ exec_safe_bind_hooks() {
         _warning "Cannot exec bind hooks without a mounted tomb." 
         return 1 }
 
-    [[ ! -r "$mnt/bind-hooks" ]] && {
+    [[ -r "$mnt/bind-hooks" ]] || {
         _verbose "bind-hooks not found in ::1 mount point::" $mnt
         return 1 }
 
     typeset -Al maps        # Maps of files and directories to mount
     typeset -al mounted     # Track already mounted files and directories
 
-    maps=($(<"$mnt/bind-hooks"))
+    # better parsing for bind hooks checks for two separated words on
+    # each line, using zsh word separator array subscript
+    _bindhooks="`cat $mnt/bind-hooks`"
+    for h in ${(f)_bindhooks}; do
+        s="${h[(w)1]}"
+        d="${h[(w)2]}"
+        [[ "$s" = "" ]] && { _warning "bind-hooks file is broken"; return 1 }
+        [[ "$d" = "" ]] && { _warning "bind-hooks file is broken"; return 1 }
+        maps+=($s $d)
+        _verbose "bind-hook found: $s -> $d"
+    done
+    unset _bindhooks
+
     for dir in ${(k)maps}; do
         [[ "${dir[1]}" == "/" || "${dir[1,2]}" == ".." ]] && {
             _warning "bind-hooks map format: local/to/tomb local/to/\$HOME"
