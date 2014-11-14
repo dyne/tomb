@@ -1291,7 +1291,7 @@ dig_tomb() {
     [[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 megabytes"
 
     _check_swap              # Ensure the available memory is safe to use
-    is_valid_tomb $tombpath          # Set TOMB{PATH,DIR,FILE,NAME}
+    _plot $tombpath          # Set TOMB{PATH,DIR,FILE,NAME}
 
     [[ -e $TOMBPATH ]] && {
         _warning "A tomb exists already. I'm not digging here:"
@@ -1430,7 +1430,7 @@ lock_tomb_with_key() {
         return 1
     }
 
-    is_valid_tomb $tombpath
+    _plot $tombpath
 
     _message "Commanded to lock tomb ::1 tomb file::" $TOMBFILE
 
