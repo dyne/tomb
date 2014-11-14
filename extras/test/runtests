@@ -28,7 +28,7 @@ tt() {
 }
 
 # check for auxiliary programs
-KDF=1
+KDF=0
 STEGHIDE=1
 RESIZER=1
 command -v steghide > /dev/null || STEGHIDE=0
@@ -44,39 +44,80 @@ tests=(dig forge lock badpass open close passwd chksum bind setkey)
 { test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen stgpipe stgimpl) }
 { test $QRENCODE = 1 } && { tests+=(qrenc) }
 
-sudo rm -f /tmp/test.tomb{,.key}
+notice "Loading test suite and wiping all test.tomb* in /tmp"
+sudo rm -f /tmp/test.tomb{,.key,.new.key}
+
+
+# functions that can be called singularly
+
+test-tomb-create() {
+    notice "Testing creation: dig"
+
+    tt dig -s 20 /tmp/test.tomb
+
+    { test $? = 0 } && { results+=(dig SUCCESS) }
+
+    notice "Testing creation: forge"
+
+    tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypass} --use-urandom forge /tmp/test.tomb.key
+
+    { test $? = 0 } && { 
+        results+=(forge SUCCESS)
+        # 
+        say "Dump of clear key contents to examine them:"
+        print ${dummypass} \
+	        | gpg --batch --passphrase-fd 0 --no-tty --no-options -d /tmp/test.tomb.key \
+	        | hexdump -C
+        echo --
+    }
+
+    notice "Testing creation: lock"
+
+    tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypass} lock /tmp/test.tomb -k /tmp/test.tomb.key
+
+    { test $? = 0 } && { results+=(lock SUCCESS) }
+}
+
+test-bind-hooks() {
+    notice "Testing bind hooks"
+    tt list test
+    [[ $? = 0 ]] || {
+        tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypass} \
+            open /tmp/test.tomb -k /tmp/test.tomb.key }
+    rnd=$RANDOM
+    bindtest="dyne-tomb-bind-test-$rnd"
+    echo $rnd > /media/test.tomb/$bindtest
+    rm -f /media/test.tomb/bind-hooks
+    echo "$bindtest $bindtest" > /media/test.tomb/bind-hooks
+    touch $HOME/$bindtest
+    tt close test
+    tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypass} open /tmp/test.tomb
+    rnd2=`cat $HOME/$bindtest`
+    if [ "$rnd" = "$rnd2" ]; then
+	    notice "Bind hook on file matches"
+	    results+=(bind SUCCESS)
+	    tt list test
+    else
+	    error "Bind hook on file reports incongruence"
+    fi
+    rm -f "/media/test.tomb/$bindtest"
+    tt close test
+    # Remove test file in HOME
+    rm -f "$HOME/$bindtest"
+}
 
 
 startloops=(`sudo losetup -a |cut -d: -f1`)
 
+[[ $1 = "source" ]] && { return 0 }
 
-
-
-notice "Testing creation: dig"
-
-tt dig -s 20 /tmp/test.tomb
-
-{ test $? = 0 } && { results+=(dig SUCCESS) }
-
-notice "Testing creation: forge"
-
-tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypass} --use-urandom forge /tmp/test.tomb.key
-
-{ test $? = 0 } && { 
-    results+=(forge SUCCESS)
-    # 
-    say "Dump of clear key contents to examine them:"
-    print ${dummypass} \
-	| gpg --batch --passphrase-fd 0 --no-tty --no-options -d /tmp/test.tomb.key \
-	| hexdump -C
-    echo --
+[[ $1 = "" ]] || {
+    tt ${=@}
+    return $?
 }
 
-notice "Testing creation: lock"
-
-tt --ignore-swap --unsecure-dev-mode --tomb-pwd ${dummypass} lock /tmp/test.tomb -k /tmp/test.tomb.key
-
-{ test $? = 0 } && { results+=(lock SUCCESS) }
+# isolated function (also called with source)
+test-tomb-create
 
 notice "Testing open with wrong password"
 
@@ -110,7 +151,7 @@ notice "Generating content for file integrity test"
 
 tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypassnew} open /tmp/test.tomb
 
-${T} dig -s 10 /media/test.tomb/datacheck.raw
+tt dig -s 10 /media/test.tomb/datacheck.raw
 
 crc="sha256 /media/test.tomb/datacheck.raw"
 echo "$crc" > /media/test.tomb/datacheck.sha
@@ -128,7 +169,7 @@ tt --unsecure-dev-mode close test
 
 notice "Testing contents integrity"
 
-${T} -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypassnew} open /tmp/test.tomb
+tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypassnew} open /tmp/test.tomb
 
 { test $? = 0 } && {
     
@@ -136,30 +177,11 @@ ${T} -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypassnew} open /
     
     { test "$crc" = "$crc2" } && { results+=(chksum SUCCESS) }
 
+    tt close test
 }
 
-
-
-notice "Testing bind hooks"
-
-rnd=$RANDOM
-bindtest="dyne-tomb-bind-test-$rnd"
-echo $rnd > /media/test.tomb/$bindtest
-echo "$bindtestfile $bindtest" > /media/test.tomb/bind-hooks
-touch $HOME/$bindtest
-tt close test
-tt -k /tmp/test.tomb.key --unsecure-dev-mode --tomb-pwd ${dummypassnew} open /tmp/test.tomb
-rnd2=`cat $HOME/$bindtest`
-if [ "$rnd" = "$rnd2" ]; then
-	notice "Bind hook on file matches"
-	results+=(bind SUCCESS)
-	tt list test
-else
-	error "Bind hook on file reports incongruence"
-fi
-tt close test
-# Remove all test files in case some previous tests failed.
-rm -f $HOME/dyne-tomb-bind-test-* 
+# isolated function
+test-bind-hooks
 
 notice "Testing set key"
 
@@ -169,13 +191,14 @@ tt -k /tmp/test.tomb.new.key --force --unsecure-dev-mode --tomb-pwd ${dummypass}
 
 tt -k /tmp/test.tomb.new.key --unsecure-dev-mode --tomb-pwd ${dummypass} --tomb-old-pwd ${dummypassnew} setkey /tmp/test.tomb.key /tmp/test.tomb
 
+tt -k /tmp/test.tomb.new.key --unsecure-dev-mode --tomb-pwd ${dummypass} open /tmp/test.tomb
+
 if [ $? = 0 ]; then
     notice "Setkey succesfully swapped tomb key"
     results+=(setkey SUCCESS)
-    mv /tmp/test.tomb.new.key /tmp/test.tomb.key 
+    mv /tmp/test.tomb.new.key /tmp/test.tomb.key
+    tt close test
 fi
-
-
 
 { test $KDF = 1 } && { 
     
