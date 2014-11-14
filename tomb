@@ -2231,12 +2231,12 @@ umount_tomb() {
     fi
 
     [[ ${#mounted_tombs} == 0 ]] && {
-            _failure "There is no open tomb to be closed." }
+        _failure "There is no open tomb to be closed." }
 
     [[ ${#mounted_tombs} -gt 1 && -z "$1" ]] && {
         _warning "Too many tombs mounted, please specify one (see tomb list)"
         _warning "or issue the command 'tomb close all' to close them all."
-	_failure "Operation aborted." }
+	    _failure "Operation aborted." }
 
     _message "Tomb close ::1::" $1
 
@@ -2259,15 +2259,15 @@ umount_tomb() {
 
         [[ -n $SLAM ]] && {
             _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
-		     $tombname $tombmount
+		        $tombname $tombmount
             _message "Kill all processes busy inside the tomb."
             { slam_tomb "$tombmount" } || {
                 _failure "Cannot slam the tomb ::1 tomb name::" $tombname }
-	} || {
+	    } || {
             _message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
-		     $tombname $tombmount }
+		        $tombname $tombmount }
 
-	# check if there are binded dirs and close them
+	    # check if there are binded dirs and close them
         bind_tombs=(`list_tomb_binds $tombname`)
         for b in ${bind_tombs}; do
             bind_mapper="${b[(ws:;:)1]}"
@@ -2280,29 +2280,30 @@ umount_tomb() {
                     [[ $? == 1 ]] && {
                         _failure "Cannot slam the bind hook ::1 hook::" $bind_mount }
                     umount $bind_mount
-		} || {
+		        } || {
                     _warning "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount }
             }
         done
 
-	# Execute post-hooks for eventual cleanup
+	    # Execute post-hooks for eventual cleanup
         { option_is_set -n } || {
             exec_safe_post_hooks ${tombmount%%/} close }
 
         _verbose "Performing umount of ::1 mount point::" $tombmount
-        umount ${tombmount} && {
-	    # We used a default mountpoint
-	    [[ "$tombmount" == "/media/$tombname.tomb" ]] && {
-		rmdir $tombmount }
-	} || { _warning "Tomb is busy, cannot umount!" }
+        umount ${tombmount}
+        [[ $? = 0 ]] || { _warning "Tomb is busy, cannot umount!"; return 1 }
+
+	    # If we used a default mountpoint and is now empty, delete it
+	    [[ "$tombmount" == "/media/$tombname.tomb" ]] && { rmdir $tombmount }
 
         cryptsetup luksClose $mapper
-	[[ $? == 0 ]] || {
+	    [[ $? == 0 ]] || {
             _failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper }
 
-	# Normally the loopback device is detached when unused
-        [[ -e "/dev/$tombloop" ]] && losetup -d "/dev/$tombloop" || {
-		_verbose "/dev/$tombloop was already closed." }
+	    # Normally the loopback device is detached when unused
+        [[ -e "/dev/$tombloop" ]] && losetup -d "/dev/$tombloop"
+        [[ $? = 0 ]] || {
+		    _verbose "/dev/$tombloop was already closed." }
 
         _success "Tomb ::1 tomb name:: closed: your bones will rest in peace." $tombname
 
