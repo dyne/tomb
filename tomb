@@ -57,6 +57,10 @@ DD=(dd)
 WIPE=(rm -f)
 MKFS=(mkfs.ext3 -q -F -j -L)
 
+# load zsh regex module
+zmodload zsh/regex
+zmodload zsh/mapfile
+
 # Flag optional commands if available (see _ensure_dependencies())
 typeset -i KDF=1
 typeset -i STEGHIDE=1
@@ -147,6 +151,10 @@ TRAPKILL() { _endgame KILL  }
 TRAPPIPE() { _endgame PIPE  }
 TRAPTERM() { _endgame TERM  }
 TRAPSTOP() { _endgame STOP  }
+
+_cat() { local -a _arr;
+    # read file using mapfile, newline fix
+    _arr=("${(f@)${mapfile[${1}]%$’\n’}}"); print "$_arr" }
 
 # Identify the running user
 # Set global variables _UID, _GID, _TTY, and _USER, either from the
@@ -452,15 +460,15 @@ is_valid_tomb() {
     # whether we can alter it.
 
     # Tomb file may be a LUKS FS (or we are creating it)
-    file "$1" | grep -i "luks encrypted file" > /dev/null || {
+    [[ "`file $1`" =~ "luks encrypted file" ]] || {
         _warning "File is not yet a tomb: ::1 tomb file::" $1 }
 
     _plot $1     # Set TOMB{PATH,DIR,FILE,NAME}
 
     # Tomb cannot be already mounted (or we cannot alter it)
-    mount -l | grep "${TOMBFILE}.*\[$TOMBNAME\]$" > /dev/null
-    [[ $? == 0 ]] && {
-        _failure "Tomb is currently in use: ::1 tomb name::" $TOMBNAME }
+    [[ "`mount -l`" -regex-match "${TOMBFILE}.*\[$TOMBNAME\]$" ]] && {
+        _failure "Tomb is currently in use: ::1 tomb name::" $TOMBNAME
+    }
 
     _message "Valid tomb file found: ::1 tomb path::" $TOMBPATH
 
@@ -470,8 +478,6 @@ is_valid_tomb() {
 # $1 is the tomb file to be lomounted
 lo_mount() {
     tpath="$1"
-    is_valid_tomb "$tpath" || {
-        _failure "Loopback mount called on invalid tomb: ::1 path::" $tpath }
 
     # check if we have support for loop mounting
     losetup -f >& -
@@ -591,7 +597,7 @@ option_is_set() {
     r=$?
 
     [[ $2 == "out" ]] && {
-        [[ $r == 0 ]] && { echo 'set' } || { echo 'unset' }
+        [[ $r == 0 ]] && { print 'set' } || { print 'unset' }
     }
 
     return $r;
@@ -715,7 +721,7 @@ _ensure_dependencies check_bin() {
 
     # The messages system requires gettext
     command -v gettext >& - || {
-	echo "Missing required dependency: gettext.  Please install it."
+	print "Missing required dependency: gettext.  Please install it."
 	exit 1
     }
 
@@ -816,7 +822,7 @@ _load_key() {
         _verbose "load_key argument: ::1 key file::" $keyfile
 	[[ -r $keyfile ]] || _failure "Key not found, specify one using -k."
         TOMBKEYFILE=$keyfile
-        TOMBKEY=$(cat $TOMBKEYFILE)
+        TOMBKEY="${mapfile[$TOMBKEYFILE]}"
     }
 
     _verbose "load_key: ::1 key::" $TOMBKEYFILE
@@ -852,7 +858,7 @@ gpg_decrypt() {
 
         # TODO: use mkfifo
         _tmp_create
-	    local statusfile=$TOMBTMP
+	    statusfile=$TOMBTMP
 
         TOMBSECRET=`print - "$gpgpass" | \
             gpg --batch --passphrase-fd 0 --no-tty --no-options \
@@ -860,8 +866,11 @@ gpg_decrypt() {
             --no-secmem-warning 2> $statusfile`
 
         unset gpgpass
-        grep 'DECRYPTION_OKAY' $statusfile > /dev/null
-        ret=$?
+
+        ret=1
+
+        [[ "${mapfile[$statusfile]}" =~ "DECRYPTION_OKAY" ]] && { ret=0 }
+
 
     }
     return $ret
@@ -994,7 +1003,7 @@ change_passwd() {
         gen_key >> "$tmpnewkey"
     }
 
-    { is_valid_key "$(cat $tmpnewkey)" } || {
+    { is_valid_key "${mapfile[$tmpnewkey]}" } || {
         _failure "Error: the newly generated keyfile does not seem valid." }
 
     # Copy the new key as the original keyfile name
@@ -1102,7 +1111,7 @@ BEGIN { ciphers=0 }
 /^Hash:/ { ciphers=0 }
 { if(ciphers==0) { next } else { gsub(/,/,""); print; } }
 '`)
-    echo " ${ciphers}"
+    print " ${ciphers}"
     return 1
 }
 
@@ -1114,11 +1123,10 @@ bury_key() {
 
     imagefile=$PARAM
 
-    file $imagefile | grep -i JPEG > /dev/null
-    if [ $? != 0 ]; then
-       _warning "Encode failed: ::1 image file:: is not a jpeg image." $imagefile
-       return 1
-    fi
+    [[ "`file $imagefile`" =~ "JPEG" ]] || {
+        _warning "Encode failed: ::1 image file:: is not a jpeg image." $imagefile
+        return 1
+    }
 
     _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $TOMBKEY $imagefile
     _message "Please confirm the key password for the encoding"
@@ -1395,13 +1403,13 @@ forge_key() {
     }
 
     # load the key contents (set global variable)
-    TOMBKEY=$(cat $TOMBKEYFILE)
+    TOMBKEY="${mapfile[$TOMBKEYFILE]}"
 
     # this does a check on the file header
     is_valid_key $TOMBKEY || {
         _warning "The key does not seem to be valid."
         _warning "Dumping contents to screen:"
-        cat $TOMBKEY
+        print "${mapfile[$TOMBKEY]}"
         _warning "--"
         umount ${keytmp}
         rm -r $keytmp
@@ -1612,8 +1620,7 @@ mount_tomb() {
     is_valid_tomb $tombpath
 
     # check file type (if its a Luks fs)
-    file $TOMBPATH | grep -i 'luks encrypted file' 2>&1 > /dev/null
-    [[ $? == 0 ]] || {
+    [[ "`file $TOMBPATH`" =~ "luks encrypted file" ]] || {
         _warning "::1 tomb file:: is not a valid tomb file" $TOMBFILE
         _failure "Operation aborted."
     }
@@ -1627,8 +1634,7 @@ mount_tomb() {
         _message "Mountpoint not specified, using default: ::1 mount point::" $tombmount }
 
     # Check if its already open
-    mount -l | grep "${tombfile}.*\[$tombname\]$" 2>&1 > /dev/null
-    [[ $? == 0 ]] && {
+    [[ "`mount -l`" -regex-match "${tombfile}.*\[$tombname\]$" ]] && {
         _warning "::1 tomb name:: is already open." $TOMBNAME
         _message "Here below its status is reported:"
         list_tombs $TOMBNAME
@@ -1713,26 +1719,31 @@ mount_tomb() {
 
     # print out when was opened the last time, by whom and where
     [[ -r ${tombmount}/.last ]] && {
-        tombtty="`cat ${tombmount}/.tty`"
-        tombhost="`cat ${tombmount}/.host`"
-        tombuid="`cat ${tombmount}/.uid`"
-        tomblast="`cat ${tombmount}/.last`"
-        tombuser=`awk -F: '/:'"$tombuid"':/ {print $1}' /etc/passwd`
+        tombtty=$(_cat ${tombmount}/.tty | tr -d ' ')
+        tombhost=$(_cat ${tombmount}/.host | tr -d ' ')
+        tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
+        tomblast=$(_cat ${tombmount}/.last | tr -d ' ')
+        for e in ${(f@)mapfile[/etc/passwd]}; do
+            [[ "$e" =~ ":$tombuid:" ]] && {
+                tombuser="${e[(ws@:@)1]}" }
+        done
         _message "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::" $tombuser $tombuid $tombtty $tombhost
         _message "on date ::1 date::" $(date --date @$tomblast +%c)
     }
     # write down the UID and TTY that opened the tomb
     rm -f ${tombmount}/.uid
-    echo $_UID > ${tombmount}/.uid
+    print $_UID > ${tombmount}/.uid
+    rm -f ${tombmount}/.user
+    id -nu > ${tombmount}/.user
     rm -f ${tombmount}/.tty
-    echo $_TTY > ${tombmount}/.tty
+    print $_TTY > ${tombmount}/.tty
     # also the hostname
     rm -f ${tombmount}/.host
-    echo `hostname` > ${tombmount}/.host
+    hostname > ${tombmount}/.host
     # and the "last time opened" information
     # in minutes since 1970, this is printed at next open
     rm -f ${tombmount}/.last
-    echo "`date +%s`" > ${tombmount}/.last
+    date +%s > ${tombmount}/.last
     # human readable: date --date=@"`cat .last`" +%c
 
 
@@ -1783,7 +1794,7 @@ exec_safe_bind_hooks() {
 
     # better parsing for bind hooks checks for two separated words on
     # each line, using zsh word separator array subscript
-    _bindhooks="`cat $mnt/bind-hooks`"
+    _bindhooks="${mapfile[${mnt}/bind-hooks]}"
     for h in ${(f)_bindhooks}; do
         s="${h[(w)1]}"
         d="${h[(w)2]}"
@@ -1832,7 +1843,7 @@ exec_safe_post_hooks() {
     # Only run if post-hooks has the executable bit set
     [[ -x $mnt/post-hooks ]] || return
 
-    # If the file starts with a shebang, run it.
+    # If the file starts with a shebang, run it.    
     cat $mnt/post-hooks | head -n1 | grep '^#!\s*/' &> /dev/null
     [[ $? == 0 ]] && {
         _success "Post hooks found, executing as user ::1 user name::." $USERNAME
@@ -1848,6 +1859,9 @@ exec_safe_post_hooks() {
 # $1 is optional, to specify a tomb
 list_tombs() {
 
+    local tombname tombmount tombfs tombfsopts tombloop
+    local ts tombtot tombused tombavail tombpercent tombp tombsince
+    local tombtty tombhost tombuid tombuser 
     # list all open tombs
     mounted_tombs=(`list_tomb_mounts $1`)
     [[ ${#mounted_tombs} == 0 ]] && {
@@ -1873,13 +1887,20 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 
         # find out who opens it from where
         [[ -r ${tombmount}/.tty ]] && {
-            tombtty="`cat ${tombmount}/.tty`"
-            tombhost="`cat ${tombmount}/.host`"
-            tombuid="`cat ${tombmount}/.uid`"
-            tombuser=`awk -F: '/:'"$tombuid"':/ {print $1}' /etc/passwd`
+            tombtty=$(_cat ${tombmount}/.tty | tr -d ' ')
+            tombhost=$(_cat ${tombmount}/.host | tr -d ' ')
+            tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
+            for ee in ${(f@)mapfile[/etc/passwd]}; do
+                [[ "$ee" =~ ":$tombuid:" ]] && {
+                    tombuser="${ee[(ws@:@)1]}" }
+            done
         }
 
-        { option_is_set --get-mountpoint } && { echo $tombmount; continue }
+        _verbose "tombtty: $tombtty"
+        _verbose "tombuid: $tombuid"
+        _verbose "tombuser: $tombuser"
+
+        { option_is_set --get-mountpoint } && { print $tombmount; continue }
 
         _message "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::" \
             $tombname $tombmount $tombfsopts
@@ -2429,7 +2450,7 @@ main() {
         #### detect early: useful for --optiion-parsing
     zparseopts -M -D -Adiscardme ${every_opts}
         if [[ -n ${(k)discardme[--option-parsing]} ]]; then
-                echo $1
+                print $1
                 if [[ -n "$1" ]]; then
                         return 1
                 fi
