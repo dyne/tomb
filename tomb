@@ -547,16 +547,18 @@ _print " resize  resize a TOMB to a new size -s (can only grow)"
     }
 _print "\000"
 _print " // Operations on keys:"
-_print " passwd  change the password of a KEY"
-_print " setkey  change the KEY locking a TOMB (needs old one)"
+_print " passwd  change the password of a KEY (needs old pass)"
+_print " setkey  change the KEY locking a TOMB (needs old key and pass)"
 _print "\000"
     [[ $QRENCODE == 1 ]] && {
+_print " // Backup on paper:"
 _print " engrave makes a QR code of a KEY to be saved on paper"
     }
 _print "\000"
     [[ $STEGHIDE == 1 ]] && {
-_print " bury    hide a KEY inside a JPEG image"
-_print " exhume  extract a KEY from a JPEG image"
+_print " // Steganography:"
+_print " bury    hide a KEY inside a JPEG image (for use with -k)"
+_print " exhume  extract a KEY from a JPEG image (prints to stout)"
     }
 _print "\000"
 _print "Options:"
@@ -1172,6 +1174,9 @@ bury_key() {
 # optional 2nd arg: the password to use (same as key, internal use)
 # optional 3rd arg: the key where to save the result (- for stdout)
 exhume_key() {
+    [[ "$1" = "" ]] && {
+        _failure "Exhume failed, no image specified" }
+
     local imagefile="$1"  # The image file where to look for the key
     local tombpass="$2"   # (Optional) the password to use (internal use)
     local destkey="$3"    # (Optional) the key file where to save the
@@ -1180,7 +1185,7 @@ exhume_key() {
 
     # Ensure the image file is a readable JPEG
     [[ ! -r $imagefile ]] && {
-        _failure "Exhume failed, image file not found: ::1 image file::" $imagefile }
+        _failure "Exhume failed, image file not found: ::1 image file::" "${imagefile:-none}" }
     [[ ! $(file "$imagefile") =~ "JP.G" ]] && {
         _failure "Exhume failed: ::1 image file:: is not a jpeg image." $imagefile }
 
@@ -2073,6 +2078,8 @@ FileRules filename regex /\.ogv/i
 FileRules filename regex /\.ogm/i
 FileRules filename regex /\.mkv/i
 FileRules filename regex /\.mov/i
+FileRules filename regex /\.flv/i
+FileRules filename regex /\.webm/i
 # exclude system
 FileRules filename is ok
 FileRules filename is lock
