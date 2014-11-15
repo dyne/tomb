@@ -1,15 +1,17 @@
 # Tomb ChangeLog
 
-## 1.6
-### September 2014
+## 2.0
+### November 2014
 
-The way secrets are handled internally has been refactored to avoid
-writing anything on the filesystem, improving security and speed.
-Steganography functions have fixes and improved usability: it is now
-possible to use an image directly as key i.e. `tomb open -k
-image.jpg`. Four translations have been contributed: Spanish, French,
-Russian and German.
-
+Tomb goes international: now translated to Russian, French, Spanish
+and German. GNU gettext required.
+The usability of steganography has improved: images can now be used
+directly as keys (-k). Piping keys to stdin now works also across ssh
+connections. Security improved by avoiding most uses of temporary files.
+All code has been refactored for readability and integration with zsh
+features. Signal handlers are now in place, global arrays are used to
+keep track of temp files. Namespace has been revisioned and corrected,
+described in [HACKING](docs/HACKING.txt).
 
 ## 1.5.3
 ### June 2014
