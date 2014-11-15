@@ -1733,8 +1733,6 @@ mount_tomb() {
     # write down the UID and TTY that opened the tomb
     rm -f ${tombmount}/.uid
     print $_UID > ${tombmount}/.uid
-    rm -f ${tombmount}/.user
-    id -nu > ${tombmount}/.user
     rm -f ${tombmount}/.tty
     print $_TTY > ${tombmount}/.tty
     # also the hostname
@@ -1895,10 +1893,6 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
                     tombuser="${ee[(ws@:@)1]}" }
             done
         }
-
-        _verbose "tombtty: $tombtty"
-        _verbose "tombuid: $tombuid"
-        _verbose "tombuser: $tombuser"
 
         { option_is_set --get-mountpoint } && { print $tombmount; continue }
 
