@@ -13,8 +13,9 @@ all:
 	@echo
 
 install:
-	@install -Dm755 ${PROG} ${DESTDIR}${PREFIX}/bin/${PROG}
-	@install -Dm666 doc/${PROG}.1 ${DESTDIR}${MANDIR}/man1/${PROG}.1
+	@make -C extras/po install
+	install -Dm755 ${PROG} ${DESTDIR}${PREFIX}/bin/${PROG}
+	install -Dm666 doc/${PROG}.1 ${DESTDIR}${MANDIR}/man1/${PROG}.1
 
 test:
 	make -C extras/test
