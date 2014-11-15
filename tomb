@@ -14,10 +14,10 @@
 #
 # Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
 #
-# With contributions by Anathema, Boyska and Hellekin O. Wolf.
+# With contributions by Anathema, Boyska, Hellekin O. Wolf and GDrooid
 #
-# Testing and reviews are contributed by Dreamer, Shining,
-# Mancausoft, Asbesto Molesto and Nignux.
+# Testing and reviews are contributed by Dreamer, Shining, Mancausoft,
+# Asbesto Molesto and Nignux.
 #
 # Tomb's artwork is contributed by Jordi aka Mon Mort.
 
@@ -39,8 +39,8 @@
 
 # {{{ Global variables
 
-typeset VERSION="1.7"
-typeset DATE="Oct/2014"
+typeset VERSION="2.0"
+typeset DATE="Nov/2014"
 typeset TOMBEXEC=$0
 
 # Tomb is using some global variables set by the shell:
@@ -611,7 +611,8 @@ option_value() {
 
 # Messaging function with pretty coloring
 function _msg() {
-    local msg="$(gettext -s "$2")"
+    local msg="$2"
+    hash gettext && msg="$(gettext -s "$2")"
     for i in $(seq 3 ${#});
     do
         msg=${(S)msg//::$(($i - 2))*::/$*[$i]}
