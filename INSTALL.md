@@ -1,4 +1,3 @@
-
 # TOMB INSTALLATION INSTRUCTIONS
 
 ## Install required tools
@@ -6,6 +5,7 @@
 Tomb needs a few programs to be installed on a system in order to work:
 
  * zsh
+ * sudo
  * gnupg
  * cryptsetup
  * pinentry-curses (or -gtk or -qt as you prefer)
@@ -52,6 +52,7 @@ executable | function
   mlocate  | have fast search of file names inside tombs
   swish++  | have fast search of file contents inside tombs
   unoconv  | have fast search of contents in PDF and DOC files
+  haveged  | have fast entropy generation for key forging
 
 As for requirements, also optional tools may be easy to install using
 the packages provided by each distribution.
@@ -98,4 +99,3 @@ navigate to extras/po and run 'make install' as root:
 
     cd extras/po
     sudo make install
-

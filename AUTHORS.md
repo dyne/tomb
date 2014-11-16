@@ -3,7 +3,9 @@ Tomb is designed and written by Denis Roio aka Jaromil.
 
 Tomb includes code by Anathema, Boyska, Hellekin O. Wolf and GDrooid.
 
-Tomb's artwork is contributed by Jordi aka Mon Mort.
+Tomber, the Python Tomb wrapper, is written by Reiven.
+
+Tomb's artwork is contributed by Jordi aka Mon Mort and Logan VanCuren.
 
 Gettext internationalization and Spanish translation is contributed by
 GDrooid, French translation by Hellekin, Russian translation by fsLeg,

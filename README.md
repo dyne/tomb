@@ -1,4 +1,3 @@
-
         .....                                                ..
      .H8888888h.  ~-.                                  . uW8"
      888888888888x  `>        u.      ..    .     :    `t888
@@ -13,6 +12,8 @@
             ^"***"`                                        "`
 
 *A minimalistic commandline tool to manage encrypted volumes* aka **The Crypto Undertaker**
+
+![](https://github.com/dyne/Tomb/blob/master/extras/images/monmort.png)
 
 Latest stable version: **2.0**
 
@@ -34,7 +35,73 @@ output to facilitate its use inside graphical applications.
 
 # How does it work?
 
+To create a Tomb, do:
+```
+ $ tomb dig -s 100 secret.tomb
+ $ tomb forge secret.tomb.key
+ $ tomb lock secret.tomb -k secret.tomb.key
+```
+To open it, do
+```
+ $ tomb open secret.tomb -k secret.tomb.key
+```
+and after you are done
+```
+ $ tomb close
+```
+or if you are in a hurry
+```
+ $ tomb slam all
+```
+
 For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md).
+
+```
+  Syntax: tomb [options] command [arguments]
+
+  Commands:
+
+   // Creation:
+   dig     create a new empty TOMB file of size -s in MB
+   forge   create a new KEY file and set its password
+   lock    installs a lock on a TOMB to use it with KEY
+
+   // Operations on tombs:
+   open    open an existing TOMB
+   index   update the search indexes of tombs
+   search  looks for filenames matching text patterns
+   list    list of open TOMBs and information on them
+   close   close a specific TOMB (or 'all')
+   slam    slam a TOMB killing all programs using it
+   resize  resize a TOMB to a new size -s (can only grow)
+
+   // Operations on keys:
+   passwd  change the password of a KEY (needs old pass)
+   setkey  change the KEY locking a TOMB (needs old key and pass)
+
+   // Backup on paper:
+   engrave makes a QR code of a KEY to be saved on paper
+
+   // Steganography:
+   bury    hide a KEY inside a JPEG image (for use with -k)
+   exhume  extract a KEY from a JPEG image (prints to stout)
+
+  Options:
+
+   -s     size of the tomb file when creating/resizing one (in MB)
+   -k     path to the key to be used ('-k -' to read from stdin)
+   -n     don't process the hooks found in tomb
+   -o     mount options used to open (default: rw,noatime,nodev)
+   -f     force operation (i.e. even if swap is active)
+   --kdf  generate passwords armored against dictionary attacks
+
+   -h     print this help
+   -v     print version, license and list of available ciphers
+   -q     run quietly without printing informations
+   -D     print debugging information at runtime
+```
+
+# What is it for, exactly?
 
 This tool can be used to dig .tomb files (LUKS volumes), forge keys
 protected by a password (GnuPG symmetric encryption) and use the keys
@@ -81,11 +148,11 @@ encrypt the Home directory of users, a system implemented already in
 As of today, Tomb is a very stable tool also used in mission critical
 situations by a number of activists in dangerous zones. It has been
 reviewed by forensics analysts and it can be considered to be safe for
-military grade use where the integrity of information stored depends on 
-the user's behaviour and the strength of a standard AES-256
-(XTS plain) encryption algorithm.
+military grade use where the integrity of information stored depends
+on the user's behaviour and the strength of a standard AES-256 (XTS
+plain) encryption algorithm.
 
-# Use stable releases in production
+# Use stable releases in production!
 
 Anyone planning to use Tomb to store and access secrets should not use
 the latest development version in Git, but use instead the .tar.gz
@@ -121,3 +188,46 @@ IRC on https://irc.dyne.org channel **#dyne**
 Some enthusiastic ideas are in the [TODO](doc/TODO.org) file.
 
 Information on developers involved is found in the [AUTHORS](AUTHORS.md) file.
+
+# Can Tomb be used inside other applications?
+
+Sure as Hell it can! Licensing issues aside ([GNU GPLv3+](COPYING)
+terms) Tomb provides machine-readable output and interaction via some flags:
+
+              flag   | function
+-------------------- | ------------------------------------------------
+ --no-color          | avoids coloring output to allow parsing
+ --unsecure-dev-mode | allows giving passwords as argument
+ --tomb-pwd          | specify the key password as argument
+ --tomb-old-pwd      | specify the old key password as argument
+ --sudo-pwd          | specify the sudo password as argument
+
+Yet please consider that these flags may introduce vulnerabilities as
+process table scanning can reveal passwords while such commands are
+executing. For passwords in particular the best is always let Tomb
+gather them via pinentry.
+
+## Python
+
+![](extras/images/python_for_tomb.png)
+
+A Python wrapper is under developed and already usable, but it
+introduces the vulnerabilities mentioned above. Find it in
+`extras/tomber`. For more information see [PYTHON](extras/PYTHON.md).
+
+## Graphical applications
+
+So far the only graphical application supporting Tomb volumes is
+[ZuluCrypt](https://github.com/mhogomchungu/zuluCrypt). One needs to
+activate the Tomb plugin included in its source and will be able to
+create, open and close tombs. It might still miss advanced Tomb
+functionalities that are only available from the command-line.
+
+## Let us know!
+
+If you plan to develop any kind of wrapper for Tomb you are welcome to
+let us know. Tomb is really meant to be maintained as a minimal tool
+for long-term compatibility when handling something so delicate as our
+secrets. For anything else we rely on your own initiative.
+
+Happy hacking! :&^)

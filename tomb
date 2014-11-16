@@ -2279,8 +2279,6 @@ umount_tomb() {
         _warning "or issue the command 'tomb close all' to close them all."
 	    _failure "Operation aborted." }
 
-    _message "Tomb close ::1::" $1
-
     for t in ${mounted_tombs}; do
         mapper=`basename ${t[(ws:;:)1]}`
         tombname=${t[(ws:;:)5]}
