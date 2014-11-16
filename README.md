@@ -101,7 +101,7 @@ For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md)
    -D     print debugging information at runtime
 ```
 
-# What is it for, exactly?
+# What is this for, exactly?
 
 This tool can be used to dig .tomb files (LUKS volumes), forge keys
 protected by a password (GnuPG symmetric encryption) and use the keys
@@ -116,17 +116,18 @@ if busy. Keys can be stored on separate media like USB sticks, NFC, or
 bluetooth devices to make the transport of data safer: one always
 needs both the tomb and the key, plus its password, to access it.
 
-The tomb script takes care of several details to improve the security
-of tombs in everyday usage: adopting PIN entry for passwords,
-facilitating the storage of backup keys using image steganography,
-listing open tombs and selectively closing them, warning the user
-about their size and last time they were used, etc.
+The tomb script takes care of several details to improve user's
+behaviour and the security of tombs in everyday usage: secures the
+typing of passwords from keyloggers, facilitates hiding keys inside
+images, indexes and search a tomb's contents, lists open tombs and
+selectively closes them, warns the user about free space and last time
+usage, etc.
 
 # How secure is this?
 
 Death is the only sure thing in life. That said, Tomb is a pretty
-secure tool especially because it is kept minimal, its source is always
-open, and its code is easy to review with a bit of shell script
+secure tool especially because it is kept minimal, its source is
+always open, and its code is easy to review with a bit of shell script
 knowledge.
 
 All encryption tools being used in Tomb are included as default in
@@ -134,16 +135,29 @@ many GNU/Linux operating systems and therefore are regularly peer
 reviewed: we don't add anything else to them really, just a layer of
 usability.
 
-The code of Tomb can be read in a literate programming style on
-http://tomb.dyne.org/literate
+The code of Tomb is made to be read in literate programming style.
+
+In absence of the Tomb script it is always possible to access the
+contents of a Tomb using a Linux v3 kernel, cryptsetup and GnuPG
+issuing the following commands as root:
+
+```
+ lo=$(losetup -f)
+ losetup -f secret.tomb
+ pass=$(gpg -d secret.key)
+ echo -ne "$pass" | cryptsetup --key-file - luksOpen $lo secret
+ mount /dev/mapper/secret $HOME/secret-contents
+```
+
 
 # Stage of development
 
-Tomb is an evolution of the 'mknest' tool developed for the dyne:bolic
-GNU/Linux distribution, which is used by its 'nesting' mechanism to
-encrypt the Home directory of users, a system implemented already in
-2001. Since then, the same shell routines kept being maintained and in
-2007, they were adapted to work on various other GNU/Linux distributions.
+Tomb is an evolution of the 'mknest' tool developed for the
+[dyne:bolic](http://www.dynebolic.org) 100% Free GNU/Linux
+distribution in 2001: its 'nesting' mechanism allowed the liveCD users
+to encrypt and make persistent home directories. Since then the same
+shell routines kept being maintained and used for dyne:bolic until
+2007, when they were ported to work on more GNU/Linux distributions.
 
 As of today, Tomb is a very stable tool also used in mission critical
 situations by a number of activists in dangerous zones. It has been
@@ -189,7 +203,7 @@ Some enthusiastic ideas are in the [TODO](doc/TODO.org) file.
 
 Information on developers involved is found in the [AUTHORS](AUTHORS.md) file.
 
-# Can Tomb be used inside other applications?
+# Can Tomb be used by applications?
 
 Sure as Hell it can! Licensing issues aside ([GNU GPLv3+](COPYING)
 terms) Tomb provides machine-readable output and interaction via some flags:
