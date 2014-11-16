@@ -733,7 +733,7 @@ _ensure_dependencies() {
 
     # Check for required programs
     for req in cryptsetup pinentry sudo gpg; do
-        command -v $req >& - || {
+        hash $req 2>/dev/null || {
 	    _failure "Missing required dependency ::1 command::.  Please install it." $req }
     done
 
@@ -741,24 +741,24 @@ _ensure_dependencies() {
     path+=(/sbin /usr/sbin) # zsh magic
 
     # Which dd command to use
-    command -v dcfldd >& - && DD=(dcfldd statusinterval=1)
+    hash dcfldd 2>/dev/null && DD=(dcfldd statusinterval=1)
 
     # Which wipe command to use
-    command -v wipe >& - && WIPE=(wipe -f -s)
+    hash wipe 2>/dev/null && WIPE=(wipe -f -s)
 
     # Check for filesystem creation programs
-    command -v mkfs.ext4 >& - && MKFS=(mkfs.ext4 -q -F -j -L)
+    hash mkfs.ext4 2>/dev/null && MKFS=(mkfs.ext4 -q -F -j -L)
 
     # Check for steghide
-    command -v steghide >& - || STEGHIDE=0
+    hash steghide 2>/dev/null || STEGHIDE=0
     # Check for resize
-    command -v e2fsck resize2fs >& - || RESIZER=0
+    hash e2fsck resize2fs 2>/dev/null || RESIZER=0
     # Check for KDF auxiliary tools
-    command -v tomb-kdb-pbkdf2 >& - || KDF=0
+    hash tomb-kdb-pbkdf2 2>/dev/null || KDF=0
     # Check for Swish-E file content indexer
-    command -v swish-e >& - || SWISH=0
+    hash swish-e 2>/dev/null || SWISH=0
     # Check for QREncode for paper backups of keys
-    command -v qrencode >& - || QRENCODE=0
+    hash qrencode 2>/dev/null || QRENCODE=0
 }
 
 # }}} - Commandline interaction
@@ -1109,7 +1109,7 @@ EOF
 # prints an array of ciphers available in gnupg (to encrypt keys)
 list_gnupg_ciphers() {
     # prints an error if GnuPG is not found
-    which gpg >& - || _failure "gpg (GnuPG) is not found, Tomb cannot function without it."
+    which gpg 2>/dev/null || _failure "gpg (GnuPG) is not found, Tomb cannot function without it."
 
     ciphers=(`gpg --version | awk '
 BEGIN { ciphers=0 }
@@ -2011,7 +2011,7 @@ BEGIN { main="" }
 # index files in all tombs for search
 # $1 is optional, to specify a tomb
 index_tombs() {
-    { command -v updatedb >& - } || {
+    { hash updatedb 2>/dev/null } || {
         _failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
 
     updatedbver=`updatedb --version | grep '^updatedb'`
@@ -2033,7 +2033,7 @@ index_tombs() {
     _success "Creating and updating search indexes."
 
     # start the LibreOffice document converter if installed
-    { command -v unoconv >& - } && {
+    { hash unoconv 2>/dev/null } && {
         unoconv -l 2>/dev/null &
         _verbose "unoconv listener launched."
         sleep 1 }
@@ -2131,7 +2131,7 @@ EOF
     done
 }
 search_tombs() {
-    { command -v locate >& - } || {
+    { hash locate 2>/dev/null } || {
         _failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
 
     updatedbver=`updatedb --version | grep '^updatedb'`
