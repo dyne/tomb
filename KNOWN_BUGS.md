@@ -21,8 +21,9 @@
  and be able to operate their tombs normally.
 
  Those who have used Tomb 1.3 or 1.3.1 to create new tombs should use
- Tomb version 1.3.1 to open them and then migrate the contents into a
- new tomb created using the latest Tomb version.
+ Tomb version 1.3.1 (available from https://files.dyne.org/tomb) to
+ open them and then migrate the contents into a new tomb created using
+ the latest stable Tomb version.
 
  This bug was due to a typo in the code which appended a GnuPG status
  string to the content of keys.  All users of Tomb 1.3.* should pay

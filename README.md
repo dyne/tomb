@@ -14,9 +14,9 @@
 
 *A minimalistic commandline tool to manage encrypted volumes* aka **The Crypto Undertaker**
 
-Latest stable version: **1.5.3**
+Latest stable version: **2.0**
 
-Updates on website: http://dyne.org/software/tomb
+Updates on website: https://www.dyne.org/software/tomb
 
 Get the stable .tar.gz signed release for production use!
 Download it from https://files.dyne.org/tomb
@@ -94,8 +94,8 @@ always ensure backward compatibility with older tombs: we make sure it
 creates sane tombs and keys by running various tests before releasing
 it. The development version in Git might introduce sudden bugs and is
 not guaranteed to produce backward- or forward-compatible tombs and keys.
-Only developers and testers should use the Git version to report bugs,
-test new features, and develop patches.
+The development version in Git should be used to report bugs, test new
+features and develop patches.
 
 So be warned: do not use the latest Git version in production
 environments, but use a stable release versioned and packed as

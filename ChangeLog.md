@@ -4,14 +4,17 @@
 ### November 2014
 
 Tomb goes international: now translated to Russian, French, Spanish
-and German. GNU gettext required.
-The usability of steganography has improved: images can now be used
+and German.
+
+The usability has improved: steganographed images can now be used
 directly as keys (-k). Piping keys to stdin now works also across ssh
-connections. Security improved by avoiding most uses of temporary files.
-All code has been refactored for readability and integration with zsh
-features. Signal handlers are now in place, global arrays are used to
-keep track of temp files. Namespace has been revisioned and corrected,
-described in [HACKING](docs/HACKING.txt).
+connections.
+
+The security is also improved by avoiding most uses of temporary
+files.  All code has been refactored for readability and integration
+with zsh features. Signal handlers are now in place, global arrays are
+used to keep track of temp files. Namespace has been revisioned and
+corrected, described in [HACKING](docs/HACKING.txt).
 
 ## 1.5.3
 ### June 2014
