@@ -1,6 +1,6 @@
 PROG = tomb
 PREFIX ?= /usr/local
-MANDIR ?= /usr/share/man
+MANDIR ?= ${PREFIX}/share/man
 
 all:
 	@echo

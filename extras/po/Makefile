@@ -1,4 +1,5 @@
-LOCALEDIR ?= /usr/share/locale
+PREFIX ?= /usr/local
+LOCALEDIR ?= ${PREFIX}/share/locale
 TOMBFILE = LC_MESSAGES/tomb.mo
 
 all:
@@ -8,10 +9,10 @@ all:
 
 .PHONY: install
 install: es.mo ru.mo fr.mo de.mo
-	@install -Dm644 es.mo ${LOCALEDIR}/es/${TOMBFILE}
-	@install -Dm644 ru.mo ${LOCALEDIR}/ru/${TOMBFILE}
-	@install -Dm644 fr.mo ${LOCALEDIR}/fr/${TOMBFILE}
-	@install -Dm644 de.mo ${LOCALEDIR}/de/${TOMBFILE}
+	install -Dm644 es.mo ${DESTDIR}${LOCALEDIR}/es_ES/${TOMBFILE}
+	install -Dm644 ru.mo ${DESTDIR}${LOCALEDIR}/ru_RU/${TOMBFILE}
+	install -Dm644 fr.mo ${DESTDIR}${LOCALEDIR}/fr_FR/${TOMBFILE}
+	install -Dm644 de.mo ${DESTDIR}${LOCALEDIR}/de_DE/${TOMBFILE}
 	@echo "Translations installed."
 
 %.mo: %.po
