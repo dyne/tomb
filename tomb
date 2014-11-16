@@ -612,7 +612,7 @@ option_value() {
 # Messaging function with pretty coloring
 function _msg() {
     local msg="$2"
-    hash gettext && msg="$(gettext -s "$2")"
+    hash gettext 2>/dev/null && msg="$(gettext -s "$2")"
     for i in $(seq 3 ${#});
     do
         msg=${(S)msg//::$(($i - 2))*::/$*[$i]}
@@ -712,19 +712,24 @@ progress() {
 
 }
 
+_list_optional_tools() {
+    typeset -a _deps
+    _deps=(gettext dcfldd wipe mkfs.ext4 steghide e2fsck)
+    _deps+=(resize2fs tomb-kdb-pbkdf2 qrencode swish-e unoconv)
+    for d in $_deps; do
+	_print "`which $d`"
+    done
+    return 0
+}
+
+
 # Check program dependencies
 #
 # Tomb depends on system utilities that must be present, and other
 # functionality that can be provided by various programs according to
 # what's available on the system.  If some required commands are
 # missing, bail out.
-_ensure_dependencies check_bin() {
-
-    # The messages system requires gettext
-    command -v gettext >& - || {
-	print "Missing required dependency: gettext.  Please install it."
-	exit 1
-    }
+_ensure_dependencies() {
 
     # Check for required programs
     for req in cryptsetup pinentry sudo gpg; do
@@ -2661,13 +2666,17 @@ _print "\000"
 _print "System utils:"
 _print "\000"
 cat <<EOF
- `sudo -V | head -n1`
- `cryptsetup --version`
- `pinentry --version`
- `gpg --version | head -n1` - key forging algorithms (GnuPG symmetric ciphers):
-`list_gnupg_ciphers`
+  `sudo -V | head -n1`
+  `cryptsetup --version`
+  `pinentry --version`
+  `gpg --version | head -n1` - key forging algorithms (GnuPG symmetric ciphers):
+  `list_gnupg_ciphers`
 EOF
-                return 0
+_print "\000"
+_print "Optional utils:"
+_print "\000"
+_list_optional_tools version
+return 0
             }
             usage
             ;;
