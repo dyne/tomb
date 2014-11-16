@@ -556,7 +556,7 @@ _print "\000"
     [[ $STEGHIDE == 1 ]] && {
 _print " // Steganography:"
 _print " bury    hide a KEY inside a JPEG image (for use with -k)"
-_print " exhume  extract a KEY from a JPEG image (prints to stout)"
+_print " exhume  extract a KEY from a JPEG image (prints to stdout)"
     }
 _print "\000"
 _print "Options:"

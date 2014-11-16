@@ -81,10 +81,6 @@ msgstr "Закрываю гробницу ::1 tomb name::"
 msgid "Valid tomb file found: ::1 tomb path::"
 msgstr ""
 
-#: failure
-msgid "Loopback mount called on invalid tomb: ::1 path::"
-msgstr ""
-
 #: warning
 #, fuzzy
 msgid "Loop mount of volumes is not possible on this machine, this error"
@@ -159,25 +155,31 @@ msgid " // Operations on keys:"
 msgstr " // Операции с ключами: "
 
 #: print
-msgid " passwd  change the password of a KEY"
-msgstr " passwd  изменить пароль КЛЮЧА "
+msgid " passwd  change the password of a KEY (needs old pass)"
+msgstr ""
 
 #: print
-msgid " setkey  change the KEY locking a TOMB (needs old one)"
-msgstr " setkey  изменить КЛЮЧ для закрытия ГРОБНИЦЫ (нужен старый ключ) "
+msgid " setkey  change the KEY locking a TOMB (needs old key and pass)"
+msgstr ""
+
+#: print
+msgid " // Backup on paper:"
+msgstr ""
 
 #: print
 msgid " engrave makes a QR code of a KEY to be saved on paper"
 msgstr " engrave создает штрих-код для хранения КЛЮЧА на бумаге "
 
 #: print
-msgid " bury    hide a KEY inside a JPEG image"
+msgid " // Steganography:"
 msgstr ""
-" bury    спрятать КЛЮЧ в JPEG изображении exhume  извлечь КЛЮЧ из JPEG "
-"изображения "
 
 #: print
-msgid " exhume  extract a KEY from a JPEG image"
+msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
+msgstr ""
+
+#: print
+msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
 msgstr ""
 
 #: print
@@ -358,6 +360,10 @@ msgid "Encoding error: steghide reports problems."
 msgstr "Ошибка шифрования: steghide сообщает о проблемах."
 
 #: failure
+msgid "Exhume failed, no image specified"
+msgstr ""
+
+#: failure
 #, fuzzy
 msgid "Exhume failed, image file not found: ::1 image file::"
 msgstr "Найден верный файл гробницы: ::1 tomb file::"
@@ -498,10 +504,6 @@ msgstr "Ключ неверен."
 #: warning
 msgid "Dumping contents to screen:"
 msgstr "Выгрузка содержимого на экран:"
-
-#: warning
-msgid "--"
-msgstr ""
 
 #: message
 msgid "Done forging ::1 key file::"
@@ -892,11 +894,6 @@ msgstr ""
 msgid "or issue the command 'tomb close all' to close them all."
 msgstr "или выполните команду 'tomb close all', чтобы закрыть их все."
 
-#: message
-#, fuzzy
-msgid "Tomb close ::1::"
-msgstr "Закрываю гробницу ::1 tomb name::"
-
 #: warning
 #, fuzzy
 msgid "Tomb not found: ::1 tomb file::"
@@ -1012,7 +1009,7 @@ msgid " This is free software: you are free to change and redistribute it"
 msgstr ""
 
 #: print
-msgid " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
+msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
 msgstr ""
 
 #: print
@@ -1028,11 +1025,15 @@ msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr ""
 
 #: print
-msgid " Please refer to the GNU Public License for more details."
+msgid " When in need please refer to <http://dyne.org/support>."
 msgstr ""
 
 #: print
 msgid "System utils:"
+msgstr ""
+
+#: print
+msgid "Optional utils:"
 msgstr ""
 
 #: warning
@@ -1042,6 +1043,21 @@ msgstr "Команда \"::1 subcommand::\" не распознана."
 #: message
 msgid "Try -h for help."
 msgstr "Используйте -h для вызова справки."
+
+#~ msgid " passwd  change the password of a KEY"
+#~ msgstr " passwd  изменить пароль КЛЮЧА "
+
+#~ msgid " setkey  change the KEY locking a TOMB (needs old one)"
+#~ msgstr " setkey  изменить КЛЮЧ для закрытия ГРОБНИЦЫ (нужен старый ключ) "
+
+#~ msgid " bury    hide a KEY inside a JPEG image"
+#~ msgstr ""
+#~ " bury    спрятать КЛЮЧ в JPEG изображении exhume  извлечь КЛЮЧ из JPEG "
+#~ "изображения "
+
+#, fuzzy
+#~ msgid "Tomb close ::1::"
+#~ msgstr "Закрываю гробницу ::1 tomb name::"
 
 #~ msgid "All your swaps are belong to crypt.  Good."
 #~ msgstr "Весь swap принадлежит криптографии. Хорошо."

@@ -81,10 +81,6 @@ msgstr "Fermons la tombe ::1 tomb name::"
 msgid "Valid tomb file found: ::1 tomb path::"
 msgstr ""
 
-#: failure
-msgid "Loopback mount called on invalid tomb: ::1 path::"
-msgstr ""
-
 #: warning
 #, fuzzy
 msgid "Loop mount of volumes is not possible on this machine, this error"
@@ -173,14 +169,16 @@ msgid " // Operations on keys:"
 msgstr " // Opération sur les clés :"
 
 #: print
-msgid " passwd  change the password of a KEY"
-msgstr " passwd                    Modifier le mot de passe d'une CLÉ"
+msgid " passwd  change the password of a KEY (needs old pass)"
+msgstr ""
 
 #: print
-msgid " setkey  change the KEY locking a TOMB (needs old one)"
+msgid " setkey  change the KEY locking a TOMB (needs old key and pass)"
 msgstr ""
-" setkey                      Changer le verrou d'une TOMBE (à l'aide de la "
-"CLÉ existante)"
+
+#: print
+msgid " // Backup on paper:"
+msgstr ""
 
 #: print
 msgid " engrave makes a QR code of a KEY to be saved on paper"
@@ -189,15 +187,16 @@ msgstr ""
 "au format QR code"
 
 #: print
-msgid " bury    hide a KEY inside a JPEG image"
+msgid " // Steganography:"
 msgstr ""
-" bury       (enterrer)   Cacher la CLÉ dans une image JPEG (stéganographie)"
 
 #: print
-msgid " exhume  extract a KEY from a JPEG image"
+msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
 msgstr ""
-" exhume (exhumer)  Extraire une CLÉ cachée dans une image JPEG "
-"(stéganographie)"
+
+#: print
+msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
+msgstr ""
 
 #: print
 msgid "Options:"
@@ -391,6 +390,10 @@ msgid "Encoding error: steghide reports problems."
 msgstr "Erreur à l'encodage : steghide rapporte des problèmes."
 
 #: failure
+msgid "Exhume failed, no image specified"
+msgstr ""
+
+#: failure
 #, fuzzy
 msgid "Exhume failed, image file not found: ::1 image file::"
 msgstr "Le fichier valide d'une tombe a été trouvé : ::1 tomb file::"
@@ -541,10 +544,6 @@ msgstr "La clé semble être invalide."
 #: warning
 msgid "Dumping contents to screen:"
 msgstr "Capture des contenus à l'écran :"
-
-#: warning
-msgid "--"
-msgstr ""
 
 #: message
 msgid "Done forging ::1 key file::"
@@ -946,11 +945,6 @@ msgstr "Trop de tombes sont montées, merci d'en choisir une (voir 'tomb list')"
 msgid "or issue the command 'tomb close all' to close them all."
 msgstr "ou bien exécuter 'tomb close all' pour les fermer toutes."
 
-#: message
-#, fuzzy
-msgid "Tomb close ::1::"
-msgstr "Fermons la tombe ::1 tomb name::"
-
 #: warning
 #, fuzzy
 msgid "Tomb not found: ::1 tomb file::"
@@ -1070,7 +1064,7 @@ msgid " This is free software: you are free to change and redistribute it"
 msgstr ""
 
 #: print
-msgid " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
+msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
 msgstr ""
 
 #: print
@@ -1086,11 +1080,15 @@ msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr ""
 
 #: print
-msgid " Please refer to the GNU Public License for more details."
+msgid " When in need please refer to <http://dyne.org/support>."
 msgstr ""
 
 #: print
 msgid "System utils:"
+msgstr ""
+
+#: print
+msgid "Optional utils:"
 msgstr ""
 
 #: warning
@@ -1100,6 +1098,28 @@ msgstr "La command \"::1 subcommand::\" n'est pas reconnue."
 #: message
 msgid "Try -h for help."
 msgstr "Essayer -h pour obtenir l'aide."
+
+#~ msgid " passwd  change the password of a KEY"
+#~ msgstr " passwd                    Modifier le mot de passe d'une CLÉ"
+
+#~ msgid " setkey  change the KEY locking a TOMB (needs old one)"
+#~ msgstr ""
+#~ " setkey                      Changer le verrou d'une TOMBE (à l'aide de "
+#~ "la CLÉ existante)"
+
+#~ msgid " bury    hide a KEY inside a JPEG image"
+#~ msgstr ""
+#~ " bury       (enterrer)   Cacher la CLÉ dans une image JPEG "
+#~ "(stéganographie)"
+
+#~ msgid " exhume  extract a KEY from a JPEG image"
+#~ msgstr ""
+#~ " exhume (exhumer)  Extraire une CLÉ cachée dans une image JPEG "
+#~ "(stéganographie)"
+
+#, fuzzy
+#~ msgid "Tomb close ::1::"
+#~ msgstr "Fermons la tombe ::1 tomb name::"
 
 #~ msgid "All your swaps are belong to crypt.  Good."
 #~ msgstr "Toutes les partitions d'échange sont chiffrées.  C'est bien."

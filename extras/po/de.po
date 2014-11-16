@@ -75,10 +75,6 @@ msgstr "Grab wird schon benutzt ::1 tomb name::"
 msgid "Valid tomb file found: ::1 tomb path::"
 msgstr ""
 
-#: failure
-msgid "Loopback mount called on invalid tomb: ::1 path::"
-msgstr "Loopback Einhängen mit ungültiger Datei versucht: ::1 path::"
-
 #: warning
 msgid "Loop mount of volumes is not possible on this machine, this error"
 msgstr "Loop-Mount der Laufwerke nicht unterstützt, dieser Fehler"
@@ -154,24 +150,32 @@ msgid " // Operations on keys:"
 msgstr " // Schlüssel bearbeiten:"
 
 #: print
-msgid " passwd  change the password of a KEY"
-msgstr " passwd  Passwort eines SCHLÜSSELS ändern"
+msgid " passwd  change the password of a KEY (needs old pass)"
+msgstr ""
 
 #: print
-msgid " setkey  change the KEY locking a TOMB (needs old one)"
-msgstr " setkey  SCHLÜSSEL eines GRABES ändern"
+msgid " setkey  change the KEY locking a TOMB (needs old key and pass)"
+msgstr ""
+
+#: print
+msgid " // Backup on paper:"
+msgstr ""
 
 #: print
 msgid " engrave makes a QR code of a KEY to be saved on paper"
 msgstr " engrave Erstellt einen QR-Code eines SCHLÜSSELS zum ausdrucken"
 
 #: print
-msgid " bury    hide a KEY inside a JPEG image"
-msgstr " bury    versteckt einen SCHLÜSSEL in einer JPEG Datei"
+msgid " // Steganography:"
+msgstr ""
 
 #: print
-msgid " exhume  extract a KEY from a JPEG image"
-msgstr " exhume  extrahiert den SCHLÜSSEL aus einer JPEG-Datei"
+msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
+msgstr ""
+
+#: print
+msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
+msgstr ""
 
 #: print
 msgid "Options:"
@@ -354,6 +358,10 @@ msgid "Encoding error: steghide reports problems."
 msgstr "Fehler beim Verschlüsseln: steghide meldet Fehler."
 
 #: failure
+msgid "Exhume failed, no image specified"
+msgstr ""
+
+#: failure
 msgid "Exhume failed, image file not found: ::1 image file::"
 msgstr "Exhumieren fehlgeschlagen, Bilddatei nicht gefunden: ::1 image file::"
 
@@ -502,10 +510,6 @@ msgstr "Der Schlüssel scheint ungültig zu sein."
 #: warning
 msgid "Dumping contents to screen:"
 msgstr "Inhalte werden am Bildschirm angezeigt :"
-
-#: warning
-msgid "--"
-msgstr ""
 
 #: message
 msgid "Done forging ::1 key file::"
@@ -890,10 +894,6 @@ msgstr ""
 msgid "or issue the command 'tomb close all' to close them all."
 msgstr "oder 'tomb close all' ausführen um alle zu schließen."
 
-#: message
-msgid "Tomb close ::1::"
-msgstr "Tomb close ::1::"
-
 #: warning
 msgid "Tomb not found: ::1 tomb file::"
 msgstr "Grab unauffindbar: ::1 tomb file::"
@@ -1017,8 +1017,8 @@ msgstr ""
 " This ist freie Software, Sie sind frei sie zu verändern und weiterzugeben"
 
 #: print
-msgid " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
-msgstr "Der neueste Quellcode ist auf <http://tomb.dyne.org> erhältlich"
+msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
+msgstr ""
 
 #: print
 msgid " This source code is distributed in the hope that it will be useful,"
@@ -1034,13 +1034,16 @@ msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr " MARKTGÄNGIGKEIT oder der EIGNUNG ZU EINEM BESTIMMTEN ZWECK."
 
 #: print
-msgid " Please refer to the GNU Public License for more details."
+msgid " When in need please refer to <http://dyne.org/support>."
 msgstr ""
-" Bitte beziehen Sie sich auf die \"GNU Public License\" für mehr Details."
 
 #: print
 msgid "System utils:"
 msgstr "Systemwerkzeuge:"
+
+#: print
+msgid "Optional utils:"
+msgstr ""
 
 #: warning
 msgid "Command \"::1 subcommand::\" not recognized."
@@ -1049,6 +1052,31 @@ msgstr "Der Befehl \"::1 subcommand::\" wurde nicht erkannt."
 #: message
 msgid "Try -h for help."
 msgstr "Versuchen Sie -h um Hilfe zu erhalten."
+
+#~ msgid "Loopback mount called on invalid tomb: ::1 path::"
+#~ msgstr "Loopback Einhängen mit ungültiger Datei versucht: ::1 path::"
+
+#~ msgid " passwd  change the password of a KEY"
+#~ msgstr " passwd  Passwort eines SCHLÜSSELS ändern"
+
+#~ msgid " setkey  change the KEY locking a TOMB (needs old one)"
+#~ msgstr " setkey  SCHLÜSSEL eines GRABES ändern"
+
+#~ msgid " bury    hide a KEY inside a JPEG image"
+#~ msgstr " bury    versteckt einen SCHLÜSSEL in einer JPEG Datei"
+
+#~ msgid " exhume  extract a KEY from a JPEG image"
+#~ msgstr " exhume  extrahiert den SCHLÜSSEL aus einer JPEG-Datei"
+
+#~ msgid "Tomb close ::1::"
+#~ msgstr "Tomb close ::1::"
+
+#~ msgid " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
+#~ msgstr "Der neueste Quellcode ist auf <http://tomb.dyne.org> erhältlich"
+
+#~ msgid " Please refer to the GNU Public License for more details."
+#~ msgstr ""
+#~ " Bitte beziehen Sie sich auf die \"GNU Public License\" für mehr Details."
 
 #~ msgid "All your swaps are belong to crypt.  Good."
 #~ msgstr "Alle geteilten Speicher gehören crypt.  Gut."

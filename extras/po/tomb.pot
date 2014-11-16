@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb \n"
-"PO-Revision-Date: Fri Nov 14 20:58:30 CET 2014\n"
+"PO-Revision-Date: Sun Nov 16 17:11:25 CET 2014\n"
 "Last-Translator: Denis Roio <jaromil@dyne.org>\n"
 "Language: English\n"
 "Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
@@ -82,10 +82,6 @@ msgstr ""
 msgid "Valid tomb file found: ::1 tomb path::"
 msgstr ""
 
-#: failure
-msgid "Loopback mount called on invalid tomb: ::1 path::"
-msgstr ""
-
 #: warning
 msgid "Loop mount of volumes is not possible on this machine, this error"
 msgstr ""
@@ -159,11 +155,15 @@ msgid " // Operations on keys:"
 msgstr ""
 
 #: print
-msgid " passwd  change the password of a KEY"
+msgid " passwd  change the password of a KEY (needs old pass)"
 msgstr ""
 
 #: print
-msgid " setkey  change the KEY locking a TOMB (needs old one)"
+msgid " setkey  change the KEY locking a TOMB (needs old key and pass)"
+msgstr ""
+
+#: print
+msgid " // Backup on paper:"
 msgstr ""
 
 #: print
@@ -171,11 +171,15 @@ msgid " engrave makes a QR code of a KEY to be saved on paper"
 msgstr ""
 
 #: print
-msgid " bury    hide a KEY inside a JPEG image"
+msgid " // Steganography:"
 msgstr ""
 
 #: print
-msgid " exhume  extract a KEY from a JPEG image"
+msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
+msgstr ""
+
+#: print
+msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
 msgstr ""
 
 #: print
@@ -347,6 +351,10 @@ msgid "Encoding error: steghide reports problems."
 msgstr ""
 
 #: failure
+msgid "Exhume failed, no image specified"
+msgstr ""
+
+#: failure
 msgid "Exhume failed, image file not found: ::1 image file::"
 msgstr ""
 
@@ -480,10 +488,6 @@ msgstr ""
 
 #: warning
 msgid "Dumping contents to screen:"
-msgstr ""
-
-#: warning
-msgid "--"
 msgstr ""
 
 #: message
@@ -842,10 +846,6 @@ msgstr ""
 msgid "or issue the command 'tomb close all' to close them all."
 msgstr ""
 
-#: message
-msgid "Tomb close ::1::"
-msgstr ""
-
 #: warning
 msgid "Tomb not found: ::1 tomb file::"
 msgstr ""
@@ -951,7 +951,7 @@ msgid " This is free software: you are free to change and redistribute it"
 msgstr ""
 
 #: print
-msgid " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
+msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
 msgstr ""
 
 #: print
@@ -967,11 +967,15 @@ msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr ""
 
 #: print
-msgid " Please refer to the GNU Public License for more details."
+msgid " When in need please refer to <http://dyne.org/support>."
 msgstr ""
 
 #: print
 msgid "System utils:"
+msgstr ""
+
+#: print
+msgid "Optional utils:"
 msgstr ""
 
 #: warning
