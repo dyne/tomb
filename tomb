@@ -480,7 +480,7 @@ lo_mount() {
     tpath="$1"
 
     # check if we have support for loop mounting
-    losetup -f >& -
+    _nstloop=`losetup -f`
     [[ $? = 0 ]] || {
         _warning "Loop mount of volumes is not possible on this machine, this error"
         _warning "often occurs on VPS and kernels that don't provide the loop module."
@@ -488,9 +488,7 @@ lo_mount() {
         _failure "Operation aborted."
     }
 
-    _nstloop=`losetup -f` # get the number for next loopback device
-
-    losetup -f "$tpath" >& - # allocates the next loopback for our file
+    losetup -f "$tpath" # allocates the next loopback for our file
 
     TOMBLOOPDEVS+=("$_nstloop") # add to array of lodevs used
 
