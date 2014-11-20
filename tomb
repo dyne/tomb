@@ -979,7 +979,7 @@ ask_key_password() {
 # call cryptsetup with arguments using the currently known secret
 # echo flags eliminate newline and disable escape (BSD_ECHO)
 _cryptsetup() {
-    echo -n -E - "$TOMBSECRET" | cryptsetup --key-file - ${=@}
+    print -R -n - "$TOMBSECRET" | cryptsetup --key-file - ${=@}
     return $?
 }
 
