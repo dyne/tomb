@@ -976,6 +976,13 @@ ask_key_password() {
     return 0
 }
 
+# call cryptsetup with arguments using the currently known secret
+# echo flags eliminate newline and disable escape (BSD_ECHO)
+_cryptsetup() {
+    echo -n -E - "$TOMBSECRET" | cryptsetup --key-file - ${=@}
+    return $?
+}
+
 # change tomb key password
 change_passwd() {
     local tmpnewkey lukskey c tombpass tombpasstmp
@@ -1496,17 +1503,14 @@ lock_tomb_with_key() {
     _success "Locking ::1 tomb file:: with ::2 tomb key file::" $TOMBFILE $TOMBKEYFILE
 
     _message "Formatting Luks mapped device."
-    print -n - $TOMBSECRET | \
-        cryptsetup --key-file -   --batch-mode \
+    _cryptsetup --batch-mode \
         --cipher ${cipher} --key-size 256 --key-slot 0 \
         luksFormat ${nstloop}
     [[ $? == 0 ]] || {
         _warning "cryptsetup luksFormat returned an error."
         _failure "Operation aborted." }
 
-    print -n - $TOMBSECRET | \
-        cryptsetup --key-file - \
-        --cipher ${cipher} luksOpen ${nstloop} tomb.tmp
+    _cryptsetup --cipher ${cipher} luksOpen ${nstloop} tomb.tmp
     [[ $? == 0 ]] || {
         _warning "cryptsetup luksOpen returned an error."
         _failure "Operation aborted." }
@@ -1694,8 +1698,7 @@ mount_tomb() {
     }
     [[ $? == 0 ]] || _failure "No valid password supplied."
 
-    print -n - $TOMBSECRET | \
-        cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+    _cryptsetup luksOpen ${nstloop} ${mapper}
 
     [[ -r /dev/mapper/${mapper} ]] || {
 	_failure "Failure mounting the encrypted file." }
@@ -2233,8 +2236,7 @@ resize_tomb() {
     mapdate=`date +%s`
     mapper="tomb.$TOMBNAME.$mapdate.$(basename $nstloop)"
 
-    print -n - $TOMBSECRET | \
-        cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+    _cryptsetup luksOpen ${nstloop} ${mapper}
 
     [[ -r /dev/mapper/${mapper} ]] || {
 	_failure "Failure mounting the encrypted file." }
