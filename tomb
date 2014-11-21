@@ -846,12 +846,12 @@ _load_key() {
     fi
 
     _verbose "load_key: ::1 key::" $TOMBKEYFILE
-    
+
     is_valid_key $TOMBKEY || {
         _warning "The key seems invalid or its format is not known by this version of Tomb."
         _tomb_key_recover $TOMBKEY
     }
-    
+
     # Declared TOMBKEYFILE (path)
     # Declared TOMBKEY (contents)
 
@@ -997,7 +997,7 @@ ask_key_password() {
 # call cryptsetup with arguments using the currently known secret
 # echo flags eliminate newline and disable escape (BSD_ECHO)
 _cryptsetup() {
-    print -R - "$TOMBSECRET" | cryptsetup --key-file - ${=@}
+    print -R -n - "$TOMBSECRET" | cryptsetup --key-file - ${=@}
     return $?
 }
 
