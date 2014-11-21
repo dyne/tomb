@@ -138,14 +138,13 @@ usability.
 The code of Tomb is made to be read in literate programming style.
 
 In absence of the Tomb script it is always possible to access the
-contents of a Tomb using a Linux v3 kernel, cryptsetup and GnuPG
-issuing the following commands as root:
+contents of a Tomb using a dm-crypt enabled Linux kernel, cryptsetup
+and GnuPG issuing the following commands as root:
 
 ```
  lo=$(losetup -f)
  losetup -f secret.tomb
- pass=$(gpg -d secret.key)
- echo -ne "$pass" | cryptsetup --key-file - luksOpen $lo secret
+ gpg -d secret.key | cryptsetup --key-file - luksOpen $lo secret
  mount /dev/mapper/secret $HOME/secret-contents
 ```
 
