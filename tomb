@@ -52,10 +52,11 @@ typeset -a OLDARGS
 for arg in "${(@)argv}"; do OLDARGS+=("$arg"); done
 
 # Special command requirements
-typeset -a DD WIPE MKFS
+typeset -a DD WIPE MKFS PINENTRY
 DD=(dd)
 WIPE=(rm -f)
 MKFS=(mkfs.ext3 -q -F -j -L)
+PINENTRY=(pinentry)
 
 # load zsh regex module
 zmodload zsh/regex
@@ -376,7 +377,7 @@ ask_password() {
 	}
     done
 
-    output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} pinentry 2>/dev/null | tail -n +7
+    output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} ${PINENTRY} 2>/dev/null | tail -n +7
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE $title
@@ -413,7 +414,7 @@ check_priv() {
 
         if ! option_is_set --sudo-pwd; then
             if [ $? != 0 ]; then # if not then ask a password
-                cat <<EOF | pinentry 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
+                cat <<EOF | ${PINENTRY} 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE Super user privileges required
@@ -745,6 +746,14 @@ _ensure_dependencies() {
 
     # Which wipe command to use
     command -v wipe 1>/dev/null 2>/dev/null && WIPE=(wipe -f -s)
+
+    # Read pinentry config from gpg-agent if present
+    [[ -r "$HOME/.gnupg/gpg-agent.conf" ]] && {
+        _verbose "gpg-agent configuration found"
+        PINENTRY=(`awk '
+/^pinentry-program/ { for(c=2;c<=NF;c++) printf("%s ", $c) }
+' $HOME/.gnupg/gpg-agent.conf`)
+        _message "gpg-agent choice of pinentry: ::1 pinentry::" "${PINENTRY}" }
 
     # Check for filesystem creation programs
     command -v mkfs.ext4 1>/dev/null 2>/dev/null && MKFS=(mkfs.ext4 -q -F -j -L)
@@ -1665,7 +1674,7 @@ mount_tomb() {
         _message "Mountpoint not specified, using default: ::1 mount point::" $tombmount }
 
     # Check if its already open
-    [[ "`mount -l`" -regex-match "${tombfile}.*\[$tombname\]$" ]] && {
+    [[ "`mount -l`" -regex-match "${TOMBFILE}.*\[$TOMBNAME\]" ]] && {
         _warning "::1 tomb name:: is already open." $TOMBNAME
         _message "Here below its status is reported:"
         list_tombs $TOMBNAME
