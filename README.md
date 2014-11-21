@@ -208,25 +208,26 @@ Information on developers involved is found in the [AUTHORS](AUTHORS.md) file.
 Sure as Hell it can! Licensing issues aside ([GNU GPLv3+](COPYING)
 terms) Tomb provides machine-readable output and interaction via some flags:
 
-              flag   | function
--------------------- | ------------------------------------------------
- --no-color          | avoids coloring output to allow parsing
- --unsecure-dev-mode | allows giving passwords as argument
- --tomb-pwd          | specify the key password as argument
- --tomb-old-pwd      | specify the old key password as argument
- --sudo-pwd          | specify the sudo password as argument
+         flag   | function
+--------------- | ------------------------------------------------
+ --no-color     | avoids coloring output to allow parsing
+ --unsafe       | allows passwords options and cleartext key from stdin
+ --tomb-pwd     | specify the key password as argument
+ --tomb-old-pwd | specify the old key password as argument
+ --sudo-pwd     | specify the sudo password as argument
+ -k cleartext   | reads the unencrypted key from stdin
 
-Yet please consider that these flags may introduce vulnerabilities as
-process table scanning can reveal passwords while such commands are
-executing. For passwords in particular the best is always let Tomb
-gather them via pinentry.
+Yet please consider that these flags may introduce vulnerabilities and
+other people logged on the same system can easily log your passwords
+while such commands are executing. We only recommend using the
+pinentry input for your passwords.
 
 ## Python
 
 ![](extras/images/python_for_tomb.png)
 
-A Python wrapper is under developed and already usable, but it
-introduces the vulnerabilities mentioned above. Find it in
+A Python wrapper is under development and already usable, but it
+introduces some vulnerabilities mentioned above. Find it in
 `extras/tomber`. For more information see [PYTHON](extras/PYTHON.md).
 
 ## Graphical applications

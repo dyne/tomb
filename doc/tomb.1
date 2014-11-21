@@ -216,7 +216,7 @@ Print more information while running, for debugging purposes
 Suppress colors in console output (needed for string parsing by
 wrappers).
 .B
-.IP "--unsecure-dev-mode"
+.IP "--unsafe"
 Enable using dev-mode arguments, i.e. to pass passwords from
 commandline options. This is mostly used needed for execution by
 wrappers and testing suite.
@@ -345,11 +345,11 @@ local copy of it:
 .EE
 
 .IP \(bu
-Open a Tomb on a remote server using the local key on stdin to SSH,
+Open a Tomb on a remote server passing the unencrypted local key on stdin via SSH,
 without saving any remote copy of it:
 
 .EX
-	cat .secrets/tomb.key | ssh server tomb open secret.tomb -k -
+	gpg -d .secrets/tomb.key | ssh server tomb open secret.tomb -k cleartext --unsafe
 .EE
 
 .IP \(bu
