@@ -772,6 +772,14 @@ is_valid_key() {
     _verbose "is_valid_key"
 
     [[ -z $key ]] && key=$TOMBKEY
+    [[ "$key" = "cleartext" ]] && {
+        { option_is_set --unsafe } || {
+            _warning "cleartext key from stdin selected: this is unsafe."
+            exitv=127 _failure "please use --unsafe if you really want to do this."
+        }
+        _warning "received key in cleartext from stdin (unsafe mode)"
+        return 0 }
+
     [[ -z $key ]] && {
 	_warning "is_valid_key() called without an argument."
 	return 1
@@ -819,25 +827,31 @@ _load_key() {
     [[ -z $keyfile ]] && {
         _failure "This operation requires a key file to be specified using the -k option." }
 
-    [[ $keyfile == "-" ]] && {
+    if [[ $keyfile == "-" ]]; then
         _verbose "load_key reading from stdin."
         _message "Waiting for the key to be piped from stdin... "
         TOMBKEYFILE=stdin
         TOMBKEY=$(cat)
-    } || {
+    elif [[ $keyfile == "cleartext" ]]; then
+        _verbose "load_key reading SECRET from stdin"
+        _message "Waiting for the key to be piped from stdin... "
+        TOMBKEYFILE=cleartext
+        TOMBKEY=cleartext
+        TOMBSECRET=$(cat)
+    else
         _verbose "load_key argument: ::1 key file::" $keyfile
-	[[ -r $keyfile ]] || _failure "Key not found, specify one using -k."
+	    [[ -r $keyfile ]] || _failure "Key not found, specify one using -k."
         TOMBKEYFILE=$keyfile
         TOMBKEY="${mapfile[$TOMBKEYFILE]}"
-    }
+    fi
 
     _verbose "load_key: ::1 key::" $TOMBKEYFILE
-
+    
     is_valid_key $TOMBKEY || {
         _warning "The key seems invalid or its format is not known by this version of Tomb."
         _tomb_key_recover $TOMBKEY
     }
-
+    
     # Declared TOMBKEYFILE (path)
     # Declared TOMBKEY (contents)
 
@@ -933,6 +947,10 @@ ask_key_password() {
     [[ -z $TOMBKEYFILE ]] && {
         _failure "Internal error: ask_key_password() called before _load_key()." }
 
+    [[ "$TOMBKEYFILE" = "cleartext" ]] && {
+        _verbose "no password needed, using secret bytes from stdin"
+        return 0 }
+
     _message "A password is required to use key ::1 key::" $TOMBKEYFILE
     passok=0
     tombpass=""
@@ -979,7 +997,7 @@ ask_key_password() {
 # call cryptsetup with arguments using the currently known secret
 # echo flags eliminate newline and disable escape (BSD_ECHO)
 _cryptsetup() {
-    print -R -n - "$TOMBSECRET" | cryptsetup --key-file - ${=@}
+    print -R - "$TOMBSECRET" | cryptsetup --key-file - ${=@}
     return $?
 }
 
@@ -1729,6 +1747,8 @@ mount_tomb() {
 
     _success "Success opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE $tombmount
 
+    local tombtty tombhost tombuid tombuser 
+
     # print out when was opened the last time, by whom and where
     [[ -r ${tombmount}/.last ]] && {
         tombtty=$(_cat ${tombmount}/.tty | tr -d ' ')
@@ -1740,7 +1760,7 @@ mount_tomb() {
                 tombuser="${e[(ws@:@)1]}" }
         done
         _message "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::" $tombuser $tombuid $tombtty $tombhost
-        _message "on date ::1 date::" $(date --date @$tomblast +%c)
+        _message "on date ::1 date::" "`date --date=@${tomblast} +%c`"
     }
     # write down the UID and TTY that opened the tomb
     rm -f ${tombmount}/.uid
@@ -2409,7 +2429,7 @@ main() {
     # can only use the non-abbreviated long-option version like:
     # -force and NOT -f
     #
-    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v U: -uid=U G: -gid=G T: -tty=T -no-color -unsecure-dev-mode)
+    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v U: -uid=U G: -gid=G T: -tty=T -no-color -unsafe)
     subcommands_opts[__default]=""
     subcommands_opts[open]="f -force n -nohook=n k: -key=k -kdf: o: -ignore-swap -sudo-pwd: -tomb-pwd: "
     subcommands_opts[mount]=${subcommands_opts[open]}
@@ -2512,10 +2532,10 @@ main() {
     # Use colors unless told not to
     { ! option_is_set --no-color } && { autoload -Uz colors && colors }
     # Some options are only available during insecure mode
-    { ! option_is_set --unsecure-dev-mode } && {
+    { ! option_is_set --unsafe } && {
         for opt in --sudo-pwd --tomb-pwd --use-urandom --tomb-old-pwd; do
             { option_is_set $opt } && {
-                exitv=127 _failure "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsecure-dev-mode" $opt }
+                exitv=127 _failure "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsafe" $opt }
         done
     }
 
