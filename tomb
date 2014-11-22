@@ -218,25 +218,28 @@ _ensure_safe_memory check_shm() {
 
     # Mount the tmpfs if the OS doesn't already
     [[ -k $shmprefix ]] || {
-	mkdir -p $shmprefix/$_UID || {
-	    _failure "Fatal error creating a directory for temporary files" }
+        mkdir $shmprefix
+        [[ $? = 0 ]] || _failure "Fatal error creating a directory in shared memory."
+    }
 
-        mount -t tmpfs tmpfs $shmprefix/$_UID \
-            -o nosuid,noexec,nodev,mode=0700,uid=$_UID,gid=$_GID
-        [[ $? == 0 ]] || {
-	    _failure "Cannot mount tmpfs in ::1 shm path::" $shmprefix }
+    [[ -r $shmprefix/$_UID ]] || {
+	    mkdir -m 700 $shmprefix/$_UID
+        [[ $? = 0 ]] || {
+	        _failure "Fatal error creating a directory for temporary files" }
     }
 
     # Ensure all temporary files go into a user-specific directory for
-    # additional safety
-    mkdir -m 0700 -p $shmprefix/$_UID || {
-	_failure "Fatal error creating a directory for temporary files" }
+    # additional safety    
+    # mount -t tmpfs tmpfs $shmprefix/$_UID \
+    #     -o nosuid,noexec,nodev,mode=0700,uid=$_UID,gid=$_GID
+    # [[ $? == 0 ]] || {
+	#     _failure "Cannot mount tmpfs in ::1 shm path::" $shmprefix }
 
     # Set a global environment variable to ensure zsh will use that
     # directory in RAM to keep temporary files by setting an.  They
     # will be created on demand and deleted as soon as the function
     # using them ends.
-    TMPPREFIX="$shmprefix/$_UID/$RANDOM$RANDOM."
+    TMPPREFIX="$shmprefix/$_UID"
 
     return 0
 
@@ -272,15 +275,18 @@ _plot() {
 # Provide a random filename in shared memory
 _tmp_create() {
 
-    tfile="${TMPPREFIX}${RANDOM}"   # Temporary file
+    tfile="${TMPPREFIX}/$RANDOM$RANDOM$RANDOM"   # Temporary file
+    umask 066
+    [[ $? == 0 ]] || {
+        _failure "Fatal error setting the permission umask for temporary files" }
 
     touch $tfile
     [[ $? == 0 ]] || {
-	_failure "Fatal error creating a temporary file: ::1 temp file::" $tfile }
+	    _failure "Fatal error creating a temporary file: ::1 temp file::" $tfile }
 
-    chown $_UID:$_GID $tfile && chmod 0600 $tfile
+    chown $_UID:$_GID $tfile
     [[ $? == 0 ]] || {
-	_failure "Fatal error setting permissions on temporary file: ::1 temp file::" $tfile }
+	    _failure "Fatal error setting ownership on temporary file: ::1 temp file::" $tfile }
 
     _verbose "Created tempfile: ::1 temp file::" $tfile
     TOMBTMP="$tfile"
@@ -1608,8 +1614,8 @@ change_tomb_key() {
     old_secret=$TOMBSECRET
 
     # luksOpen the tomb (not really mounting, just on the loopback)
-    print -n - "$old_secret" | \
-        cryptsetup --key-file - luksOpen ${nstloop} ${mapper}
+    cryptsetup --key-file <(print -R -n - "$old_secret") \
+        luksOpen ${nstloop} ${mapper}
     [[ $? == 0 ]] || _failure "Unexpected error in luksOpen."
 
     _load_key # Try loading new key from option -k and set TOMBKEYFILE
@@ -1627,14 +1633,9 @@ change_tomb_key() {
         _failure "No valid password supplied for the new key." }
     new_secret=$TOMBSECRET
 
-    # Danger zone: due to cryptsetup limitations, in setkey we need
-    # to write the bare unencrypted key on the tmpfs.
-    _tmp_create
-    local newsecretfile=$TOMBTMP
+    cryptsetup --key-file <(print -R -n - "$old_secret") \
+        luksChangeKey "$nstloop" <(print -R -n - "$new_secret")
 
-    print -n - "$new_secret" >> $newsecretfile
-    print -n - "$old_secret" | \
-        cryptsetup --key-file - luksChangeKey "$nstloop" "$newsecretfile"
     [[ $? == 0 ]] || _failure "Unexpected error in luksChangeKey."
 
     cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
