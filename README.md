@@ -218,8 +218,8 @@ terms) Tomb provides machine-readable output and interaction via some flags:
 
 Yet please consider that these flags may introduce vulnerabilities and
 other people logged on the same system can easily log your passwords
-while such commands are executing. We only recommend using the
-pinentry input for your passwords.
+while such commands are executing.
+We only recommend using the pinentry to input your passwords.
 
 ## Python
 

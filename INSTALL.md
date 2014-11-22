@@ -70,10 +70,10 @@ The Gtk3 tray adds a nifty tomb skull into the desktop toolbar: one can use it t
 
 To have it enter `extras/gtk-tray` then
 
- 1- make sure libnotify and gtk+-3.0 dev packages are available
- 2- run `make` inside the directory to build `tomb-gtk-tray`
- 3- optionally copy tomb-gtk-tray into your PATH (/usr/local/bin)
- 4- start `tomb-gtk-tray tombname` for each tomb
+ 1. make sure libnotify and gtk+-3.0 dev packages are available
+ 2. run `make` inside the directory to build `tomb-gtk-tray`
+ 3. optionally copy tomb-gtk-tray into your PATH (/usr/local/bin)
+ 4. start `tomb-gtk-tray tombname` for each tomb
 
 One can include the launch of tomb-gtk-tray from scripts.
 
@@ -85,10 +85,10 @@ In case an attacker comes in possession of both a tomb and its key, the easy to 
 
 To have it enter `extras/kdf-keys` then
 
- 1- make sure libgcrypt dev packages are available
- 2- run `make` inside the directory to build tomb-kdb-* executables
- 3- optionally copy tomb-kdb-* into your PATH (/usr/local/bin)
- 4- always use tomb using the `--kdf` flag: forge, lock, open etc.
+ 1. make sure libgcrypt dev packages are available
+ 2. run `make` inside the directory to build tomb-kdb-* executables
+ 3. optionally copy tomb-kdb-* into your PATH (/usr/local/bin)
+ 4. always use tomb using the `--kdf` flag: forge, lock, open etc.
 
 In case one creates and uses KDF keys then the --kdf flag must be always present for tomb to work correctly. It might be handy to create an alias tomb=`tomb --kdf`.
 
