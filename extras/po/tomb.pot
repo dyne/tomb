@@ -6,13 +6,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb \n"
-"PO-Revision-Date: Sun Nov 16 17:11:25 CET 2014\n"
+"PO-Revision-Date: Sat Nov 22 20:50:23 CET 2014\n"
 "Last-Translator: Denis Roio <jaromil@dyne.org>\n"
 "Language: English\n"
 "Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: failure
+msgid "Fatal error creating a directory in shared memory."
+msgstr ""
 
 #: failure
 msgid "Fatal error creating a directory for temporary files"
@@ -27,11 +31,15 @@ msgid "Tomb won't work without a TOMBNAME."
 msgstr ""
 
 #: failure
+msgid "Fatal error setting the permission umask for temporary files"
+msgstr ""
+
+#: failure
 msgid "Fatal error creating a temporary file: ::1 temp file::"
 msgstr ""
 
 #: failure
-msgid "Fatal error setting permissions on temporary file: ::1 temp file::"
+msgid "Fatal error setting ownership on temporary file: ::1 temp file::"
 msgstr ""
 
 #: warning
@@ -236,6 +244,22 @@ msgstr ""
 
 #: failure
 msgid "Missing required dependency ::1 command::.  Please install it."
+msgstr ""
+
+#: message
+msgid "gpg-agent choice of pinentry: ::1 pinentry::"
+msgstr ""
+
+#: warning
+msgid "cleartext key from stdin selected: this is unsafe."
+msgstr ""
+
+#: failure
+msgid "please use --unsafe if you really want to do this."
+msgstr ""
+
+#: warning
+msgid "received key in cleartext from stdin (unsafe mode)"
 msgstr ""
 
 #: warning
@@ -911,7 +935,7 @@ msgid "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::"
 msgstr ""
 
 #: failure
-msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsecure-dev-mode"
+msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsafe"
 msgstr ""
 
 #: warning

@@ -1013,3 +1013,35 @@ msgstr " Cuando sea necesario por favor dirígete a <http://dyne.org/support>."
 msgid "Optional utils:"
 msgstr "Utilidades opcionales:"
 
+#: failure
+msgid "Fatal error creating a directory in shared memory."
+msgstr "Error fatal al crear un  directorio en memoria compartida."
+
+#: failure
+msgid "Fatal error setting the permission umask for temporary files"
+msgstr "Error fatal al establecer el permiso umask para los ficheros temporales"
+
+#: failure
+msgid "Fatal error setting ownership on temporary file: ::1 temp file::"
+msgstr "Error fatal al establecer la posesión del fichero temporal ::1 fichero::"
+
+#: message
+msgid "gpg-agent choice of pinentry: ::1 pinentry::"
+msgstr "Elección de pinentry ::1 pinentry:: por gpg-agent"
+
+#: warning
+msgid "cleartext key from stdin selected: this is unsafe."
+msgstr "se ha seleccionado una clave en texto plano por la entrada estándar: esto es inseguro."
+
+#: failure
+msgid "please use --unsafe if you really want to do this."
+msgstr "por favor, usa --unsafe si estás seguro."
+
+#: warning
+msgid "received key in cleartext from stdin (unsafe mode)"
+msgstr "se ha recibido una clave en texto plano por la entrada estándar (modo inseguro)"
+
+#: failure
+msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsafe"
+msgstr "Has especificado la opción ::1 opción::, que es PELIGROSA y debería usarse sólo en testeo\nSi estás seguro, añade --unsafe"
+
