@@ -1,3 +1,28 @@
+# Vulnerability to password bruteforcing
+## Issue affecting keys used in steganography
+
+ An important part of Tomb's security model is to *make it hard for
+ attackers to enter in possession of both key and data storage*: once
+ that happens, bruteforcing the password can be relatively easy.
+
+ Protection from bruteforcing is provided by the KDF module that can
+ be optionally compiled in `extras/kdf-keys` and installed.
+
+ If a key is buried in an image and then the image is stolen, the KDF
+ protection does not works because *attackers can bruteforce easily
+ using steghide dictionary attacks*: once found the password is the
+ same for the steg crypto and the key crypto.
+
+ Users should keep in mind these issues when planning their encryption
+ scheme and, when relying on steganography, keep the image always
+ mixed in the same folder with many more images since that will be the
+ multiplier making it slightly harder to bruteforce their password.
+
+ In most cases consider that *password bruteforce is a feasible attack
+ vector on keys*. If there are doubts about a key being compromised is
+ a good practice to change it using the `setkey` command on a secure
+ machine, possibly while off-line or in single user mode.
+
 # Versioning and stdin key
 ## 1.5
 
