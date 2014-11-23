@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb \n"
-"PO-Revision-Date: Sat Nov 22 20:50:23 CET 2014\n"
+"PO-Revision-Date: Sun Nov 23 22:50:06 CET 2014\n"
 "Last-Translator: Denis Roio <jaromil@dyne.org>\n"
 "Language: English\n"
 "Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
@@ -15,15 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: failure
-msgid "Fatal error creating a directory in shared memory."
-msgstr ""
-
-#: failure
-msgid "Fatal error creating a directory for temporary files"
-msgstr ""
-
-#: failure
-msgid "Cannot mount tmpfs in ::1 shm path::"
+msgid "Failing to identify the user who is calling us"
 msgstr ""
 
 #: failure
@@ -31,7 +23,15 @@ msgid "Tomb won't work without a TOMBNAME."
 msgstr ""
 
 #: failure
+msgid "Fatal error creating the temporary directory: ::1 temp dir::"
+msgstr ""
+
+#: failure
 msgid "Fatal error setting the permission umask for temporary files"
+msgstr ""
+
+#: failure
+msgid "Someone is messing up with us trying to hijack temporary files."
 msgstr ""
 
 #: failure
@@ -40,6 +40,10 @@ msgstr ""
 
 #: failure
 msgid "Fatal error setting ownership on temporary file: ::1 temp file::"
+msgstr ""
+
+#: success
+msgid "All your swaps are belong to crypt.  Good."
 msgstr ""
 
 #: warning
@@ -246,10 +250,6 @@ msgstr ""
 msgid "Missing required dependency ::1 command::.  Please install it."
 msgstr ""
 
-#: message
-msgid "gpg-agent choice of pinentry: ::1 pinentry::"
-msgstr ""
-
 #: warning
 msgid "cleartext key from stdin selected: this is unsafe."
 msgstr ""
@@ -322,20 +322,32 @@ msgstr ""
 msgid "No valid password supplied."
 msgstr ""
 
+#: success
+msgid "Changing password for ::1 key file::"
+msgstr ""
+
 #: failure
 msgid "Error: the newly generated keyfile does not seem valid."
+msgstr ""
+
+#: success
+msgid "Your passphrase was successfully updated."
 msgstr ""
 
 #: failure
 msgid "User aborted."
 msgstr ""
 
-#: warning
+#: failure
 msgid "You set empty password, which is not possible."
 msgstr ""
 
 #: failure
 msgid "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+msgstr ""
+
+#: success
+msgid "Using KDF, iterations: ::1 microseconds::"
 msgstr ""
 
 #: message
@@ -358,6 +370,10 @@ msgstr ""
 msgid "Encode failed: ::1 image file:: is not a jpeg image."
 msgstr ""
 
+#: success
+msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
+msgstr ""
+
 #: message
 msgid "Please confirm the key password for the encoding"
 msgstr ""
@@ -372,6 +388,10 @@ msgstr ""
 
 #: warning
 msgid "Encoding error: steghide reports problems."
+msgstr ""
+
+#: success
+msgid "Tomb key encoded succesfully into image ::1 image file::"
 msgstr ""
 
 #: failure
@@ -414,12 +434,24 @@ msgstr ""
 msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr ""
 
+#: success
+msgid "Key succesfully exhumed to ::1 key::."
+msgstr ""
+
 #: warning
 msgid "Nothing found in ::1 image file::"
 msgstr ""
 
+#: success
+msgid "Rendering a printable QRCode for key: ::1 tomb key file::"
+msgstr ""
+
 #: failure
 msgid "QREncode reported an error."
+msgstr ""
+
+#: success
+msgid "Operation successful:"
 msgstr ""
 
 #: message
@@ -446,12 +478,20 @@ msgstr ""
 msgid "A tomb exists already. I'm not digging here:"
 msgstr ""
 
+#: success
+msgid "Creating a new tomb in ::1 tomb path::"
+msgstr ""
+
 #: message
 msgid "Generating ::1 tomb file:: of ::2 size::MiB"
 msgstr ""
 
 #: warning
 msgid "Error creating the tomb ::1 tomb path::"
+msgstr ""
+
+#: success
+msgid "Done digging ::1 tomb name::"
 msgstr ""
 
 #: message
@@ -502,6 +542,10 @@ msgstr ""
 msgid "Cannot generate encryption key."
 msgstr ""
 
+#: success
+msgid "Choose the  password of your key: ::1 tomb key::"
+msgstr ""
+
 #: message
 msgid "(You can also change it later using 'tomb passwd'.)"
 msgstr ""
@@ -516,6 +560,10 @@ msgstr ""
 
 #: message
 msgid "Done forging ::1 key file::"
+msgstr ""
+
+#: success
+msgid "Your key is ready:"
 msgstr ""
 
 #: warning
@@ -554,6 +602,10 @@ msgstr ""
 msgid "Locking using cipher: ::1 cipher::"
 msgstr ""
 
+#: success
+msgid "Locking ::1 tomb file:: with ::2 tomb key file::"
+msgstr ""
+
 #: message
 msgid "Formatting Luks mapped device."
 msgstr ""
@@ -582,6 +634,10 @@ msgstr ""
 msgid "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::"
 msgstr ""
 
+#: success
+msgid "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::"
+msgstr ""
+
 #: message
 msgid "Commanded to reset key for tomb ::1 tomb path::"
 msgstr ""
@@ -600,6 +656,10 @@ msgstr ""
 
 #: failure
 msgid "Not a valid LUKS encrypted volume: ::1 volume::"
+msgstr ""
+
+#: success
+msgid "Changing lock on tomb ::1 tomb name::"
 msgstr ""
 
 #: message
@@ -630,6 +690,10 @@ msgstr ""
 msgid "Unexpected error in luksClose."
 msgstr ""
 
+#: success
+msgid "Succesfully changed key for tomb: ::1 tomb file::"
+msgstr ""
+
 #: message
 msgid "The new key is: ::1 new key::"
 msgstr ""
@@ -658,6 +722,10 @@ msgstr ""
 msgid "Here below its status is reported:"
 msgstr ""
 
+#: success
+msgid "Opening ::1 tomb file:: on ::2 mount point::"
+msgstr ""
+
 #: failure
 msgid "::1 tomb file:: is not a valid Luks encrypted storage file."
 msgstr ""
@@ -678,8 +746,16 @@ msgstr ""
 msgid "Failure mounting the encrypted file."
 msgstr ""
 
+#: success
+msgid "Success unlocking tomb ::1 tomb name::"
+msgstr ""
+
 #: message
 msgid "Checking filesystem via ::1::"
+msgstr ""
+
+#: success
+msgid "Success opening ::1 tomb file:: on ::2 mount point::"
 msgstr ""
 
 #: message
@@ -716,6 +792,10 @@ msgstr ""
 
 #: warning
 msgid "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
+msgstr ""
+
+#: success
+msgid "Post hooks found, executing as user ::1 user name::."
 msgstr ""
 
 #: failure
@@ -770,6 +850,10 @@ msgstr ""
 msgid "I can't see any open tomb, may they all rest in peace."
 msgstr ""
 
+#: success
+msgid "Creating and updating search indexes."
+msgstr ""
+
 #: message
 msgid "Skipping ::1 tomb name:: (.noindex found)."
 msgstr ""
@@ -783,7 +867,15 @@ msgid "Indexing ::1 tomb name:: contents..."
 msgstr ""
 
 #: message
+msgid "Generating a new swish-e configuration file: ::1 swish conf::"
+msgstr ""
+
+#: message
 msgid "Search index updated."
+msgstr ""
+
+#: success
+msgid "Searching for: ::1::"
 msgstr ""
 
 #: message
@@ -878,6 +970,10 @@ msgstr ""
 msgid "Please specify an existing tomb."
 msgstr ""
 
+#: success
+msgid "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::"
+msgstr ""
+
 #: message
 msgid "Kill all processes busy inside the tomb."
 msgstr ""
@@ -894,6 +990,10 @@ msgstr ""
 msgid "Closing tomb bind hook: ::1 hook::"
 msgstr ""
 
+#: success
+msgid "Slamming tomb: killing all processes using this hook."
+msgstr ""
+
 #: failure
 msgid "Cannot slam the bind hook ::1 hook::"
 msgstr ""
@@ -908,6 +1008,10 @@ msgstr ""
 
 #: failure
 msgid "Error occurred in cryptsetup luksClose ::1 mapper::"
+msgstr ""
+
+#: success
+msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
 msgstr ""
 
 #: failure
