@@ -64,6 +64,9 @@ PINENTRY=(pinentry)
 zmodload zsh/regex
 zmodload zsh/mapfile
 
+# make sure variables aren't exported
+unsetopt allexport
+
 # Flag optional commands if available (see _ensure_dependencies())
 typeset -i KDF=1
 typeset -i STEGHIDE=1
