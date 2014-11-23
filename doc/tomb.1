@@ -165,21 +165,12 @@ key is buried in any image or not.
 .SH OPTIONS
 .B
 .B
-.IP "-s \fI<MBytes>\fR" 
-When digging or resizing a tomb, this option must be used to specify
-the \fIsize\fR of the new file to be created. Units are megabytes (MiB).
-.B
 .IP "-k \fI<keyfile>\fR"
 When opening a tomb, this option can specify the location of the key
 file to use. Keys are created with the same name of the tomb file
 adding a '.key' suffix, but can be later renamed and transported on
 other media.  If \fI<keyfile>\fR is "-" (dash), it will read it from
 stdin.
-.B
-.IP "--kdf \fI<iterations>\fR"
-Activate the KDF feature against dictionary attacks when creating a
-key: forces a delay of \fI<iterations>\fR (integer multiplied by 10k)
-every time this key is used.
 .B
 .IP "-n"
 Skip processing of post-hooks and bind-hooks if found inside the tomb.
@@ -197,6 +188,15 @@ operations (default \fIAES256\fR) or the LUKS encryption method during
 Force flag, currently used to override swap checks, might be
 overriding more wimpy behaviours in future, but make sure you know
 what you are doing if you force an operation.
+.B
+.IP "-s \fI<MBytes>\fR" 
+When digging or resizing a tomb, this option must be used to specify
+the \fIsize\fR of the new file to be created. Units are megabytes (MiB).
+.B
+.IP "--kdf \fI<iterations>\fR"
+Activate the KDF feature against dictionary attacks when creating a
+key: forces a delay of \fI<iterations>\fR (integer multiplied by 10k)
+every time this key is used.
 .B
 .IP "-h"
 Display a help text and quit.
@@ -235,13 +235,13 @@ Use string as password when needed on tomb.
 Use string as old password when needed in tomb commands requiring
 multiple keys, like \fIpasswd\fR or \fIsetkey\fR.
 .B
-.IP "-U --uid"
+.IP "-U"
 Switch to this user ID when dropping privileges.
 .B
-.IP "-G --gid"
+.IP "-G"
 Switch to this group ID when dropping privileges.
 .B
-.IP "-T --tty"
+.IP "-T"
 Switch to this TTY terminal when dropping privileges.
 
 .SH HOOKS
