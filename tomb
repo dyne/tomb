@@ -168,14 +168,12 @@ _cat() { local -a _arr;
 # Also update USERNAME and HOME to maintain consistency.
 _whoami() {
 
-    # Set global variables
-    typeset -gi _GID _UID
-    typeset -g  _TTY _USER
-
     # Set username from UID or environment
-    [[ -n $SUDO_USER ]]             && _USER=$SUDO_USER
-    [[ -z $_USER && -n $USERNAME ]] && _USER=$USERNAME
-    [[ -z $_USER ]]                 && _USER=$(id -u)
+    _USER=$SUDO_USER
+    [[ "$_USER" = "" ]] && { _USER=$USERNAME }
+    [[ "$_USER" = "" ]] && { _USER=$(id -u)  }
+    [[ "$_USER" = "" ]] && {
+        _failure "Failing to identify the user who is calling us" }
 
     # Get GID from option -G or the environment
     option_is_set -G \
@@ -2051,10 +2049,9 @@ index_tombs() {
         # here we use swish to index file contents
         [[ $SWISH == 1 ]] && {
             _message "Indexing ::1 tomb name:: contents..." $tombname
-            _tmp_create
-            local swishrc=$TOMBTMP
-
-            cat <<EOF > $swishrc
+            [[ -r ${tombmount}/.swishrc ]] || {
+                _message "Generating a new swish-e configuration file: ::1 swish conf::" ${tombmount}/.swishrc
+                cat <<EOF > ${tombmount}/.swishrc
 # index directives
 DefaultContents TXT*
 IndexDir $tombmount
@@ -2121,10 +2118,10 @@ FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.tex$/i
 IndexContents HTML* .htm .html .shtml
 IndexContents XML*  .xml
 EOF
+            }
 
-            _verbose "Using swish-e to create index."
-            swish-e -c $swishrc -S fs -v3
-            rm -f $swishrc
+            swish-e -c ${tombmount}/.swishrc -S fs -v3
+
         }
 
         _message "Search index updated."
