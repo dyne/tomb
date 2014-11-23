@@ -727,7 +727,7 @@ _ensure_dependencies() {
         PINENTRY=(`awk '
 /^pinentry-program/ { for(c=2;c<=NF;c++) printf("%s ", $c) }
 ' $HOME/.gnupg/gpg-agent.conf`)
-        _message "gpg-agent choice of pinentry: ::1 pinentry::" "${PINENTRY}" }
+        _verbose "gpg-agent choice of pinentry: ::1 pinentry::" "${PINENTRY}" }
 
     # Check for filesystem creation programs
     command -v mkfs.ext4 1>/dev/null 2>/dev/null && MKFS=(mkfs.ext4 -q -F -j -L)
@@ -1318,7 +1318,7 @@ dig_tomb() {
 
     [[ -e $TOMBPATH ]] && {
         _warning "A tomb exists already. I'm not digging here:"
-        _warning "  $(ls -lh $TOMBPATH)"
+        ls -lh $TOMBPATH
         return 1
     }
 
@@ -1335,7 +1335,7 @@ dig_tomb() {
     ${=DD} if=/dev/urandom bs=1048576 count=$tombsize of=$TOMBPATH
 
     [[ $? == 0 && -e $TOMBPATH ]] && {
-        _message "  $(ls -lh $TOMBPATH)"
+        ls -lh $TOMBPATH
     } || {
         _warning "Error creating the tomb ::1 tomb path::" $TOMBPATH
         _failure "Operation aborted."
@@ -1372,7 +1372,7 @@ forge_key() {
     # Do not overwrite any files accidentally
     [[ -r "$destkey" ]] && {
         _warning "Forging this key would overwrite an existing file. Operation aborted."
-        _failure "`ls -lh $destkey`" }
+        ls -lh $destkey
 
     # Update algorithm if it was passed on the command line with -o
     { option_is_set -o } && { algopt="$(option_value -o)" }
