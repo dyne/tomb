@@ -42,6 +42,8 @@
 typeset VERSION="2.0"
 typeset DATE="Nov/2014"
 typeset TOMBEXEC=$0
+typeset TMPPREFIX=${TMPPREFIX:-/tmp}
+# TODO: configure which tmp dir to use from a cli flag
 
 # Tomb is using some global variables set by the shell:
 # TMPPREFIX, UID, GID, PATH, TTY, USERNAME
@@ -180,13 +182,11 @@ _whoami() {
     option_is_set -U \
 	&& _UID=$(option_value -U) || _UID=$(id -u $_USER)
 
-#    _verbose "Identified caller: ::1 username:: (::2 UID:::::3  GID::)" \
-#	$_USER $_UID $_GID
+    _verbose "Identified caller: ::1 username:: (::2 UID:::::3  GID::)" $_USER $_UID $_GID
 
     # Update USERNAME accordingly if we can
     [[ EUID == 0 && $_USER != $USERNAME ]] && {
-#	_verbose "Updating USERNAME from '::1 USERNAME::' to '::2 _USER::')" \
-#	    $USERNAME $_USER
+	_verbose "Updating USERNAME from '::1 USERNAME::' to '::2 _USER::')" $USERNAME $_USER
 	USERNAME=$_USER
     }
 
@@ -200,48 +200,6 @@ _whoami() {
     # Get connecting TTY from option -T or the environment
     option_is_set -T && _TTY=$(option_value -T)
     [[ -z $_TTY ]]   && _TTY=$TTY
-
-}
-
-# Ensure temporary files remain in RAM
-# Set global variable TMPPREFIX
-# TODO: configure which tmp dir to use from a cli flag
-_ensure_safe_memory check_shm() {
-
-    local shmprefix=""     # Path prefix for safe temporary files
-
-    # Set $shmprefix to something sensible
-    [[ -z $shmprefix && -k "/dev/shm" ]] \
-	&& shmprefix="/dev/shm" || shmprefix="/run/shm"
-
-    _whoami    # Set _UID and _GID for later
-
-    # Mount the tmpfs if the OS doesn't already
-    [[ -k $shmprefix ]] || {
-        mkdir $shmprefix
-        [[ $? = 0 ]] || _failure "Fatal error creating a directory in shared memory."
-    }
-
-    [[ -r $shmprefix/$_UID ]] || {
-	    mkdir -m 700 $shmprefix/$_UID
-        [[ $? = 0 ]] || {
-	        _failure "Fatal error creating a directory for temporary files" }
-    }
-
-    # Ensure all temporary files go into a user-specific directory for
-    # additional safety    
-    # mount -t tmpfs tmpfs $shmprefix/$_UID \
-    #     -o nosuid,noexec,nodev,mode=0700,uid=$_UID,gid=$_GID
-    # [[ $? == 0 ]] || {
-	#     _failure "Cannot mount tmpfs in ::1 shm path::" $shmprefix }
-
-    # Set a global environment variable to ensure zsh will use that
-    # directory in RAM to keep temporary files by setting an.  They
-    # will be created on demand and deleted as soon as the function
-    # using them ends.
-    TMPPREFIX="$shmprefix/$_UID"
-
-    return 0
 
 }
 
@@ -274,21 +232,32 @@ _plot() {
 
 # Provide a random filename in shared memory
 _tmp_create() {
+    [[ -d "$TMPPREFIX" ]] || {
+	mkdir -m 777 "$TMPPREFIX"
+	[[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPPREFIX"
+	# we create the tempdir with the sticky bit on
+	chmod o+t "$TMPPREFIX"
+    }
 
-    tfile="${TMPPREFIX}/$RANDOM$RANDOM$RANDOM"   # Temporary file
+    # We're going to add one more $RANDOM for each time someone complain
+    # about this being too weak of a random.
+    tfile="${TMPPREFIX}/$RANDOM$RANDOM$RANDOM$RANDOM"   # Temporary file
     umask 066
     [[ $? == 0 ]] || {
         _failure "Fatal error setting the permission umask for temporary files" }
 
-    touch $tfile
-    [[ $? == 0 ]] || {
-	    _failure "Fatal error creating a temporary file: ::1 temp file::" $tfile }
+    [[ -r "$tfile" ]] && {
+	_failure "Someone is messing up with us trying to hijack temporary files." } 
 
-    chown $_UID:$_GID $tfile
+    touch "$tfile"
     [[ $? == 0 ]] || {
-	    _failure "Fatal error setting ownership on temporary file: ::1 temp file::" $tfile }
+        _failure "Fatal error creating a temporary file: ::1 temp file::" "$tfile" }
 
-    _verbose "Created tempfile: ::1 temp file::" $tfile
+    chown $_UID:$_GID "$tfile"
+    [[ $? == 0 ]] || {
+        _failure "Fatal error setting ownership on temporary file: ::1 temp file::" "$tfile" }
+
+    _verbose "Created tempfile: ::1 temp file::" "$tfile"
     TOMBTMP="$tfile"
     TOMBTMPFILES+=("$tfile")
 
@@ -357,7 +326,6 @@ _check_swap() {
                 return 0
                 ;;
             *)       # Unencrypted swap
-                return 1
 		_failure "Operation aborted."
                 ;;
         esac
@@ -403,7 +371,7 @@ EOF`
 # Drop privileges
 exec_as_user() {
     if ! [ $SUDO_USER ]; then
-        exec $@[@]
+        exec ${@[@]}
         return $?
     fi
     _verbose "exec_as_user '::1 user::': ::2::" $SUDO_USER ${(f)@}
@@ -1079,8 +1047,7 @@ gen_key() {
                 _failure "User aborted."
             fi
             if [ -z $tombpass ]; then
-                _warning "You set empty password, which is not possible."
-                continue
+                _failure "You set empty password, which is not possible."
             fi
             tombpasstmp=$tombpass
             tombpass=`exec_as_user ${TOMBEXEC} askpass "Type the new password to secure your key (again)"`
@@ -1347,7 +1314,6 @@ dig_tomb() {
     [[ $tombsize == <-> ]] || _failure "Size must be an integer (megabytes)"
     [[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 megabytes"
 
-    _check_swap              # Ensure the available memory is safe to use
     _plot $tombpath          # Set TOMB{PATH,DIR,FILE,NAME}
 
     [[ -e $TOMBPATH ]] && {
@@ -2416,7 +2382,6 @@ slam_tomb() {
 main() {
 
     _ensure_dependencies  # Check dependencies are present or bail out
-    _ensure_safe_memory   # Check available memory can be used safely
 
     local -A subcommands_opts
     ### Options configuration
@@ -2439,20 +2404,20 @@ main() {
     # can only use the non-abbreviated long-option version like:
     # -force and NOT -f
     #
-    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v U: -uid=U G: -gid=G T: -tty=T -no-color -unsafe)
+    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe)
     subcommands_opts[__default]=""
-    subcommands_opts[open]="f -force n -nohook=n k: -key=k -kdf: o: -ignore-swap -sudo-pwd: -tomb-pwd: "
+    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -sudo-pwd: -tomb-pwd: "
     subcommands_opts[mount]=${subcommands_opts[open]}
 
     subcommands_opts[create]="" # deprecated, will issue warning
 
-    subcommands_opts[forge]="f -force -ignore-swap k: -key=k -kdf: o: -tomb-pwd: -use-urandom "
-    subcommands_opts[dig]="f -force -ignore-swap s: -size=s "
-    subcommands_opts[lock]="f -force -ignore-swap k: -key=k -kdf: o: -sudo-pwd: -tomb-pwd: "
-    subcommands_opts[setkey]="k: -key=k f -force -ignore-swap -kdf: -sudo-pwd: -tomb-old-pwd: -tomb-pwd: "
-    subcommands_opts[engrave]="k: -key=k "
+    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom "
+    subcommands_opts[dig]="-ignore-swap s: -size=s "
+    subcommands_opts[lock]="-ignore-swap k: -kdf: o: -sudo-pwd: -tomb-pwd: "
+    subcommands_opts[setkey]="k: -ignore-swap -kdf: -sudo-pwd: -tomb-old-pwd: -tomb-pwd: "
+    subcommands_opts[engrave]="k: "
 
-    subcommands_opts[passwd]="k: -key=k f -force -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
+    subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
     subcommands_opts[close]="-sudo-pwd: "
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
@@ -2462,14 +2427,14 @@ main() {
     subcommands_opts[search]=""
 
     subcommands_opts[help]=""
-    subcommands_opts[bury]="f -force k: -key=k -tomb-pwd: "
-    subcommands_opts[exhume]="f -force k: -key=k -tomb-pwd: "
+    subcommands_opts[bury]="k: -tomb-pwd: "
+    subcommands_opts[exhume]="k: -tomb-pwd: "
     # subcommands_opts[decompose]=""
     # subcommands_opts[recompose]=""
     # subcommands_opts[install]=""
     subcommands_opts[askpass]=""
     subcommands_opts[source]=""
-    subcommands_opts[resize]="f -force -ignore-swap s: -size=s k: -key=k -tomb-pwd: "
+    subcommands_opts[resize]="-ignore-swap s: -size=s k: -tomb-pwd: "
     subcommands_opts[check]="-ignore-swap "
 #    subcommands_opts[translate]=""
 
@@ -2548,6 +2513,9 @@ main() {
                 exitv=127 _failure "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsafe" $opt }
         done
     }
+    # read -t or --tmp flags to set a custom temporary directory
+    option_is_set --tmp && TMPPREFIX=$(option_value --tmp)
+
 
     # When we run as root, we remember the original uid:gid to set
     # permissions for the calling user and drop privileges
@@ -2563,6 +2531,8 @@ main() {
         _verbose "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]." \
 	    $_UID $_GID $_TTY
     }
+
+    _verbose "Temporary directory: $TMPPREFIX"
 
     # Process subcommand
     case "$subcommand" in
