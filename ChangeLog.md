@@ -7,8 +7,9 @@ Tomb goes international: now translated to Russian, French, Spanish
 and German.
 
 The usability has improved: steganographed images can now be used
-directly as keys (-k). Piping keys to stdin now works also across ssh
-connections.
+directly as keys using `-k`. Tomb now works also across ssh
+connections: it is possible to pipe cleartext secrets from stdin using
+`-k cleartext` but that requires the --unsafe flag.
 
 The security is also improved by avoiding most uses of temporary
 files.  All code has been refactored for readability and integration
