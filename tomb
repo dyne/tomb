@@ -192,7 +192,7 @@ _whoami() {
     }
 
     # Force HOME to _USER's HOME if necessary
-    local home="$(awk -F: "/^$_USER/ { print \$6 }" /etc/passwd 2>/dev/null)"
+    local home=$(awk -F: "/^$_USER:/ { print \$6 }" /etc/passwd 2>/dev/null)
     [[ $home == $HOME ]] || {
         _verbose "Updating HOME to match user's: ::1 home:: (was ::2 HOME::)" \
             $home $HOME
