@@ -1370,8 +1370,8 @@ forge_key() {
 
     # Do not overwrite any files accidentally
     [[ -r "$destkey" ]] && {
-        _warning "Forging this key would overwrite an existing file. Operation aborted."
-        ls -lh $destkey }
+        ls -lh $destkey
+        _failure "Forging this key would overwrite an existing file. Operation aborted." }
 
     # Update algorithm if it was passed on the command line with -o
     { option_is_set -o } && { algopt="$(option_value -o)" }
