@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb \n"
-"PO-Revision-Date: Sun Nov 23 22:50:06 CET 2014\n"
+"PO-Revision-Date: Tue Nov 25 22:48:08 CET 2014\n"
 "Last-Translator: Denis Roio <jaromil@dyne.org>\n"
 "Language: English\n"
 "Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
@@ -60,6 +60,14 @@ msgstr ""
 
 #: failure
 msgid "Operation aborted."
+msgstr ""
+
+#: warning
+msgid "Pinentry error: ::1 error::"
+msgstr ""
+
+#: warning
+msgid "Empty password"
 msgstr ""
 
 #: failure
@@ -514,7 +522,7 @@ msgstr ""
 msgid "Commanded to forge key ::1 key::"
 msgstr ""
 
-#: warning
+#: failure
 msgid "Forging this key would overwrite an existing file. Operation aborted."
 msgstr ""
 

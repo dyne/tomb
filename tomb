@@ -364,7 +364,7 @@ EOF`
     # parse the pinentry output
     for i in ${(f)_output}; do
         [[ "$i" =~ "^ERR.*" ]] && {
-            _warning "Pinentry error: ${i[(w)3]};"
+            _warning "Pinentry error: ::1 error::" ${i[(w)3]}
             print "canceled"
             return 1 }
 
