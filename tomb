@@ -57,7 +57,7 @@ for arg in "${(@)argv}"; do OLDARGS+=("$arg"); done
 typeset -a DD WIPE MKFS PINENTRY
 DD=(dd)
 WIPE=(rm -f)
-MKFS=(mkfs.ext3 -q -F -j -L)
+MKFS=(sudo mkfs.ext3 -q -F -j -L)
 PINENTRY=(pinentry)
 
 # load zsh regex module
@@ -141,7 +141,7 @@ _endgame() {
 
     # Detach loop devices
     for l in $TOMBLOOPDEVS; do
-        losetup -d "$l"
+        sudo losetup -d "$l"
     done
     unset TOMBLOOPDEVS
 
@@ -234,10 +234,10 @@ _plot() {
 # Provide a random filename in shared memory
 _tmp_create() {
     [[ -d "$TMPPREFIX" ]] || {
-        mkdir -m 777 "$TMPPREFIX"
+        sudo mkdir -m 777 "$TMPPREFIX"
         [[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPPREFIX"
         # we create the tempdir with the sticky bit on
-        chmod o+t "$TMPPREFIX"
+        sudo chmod o+t "$TMPPREFIX"
     }
 
     # We're going to add one more $RANDOM for each time someone complain
@@ -254,7 +254,6 @@ _tmp_create() {
     [[ $? == 0 ]] || {
         _failure "Fatal error creating a temporary file: ::1 temp file::" "$tfile" }
 
-    chown $_UID:$_GID "$tfile"
     [[ $? == 0 ]] || {
         _failure "Fatal error setting ownership on temporary file: ::1 temp file::" "$tfile" }
 
@@ -338,21 +337,22 @@ _check_swap() {
 # provides better security and conveniently use the right toolkit.
 ask_password() {
 
-    local description=$1
-    local title=${2:-Enter tomb password.}
-    local gtkrc="share/themes/tomb/gtk-2.0-key/gtkrc"
-    local output
+    local description="$1"
+    local title="${2:-Enter tomb password.}"
+    local _output
+    local _password
+    local _gtkrc
+    local _theme
 
-    # Force pinentry to use a custom icon by overriding the GTK theme
-    # temporarily.
-    for prefix in /usr/local /usr; do
-        [[ -r "$prefix/$gtkrc" ]] && {
-            GTK2_RC="$prefix/$gtkrc"
-            break
-        }
-    done
+    [[ "$DISPLAY" = "" ]] || {
+        _theme=/share/themes/tomb/gtk-2.0-key/gtkrc
+        for i in /usr/local /usr; do
+            [[ -r $i/$_theme ]] && {
+                _gtkrc=$i/$_theme
+                break }
+        done }
 
-    output=`cat <<EOF | GTK2_RC_FILES=${GTK2_RC} ${PINENTRY} 2>/dev/null | tail -n +7
+    _output=`cat <<EOF | GTK2_RC_FILES="$_gtkrc" pinentry-gtk-2
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE $title
@@ -360,58 +360,28 @@ SETDESC $description
 SETPROMPT Password:
 GETPIN
 EOF`
+    
+    # parse the pinentry output
+    for i in ${(f)_output}; do
+        [[ "$i" =~ "^ERR.*" ]] && {
+            _warning "Pinentry error: ${i[(w)3]};"
+            print "canceled"
+            return 1 }
 
-    # Return 1 on error
-    [[ `tail -n1 <<<$output` =~ ERR ]] && return 1
+        # here the password is found
+        [[ "$i" =~ "^D .*" ]] && _password="${i##D }"
+    done
 
-    # Print out the typed password and return 0
-    head -n1 <<<$output | awk '/^D / { sub(/^D /, ""); print }'
+    [[ "$_password" = "" ]] && { 
+        _warning "Empty password"
+        print "empty"
+        return 1 }
+
+    print "$_password"
     return 0
 }
 
-# Drop privileges
-exec_as_user() {
-    if ! [ $SUDO_USER ]; then
-        exec ${@[@]}
-        return $?
-    fi
-    _verbose "exec_as_user '::1 user::': ::2::" $SUDO_USER ${(f)@}
-    sudo -u $SUDO_USER "${@[@]}"
-    return $?
-}
 
-# Escalate privileges
-check_priv() {
-    if [ $UID != 0 ]; then
-        _verbose "Using sudo for root execution of '::1 exec:: ::2 args::'." $TOMBEXEC ${(f)OLDARGS}
-        # check if sudo has a timestamp active
-        sudok=false
-
-        if ! option_is_set --sudo-pwd; then
-            if [ $? != 0 ]; then # if not then ask a password
-                cat <<EOF | ${PINENTRY} 2>/dev/null | awk '/^D / { sub(/^D /, ""); print }' | sudo -S -v
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE Super user privileges required
-SETDESC Sudo execution of Tomb ${OLDARGS[@]}
-SETPROMPT Insert your USER password:
-GETPIN
-EOF
-            fi
-        else
-            _verbose "Escalating privileges using sudo-pwd."
-            sudo -S -v <<<`option_value --sudo-pwd`
-        fi
-        sudo "${TOMBEXEC}" -U "${UID}" -G "${GID}" -T "${TTY:-SSH_TTY}" "${(@)OLDARGS}"
-        exit $?
-    fi # are we root already
-
-    # make sure necessary kernel modules are loaded
-    modprobe dm_mod
-    modprobe dm_crypt
-
-    return 0
-}
 
 # Check if a filename is a valid tomb
 is_valid_tomb() {
@@ -456,7 +426,7 @@ lo_mount() {
     tpath="$1"
 
     # check if we have support for loop mounting
-    _nstloop=`losetup -f`
+    _nstloop=`sudo losetup -f`
     [[ $? = 0 ]] || {
         _warning "Loop mount of volumes is not possible on this machine, this error"
         _warning "often occurs on VPS and kernels that don't provide the loop module."
@@ -464,7 +434,7 @@ lo_mount() {
         _failure "Operation aborted."
     }
 
-    losetup -f "$tpath" # allocates the next loopback for our file
+    sudo losetup -f "$tpath" # allocates the next loopback for our file
 
     TOMBLOOPDEVS+=("$_nstloop") # add to array of lodevs used
 
@@ -666,31 +636,9 @@ function _print() {
     return 0
 }
 
-# Print out progress to inform GUI caller applications (--batch mode)
-progress() {
-    #      $1 is "what is progressing"
-    #      $2 is "percentage"
-    #      $3 is (eventually blank) status
-    #      Example: if creating a tomb, it could be sth like
-    #          progress create 0 filling with random data
-    #          progress create 40 generating key
-    #          progress keygen 0 please move the mouse
-    #          progress keygen 30 please move the mouse
-    #          progress keygen 60 please move the mouse
-    #          progress keygen 100 key generated
-    #          progress create 80 please enter password
-    #          progress create 90 formatting the tomb
-    #          progress create 100 tomb created successfully
-    if ! option_is_set --batch; then
-        return
-    fi
-    print "[m][P][$1][$2][$3]" >&2
-
-}
-
 _list_optional_tools() {
     typeset -a _deps
-    _deps=(gettext dcfldd wipe mkfs.ext4 steghide e2fsck)
+    _deps=(gettext dcfldd wipe steghide)
     _deps+=(resize2fs tomb-kdb-pbkdf2 qrencode swish-e unoconv)
     for d in $_deps; do
         _print "`which $d`"
@@ -708,7 +656,7 @@ _list_optional_tools() {
 _ensure_dependencies() {
 
     # Check for required programs
-    for req in cryptsetup pinentry sudo gpg; do
+    for req in cryptsetup pinentry sudo gpg mkfs.ext4 e2fsck; do
         command -v $req 1>/dev/null 2>/dev/null || {
             _failure "Missing required dependency ::1 command::.  Please install it." $req }
     done
@@ -722,21 +670,10 @@ _ensure_dependencies() {
     # Which wipe command to use
     command -v wipe 1>/dev/null 2>/dev/null && WIPE=(wipe -f -s)
 
-    # Read pinentry config from gpg-agent if present
-    [[ -r "$HOME/.gnupg/gpg-agent.conf" ]] && {
-        _verbose "gpg-agent configuration found"
-        PINENTRY=(`awk '
-/^pinentry-program/ { for(c=2;c<=NF;c++) printf("%s ", $c) }
-' $HOME/.gnupg/gpg-agent.conf`)
-        _verbose "gpg-agent choice of pinentry: ::1 pinentry::" "${PINENTRY}" }
-
-    # Check for filesystem creation programs
-    command -v mkfs.ext4 1>/dev/null 2>/dev/null && MKFS=(mkfs.ext4 -q -F -j -L)
-
     # Check for steghide
     command -v steghide 1>/dev/null 2>/dev/null || STEGHIDE=0
     # Check for resize
-    command -v e2fsck resize2fs 1>/dev/null 2>/dev/null || RESIZER=0
+    command -v resize2fs 1>/dev/null 2>/dev/null || RESIZER=0
     # Check for KDF auxiliary tools
     command -v tomb-kdb-pbkdf2 1>/dev/null 2>/dev/null || KDF=0
     # Check for Swish-E file content indexer
@@ -926,7 +863,7 @@ get_lukskey() {
 # it against the return code of gpg on success returns 0 and saves
 # the password in the global variable $TOMBPASSWORD
 ask_key_password() {
-    [[ -z $TOMBKEYFILE ]] && {
+    [[ -z "$TOMBKEYFILE" ]] && {
         _failure "Internal error: ask_key_password() called before _load_key()." }
 
     [[ "$TOMBKEYFILE" = "cleartext" ]] && {
@@ -937,25 +874,24 @@ ask_key_password() {
     passok=0
     tombpass=""
     if [[ "$1" = "" ]]; then
+
         for c in 1 2 3; do
             if [[ $c == 1 ]]; then
-                tombpass=$(exec_as_user ${TOMBEXEC} askpass \
-                    "Insert password to use key: $TOMBKEYFILE")
+                tombpass=$(ask_password "Insert password to: $TOMBKEYFILE")
             else
-                tombpass=$(exec_as_user ${TOMBEXEC} askpass \
-                    "Insert password to use key: $TOMBKEYFILE (attempt $c)")
+                tombpass=$(ask_password "Insert password to: $TOMBKEYFILE (attempt $c)")
             fi
-            if [[ $? != 0 ]]; then
+            [[ $? = 0 ]] || {
                 _warning "User aborted password dialog."
                 return 1
-            fi
+            }
 
             get_lukskey "$tombpass"
 
-            if [ $? = 0 ]; then
+            [[ $? = 0 ]] && {
                 passok=1; _message "Password OK."
                 break;
-            fi
+            }
         done
 
     else
@@ -965,8 +901,9 @@ ask_key_password() {
 
         get_lukskey "$tombpass"
 
-        if [ $? = 0 ]; then
-            passok=1; _message "Password OK."; fi
+        [[ $? = 0 ]] && {
+            passok=1; _message "Password OK."
+        }
 
     fi
     # print the password out in case caller needs to know it
@@ -979,7 +916,7 @@ ask_key_password() {
 # call cryptsetup with arguments using the currently known secret
 # echo flags eliminate newline and disable escape (BSD_ECHO)
 _cryptsetup() {
-    print -R -n - "$TOMBSECRET" | cryptsetup --key-file - ${=@}
+    print -R -n - "$TOMBSECRET" | sudo cryptsetup --key-file - ${=@}
     return $?
 }
 
@@ -1041,7 +978,7 @@ gen_key() {
     if [ "$1" = "" ]; then
         while true; do
             # 3 tries to write two times a matching password
-            tombpass=`exec_as_user ${TOMBEXEC} askpass "Type the new password to secure your key"`
+            tombpass=`ask_password "Type the new password to secure your key"`
             if [[ $? != 0 ]]; then
                 _failure "User aborted."
             fi
@@ -1049,7 +986,7 @@ gen_key() {
                 _failure "You set empty password, which is not possible."
             fi
             tombpasstmp=$tombpass
-            tombpass=`exec_as_user ${TOMBEXEC} askpass "Type the new password to secure your key (again)"`
+            tombpass=`ask_password "Type the new password to secure your key (again)"`
             if [[ $? != 0 ]]; then
                 _failure "User aborted."
             fi
@@ -1234,8 +1171,7 @@ exhume_key() {
     } || {
         [[ -n $TOMBPASSWORD ]] && tombpass=$TOMBPASSWORD
     } || {
-        tombpass=$(exec_as_user ${TOMBEXEC} askpass \
-            "Insert password to exhume key from $imagefile")
+        tombpass=$(ask_password "Insert password to exhume key from $imagefile")
         [[ $? != 0 ]] && {
             _warning "User aborted password dialog."
             return 1
@@ -1328,7 +1264,6 @@ dig_tomb() {
     # Ensure that file permissions are safe even if interrupted
     touch $TOMBPATH
     chmod 0600 $TOMBPATH
-    chown $_UID:$_GID $TOMBPATH
 
     _verbose "Data dump using ::1:: from /dev/urandom" ${DD[1]}
     ${=DD} if=/dev/urandom bs=1048576 count=$tombsize of=$TOMBPATH
@@ -1403,7 +1338,6 @@ forge_key() {
     _message "(You can also change it later using 'tomb passwd'.)"
     # _user_file $TOMBKEYFILE
     touch $TOMBKEYFILE
-    chown $_UID:$_GID $TOMBKEYFILE
     chmod 0600 $TOMBKEYFILE
 
     tombname="$TOMBKEYFILE" # XXX ???
@@ -1425,7 +1359,7 @@ forge_key() {
         _warning "Dumping contents to screen:"
         print "${mapfile[$TOMBKEY]}"
         _warning "--"
-        umount ${keytmp}
+        sudo umount ${keytmp}
         rm -r $keytmp
         _failure "Operation aborted."
     }
@@ -1467,7 +1401,7 @@ lock_tomb_with_key() {
     _verbose "Loop mounted on ::1 mount point::" $nstloop
 
     _message "Checking if the tomb is empty (we never step on somebody else's bones)."
-    cryptsetup isLuks ${nstloop}
+    sudo cryptsetup isLuks ${nstloop}
     if [ $? = 0 ]; then
         # is it a LUKS encrypted nest? then bail out and avoid reformatting it
         _warning "The tomb was already locked with another key."
@@ -1521,7 +1455,7 @@ lock_tomb_with_key() {
         _warning "Your tomb ::1 tomb file:: may be corrupted." $TOMBFILE }
 
     # Sync
-    cryptsetup luksClose tomb.tmp
+    sudo cryptsetup luksClose tomb.tmp
 
     _message "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::" $TOMBNAME $cipher
     _success "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::" \
@@ -1547,7 +1481,7 @@ change_tomb_key() {
 
     lo_mount $TOMBPATH
     nstloop=`lo_new`
-    cryptsetup isLuks ${nstloop}
+    sudo cryptsetup isLuks ${nstloop}
     # is it a LUKS encrypted nest? we check one more time
     [[ $? == 0 ]] || {
         _failure "Not a valid LUKS encrypted volume: ::1 volume::" $TOMBPATH }
@@ -1579,7 +1513,7 @@ change_tomb_key() {
     old_secret=$TOMBSECRET
 
     # luksOpen the tomb (not really mounting, just on the loopback)
-    cryptsetup --key-file <(print -R -n - "$old_secret") \
+    print -R -n - "$old_secret" | sudo cryptsetup --key-file - \
         luksOpen ${nstloop} ${mapper}
     [[ $? == 0 ]] || _failure "Unexpected error in luksOpen."
 
@@ -1596,14 +1530,17 @@ change_tomb_key() {
     fi
     [[ $? == 0 ]] || {
         _failure "No valid password supplied for the new key." }
-    new_secret=$TOMBSECRET
 
-    cryptsetup --key-file <(print -R -n - "$old_secret") \
-        luksChangeKey "$nstloop" <(print -R -n - "$new_secret")
+    _tmp_create
+    tmpnewkey=$TOMBTMP
+    print -R -n - "$TOMBSECRET" >> $tmpnewkey
+
+    print -R -n - "$old_secret" | sudo cryptsetup --key-file - \
+        luksChangeKey "$nstloop" "$tmpnewkey"
 
     [[ $? == 0 ]] || _failure "Unexpected error in luksChangeKey."
 
-    cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
+    sudo cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
 
     _success "Succesfully changed key for tomb: ::1 tomb file::" $TOMBFILE
     _message "The new key is: ::1 new key::" $TOMBKEYFILE
@@ -1651,13 +1588,13 @@ mount_tomb() {
     lo_mount $TOMBPATH
     nstloop=`lo_new`
 
-    cryptsetup isLuks ${nstloop} || {
+    sudo cryptsetup isLuks ${nstloop} || {
         # is it a LUKS encrypted nest? see cryptsetup(1)
         _failure "::1 tomb file:: is not a valid Luks encrypted storage file." $TOMBFILE }
 
     _message "This tomb is a valid LUKS encrypted device."
 
-    luksdump="`cryptsetup luksDump ${nstloop}`"
+    luksdump="`sudo cryptsetup luksDump ${nstloop}`"
     tombdump=(`print $luksdump | awk '
         /^Cipher name/ {print $3}
         /^Cipher mode/ {print $3}
@@ -1692,15 +1629,14 @@ mount_tomb() {
     [[ $? == 0 ]] || _failure "No valid password supplied."
 
     _cryptsetup luksOpen ${nstloop} ${mapper}
-
-    [[ -r /dev/mapper/${mapper} ]] || {
+    [[ $? = 0 ]] || {
         _failure "Failure mounting the encrypted file." }
 
     # preserve the loopdev after exit
     lo_preserve "$nstloop"
 
     # array: [ cipher, keysize, loopdevice ]
-    tombstat=(`cryptsetup status ${mapper} | awk '
+    tombstat=(`sudo cryptsetup status ${mapper} | awk '
     /cipher:/  {print $2}
     /keysize:/ {print $2}
     /device:/  {print $2}'`)
@@ -1708,17 +1644,17 @@ mount_tomb() {
     _verbose "Key size is ::1 size:: for cipher ::2 cipher::" $tombstat[2] $tombstat[1]
 
     _message "Checking filesystem via ::1::" $tombstat[3]
-    fsck -p -C0 /dev/mapper/${mapper}
+    sudo fsck -p -C0 /dev/mapper/${mapper}
     _verbose "Tomb engraved as ::1 tomb name::" $TOMBNAME
-    tune2fs -L $TOMBNAME /dev/mapper/${mapper} > /dev/null
+    sudo tune2fs -L $TOMBNAME /dev/mapper/${mapper} > /dev/null
 
     # we need root from here on
-    mkdir -p $tombmount
+    sudo mkdir -p $tombmount
 
-    mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
+    sudo mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
 
-    chown $_UID:$_GID ${tombmount}
-    chmod 0711 ${tombmount}
+    sudo chown $UID:$GID ${tombmount}
+    sudo chmod 0711 ${tombmount}
 
     _success "Success opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE $tombmount
 
@@ -1817,7 +1753,7 @@ exec_safe_bind_hooks() {
 
         [[ "${${maps[$dir]}[1]}" == "/" || "${${maps[$dir]}[1,2]}" == ".." ]] && {
             _warning "bind-hooks map format: local/to/tomb local/to/\$HOME.  Rolling back"
-            for dir in ${mounted}; do umount $dir; done
+            for dir in ${mounted}; do sudo umount $dir; done
             return 1 }
 
         if [[ ! -r "$HOME/${maps[$dir]}" ]]; then
@@ -1825,7 +1761,7 @@ exec_safe_bind_hooks() {
         elif [[ ! -r "$mnt/$dir" ]]; then
             _warning "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::" $mnt $dir
         else
-            mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]} \
+            sudo mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]} \
                 && mounted+=("$HOME/${maps[$dir]}")
         fi
     done
@@ -1852,7 +1788,7 @@ exec_safe_post_hooks() {
     cat $mnt/post-hooks | head -n1 | grep '^#!\s*/' &> /dev/null
     [[ $? == 0 ]] && {
         _success "Post hooks found, executing as user ::1 user name::." $USERNAME
-        exec_as_user $mnt/post-hooks $act $mnt
+        $mnt/post-hooks $act $mnt
     }
 }
 
@@ -2230,24 +2166,20 @@ resize_tomb() {
     mapdate=`date +%s`
     mapper="tomb.$TOMBNAME.$mapdate.$(basename $nstloop)"
 
-    _cryptsetup luksOpen ${nstloop} ${mapper}
-
-    [[ -r /dev/mapper/${mapper} ]] || {
+    _cryptsetup luksOpen ${nstloop} ${mapper} || {
         _failure "Failure mounting the encrypted file." }
 
-    cryptsetup resize "${mapper}" || {
+    sudo cryptsetup resize "${mapper}" || {
         _failure "cryptsetup failed to resize ::1 mapper::" $mapper }
 
-    e2fsck -p -f /dev/mapper/${mapper} || {
+    sudo e2fsck -p -f /dev/mapper/${mapper} || {
         _failure "e2fsck failed to check ::1 mapper::" $mapper }
 
-    resize2fs /dev/mapper/${mapper} || {
+    sudo resize2fs /dev/mapper/${mapper} || {
         _failure "resize2fs failed to resize ::1 mapper::" $mapper }
 
-    sleep 1 # needs to settle a bit
-
     # close and free the loop device
-    cryptsetup luksClose "${mapper}"
+    sudo cryptsetup luksClose "${mapper}"
 
     return 0
 }
@@ -2308,7 +2240,7 @@ umount_tomb() {
             bind_mapper="${b[(ws:;:)1]}"
             bind_mount="${b[(ws:;:)2]}"
             _message "Closing tomb bind hook: ::1 hook::" $bind_mount
-            umount $bind_mount || {
+            sudo umount $bind_mount || {
                 [[ -n $SLAM ]] && {
                     _success "Slamming tomb: killing all processes using this hook."
                     slam_tomb "$bind_mount"
@@ -2325,18 +2257,18 @@ umount_tomb() {
             exec_safe_post_hooks ${tombmount%%/} close }
 
         _verbose "Performing umount of ::1 mount point::" $tombmount
-        umount ${tombmount}
+        sudo umount ${tombmount}
         [[ $? = 0 ]] || { _warning "Tomb is busy, cannot umount!"; return 1 }
 
         # If we used a default mountpoint and is now empty, delete it
         [[ "$tombmount" == "/media/$tombname.tomb" ]] && { rmdir $tombmount }
 
-        cryptsetup luksClose $mapper
+        sudo cryptsetup luksClose $mapper
         [[ $? == 0 ]] || {
             _failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper }
 
         # Normally the loopback device is detached when unused
-        [[ -e "/dev/$tombloop" ]] && losetup -d "/dev/$tombloop"
+        [[ -e "/dev/$tombloop" ]] && sudo losetup -d "/dev/$tombloop"
         [[ $? = 0 ]] || {
             _verbose "/dev/$tombloop was already closed." }
 
@@ -2404,19 +2336,19 @@ main() {
     #
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe)
     subcommands_opts[__default]=""
-    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -sudo-pwd: -tomb-pwd: "
+    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: "
     subcommands_opts[mount]=${subcommands_opts[open]}
 
     subcommands_opts[create]="" # deprecated, will issue warning
 
     subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom "
     subcommands_opts[dig]="-ignore-swap s: -size=s "
-    subcommands_opts[lock]="-ignore-swap k: -kdf: o: -sudo-pwd: -tomb-pwd: "
-    subcommands_opts[setkey]="k: -ignore-swap -kdf: -sudo-pwd: -tomb-old-pwd: -tomb-pwd: "
+    subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: "
+    subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
     subcommands_opts[engrave]="k: "
 
     subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
-    subcommands_opts[close]="-sudo-pwd: "
+    subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
     subcommands_opts[list]="-get-mountpoint "
@@ -2506,7 +2438,7 @@ main() {
     { ! option_is_set --no-color } && { autoload -Uz colors && colors }
     # Some options are only available during insecure mode
     { ! option_is_set --unsafe } && {
-        for opt in --sudo-pwd --tomb-pwd --use-urandom --tomb-old-pwd; do
+        for opt in --tomb-pwd --use-urandom --tomb-old-pwd; do
             { option_is_set $opt } && {
                 exitv=127 _failure "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsafe" $opt }
         done
@@ -2549,32 +2481,27 @@ main() {
 
         # CREATE Step 1: dig -s NN file.tomb
         dig)
-            check_priv
             dig_tomb ${=PARAM}
             ;;
 
         # CREATE Step 2: forge file.tomb.key
         forge)
-            check_priv
             forge_key ${=PARAM}
             ;;
 
         # CREATE Step 2: lock -k file.tomb.key file.tomb
         lock)
-            check_priv
             lock_tomb_with_key ${=PARAM}
             ;;
 
         # Open the tomb
         mount|open)
-            check_priv
             mount_tomb $PARAM[1] $PARAM[2]
             ;;
 
         # Close the tomb
         # `slam` is used to force closing.
         umount|close|slam)
-            check_priv
             [[ "$subcommand" ==  "slam" ]] && SLAM=1
             umount_tomb $PARAM[1]
             ;;
@@ -2583,7 +2510,6 @@ main() {
         resize)
             [[ $RESIZER == 0 ]] && {
                 _failure "Resize2fs not installed: cannot resize tombs." }
-            check_priv
             resize_tomb $PARAM[1]
             ;;
 
@@ -2615,13 +2541,11 @@ main() {
 
         # Change password on existing key
         passwd)
-            check_priv
             change_passwd $PARAM[1]
             ;;
 
         # Change tomb key
         setkey)
-            check_priv
             change_tomb_key ${=PARAM}
             ;;
 
