@@ -722,13 +722,15 @@ is_valid_key() {
 
 # $1 is a string containing an encrypted key
 _tomb_key_recover recover_key() {
-    local key="$1"    # Unique argument is an encrypted key
+    local key="${1}"    # Unique argument is an encrypted key
 
     _warning "Attempting key recovery."
+    
+    _head="${key[(f)1]}" # take the first line
 
     TOMBKEY=""        # Reset global variable
 
-    [[ $key =~ "_KDF_" ]] && TOMBKEY+="`print - $key | $head -n 1`\n"
+    [[ $_head =~ "^_KDF_" ]] && TOMBKEY+="$_head\n"
 
     TOMBKEY+="-----BEGIN PGP MESSAGE-----\n"
     TOMBKEY+="$key\n"
@@ -827,18 +829,24 @@ get_lukskey() {
 
     exhumedkey=""
 
-    firstline=$(head -n1 <<< $TOMBKEY)
+    firstline="${TOMBKEY[(f)1]}"
 
     # key is KDF encoded
     if [[ $firstline =~ '^_KDF_' ]]; then
-        _verbose "KDF: ::1 kdf::" $(cut -d_ -f 3 <<<$firstline)
-        case `cut -d_ -f 3 <<<$firstline` in
-            pbkdf2sha1)
-                pbkdf2_param=`cut -d_ -f 4- <<<$firstline | tr '_' ' '`
-                _password=$(tomb-kdb-pbkdf2 ${=pbkdf2_param} 2>/dev/null <<<$_password)
+        kdf_hash="${firstline[(ws:_:)2]}"
+        _verbose "KDF: ::1 kdf::" "$kdf_hash"
+        case "$kdf_hash" in
+            "pbkdf2sha1")
+                kdf_salt="${firstline[(ws:_:)3]}"
+                kdf_ic="${firstline[(ws:_:)4]}"
+                kdf_len="${firstline[(ws:_:)5]}"
+                _verbose "KDF salt: $kdf_salt"
+                _verbose "KDF ic: $kdf_ic"
+                _verbose "KDF len: $kdf_len"
+                _password=$(tomb-kdb-pbkdf2 $kdf_salt $kdf_ic $kdf_len 2>/dev/null <<<$_password)
                 ;;
             *)
-                _failure "No suitable program for KDF ::1 program::." $(cut -f 3 <<<$firstline)
+                _failure "No suitable program for KDF ::1 program::." $pbkdf_hash
                 unset _password
                 return 1
                 ;;
