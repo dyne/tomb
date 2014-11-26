@@ -1,44 +1,285 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Tomb the Crypto Undertaker\n"
-"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
+"Project-Id-Version: Tomb the Crypto Undertaker\n"
+"Language: ru\n"
 
 #: failure
-msgid "Failing to identify the user who is calling us"
-msgstr ""
+msgid "Operation aborted."
+msgstr "Операция отменена."
+
+#: warning
+msgid "often occurs on VPS and kernels that don't provide the loop module."
+msgstr "часто возникает на VPS и ядрах, которые не имеют модуля loop."
+
+#: warning
+msgid "It is impossible to use Tomb on this machine at this conditions."
+msgstr "Невозможно использовать Tomb на этой машине при таких условиях."
+
+#: message
+msgid "Waiting for the key to be piped from stdin... "
+msgstr "Ожидание передачи ключа через стандартный ввод..."
+
+#: failure
+msgid "This operation requires a key file to be specified using the -k option."
+msgstr "Эта операция требует указания файла ключа с помощью опции -k."
+
+#: failure
+msgid "Key not found, specify one using -k."
+msgstr "Ключ не найден, укажите его с помощью опции -k."
+
+#: warning
+msgid "User aborted password dialog."
+msgstr "Пользователь отменил диалог пароля."
+
+#: message
+msgid "Password OK."
+msgstr "Верный пароль."
+
+#: failure
+msgid "Error: the newly generated keyfile does not seem valid."
+msgstr "Ошибка: сгенерированный файл ключа неверен."
+
+#: failure
+msgid "User aborted."
+msgstr "Отменено пользователем."
+
+#: failure
+msgid "You set empty password, which is not possible."
+msgstr "Вы указали пустой пароль, так нельзя."
+
+#: failure
+msgid "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+msgstr "Неверный аргумент для --kdf: должно быть указано целое число (секунд итерации)."
+
+#: failure
+msgid "gpg (GnuPG) is not found, Tomb cannot function without it."
+msgstr "gpg (GnuPG) не найден, Tomb не может работать без него."
+
+#: message
+msgid "Please confirm the key password for the encoding"
+msgstr "Пожалуйста, подтвердите пароль ключа для шифрования"
+
+#: warning
+msgid "Wrong password supplied."
+msgstr "Указан неверный пароль."
+
+#: failure
+msgid "You shall not bury a key whose password is unknown to you."
+msgstr "Вам не захоронить ключ, чей пароль не известен Вам."
+
+#: warning
+msgid "Encoding error: steghide reports problems."
+msgstr "Ошибка шифрования: steghide сообщает о проблемах."
+
+#: warning
+msgid "Make explicit use of --force to overwrite."
+msgstr "Явно укажите опцию --force для перезаписи."
+
+#: warning
+msgid "Use of --force selected: overwriting."
+msgstr "Указана опция --force: перезаписываю."
+
+#: failure
+msgid "A filename needs to be specified using -k to forge a new key."
+msgstr "Необходимо указать имя файла через опцию -k, чтобы выковать новый ключ."
+
+#: failure
+msgid "Forging this key would overwrite an existing file. Operation aborted."
+msgstr "Выковка этого ключа перезапишет существующий файл. Операция отменена."
+
+#: message
+msgid "This operation takes time, keep using this computer on other tasks,"
+msgstr "Эта операция займет некоторое время, выполняйте пока другие задачи,"
+
+#: message
+msgid "once done you will be asked to choose a password for your tomb."
+msgstr "по завершении Вас вопросят ввести пароль для гробницы."
+
+#: message
+msgid "To make it faster you can move the mouse around."
+msgstr "Чтобы ускорить операцию, подвигайте мышку."
+
+#: message
+msgid "If you are on a server, you can use an Entropy Generation Daemon."
+msgstr "Если Вы на сервере, можно использовать демон генерации энтропии."
+
+#: warning
+msgid "Cannot generate encryption key."
+msgstr "Не могу сгенерировать ключ шифрования."
+
+#: message
+msgid "(You can also change it later using 'tomb passwd'.)"
+msgstr "(Его можно потом изменить с помощью 'tomb passwd'.)"
+
+#: warning
+msgid "The key does not seem to be valid."
+msgstr "Ключ неверен."
+
+#: warning
+msgid "Dumping contents to screen:"
+msgstr "Выгрузка содержимого на экран:"
+
+#: failure
+msgid "Size argument missing, use -s"
+msgstr "Отсутствует размер, укажите его с помощью -s"
+
+#: warning
+msgid "A tomb exists already. I'm not digging here:"
+msgstr "Гробница существует. Я не буду копать здесь:"
+
+#: message
+msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
+msgstr "Ваша гробница пока не готова, необходимо выковать ключ и запереть ее:"
+
+#: warning
+msgid "No tomb specified for locking."
+msgstr "Не указана гробница для запирания."
+
+#: warning
+msgid "Usage: tomb lock file.tomb file.tomb.key"
+msgstr "Использование: tomb lock file.tomb file.tomb.key"
+
+#: failure
+msgid "There is no tomb here. You have to it dig first."
+msgstr "Здесь нет гробницы. Сначала выкопайте ее."
+
+#: message
+msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
+msgstr "Проверяю, пуста ли гробница (мы никогда не ходим по чужим костям)."
+
+#: warning
+msgid "The tomb was already locked with another key."
+msgstr "Гробница уже заперта другим ключом."
+
+#: failure
+msgid "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
+msgstr "Операция отменена. Я не могу запереть уже запертую гробницу. Выкопайте новую."
+
+#: message
+msgid "Fine, this tomb seems empty."
+msgstr "Так, эта гробница, вроде как, пуста."
+
+#: message
+msgid "Formatting Luks mapped device."
+msgstr "Форматирую устройство LUKS."
+
+#: warning
+msgid "cryptsetup luksFormat returned an error."
+msgstr "cryptsetup luksFormat вернул ошибку."
+
+#: message
+msgid "Formatting your Tomb with Ext3/Ext4 filesystem."
+msgstr "Форматирую Вашу гробницу в файловую систему Ext3/Ext4."
+
+#: warning
+msgid "Tomb format returned an error."
+msgstr "Tomb format вернул ошибку."
+
+#: message
+msgid "Here below its status is reported:"
+msgstr "Ниже назодится отчет о его статусе:"
+
+#: message
+msgid "This tomb is a valid LUKS encrypted device."
+msgstr "Эта гробница - верное зашифрованное устройство LUKS."
+
+#: failure
+msgid "Failure mounting the encrypted file."
+msgstr "Не удалось примонтировать зашифрованный файл."
+
+#: warning
+msgid "How pitiful!  A tomb, and no HOME."
+msgstr "Как жаль! Гробница есть, но нет HOME."
+
+#. Don't know how to correctly translate "bind hook".
+#: warning
+#, fuzzy
+msgid "Cannot exec bind hooks without a mounted tomb."
+msgstr "Невозможно совершить привязки без примонтированной гробницы."
+
+#: failure
+msgid "I can't see any open tomb, may they all rest in peace."
+msgstr "Я не вижу открытых гробниц, да упокоятся они все с миром."
+
+#: message
+msgid "Search index updated."
+msgstr "Поисковый индекс обновлен."
+
+#: warning
+msgid "Run 'tomb index' to create indexes."
+msgstr "Запустите 'tomb index' для создания индексов."
+
+#: message
+msgid "Search completed."
+msgstr "Поиск завершен."
+
+#: failure
+msgid "No tomb name specified for resizing."
+msgstr "Не указано имя гробницы для изменения размера."
+
+#: failure
+msgid "Size is not an integer."
+msgstr "Размер не целое число."
+
+#: failure
+msgid "The new size must be greater then old tomb size."
+msgstr "Новый размер гробницы должен быть больше старого."
+
+#: failure
+msgid "There is no open tomb to be closed."
+msgstr "Нет открытой гробницы для закрытия."
+
+#: warning
+msgid "Too many tombs mounted, please specify one (see tomb list)"
+msgstr "Примонтировано слишком много гробниц, пожалуйста, укажите точнее (см. tomb list)"
+
+#: warning
+msgid "or issue the command 'tomb close all' to close them all."
+msgstr "или выполните команду 'tomb close all', чтобы закрыть их все."
+
+#: warning
+msgid "Please specify an existing tomb."
+msgstr "Пожалуйста, укажите существующую гробницу."
+
+#: message
+msgid "Kill all processes busy inside the tomb."
+msgstr "Убиваю все процессы, занятые в гробнице"
+
+#: warning
+msgid "Tomb is busy, cannot umount!"
+msgstr "Гробница занята, не могу отмонтировать!"
+
+#: failure
+msgid "Error parsing."
+msgstr "Ошибка парсинга."
+
+#: warning
+msgid "Some error occurred during option processing."
+msgstr "Произошла какая-то ошибка при обработке опций."
+
+#: warning
+msgid "The create command is deprecated, please use dig, forge and lock instead."
+msgstr "Команда create устарела, пожалуйста, используйте dig, forge и lock."
+
+#: warning
+msgid "For more informations see Tomb's manual page (man tomb)."
+msgstr "Для большей информации обратитесь к руководству Tomb (man tomb)."
+
+#: message
+msgid "Try -h for help."
+msgstr "Используйте -h для вызова справки."
 
 #: failure
 msgid "Tomb won't work without a TOMBNAME."
 msgstr "Tomb не будет работать без ИМЕНИ_ГРОБНИЦЫ."
 
 #: failure
-msgid "Fatal error creating the temporary directory: ::1 temp dir::"
-msgstr ""
-
-#: failure
-msgid "Fatal error setting the permission umask for temporary files"
-msgstr "Критическая ошибка при задании маски прав для временных файлов"
-
-#: failure
-msgid "Someone is messing up with us trying to hijack temporary files."
-msgstr ""
-
-#: failure
 msgid "Fatal error creating a temporary file: ::1 temp file::"
 msgstr "Критическая ошибка при создании временного файла ::1 temp file::"
-
-#: failure
-msgid "Fatal error setting ownership on temporary file: ::1 temp file::"
-msgstr ""
-"Критическая ошибка при задании владельца временного файла ::1 temp file::"
-
-#: success
-msgid "All your swaps are belong to crypt.  Good."
-msgstr ""
 
 #: warning
 msgid "You can deactivate all swap partitions using the command:"
@@ -50,12 +291,7 @@ msgstr " swapoff -a"
 
 #: warning
 msgid "But if you want to proceed like this, use the -f (force) flag."
-msgstr ""
-"Но если Вы все равно хотите продолжить работу, используйте флаг -f (force)."
-
-#: failure
-msgid "Operation aborted."
-msgstr "Операция отменена."
+msgstr "Но если Вы все равно хотите продолжить работу, используйте флаг -f (force)."
 
 #: failure
 msgid "Tomb file is missing from arguments."
@@ -92,14 +328,6 @@ msgstr "Найден верный файл гробницы: ::1 tomb path::"
 #: warning
 msgid "Loop mount of volumes is not possible on this machine, this error"
 msgstr "Loop-монтирование томов не поддерживается на этой машине, эта ошибка"
-
-#: warning
-msgid "often occurs on VPS and kernels that don't provide the loop module."
-msgstr "часто возникает на VPS и ядрах, которые не имеют модуля loop."
-
-#: warning
-msgid "It is impossible to use Tomb on this machine at this conditions."
-msgstr "Невозможно использовать Tomb на этой машине при таких условиях."
 
 #: print
 msgid "Syntax: tomb [options] command [arguments]"
@@ -162,34 +390,8 @@ msgid " // Operations on keys:"
 msgstr " // Операции с ключами: "
 
 #: print
-msgid " passwd  change the password of a KEY (needs old pass)"
-msgstr " passwd  изменить пароль КЛЮЧА (требуется старый пароль)"
-
-#: print
-msgid " setkey  change the KEY locking a TOMB (needs old key and pass)"
-msgstr ""
-" setkey  изменить КЛЮЧ, запирающий ГРОБНИЦУ (требуется старый ключ и пароль)"
-
-#: print
-msgid " // Backup on paper:"
-msgstr " // Резервная копия на бумаге:"
-
-#: print
 msgid " engrave makes a QR code of a KEY to be saved on paper"
 msgstr " engrave создает штрих-код для хранения КЛЮЧА на бумаге "
-
-#: print
-msgid " // Steganography:"
-msgstr " // Стеганография:"
-
-#: print
-msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
-msgstr " bury   спрятать КЛЮЧ внутри изображения JPEG (для использования с -k)"
-
-#: print
-msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
-msgstr ""
-" exhume  извлечь КЛЮЧ из изображения JPEG (выводится в стандартный вывод)"
 
 #: print
 msgid "Options:"
@@ -205,12 +407,11 @@ msgstr " -k     путь к ключу ('-k -' для чтения из стан
 
 #: print
 msgid " -n     don't process the hooks found in tomb"
-msgstr " -n     не обрабатывать события, найденные в гробнице "
+msgstr " -n     не обрабатывать привязки, найденные в гробнице "
 
 #: print
 msgid " -o     mount options used to open (default: rw,noatime,nodev)"
-msgstr ""
-" -o     параметры монтирования при открытии (по умолчанию rw,noatime,nodev) "
+msgstr " -o     параметры монтирования при открытии (по умолчанию rw,noatime,nodev) "
 
 #: print
 msgid " -f     force operation (i.e. even if swap is active)"
@@ -242,36 +443,19 @@ msgstr "Больше информации по Tomb Вы можете найти
 
 #: print
 msgid "Please report bugs on <http://github.com/dyne/tomb/issues>."
-msgstr ""
-"Пожалуйста, сообщайте о найденных ошибках на <http://github.com/dyne/tomb/"
-"issues>."
+msgstr "Пожалуйста, сообщайте о найденных ошибках на <http://github.com/dyne/tomb/issues>."
 
 #: failure
 msgid "Missing required dependency ::1 command::.  Please install it."
-msgstr ""
-"Отсутствует необходимая зависимость: ::1 command::. Пожалуйста, установите "
-"ее."
-
-#: warning
-msgid "cleartext key from stdin selected: this is unsafe."
-msgstr "выбран ключ, явно указанный через стандартный ввод: это небезопасно."
-
-#: failure
-msgid "please use --unsafe if you really want to do this."
-msgstr "пожалуйчтв, используйте --unsafe, если Вы действительно этого хотите."
-
-#: warning
-msgid "received key in cleartext from stdin (unsafe mode)"
-msgstr "получен ключ в явном виде через стандартный ввод (небезопасный режим)"
+msgstr "Отсутствует необходимая зависимость: ::1 command::. Пожалуйста, установите ее."
 
 #: warning
 msgid "is_valid_key() called without an argument."
 msgstr "is_valid_key() вызвана без аргумента."
 
 #: message
-#, fuzzy
 msgid "Key is an image, it might be valid."
-msgstr "Ключ - изображение, такое возможно."
+msgstr "Ключ - изображение, может подойти."
 
 #: message
 msgid "Key is valid."
@@ -281,21 +465,8 @@ msgstr "Верный ключ."
 msgid "Attempting key recovery."
 msgstr "Попытка восстановления ключа."
 
-#: failure
-msgid "This operation requires a key file to be specified using the -k option."
-msgstr "Эта операция требует указания файла ключа с помощью опции -k."
-
-#: message
-msgid "Waiting for the key to be piped from stdin... "
-msgstr "Ожидание передачи ключа через стандартный ввод..."
-
-#: failure
-msgid "Key not found, specify one using -k."
-msgstr "Ключ не найден, укажите его с помощью опции -k."
-
 #: warning
-msgid ""
-"The key seems invalid or its format is not known by this version of Tomb."
+msgid "The key seems invalid or its format is not known by this version of Tomb."
 msgstr "Похоже, ключ неверен, либо его формат неизвестен этой версии Tomb."
 
 #: failure
@@ -310,14 +481,6 @@ msgstr "Внутренняя ошибка: ask_key_password() вызвана п�
 msgid "A password is required to use key ::1 key::"
 msgstr "Для использования ключа ::1 key:: требуется пароль"
 
-#: warning
-msgid "User aborted password dialog."
-msgstr "Пользователь отменил диалог пароля."
-
-#: message
-msgid "Password OK."
-msgstr "Верный пароль."
-
 #: message
 msgid "Commanded to change password for tomb key ::1 key::"
 msgstr "Приказано изменить пароль для ключа ::1 key::"
@@ -325,37 +488,6 @@ msgstr "Приказано изменить пароль для ключа ::1 k
 #: failure
 msgid "No valid password supplied."
 msgstr "Не предоставлен верный пароль."
-
-#: success
-msgid "Changing password for ::1 key file::"
-msgstr ""
-
-#: failure
-msgid "Error: the newly generated keyfile does not seem valid."
-msgstr "Ошибка: сгенерированный файл ключа неверен."
-
-#: success
-msgid "Your passphrase was successfully updated."
-msgstr ""
-
-#: failure
-msgid "User aborted."
-msgstr "Отменено пользователем."
-
-#: failure
-msgid "You set empty password, which is not possible."
-msgstr "Вы указали пустой пароль, так нельзя."
-
-#: failure
-msgid ""
-"Wrong argument for --kdf: must be an integer number (iteration seconds)."
-msgstr ""
-"Неверный аргумент для --kdf: должно быть указано целое число (секунд "
-"итерации)."
-
-#: success
-msgid "Using KDF, iterations: ::1 microseconds::"
-msgstr ""
 
 #: message
 msgid "generating salt"
@@ -369,41 +501,9 @@ msgstr "вычисляю итерации"
 msgid "encoding the password"
 msgstr "кодирую пароль"
 
-#: failure
-msgid "gpg (GnuPG) is not found, Tomb cannot function without it."
-msgstr "gpg (GnuPG) не найден, Tomb не может работать без него."
-
 #: warning
 msgid "Encode failed: ::1 image file:: is not a jpeg image."
 msgstr "Шифрование не удалось: ::1 image file:: не jpeg-изображение."
-
-#: success
-msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
-msgstr ""
-
-#: message
-msgid "Please confirm the key password for the encoding"
-msgstr "Пожалуйста, подтвердите пароль ключа для шифрования"
-
-#: warning
-msgid "Wrong password supplied."
-msgstr "Указан неверный пароль."
-
-#: failure
-msgid "You shall not bury a key whose password is unknown to you."
-msgstr "Вам не захоронить ключ, чей пароль не известен Вам."
-
-#: warning
-msgid "Encoding error: steghide reports problems."
-msgstr "Ошибка шифрования: steghide сообщает о проблемах."
-
-#: success
-msgid "Tomb key encoded succesfully into image ::1 image file::"
-msgstr ""
-
-#: failure
-msgid "Exhume failed, no image specified"
-msgstr "Эксгумация не удалась, не указано изображения"
 
 #: failure
 msgid "Exhume failed, image file not found: ::1 image file::"
@@ -425,14 +525,6 @@ msgstr "вывод эксгумированного ключа в стандар
 msgid "File exists: ::1 tomb key::"
 msgstr "Файл существует: ::1 tomb key::"
 
-#: warning
-msgid "Use of --force selected: overwriting."
-msgstr "Указана опция --force: перезаписываю."
-
-#: warning
-msgid "Make explicit use of --force to overwrite."
-msgstr "Явно укажите опцию --force для перезаписи."
-
 #: failure
 msgid "Refusing to overwrite file. Operation aborted."
 msgstr "Отказываюсь перезаписывать файл. Операция отменена."
@@ -441,25 +533,13 @@ msgstr "Отказываюсь перезаписывать файл. Опера
 msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr "Пытаюсь эксгумировать ключ из изображения ::1 image file::"
 
-#: success
-msgid "Key succesfully exhumed to ::1 key::."
-msgstr ""
-
 #: warning
 msgid "Nothing found in ::1 image file::"
 msgstr "В ::1 image file:: ничего не найдено"
 
-#: success
-msgid "Rendering a printable QRCode for key: ::1 tomb key file::"
-msgstr ""
-
 #: failure
 msgid "QREncode reported an error."
 msgstr "QREncode сообщил об ошибке."
-
-#: success
-msgid "Operation successful:"
-msgstr ""
 
 #: message
 msgid "Commanded to dig tomb ::1 tomb path::"
@@ -470,24 +550,12 @@ msgid "Missing path to tomb"
 msgstr "Отсутствует путь к гробнице"
 
 #: failure
-msgid "Size argument missing, use -s"
-msgstr "Отсутствует размер, укажите его с помощью -s"
-
-#: failure
 msgid "Size must be an integer (megabytes)"
 msgstr "Размер должен быть целым числом (в мегабатах)"
 
 #: failure
 msgid "Tombs can't be smaller than 10 megabytes"
 msgstr "Гробницы не могут быть меньше 10 мегабайт"
-
-#: warning
-msgid "A tomb exists already. I'm not digging here:"
-msgstr "Гробница существует. Я не буду копать здесь:"
-
-#: success
-msgid "Creating a new tomb in ::1 tomb path::"
-msgstr ""
 
 #: message
 msgid "Generating ::1 tomb file:: of ::2 size::MiB"
@@ -497,14 +565,6 @@ msgstr "Генерирую ::1 tomb file:: размером ::2 size::Мб"
 msgid "Error creating the tomb ::1 tomb path::"
 msgstr "Ошибка при создании гробницы ::1 tomb path::"
 
-#: success
-msgid "Done digging ::1 tomb name::"
-msgstr ""
-
-#: message
-msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
-msgstr "Ваша гробница пока не готова, необходимо выковать ключ и запереть ее:"
-
 #: message
 msgid "tomb forge ::1 tomb path::.key"
 msgstr "tomb forge ::1 tomb path::.key"
@@ -513,129 +573,29 @@ msgstr "tomb forge ::1 tomb path::.key"
 msgid "tomb lock ::1 tomb path:: -k ::1 tomb path::.key"
 msgstr "tomb lock ::1 tomb path:: -k ::1 tomb path::.key"
 
-#: failure
-msgid "A filename needs to be specified using -k to forge a new key."
-msgstr ""
-"Необходимо указать имя файла через опцию -k, чтобы выковать новый ключ."
-
 #: message
 msgid "Commanded to forge key ::1 key::"
 msgstr "Приказано выковать ключ ::1 key::"
 
-#: warning
-msgid "Forging this key would overwrite an existing file. Operation aborted."
-msgstr "Выковка этого ключа перезапишет существующий файл. Операция отменена."
-
 #: message
 msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
-msgstr ""
-"Приказано выковать ключ ::1 key:: с алгоритмом шифрования ::2 algorithm::"
-
-#: message
-msgid "This operation takes time, keep using this computer on other tasks,"
-msgstr "Эта операция займет некоторое время, выполняйте пока другие задачи,"
-
-#: message
-msgid "once done you will be asked to choose a password for your tomb."
-msgstr "по завершении Вас вопросят ввести пароль для гробницы."
-
-#: message
-msgid "To make it faster you can move the mouse around."
-msgstr "Чтобы ускорить операцию, подвигайте мышку."
-
-#: message
-msgid "If you are on a server, you can use an Entropy Generation Daemon."
-msgstr "Если Вы на сервере, можно использовать демон генерации энтропии.."
-
-#: warning
-msgid "Cannot generate encryption key."
-msgstr "Не могу сгенерировать ключ шифрования."
-
-#: success
-msgid "Choose the  password of your key: ::1 tomb key::"
-msgstr ""
-
-#: message
-msgid "(You can also change it later using 'tomb passwd'.)"
-msgstr "(Его можно потом изменить с помощью 'tomb passwd'.)"
-
-#: warning
-msgid "The key does not seem to be valid."
-msgstr "Ключ неверен."
-
-#: warning
-msgid "Dumping contents to screen:"
-msgstr "Выгрузка содержимого на экран:"
+msgstr "Приказано выковать ключ ::1 key:: с алгоритмом шифрования ::2 algorithm::"
 
 #: message
 msgid "Done forging ::1 key file::"
 msgstr "Выкован ключ ::1 key file::"
 
-#: success
-msgid "Your key is ready:"
-msgstr ""
-
-#: warning
-msgid "No tomb specified for locking."
-msgstr "Не указана гробница для запирания."
-
-#: warning
-msgid "Usage: tomb lock file.tomb file.tomb.key"
-msgstr "Использование: tomb lock file.tomb file.tomb.key"
-
 #: message
 msgid "Commanded to lock tomb ::1 tomb file::"
 msgstr "Приказано запереть гробницу ::1 tomb file::"
-
-#: failure
-msgid "There is no tomb here. You have to it dig first."
-msgstr "Здесь нет гробницы. Сначала выкопайте ее."
-
-#: message
-msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
-msgstr "Проверяю, пуста ли гробница (мы никогда не ходим по чужим костям)."
-
-#: warning
-msgid "The tomb was already locked with another key."
-msgstr "Гробница уже заперта другим ключом."
-
-#: failure
-msgid ""
-"Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
-msgstr ""
-"Операция отменена. Я не могу запереть уже запертую гробницу. Выкопайте новую."
-
-#: message
-msgid "Fine, this tomb seems empty."
-msgstr "Так, эта гробница, вроде как, пуста."
 
 #: message
 msgid "Locking using cipher: ::1 cipher::"
 msgstr "Запираю, используя шифр ::1 cipher::"
 
-#: success
-msgid "Locking ::1 tomb file:: with ::2 tomb key file::"
-msgstr ""
-
-#: message
-msgid "Formatting Luks mapped device."
-msgstr "Форматирую устройство LUKS."
-
-#: warning
-msgid "cryptsetup luksFormat returned an error."
-msgstr "cryptsetup luksFormat вернул ошибку."
-
 #: warning
 msgid "cryptsetup luksOpen returned an error."
 msgstr "cryptsetup luksOpen возвратил ошибку."
-
-#: message
-msgid "Formatting your Tomb with Ext3/Ext4 filesystem."
-msgstr "Форматирую Вашу гробницу в файловую систему Ext3/Ext4."
-
-#: warning
-msgid "Tomb format returned an error."
-msgstr "Tomb format вернул ошибку."
 
 #: warning
 msgid "Your tomb ::1 tomb file:: may be corrupted."
@@ -644,11 +604,6 @@ msgstr "Ваша гробница ::1 tomb file:: может быть повре
 #: message
 msgid "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::"
 msgstr "Запер ::1 tomb name:: с помощью LUKS dm-crypt ::2 cipher::"
-
-#: success
-msgid ""
-"Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::"
-msgstr ""
 
 #: message
 msgid "Commanded to reset key for tomb ::1 tomb path::"
@@ -669,10 +624,6 @@ msgstr "Операция отменена."
 #: failure
 msgid "Not a valid LUKS encrypted volume: ::1 volume::"
 msgstr "Неверный зашифрованный том LUKS: ::1 volume::"
-
-#: success
-msgid "Changing lock on tomb ::1 tomb name::"
-msgstr ""
 
 #: message
 msgid "Old key: ::1 old key::"
@@ -702,10 +653,6 @@ msgstr "Неожиданная ошибка в luksChangeKey."
 msgid "Unexpected error in luksClose."
 msgstr "Неожиданная ошибка в luksClose."
 
-#: success
-msgid "Succesfully changed key for tomb: ::1 tomb file::"
-msgstr ""
-
 #: message
 msgid "The new key is: ::1 new key::"
 msgstr "Новый ключ: ::1 new key::"
@@ -724,80 +671,40 @@ msgstr "::1 tomb file:: неверный файл гробницы"
 
 #: message
 msgid "Mountpoint not specified, using default: ::1 mount point::"
-msgstr ""
-"Не указана точка монтирования, использую точку по умолчанию: ::1 mount "
-"point::"
+msgstr "Не указана точка монтирования, использую точку по умолчанию: ::1 mount point::"
 
 #: warning
 msgid "::1 tomb name:: is already open."
 msgstr "::1 tomb name:: уже открыт."
-
-#: message
-msgid "Here below its status is reported:"
-msgstr "Ниже назодится отчет о его статусе:"
-
-#: success
-msgid "Opening ::1 tomb file:: on ::2 mount point::"
-msgstr ""
 
 #: failure
 msgid "::1 tomb file:: is not a valid Luks encrypted storage file."
 msgstr "::1 tomb file:: - неверное зашифрованное устройство LUSK."
 
 #: message
-msgid "This tomb is a valid LUKS encrypted device."
-msgstr "Эта гробница - верное зашифрованное устройство LUKS."
-
-#: message
 msgid "Cipher is \"::1 cipher::\" mode \"::2 mode::\" hash \"::3 hash::\""
 msgstr "Шифр \"::1 cipher::\", режим \"::2 mode::\", хеш \"::3 hash::\""
 
 #: warning
-msgid ""
-"Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
-msgstr ""
-"Для этой гробницы разрешено использование нескольких ключей. Будьте "
-"осторожны: там может быть бэкдор."
-
-#: failure
-msgid "Failure mounting the encrypted file."
-msgstr "Не удалось примонтировать зашифрованный файл."
-
-#: success
-msgid "Success unlocking tomb ::1 tomb name::"
-msgstr ""
+msgid "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
+msgstr "Для этой гробницы разрешено использование нескольких ключей. Будьте осторожны: там может быть бэкдор."
 
 #: message
 msgid "Checking filesystem via ::1::"
 msgstr "Проверка файловой системы через ::1::"
 
-#: success
-msgid "Success opening ::1 tomb file:: on ::2 mount point::"
-msgstr ""
-
 #: message
 msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
-msgstr ""
-"Последний визит нанес ::1 user::(::2 tomb build::) из ::3 tty:: на ::4 host::"
+msgstr "Последний визит нанес ::1 user::(::2 tomb build::) из ::3 tty:: на ::4 host::"
 
 #: message
 msgid "on date ::1 date::"
 msgstr "дата: ::1 date::"
 
 #: warning
-msgid "How pitiful!  A tomb, and no HOME."
-msgstr "Как жаль! Гробница есть, но нет HOME."
-
-#: warning
-#, fuzzy
-msgid "Cannot exec bind hooks without a mounted tomb."
-msgstr ""
-"Невозможно выполнить обработчики событий без примонтированной гробницы."
-
-#: warning
 #, fuzzy
 msgid "bind-hooks file is broken"
-msgstr "файл обработчиков битый"
+msgstr "файл bind-hooks битый"
 
 #: warning
 #, fuzzy
@@ -816,14 +723,8 @@ msgstr "Цель bind-hook не существует, пропускаю ::1 hom
 
 #: warning
 #, fuzzy
-msgid ""
-"bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
-msgstr ""
-"Источник bind-hook не найден в гробнице,пропускаю ::1 mount point::/::2 dir::"
-
-#: success
-msgid "Post hooks found, executing as user ::1 user name::."
-msgstr ""
+msgid "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
+msgstr "Источник bind-hook не найден в гробнице, пропускаю ::1 mount point::/::2 subdir::"
 
 #: failure
 msgid "I can't see any ::1 status:: tomb, may they all rest in peace."
@@ -831,25 +732,19 @@ msgstr "Я не вижу ::1 status:: гробниц, да упокоятся о
 
 #: message
 msgid "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::"
-msgstr "::1 tombname:: открыта на ::2 tombmount:: с помощью ::3 tombfsopts::"
+msgstr "::1 tombname:: открыта на ::2 tombmount:: с параметрами ::3 tombfsopts::"
 
 #: message
 msgid "::1 tombname:: open since ::2 tombsince::"
 msgstr "::1 tombname:: открыта с ::2 tombsince::"
 
 #: message
-msgid ""
-"::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::"
-msgstr ""
-"::1 tombname:: открыл ::2 tombuser:: из ::3 tombtty:: на ::4 tombhost::"
+msgid "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::"
+msgstr "::1 tombname:: открыл ::2 tombuser:: из ::3 tombtty:: на ::4 tombhost::"
 
 #: message
-msgid ""
-"::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::"
-"%) is used: ::4 tombavail:: free "
-msgstr ""
-"::1 tombname:: размер ::2 tombtot:: из которых ::3 tombused:: (::5 "
-"tombpercent::%) использовано: ::4 tombavail:: свободно "
+msgid "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::%) is used: ::4 tombavail:: free "
+msgstr "::1 tombname:: размер ::2 tombtot:: из которых ::3 tombused:: (::5 tombpercent::%) использовано: ::4 tombavail:: свободно "
 
 #: warning
 msgid "::1 tombname:: warning: your tomb is almost full!"
@@ -865,9 +760,7 @@ msgstr "Внутренняя ошибка: list_tomb_binds вызвана без
 
 #: failure
 msgid "Cannot index tombs on this system: updatedb (mlocate) not installed."
-msgstr ""
-"Не могу проиндексировать гробницы на этой системе: updatedb (mlocate) не "
-"установлен."
+msgstr "Не могу проиндексировать гробницы на этой системе: updatedb (mlocate) не установлен."
 
 #: warning
 msgid "Cannot use GNU findutils for index/search commands."
@@ -881,14 +774,6 @@ msgstr "Для использования команды index необходи�
 msgid "There seems to be no open tomb engraved as [::1::]"
 msgstr "Не похоже, что открыта гробница, гравированная как [::1::]"
 
-#: failure
-msgid "I can't see any open tomb, may they all rest in peace."
-msgstr "Я не вижу открытых гробниц, да упокоятся они все с миром."
-
-#: success
-msgid "Creating and updating search indexes."
-msgstr ""
-
 #: message
 msgid "Skipping ::1 tomb name:: (.noindex found)."
 msgstr "Пропускаю ::1 tomb name:: (найден файл .noindex)."
@@ -900,18 +785,6 @@ msgstr "Индексирую имена в ::1 tomb name::..."
 #: message
 msgid "Indexing ::1 tomb name:: contents..."
 msgstr "Индексирую содержимое ::1 tomb name::..."
-
-#: message
-msgid "Generating a new swish-e configuration file: ::1 swish conf::"
-msgstr ""
-
-#: message
-msgid "Search index updated."
-msgstr "Поисковый индекс обновлен."
-
-#: success
-msgid "Searching for: ::1::"
-msgstr ""
 
 #: message
 msgid "Searching filenames in tomb ::1 tomb name::"
@@ -929,23 +802,9 @@ msgstr "Ищу в содержимом гробницы ::1 tomb name::"
 msgid "Skipping tomb ::1 tomb name::: not indexed."
 msgstr "Пропускаю гробницу ::1 tomb name::: она не индексирована."
 
-#: warning
-msgid "Run 'tomb index' to create indexes."
-msgstr "Запустите 'tomb index' для создания индексов."
-
-#: message
-msgid "Search completed."
-msgstr "Поиск завершен."
-
 #: message
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes."
-msgstr ""
-"Приказано изменить размер гробницы ::1 tomb name::. Новый размер: ::2 size:: "
-"мегабайт."
-
-#: failure
-msgid "No tomb name specified for resizing."
-msgstr "Не указано имя гробницы для изменения размера."
+msgstr "Приказано изменить размер гробницы ::1 tomb name::. Новый размер: ::2 size:: мегабайт."
 
 #: failure
 msgid "Cannot find ::1::"
@@ -957,20 +816,11 @@ msgstr "Отмена операций: не указан новый размер
 
 #: failure
 msgid "Please close the tomb ::1 tomb name:: before trying to resize it."
-msgstr ""
-"Пожалуйста, закройте гробницу ::1 tomb name::, прежде чем менять ее размер."
+msgstr "Пожалуйста, закройте гробницу ::1 tomb name::, прежде чем менять ее размер."
 
 #: failure
 msgid "You must specify the new size of ::1 tomb name::"
 msgstr "Вы должны указать новый размер для ::1 tomb name::"
-
-#: failure
-msgid "Size is not an integer."
-msgstr "Размер не целое число."
-
-#: failure
-msgid "The new size must be greater then old tomb size."
-msgstr "Новый размер гробницы должен быть больше старого."
 
 #: failure
 msgid "Error creating the extra resize ::1 size::, operation aborted."
@@ -988,35 +838,9 @@ msgstr "e2fsck не смог проверить ::1 mapper::"
 msgid "resize2fs failed to resize ::1 mapper::"
 msgstr "resize2fs не смог изменить размер ::1 mapper::"
 
-#: failure
-msgid "There is no open tomb to be closed."
-msgstr "Нет открытой гробницы для закрытия."
-
-#: warning
-msgid "Too many tombs mounted, please specify one (see tomb list)"
-msgstr ""
-"Примонтировано слишком много гробниц, пожалуйста, укажите точнее (см. tomb "
-"list)"
-
-#: warning
-msgid "or issue the command 'tomb close all' to close them all."
-msgstr "или выполните команду 'tomb close all', чтобы закрыть их все."
-
 #: warning
 msgid "Tomb not found: ::1 tomb file::"
 msgstr "Гробница не найдена: ::1 tomb file::"
-
-#: warning
-msgid "Please specify an existing tomb."
-msgstr "Пожалуйста, укажите существующую гробницу."
-
-#: success
-msgid "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::"
-msgstr ""
-
-#: message
-msgid "Kill all processes busy inside the tomb."
-msgstr "Убиваю все процессы, занятые в гробнице"
 
 #: failure
 msgid "Cannot slam the tomb ::1 tomb name::"
@@ -1024,17 +848,12 @@ msgstr "Не могу захлопнуть гробницу ::1 tomb name::"
 
 #: message
 msgid "Closing tomb ::1 tomb name:: mounted on ::2 mount point::"
-msgstr ""
-"Закрываю гробницу ::1 tomb name::, примонтированную на ::2 mount point::"
+msgstr "Закрываю гробницу ::1 tomb name::, примонтированную на ::2 mount point::"
 
 #: message
 #, fuzzy
 msgid "Closing tomb bind hook: ::1 hook::"
-msgstr "Закрываю обработчик событий гробницы: ::1 hook::"
-
-#: success
-msgid "Slamming tomb: killing all processes using this hook."
-msgstr ""
+msgstr "Закрываю привязку гробницы: ::1 hook::"
 
 #: failure
 msgid "Cannot slam the bind hook ::1 hook::"
@@ -1044,21 +863,9 @@ msgstr "Не могу захлопнуть обработчик ::1 hook::"
 msgid "Tomb bind hook ::1 hook:: is busy, cannot close tomb."
 msgstr "Обработчик гробницы ::1 hook:: занят, не могу закрыть гробницу."
 
-#: warning
-msgid "Tomb is busy, cannot umount!"
-msgstr "Гробница занята, не могу отмонтировать!"
-
 #: failure
 msgid "Error occurred in cryptsetup luksClose ::1 mapper::"
 msgstr "Произошла ошибка cryptsetup luksClose ::1 mapper::"
-
-#: success
-msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
-msgstr ""
-
-#: failure
-msgid "Error parsing."
-msgstr "Ошибка парсинга."
 
 #: warning
 msgid "There's no such command \"::1 subcommand::\"."
@@ -1068,10 +875,6 @@ msgstr "Нет такой команды \"::1 subcommand::\"."
 msgid "Please try -h for help."
 msgstr "Используйте -h для вызова справки."
 
-#: warning
-msgid "Some error occurred during option processing."
-msgstr "Произошла какая-то ошибка при обработке опций."
-
 #: failure
 msgid "See \"tomb help\" for more info."
 msgstr "Для дополнительной информации выполните \"tomb help\"."
@@ -1079,25 +882,6 @@ msgstr "Для дополнительной информации выполни�
 #: failure
 msgid "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::"
 msgstr "Не распознана опция ::1 arg:: для подкоманды ::2 subcommand::"
-
-#: failure
-msgid ""
-"You specified option ::1 option::, which is DANGEROUS and should only be "
-"used for testing\n"
-"If you really want so, add --unsafe"
-msgstr ""
-"Вы указали опцию ::1 option::, которая ОПАСНА и должна быть использована "
-"только для тестирования\n"
-"Если Вы и правда этого хотите, добавьте параметр --unsafe"
-
-#: warning
-msgid ""
-"The create command is deprecated, please use dig, forge and lock instead."
-msgstr "Команда create устарела, пожалуйста, используйте dig, forge и lock."
-
-#: warning
-msgid "For more informations see Tomb's manual page (man tomb)."
-msgstr "Для большей информации обратитесь к руководству Tomb (man tomb)."
 
 #: failure
 msgid "Resize2fs not installed: cannot resize tombs."
@@ -1121,19 +905,11 @@ msgstr "Tomb ::1 version:: - стойкий и аккуратный хранит
 
 #: print
 msgid " Copyright (C) 2007-2014 Dyne.org Foundation, License GNU GPL v3+"
-msgstr ""
-" Все права защищены (C) 2007-2014 Dyne.org Foundation, Лицензия GNU GPL v3+"
+msgstr " Все права защищены (C) 2007-2014 Dyne.org Foundation, Лицензия GNU GPL v3+"
 
 #: print
 msgid " This is free software: you are free to change and redistribute it"
-msgstr ""
-" Это свободное программное обеспечение: Вы в праве изменять и распространять "
-"его"
-
-#: print
-msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
-msgstr ""
-" За последним исходным кодом зайдите на <http://dyne.org/software/tomb>"
+msgstr " Это свободное программное обеспечение: Вы в праве изменять и распространять его"
 
 #: print
 msgid " This source code is distributed in the hope that it will be useful,"
@@ -1148,70 +924,205 @@ msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr " ТОВАРОПРИГОДНОСТИ или ПОЛЕЗНОСТИ ДЛЯ КОНКРЕТНЫХ ЦЕЛЕЙ."
 
 #: print
-msgid " When in need please refer to <http://dyne.org/support>."
-msgstr " Если Вам нужна помощь, обращайтесь к <http://dyne.org/support>."
-
-#: print
 msgid "System utils:"
 msgstr "Системные утилиты:"
-
-#: print
-msgid "Optional utils:"
-msgstr "Дополнительные утилиты:"
 
 #: warning
 msgid "Command \"::1 subcommand::\" not recognized."
 msgstr "Команда \"::1 subcommand::\" не распознана."
 
+#: print
+msgid " passwd  change the password of a KEY (needs old pass)"
+msgstr " passwd  изменить пароль КЛЮЧА (требуется старый пароль)"
+
+#: print
+msgid " setkey  change the KEY locking a TOMB (needs old key and pass)"
+msgstr " setkey  изменить КЛЮЧ, запирающий ГРОБНИЦУ (требуется старый ключ и пароль)"
+
+#: print
+msgid " // Backup on paper:"
+msgstr " // Резервная копия на бумаге:"
+
+#: print
+msgid " // Steganography:"
+msgstr " // Стеганография:"
+
+#: print
+msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
+msgstr " bury   спрятать КЛЮЧ внутри изображения JPEG (для использования с -k)"
+
+#: print
+msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
+msgstr " exhume  извлечь КЛЮЧ из изображения JPEG (выводится в стандартный вывод)"
+
+#: failure
+msgid "Exhume failed, no image specified"
+msgstr "Эксгумация не удалась, не указано изображения"
+
+#: print
+msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
+msgstr " За последним исходным кодом зайдите на <http://dyne.org/software/tomb>"
+
+#: print
+msgid " When in need please refer to <http://dyne.org/support>."
+msgstr " Если Вам нужна помощь, обращайтесь к <http://dyne.org/support>."
+
+#: print
+msgid "Optional utils:"
+msgstr "Дополнительные утилиты:"
+
+#: failure
+msgid "Fatal error setting the permission umask for temporary files"
+msgstr "Критическая ошибка при задании маски прав для временных файлов"
+
+#: failure
+msgid "Fatal error setting ownership on temporary file: ::1 temp file::"
+msgstr "Критическая ошибка при задании владельца временного файла ::1 temp file::"
+
+#: warning
+msgid "cleartext key from stdin selected: this is unsafe."
+msgstr "выбран ключ, явно указанный через стандартный ввод: это небезопасно."
+
+#: failure
+msgid "please use --unsafe if you really want to do this."
+msgstr "пожалуйчтв, используйте --unsafe, если Вы действительно этого хотите."
+
+#: warning
+msgid "received key in cleartext from stdin (unsafe mode)"
+msgstr "получен ключ в явном виде через стандартный ввод (небезопасный режим)"
+
+#: failure
+msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\n"
+"If you really want so, add --unsafe"
+msgstr "Вы указали опцию ::1 option::, которая ОПАСНА и должна быть использована только для тестирования\n"
+"Если Вы и правда этого хотите, добавьте параметр --unsafe"
+
+#: failure
+msgid "Failing to identify the user who is calling us"
+msgstr "Не удалось определить пользователя, вызвавшего меня"
+
+#: failure
+msgid "Fatal error creating the temporary directory: ::1 temp dir::"
+msgstr "Критическая ошибка при создании временной директории: ::1 temp dir::"
+
+#: failure
+msgid "Someone is messing up with us trying to hijack temporary files."
+msgstr "Кто-то наглый пытается похитить наши временные файлы."
+
+#: success
+msgid "All your swaps are belong to crypt.  Good."
+msgstr "All your swaps are belong to crypt.  Хорошо."
+
+#: success
+msgid "Changing password for ::1 key file::"
+msgstr "Меняю пароль для ::1 key file::"
+
+#: success
+msgid "Your passphrase was successfully updated."
+msgstr "Ваш пароль успешно обновлен."
+
+#: success
+msgid "Using KDF, iterations: ::1 microseconds::"
+msgstr "Использую KDF, итераций: ::1 microseconds::"
+
+#: success
+msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
+msgstr "Кодирую ключ ::1 tomb key:: в изображение ::2 image file::"
+
+#: success
+msgid "Tomb key encoded succesfully into image ::1 image file::"
+msgstr "Ключ от гробницы успешно закодирован в изображение ::1 image file::"
+
+#: success
+msgid "Key succesfully exhumed to ::1 key::."
+msgstr "Ключ успешно эксгумирован в ::1 key::"
+
+#: success
+msgid "Rendering a printable QRCode for key: ::1 tomb key file::"
+msgstr "Рендерю готовый для печати штрих-код для ключа: ::1 tomb key file::"
+
+#: success
+msgid "Operation successful:"
+msgstr "Операция успешна."
+
+#: success
+msgid "Creating a new tomb in ::1 tomb path::"
+msgstr "Создаю новую гробницу в ::1 tomb path::"
+
+#: success
+msgid "Done digging ::1 tomb name::"
+msgstr "::1 tomb name:: выкопана"
+
+#: success
+msgid "Choose the  password of your key: ::1 tomb key::"
+msgstr "Выберите пароль для вашего ключа: ::1 tomb key::"
+
+#: success
+msgid "Your key is ready:"
+msgstr "Ваш ключ готов:"
+
+#: success
+msgid "Locking ::1 tomb file:: with ::2 tomb key file::"
+msgstr "Запираю ::1 tomb file:: с помощью ::2 tomb key file::"
+
+#: success
+msgid "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::"
+msgstr "Ваша гробница готова в ::1 tomb path:: и защищена ключом ::2 tomb key::"
+
+#: success
+msgid "Changing lock on tomb ::1 tomb name::"
+msgstr "Меняю замок на гробнице ::1 tomb name::"
+
+#: success
+msgid "Succesfully changed key for tomb: ::1 tomb file::"
+msgstr "Ключ для гробницы ::1 tomb file:: успешно изменен"
+
+#: success
+msgid "Opening ::1 tomb file:: on ::2 mount point::"
+msgstr "Открываю ::1 tomb file:: в ::2 mount point::"
+
+#: success
+msgid "Success unlocking tomb ::1 tomb name::"
+msgstr "Успешно отпер гробницу ::1 tomb name::"
+
+#: success
+msgid "Success opening ::1 tomb file:: on ::2 mount point::"
+msgstr "Успешно открыл ::1 tomb file:: в ::2 mount point::"
+
+#: success
+msgid "Post hooks found, executing as user ::1 user name::."
+msgstr "Найдены пост-обработчики, выполняю как пользователь ::1 user name::."
+
+#: success
+msgid "Creating and updating search indexes."
+msgstr "Создаю и обновляю индексы поиска."
+
 #: message
-msgid "Try -h for help."
-msgstr "Используйте -h для вызова справки."
+msgid "Generating a new swish-e configuration file: ::1 swish conf::"
+msgstr "Генерирую новый файл конфигурации swish-e: ::1 swish conf::"
 
-#~ msgid "Fatal error creating a directory for temporary files"
-#~ msgstr "Критическая ошибка при создании директории для временных файлов"
+#: success
+msgid "Searching for: ::1::"
+msgstr "Ищу: ::1::"
 
-#~ msgid "Cannot mount tmpfs in ::1 shm path::"
-#~ msgstr "Не могу примонтировать tmpfs в ::1 shm path::"
+#: success
+msgid "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::"
+msgstr "Захлопываю гробницу ::1 tomb name::, примонтированную на ::2 mount point::"
 
-#~ msgid "Fatal error setting permissions on temporary file: ::1 temp file::"
-#~ msgstr ""
-#~ "Критическая ошибка при установке прав на временный файл ::1 temp file::"
+#: success
+#, fuzzy
+msgid "Slamming tomb: killing all processes using this hook."
+msgstr "Захлопываю гробницу: убиваю все процессы, использующие эту привязку."
 
-#~ msgid "Loopback mount called on invalid tomb: ::1 path::"
-#~ msgstr "Вызов loopback монтирования на неверную гробницу: ::1 path::"
+#: success
+msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
+msgstr "Гробница ::1 tomb name:: закрыта: да упокоятся с миром Ваши кости."
 
-#~ msgid " passwd  change the password of a KEY"
-#~ msgstr " passwd  изменить пароль КЛЮЧА "
+#: warning
+msgid "Pinentry error: ::1 error::"
+msgstr "Ошибка pinentry: ::1 error::"
 
-#~ msgid " setkey  change the KEY locking a TOMB (needs old one)"
-#~ msgstr " setkey  изменить КЛЮЧ для закрытия ГРОБНИЦЫ (нужен старый ключ) "
+#: warning
+msgid "Empty password"
+msgstr "Пустой пароль"
 
-#~ msgid " bury    hide a KEY inside a JPEG image"
-#~ msgstr " bury    спрятать КЛЮЧ в JPEG изображении"
-
-#~ msgid " exhume  extract a KEY from a JPEG image"
-#~ msgstr " exhume  извлечь КЛЮЧ из изображения JPEG"
-
-#~ msgid "Tomb close ::1::"
-#~ msgstr "Закрываю гробницу ::1::"
-
-#~ msgid ""
-#~ "You specified option ::1 option::, which is DANGEROUS and should only be "
-#~ "used for testing\n"
-#~ "If you really want so, add --unsecure-dev-mode"
-#~ msgstr ""
-#~ "Вы указали опцию ::1 option::, которая ОПАСНА и должна быть использована "
-#~ "только для тестирования\n"
-#~ "Если Вы и правда этого хотите, добавьте параметр --unsecure-dev-mode"
-
-#~ msgid " The latest Tomb sourcecode is published on <http://tomb.dyne.org>"
-#~ msgstr " Последний исходный код Tomb опубликован на <http://tomb.dyne.org>"
-
-#~ msgid " Please refer to the GNU Public License for more details."
-#~ msgstr " За более подробной информацией обратитесь к GNU Public License."
-
-#~ msgid "Fatal error creating a directory in shared memory."
-#~ msgstr "Критическая ошибка при создании директории в разделяемой памяти."
-
-#~ msgid "gpg-agent choice of pinentry: ::1 pinentry::"
-#~ msgstr "Выбор pinentry для gpg-agent: ::1 pinentry::"
