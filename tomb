@@ -234,10 +234,9 @@ _plot() {
 # Provide a random filename in shared memory
 _tmp_create() {
     [[ -d "$TMPPREFIX" ]] || {
-        sudo mkdir -m 777 "$TMPPREFIX"
-        [[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPPREFIX"
         # we create the tempdir with the sticky bit on
-        sudo chmod o+t "$TMPPREFIX"
+        sudo mkdir -m 1777 "$TMPPREFIX"
+        [[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPPREFIX"
     }
 
     # We're going to add one more $RANDOM for each time someone complain
@@ -339,20 +338,20 @@ ask_password() {
 
     local description="$1"
     local title="${2:-Enter tomb password.}"
-    local _output
-    local _password
-    local _gtkrc
-    local _theme
+    local output
+    local password
+    local gtkrc
+    local theme
 
     [[ "$DISPLAY" = "" ]] || {
-        _theme=/share/themes/tomb/gtk-2.0-key/gtkrc
+        theme=/share/themes/tomb/gtk-2.0-key/gtkrc
         for i in /usr/local /usr; do
-            [[ -r $i/$_theme ]] && {
-                _gtkrc=$i/$_theme
+            [[ -r $i/$theme ]] && {
+                gtkrc=$i/$theme
                 break }
         done }
 
-    _output=`cat <<EOF | GTK2_RC_FILES="$_gtkrc" pinentry-gtk-2
+    output=`cat <<EOF | GTK2_RC_FILES="$gtkrc" pinentry-gtk-2
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE $title
@@ -362,22 +361,22 @@ GETPIN
 EOF`
     
     # parse the pinentry output
-    for i in ${(f)_output}; do
+    for i in ${(f)output}; do
         [[ "$i" =~ "^ERR.*" ]] && {
             _warning "Pinentry error: ::1 error::" ${i[(w)3]}
             print "canceled"
             return 1 }
 
         # here the password is found
-        [[ "$i" =~ "^D .*" ]] && _password="${i##D }"
+        [[ "$i" =~ "^D .*" ]] && password="${i##D }"
     done
 
-    [[ "$_password" = "" ]] && { 
+    [[ "$password" = "" ]] && { 
         _warning "Empty password"
         print "empty"
         return 1 }
 
-    print "$_password"
+    print "$password"
     return 0
 }
 
