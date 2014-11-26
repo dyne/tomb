@@ -2666,9 +2666,12 @@ main() {
             _print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
             _print "\000"
             option_is_set -v && {
+                local langwas=$LANG
+                LANG=en
                 _print " This source code is distributed in the hope that it will be useful,"
                 _print " but WITHOUT ANY WARRANTY; without even the implied warranty of"
                 _print " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+                LANG=$langwas
                 _print " When in need please refer to <http://dyne.org/support>."
                 _print "\000"
                 _print "System utils:"
