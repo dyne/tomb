@@ -12,10 +12,11 @@ connections: it is possible to pipe cleartext secrets from stdin using
 `-k cleartext` but that requires the --unsafe flag.
 
 The security is also improved by avoiding most uses of temporary
-files.  All code has been refactored for readability and integration
-with zsh features. Signal handlers are now in place, global arrays are
-used to keep track of temp files. Namespace has been revisioned and
-corrected, described in [HACKING](docs/HACKING.txt).
+files. The privilege escalation model has been simplified and sudo is
+called only when needed. All code has been refactored for readability
+and integration with zsh features. Signal handlers are now in place,
+global arrays are used to keep track of temp files. Namespace has been
+revisioned and corrected, described in [HACKING](docs/HACKING.txt).
 
 ## 1.5.3
 ### June 2014

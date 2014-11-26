@@ -13,7 +13,8 @@ German translation by x3nu.
 
 Testing, reviews and documentation are contributed by Dreamer, Shining
 the Translucent, Mancausoft, Asbesto Molesto, Nignux, Vlax, The Grugq,
-Reiven, GDrooid, Alphazo, Brian May, TheJH and the Linux Action Show!
+Reiven, GDrooid, Alphazo, Brian May, TheJH, fsLeg, JoelMon and the
+Linux Action Show!
 
 Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth.
 

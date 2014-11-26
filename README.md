@@ -15,11 +15,10 @@
 
 ![](https://github.com/dyne/Tomb/blob/master/extras/images/monmort.png)
 
-Latest stable version: **2.0**
-
 Updates on website: https://www.dyne.org/software/tomb
 
 Get the stable .tar.gz signed release for production use!
+
 Download it from https://files.dyne.org/tomb
 
 # What is Tomb, the crypto undertaker?
@@ -137,6 +136,9 @@ usability.
 
 The code of Tomb is made to be read in literate programming style.
 
+The file [KNOWN_BUGS.md](KNOWN_BUGS) contains some notes on known
+vulnerabilities and threat model analysis.
+
 In absence of the Tomb script it is always possible to access the
 contents of a Tomb using a dm-crypt enabled Linux kernel, cryptsetup
 and GnuPG issuing the following commands as root:
@@ -183,7 +185,7 @@ tarball on https://files.dyne.org/tomb
 
 # How can you help
 
-Donations are always welcome, see https://www.dyne.org/donate
+Donations are very welcome, please go to https://www.dyne.org/donate
 
 Translations are also needed: they can be contributed via this website
 https://poeditor.com/join/project?hash=33bdefea2e46b26f512a0caae55fbbb5
@@ -195,53 +197,32 @@ to be further implemented.
 
 For the bleeding edge visit https://github.com/dyne/Tomb
 
+If you plan to commit code into Tomb, please keep in mind this is a
+minimalist tool and its code should be readable. Guidelines on the
+coding style are illustrated in [doc/HACKING.txt](HACKING.txt).
+
 Tomb's developers can be contacted using the issues on GitHub or over
 IRC on https://irc.dyne.org channel **#dyne**
 
-Some enthusiastic ideas are in the [TODO](doc/TODO.org) file.
+# Licensing
 
-Information on developers involved is found in the [AUTHORS](AUTHORS.md) file.
+Tomb is Copyright (C) 2007-2014 by the Dyne.org Foundation
 
-# Can Tomb be used by applications?
+Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
 
-Sure as Hell it can! Licensing issues aside ([GNU GPLv3+](COPYING)
-terms) Tomb provides machine-readable output and interaction via some flags:
+More information on all the developers involved is found in the
+[AUTHORS](AUTHORS.md) file.
 
-         flag   | function
---------------- | ------------------------------------------------
- --no-color     | avoids coloring output to allow parsing
- --unsafe       | allows passwords options and cleartext key from stdin
- --tomb-pwd     | specify the key password as argument
- --tomb-old-pwd | specify the old key password as argument
- --sudo-pwd     | specify the sudo password as argument
- -k cleartext   | reads the unencrypted key from stdin
+This source code is free software; you can redistribute it and/or
+modify it under the terms of the GNU Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
-Yet please consider that these flags may introduce vulnerabilities and
-other people logged on the same system can easily log your passwords
-while such commands are executing.
-We only recommend using the pinentry to input your passwords.
+This source code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  Please refer
+to the GNU Public License for more details.
 
-## Python
-
-![](extras/images/python_for_tomb.png)
-
-A Python wrapper is under development and already usable, but it
-introduces some vulnerabilities mentioned above. Find it in
-`extras/tomber`. For more information see [PYTHON](extras/PYTHON.md).
-
-## Graphical applications
-
-So far the only graphical application supporting Tomb volumes is
-[ZuluCrypt](https://github.com/mhogomchungu/zuluCrypt). One needs to
-activate the Tomb plugin included in its source and will be able to
-create, open and close tombs. It might still miss advanced Tomb
-functionalities that are only available from the command-line.
-
-## Let us know!
-
-If you plan to develop any kind of wrapper for Tomb you are welcome to
-let us know. Tomb is really meant to be maintained as a minimal tool
-for long-term compatibility when handling something so delicate as our
-secrets. For anything else we rely on your own initiative.
-
-Happy hacking! :&^)
+You should have received a copy of the GNU Public License along with
+this source code; if not, write to: Free Software Foundation, Inc.,
+675 Mass Ave, Cambridge, MA 02139, USA.
