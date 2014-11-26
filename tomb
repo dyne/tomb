@@ -160,7 +160,14 @@ TRAPSTOP() { _endgame STOP  }
 
 _cat() { local -a _arr;
     # read file using mapfile, newline fix
-    _arr=("${(f@)${mapfile[${1}]%$’\n’}}"); print "$_arr" }
+    _arr=("${(f@)${mapfile[${1}]%$’\n’}}"); print "$_arr"
+}
+
+_is_found() {
+    # returns 0 if binary if found in path
+    [[ "$1" = "" ]] && return 1
+    return command -v "$1" 1>/dev/null 2>/dev/null
+}
 
 # Identify the running user
 # Set global variables _UID, _GID, _TTY, and _USER, either from the
@@ -343,15 +350,17 @@ ask_password() {
     local gtkrc
     local theme
 
-    [[ "$DISPLAY" = "" ]] || {
-        theme=/share/themes/tomb/gtk-2.0-key/gtkrc
-        for i in /usr/local /usr; do
-            [[ -r $i/$theme ]] && {
-                gtkrc=$i/$theme
-                break }
-        done }
+    # Distributions have broken wrappers for pinentry: they do
+    # implement fallback, but they disrupt the output somehow.  We are
+    # better off relying on less intermediaries, so we implement our
+    # own fallback mechanisms. Pinentry supported: curses, gtk-2, qt4
+    # and x11.
 
-    output=`cat <<EOF | GTK2_RC_FILES="$gtkrc" pinentry-gtk-2
+    if [[ "$DISPLAY" = "" ]]; then
+
+        if _is_found "pinentry-curses"; then
+
+            output=`cat <<EOF | pinentry-curses
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE $title
@@ -359,7 +368,77 @@ SETDESC $description
 SETPROMPT Password:
 GETPIN
 EOF`
-    
+        else
+            _failure "Cannot find pinentry-curses and no DISPLAY detected."
+        fi
+
+    else # a DISPLAY is found to be active
+
+        # customized gtk2 dialog with a skull (if extras are installed)
+        if _is_found "pinentry-gtk-2"; then
+
+            [[ "$DISPLAY" = "" ]] || {
+                theme=/share/themes/tomb/gtk-2.0-key/gtkrc
+                for i in /usr/local /usr; do
+                    [[ -r $i/$theme ]] && {
+                        gtkrc=$i/$theme
+                        break }
+                done }
+
+            output=`cat <<EOF | GTK2_RC_FILES="$gtkrc" pinentry-gtk-2
+OPTION ttyname=$TTY
+OPTION lc-ctype=$LANG
+SETTITLE $title
+SETDESC $description
+SETPROMPT Password:
+GETPIN
+EOF`
+
+            # TODO QT4 customization of dialog
+        elif _is_found "pinentry-qt4"; then
+
+            output=`cat <<EOF | pinentry-qt4
+OPTION ttyname=$TTY
+OPTION lc-ctype=$LANG
+SETTITLE $title
+SETDESC $description
+SETPROMPT Password:
+GETPIN
+EOF`
+
+            # TODO X11 customization of dialog
+        elif _is_found "pinentry-x11"; then
+
+            output=`cat <<EOF | pinentry-x11
+OPTION ttyname=$TTY
+OPTION lc-ctype=$LANG
+SETTITLE $title
+SETDESC $description
+SETPROMPT Password:
+GETPIN
+EOF`
+
+        else
+
+            if _is_found "pinentry-curses"; then
+
+                _warning "Detected DISPLAY, but only pinentry-curses is found."
+                output=`cat <<EOF | pinentry-curses
+OPTION ttyname=$TTY
+OPTION lc-ctype=$LANG
+SETTITLE $title
+SETDESC $description
+SETPROMPT Password:
+GETPIN
+EOF`
+            else
+                _failure "Cannot find any pinentry: impossible to ask for password."
+            fi
+
+        fi
+
+    fi # end of DISPLAY block
+
     # parse the pinentry output
     for i in ${(f)output}; do
         [[ "$i" =~ "^ERR.*" ]] && {
@@ -371,7 +450,7 @@ EOF`
         [[ "$i" =~ "^D .*" ]] && password="${i##D }"
     done
 
-    [[ "$password" = "" ]] && { 
+    [[ "$password" = "" ]] && {
         _warning "Empty password"
         print "empty"
         return 1 }
@@ -724,7 +803,7 @@ _tomb_key_recover recover_key() {
     local key="${1}"    # Unique argument is an encrypted key
 
     _warning "Attempting key recovery."
-    
+
     _head="${key[(f)1]}" # take the first line
 
     TOMBKEY=""        # Reset global variable
