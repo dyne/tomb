@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb \n"
-"PO-Revision-Date: Tue Nov 25 22:48:08 CET 2014\n"
+"PO-Revision-Date: Wed Nov 26 17:50:10 CET 2014\n"
 "Last-Translator: Denis Roio <jaromil@dyne.org>\n"
 "Language: English\n"
 "Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
@@ -60,6 +60,18 @@ msgstr ""
 
 #: failure
 msgid "Operation aborted."
+msgstr ""
+
+#: failure
+msgid "Cannot find pinentry-curses and no DISPLAY detected."
+msgstr ""
+
+#: warning
+msgid "Detected DISPLAY, but only pinentry-curses is found."
+msgstr ""
+
+#: failure
+msgid "Cannot find any pinentry: impossible to ask for password."
 msgstr ""
 
 #: warning

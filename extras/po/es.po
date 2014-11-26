@@ -1116,3 +1116,15 @@ msgstr "Error de pinentry: ::1 error::"
 msgid "Empty password"
 msgstr "Contraseña vacia"
 
+#: failure
+msgid "Cannot find pinentry-curses and no DISPLAY detected."
+msgstr "No se puede encontrar pinentry-curses, y no se ha detectado DISPLAY."
+
+#: warning
+msgid "Detected DISPLAY, but only pinentry-curses is found."
+msgstr "DISPLAY detectado, pero sólo se ha encontrado pinentry-curses."
+
+#: failure
+msgid "Cannot find any pinentry: impossible to ask for password."
+msgstr "No se ha encontrado ningún pinentry: es imposible pedir una contraseña."
+
