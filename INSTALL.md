@@ -8,19 +8,19 @@ Tomb needs a few programs to be installed on a system in order to work:
  * sudo
  * gnupg
  * cryptsetup
- * pinentry-curses (or -gtk or -qt as you prefer)
+ * pinentry-curses (and/or -gtk-2, -x11, -qt)
 
-Most systems provide these tools in their package collection,
-for instance on Debian/Ubuntu one can use 'apt-get install'
-on Fedora and CentOS one can use 'yum install'
+Most systems provide these tools in their package collection, for
+instance on Debian/Ubuntu one can use `apt-get install` on Fedora and
+CentOS one can use `yum install` and `pacman` on Arch.
 
 ## Install Tomb
 
 To install Tomb simply download the source distribution (the tar.gz file)
-and decompress it. From a terminal:
+from https://files.dyne.org/tomb and decompress it. From a terminal:
 
     cd Downloads
-    tar xvfz Tomb-1.5.3.tar.gz (correct with actual file name)
+    tar xvfz Tomb-2.0.tar.gz (correct with actual file name)
 
 Then enter its directory and run 'make install' as root, this will install
 Tomb into /usr/local:
@@ -33,11 +33,34 @@ After installation one can read the commandline help or read the manual:
     tomb -h     (print a short help on the commandline)
     man tomb    (show the full usage manual)
 
-At this point one can proceed creating a tomb, for instance:
+# Basic usage
 
-    tomb dig -s 1000 secrets.tomb       (be patient and wait a bit)
-    tomb forge -k secrets.tomb.key     (be patient and follow instructions)
+Once installed one can proceed creating a tomb, for instance:
+
+    tomb dig -s 10 secrets.tomb       (dig a 10MB Tomb, be patient)
+    tomb forge -k secrets.tomb.key    (be patient and follow instructions)
     tomb lock  -k secrets.tomb.key secrets.tomb
+
+When this is done, the tomb can be opened with:
+
+    tomb open -k secrets.tomb.key secrets.tomb
+
+The key can also be hidden in an image, to be used as key later
+
+    tomb bury -k secrets.tomb.key nosferatu.jpg
+    tomb open -k nosferatu.jpg secrets.tomb
+
+Or backupped to a QRCode that can be printed on paper and hidden in
+books. QRCodes can be scanned with any mobile application, resulting
+into a block of text that can be used with `-k` just as a normal key.
+
+    tomb engrave -k secrets.tomb.key  (also an image will work)
+
+There are some more things that tomb can do for you, make sure you
+have a look at the manpage and at the commandline help to find out
+more.
+
+# Advanced usage
 
 ## Install optional tools
 
@@ -66,36 +89,99 @@ functionality or integrate it into particular system environments.
 
 ### extras/gtk-tray
 
-The Gtk3 tray adds a nifty tomb skull into the desktop toolbar: one can use it to close, slam and explore the open tomb represented by it.
+The Gtk tray adds a nifty tomb skull into the desktop toolbar: one can
+use it to close, slam and explore the open tomb represented by it.
 
-To have it enter `extras/gtk-tray` then
+When using pinentry-gtk-2 it also adds a little skull on the password
+input, useful to not confuse it with other password inputs.
+
+To have it change directory `extras/gtk-tray` then
 
  1. make sure libnotify and gtk+-3.0 dev packages are available
  2. run `make` inside the directory to build `tomb-gtk-tray`
- 3. optionally copy tomb-gtk-tray into your PATH (/usr/local/bin)
- 4. start `tomb-gtk-tray tombname` for each tomb
+ 3. run `sudo make install` (default PREFIX is `/usr/local`)
+ 4. start `tomb-gtk-tray tombname` after the tomb is open
 
-One can include the launch of tomb-gtk-tray from scripts.
+Of cource one can include the launch of tomb-gtk-tray scripts.
 
 ### extras/kdf-keys
 
-The KDF wrapper programs allows one to use KDF rounds on passwords in order to obstruct dictionary based and similar brute-forcing attacks.
+The KDF wrapper programs allows one to use KDF rounds on passwords in
+order to obstruct dictionary based and similar brute-forcing attacks.
 
-In case an attacker comes in possession of both a tomb and its key, the easy to memorize password can be guessed by rapidly trying different combinations. With KDF every try will require a significant amount of computation that will slow down the process avoiding tight loops and in fact making such attacks very onerous and almost impossible.
+In case an attacker comes in possession of both a tomb and its key,
+the easy to memorize password can be guessed by rapidly trying
+different combinations. With KDF every try will require a significant
+amount of computation that will slow down the process avoiding tight
+loops and in fact making such attacks very onerous and almost
+impossible.
 
 To have it enter `extras/kdf-keys` then
 
  1. make sure libgcrypt dev packages are available
  2. run `make` inside the directory to build tomb-kdb-* executables
- 3. optionally copy tomb-kdb-* into your PATH (/usr/local/bin)
- 4. always use tomb using the `--kdf` flag: forge, lock, open etc.
+ 3. run `sudo make install` (default PREFIX is `/usr/local`)
+ 4. use `--kdf 100` when forging a key (tune the number to your cpu)
 
-In case one creates and uses KDF keys then the --kdf flag must be always present for tomb to work correctly. It might be handy to create an alias tomb=`tomb --kdf`.
+KDF keys are recognized automatically by Tomb, which will always need
+the `extras/kdf-keys` program to be installed on a machine in order to
+open the Tomb.
+
+Please note that it doesn't makes much sense to use KDF keys and
+steganography, since the latter will invalidate the brute-forcing
+protection. For details on the issue see [KNOWN_BUGS.md](KNOWN_BUGS).
 
 ### extras/po (translations)
 
-There are translations available for Tomb. If you wish to install them
-navigate to extras/po and run 'make install' as root:
+There are translations available for Tomb and they are installed by
+default. If you wish to update them manually navigate to extras/po
+and run 'make install' as root:
 
     cd extras/po
     sudo make install
+
+# Tomb support in other applications
+
+Can Tomb be used by other applications?
+
+Sure as Hell it can! Licensing issues aside ([GNU GPLv3+](COPYING)
+terms) Tomb provides machine-readable output and interaction via some
+flags:
+
+         flag   | function
+--------------- | ------------------------------------------------
+ --no-color     | avoids coloring output to allow parsing
+ --unsafe       | allows passwords options and cleartext key from stdin
+ --tomb-pwd     | specify the key password as argument
+ --tomb-old-pwd | specify the old key password as argument
+ -k cleartext   | reads the unencrypted key from stdin
+
+Yet please consider that these flags may introduce vulnerabilities and
+other people logged on the same system can easily log your passwords
+while such commands are executing.
+We only recommend using the pinentry to input your passwords.
+
+## Python
+
+![](extras/images/python_for_tomb.png)
+
+A Python wrapper is under development and already usable, but it
+introduces some vulnerabilities mentioned above. Find it in
+`extras/tomber`. For more information see [PYTHON](extras/PYTHON.md).
+
+## Graphical applications
+
+So far the only graphical application supporting Tomb volumes is
+[ZuluCrypt](https://github.com/mhogomchungu/zuluCrypt). One needs to
+activate the Tomb plugin included in its source and will be able to
+create, open and close tombs. It might still miss advanced Tomb
+functionalities that are only available from the command-line.
+
+## Let us know!
+
+If you plan to develop any kind of wrapper for Tomb you are welcome to
+let us know. Tomb is really meant to be maintained as a minimal tool
+for long-term compatibility when handling something so delicate as our
+secrets. For anything else we rely on your own initiative.
+
+Happy hacking! :&^)

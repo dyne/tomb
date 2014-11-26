@@ -4,9 +4,6 @@
 #
 # A commandline tool to easily operate encryption of secret data
 #
-# Homepage on: [tomb.dyne.org](http://tomb.dyne.org)
-#
-# In Emacs, you can use C-c @ C-q to (un)fold code using folding.el
 
 # {{{ License
 
@@ -16,10 +13,18 @@
 #
 # With contributions by Anathema, Boyska, Hellekin O. Wolf and GDrooid
 #
-# Testing and reviews are contributed by Dreamer, Shining, Mancausoft,
-# Asbesto Molesto and Nignux.
+# Gettext internationalization and Spanish translation is contributed by
+# GDrooid, French translation by Hellekin, Russian translation by fsLeg,
+# German translation by x3nu.
 #
-# Tomb's artwork is contributed by Jordi aka Mon Mort.
+# Testing, reviews and documentation are contributed by Dreamer, Shining
+# the Translucent, Mancausoft, Asbesto Molesto, Nignux, Vlax, The Grugq,
+# Reiven, GDrooid, Alphazo, Brian May, TheJH, fsLeg, JoelMon and the
+# Linux Action Show!
+#
+# Tomb's artwork is contributed by Jordi aka Mon Mort and Logan VanCuren.
+#
+# Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth.
 
 # This source code is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Public License as published by
@@ -166,7 +171,8 @@ _cat() { local -a _arr;
 _is_found() {
     # returns 0 if binary if found in path
     [[ "$1" = "" ]] && return 1
-    return command -v "$1" 1>/dev/null 2>/dev/null
+    command -v "$1" 1>/dev/null 2>/dev/null
+    return $?
 }
 
 # Identify the running user
