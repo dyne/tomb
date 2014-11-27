@@ -2,7 +2,7 @@
 
 cat <<EOF
 # Tomb - The Crypto Undertaker.
-# Copyright (C) 2007-2013 Dyne.org Foundation
+# Copyright (C) 2007-2014 Dyne.org Foundation
 # Denis Roio <jaromil@dyne.org>, 2013.
 #
 #, fuzzy
