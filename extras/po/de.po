@@ -25,7 +25,7 @@ msgstr "Warten auf den Schlüssel auf der Standarteingabe... "
 
 #: failure
 msgid "This operation requires a key file to be specified using the -k option."
-msgstr "Diese Operation benötigt das angeben eines Schlüssels durch die -k Option."
+msgstr "Diese Operation benötigt das Angeben eines Schlüssels durch die -k Option."
 
 #: failure
 msgid "Key not found, specify one using -k."
@@ -125,7 +125,7 @@ msgstr "Inhalte werden am Bildschirm angezeigt :"
 
 #: failure
 msgid "Size argument missing, use -s"
-msgstr "Größenangabe fehlt, benutzen Sie -s."
+msgstr "Größenangabe fehlt, benutzen Sie -s"
 
 #: warning
 msgid "A tomb exists already. I'm not digging here:"
@@ -169,7 +169,7 @@ msgstr "Formatieren des Luks Gerätes."
 
 #: warning
 msgid "cryptsetup luksFormat returned an error."
-msgstr "'cryptsetup luksFormat' hat einen Fehler ausgegeben"
+msgstr "'cryptsetup luksFormat' hat einen Fehler ausgegeben."
 
 #: message
 msgid "Formatting your Tomb with Ext3/Ext4 filesystem."
@@ -181,7 +181,7 @@ msgstr "Beim Formatieren ist ein Fehler aufgetreten."
 
 #: message
 msgid "Here below its status is reported:"
-msgstr "Zustand des Grabes wie folgt :"
+msgstr "Zustand des Grabes wie folgt:"
 
 #: message
 msgid "This tomb is a valid LUKS encrypted device."
@@ -257,7 +257,7 @@ msgstr "Syntax Fehler."
 
 #: warning
 msgid "Some error occurred during option processing."
-msgstr "Fehler beim interpretieren der Optionen"
+msgstr "Fehler beim interpretieren der Optionen."
 
 #: warning
 msgid "The create command is deprecated, please use dig, forge and lock instead."
@@ -273,7 +273,7 @@ msgstr "Versuchen Sie -h um Hilfe zu erhalten."
 
 #: failure
 msgid "Tomb won't work without a TOMBNAME."
-msgstr "Ohne GRABNAME kann Tomb nicht funktionieren"
+msgstr "Ohne GRABNAME kann Tomb nicht funktionieren."
 
 #: failure
 msgid "Fatal error creating a temporary file: ::1 temp file::"
@@ -309,7 +309,7 @@ msgstr "Grab Datei ist leer (Länge: 0): ::1 tomb file::"
 
 #: failure
 msgid "Tomb file is not writable: ::1 tomb file::"
-msgstr "Gültige Grab-Datei gefunden: ::1 tomb file::"
+msgstr "Grab-Datei ist nicht beschreibbar: ::1 tomb file::"
 
 #: warning
 msgid "File is not yet a tomb: ::1 tomb file::"
@@ -417,7 +417,7 @@ msgstr " -f        Vorgang erzwingen (z.B. falls Swap-Datei aktiv)"
 
 #: print
 msgid " --kdf  generate passwords armored against dictionary attacks"
-msgstr " --kdf     Gegen Wörterbuchattacken gefeite Passwörter erstellen"
+msgstr " --kdf  Gegen Wörterbuchattacken gefeite Passwörter erstellen"
 
 #: print
 msgid " -h     print this help"
@@ -537,7 +537,7 @@ msgstr "Nichts gefunden in ::1 image file::"
 
 #: failure
 msgid "QREncode reported an error."
-msgstr "QREncode meldet einen Fehler"
+msgstr "QREncode meldet einen Fehler."
 
 #: message
 msgid "Commanded to dig tomb ::1 tomb path::"
@@ -633,7 +633,7 @@ msgstr "Kein gültiges Passwort für den alten Schlüssel angegeben."
 
 #: failure
 msgid "Unexpected error in luksOpen."
-msgstr "Unerwarteter Fehler in luksOpen"
+msgstr "Unerwarteter Fehler in luksOpen."
 
 #: message
 msgid "New key: ::1 key file::"
@@ -645,11 +645,11 @@ msgstr "Kein gültiges Passwort für den neuen Schlüssel angegeben."
 
 #: failure
 msgid "Unexpected error in luksChangeKey."
-msgstr "Unerwarteter Fehler in luksChangeKey"
+msgstr "Unerwarteter Fehler in luksChangeKey."
 
 #: failure
 msgid "Unexpected error in luksClose."
-msgstr "Unerwarteter Fehler in luksClose "
+msgstr "Unerwarteter Fehler in luksClose."
 
 #: message
 msgid "The new key is: ::1 new key::"
@@ -749,7 +749,7 @@ msgstr "::1 tombname:: bindet ::2 hookname:: ein auf ::3 hookdest::"
 
 #: failure
 msgid "Internal error: list_tomb_binds called without argument."
-msgstr "Interner fehler: list_tomb_binds ohne rgumente aufgerufen."
+msgstr "Interner Fehler: list_tomb_binds ohne rgumente aufgerufen."
 
 #: failure
 msgid "Cannot index tombs on this system: updatedb (mlocate) not installed."
@@ -761,7 +761,7 @@ msgstr "Kann GNU findutils nicht für Indexierung/Suchbefehle benutzen."
 
 #: failure
 msgid "Index command needs 'mlocate' to be installed."
-msgstr "Index Befehl benötigt installiertes 'mlocate'"
+msgstr "Index Befehl benötigt installiertes 'mlocate'."
 
 #: failure
 msgid "There seems to be no open tomb engraved as [::1::]"
@@ -1027,7 +1027,7 @@ msgstr "Grabschlüssel erfolgreich im Bild ::1 image file:: enkodiert"
 
 #: success
 msgid "Key succesfully exhumed to ::1 key::."
-msgstr "Schlüssel erfolgreich exhumiert in ::1 key::"
+msgstr "Schlüssel erfolgreich exhumiert in ::1 key::."
 
 #: success
 msgid "Rendering a printable QRCode for key: ::1 tomb key file::"
@@ -1116,4 +1116,3 @@ msgstr "Pinentry Fehler: ::1 error::"
 #: warning
 msgid "Empty password"
 msgstr "Leeres Passwort"
-
