@@ -317,7 +317,7 @@ _ensure_safe_swap() {
     if [[ $r -eq 2 ]]; then
         _success "All your swaps are belong to crypt.  Good."
     else
-	_warning "This poses a security risk."
+        _warning "This poses a security risk."
         _warning "You can deactivate all swap partitions using the command:"
         _warning " swapoff -a"
         _warning "But if you want to proceed like this, use the -f (force) flag."
