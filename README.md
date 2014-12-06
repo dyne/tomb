@@ -136,7 +136,7 @@ usability.
 
 The code of Tomb is made to be read in literate programming style.
 
-The file [KNOWN_BUGS.md](KNOWN_BUGS) contains some notes on known
+The file [KNOWN_BUGS.md](KNOWN_BUGS.md) contains some notes on known
 vulnerabilities and threat model analysis.
 
 In absence of the Tomb script it is always possible to access the
@@ -199,7 +199,7 @@ For the bleeding edge visit https://github.com/dyne/Tomb
 
 If you plan to commit code into Tomb, please keep in mind this is a
 minimalist tool and its code should be readable. Guidelines on the
-coding style are illustrated in [doc/HACKING.txt](HACKING.txt).
+coding style are illustrated in [doc/HACKING.txt](doc/HACKING.txt).
 
 Tomb's developers can be contacted using the issues on GitHub or over
 IRC on https://irc.dyne.org channel **#dyne**
