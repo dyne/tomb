@@ -879,7 +879,7 @@ gpg_decrypt() {
         _verbose "GnuPG is version 1.4.11 - adopting status fix."
 
         TOMBSECRET=`print - "$gpgpass" | \
-            gpg --batch --passphrase-fd 0 --no-tty --no-options"`
+            gpg --batch --passphrase-fd 0 --no-tty --no-options`
         ret=$?
         unset gpgpass
 
