@@ -33,26 +33,55 @@ close $handle;
 my %seen;
 my @ignored;
 my $index = 0;
+my $fold;
+my $func;
 
 foreach (@lines) {
     $index++;
-    # Ignore if there is no print function on this line
+
+    # It's a fold title
+    if (m/^# +{{{ +(.*)$/) {
+        $fold = $1;
+        next;
+    }
+
+    # It's a function name
+    if (m/^(.*)\(\) *{$/) {
+        $func = $1;
+        next;
+    }
+
+    # Next if there is no print function
     next unless m/$FUNCPATTERN +$STRINGPATTERN/;
 
-    # Ignore if the string was seen before
+    # Next if it was seen before
     $seen{$2}++;
     next if $seen{$2} > 1;
 
-    # Ignore if this string is blacklisted
+    # Next if it's blacklisted
     if (grep {$2 =~ m/$_/} @blacklist) {
 	push @ignored, $2;
 	next;
     }
 
+    print "#. Fold: $fold\n";
+    print "#. Function: $func\n";
+    print "#.\n";
+    print "#. Code sample:\n";
+
+    my $sign = ' ';
     for (-7..3) {
+        if($_ == -1) {
+            $sign = '>';
+        }
+        else {
+            $sign = ' ';
+        }
+
         my $n = $index + $_;
-        print "#. $lines[$n]";
+        print "#. $sign $lines[$n]";
     }
+
     print "#: tomb:$index\n";
     print "msgid $2\n";
     print "msgstr \"\"\n\n";
