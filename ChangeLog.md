@@ -1,5 +1,12 @@
 # Tomb ChangeLog
 
+## 2.1
+### December 2014
+
+Fix for usage with GnuPG 1.4.11, a problem affecting long term
+GNU/Linux distribution releases like Ubuntu 12.04 and Mint 13.
+Minor messaging fixes.
+
 ## 2.0
 ### November 2014
 
