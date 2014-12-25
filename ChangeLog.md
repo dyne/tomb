@@ -1,6 +1,6 @@
 # Tomb ChangeLog
 
-## 2.1
+## 2.0.1
 ### December 2014
 
 Fix for usage with GnuPG 1.4.11, a problem affecting long term
