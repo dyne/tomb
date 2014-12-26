@@ -592,6 +592,7 @@ usage() {
     _print "\000"
     _print "Options:"
     _print "\000"
+    _print " -c     alternate encryption algorithm (forge and lock)"
     _print " -s     size of the tomb file when creating/resizing one (in MB)"
     _print " -k     path to the key to be used ('-k -' to read from stdin)"
     _print " -n     don't process the hooks found in tomb"
@@ -1376,7 +1377,15 @@ dig_tomb() {
     return 0
 }
 
-
+# Step two -- Create a detached key to lock a tomb with
+#
+# Synopsis: forge_key [destkey|-k destkey] [-c algo|--cipher=algo]
+#
+# Arguments:
+# -k                path to destination keyfile
+# -o                DEPRECATED use -c instead
+# -c | --cipher     Use an alternate algorithm
+#
 forge_key() {
     # can be specified both as simple argument or using -k
     local destkey="$1"
@@ -1401,8 +1410,11 @@ forge_key() {
         ls -lh $destkey
         _failure "Forging this key would overwrite an existing file. Operation aborted." }
 
-    # Update algorithm if it was passed on the command line with -o
-    { option_is_set -o } && { algopt="$(option_value -o)" }
+    # Update algorithm if it was passed on the command line with -c
+    { option_is_set -o } && {
+	_warning "DEPRECATED: use -c or --cipher to specify an alternate encryption algorithm"
+	algopt="$(option_value -o)" }
+    { option_is_set -c } && algopt="$(option_value -c)"
     [[ -n "$algopt" ]] && algo=$algopt
 
     _message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" \
@@ -1464,13 +1476,17 @@ forge_key() {
 
 # Step three -- Lock tomb
 #
-# Synopsis: tomb_lock file.tomb file.tomb.key
+# Synopsis: tomb_lock file.tomb file.tomb.key [-c cipher]
 #
 # Lock the given tomb with the given key file, in fact formatting the
-# loopback volume as a LUKS device. it take arguments as the LUKS
-# cipher to be used
-
+# loopback volume as a LUKS device.
+# Default cipher 'aes-xts-plain64:sha256'can be overridden with -c
 lock_tomb_with_key() {
+    # old default was aes-cbc-essiv:sha256
+    # Override with -c or --cipher
+    # for more alternatives refer to cryptsetup(8)
+    local cipher="aes-xts-plain64:sha256"
+
     local tombpath="$1"      # First argument is the path to the tomb
 
     [[ -n $tombpath ]] || {
@@ -1505,14 +1521,12 @@ lock_tomb_with_key() {
 
     _load_key    # Try loading key from option -k and set TOMBKEYFILE
 
-    # the encryption cipher for a tomb can be set when locking using -o
-    if option_is_set -o; then
-        cipher="`option_value -o`"
-    else
-        cipher="aes-xts-plain64:sha256"
-        # old default was aes-cbc-essiv:sha256
-        # for more alternatives refer to cryptsetup(8)
-    fi
+    # the encryption cipher for a tomb can be set when locking using -c
+    { option_is_set -o } && {
+	_warning "DEPRECATED: use -c or --cipher to specify an alternate encryption algorithm"
+	algopt="$(option_value -o)" }
+    { option_is_set -c } && algopt="$(option_value -c)"
+    [[ -n "$algopt" ]] && cipher=$algopt
     _message "Locking using cipher: ::1 cipher::" $cipher
 
     # get the pass from the user and check it
@@ -1743,6 +1757,9 @@ mount_tomb() {
 
     # we need root from here on
     sudo mkdir -p $tombmount
+
+    # Default mount options are overridden with the -o switch
+    { option_is_set -o } && MOUNTOPTS="$(option_value -o)"
 
     sudo mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
 
@@ -2434,9 +2451,10 @@ main() {
 
     subcommands_opts[create]="" # deprecated, will issue warning
 
-    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom "
+    # TODO: remove deprecated option -o in next major release (-c replaces it)
+    subcommands_opts[forge]="-ignore-swap k: -kdf: o: c: -cipher=c -tomb-pwd: -use-urandom "
     subcommands_opts[dig]="-ignore-swap s: -size=s "
-    subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: "
+    subcommands_opts[lock]="-ignore-swap k: -kdf: o: c: -cipher=c -tomb-pwd: "
     subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
     subcommands_opts[engrave]="k: "
 
@@ -2470,7 +2488,7 @@ main() {
     done
     local -a oldstar
     oldstar=("${(@)argv}")
-    #### detect early: useful for --optiion-parsing
+    #### detect early: useful for --option-parsing
     zparseopts -M -D -Adiscardme ${every_opts}
     if [[ -n ${(k)discardme[--option-parsing]} ]]; then
         print $1
@@ -2589,7 +2607,7 @@ main() {
 
         # Open the tomb
         mount|open)
-            mount_tomb $PARAM[1] $PARAM[2]
+            mount_tomb ${=PARAM}
             ;;
 
         # Close the tomb
