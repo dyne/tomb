@@ -1753,9 +1753,24 @@ mount_tomb() {
     sudo mkdir -p $tombmount
 
     # Default mount options are overridden with the -o switch
-    { option_is_set -o } && MOUNTOPTS="$(option_value -o)"
+    { option_is_set -o } && {
+	local oldmountopts=$MOUNTOPTS
+	MOUNTOPTS="$(option_value -o)" }
 
+    # TODO: safety check MOUNTOPTS
+    # safe_mount_options && \
     sudo mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
+    # Clean up if the mount failed
+    [[ $? == 0 ]] || {
+	_warning "Error mounting ::1 mapper:: on ::2 tombmount::" $mapper $tombmount
+	[[ $oldmountopts != $MOUNTOPTS ]] && \
+	    _warning "Are mount options '::1 mount options::' valid?" $MOUNTOPTS
+	# TODO: move cleanup to _endgame()
+	[[ -d $tombmount ]] && rmdir $tombmount
+	[[ -e /dev/mapper/$mapper ]] && sudo cryptsetup luksClose $mapper
+	# The loop is taken care of in _endgame()
+	_failure "Cannot mount ::1 tomb name::" $TOMBNAME
+    }
 
     sudo chown $UID:$GID ${tombmount}
     sudo chmod 0711 ${tombmount}
