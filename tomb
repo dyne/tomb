@@ -1358,6 +1358,10 @@ dig_tomb() {
 
     # Ensure that file permissions are safe even if interrupted
     touch $TOMBPATH
+    [[ $? = 0 ]] || {
+        _warning "Error creating the tomb ::1 tomb path::" $TOMBPATH
+        _failure "Operation aborted."
+    }
     chmod 0600 $TOMBPATH
 
     _verbose "Data dump using ::1:: from /dev/urandom" ${DD[1]}
@@ -1410,6 +1414,12 @@ forge_key() {
         ls -lh $destkey
         _failure "Forging this key would overwrite an existing file. Operation aborted." }
 
+    touch $destkey
+    [[ $? == 0 ]] || {
+        _warning "Cannot generate encryption key."
+        _failure "Operation aborted." }
+    chmod 0600 $destkey
+
     # Update algorithm if it was passed on the command line with -o
     { option_is_set -o } && algopt="$(option_value -o)"
     [[ -n "$algopt" ]] && algo=$algopt
@@ -1439,8 +1449,6 @@ forge_key() {
     _success "Choose the  password of your key: ::1 tomb key::" $TOMBKEYFILE
     _message "(You can also change it later using 'tomb passwd'.)"
     # _user_file $TOMBKEYFILE
-    touch $TOMBKEYFILE
-    chmod 0600 $TOMBKEYFILE
 
     tombname="$TOMBKEYFILE" # XXX ???
     # the gen_key() function takes care of the new key's encryption
