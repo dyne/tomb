@@ -13,9 +13,14 @@ all:
 	@echo
 
 install:
-	@make -C extras/po install
 	install -Dm755 ${PROG} ${DESTDIR}${PREFIX}/bin/${PROG}
 	install -Dm666 doc/${PROG}.1 ${DESTDIR}${MANDIR}/man1/${PROG}.1
+	@echo
+	@echo "Tomb is installed succesfully. To install language translations, make sure"
+	@echo "gettext is also installed, then 'cd extras/po' and 'make install' there."
+	@echo
+	@echo "Look around the extras/ directory, it contains other interesting modules."
+	@echo
 
 test:
 	make -C extras/test
