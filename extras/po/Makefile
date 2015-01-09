@@ -4,7 +4,7 @@ TOMBFILE = LC_MESSAGES/tomb.mo
 
 all:
 	@rm -f tomb.pot
-	@./generate_translatable_strings.sh > tomb.pot
+	@perl generate_translatable_strings.pl > tomb.pot
 	@echo "Strings generated in tomb.pot"
 
 .PHONY: install
