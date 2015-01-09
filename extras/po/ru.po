@@ -3855,9 +3855,8 @@ msgstr "Невозможно совершить привязки без прим
 #.           _verbose "bind-hook found: $s -> $d"
 #.       done
 #: tomb:1869
-#, fuzzy
 msgid "bind-hooks file is broken"
-msgstr "файл bind-hooks битый"
+msgstr "Файл bind-hooks поврежден."
 
 #. Fold: Open
 #. Function: exec_safe_bind_hooks
@@ -3895,7 +3894,6 @@ msgstr "Формат bind-hooks: local/to/tomb local/to/HOME"
 #.   
 #.           if [[ ! -r "$HOME/${maps[$dir]}" ]]; then
 #: tomb:1882
-#, fuzzy
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.  Rolling back"
 msgstr "Формат bind-hooks: local/to/tomb local/to/HOME.  Откат"
 
@@ -3914,7 +3912,6 @@ msgstr "Формат bind-hooks: local/to/tomb local/to/HOME.  Откат"
 #.               _warning "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::" $mnt $dir
 #.           else
 #.               sudo mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]} #: tomb:1887
-#, fuzzy
 msgid "bind-hook target not existent, skipping ::1 home::/::2 subdir::"
 msgstr "Цель bind-hook не существует, пропускаю ::1 home::/::2 dir::"
 
@@ -3933,7 +3930,6 @@ msgstr "Цель bind-hook не существует, пропускаю ::1 hom
 #.               sudo mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]} #.                   && mounted+=("$HOME/${maps[$dir]}")
 #.           fi
 #: tomb:1889
-#, fuzzy
 msgid ""
 "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
 msgstr ""
@@ -5291,7 +5287,7 @@ msgstr ""
 #: tomb:2710
 msgid " This is free software: you are free to change and redistribute it"
 msgstr ""
-" Это свободное программное обеспечение: Вы в праве изменять и распространять "
+" Это свободное программное обеспечение: Вы вправе изменять и распространять "
 "его"
 
 #. Fold: Main routine

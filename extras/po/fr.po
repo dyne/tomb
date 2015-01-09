@@ -4630,7 +4630,7 @@ msgstr ""
 #.       # New tomb size must be an integer
 #: tomb:2261
 msgid "Please close the tomb ::1 tomb name:: before trying to resize it."
-msgstr ""
+msgstr "Merci de fermer la tombe ::1 tombe name:: avant de la redimensionner"
 
 #. Fold: Resize
 #. Function: resize_tomb
@@ -5184,7 +5184,7 @@ msgstr "Voir \"tomb help\" pour plus d'info"
 #.       done
 #: tomb:2558
 msgid "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::"
-msgstr ""
+msgstr "option ::1 arg:: non reconnue pour la sous-commande ::2 subcommand:: "
 
 #. Fold: Main routine
 #. Function: main
@@ -5307,6 +5307,8 @@ msgstr ""
 #: tomb:2686
 msgid "Steghide not installed: cannot bury keys into images."
 msgstr ""
+"Steghide n'est pas installé : Impossible de d'enterrer les clefs dans les "
+"images. "
 
 #. Fold: Main routine
 #. Function: main
