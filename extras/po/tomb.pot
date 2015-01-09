@@ -1,12 +1,12 @@
+
 # Tomb - The Crypto Undertaker.
-# Copyright (C) 2007-2013 Dyne.org Foundation
+# Copyright (C) 2007-2014 Dyne.org Foundation
 # Denis Roio <jaromil@dyne.org>, 2013.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Tomb \n"
-"PO-Revision-Date: Wed Nov 26 17:50:10 CET 2014\n"
+"PO-Revision-Date: Fri Jan  9 17:08:25 2015\n"
 "Last-Translator: Denis Roio <jaromil@dyne.org>\n"
 "Language: English\n"
 "Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
@@ -14,1123 +14,5456 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: failure
+#. Fold: Safety functions
+#. Function: _whoami
+#.
+#. Code sample:
+#.   
+#.       # Set username from UID or environment
+#.       _USER=$SUDO_USER
+#.       [[ "$_USER" = "" ]] && { _USER=$USERNAME }
+#.       [[ "$_USER" = "" ]] && { _USER=$(id -u)  }
+#.       [[ "$_USER" = "" ]] && {
+#. >         _failure "Failing to identify the user who is calling us" }
+#.   
+#.       # Get GID from option -G or the environment
+#.       option_is_set -G \
+#.           && _GID=$(option_value -G) || _GID=$(id -g $_USER)
+#: tomb:189
 msgid "Failing to identify the user who is calling us"
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: _plot
+#.
+#. Code sample:
+#.       TOMBFILE=$(basename $TOMBPATH)
+#.   
+#.       # The tomb name is TOMBFILE without an extension.
+#.       # It can start with dots: ..foo.tomb -> ..foo
+#.       TOMBNAME="${TOMBFILE%\.[^\.]*}"
+#.       [[ -z $TOMBNAME ]] && {
+#. >         _failure "Tomb won't work without a TOMBNAME." }
+#.   
+#.       # Normalize tomb name
+#.       TOMBFILE="$TOMBNAME.tomb"
+#.   
+#: tomb:237
 msgid "Tomb won't work without a TOMBNAME."
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: _tmp_create
+#.
+#. Code sample:
+#.   
+#.   # Provide a random filename in shared memory
+#.   _tmp_create() {
+#.       [[ -d "$TMPPREFIX" ]] || {
+#.           # we create the tempdir with the sticky bit on
+#.           sudo mkdir -m 1777 "$TMPPREFIX"
+#. >         [[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPPREFIX"
+#.       }
+#.   
+#.       # We're going to add one more $RANDOM for each time someone complain
+#.       # about this being too weak of a random.
+#: tomb:252
 msgid "Fatal error creating the temporary directory: ::1 temp dir::"
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: _tmp_create
+#.
+#. Code sample:
+#.   
+#.       # We're going to add one more $RANDOM for each time someone complain
+#.       # about this being too weak of a random.
+#.       tfile="${TMPPREFIX}/$RANDOM$RANDOM$RANDOM$RANDOM"   # Temporary file
+#.       umask 066
+#.       [[ $? == 0 ]] || {
+#. >         _failure "Fatal error setting the permission umask for temporary files" }
+#.   
+#.       [[ -r "$tfile" ]] && {
+#.           _failure "Someone is messing up with us trying to hijack temporary files." }
+#.   
+#: tomb:260
 msgid "Fatal error setting the permission umask for temporary files"
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: _tmp_create
+#.
+#. Code sample:
+#.       tfile="${TMPPREFIX}/$RANDOM$RANDOM$RANDOM$RANDOM"   # Temporary file
+#.       umask 066
+#.       [[ $? == 0 ]] || {
+#.           _failure "Fatal error setting the permission umask for temporary files" }
+#.   
+#.       [[ -r "$tfile" ]] && {
+#. >         _failure "Someone is messing up with us trying to hijack temporary files." }
+#.   
+#.       touch "$tfile"
+#.       [[ $? == 0 ]] || {
+#.           _failure "Fatal error creating a temporary file: ::1 temp file::" "$tfile" }
+#: tomb:263
 msgid "Someone is messing up with us trying to hijack temporary files."
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: _tmp_create
+#.
+#. Code sample:
+#.   
+#.       [[ -r "$tfile" ]] && {
+#.           _failure "Someone is messing up with us trying to hijack temporary files." }
+#.   
+#.       touch "$tfile"
+#.       [[ $? == 0 ]] || {
+#. >         _failure "Fatal error creating a temporary file: ::1 temp file::" "$tfile" }
+#.   
+#.       [[ $? == 0 ]] || {
+#.           _failure "Fatal error setting ownership on temporary file: ::1 temp file::" "$tfile" }
+#.   
+#: tomb:267
 msgid "Fatal error creating a temporary file: ::1 temp file::"
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: _tmp_create
+#.
+#. Code sample:
+#.   
+#.       touch "$tfile"
+#.       [[ $? == 0 ]] || {
+#.           _failure "Fatal error creating a temporary file: ::1 temp file::" "$tfile" }
+#.   
+#.       [[ $? == 0 ]] || {
+#. >         _failure "Fatal error setting ownership on temporary file: ::1 temp file::" "$tfile" }
+#.   
+#.       _verbose "Created tempfile: ::1 temp file::" "$tfile"
+#.       TOMBTMP="$tfile"
+#.       TOMBTMPFILES+=("$tfile")
+#: tomb:270
 msgid "Fatal error setting ownership on temporary file: ::1 temp file::"
 msgstr ""
 
-#: success
+#. Fold: Safety functions
+#. Function: _ensure_safe_swap
+#.
+#. Code sample:
+#.               r=1
+#.               is_crypt=`sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
+#.               [[ $is_crypt == "crypt" ]] && { r=2 } || { break }
+#.   
+#.           fi
+#.       done
+#. >     _message "An active swap partition is detected..."
+#.       if [[ $r -eq 2 ]]; then
+#.           _success "All your swaps are belong to crypt.  Good."
+#.       else
+#.           _warning "This poses a security risk."
+#: tomb:316
+msgid "An active swap partition is detected..."
+msgstr ""
+
+#. Fold: Safety functions
+#. Function: _ensure_safe_swap
+#.
+#. Code sample:
+#.               [[ $is_crypt == "crypt" ]] && { r=2 } || { break }
+#.   
+#.           fi
+#.       done
+#.       _message "An active swap partition is detected..."
+#.       if [[ $r -eq 2 ]]; then
+#. >         _success "All your swaps are belong to crypt.  Good."
+#.       else
+#.           _warning "This poses a security risk."
+#.           _warning "You can deactivate all swap partitions using the command:"
+#.           _warning " swapoff -a"
+#: tomb:318
 msgid "All your swaps are belong to crypt.  Good."
 msgstr ""
 
-#: warning
+#. Fold: Safety functions
+#. Function: _ensure_safe_swap
+#.
+#. Code sample:
+#.           fi
+#.       done
+#.       _message "An active swap partition is detected..."
+#.       if [[ $r -eq 2 ]]; then
+#.           _success "All your swaps are belong to crypt.  Good."
+#.       else
+#. >         _warning "This poses a security risk."
+#.           _warning "You can deactivate all swap partitions using the command:"
+#.           _warning " swapoff -a"
+#.           _warning "But if you want to proceed like this, use the -f (force) flag."
+#.       fi
+#: tomb:320
+msgid "This poses a security risk."
+msgstr ""
+
+#. Fold: Safety functions
+#. Function: _ensure_safe_swap
+#.
+#. Code sample:
+#.       done
+#.       _message "An active swap partition is detected..."
+#.       if [[ $r -eq 2 ]]; then
+#.           _success "All your swaps are belong to crypt.  Good."
+#.       else
+#.           _warning "This poses a security risk."
+#. >         _warning "You can deactivate all swap partitions using the command:"
+#.           _warning " swapoff -a"
+#.           _warning "But if you want to proceed like this, use the -f (force) flag."
+#.       fi
+#.       return $r
+#: tomb:321
 msgid "You can deactivate all swap partitions using the command:"
 msgstr ""
 
-#: warning
+#. Fold: Safety functions
+#. Function: _ensure_safe_swap
+#.
+#. Code sample:
+#.       _message "An active swap partition is detected..."
+#.       if [[ $r -eq 2 ]]; then
+#.           _success "All your swaps are belong to crypt.  Good."
+#.       else
+#.           _warning "This poses a security risk."
+#.           _warning "You can deactivate all swap partitions using the command:"
+#. >         _warning " swapoff -a"
+#.           _warning "But if you want to proceed like this, use the -f (force) flag."
+#.       fi
+#.       return $r
+#.   
+#: tomb:322
 msgid " swapoff -a"
 msgstr ""
 
-#: warning
+#. Fold: Safety functions
+#. Function: _ensure_safe_swap
+#.
+#. Code sample:
+#.       if [[ $r -eq 2 ]]; then
+#.           _success "All your swaps are belong to crypt.  Good."
+#.       else
+#.           _warning "This poses a security risk."
+#.           _warning "You can deactivate all swap partitions using the command:"
+#.           _warning " swapoff -a"
+#. >         _warning "But if you want to proceed like this, use the -f (force) flag."
+#.       fi
+#.       return $r
+#.   
+#.   }
+#: tomb:323
 msgid "But if you want to proceed like this, use the -f (force) flag."
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: _check_swap
+#.
+#. Code sample:
+#.           _ensure_safe_swap
+#.           case $? in
+#.               0|2)     # No, or encrypted swap
+#.                   return 0
+#.                   ;;
+#.               *)       # Unencrypted swap
+#. >                 _failure "Operation aborted."
+#.                   ;;
+#.           esac
+#.       fi
+#.   }
+#: tomb:342
 msgid "Operation aborted."
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: ask_password
+#.
+#. Code sample:
+#.   SETTITLE $title
+#.   SETDESC $description
+#.   SETPROMPT Password:
+#.   GETPIN
+#.   EOF`
+#.           else
+#. >             _failure "Cannot find pinentry-curses and no DISPLAY detected."
+#.           fi
+#.   
+#.       else # a DISPLAY is found to be active
+#.   
+#: tomb:379
 msgid "Cannot find pinentry-curses and no DISPLAY detected."
 msgstr ""
 
-#: warning
+#. Fold: Safety functions
+#. Function: ask_password
+#.
+#. Code sample:
+#.   EOF`
+#.   
+#.           else
+#.   
+#.               if _is_found "pinentry-curses"; then
+#.   
+#. >                 _warning "Detected DISPLAY, but only pinentry-curses is found."
+#.                   output=`cat <<EOF | pinentry-curses
+#.   OPTION ttyname=$TTY
+#.   OPTION lc-ctype=$LANG
+#.   SETTITLE $title
+#: tomb:432
 msgid "Detected DISPLAY, but only pinentry-curses is found."
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: ask_password
+#.
+#. Code sample:
+#.   SETTITLE $title
+#.   SETDESC $description
+#.   SETPROMPT Password:
+#.   GETPIN
+#.   EOF`
+#.               else
+#. >                 _failure "Cannot find any pinentry: impossible to ask for password."
+#.               fi
+#.   
+#.           fi
+#.   
+#: tomb:442
 msgid "Cannot find any pinentry: impossible to ask for password."
 msgstr ""
 
-#: warning
+#. Fold: Safety functions
+#. Function: ask_password
+#.
+#. Code sample:
+#.   
+#.       fi # end of DISPLAY block
+#.   
+#.       # parse the pinentry output
+#.       for i in ${(f)output}; do
+#.           [[ "$i" =~ "^ERR.*" ]] && {
+#. >             _warning "Pinentry error: ::1 error::" ${i[(w)3]}
+#.               print "canceled"
+#.               return 1 }
+#.   
+#.           # here the password is found
+#: tomb:452
 msgid "Pinentry error: ::1 error::"
 msgstr ""
 
-#: warning
+#. Fold: Safety functions
+#. Function: ask_password
+#.
+#. Code sample:
+#.   
+#.           # here the password is found
+#.           [[ "$i" =~ "^D .*" ]] && password="${i##D }"
+#.       done
+#.   
+#.       [[ "$password" = "" ]] && {
+#. >         _warning "Empty password"
+#.           print "empty"
+#.           return 1 }
+#.   
+#.       print "$password"
+#: tomb:461
 msgid "Empty password"
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: is_valid_tomb
+#.
+#. Code sample:
+#.   # Check if a filename is a valid tomb
+#.   is_valid_tomb() {
+#.       _verbose "is_valid_tomb ::1 tomb file::" $1
+#.   
+#.       # First argument must be the path to a tomb
+#.       [[ -z "$1" ]] && {
+#. >         _failure "Tomb file is missing from arguments." }
+#.   
+#.       # Tomb file must be a readable, writable, not-empty regular file.
+#.       [[ ! -r "$1" ]] && {
+#.           _failure "Tomb file not found: ::1 tomb file::" $1 }
+#: tomb:477
 msgid "Tomb file is missing from arguments."
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: is_valid_tomb
+#.
+#. Code sample:
+#.       # First argument must be the path to a tomb
+#.       [[ -z "$1" ]] && {
+#.           _failure "Tomb file is missing from arguments." }
+#.   
+#.       # Tomb file must be a readable, writable, not-empty regular file.
+#.       [[ ! -r "$1" ]] && {
+#. >         _failure "Tomb file not found: ::1 tomb file::" $1 }
+#.       [[ ! -f "$1" ]] && {
+#.           _failure "Tomb file is not a regular file: ::1 tomb file::" $1 }
+#.       [[ ! -s "$1" ]] && {
+#.           _failure "Tomb file is empty (zero length): ::1 tomb file::" $1 }
+#: tomb:481
 msgid "Tomb file not found: ::1 tomb file::"
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: is_valid_tomb
+#.
+#. Code sample:
+#.           _failure "Tomb file is missing from arguments." }
+#.   
+#.       # Tomb file must be a readable, writable, not-empty regular file.
+#.       [[ ! -r "$1" ]] && {
+#.           _failure "Tomb file not found: ::1 tomb file::" $1 }
+#.       [[ ! -f "$1" ]] && {
+#. >         _failure "Tomb file is not a regular file: ::1 tomb file::" $1 }
+#.       [[ ! -s "$1" ]] && {
+#.           _failure "Tomb file is empty (zero length): ::1 tomb file::" $1 }
+#.       [[ ! -w "$1" ]] && {
+#.           _failure "Tomb file is not writable: ::1 tomb file::" $1 }
+#: tomb:483
 msgid "Tomb file is not a regular file: ::1 tomb file::"
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: is_valid_tomb
+#.
+#. Code sample:
+#.       # Tomb file must be a readable, writable, not-empty regular file.
+#.       [[ ! -r "$1" ]] && {
+#.           _failure "Tomb file not found: ::1 tomb file::" $1 }
+#.       [[ ! -f "$1" ]] && {
+#.           _failure "Tomb file is not a regular file: ::1 tomb file::" $1 }
+#.       [[ ! -s "$1" ]] && {
+#. >         _failure "Tomb file is empty (zero length): ::1 tomb file::" $1 }
+#.       [[ ! -w "$1" ]] && {
+#.           _failure "Tomb file is not writable: ::1 tomb file::" $1 }
+#.   
+#.       # TODO: split the rest of that function out.
+#: tomb:485
 msgid "Tomb file is empty (zero length): ::1 tomb file::"
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: is_valid_tomb
+#.
+#. Code sample:
+#.           _failure "Tomb file not found: ::1 tomb file::" $1 }
+#.       [[ ! -f "$1" ]] && {
+#.           _failure "Tomb file is not a regular file: ::1 tomb file::" $1 }
+#.       [[ ! -s "$1" ]] && {
+#.           _failure "Tomb file is empty (zero length): ::1 tomb file::" $1 }
+#.       [[ ! -w "$1" ]] && {
+#. >         _failure "Tomb file is not writable: ::1 tomb file::" $1 }
+#.   
+#.       # TODO: split the rest of that function out.
+#.       # We already have a valid tomb, now we're checking
+#.       # whether we can alter it.
+#: tomb:487
 msgid "Tomb file is not writable: ::1 tomb file::"
 msgstr ""
 
-#: warning
+#. Fold: Safety functions
+#. Function: is_valid_tomb
+#.
+#. Code sample:
+#.       # TODO: split the rest of that function out.
+#.       # We already have a valid tomb, now we're checking
+#.       # whether we can alter it.
+#.   
+#.       # Tomb file may be a LUKS FS (or we are creating it)
+#.       [[ "`file $1`" =~ "luks encrypted file" ]] || {
+#. >         _warning "File is not yet a tomb: ::1 tomb file::" $1 }
+#.   
+#.       _plot $1     # Set TOMB{PATH,DIR,FILE,NAME}
+#.   
+#.       # Tomb cannot be already mounted (or we cannot alter it)
+#: tomb:495
 msgid "File is not yet a tomb: ::1 tomb file::"
 msgstr ""
 
-#: failure
+#. Fold: Safety functions
+#. Function: is_valid_tomb
+#.
+#. Code sample:
+#.           _warning "File is not yet a tomb: ::1 tomb file::" $1 }
+#.   
+#.       _plot $1     # Set TOMB{PATH,DIR,FILE,NAME}
+#.   
+#.       # Tomb cannot be already mounted (or we cannot alter it)
+#.       [[ "`mount -l`" -regex-match "${TOMBFILE}.*\[$TOMBNAME\]$" ]] && {
+#. >         _failure "Tomb is currently in use: ::1 tomb name::" $TOMBNAME
+#.       }
+#.   
+#.       _message "Valid tomb file found: ::1 tomb path::" $TOMBPATH
+#.   
+#: tomb:501
 msgid "Tomb is currently in use: ::1 tomb name::"
 msgstr ""
 
-#: message
+#. Fold: Safety functions
+#. Function: is_valid_tomb
+#.
+#. Code sample:
+#.   
+#.       # Tomb cannot be already mounted (or we cannot alter it)
+#.       [[ "`mount -l`" -regex-match "${TOMBFILE}.*\[$TOMBNAME\]$" ]] && {
+#.           _failure "Tomb is currently in use: ::1 tomb name::" $TOMBNAME
+#.       }
+#.   
+#. >     _message "Valid tomb file found: ::1 tomb path::" $TOMBPATH
+#.   
+#.       return 0
+#.   }
+#.   
+#: tomb:504
 msgid "Valid tomb file found: ::1 tomb path::"
 msgstr ""
 
-#: warning
+#. Fold: Safety functions
+#. Function: lo_mount
+#.
+#. Code sample:
+#.   lo_mount() {
+#.       tpath="$1"
+#.   
+#.       # check if we have support for loop mounting
+#.       _nstloop=`sudo losetup -f`
+#.       [[ $? = 0 ]] || {
+#. >         _warning "Loop mount of volumes is not possible on this machine, this error"
+#.           _warning "often occurs on VPS and kernels that don't provide the loop module."
+#.           _warning "It is impossible to use Tomb on this machine at this conditions."
+#.           _failure "Operation aborted."
+#.       }
+#: tomb:516
 msgid "Loop mount of volumes is not possible on this machine, this error"
 msgstr ""
 
-#: warning
+#. Fold: Safety functions
+#. Function: lo_mount
+#.
+#. Code sample:
+#.       tpath="$1"
+#.   
+#.       # check if we have support for loop mounting
+#.       _nstloop=`sudo losetup -f`
+#.       [[ $? = 0 ]] || {
+#.           _warning "Loop mount of volumes is not possible on this machine, this error"
+#. >         _warning "often occurs on VPS and kernels that don't provide the loop module."
+#.           _warning "It is impossible to use Tomb on this machine at this conditions."
+#.           _failure "Operation aborted."
+#.       }
+#.   
+#: tomb:517
 msgid "often occurs on VPS and kernels that don't provide the loop module."
 msgstr ""
 
-#: warning
+#. Fold: Safety functions
+#. Function: lo_mount
+#.
+#. Code sample:
+#.   
+#.       # check if we have support for loop mounting
+#.       _nstloop=`sudo losetup -f`
+#.       [[ $? = 0 ]] || {
+#.           _warning "Loop mount of volumes is not possible on this machine, this error"
+#.           _warning "often occurs on VPS and kernels that don't provide the loop module."
+#. >         _warning "It is impossible to use Tomb on this machine at this conditions."
+#.           _failure "Operation aborted."
+#.       }
+#.   
+#.       sudo losetup -f "$tpath" # allocates the next loopback for our file
+#: tomb:518
 msgid "It is impossible to use Tomb on this machine at this conditions."
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.   
+#.   # }}}
+#.   
+#.   # {{{ Commandline interaction
+#.   
+#.   usage() {
+#. >     _print "Syntax: tomb [options] command [arguments]"
+#.       _print "\000"
+#.       _print "Commands:"
+#.       _print "\000"
+#.       _print " // Creation:"
+#: tomb:558
 msgid "Syntax: tomb [options] command [arguments]"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.   
+#.   # {{{ Commandline interaction
+#.   
+#.   usage() {
+#.       _print "Syntax: tomb [options] command [arguments]"
+#.       _print "\000"
+#. >     _print "Commands:"
+#.       _print "\000"
+#.       _print " // Creation:"
+#.       _print " dig     create a new empty TOMB file of size -s in MB"
+#.       _print " forge   create a new KEY file and set its password"
+#: tomb:560
 msgid "Commands:"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.   
+#.   usage() {
+#.       _print "Syntax: tomb [options] command [arguments]"
+#.       _print "\000"
+#.       _print "Commands:"
+#.       _print "\000"
+#. >     _print " // Creation:"
+#.       _print " dig     create a new empty TOMB file of size -s in MB"
+#.       _print " forge   create a new KEY file and set its password"
+#.       _print " lock    installs a lock on a TOMB to use it with KEY"
+#.       _print "\000"
+#: tomb:562
 msgid " // Creation:"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.   usage() {
+#.       _print "Syntax: tomb [options] command [arguments]"
+#.       _print "\000"
+#.       _print "Commands:"
+#.       _print "\000"
+#.       _print " // Creation:"
+#. >     _print " dig     create a new empty TOMB file of size -s in MB"
+#.       _print " forge   create a new KEY file and set its password"
+#.       _print " lock    installs a lock on a TOMB to use it with KEY"
+#.       _print "\000"
+#.       _print " // Operations on tombs:"
+#: tomb:563
 msgid " dig     create a new empty TOMB file of size -s in MB"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print "Syntax: tomb [options] command [arguments]"
+#.       _print "\000"
+#.       _print "Commands:"
+#.       _print "\000"
+#.       _print " // Creation:"
+#.       _print " dig     create a new empty TOMB file of size -s in MB"
+#. >     _print " forge   create a new KEY file and set its password"
+#.       _print " lock    installs a lock on a TOMB to use it with KEY"
+#.       _print "\000"
+#.       _print " // Operations on tombs:"
+#.       _print " open    open an existing TOMB"
+#: tomb:564
 msgid " forge   create a new KEY file and set its password"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print "\000"
+#.       _print "Commands:"
+#.       _print "\000"
+#.       _print " // Creation:"
+#.       _print " dig     create a new empty TOMB file of size -s in MB"
+#.       _print " forge   create a new KEY file and set its password"
+#. >     _print " lock    installs a lock on a TOMB to use it with KEY"
+#.       _print "\000"
+#.       _print " // Operations on tombs:"
+#.       _print " open    open an existing TOMB"
+#.       _print " index   update the search indexes of tombs"
+#: tomb:565
 msgid " lock    installs a lock on a TOMB to use it with KEY"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print "\000"
+#.       _print " // Creation:"
+#.       _print " dig     create a new empty TOMB file of size -s in MB"
+#.       _print " forge   create a new KEY file and set its password"
+#.       _print " lock    installs a lock on a TOMB to use it with KEY"
+#.       _print "\000"
+#. >     _print " // Operations on tombs:"
+#.       _print " open    open an existing TOMB"
+#.       _print " index   update the search indexes of tombs"
+#.       _print " search  looks for filenames matching text patterns"
+#.       _print " list    list of open TOMBs and information on them"
+#: tomb:567
 msgid " // Operations on tombs:"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " // Creation:"
+#.       _print " dig     create a new empty TOMB file of size -s in MB"
+#.       _print " forge   create a new KEY file and set its password"
+#.       _print " lock    installs a lock on a TOMB to use it with KEY"
+#.       _print "\000"
+#.       _print " // Operations on tombs:"
+#. >     _print " open    open an existing TOMB"
+#.       _print " index   update the search indexes of tombs"
+#.       _print " search  looks for filenames matching text patterns"
+#.       _print " list    list of open TOMBs and information on them"
+#.       _print " close   close a specific TOMB (or 'all')"
+#: tomb:568
 msgid " open    open an existing TOMB"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " dig     create a new empty TOMB file of size -s in MB"
+#.       _print " forge   create a new KEY file and set its password"
+#.       _print " lock    installs a lock on a TOMB to use it with KEY"
+#.       _print "\000"
+#.       _print " // Operations on tombs:"
+#.       _print " open    open an existing TOMB"
+#. >     _print " index   update the search indexes of tombs"
+#.       _print " search  looks for filenames matching text patterns"
+#.       _print " list    list of open TOMBs and information on them"
+#.       _print " close   close a specific TOMB (or 'all')"
+#.       _print " slam    slam a TOMB killing all programs using it"
+#: tomb:569
 msgid " index   update the search indexes of tombs"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " forge   create a new KEY file and set its password"
+#.       _print " lock    installs a lock on a TOMB to use it with KEY"
+#.       _print "\000"
+#.       _print " // Operations on tombs:"
+#.       _print " open    open an existing TOMB"
+#.       _print " index   update the search indexes of tombs"
+#. >     _print " search  looks for filenames matching text patterns"
+#.       _print " list    list of open TOMBs and information on them"
+#.       _print " close   close a specific TOMB (or 'all')"
+#.       _print " slam    slam a TOMB killing all programs using it"
+#.       [[ $RESIZER == 1 ]] && {
+#: tomb:570
 msgid " search  looks for filenames matching text patterns"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " lock    installs a lock on a TOMB to use it with KEY"
+#.       _print "\000"
+#.       _print " // Operations on tombs:"
+#.       _print " open    open an existing TOMB"
+#.       _print " index   update the search indexes of tombs"
+#.       _print " search  looks for filenames matching text patterns"
+#. >     _print " list    list of open TOMBs and information on them"
+#.       _print " close   close a specific TOMB (or 'all')"
+#.       _print " slam    slam a TOMB killing all programs using it"
+#.       [[ $RESIZER == 1 ]] && {
+#.           _print " resize  resize a TOMB to a new size -s (can only grow)"
+#: tomb:571
 msgid " list    list of open TOMBs and information on them"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print "\000"
+#.       _print " // Operations on tombs:"
+#.       _print " open    open an existing TOMB"
+#.       _print " index   update the search indexes of tombs"
+#.       _print " search  looks for filenames matching text patterns"
+#.       _print " list    list of open TOMBs and information on them"
+#. >     _print " close   close a specific TOMB (or 'all')"
+#.       _print " slam    slam a TOMB killing all programs using it"
+#.       [[ $RESIZER == 1 ]] && {
+#.           _print " resize  resize a TOMB to a new size -s (can only grow)"
+#.       }
+#: tomb:572
 msgid " close   close a specific TOMB (or 'all')"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " // Operations on tombs:"
+#.       _print " open    open an existing TOMB"
+#.       _print " index   update the search indexes of tombs"
+#.       _print " search  looks for filenames matching text patterns"
+#.       _print " list    list of open TOMBs and information on them"
+#.       _print " close   close a specific TOMB (or 'all')"
+#. >     _print " slam    slam a TOMB killing all programs using it"
+#.       [[ $RESIZER == 1 ]] && {
+#.           _print " resize  resize a TOMB to a new size -s (can only grow)"
+#.       }
+#.       _print "\000"
+#: tomb:573
 msgid " slam    slam a TOMB killing all programs using it"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " index   update the search indexes of tombs"
+#.       _print " search  looks for filenames matching text patterns"
+#.       _print " list    list of open TOMBs and information on them"
+#.       _print " close   close a specific TOMB (or 'all')"
+#.       _print " slam    slam a TOMB killing all programs using it"
+#.       [[ $RESIZER == 1 ]] && {
+#. >         _print " resize  resize a TOMB to a new size -s (can only grow)"
+#.       }
+#.       _print "\000"
+#.       _print " // Operations on keys:"
+#.       _print " passwd  change the password of a KEY (needs old pass)"
+#: tomb:575
 msgid " resize  resize a TOMB to a new size -s (can only grow)"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " close   close a specific TOMB (or 'all')"
+#.       _print " slam    slam a TOMB killing all programs using it"
+#.       [[ $RESIZER == 1 ]] && {
+#.           _print " resize  resize a TOMB to a new size -s (can only grow)"
+#.       }
+#.       _print "\000"
+#. >     _print " // Operations on keys:"
+#.       _print " passwd  change the password of a KEY (needs old pass)"
+#.       _print " setkey  change the KEY locking a TOMB (needs old key and pass)"
+#.       _print "\000"
+#.       [[ $QRENCODE == 1 ]] && {
+#: tomb:578
 msgid " // Operations on keys:"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " slam    slam a TOMB killing all programs using it"
+#.       [[ $RESIZER == 1 ]] && {
+#.           _print " resize  resize a TOMB to a new size -s (can only grow)"
+#.       }
+#.       _print "\000"
+#.       _print " // Operations on keys:"
+#. >     _print " passwd  change the password of a KEY (needs old pass)"
+#.       _print " setkey  change the KEY locking a TOMB (needs old key and pass)"
+#.       _print "\000"
+#.       [[ $QRENCODE == 1 ]] && {
+#.           _print " // Backup on paper:"
+#: tomb:579
 msgid " passwd  change the password of a KEY (needs old pass)"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       [[ $RESIZER == 1 ]] && {
+#.           _print " resize  resize a TOMB to a new size -s (can only grow)"
+#.       }
+#.       _print "\000"
+#.       _print " // Operations on keys:"
+#.       _print " passwd  change the password of a KEY (needs old pass)"
+#. >     _print " setkey  change the KEY locking a TOMB (needs old key and pass)"
+#.       _print "\000"
+#.       [[ $QRENCODE == 1 ]] && {
+#.           _print " // Backup on paper:"
+#.           _print " engrave makes a QR code of a KEY to be saved on paper"
+#: tomb:580
 msgid " setkey  change the KEY locking a TOMB (needs old key and pass)"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print "\000"
+#.       _print " // Operations on keys:"
+#.       _print " passwd  change the password of a KEY (needs old pass)"
+#.       _print " setkey  change the KEY locking a TOMB (needs old key and pass)"
+#.       _print "\000"
+#.       [[ $QRENCODE == 1 ]] && {
+#. >         _print " // Backup on paper:"
+#.           _print " engrave makes a QR code of a KEY to be saved on paper"
+#.       }
+#.       _print "\000"
+#.       [[ $STEGHIDE == 1 ]] && {
+#: tomb:583
 msgid " // Backup on paper:"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " // Operations on keys:"
+#.       _print " passwd  change the password of a KEY (needs old pass)"
+#.       _print " setkey  change the KEY locking a TOMB (needs old key and pass)"
+#.       _print "\000"
+#.       [[ $QRENCODE == 1 ]] && {
+#.           _print " // Backup on paper:"
+#. >         _print " engrave makes a QR code of a KEY to be saved on paper"
+#.       }
+#.       _print "\000"
+#.       [[ $STEGHIDE == 1 ]] && {
+#.           _print " // Steganography:"
+#: tomb:584
 msgid " engrave makes a QR code of a KEY to be saved on paper"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       [[ $QRENCODE == 1 ]] && {
+#.           _print " // Backup on paper:"
+#.           _print " engrave makes a QR code of a KEY to be saved on paper"
+#.       }
+#.       _print "\000"
+#.       [[ $STEGHIDE == 1 ]] && {
+#. >         _print " // Steganography:"
+#.           _print " bury    hide a KEY inside a JPEG image (for use with -k)"
+#.           _print " exhume  extract a KEY from a JPEG image (prints to stdout)"
+#.       }
+#.       _print "\000"
+#: tomb:588
 msgid " // Steganography:"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.           _print " // Backup on paper:"
+#.           _print " engrave makes a QR code of a KEY to be saved on paper"
+#.       }
+#.       _print "\000"
+#.       [[ $STEGHIDE == 1 ]] && {
+#.           _print " // Steganography:"
+#. >         _print " bury    hide a KEY inside a JPEG image (for use with -k)"
+#.           _print " exhume  extract a KEY from a JPEG image (prints to stdout)"
+#.       }
+#.       _print "\000"
+#.       _print "Options:"
+#: tomb:589
 msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.           _print " engrave makes a QR code of a KEY to be saved on paper"
+#.       }
+#.       _print "\000"
+#.       [[ $STEGHIDE == 1 ]] && {
+#.           _print " // Steganography:"
+#.           _print " bury    hide a KEY inside a JPEG image (for use with -k)"
+#. >         _print " exhume  extract a KEY from a JPEG image (prints to stdout)"
+#.       }
+#.       _print "\000"
+#.       _print "Options:"
+#.       _print "\000"
+#: tomb:590
 msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       [[ $STEGHIDE == 1 ]] && {
+#.           _print " // Steganography:"
+#.           _print " bury    hide a KEY inside a JPEG image (for use with -k)"
+#.           _print " exhume  extract a KEY from a JPEG image (prints to stdout)"
+#.       }
+#.       _print "\000"
+#. >     _print "Options:"
+#.       _print "\000"
+#.       _print " -s     size of the tomb file when creating/resizing one (in MB)"
+#.       _print " -k     path to the key to be used ('-k -' to read from stdin)"
+#.       _print " -n     don't process the hooks found in tomb"
+#: tomb:593
 msgid "Options:"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.           _print " bury    hide a KEY inside a JPEG image (for use with -k)"
+#.           _print " exhume  extract a KEY from a JPEG image (prints to stdout)"
+#.       }
+#.       _print "\000"
+#.       _print "Options:"
+#.       _print "\000"
+#. >     _print " -s     size of the tomb file when creating/resizing one (in MB)"
+#.       _print " -k     path to the key to be used ('-k -' to read from stdin)"
+#.       _print " -n     don't process the hooks found in tomb"
+#.       _print " -o     options passed to local command, e.g.:"
+#.       _print "          - mount options used to open (default: rw,noatime,nodev)"
+#: tomb:595
 msgid " -s     size of the tomb file when creating/resizing one (in MB)"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.           _print " exhume  extract a KEY from a JPEG image (prints to stdout)"
+#.       }
+#.       _print "\000"
+#.       _print "Options:"
+#.       _print "\000"
+#.       _print " -s     size of the tomb file when creating/resizing one (in MB)"
+#. >     _print " -k     path to the key to be used ('-k -' to read from stdin)"
+#.       _print " -n     don't process the hooks found in tomb"
+#.       _print " -o     options passed to local command, e.g.:"
+#.       _print "          - mount options used to open (default: rw,noatime,nodev)"
+#.       _print "          - an alternate cipher to forge and lock"
+#: tomb:596
 msgid " -k     path to the key to be used ('-k -' to read from stdin)"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       }
+#.       _print "\000"
+#.       _print "Options:"
+#.       _print "\000"
+#.       _print " -s     size of the tomb file when creating/resizing one (in MB)"
+#.       _print " -k     path to the key to be used ('-k -' to read from stdin)"
+#. >     _print " -n     don't process the hooks found in tomb"
+#.       _print " -o     options passed to local command, e.g.:"
+#.       _print "          - mount options used to open (default: rw,noatime,nodev)"
+#.       _print "          - an alternate cipher to forge and lock"
+#.       _print " -f     force operation (i.e. even if swap is active)"
+#: tomb:597
 msgid " -n     don't process the hooks found in tomb"
 msgstr ""
 
-#: print
-msgid " -o     mount options used to open (default: rw,noatime,nodev)"
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print "\000"
+#.       _print "Options:"
+#.       _print "\000"
+#.       _print " -s     size of the tomb file when creating/resizing one (in MB)"
+#.       _print " -k     path to the key to be used ('-k -' to read from stdin)"
+#.       _print " -n     don't process the hooks found in tomb"
+#. >     _print " -o     options passed to local command, e.g.:"
+#.       _print "          - mount options used to open (default: rw,noatime,nodev)"
+#.       _print "          - an alternate cipher to forge and lock"
+#.       _print " -f     force operation (i.e. even if swap is active)"
+#.       [[ $KDF == 1 ]] && {
+#: tomb:598
+msgid " -o     options passed to local command, e.g.:"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print "Options:"
+#.       _print "\000"
+#.       _print " -s     size of the tomb file when creating/resizing one (in MB)"
+#.       _print " -k     path to the key to be used ('-k -' to read from stdin)"
+#.       _print " -n     don't process the hooks found in tomb"
+#.       _print " -o     options passed to local command, e.g.:"
+#. >     _print "          - mount options used to open (default: rw,noatime,nodev)"
+#.       _print "          - an alternate cipher to forge and lock"
+#.       _print " -f     force operation (i.e. even if swap is active)"
+#.       [[ $KDF == 1 ]] && {
+#.           _print " --kdf  generate passwords armored against dictionary attacks"
+#: tomb:599
+msgid "          - mount options used to open (default: rw,noatime,nodev)"
+msgstr ""
+
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print "\000"
+#.       _print " -s     size of the tomb file when creating/resizing one (in MB)"
+#.       _print " -k     path to the key to be used ('-k -' to read from stdin)"
+#.       _print " -n     don't process the hooks found in tomb"
+#.       _print " -o     options passed to local command, e.g.:"
+#.       _print "          - mount options used to open (default: rw,noatime,nodev)"
+#. >     _print "          - an alternate cipher to forge and lock"
+#.       _print " -f     force operation (i.e. even if swap is active)"
+#.       [[ $KDF == 1 ]] && {
+#.           _print " --kdf  generate passwords armored against dictionary attacks"
+#.       }
+#: tomb:600
+msgid "          - an alternate cipher to forge and lock"
+msgstr ""
+
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " -s     size of the tomb file when creating/resizing one (in MB)"
+#.       _print " -k     path to the key to be used ('-k -' to read from stdin)"
+#.       _print " -n     don't process the hooks found in tomb"
+#.       _print " -o     options passed to local command, e.g.:"
+#.       _print "          - mount options used to open (default: rw,noatime,nodev)"
+#.       _print "          - an alternate cipher to forge and lock"
+#. >     _print " -f     force operation (i.e. even if swap is active)"
+#.       [[ $KDF == 1 ]] && {
+#.           _print " --kdf  generate passwords armored against dictionary attacks"
+#.       }
+#.   
+#: tomb:601
 msgid " -f     force operation (i.e. even if swap is active)"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " -n     don't process the hooks found in tomb"
+#.       _print " -o     options passed to local command, e.g.:"
+#.       _print "          - mount options used to open (default: rw,noatime,nodev)"
+#.       _print "          - an alternate cipher to forge and lock"
+#.       _print " -f     force operation (i.e. even if swap is active)"
+#.       [[ $KDF == 1 ]] && {
+#. >         _print " --kdf  generate passwords armored against dictionary attacks"
+#.       }
+#.   
+#.       _print "\000"
+#.       _print " -h     print this help"
+#: tomb:603
 msgid " --kdf  generate passwords armored against dictionary attacks"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " -f     force operation (i.e. even if swap is active)"
+#.       [[ $KDF == 1 ]] && {
+#.           _print " --kdf  generate passwords armored against dictionary attacks"
+#.       }
+#.   
+#.       _print "\000"
+#. >     _print " -h     print this help"
+#.       _print " -v     print version, license and list of available ciphers"
+#.       _print " -q     run quietly without printing informations"
+#.       _print " -D     print debugging information at runtime"
+#.       _print "\000"
+#: tomb:607
 msgid " -h     print this help"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       [[ $KDF == 1 ]] && {
+#.           _print " --kdf  generate passwords armored against dictionary attacks"
+#.       }
+#.   
+#.       _print "\000"
+#.       _print " -h     print this help"
+#. >     _print " -v     print version, license and list of available ciphers"
+#.       _print " -q     run quietly without printing informations"
+#.       _print " -D     print debugging information at runtime"
+#.       _print "\000"
+#.       _print "For more informations on Tomb read the manual: man tomb"
+#: tomb:608
 msgid " -v     print version, license and list of available ciphers"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.           _print " --kdf  generate passwords armored against dictionary attacks"
+#.       }
+#.   
+#.       _print "\000"
+#.       _print " -h     print this help"
+#.       _print " -v     print version, license and list of available ciphers"
+#. >     _print " -q     run quietly without printing informations"
+#.       _print " -D     print debugging information at runtime"
+#.       _print "\000"
+#.       _print "For more informations on Tomb read the manual: man tomb"
+#.       _print "Please report bugs on <http://github.com/dyne/tomb/issues>."
+#: tomb:609
 msgid " -q     run quietly without printing informations"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       }
+#.   
+#.       _print "\000"
+#.       _print " -h     print this help"
+#.       _print " -v     print version, license and list of available ciphers"
+#.       _print " -q     run quietly without printing informations"
+#. >     _print " -D     print debugging information at runtime"
+#.       _print "\000"
+#.       _print "For more informations on Tomb read the manual: man tomb"
+#.       _print "Please report bugs on <http://github.com/dyne/tomb/issues>."
+#.   }
+#: tomb:610
 msgid " -D     print debugging information at runtime"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print "\000"
+#.       _print " -h     print this help"
+#.       _print " -v     print version, license and list of available ciphers"
+#.       _print " -q     run quietly without printing informations"
+#.       _print " -D     print debugging information at runtime"
+#.       _print "\000"
+#. >     _print "For more informations on Tomb read the manual: man tomb"
+#.       _print "Please report bugs on <http://github.com/dyne/tomb/issues>."
+#.   }
+#.   
+#.   
+#: tomb:612
 msgid "For more informations on Tomb read the manual: man tomb"
 msgstr ""
 
-#: print
+#. Fold: Commandline interaction
+#. Function: usage
+#.
+#. Code sample:
+#.       _print " -h     print this help"
+#.       _print " -v     print version, license and list of available ciphers"
+#.       _print " -q     run quietly without printing informations"
+#.       _print " -D     print debugging information at runtime"
+#.       _print "\000"
+#.       _print "For more informations on Tomb read the manual: man tomb"
+#. >     _print "Please report bugs on <http://github.com/dyne/tomb/issues>."
+#.   }
+#.   
+#.   
+#.   # Check whether a commandline option is set.
+#: tomb:613
 msgid "Please report bugs on <http://github.com/dyne/tomb/issues>."
 msgstr ""
 
-#: failure
+#. Fold: Commandline interaction
+#. Function: _ensure_dependencies
+#.
+#. Code sample:
+#.   # missing, bail out.
+#.   _ensure_dependencies() {
+#.   
+#.       # Check for required programs
+#.       for req in cryptsetup pinentry sudo gpg mkfs.ext4 e2fsck; do
+#.           command -v $req 1>/dev/null 2>/dev/null || {
+#. >             _failure "Missing required dependency ::1 command::.  Please install it." $req }
+#.       done
+#.   
+#.       # Ensure system binaries are available in the PATH
+#.       path+=(/sbin /usr/sbin) # zsh magic
+#: tomb:748
 msgid "Missing required dependency ::1 command::.  Please install it."
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: is_valid_key
+#.
+#. Code sample:
+#.   
+#.       _verbose "is_valid_key"
+#.   
+#.       [[ -z $key ]] && key=$TOMBKEY
+#.       [[ "$key" = "cleartext" ]] && {
+#.           { option_is_set --unsafe } || {
+#. >             _warning "cleartext key from stdin selected: this is unsafe."
+#.               exitv=127 _failure "please use --unsafe if you really want to do this."
+#.           }
+#.           _warning "received key in cleartext from stdin (unsafe mode)"
+#.           return 0 }
+#: tomb:785
 msgid "cleartext key from stdin selected: this is unsafe."
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: is_valid_key
+#.
+#. Code sample:
+#.       _verbose "is_valid_key"
+#.   
+#.       [[ -z $key ]] && key=$TOMBKEY
+#.       [[ "$key" = "cleartext" ]] && {
+#.           { option_is_set --unsafe } || {
+#.               _warning "cleartext key from stdin selected: this is unsafe."
+#. >             exitv=127 _failure "please use --unsafe if you really want to do this."
+#.           }
+#.           _warning "received key in cleartext from stdin (unsafe mode)"
+#.           return 0 }
+#.   
+#: tomb:786
 msgid "please use --unsafe if you really want to do this."
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: is_valid_key
+#.
+#. Code sample:
+#.       [[ -z $key ]] && key=$TOMBKEY
+#.       [[ "$key" = "cleartext" ]] && {
+#.           { option_is_set --unsafe } || {
+#.               _warning "cleartext key from stdin selected: this is unsafe."
+#.               exitv=127 _failure "please use --unsafe if you really want to do this."
+#.           }
+#. >         _warning "received key in cleartext from stdin (unsafe mode)"
+#.           return 0 }
+#.   
+#.       [[ -z $key ]] && {
+#.           _warning "is_valid_key() called without an argument."
+#: tomb:788
 msgid "received key in cleartext from stdin (unsafe mode)"
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: is_valid_key
+#.
+#. Code sample:
+#.               exitv=127 _failure "please use --unsafe if you really want to do this."
+#.           }
+#.           _warning "received key in cleartext from stdin (unsafe mode)"
+#.           return 0 }
+#.   
+#.       [[ -z $key ]] && {
+#. >         _warning "is_valid_key() called without an argument."
+#.           return 1
+#.       }
+#.   
+#.       # If the key file is an image don't check file header
+#: tomb:792
 msgid "is_valid_key() called without an argument."
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: is_valid_key
+#.
+#. Code sample:
+#.       }
+#.   
+#.       # If the key file is an image don't check file header
+#.       [[ -r $TOMBKEYFILE ]] \
+#.           && [[ $(file $TOMBKEYFILE) =~ "JP.G" ]] \
+#.           && {
+#. >         _message "Key is an image, it might be valid."
+#.           return 0 }
+#.   
+#.       [[ $key =~ "BEGIN PGP" ]] && {
+#.           _message "Key is valid."
+#: tomb:800
 msgid "Key is an image, it might be valid."
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: is_valid_key
+#.
+#. Code sample:
+#.           && [[ $(file $TOMBKEYFILE) =~ "JP.G" ]] \
+#.           && {
+#.           _message "Key is an image, it might be valid."
+#.           return 0 }
+#.   
+#.       [[ $key =~ "BEGIN PGP" ]] && {
+#. >         _message "Key is valid."
+#.           return 0 }
+#.   
+#.       return 1
+#.   }
+#: tomb:804
 msgid "Key is valid."
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: _tomb_key_recover recover_key
+#.
+#. Code sample:
+#.   }
+#.   
+#.   # $1 is a string containing an encrypted key
+#.   _tomb_key_recover recover_key() {
+#.       local key="${1}"    # Unique argument is an encrypted key
+#.   
+#. >     _warning "Attempting key recovery."
+#.   
+#.       _head="${key[(f)1]}" # take the first line
+#.   
+#.       TOMBKEY=""        # Reset global variable
+#: tomb:814
 msgid "Attempting key recovery."
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: _load_key
+#.
+#. Code sample:
+#.   # Set global variables TOMBKEY and TOMBKEYFILE.
+#.   _load_key() {
+#.       local keyfile="$1"    # Unique argument is an optional keyfile
+#.   
+#.       [[ -z $keyfile ]] && keyfile=$(option_value -k)
+#.       [[ -z $keyfile ]] && {
+#. >         _failure "This operation requires a key file to be specified using the -k option." }
+#.   
+#.       if [[ $keyfile == "-" ]]; then
+#.           _verbose "load_key reading from stdin."
+#.           _message "Waiting for the key to be piped from stdin... "
+#: tomb:838
 msgid "This operation requires a key file to be specified using the -k option."
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: _load_key
+#.
+#. Code sample:
+#.       [[ -z $keyfile ]] && keyfile=$(option_value -k)
+#.       [[ -z $keyfile ]] && {
+#.           _failure "This operation requires a key file to be specified using the -k option." }
+#.   
+#.       if [[ $keyfile == "-" ]]; then
+#.           _verbose "load_key reading from stdin."
+#. >         _message "Waiting for the key to be piped from stdin... "
+#.           TOMBKEYFILE=stdin
+#.           TOMBKEY=$(cat)
+#.       elif [[ $keyfile == "cleartext" ]]; then
+#.           _verbose "load_key reading SECRET from stdin"
+#: tomb:842
 msgid "Waiting for the key to be piped from stdin... "
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: _load_key
+#.
+#. Code sample:
+#.           _message "Waiting for the key to be piped from stdin... "
+#.           TOMBKEYFILE=cleartext
+#.           TOMBKEY=cleartext
+#.           TOMBSECRET=$(cat)
+#.       else
+#.           _verbose "load_key argument: ::1 key file::" $keyfile
+#. >         [[ -r $keyfile ]] || _failure "Key not found, specify one using -k."
+#.           TOMBKEYFILE=$keyfile
+#.           TOMBKEY="${mapfile[$TOMBKEYFILE]}"
+#.       fi
+#.   
+#: tomb:853
 msgid "Key not found, specify one using -k."
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: _load_key
+#.
+#. Code sample:
+#.           TOMBKEY="${mapfile[$TOMBKEYFILE]}"
+#.       fi
+#.   
+#.       _verbose "load_key: ::1 key::" $TOMBKEYFILE
+#.   
+#.       is_valid_key $TOMBKEY || {
+#. >         _warning "The key seems invalid or its format is not known by this version of Tomb."
+#.           _tomb_key_recover $TOMBKEY
+#.       }
+#.   
+#.       # Declared TOMBKEYFILE (path)
+#: tomb:861
 msgid "The key seems invalid or its format is not known by this version of Tomb."
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: get_lukskey
+#.
+#. Code sample:
+#.                   _verbose "KDF salt: $kdf_salt"
+#.                   _verbose "KDF ic: $kdf_ic"
+#.                   _verbose "KDF len: $kdf_len"
+#.                   _password=$(tomb-kdb-pbkdf2 $kdf_salt $kdf_ic $kdf_len 2>/dev/null <<<$_password)
+#.                   ;;
+#.               *)
+#. >                 _failure "No suitable program for KDF ::1 program::." $pbkdf_hash
+#.                   unset _password
+#.                   return 1
+#.                   ;;
+#.           esac
+#: tomb:936
 msgid "No suitable program for KDF ::1 program::."
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: ask_key_password
+#.
+#. Code sample:
+#.   
+#.   # This function asks the user for the password to use the key it tests
+#.   # it against the return code of gpg on success returns 0 and saves
+#.   # the password in the global variable $TOMBPASSWORD
+#.   ask_key_password() {
+#.       [[ -z "$TOMBKEYFILE" ]] && {
+#. >         _failure "Internal error: ask_key_password() called before _load_key()." }
+#.   
+#.       [[ "$TOMBKEYFILE" = "cleartext" ]] && {
+#.           _verbose "no password needed, using secret bytes from stdin"
+#.           return 0 }
+#: tomb:962
 msgid "Internal error: ask_key_password() called before _load_key()."
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: ask_key_password
+#.
+#. Code sample:
+#.           _failure "Internal error: ask_key_password() called before _load_key()." }
+#.   
+#.       [[ "$TOMBKEYFILE" = "cleartext" ]] && {
+#.           _verbose "no password needed, using secret bytes from stdin"
+#.           return 0 }
+#.   
+#. >     _message "A password is required to use key ::1 key::" $TOMBKEYFILE
+#.       passok=0
+#.       tombpass=""
+#.       if [[ "$1" = "" ]]; then
+#.   
+#: tomb:968
 msgid "A password is required to use key ::1 key::"
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: ask_key_password
+#.
+#. Code sample:
+#.               if [[ $c == 1 ]]; then
+#.                   tombpass=$(ask_password "Insert password to: $TOMBKEYFILE")
+#.               else
+#.                   tombpass=$(ask_password "Insert password to: $TOMBKEYFILE (attempt $c)")
+#.               fi
+#.               [[ $? = 0 ]] || {
+#. >                 _warning "User aborted password dialog."
+#.                   return 1
+#.               }
+#.   
+#.               get_lukskey "$tombpass"
+#: tomb:980
 msgid "User aborted password dialog."
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: ask_key_password
+#.
+#. Code sample:
+#.                   return 1
+#.               }
+#.   
+#.               get_lukskey "$tombpass"
+#.   
+#.               [[ $? = 0 ]] && {
+#. >                 passok=1; _message "Password OK."
+#.                   break;
+#.               }
+#.           done
+#.   
+#: tomb:987
 msgid "Password OK."
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: change_passwd
+#.
+#. Code sample:
+#.   change_passwd() {
+#.       local tmpnewkey lukskey c tombpass tombpasstmp
+#.   
+#.       _check_swap  # Ensure swap is secure, if any
+#.       _load_key    # Try loading key from option -k and set TOMBKEYFILE
+#.   
+#. >     _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
+#.   
+#.       _tmp_create
+#.       tmpnewkey=$TOMBTMP
+#.   
+#: tomb:1025
 msgid "Commanded to change password for tomb key ::1 key::"
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: change_passwd
+#.
+#. Code sample:
+#.           local tomboldpwd="`option_value --tomb-old-pwd`"
+#.           _verbose "tomb-old-pwd = ::1 old pass::" $tomboldpwd
+#.           ask_key_password "$tomboldpwd"
+#.       else
+#.           ask_key_password
+#.       fi
+#. >     [[ $? == 0 ]] || _failure "No valid password supplied."
+#.   
+#.       _success "Changing password for ::1 key file::" $TOMBKEYFILE
+#.   
+#.       # Here $TOMBSECRET contains the key material in clear
+#: tomb:1037
 msgid "No valid password supplied."
 msgstr ""
 
-#: success
+#. Fold: Key operations
+#. Function: change_passwd
+#.
+#. Code sample:
+#.           ask_key_password "$tomboldpwd"
+#.       else
+#.           ask_key_password
+#.       fi
+#.       [[ $? == 0 ]] || _failure "No valid password supplied."
+#.   
+#. >     _success "Changing password for ::1 key file::" $TOMBKEYFILE
+#.   
+#.       # Here $TOMBSECRET contains the key material in clear
+#.   
+#.       { option_is_set --tomb-pwd } && {
+#: tomb:1039
 msgid "Changing password for ::1 key file::"
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: change_passwd
+#.
+#. Code sample:
+#.           gen_key "$tombpwd" >> "$tmpnewkey"
+#.       } || {
+#.           gen_key >> "$tmpnewkey"
+#.       }
+#.   
+#.       { is_valid_key "${mapfile[$tmpnewkey]}" } || {
+#. >         _failure "Error: the newly generated keyfile does not seem valid." }
+#.   
+#.       # Copy the new key as the original keyfile name
+#.       cp -f "${tmpnewkey}" $TOMBKEYFILE
+#.       _success "Your passphrase was successfully updated."
+#: tomb:1052
 msgid "Error: the newly generated keyfile does not seem valid."
 msgstr ""
 
-#: success
+#. Fold: Key operations
+#. Function: change_passwd
+#.
+#. Code sample:
+#.   
+#.       { is_valid_key "${mapfile[$tmpnewkey]}" } || {
+#.           _failure "Error: the newly generated keyfile does not seem valid." }
+#.   
+#.       # Copy the new key as the original keyfile name
+#.       cp -f "${tmpnewkey}" $TOMBKEYFILE
+#. >     _success "Your passphrase was successfully updated."
+#.   
+#.       return 0
+#.   }
+#.   
+#: tomb:1056
 msgid "Your passphrase was successfully updated."
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: gen_key
+#.
+#. Code sample:
+#.   
+#.       if [ "$1" = "" ]; then
+#.           while true; do
+#.               # 3 tries to write two times a matching password
+#.               tombpass=`ask_password "Type the new password to secure your key"`
+#.               if [[ $? != 0 ]]; then
+#. >                 _failure "User aborted."
+#.               fi
+#.               if [ -z $tombpass ]; then
+#.                   _failure "You set empty password, which is not possible."
+#.               fi
+#: tomb:1078
 msgid "User aborted."
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: gen_key
+#.
+#. Code sample:
+#.               # 3 tries to write two times a matching password
+#.               tombpass=`ask_password "Type the new password to secure your key"`
+#.               if [[ $? != 0 ]]; then
+#.                   _failure "User aborted."
+#.               fi
+#.               if [ -z $tombpass ]; then
+#. >                 _failure "You set empty password, which is not possible."
+#.               fi
+#.               tombpasstmp=$tombpass
+#.               tombpass=`ask_password "Type the new password to secure your key (again)"`
+#.               if [[ $? != 0 ]]; then
+#: tomb:1081
 msgid "You set empty password, which is not possible."
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: gen_key
+#.
+#. Code sample:
+#.               # see: https://github.com/dyne/Tomb/issues/82
+#.               itertime="`option_value --kdf`"
+#.               # removing support of floating points because they can't be type checked well
+#.               if [[ "$itertime" != <-> ]]; then
+#.                   unset tombpass
+#.                   unset tombpasstmp
+#. >                 _failure "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+#.               fi
+#.               # --kdf takes one parameter: iter time (on present machine) in seconds
+#.               local -i microseconds
+#.               microseconds=$(( itertime * 10000 ))
+#: tomb:1109
 msgid "Wrong argument for --kdf: must be an integer number (iteration seconds)."
 msgstr ""
 
-#: success
+#. Fold: Key operations
+#. Function: gen_key
+#.
+#. Code sample:
+#.                   unset tombpasstmp
+#.                   _failure "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+#.               fi
+#.               # --kdf takes one parameter: iter time (on present machine) in seconds
+#.               local -i microseconds
+#.               microseconds=$(( itertime * 10000 ))
+#. >             _success "Using KDF, iterations: ::1 microseconds::" $microseconds
+#.               _message "generating salt"
+#.               pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
+#.               _message "calculating iterations"
+#.               pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
+#: tomb:1114
 msgid "Using KDF, iterations: ::1 microseconds::"
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: gen_key
+#.
+#. Code sample:
+#.                   _failure "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+#.               fi
+#.               # --kdf takes one parameter: iter time (on present machine) in seconds
+#.               local -i microseconds
+#.               microseconds=$(( itertime * 10000 ))
+#.               _success "Using KDF, iterations: ::1 microseconds::" $microseconds
+#. >             _message "generating salt"
+#.               pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
+#.               _message "calculating iterations"
+#.               pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
+#.               _message "encoding the password"
+#: tomb:1115
 msgid "generating salt"
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: gen_key
+#.
+#. Code sample:
+#.               # --kdf takes one parameter: iter time (on present machine) in seconds
+#.               local -i microseconds
+#.               microseconds=$(( itertime * 10000 ))
+#.               _success "Using KDF, iterations: ::1 microseconds::" $microseconds
+#.               _message "generating salt"
+#.               pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
+#. >             _message "calculating iterations"
+#.               pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
+#.               _message "encoding the password"
+#.               # We use a length of 64bytes = 512bits (more than needed!?)
+#.               tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
+#: tomb:1117
 msgid "calculating iterations"
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: gen_key
+#.
+#. Code sample:
+#.               microseconds=$(( itertime * 10000 ))
+#.               _success "Using KDF, iterations: ::1 microseconds::" $microseconds
+#.               _message "generating salt"
+#.               pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
+#.               _message "calculating iterations"
+#.               pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
+#. >             _message "encoding the password"
+#.               # We use a length of 64bytes = 512bits (more than needed!?)
+#.               tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
+#.   
+#.               header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+#: tomb:1119
 msgid "encoding the password"
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: list_gnupg_ciphers
+#.
+#. Code sample:
+#.       unset tombpasstmp
+#.   }
+#.   
+#.   # prints an array of ciphers available in gnupg (to encrypt keys)
+#.   list_gnupg_ciphers() {
+#.       # prints an error if GnuPG is not found
+#. >     which gpg 2>/dev/null || _failure "gpg (GnuPG) is not found, Tomb cannot function without it."
+#.   
+#.       ciphers=(`gpg --version | awk '
+#.   BEGIN { ciphers=0 }
+#.   /^Cipher:/ { gsub(/,/,""); sub(/^Cipher:/,""); print; ciphers=1; next }
+#: tomb:1150
 msgid "gpg (GnuPG) is not found, Tomb cannot function without it."
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: bury_key
+#.
+#. Code sample:
+#.   
+#.       _load_key    # Try loading key from option -k and set TOMBKEY
+#.   
+#.       imagefile=$PARAM
+#.   
+#.       [[ "`file $imagefile`" =~ "JPEG" ]] || {
+#. >         _warning "Encode failed: ::1 image file:: is not a jpeg image." $imagefile
+#.           return 1
+#.       }
+#.   
+#.       _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $TOMBKEY $imagefile
+#: tomb:1171
 msgid "Encode failed: ::1 image file:: is not a jpeg image."
 msgstr ""
 
-#: success
+#. Fold: Key operations
+#. Function: bury_key
+#.
+#. Code sample:
+#.   
+#.       [[ "`file $imagefile`" =~ "JPEG" ]] || {
+#.           _warning "Encode failed: ::1 image file:: is not a jpeg image." $imagefile
+#.           return 1
+#.       }
+#.   
+#. >     _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $TOMBKEY $imagefile
+#.       _message "Please confirm the key password for the encoding"
+#.       # We ask the password and test if it is the same encoding the
+#.       # base key, to insure that the same password is used for the
+#.       # encryption and the steganography. This is a standard enforced
+#: tomb:1175
 msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: bury_key
+#.
+#. Code sample:
+#.       [[ "`file $imagefile`" =~ "JPEG" ]] || {
+#.           _warning "Encode failed: ::1 image file:: is not a jpeg image." $imagefile
+#.           return 1
+#.       }
+#.   
+#.       _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $TOMBKEY $imagefile
+#. >     _message "Please confirm the key password for the encoding"
+#.       # We ask the password and test if it is the same encoding the
+#.       # base key, to insure that the same password is used for the
+#.       # encryption and the steganography. This is a standard enforced
+#.       # by Tomb, but its not strictly necessary (and having different
+#: tomb:1176
 msgid "Please confirm the key password for the encoding"
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: bury_key
+#.
+#. Code sample:
+#.           _verbose "tomb-pwd = ::1 tomb pass::" $tombpwd
+#.           ask_key_password "$tombpwd"
+#.       } || {
+#.           ask_key_password
+#.       }
+#.       [[ $? != 0 ]] && {
+#. >         _warning "Wrong password supplied."
+#.           _failure "You shall not bury a key whose password is unknown to you." }
+#.   
+#.       # We omit armor strings since having them as constants can give
+#.       # ground to effective attacks on steganography
+#: tomb:1192
 msgid "Wrong password supplied."
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: bury_key
+#.
+#. Code sample:
+#.           ask_key_password "$tombpwd"
+#.       } || {
+#.           ask_key_password
+#.       }
+#.       [[ $? != 0 ]] && {
+#.           _warning "Wrong password supplied."
+#. >         _failure "You shall not bury a key whose password is unknown to you." }
+#.   
+#.       # We omit armor strings since having them as constants can give
+#.       # ground to effective attacks on steganography
+#.       print - "$TOMBKEY" | awk '
+#: tomb:1193
 msgid "You shall not bury a key whose password is unknown to you."
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: bury_key
+#.
+#. Code sample:
+#.   /^-----/ {next}
+#.   /^Version/ {next}
+#.   {print $0}' \
+#.       | steghide embed --embedfile - --coverfile ${imagefile} \
+#.       -p $TOMBPASSWORD -z 9 -e serpent cbc
+#.       if [ $? != 0 ]; then
+#. >         _warning "Encoding error: steghide reports problems."
+#.           res=1
+#.       else
+#.           _success "Tomb key encoded succesfully into image ::1 image file::" $imagefile
+#.           res=0
+#: tomb:1204
 msgid "Encoding error: steghide reports problems."
 msgstr ""
 
-#: success
+#. Fold: Key operations
+#. Function: bury_key
+#.
+#. Code sample:
+#.       | steghide embed --embedfile - --coverfile ${imagefile} \
+#.       -p $TOMBPASSWORD -z 9 -e serpent cbc
+#.       if [ $? != 0 ]; then
+#.           _warning "Encoding error: steghide reports problems."
+#.           res=1
+#.       else
+#. >         _success "Tomb key encoded succesfully into image ::1 image file::" $imagefile
+#.           res=0
+#.       fi
+#.   
+#.       return $res
+#: tomb:1207
 msgid "Tomb key encoded succesfully into image ::1 image file::"
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.   
+#.   # mandatory 1st arg: the image file where key is supposed to be
+#.   # optional 2nd arg: the password to use (same as key, internal use)
+#.   # optional 3rd arg: the key where to save the result (- for stdout)
+#.   exhume_key() {
+#.       [[ "$1" = "" ]] && {
+#. >         _failure "Exhume failed, no image specified" }
+#.   
+#.       local imagefile="$1"  # The image file where to look for the key
+#.       local tombpass="$2"   # (Optional) the password to use (internal use)
+#.       local destkey="$3"    # (Optional) the key file where to save the
+#: tomb:1219
 msgid "Exhume failed, no image specified"
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.       local destkey="$3"    # (Optional) the key file where to save the
+#.       # result (- for stdout)
+#.       local r=1             # Return code (default: fail)
+#.   
+#.       # Ensure the image file is a readable JPEG
+#.       [[ ! -r $imagefile ]] && {
+#. >         _failure "Exhume failed, image file not found: ::1 image file::" "${imagefile:-none}" }
+#.       [[ ! $(file "$imagefile") =~ "JP.G" ]] && {
+#.           _failure "Exhume failed: ::1 image file:: is not a jpeg image." $imagefile }
+#.   
+#.       # When a password is passed as argument then always print out
+#: tomb:1229
 msgid "Exhume failed, image file not found: ::1 image file::"
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.       local r=1             # Return code (default: fail)
+#.   
+#.       # Ensure the image file is a readable JPEG
+#.       [[ ! -r $imagefile ]] && {
+#.           _failure "Exhume failed, image file not found: ::1 image file::" "${imagefile:-none}" }
+#.       [[ ! $(file "$imagefile") =~ "JP.G" ]] && {
+#. >         _failure "Exhume failed: ::1 image file:: is not a jpeg image." $imagefile }
+#.   
+#.       # When a password is passed as argument then always print out
+#.       # the exhumed key on stdout without further checks (internal use)
+#.       [[ -n "$tombpass" ]] && {
+#: tomb:1231
 msgid "Exhume failed: ::1 image file:: is not a jpeg image."
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.   
+#.       # When a password is passed as argument then always print out
+#.       # the exhumed key on stdout without further checks (internal use)
+#.       [[ -n "$tombpass" ]] && {
+#.           TOMBKEY=$(steghide extract -sf $imagefile -p $tombpass -xf -)
+#.           [[ $? != 0 ]] && {
+#. >             _failure "Wrong password or no steganographic key found" }
+#.   
+#.           recover_key $TOMBKEY
+#.   
+#.           return 0
+#: tomb:1238
 msgid "Wrong password or no steganographic key found"
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.       }
+#.   
+#.       # Ensure we have a valid destination for the key
+#.       [[ -z $destkey ]] && { option_is_set -k } && destkey=$(option_value -k)
+#.       [[ -z $destkey ]] && {
+#.           destkey="-" # No key was specified: fallback to stdout
+#. >         _message "printing exhumed key on stdout" }
+#.   
+#.       # Bail out if destination exists, unless -f (force) was passed
+#.       [[ $destkey != "-" && -s $destkey ]] && {
+#.           _warning "File exists: ::1 tomb key::" $destkey
+#: tomb:1249
 msgid "printing exhumed key on stdout"
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.       [[ -z $destkey ]] && {
+#.           destkey="-" # No key was specified: fallback to stdout
+#.           _message "printing exhumed key on stdout" }
+#.   
+#.       # Bail out if destination exists, unless -f (force) was passed
+#.       [[ $destkey != "-" && -s $destkey ]] && {
+#. >         _warning "File exists: ::1 tomb key::" $destkey
+#.           { option_is_set -f } && {
+#.               _warning "Use of --force selected: overwriting."
+#.               rm -f $destkey
+#.           } || {
+#: tomb:1253
 msgid "File exists: ::1 tomb key::"
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.           _message "printing exhumed key on stdout" }
+#.   
+#.       # Bail out if destination exists, unless -f (force) was passed
+#.       [[ $destkey != "-" && -s $destkey ]] && {
+#.           _warning "File exists: ::1 tomb key::" $destkey
+#.           { option_is_set -f } && {
+#. >             _warning "Use of --force selected: overwriting."
+#.               rm -f $destkey
+#.           } || {
+#.               _warning "Make explicit use of --force to overwrite."
+#.               _failure "Refusing to overwrite file. Operation aborted." }
+#: tomb:1255
 msgid "Use of --force selected: overwriting."
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.       [[ $destkey != "-" && -s $destkey ]] && {
+#.           _warning "File exists: ::1 tomb key::" $destkey
+#.           { option_is_set -f } && {
+#.               _warning "Use of --force selected: overwriting."
+#.               rm -f $destkey
+#.           } || {
+#. >             _warning "Make explicit use of --force to overwrite."
+#.               _failure "Refusing to overwrite file. Operation aborted." }
+#.       }
+#.   
+#.       _message "Trying to exhume a key out of image ::1 image file::" $imagefile
+#: tomb:1258
 msgid "Make explicit use of --force to overwrite."
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.           _warning "File exists: ::1 tomb key::" $destkey
+#.           { option_is_set -f } && {
+#.               _warning "Use of --force selected: overwriting."
+#.               rm -f $destkey
+#.           } || {
+#.               _warning "Make explicit use of --force to overwrite."
+#. >             _failure "Refusing to overwrite file. Operation aborted." }
+#.       }
+#.   
+#.       _message "Trying to exhume a key out of image ::1 image file::" $imagefile
+#.       { option_is_set --tomb-pwd } && {
+#: tomb:1259
 msgid "Refusing to overwrite file. Operation aborted."
 msgstr ""
 
-#: message
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.               rm -f $destkey
+#.           } || {
+#.               _warning "Make explicit use of --force to overwrite."
+#.               _failure "Refusing to overwrite file. Operation aborted." }
+#.       }
+#.   
+#. >     _message "Trying to exhume a key out of image ::1 image file::" $imagefile
+#.       { option_is_set --tomb-pwd } && {
+#.           tombpass=$(option_value --tomb-pwd)
+#.           _verbose "tomb-pwd = ::1 tomb pass::" $tombpass
+#.       } || {
+#: tomb:1262
 msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr ""
 
-#: success
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.       steghide extract -sf $imagefile -p ${tombpass} -xf $destkey
+#.       r=$?
+#.   
+#.       # Report to the user
+#.       [[ "$destkey" = "-" ]] && destkey="stdout"
+#.       [[ $r == 0 ]] && {
+#. >         _success "Key succesfully exhumed to ::1 key::." $destkey
+#.       } || {
+#.           _warning "Nothing found in ::1 image file::" $imagefile
+#.       }
+#.   
+#: tomb:1283
 msgid "Key succesfully exhumed to ::1 key::."
 msgstr ""
 
-#: warning
+#. Fold: Key operations
+#. Function: exhume_key
+#.
+#. Code sample:
+#.   
+#.       # Report to the user
+#.       [[ "$destkey" = "-" ]] && destkey="stdout"
+#.       [[ $r == 0 ]] && {
+#.           _success "Key succesfully exhumed to ::1 key::." $destkey
+#.       } || {
+#. >         _warning "Nothing found in ::1 image file::" $imagefile
+#.       }
+#.   
+#.       return $r
+#.   }
+#: tomb:1285
 msgid "Nothing found in ::1 image file::"
 msgstr ""
 
-#: success
+#. Fold: Key operations
+#. Function: engrave_key
+#.
+#. Code sample:
+#.   
+#.       _load_key    # Try loading key from option -k and set TOMBKEYFILE
+#.   
+#.       local keyname=$(basename $TOMBKEYFILE)
+#.       local pngname="$keyname.qr.png"
+#.   
+#. >     _success "Rendering a printable QRCode for key: ::1 tomb key file::" $TOMBKEYFILE
+#.       # we omit armor strings to save space
+#.       awk '/^-----/ {next}; /^Version/ {next}; {print $0}' $TOMBKEYFILE \
+#.           | qrencode --size 4 --level H --casesensitive -o $pngname
+#.       [[ $? != 0 ]] && {
+#: tomb:1300
 msgid "Rendering a printable QRCode for key: ::1 tomb key file::"
 msgstr ""
 
-#: failure
+#. Fold: Key operations
+#. Function: engrave_key
+#.
+#. Code sample:
+#.   
+#.       _success "Rendering a printable QRCode for key: ::1 tomb key file::" $TOMBKEYFILE
+#.       # we omit armor strings to save space
+#.       awk '/^-----/ {next}; /^Version/ {next}; {print $0}' $TOMBKEYFILE \
+#.           | qrencode --size 4 --level H --casesensitive -o $pngname
+#.       [[ $? != 0 ]] && {
+#. >         _failure "QREncode reported an error." }
+#.   
+#.       _success "Operation successful:"
+#.       # TODO: only if verbose and/or not silent
+#.       ls -lh $pngname
+#: tomb:1305
 msgid "QREncode reported an error."
 msgstr ""
 
-#: success
+#. Fold: Key operations
+#. Function: engrave_key
+#.
+#. Code sample:
+#.       # we omit armor strings to save space
+#.       awk '/^-----/ {next}; /^Version/ {next}; {print $0}' $TOMBKEYFILE \
+#.           | qrencode --size 4 --level H --casesensitive -o $pngname
+#.       [[ $? != 0 ]] && {
+#.           _failure "QREncode reported an error." }
+#.   
+#. >     _success "Operation successful:"
+#.       # TODO: only if verbose and/or not silent
+#.       ls -lh $pngname
+#.       file $pngname
+#.   }
+#: tomb:1307
 msgid "Operation successful:"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.   
+#.   dig_tomb() {
+#.       local    tombpath="$1"    # Path to tomb
+#.       # Require the specification of the size of the tomb (-s) in MB
+#.       local -i tombsize=$(option_value -s)
+#.   
+#. >     _message "Commanded to dig tomb ::1 tomb path::" $tombpath
+#.   
+#.       [[ -n "$tombpath"   ]] || _failure "Missing path to tomb"
+#.       [[ -n "$tombsize"   ]] || _failure "Size argument missing, use -s"
+#.       [[ $tombsize == <-> ]] || _failure "Size must be an integer (megabytes)"
+#: tomb:1340
 msgid "Commanded to dig tomb ::1 tomb path::"
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.       local    tombpath="$1"    # Path to tomb
+#.       # Require the specification of the size of the tomb (-s) in MB
+#.       local -i tombsize=$(option_value -s)
+#.   
+#.       _message "Commanded to dig tomb ::1 tomb path::" $tombpath
+#.   
+#. >     [[ -n "$tombpath"   ]] || _failure "Missing path to tomb"
+#.       [[ -n "$tombsize"   ]] || _failure "Size argument missing, use -s"
+#.       [[ $tombsize == <-> ]] || _failure "Size must be an integer (megabytes)"
+#.       [[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 megabytes"
+#.   
+#: tomb:1342
 msgid "Missing path to tomb"
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.       # Require the specification of the size of the tomb (-s) in MB
+#.       local -i tombsize=$(option_value -s)
+#.   
+#.       _message "Commanded to dig tomb ::1 tomb path::" $tombpath
+#.   
+#.       [[ -n "$tombpath"   ]] || _failure "Missing path to tomb"
+#. >     [[ -n "$tombsize"   ]] || _failure "Size argument missing, use -s"
+#.       [[ $tombsize == <-> ]] || _failure "Size must be an integer (megabytes)"
+#.       [[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 megabytes"
+#.   
+#.       _plot $tombpath          # Set TOMB{PATH,DIR,FILE,NAME}
+#: tomb:1343
 msgid "Size argument missing, use -s"
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.       local -i tombsize=$(option_value -s)
+#.   
+#.       _message "Commanded to dig tomb ::1 tomb path::" $tombpath
+#.   
+#.       [[ -n "$tombpath"   ]] || _failure "Missing path to tomb"
+#.       [[ -n "$tombsize"   ]] || _failure "Size argument missing, use -s"
+#. >     [[ $tombsize == <-> ]] || _failure "Size must be an integer (megabytes)"
+#.       [[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 megabytes"
+#.   
+#.       _plot $tombpath          # Set TOMB{PATH,DIR,FILE,NAME}
+#.   
+#: tomb:1344
 msgid "Size must be an integer (megabytes)"
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.   
+#.       _message "Commanded to dig tomb ::1 tomb path::" $tombpath
+#.   
+#.       [[ -n "$tombpath"   ]] || _failure "Missing path to tomb"
+#.       [[ -n "$tombsize"   ]] || _failure "Size argument missing, use -s"
+#.       [[ $tombsize == <-> ]] || _failure "Size must be an integer (megabytes)"
+#. >     [[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 megabytes"
+#.   
+#.       _plot $tombpath          # Set TOMB{PATH,DIR,FILE,NAME}
+#.   
+#.       [[ -e $TOMBPATH ]] && {
+#: tomb:1345
 msgid "Tombs can't be smaller than 10 megabytes"
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.       [[ $tombsize == <-> ]] || _failure "Size must be an integer (megabytes)"
+#.       [[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 megabytes"
+#.   
+#.       _plot $tombpath          # Set TOMB{PATH,DIR,FILE,NAME}
+#.   
+#.       [[ -e $TOMBPATH ]] && {
+#. >         _warning "A tomb exists already. I'm not digging here:"
+#.           ls -lh $TOMBPATH
+#.           return 1
+#.       }
+#.   
+#: tomb:1350
 msgid "A tomb exists already. I'm not digging here:"
 msgstr ""
 
-#: success
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.       [[ -e $TOMBPATH ]] && {
+#.           _warning "A tomb exists already. I'm not digging here:"
+#.           ls -lh $TOMBPATH
+#.           return 1
+#.       }
+#.   
+#. >     _success "Creating a new tomb in ::1 tomb path::" $TOMBPATH
+#.   
+#.       _message "Generating ::1 tomb file:: of ::2 size::MiB" $TOMBFILE $tombsize
+#.   
+#.       # Ensure that file permissions are safe even if interrupted
+#: tomb:1355
 msgid "Creating a new tomb in ::1 tomb path::"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.           ls -lh $TOMBPATH
+#.           return 1
+#.       }
+#.   
+#.       _success "Creating a new tomb in ::1 tomb path::" $TOMBPATH
+#.   
+#. >     _message "Generating ::1 tomb file:: of ::2 size::MiB" $TOMBFILE $tombsize
+#.   
+#.       # Ensure that file permissions are safe even if interrupted
+#.       touch $TOMBPATH
+#.       [[ $? = 0 ]] || {
+#: tomb:1357
 msgid "Generating ::1 tomb file:: of ::2 size::MiB"
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.   
+#.       _message "Generating ::1 tomb file:: of ::2 size::MiB" $TOMBFILE $tombsize
+#.   
+#.       # Ensure that file permissions are safe even if interrupted
+#.       touch $TOMBPATH
+#.       [[ $? = 0 ]] || {
+#. >         _warning "Error creating the tomb ::1 tomb path::" $TOMBPATH
+#.           _failure "Operation aborted."
+#.       }
+#.       chmod 0600 $TOMBPATH
+#.   
+#: tomb:1362
 msgid "Error creating the tomb ::1 tomb path::"
 msgstr ""
 
-#: success
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.           ls -lh $TOMBPATH
+#.       } || {
+#.           _warning "Error creating the tomb ::1 tomb path::" $TOMBPATH
+#.           _failure "Operation aborted."
+#.       }
+#.   
+#. >     _success "Done digging ::1 tomb name::" $TOMBNAME
+#.       _message "Your tomb is not yet ready, you need to forge a key and lock it:"
+#.       _message "tomb forge ::1 tomb path::.key" $TOMBPATH
+#.       _message "tomb lock ::1 tomb path:: -k ::1 tomb path::.key" $TOMBPATH
+#.   
+#: tomb:1377
 msgid "Done digging ::1 tomb name::"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.       } || {
+#.           _warning "Error creating the tomb ::1 tomb path::" $TOMBPATH
+#.           _failure "Operation aborted."
+#.       }
+#.   
+#.       _success "Done digging ::1 tomb name::" $TOMBNAME
+#. >     _message "Your tomb is not yet ready, you need to forge a key and lock it:"
+#.       _message "tomb forge ::1 tomb path::.key" $TOMBPATH
+#.       _message "tomb lock ::1 tomb path:: -k ::1 tomb path::.key" $TOMBPATH
+#.   
+#.       return 0
+#: tomb:1378
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.           _warning "Error creating the tomb ::1 tomb path::" $TOMBPATH
+#.           _failure "Operation aborted."
+#.       }
+#.   
+#.       _success "Done digging ::1 tomb name::" $TOMBNAME
+#.       _message "Your tomb is not yet ready, you need to forge a key and lock it:"
+#. >     _message "tomb forge ::1 tomb path::.key" $TOMBPATH
+#.       _message "tomb lock ::1 tomb path:: -k ::1 tomb path::.key" $TOMBPATH
+#.   
+#.       return 0
+#.   }
+#: tomb:1379
 msgid "tomb forge ::1 tomb path::.key"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: dig_tomb
+#.
+#. Code sample:
+#.           _failure "Operation aborted."
+#.       }
+#.   
+#.       _success "Done digging ::1 tomb name::" $TOMBNAME
+#.       _message "Your tomb is not yet ready, you need to forge a key and lock it:"
+#.       _message "tomb forge ::1 tomb path::.key" $TOMBPATH
+#. >     _message "tomb lock ::1 tomb path:: -k ::1 tomb path::.key" $TOMBPATH
+#.   
+#.       return 0
+#.   }
+#.   
+#: tomb:1380
 msgid "tomb lock ::1 tomb path:: -k ::1 tomb path::.key"
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.       local destkey="$1"
+#.       { option_is_set -k } && { destkey=$(option_value -k) }
+#.   
+#.       local algo="AES256"  # Default encryption algorithm
+#.   
+#.       [[ -z "$destkey" ]] && {
+#. >         _failure "A filename needs to be specified using -k to forge a new key." }
+#.   
+#.       _message "Commanded to forge key ::1 key::" $destkey
+#.   
+#.       _check_swap # Ensure the available memory is safe to use
+#: tomb:1401
 msgid "A filename needs to be specified using -k to forge a new key."
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.   
+#.       local algo="AES256"  # Default encryption algorithm
+#.   
+#.       [[ -z "$destkey" ]] && {
+#.           _failure "A filename needs to be specified using -k to forge a new key." }
+#.   
+#. >     _message "Commanded to forge key ::1 key::" $destkey
+#.   
+#.       _check_swap # Ensure the available memory is safe to use
+#.   
+#.       # Ensure GnuPG won't exit with an error before first run
+#: tomb:1403
 msgid "Commanded to forge key ::1 key::"
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.           mkdir -m 0700 $HOME/.gnupg
+#.           touch $HOME/.gnupg/pubring.gpg }
+#.   
+#.       # Do not overwrite any files accidentally
+#.       [[ -r "$destkey" ]] && {
+#.           ls -lh $destkey
+#. >         _failure "Forging this key would overwrite an existing file. Operation aborted." }
+#.   
+#.       touch $destkey
+#.       [[ $? == 0 ]] || {
+#.           _warning "Cannot generate encryption key."
+#: tomb:1415
 msgid "Forging this key would overwrite an existing file. Operation aborted."
 msgstr ""
 
-#: message
-msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
-msgstr ""
-
-#: message
-msgid "This operation takes time, keep using this computer on other tasks,"
-msgstr ""
-
-#: message
-msgid "once done you will be asked to choose a password for your tomb."
-msgstr ""
-
-#: message
-msgid "To make it faster you can move the mouse around."
-msgstr ""
-
-#: message
-msgid "If you are on a server, you can use an Entropy Generation Daemon."
-msgstr ""
-
-#: warning
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.       [[ -r "$destkey" ]] && {
+#.           ls -lh $destkey
+#.           _failure "Forging this key would overwrite an existing file. Operation aborted." }
+#.   
+#.       touch $destkey
+#.       [[ $? == 0 ]] || {
+#. >         _warning "Cannot generate encryption key."
+#.           _failure "Operation aborted." }
+#.       chmod 0600 $destkey
+#.   
+#.       # Update algorithm if it was passed on the command line with -o
+#: tomb:1419
 msgid "Cannot generate encryption key."
 msgstr ""
 
-#: success
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.       chmod 0600 $destkey
+#.   
+#.       # Update algorithm if it was passed on the command line with -o
+#.       { option_is_set -o } && algopt="$(option_value -o)"
+#.       [[ -n "$algopt" ]] && algo=$algopt
+#.   
+#. >     _message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" \
+#.           $destkey $algo
+#.   
+#.       TOMBKEYFILE="$destkey"    # Set global variable
+#.   
+#: tomb:1427
+msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
+msgstr ""
+
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.   
+#.       _message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" \
+#.           $destkey $algo
+#.   
+#.       TOMBKEYFILE="$destkey"    # Set global variable
+#.   
+#. >     _message "This operation takes time, keep using this computer on other tasks,"
+#.       _message "once done you will be asked to choose a password for your tomb."
+#.       _message "To make it faster you can move the mouse around."
+#.       _message "If you are on a server, you can use an Entropy Generation Daemon."
+#.   
+#: tomb:1432
+msgid "This operation takes time, keep using this computer on other tasks,"
+msgstr ""
+
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.       _message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" \
+#.           $destkey $algo
+#.   
+#.       TOMBKEYFILE="$destkey"    # Set global variable
+#.   
+#.       _message "This operation takes time, keep using this computer on other tasks,"
+#. >     _message "once done you will be asked to choose a password for your tomb."
+#.       _message "To make it faster you can move the mouse around."
+#.       _message "If you are on a server, you can use an Entropy Generation Daemon."
+#.   
+#.       # Use /dev/random as the entropy source, unless --use-random is specified
+#: tomb:1433
+msgid "once done you will be asked to choose a password for your tomb."
+msgstr ""
+
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.           $destkey $algo
+#.   
+#.       TOMBKEYFILE="$destkey"    # Set global variable
+#.   
+#.       _message "This operation takes time, keep using this computer on other tasks,"
+#.       _message "once done you will be asked to choose a password for your tomb."
+#. >     _message "To make it faster you can move the mouse around."
+#.       _message "If you are on a server, you can use an Entropy Generation Daemon."
+#.   
+#.       # Use /dev/random as the entropy source, unless --use-random is specified
+#.       local random_source=/dev/random
+#: tomb:1434
+msgid "To make it faster you can move the mouse around."
+msgstr ""
+
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.   
+#.       TOMBKEYFILE="$destkey"    # Set global variable
+#.   
+#.       _message "This operation takes time, keep using this computer on other tasks,"
+#.       _message "once done you will be asked to choose a password for your tomb."
+#.       _message "To make it faster you can move the mouse around."
+#. >     _message "If you are on a server, you can use an Entropy Generation Daemon."
+#.   
+#.       # Use /dev/random as the entropy source, unless --use-random is specified
+#.       local random_source=/dev/random
+#.       { option_is_set --use-urandom } && random_source=/dev/urandom
+#: tomb:1435
+msgid "If you are on a server, you can use an Entropy Generation Daemon."
+msgstr ""
+
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.       [[ $? == 0 ]] || {
+#.           _warning "Cannot generate encryption key."
+#.           _failure "Operation aborted." }
+#.   
+#.       # Here the global variable TOMBSECRET contains the naked secret
+#.   
+#. >     _success "Choose the  password of your key: ::1 tomb key::" $TOMBKEYFILE
+#.       _message "(You can also change it later using 'tomb passwd'.)"
+#.       # _user_file $TOMBKEYFILE
+#.   
+#.       tombname="$TOMBKEYFILE" # XXX ???
+#: tomb:1449
 msgid "Choose the  password of your key: ::1 tomb key::"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.           _warning "Cannot generate encryption key."
+#.           _failure "Operation aborted." }
+#.   
+#.       # Here the global variable TOMBSECRET contains the naked secret
+#.   
+#.       _success "Choose the  password of your key: ::1 tomb key::" $TOMBKEYFILE
+#. >     _message "(You can also change it later using 'tomb passwd'.)"
+#.       # _user_file $TOMBKEYFILE
+#.   
+#.       tombname="$TOMBKEYFILE" # XXX ???
+#.       # the gen_key() function takes care of the new key's encryption
+#: tomb:1450
 msgid "(You can also change it later using 'tomb passwd'.)"
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.   
+#.       # load the key contents (set global variable)
+#.       TOMBKEY="${mapfile[$TOMBKEYFILE]}"
+#.   
+#.       # this does a check on the file header
+#.       is_valid_key $TOMBKEY || {
+#. >         _warning "The key does not seem to be valid."
+#.           _warning "Dumping contents to screen:"
+#.           print "${mapfile[$TOMBKEY]}"
+#.           _warning "--"
+#.           sudo umount ${keytmp}
+#: tomb:1468
 msgid "The key does not seem to be valid."
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.       # load the key contents (set global variable)
+#.       TOMBKEY="${mapfile[$TOMBKEYFILE]}"
+#.   
+#.       # this does a check on the file header
+#.       is_valid_key $TOMBKEY || {
+#.           _warning "The key does not seem to be valid."
+#. >         _warning "Dumping contents to screen:"
+#.           print "${mapfile[$TOMBKEY]}"
+#.           _warning "--"
+#.           sudo umount ${keytmp}
+#.           rm -r $keytmp
+#: tomb:1469
 msgid "Dumping contents to screen:"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.           _warning "--"
+#.           sudo umount ${keytmp}
+#.           rm -r $keytmp
+#.           _failure "Operation aborted."
+#.       }
+#.   
+#. >     _message "Done forging ::1 key file::" $TOMBKEYFILE
+#.       _success "Your key is ready:"
+#.       ls -lh $TOMBKEYFILE
+#.   }
+#.   
+#: tomb:1477
 msgid "Done forging ::1 key file::"
 msgstr ""
 
-#: success
+#. Fold: Create
+#. Function: forge_key
+#.
+#. Code sample:
+#.           sudo umount ${keytmp}
+#.           rm -r $keytmp
+#.           _failure "Operation aborted."
+#.       }
+#.   
+#.       _message "Done forging ::1 key file::" $TOMBKEYFILE
+#. >     _success "Your key is ready:"
+#.       ls -lh $TOMBKEYFILE
+#.   }
+#.   
+#.   # Step three -- Lock tomb
+#: tomb:1478
 msgid "Your key is ready:"
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.       # for more alternatives refer to cryptsetup(8)
+#.       local cipher="aes-xts-plain64:sha256"
+#.   
+#.       local tombpath="$1"      # First argument is the path to the tomb
+#.   
+#.       [[ -n $tombpath ]] || {
+#. >         _warning "No tomb specified for locking."
+#.           _warning "Usage: tomb lock file.tomb file.tomb.key"
+#.           return 1
+#.       }
+#.   
+#: tomb:1498
 msgid "No tomb specified for locking."
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.       local cipher="aes-xts-plain64:sha256"
+#.   
+#.       local tombpath="$1"      # First argument is the path to the tomb
+#.   
+#.       [[ -n $tombpath ]] || {
+#.           _warning "No tomb specified for locking."
+#. >         _warning "Usage: tomb lock file.tomb file.tomb.key"
+#.           return 1
+#.       }
+#.   
+#.       _plot $tombpath
+#: tomb:1499
 msgid "Usage: tomb lock file.tomb file.tomb.key"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.           _warning "Usage: tomb lock file.tomb file.tomb.key"
+#.           return 1
+#.       }
+#.   
+#.       _plot $tombpath
+#.   
+#. >     _message "Commanded to lock tomb ::1 tomb file::" $TOMBFILE
+#.   
+#.       [[ -f $TOMBPATH ]] || {
+#.           _failure "There is no tomb here. You have to dig it first." }
+#.   
+#: tomb:1505
 msgid "Commanded to lock tomb ::1 tomb file::"
 msgstr ""
 
-#: failure
-msgid "There is no tomb here. You have to it dig first."
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.   
+#.       _plot $tombpath
+#.   
+#.       _message "Commanded to lock tomb ::1 tomb file::" $TOMBFILE
+#.   
+#.       [[ -f $TOMBPATH ]] || {
+#. >         _failure "There is no tomb here. You have to dig it first." }
+#.   
+#.       _verbose "Tomb found: ::1 tomb path::" $TOMBPATH
+#.   
+#.       lo_mount $TOMBPATH
+#: tomb:1508
+msgid "There is no tomb here. You have to dig it first."
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.   
+#.       lo_mount $TOMBPATH
+#.       nstloop=`lo_new`
+#.   
+#.       _verbose "Loop mounted on ::1 mount point::" $nstloop
+#.   
+#. >     _message "Checking if the tomb is empty (we never step on somebody else's bones)."
+#.       sudo cryptsetup isLuks ${nstloop}
+#.       if [ $? = 0 ]; then
+#.           # is it a LUKS encrypted nest? then bail out and avoid reformatting it
+#.           _warning "The tomb was already locked with another key."
+#: tomb:1517
 msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.       _verbose "Loop mounted on ::1 mount point::" $nstloop
+#.   
+#.       _message "Checking if the tomb is empty (we never step on somebody else's bones)."
+#.       sudo cryptsetup isLuks ${nstloop}
+#.       if [ $? = 0 ]; then
+#.           # is it a LUKS encrypted nest? then bail out and avoid reformatting it
+#. >         _warning "The tomb was already locked with another key."
+#.           _failure "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
+#.       else
+#.           _message "Fine, this tomb seems empty."
+#.       fi
+#: tomb:1521
 msgid "The tomb was already locked with another key."
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.   
+#.       _message "Checking if the tomb is empty (we never step on somebody else's bones)."
+#.       sudo cryptsetup isLuks ${nstloop}
+#.       if [ $? = 0 ]; then
+#.           # is it a LUKS encrypted nest? then bail out and avoid reformatting it
+#.           _warning "The tomb was already locked with another key."
+#. >         _failure "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
+#.       else
+#.           _message "Fine, this tomb seems empty."
+#.       fi
+#.   
+#: tomb:1522
 msgid "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.       sudo cryptsetup isLuks ${nstloop}
+#.       if [ $? = 0 ]; then
+#.           # is it a LUKS encrypted nest? then bail out and avoid reformatting it
+#.           _warning "The tomb was already locked with another key."
+#.           _failure "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
+#.       else
+#. >         _message "Fine, this tomb seems empty."
+#.       fi
+#.   
+#.       _load_key    # Try loading key from option -k and set TOMBKEYFILE
+#.   
+#: tomb:1524
 msgid "Fine, this tomb seems empty."
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.   
+#.       _load_key    # Try loading key from option -k and set TOMBKEYFILE
+#.   
+#.       # the encryption cipher for a tomb can be set when locking using -c
+#.       { option_is_set -o } && algopt="$(option_value -o)"
+#.       [[ -n "$algopt" ]] && cipher=$algopt
+#. >     _message "Locking using cipher: ::1 cipher::" $cipher
+#.   
+#.       # get the pass from the user and check it
+#.       if option_is_set --tomb-pwd; then
+#.           tomb_pwd="`option_value --tomb-pwd`"
+#: tomb:1532
 msgid "Locking using cipher: ::1 cipher::"
 msgstr ""
 
-#: success
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.           ask_key_password "$tomb_pwd"
+#.       else
+#.           ask_key_password
+#.       fi
+#.       [[ $? == 0 ]] || _failure "No valid password supplied."
+#.   
+#. >     _success "Locking ::1 tomb file:: with ::2 tomb key file::" $TOMBFILE $TOMBKEYFILE
+#.   
+#.       _message "Formatting Luks mapped device."
+#.       _cryptsetup --batch-mode \
+#.           --cipher ${cipher} --key-size 256 --key-slot 0 \
+#: tomb:1544
 msgid "Locking ::1 tomb file:: with ::2 tomb key file::"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.           ask_key_password
+#.       fi
+#.       [[ $? == 0 ]] || _failure "No valid password supplied."
+#.   
+#.       _success "Locking ::1 tomb file:: with ::2 tomb key file::" $TOMBFILE $TOMBKEYFILE
+#.   
+#. >     _message "Formatting Luks mapped device."
+#.       _cryptsetup --batch-mode \
+#.           --cipher ${cipher} --key-size 256 --key-slot 0 \
+#.           luksFormat ${nstloop}
+#.       [[ $? == 0 ]] || {
+#: tomb:1546
 msgid "Formatting Luks mapped device."
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.   
+#.       _message "Formatting Luks mapped device."
+#.       _cryptsetup --batch-mode \
+#.           --cipher ${cipher} --key-size 256 --key-slot 0 \
+#.           luksFormat ${nstloop}
+#.       [[ $? == 0 ]] || {
+#. >         _warning "cryptsetup luksFormat returned an error."
+#.           _failure "Operation aborted." }
+#.   
+#.       _cryptsetup --cipher ${cipher} luksOpen ${nstloop} tomb.tmp
+#.       [[ $? == 0 ]] || {
+#: tomb:1551
 msgid "cryptsetup luksFormat returned an error."
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.       [[ $? == 0 ]] || {
+#.           _warning "cryptsetup luksFormat returned an error."
+#.           _failure "Operation aborted." }
+#.   
+#.       _cryptsetup --cipher ${cipher} luksOpen ${nstloop} tomb.tmp
+#.       [[ $? == 0 ]] || {
+#. >         _warning "cryptsetup luksOpen returned an error."
+#.           _failure "Operation aborted." }
+#.   
+#.       _message "Formatting your Tomb with Ext3/Ext4 filesystem."
+#.       ${=MKFS} $TOMBNAME /dev/mapper/tomb.tmp
+#: tomb:1556
 msgid "cryptsetup luksOpen returned an error."
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.   
+#.       _cryptsetup --cipher ${cipher} luksOpen ${nstloop} tomb.tmp
+#.       [[ $? == 0 ]] || {
+#.           _warning "cryptsetup luksOpen returned an error."
+#.           _failure "Operation aborted." }
+#.   
+#. >     _message "Formatting your Tomb with Ext3/Ext4 filesystem."
+#.       ${=MKFS} $TOMBNAME /dev/mapper/tomb.tmp
+#.   
+#.       [[ $? == 0 ]] || {
+#.           _warning "Tomb format returned an error."
+#: tomb:1559
 msgid "Formatting your Tomb with Ext3/Ext4 filesystem."
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.           _failure "Operation aborted." }
+#.   
+#.       _message "Formatting your Tomb with Ext3/Ext4 filesystem."
+#.       ${=MKFS} $TOMBNAME /dev/mapper/tomb.tmp
+#.   
+#.       [[ $? == 0 ]] || {
+#. >         _warning "Tomb format returned an error."
+#.           _warning "Your tomb ::1 tomb file:: may be corrupted." $TOMBFILE }
+#.   
+#.       # Sync
+#.       sudo cryptsetup luksClose tomb.tmp
+#: tomb:1563
 msgid "Tomb format returned an error."
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.   
+#.       _message "Formatting your Tomb with Ext3/Ext4 filesystem."
+#.       ${=MKFS} $TOMBNAME /dev/mapper/tomb.tmp
+#.   
+#.       [[ $? == 0 ]] || {
+#.           _warning "Tomb format returned an error."
+#. >         _warning "Your tomb ::1 tomb file:: may be corrupted." $TOMBFILE }
+#.   
+#.       # Sync
+#.       sudo cryptsetup luksClose tomb.tmp
+#.   
+#: tomb:1564
 msgid "Your tomb ::1 tomb file:: may be corrupted."
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.           _warning "Tomb format returned an error."
+#.           _warning "Your tomb ::1 tomb file:: may be corrupted." $TOMBFILE }
+#.   
+#.       # Sync
+#.       sudo cryptsetup luksClose tomb.tmp
+#.   
+#. >     _message "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::" $TOMBNAME $cipher
+#.       _success "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::" \
+#.           $TOMBPATH $TOMBKEYFILE
+#.   
+#.   }
+#: tomb:1569
 msgid "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::"
 msgstr ""
 
-#: success
+#. Fold: Create
+#. Function: lock_tomb_with_key
+#.
+#. Code sample:
+#.           _warning "Your tomb ::1 tomb file:: may be corrupted." $TOMBFILE }
+#.   
+#.       # Sync
+#.       sudo cryptsetup luksClose tomb.tmp
+#.   
+#.       _message "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::" $TOMBNAME $cipher
+#. >     _success "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::" \
+#.           $TOMBPATH $TOMBKEYFILE
+#.   
+#.   }
+#.   
+#: tomb:1570
 msgid "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.   
+#.   # This function changes the key that locks a tomb
+#.   change_tomb_key() {
+#.       local tombkey="$1"      # Path to the tomb's key file
+#.       local tombpath="$2"     # Path to the tomb
+#.   
+#. >     _message "Commanded to reset key for tomb ::1 tomb path::" $tombpath
+#.   
+#.       [[ -z "$tombpath" ]] && {
+#.           _warning "Command 'setkey' needs two arguments: the old key file and the tomb."
+#.           _warning "I.e:  tomb -k new.tomb.key old.tomb.key secret.tomb"
+#: tomb:1580
 msgid "Commanded to reset key for tomb ::1 tomb path::"
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.       local tombkey="$1"      # Path to the tomb's key file
+#.       local tombpath="$2"     # Path to the tomb
+#.   
+#.       _message "Commanded to reset key for tomb ::1 tomb path::" $tombpath
+#.   
+#.       [[ -z "$tombpath" ]] && {
+#. >         _warning "Command 'setkey' needs two arguments: the old key file and the tomb."
+#.           _warning "I.e:  tomb -k new.tomb.key old.tomb.key secret.tomb"
+#.           _failure "Execution aborted."
+#.       }
+#.   
+#: tomb:1583
 msgid "Command 'setkey' needs two arguments: the old key file and the tomb."
 msgstr ""
 
-#: warning
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.       local tombpath="$2"     # Path to the tomb
+#.   
+#.       _message "Commanded to reset key for tomb ::1 tomb path::" $tombpath
+#.   
+#.       [[ -z "$tombpath" ]] && {
+#.           _warning "Command 'setkey' needs two arguments: the old key file and the tomb."
+#. >         _warning "I.e:  tomb -k new.tomb.key old.tomb.key secret.tomb"
+#.           _failure "Execution aborted."
+#.       }
+#.   
+#.       _check_swap
+#: tomb:1584
 msgid "I.e:  tomb -k new.tomb.key old.tomb.key secret.tomb"
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.   
+#.       _message "Commanded to reset key for tomb ::1 tomb path::" $tombpath
+#.   
+#.       [[ -z "$tombpath" ]] && {
+#.           _warning "Command 'setkey' needs two arguments: the old key file and the tomb."
+#.           _warning "I.e:  tomb -k new.tomb.key old.tomb.key secret.tomb"
+#. >         _failure "Execution aborted."
+#.       }
+#.   
+#.       _check_swap
+#.       is_valid_tomb $tombpath
+#: tomb:1585
 msgid "Execution aborted."
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.   
+#.       lo_mount $TOMBPATH
+#.       nstloop=`lo_new`
+#.       sudo cryptsetup isLuks ${nstloop}
+#.       # is it a LUKS encrypted nest? we check one more time
+#.       [[ $? == 0 ]] || {
+#. >         _failure "Not a valid LUKS encrypted volume: ::1 volume::" $TOMBPATH }
+#.   
+#.       _load_key $tombkey    # Try loading given key and set TOMBKEY and
+#.       # TOMBKEYFILE
+#.       local oldkey=$TOMBKEY
+#: tomb:1596
 msgid "Not a valid LUKS encrypted volume: ::1 volume::"
 msgstr ""
 
-#: success
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.       _load_key $tombkey    # Try loading given key and set TOMBKEY and
+#.       # TOMBKEYFILE
+#.       local oldkey=$TOMBKEY
+#.       local oldkeyfile=$TOMBKEYFILE
+#.   
+#.       # we have everything, prepare to mount
+#. >     _success "Changing lock on tomb ::1 tomb name::" $TOMBNAME
+#.       _message "Old key: ::1 old key::" $oldkeyfile
+#.   
+#.       # render the mapper
+#.       mapdate=`date +%s`
+#: tomb:1604
 msgid "Changing lock on tomb ::1 tomb name::"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.       # TOMBKEYFILE
+#.       local oldkey=$TOMBKEY
+#.       local oldkeyfile=$TOMBKEYFILE
+#.   
+#.       # we have everything, prepare to mount
+#.       _success "Changing lock on tomb ::1 tomb name::" $TOMBNAME
+#. >     _message "Old key: ::1 old key::" $oldkeyfile
+#.   
+#.       # render the mapper
+#.       mapdate=`date +%s`
+#.       # save date of mount in minutes since 1970
+#: tomb:1605
 msgid "Old key: ::1 old key::"
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.           _verbose "tomb-old-pwd = ::1 old pass::" $tomb_old_pwd
+#.           ask_key_password "$tomb_old_pwd"
+#.       else
+#.           ask_key_password
+#.       fi
+#.       [[ $? == 0 ]] || {
+#. >         _failure "No valid password supplied for the old key." }
+#.       old_secret=$TOMBSECRET
+#.   
+#.       # luksOpen the tomb (not really mounting, just on the loopback)
+#.       print -R -n - "$old_secret" | sudo cryptsetup --key-file - \
+#: tomb:1621
 msgid "No valid password supplied for the old key."
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.           _failure "No valid password supplied for the old key." }
+#.       old_secret=$TOMBSECRET
+#.   
+#.       # luksOpen the tomb (not really mounting, just on the loopback)
+#.       print -R -n - "$old_secret" | sudo cryptsetup --key-file - \
+#.           luksOpen ${nstloop} ${mapper}
+#. >     [[ $? == 0 ]] || _failure "Unexpected error in luksOpen."
+#.   
+#.       _load_key # Try loading new key from option -k and set TOMBKEYFILE
+#.   
+#.       _message "New key: ::1 key file::" $TOMBKEYFILE
+#: tomb:1627
 msgid "Unexpected error in luksOpen."
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.       print -R -n - "$old_secret" | sudo cryptsetup --key-file - \
+#.           luksOpen ${nstloop} ${mapper}
+#.       [[ $? == 0 ]] || _failure "Unexpected error in luksOpen."
+#.   
+#.       _load_key # Try loading new key from option -k and set TOMBKEYFILE
+#.   
+#. >     _message "New key: ::1 key file::" $TOMBKEYFILE
+#.   
+#.       if option_is_set --tomb-pwd; then
+#.           tomb_new_pwd="`option_value --tomb-pwd`"
+#.           _verbose "tomb-pwd = ::1 tomb pass::" $tomb_new_pwd
+#: tomb:1631
 msgid "New key: ::1 key file::"
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.           _verbose "tomb-pwd = ::1 tomb pass::" $tomb_new_pwd
+#.           ask_key_password "$tomb_new_pwd"
+#.       else
+#.           ask_key_password
+#.       fi
+#.       [[ $? == 0 ]] || {
+#. >         _failure "No valid password supplied for the new key." }
+#.   
+#.       _tmp_create
+#.       tmpnewkey=$TOMBTMP
+#.       print -R -n - "$TOMBSECRET" >> $tmpnewkey
+#: tomb:1641
 msgid "No valid password supplied for the new key."
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.       tmpnewkey=$TOMBTMP
+#.       print -R -n - "$TOMBSECRET" >> $tmpnewkey
+#.   
+#.       print -R -n - "$old_secret" | sudo cryptsetup --key-file - \
+#.           luksChangeKey "$nstloop" "$tmpnewkey"
+#.   
+#. >     [[ $? == 0 ]] || _failure "Unexpected error in luksChangeKey."
+#.   
+#.       sudo cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
+#.   
+#.       _success "Succesfully changed key for tomb: ::1 tomb file::" $TOMBFILE
+#: tomb:1650
 msgid "Unexpected error in luksChangeKey."
 msgstr ""
 
-#: failure
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.   
+#.       print -R -n - "$old_secret" | sudo cryptsetup --key-file - \
+#.           luksChangeKey "$nstloop" "$tmpnewkey"
+#.   
+#.       [[ $? == 0 ]] || _failure "Unexpected error in luksChangeKey."
+#.   
+#. >     sudo cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
+#.   
+#.       _success "Succesfully changed key for tomb: ::1 tomb file::" $TOMBFILE
+#.       _message "The new key is: ::1 new key::" $TOMBKEYFILE
+#.   
+#: tomb:1652
 msgid "Unexpected error in luksClose."
 msgstr ""
 
-#: success
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.           luksChangeKey "$nstloop" "$tmpnewkey"
+#.   
+#.       [[ $? == 0 ]] || _failure "Unexpected error in luksChangeKey."
+#.   
+#.       sudo cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
+#.   
+#. >     _success "Succesfully changed key for tomb: ::1 tomb file::" $TOMBFILE
+#.       _message "The new key is: ::1 new key::" $TOMBKEYFILE
+#.   
+#.       return 0
+#.   }
+#: tomb:1654
 msgid "Succesfully changed key for tomb: ::1 tomb file::"
 msgstr ""
 
-#: message
+#. Fold: Create
+#. Function: change_tomb_key
+#.
+#. Code sample:
+#.   
+#.       [[ $? == 0 ]] || _failure "Unexpected error in luksChangeKey."
+#.   
+#.       sudo cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
+#.   
+#.       _success "Succesfully changed key for tomb: ::1 tomb file::" $TOMBFILE
+#. >     _message "The new key is: ::1 new key::" $TOMBKEYFILE
+#.   
+#.       return 0
+#.   }
+#.   
+#: tomb:1655
 msgid "The new key is: ::1 new key::"
 msgstr ""
 
-#: failure
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.   
+#.   # {{{ Open
+#.   
+#.   # $1 = tombfile $2(optional) = mountpoint
+#.   mount_tomb() {
+#.       local tombpath="$1"    # First argument is the path to the tomb
+#. >     [[ -n "$tombpath" ]] || _failure "No tomb name specified for opening."
+#.   
+#.       _message "Commanded to open tomb ::1 tomb name::" $1
+#.   
+#.       _check_swap
+#: tomb:1667
 msgid "No tomb name specified for opening."
 msgstr ""
 
-#: message
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.   
+#.   # $1 = tombfile $2(optional) = mountpoint
+#.   mount_tomb() {
+#.       local tombpath="$1"    # First argument is the path to the tomb
+#.       [[ -n "$tombpath" ]] || _failure "No tomb name specified for opening."
+#.   
+#. >     _message "Commanded to open tomb ::1 tomb name::" $1
+#.   
+#.       _check_swap
+#.       is_valid_tomb $tombpath
+#.   
+#: tomb:1669
 msgid "Commanded to open tomb ::1 tomb name::"
 msgstr ""
 
-#: warning
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.   
+#.       _check_swap
+#.       is_valid_tomb $tombpath
+#.   
+#.       # check file type (if its a Luks fs)
+#.       [[ "`file $TOMBPATH`" =~ "luks encrypted file" ]] || {
+#. >         _warning "::1 tomb file:: is not a valid tomb file" $TOMBFILE
+#.           _failure "Operation aborted."
+#.       }
+#.   
+#.       _verbose "Tomb found: ::1 tomb path::" $TOMBPATH
+#: tomb:1676
 msgid "::1 tomb file:: is not a valid tomb file"
 msgstr ""
 
-#: message
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.       _verbose "Tomb found: ::1 tomb path::" $TOMBPATH
+#.   
+#.       _load_key # Try loading new key from option -k and set TOMBKEYFILE
+#.   
+#.       tombmount=${2:-/media/$TOMBFILE}
+#.       [[ -z "$2" ]] && {
+#. >         _message "Mountpoint not specified, using default: ::1 mount point::" $tombmount }
+#.   
+#.       # Check if its already open
+#.       [[ "`mount -l`" -regex-match "${TOMBFILE}.*\[$TOMBNAME\]" ]] && {
+#.           _warning "::1 tomb name:: is already open." $TOMBNAME
+#: tomb:1686
 msgid "Mountpoint not specified, using default: ::1 mount point::"
 msgstr ""
 
-#: warning
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.       tombmount=${2:-/media/$TOMBFILE}
+#.       [[ -z "$2" ]] && {
+#.           _message "Mountpoint not specified, using default: ::1 mount point::" $tombmount }
+#.   
+#.       # Check if its already open
+#.       [[ "`mount -l`" -regex-match "${TOMBFILE}.*\[$TOMBNAME\]" ]] && {
+#. >         _warning "::1 tomb name:: is already open." $TOMBNAME
+#.           _message "Here below its status is reported:"
+#.           list_tombs $TOMBNAME
+#.           return 0 }
+#.   
+#: tomb:1690
 msgid "::1 tomb name:: is already open."
 msgstr ""
 
-#: message
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.       [[ -z "$2" ]] && {
+#.           _message "Mountpoint not specified, using default: ::1 mount point::" $tombmount }
+#.   
+#.       # Check if its already open
+#.       [[ "`mount -l`" -regex-match "${TOMBFILE}.*\[$TOMBNAME\]" ]] && {
+#.           _warning "::1 tomb name:: is already open." $TOMBNAME
+#. >         _message "Here below its status is reported:"
+#.           list_tombs $TOMBNAME
+#.           return 0 }
+#.   
+#.       _success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE $tombmount
+#: tomb:1691
 msgid "Here below its status is reported:"
 msgstr ""
 
-#: success
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.       [[ "`mount -l`" -regex-match "${TOMBFILE}.*\[$TOMBNAME\]" ]] && {
+#.           _warning "::1 tomb name:: is already open." $TOMBNAME
+#.           _message "Here below its status is reported:"
+#.           list_tombs $TOMBNAME
+#.           return 0 }
+#.   
+#. >     _success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE $tombmount
+#.   
+#.       lo_mount $TOMBPATH
+#.       nstloop=`lo_new`
+#.   
+#: tomb:1695
 msgid "Opening ::1 tomb file:: on ::2 mount point::"
 msgstr ""
 
-#: failure
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.   
+#.       lo_mount $TOMBPATH
+#.       nstloop=`lo_new`
+#.   
+#.       sudo cryptsetup isLuks ${nstloop} || {
+#.           # is it a LUKS encrypted nest? see cryptsetup(1)
+#. >         _failure "::1 tomb file:: is not a valid Luks encrypted storage file." $TOMBFILE }
+#.   
+#.       _message "This tomb is a valid LUKS encrypted device."
+#.   
+#.       luksdump="`sudo cryptsetup luksDump ${nstloop}`"
+#: tomb:1702
 msgid "::1 tomb file:: is not a valid Luks encrypted storage file."
 msgstr ""
 
-#: message
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.       nstloop=`lo_new`
+#.   
+#.       sudo cryptsetup isLuks ${nstloop} || {
+#.           # is it a LUKS encrypted nest? see cryptsetup(1)
+#.           _failure "::1 tomb file:: is not a valid Luks encrypted storage file." $TOMBFILE }
+#.   
+#. >     _message "This tomb is a valid LUKS encrypted device."
+#.   
+#.       luksdump="`sudo cryptsetup luksDump ${nstloop}`"
+#.       tombdump=(`print $luksdump | awk '
+#.           /^Cipher name/ {print $3}
+#: tomb:1704
 msgid "This tomb is a valid LUKS encrypted device."
 msgstr ""
 
-#: message
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.   
+#.       luksdump="`sudo cryptsetup luksDump ${nstloop}`"
+#.       tombdump=(`print $luksdump | awk '
+#.           /^Cipher name/ {print $3}
+#.           /^Cipher mode/ {print $3}
+#.           /^Hash spec/   {print $3}'`)
+#. >     _message "Cipher is \"::1 cipher::\" mode \"::2 mode::\" hash \"::3 hash::\"" $tombdump[1] $tombdump[2] $tombdump[3]
+#.   
+#.       slotwarn=`print $luksdump | awk '
+#.           BEGIN { zero=0 }
+#.           /^Key slot 0/ { zero=1 }
+#: tomb:1711
 msgid "Cipher is \"::1 cipher::\" mode \"::2 mode::\" hash \"::3 hash::\""
 msgstr ""
 
-#: warning
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.   
+#.       slotwarn=`print $luksdump | awk '
+#.           BEGIN { zero=0 }
+#.           /^Key slot 0/ { zero=1 }
+#.           /^Key slot.*ENABLED/ { if(zero==1) print "WARN" }'`
+#.       [[ "$slotwarn" == "WARN" ]] && {
+#. >         _warning "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor." }
+#.   
+#.       # save date of mount in minutes since 1970
+#.       mapdate=`date +%s`
+#.   
+#: tomb:1718
 msgid "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
 msgstr ""
 
-#: failure
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.           ask_key_password
+#.       }
+#.       [[ $? == 0 ]] || _failure "No valid password supplied."
+#.   
+#.       _cryptsetup luksOpen ${nstloop} ${mapper}
+#.       [[ $? = 0 ]] || {
+#. >         _failure "Failure mounting the encrypted file." }
+#.   
+#.       # preserve the loopdev after exit
+#.       lo_preserve "$nstloop"
+#.   
+#: tomb:1742
 msgid "Failure mounting the encrypted file."
 msgstr ""
 
-#: success
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.   
+#.       # array: [ cipher, keysize, loopdevice ]
+#.       tombstat=(`sudo cryptsetup status ${mapper} | awk '
+#.       /cipher:/  {print $2}
+#.       /keysize:/ {print $2}
+#.       /device:/  {print $2}'`)
+#. >     _success "Success unlocking tomb ::1 tomb name::" $TOMBNAME
+#.       _verbose "Key size is ::1 size:: for cipher ::2 cipher::" $tombstat[2] $tombstat[1]
+#.   
+#.       _message "Checking filesystem via ::1::" $tombstat[3]
+#.       sudo fsck -p -C0 /dev/mapper/${mapper}
+#: tomb:1752
 msgid "Success unlocking tomb ::1 tomb name::"
 msgstr ""
 
-#: message
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.       /cipher:/  {print $2}
+#.       /keysize:/ {print $2}
+#.       /device:/  {print $2}'`)
+#.       _success "Success unlocking tomb ::1 tomb name::" $TOMBNAME
+#.       _verbose "Key size is ::1 size:: for cipher ::2 cipher::" $tombstat[2] $tombstat[1]
+#.   
+#. >     _message "Checking filesystem via ::1::" $tombstat[3]
+#.       sudo fsck -p -C0 /dev/mapper/${mapper}
+#.       _verbose "Tomb engraved as ::1 tomb name::" $TOMBNAME
+#.       sudo tune2fs -L $TOMBNAME /dev/mapper/${mapper} > /dev/null
+#.   
+#: tomb:1755
 msgid "Checking filesystem via ::1::"
 msgstr ""
 
-#: success
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.   
+#.       # TODO: safety check MOUNTOPTS
+#.       # safe_mount_options && \
+#.       sudo mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
+#.       # Clean up if the mount failed
+#.       [[ $? == 0 ]] || {
+#. > 	_warning "Error mounting ::1 mapper:: on ::2 tombmount::" $mapper $tombmount
+#.   	[[ $oldmountopts != $MOUNTOPTS ]] && \
+#.   	    _warning "Are mount options '::1 mount options::' valid?" $MOUNTOPTS
+#.   	# TODO: move cleanup to _endgame()
+#.   	[[ -d $tombmount ]] && rmdir $tombmount
+#: tomb:1773
+msgid "Error mounting ::1 mapper:: on ::2 tombmount::"
+msgstr ""
+
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.       # safe_mount_options && \
+#.       sudo mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
+#.       # Clean up if the mount failed
+#.       [[ $? == 0 ]] || {
+#.   	_warning "Error mounting ::1 mapper:: on ::2 tombmount::" $mapper $tombmount
+#.   	[[ $oldmountopts != $MOUNTOPTS ]] && \
+#. > 	    _warning "Are mount options '::1 mount options::' valid?" $MOUNTOPTS
+#.   	# TODO: move cleanup to _endgame()
+#.   	[[ -d $tombmount ]] && rmdir $tombmount
+#.   	[[ -e /dev/mapper/$mapper ]] && sudo cryptsetup luksClose $mapper
+#.   	# The loop is taken care of in _endgame()
+#: tomb:1775
+msgid "Are mount options '::1 mount options::' valid?"
+msgstr ""
+
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.   	[[ $oldmountopts != $MOUNTOPTS ]] && \
+#.   	    _warning "Are mount options '::1 mount options::' valid?" $MOUNTOPTS
+#.   	# TODO: move cleanup to _endgame()
+#.   	[[ -d $tombmount ]] && rmdir $tombmount
+#.   	[[ -e /dev/mapper/$mapper ]] && sudo cryptsetup luksClose $mapper
+#.   	# The loop is taken care of in _endgame()
+#. > 	_failure "Cannot mount ::1 tomb name::" $TOMBNAME
+#.       }
+#.   
+#.       sudo chown $UID:$GID ${tombmount}
+#.       sudo chmod 0711 ${tombmount}
+#: tomb:1780
+msgid "Cannot mount ::1 tomb name::"
+msgstr ""
+
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.   	_failure "Cannot mount ::1 tomb name::" $TOMBNAME
+#.       }
+#.   
+#.       sudo chown $UID:$GID ${tombmount}
+#.       sudo chmod 0711 ${tombmount}
+#.   
+#. >     _success "Success opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE $tombmount
+#.   
+#.       local tombtty tombhost tombuid tombuser
+#.   
+#.       # print out when was opened the last time, by whom and where
+#: tomb:1786
 msgid "Success opening ::1 tomb file:: on ::2 mount point::"
 msgstr ""
 
-#: message
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.           tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
+#.           tomblast=$(_cat ${tombmount}/.last | tr -d ' ')
+#.           for e in ${(f@)mapfile[/etc/passwd]}; do
+#.               [[ "$e" =~ ":$tombuid:" ]] && {
+#.                   tombuser="${e[(ws@:@)1]}" }
+#.           done
+#. >         _message "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::" $tombuser $tombuid $tombtty $tombhost
+#.           _message "on date ::1 date::" "`date --date=@${tomblast} +%c`"
+#.       }
+#.       # write down the UID and TTY that opened the tomb
+#.       rm -f ${tombmount}/.uid
+#: tomb:1800
 msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
 msgstr ""
 
-#: message
+#. Fold: Open
+#. Function: mount_tomb
+#.
+#. Code sample:
+#.           tomblast=$(_cat ${tombmount}/.last | tr -d ' ')
+#.           for e in ${(f@)mapfile[/etc/passwd]}; do
+#.               [[ "$e" =~ ":$tombuid:" ]] && {
+#.                   tombuser="${e[(ws@:@)1]}" }
+#.           done
+#.           _message "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::" $tombuser $tombuid $tombtty $tombhost
+#. >         _message "on date ::1 date::" "`date --date=@${tomblast} +%c`"
+#.       }
+#.       # write down the UID and TTY that opened the tomb
+#.       rm -f ${tombmount}/.uid
+#.       print $_UID > ${tombmount}/.uid
+#: tomb:1801
 msgid "on date ::1 date::"
 msgstr ""
 
-#: warning
+#. Fold: Open
+#. Function: exec_safe_bind_hooks
+#.
+#. Code sample:
+#.   
+#.       # Default mount options are overridden with the -o switch
+#.       [[ -n ${(k)OPTS[-o]} ]] && MOUNTOPTS=${OPTS[-o]}
+#.   
+#.       # No HOME set? Note: this should never happen again.
+#.       [[ -z $HOME ]] && {
+#. >         _warning "How pitiful!  A tomb, and no HOME."
+#.           return 1 }
+#.   
+#.       [[ -z $mnt || ! -d $mnt ]] && {
+#.           _warning "Cannot exec bind hooks without a mounted tomb."
+#: tomb:1849
 msgid "How pitiful!  A tomb, and no HOME."
 msgstr ""
 
-#: warning
+#. Fold: Open
+#. Function: exec_safe_bind_hooks
+#.
+#. Code sample:
+#.       # No HOME set? Note: this should never happen again.
+#.       [[ -z $HOME ]] && {
+#.           _warning "How pitiful!  A tomb, and no HOME."
+#.           return 1 }
+#.   
+#.       [[ -z $mnt || ! -d $mnt ]] && {
+#. >         _warning "Cannot exec bind hooks without a mounted tomb."
+#.           return 1 }
+#.   
+#.       [[ -r "$mnt/bind-hooks" ]] || {
+#.           _verbose "bind-hooks not found in ::1 mount point::" $mnt
+#: tomb:1853
 msgid "Cannot exec bind hooks without a mounted tomb."
 msgstr ""
 
-#: warning
+#. Fold: Open
+#. Function: exec_safe_bind_hooks
+#.
+#. Code sample:
+#.       # better parsing for bind hooks checks for two separated words on
+#.       # each line, using zsh word separator array subscript
+#.       _bindhooks="${mapfile[${mnt}/bind-hooks]}"
+#.       for h in ${(f)_bindhooks}; do
+#.           s="${h[(w)1]}"
+#.           d="${h[(w)2]}"
+#. >         [[ "$s" = "" ]] && { _warning "bind-hooks file is broken"; return 1 }
+#.           [[ "$d" = "" ]] && { _warning "bind-hooks file is broken"; return 1 }
+#.           maps+=($s $d)
+#.           _verbose "bind-hook found: $s -> $d"
+#.       done
+#: tomb:1869
 msgid "bind-hooks file is broken"
 msgstr ""
 
-#: warning
+#. Fold: Open
+#. Function: exec_safe_bind_hooks
+#.
+#. Code sample:
+#.           _verbose "bind-hook found: $s -> $d"
+#.       done
+#.       unset _bindhooks
+#.   
+#.       for dir in ${(k)maps}; do
+#.           [[ "${dir[1]}" == "/" || "${dir[1,2]}" == ".." ]] && {
+#. >             _warning "bind-hooks map format: local/to/tomb local/to/\$HOME"
+#.               continue }
+#.   
+#.           [[ "${${maps[$dir]}[1]}" == "/" || "${${maps[$dir]}[1,2]}" == ".." ]] && {
+#.               _warning "bind-hooks map format: local/to/tomb local/to/\$HOME.  Rolling back"
+#: tomb:1878
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
 msgstr ""
 
-#: warning
+#. Fold: Open
+#. Function: exec_safe_bind_hooks
+#.
+#. Code sample:
+#.       for dir in ${(k)maps}; do
+#.           [[ "${dir[1]}" == "/" || "${dir[1,2]}" == ".." ]] && {
+#.               _warning "bind-hooks map format: local/to/tomb local/to/\$HOME"
+#.               continue }
+#.   
+#.           [[ "${${maps[$dir]}[1]}" == "/" || "${${maps[$dir]}[1,2]}" == ".." ]] && {
+#. >             _warning "bind-hooks map format: local/to/tomb local/to/\$HOME.  Rolling back"
+#.               for dir in ${mounted}; do sudo umount $dir; done
+#.               return 1 }
+#.   
+#.           if [[ ! -r "$HOME/${maps[$dir]}" ]]; then
+#: tomb:1882
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.  Rolling back"
 msgstr ""
 
-#: warning
+#. Fold: Open
+#. Function: exec_safe_bind_hooks
+#.
+#. Code sample:
+#.           [[ "${${maps[$dir]}[1]}" == "/" || "${${maps[$dir]}[1,2]}" == ".." ]] && {
+#.               _warning "bind-hooks map format: local/to/tomb local/to/\$HOME.  Rolling back"
+#.               for dir in ${mounted}; do sudo umount $dir; done
+#.               return 1 }
+#.   
+#.           if [[ ! -r "$HOME/${maps[$dir]}" ]]; then
+#. >             _warning "bind-hook target not existent, skipping ::1 home::/::2 subdir::" $HOME ${maps[$dir]}
+#.           elif [[ ! -r "$mnt/$dir" ]]; then
+#.               _warning "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::" $mnt $dir
+#.           else
+#.               sudo mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]} \
+#: tomb:1887
 msgid "bind-hook target not existent, skipping ::1 home::/::2 subdir::"
 msgstr ""
 
-#: warning
+#. Fold: Open
+#. Function: exec_safe_bind_hooks
+#.
+#. Code sample:
+#.               for dir in ${mounted}; do sudo umount $dir; done
+#.               return 1 }
+#.   
+#.           if [[ ! -r "$HOME/${maps[$dir]}" ]]; then
+#.               _warning "bind-hook target not existent, skipping ::1 home::/::2 subdir::" $HOME ${maps[$dir]}
+#.           elif [[ ! -r "$mnt/$dir" ]]; then
+#. >             _warning "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::" $mnt $dir
+#.           else
+#.               sudo mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]} \
+#.                   && mounted+=("$HOME/${maps[$dir]}")
+#.           fi
+#: tomb:1889
 msgid "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
 msgstr ""
 
-#: success
+#. Fold: Open
+#. Function: exec_safe_post_hooks
+#.
+#. Code sample:
+#.       # Only run if post-hooks has the executable bit set
+#.       [[ -x $mnt/post-hooks ]] || return
+#.   
+#.       # If the file starts with a shebang, run it.
+#.       cat $mnt/post-hooks | head -n1 | grep '^#!\s*/' &> /dev/null
+#.       [[ $? == 0 ]] && {
+#. >         _success "Post hooks found, executing as user ::1 user name::." $USERNAME
+#.           $mnt/post-hooks $act $mnt
+#.       }
+#.   }
+#.   
+#: tomb:1917
 msgid "Post hooks found, executing as user ::1 user name::."
 msgstr ""
 
-#: failure
+#. Fold: List
+#. Function: list_tombs
+#.
+#. Code sample:
+#.       local tombname tombmount tombfs tombfsopts tombloop
+#.       local ts tombtot tombused tombavail tombpercent tombp tombsince
+#.       local tombtty tombhost tombuid tombuser
+#.       # list all open tombs
+#.       mounted_tombs=(`list_tomb_mounts $1`)
+#.       [[ ${#mounted_tombs} == 0 ]] && {
+#. >         _failure "I can't see any ::1 status:: tomb, may they all rest in peace." ${1:-open} }
+#.   
+#.       for t in ${mounted_tombs}; do
+#.           mapper=`basename ${t[(ws:;:)1]}`
+#.           tombname=${t[(ws:;:)5]}
+#: tomb:1936
 msgid "I can't see any ::1 status:: tomb, may they all rest in peace."
 msgstr ""
 
-#: message
+#. Fold: List
+#. Function: list_tombs
+#.
+#. Code sample:
+#.                       tombuser="${ee[(ws@:@)1]}" }
+#.               done
+#.           }
+#.   
+#.           { option_is_set --get-mountpoint } && { print $tombmount; continue }
+#.   
+#. >         _message "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::" \
+#.               $tombname $tombmount $tombfsopts
+#.   
+#.           _message "::1 tombname:: open since ::2 tombsince::" $tombname $tombsince
+#.   
+#: tomb:1969
 msgid "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::"
 msgstr ""
 
-#: message
+#. Fold: List
+#. Function: list_tombs
+#.
+#. Code sample:
+#.   
+#.           { option_is_set --get-mountpoint } && { print $tombmount; continue }
+#.   
+#.           _message "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::" \
+#.               $tombname $tombmount $tombfsopts
+#.   
+#. >         _message "::1 tombname:: open since ::2 tombsince::" $tombname $tombsince
+#.   
+#.           [[ -z "$tombtty" ]] || {
+#.               _message "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::" \
+#.                   $tombname $tombuser $tombtty $tombhost
+#: tomb:1972
 msgid "::1 tombname:: open since ::2 tombsince::"
 msgstr ""
 
-#: message
+#. Fold: List
+#. Function: list_tombs
+#.
+#. Code sample:
+#.           _message "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::" \
+#.               $tombname $tombmount $tombfsopts
+#.   
+#.           _message "::1 tombname:: open since ::2 tombsince::" $tombname $tombsince
+#.   
+#.           [[ -z "$tombtty" ]] || {
+#. >             _message "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::" \
+#.                   $tombname $tombuser $tombtty $tombhost
+#.           }
+#.   
+#.           _message "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::%) is used: ::4 tombavail:: free " \
+#: tomb:1975
 msgid "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::"
 msgstr ""
 
-#: message
+#. Fold: List
+#. Function: list_tombs
+#.
+#. Code sample:
+#.   
+#.           [[ -z "$tombtty" ]] || {
+#.               _message "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::" \
+#.                   $tombname $tombuser $tombtty $tombhost
+#.           }
+#.   
+#. >         _message "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::%) is used: ::4 tombavail:: free " \
+#.               $tombname $tombtot $tombused $tombavail $tombpercent
+#.   
+#.           [[ ${tombp} -ge 90 ]] && {
+#.               _warning "::1 tombname:: warning: your tomb is almost full!" $tombname
+#: tomb:1979
 msgid "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::%) is used: ::4 tombavail:: free "
 msgstr ""
 
-#: warning
+#. Fold: List
+#. Function: list_tombs
+#.
+#. Code sample:
+#.           }
+#.   
+#.           _message "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::%) is used: ::4 tombavail:: free " \
+#.               $tombname $tombtot $tombused $tombavail $tombpercent
+#.   
+#.           [[ ${tombp} -ge 90 ]] && {
+#. >             _warning "::1 tombname:: warning: your tomb is almost full!" $tombname
+#.           }
+#.   
+#.           # Now check hooks
+#.           mounted_hooks=(`list_tomb_binds $tombname`)
+#: tomb:1983
 msgid "::1 tombname:: warning: your tomb is almost full!"
 msgstr ""
 
-#: message
+#. Fold: List
+#. Function: list_tombs
+#.
+#. Code sample:
+#.               _warning "::1 tombname:: warning: your tomb is almost full!" $tombname
+#.           }
+#.   
+#.           # Now check hooks
+#.           mounted_hooks=(`list_tomb_binds $tombname`)
+#.           for h in ${mounted_hooks}; do
+#. >             _message "::1 tombname:: hooks ::2 hookname:: on ::3 hookdest::" \
+#.                   $tombname "`basename ${h[(ws:;:)1]}`" ${h[(ws:;:)2]}
+#.           done
+#.       done
+#.   }
+#: tomb:1989
 msgid "::1 tombname:: hooks ::2 hookname:: on ::3 hookdest::"
 msgstr ""
 
-#: failure
+#. Fold: List
+#. Function: list_tomb_binds
+#.
+#. Code sample:
+#.   # list_tomb_binds
+#.   # print out an array of mounted bind hooks (internal use)
+#.   # format is semi-colon separated list of attributes
+#.   # needs an argument: name of tomb whose hooks belong
+#.   list_tomb_binds() {
+#.       [[ -z "$1" ]] && {
+#. >         _failure "Internal error: list_tomb_binds called without argument." }
+#.   
+#.       # list bind hooks on util-linux 2.20 (Debian 7)
+#.       mount -l \
+#.           | awk -vtomb="$1" '
+#: tomb:2044
 msgid "Internal error: list_tomb_binds called without argument."
 msgstr ""
 
-#: failure
+#. Fold: Index and search
+#. Function: index_tombs
+#.
+#. Code sample:
+#.   # {{{ Index and search
+#.   
+#.   # index files in all tombs for search
+#.   # $1 is optional, to specify a tomb
+#.   index_tombs() {
+#.       { command -v updatedb 1>/dev/null 2>/dev/null } || {
+#. >         _failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
+#.   
+#.       updatedbver=`updatedb --version | grep '^updatedb'`
+#.       [[ "$updatedbver" =~ "GNU findutils" ]] && {
+#.           _warning "Cannot use GNU findutils for index/search commands." }
+#: tomb:2076
 msgid "Cannot index tombs on this system: updatedb (mlocate) not installed."
 msgstr ""
 
-#: warning
+#. Fold: Index and search
+#. Function: index_tombs
+#.
+#. Code sample:
+#.   index_tombs() {
+#.       { command -v updatedb 1>/dev/null 2>/dev/null } || {
+#.           _failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
+#.   
+#.       updatedbver=`updatedb --version | grep '^updatedb'`
+#.       [[ "$updatedbver" =~ "GNU findutils" ]] && {
+#. >         _warning "Cannot use GNU findutils for index/search commands." }
+#.       [[ "$updatedbver" =~ "mlocate" ]] || {
+#.           _failure "Index command needs 'mlocate' to be installed." }
+#.   
+#.       _verbose "$updatedbver"
+#: tomb:2080
 msgid "Cannot use GNU findutils for index/search commands."
 msgstr ""
 
-#: failure
+#. Fold: Index and search
+#. Function: index_tombs
+#.
+#. Code sample:
+#.           _failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
+#.   
+#.       updatedbver=`updatedb --version | grep '^updatedb'`
+#.       [[ "$updatedbver" =~ "GNU findutils" ]] && {
+#.           _warning "Cannot use GNU findutils for index/search commands." }
+#.       [[ "$updatedbver" =~ "mlocate" ]] || {
+#. >         _failure "Index command needs 'mlocate' to be installed." }
+#.   
+#.       _verbose "$updatedbver"
+#.   
+#.       mounted_tombs=(`list_tomb_mounts $1`)
+#: tomb:2082
 msgid "Index command needs 'mlocate' to be installed."
 msgstr ""
 
-#: failure
+#. Fold: Index and search
+#. Function: index_tombs
+#.
+#. Code sample:
+#.       _verbose "$updatedbver"
+#.   
+#.       mounted_tombs=(`list_tomb_mounts $1`)
+#.       [[ ${#mounted_tombs} == 0 ]] && {
+#.           # Considering one tomb
+#.           [[ -n "$1" ]] && {
+#. >             _failure "There seems to be no open tomb engraved as [::1::]" $1 }
+#.           # Or more
+#.           _failure "I can't see any open tomb, may they all rest in peace." }
+#.   
+#.       _success "Creating and updating search indexes."
+#: tomb:2090
 msgid "There seems to be no open tomb engraved as [::1::]"
 msgstr ""
 
-#: failure
+#. Fold: Index and search
+#. Function: index_tombs
+#.
+#. Code sample:
+#.       mounted_tombs=(`list_tomb_mounts $1`)
+#.       [[ ${#mounted_tombs} == 0 ]] && {
+#.           # Considering one tomb
+#.           [[ -n "$1" ]] && {
+#.               _failure "There seems to be no open tomb engraved as [::1::]" $1 }
+#.           # Or more
+#. >         _failure "I can't see any open tomb, may they all rest in peace." }
+#.   
+#.       _success "Creating and updating search indexes."
+#.   
+#.       # start the LibreOffice document converter if installed
+#: tomb:2092
 msgid "I can't see any open tomb, may they all rest in peace."
 msgstr ""
 
-#: success
+#. Fold: Index and search
+#. Function: index_tombs
+#.
+#. Code sample:
+#.           # Considering one tomb
+#.           [[ -n "$1" ]] && {
+#.               _failure "There seems to be no open tomb engraved as [::1::]" $1 }
+#.           # Or more
+#.           _failure "I can't see any open tomb, may they all rest in peace." }
+#.   
+#. >     _success "Creating and updating search indexes."
+#.   
+#.       # start the LibreOffice document converter if installed
+#.       { command -v unoconv 1>/dev/null 2>/dev/null } && {
+#.           unoconv -l 2>/dev/null &
+#: tomb:2094
 msgid "Creating and updating search indexes."
 msgstr ""
 
-#: message
+#. Fold: Index and search
+#. Function: index_tombs
+#.
+#. Code sample:
+#.   
+#.       for t in ${mounted_tombs}; do
+#.           mapper=`basename ${t[(ws:;:)1]}`
+#.           tombname=${t[(ws:;:)5]}
+#.           tombmount=${t[(ws:;:)2]}
+#.           [[ -r ${tombmount}/.noindex ]] && {
+#. >             _message "Skipping ::1 tomb name:: (.noindex found)." $tombname
+#.               continue }
+#.           _message "Indexing ::1 tomb name:: filenames..." $tombname
+#.           updatedb -l 0 -o ${tombmount}/.updatedb -U ${tombmount}
+#.   
+#: tomb:2107
 msgid "Skipping ::1 tomb name:: (.noindex found)."
 msgstr ""
 
-#: message
+#. Fold: Index and search
+#. Function: index_tombs
+#.
+#. Code sample:
+#.           mapper=`basename ${t[(ws:;:)1]}`
+#.           tombname=${t[(ws:;:)5]}
+#.           tombmount=${t[(ws:;:)2]}
+#.           [[ -r ${tombmount}/.noindex ]] && {
+#.               _message "Skipping ::1 tomb name:: (.noindex found)." $tombname
+#.               continue }
+#. >         _message "Indexing ::1 tomb name:: filenames..." $tombname
+#.           updatedb -l 0 -o ${tombmount}/.updatedb -U ${tombmount}
+#.   
+#.           # here we use swish to index file contents
+#.           [[ $SWISH == 1 ]] && {
+#: tomb:2109
 msgid "Indexing ::1 tomb name:: filenames..."
 msgstr ""
 
-#: message
+#. Fold: Index and search
+#. Function: index_tombs
+#.
+#. Code sample:
+#.               continue }
+#.           _message "Indexing ::1 tomb name:: filenames..." $tombname
+#.           updatedb -l 0 -o ${tombmount}/.updatedb -U ${tombmount}
+#.   
+#.           # here we use swish to index file contents
+#.           [[ $SWISH == 1 ]] && {
+#. >             _message "Indexing ::1 tomb name:: contents..." $tombname
+#.               [[ -r ${tombmount}/.swishrc ]] || {
+#.                   _message "Generating a new swish-e configuration file: ::1 swish conf::" ${tombmount}/.swishrc
+#.                   cat <<EOF > ${tombmount}/.swishrc
+#.   # index directives
+#: tomb:2114
 msgid "Indexing ::1 tomb name:: contents..."
 msgstr ""
 
-#: message
+#. Fold: Index and search
+#. Function: index_tombs
+#.
+#. Code sample:
+#.           updatedb -l 0 -o ${tombmount}/.updatedb -U ${tombmount}
+#.   
+#.           # here we use swish to index file contents
+#.           [[ $SWISH == 1 ]] && {
+#.               _message "Indexing ::1 tomb name:: contents..." $tombname
+#.               [[ -r ${tombmount}/.swishrc ]] || {
+#. >                 _message "Generating a new swish-e configuration file: ::1 swish conf::" ${tombmount}/.swishrc
+#.                   cat <<EOF > ${tombmount}/.swishrc
+#.   # index directives
+#.   DefaultContents TXT*
+#.   IndexDir $tombmount
+#: tomb:2116
 msgid "Generating a new swish-e configuration file: ::1 swish conf::"
 msgstr ""
 
-#: message
+#. Fold: Index and search
+#. Function: index_tombs
+#.
+#. Code sample:
+#.               }
+#.   
+#.               swish-e -c ${tombmount}/.swishrc -S fs -v3
+#.   
+#.           }
+#.   
+#. >         _message "Search index updated."
+#.       done
+#.   }
+#.   search_tombs() {
+#.       { command -v locate 1>/dev/null 2>/dev/null } || {
+#: tomb:2190
 msgid "Search index updated."
 msgstr ""
 
-#: success
+#. Fold: Index and search
+#. Function: search_tombs
+#.
+#. Code sample:
+#.   
+#.       # list all open tombs
+#.       mounted_tombs=(`list_tomb_mounts`)
+#.       [[ ${#mounted_tombs} == 0 ]] && {
+#.           _failure "I can't see any open tomb, may they all rest in peace." }
+#.   
+#. >     _success "Searching for: ::1::" ${(f)@}
+#.       for t in ${mounted_tombs}; do
+#.           _verbose "Checking for index: ::1::" ${t}
+#.           mapper=`basename ${t[(ws:;:)1]}`
+#.           tombname=${t[(ws:;:)5]}
+#: tomb:2210
 msgid "Searching for: ::1::"
 msgstr ""
 
-#: message
+#. Fold: Index and search
+#. Function: search_tombs
+#.
+#. Code sample:
+#.           _verbose "Checking for index: ::1::" ${t}
+#.           mapper=`basename ${t[(ws:;:)1]}`
+#.           tombname=${t[(ws:;:)5]}
+#.           tombmount=${t[(ws:;:)2]}
+#.           [[ -r ${tombmount}/.updatedb ]] && {
+#.               # Use mlocate to search hits on filenames
+#. >             _message "Searching filenames in tomb ::1 tomb name::" $tombname
+#.               locate -d ${tombmount}/.updatedb -e -i "${(f)@}"
+#.               _message "Matches found: ::1 matches::" \
+#.                   $(locate -d ${tombmount}/.updatedb -e -i -c ${(f)@})
+#.   
+#: tomb:2218
 msgid "Searching filenames in tomb ::1 tomb name::"
 msgstr ""
 
-#: message
+#. Fold: Index and search
+#. Function: search_tombs
+#.
+#. Code sample:
+#.           tombname=${t[(ws:;:)5]}
+#.           tombmount=${t[(ws:;:)2]}
+#.           [[ -r ${tombmount}/.updatedb ]] && {
+#.               # Use mlocate to search hits on filenames
+#.               _message "Searching filenames in tomb ::1 tomb name::" $tombname
+#.               locate -d ${tombmount}/.updatedb -e -i "${(f)@}"
+#. >             _message "Matches found: ::1 matches::" \
+#.                   $(locate -d ${tombmount}/.updatedb -e -i -c ${(f)@})
+#.   
+#.               # Use swish-e to search over contents
+#.               [[ $SWISH == 1 && -r $tombmount/.swish ]] && {
+#: tomb:2220
 msgid "Matches found: ::1 matches::"
 msgstr ""
 
-#: message
+#. Fold: Index and search
+#. Function: search_tombs
+#.
+#. Code sample:
+#.               locate -d ${tombmount}/.updatedb -e -i "${(f)@}"
+#.               _message "Matches found: ::1 matches::" \
+#.                   $(locate -d ${tombmount}/.updatedb -e -i -c ${(f)@})
+#.   
+#.               # Use swish-e to search over contents
+#.               [[ $SWISH == 1 && -r $tombmount/.swish ]] && {
+#. >                 _message "Searching contents in tomb ::1 tomb name::" $tombname
+#.                   swish-e -w ${=@} -f $tombmount/.swish -H0 }
+#.           } || {
+#.               _warning "Skipping tomb ::1 tomb name::: not indexed." $tombname
+#.               _warning "Run 'tomb index' to create indexes." }
+#: tomb:2225
 msgid "Searching contents in tomb ::1 tomb name::"
 msgstr ""
 
-#: warning
+#. Fold: Index and search
+#. Function: search_tombs
+#.
+#. Code sample:
+#.   
+#.               # Use swish-e to search over contents
+#.               [[ $SWISH == 1 && -r $tombmount/.swish ]] && {
+#.                   _message "Searching contents in tomb ::1 tomb name::" $tombname
+#.                   swish-e -w ${=@} -f $tombmount/.swish -H0 }
+#.           } || {
+#. >             _warning "Skipping tomb ::1 tomb name::: not indexed." $tombname
+#.               _warning "Run 'tomb index' to create indexes." }
+#.       done
+#.       _message "Search completed."
+#.   }
+#: tomb:2228
 msgid "Skipping tomb ::1 tomb name::: not indexed."
 msgstr ""
 
-#: warning
+#. Fold: Index and search
+#. Function: search_tombs
+#.
+#. Code sample:
+#.               # Use swish-e to search over contents
+#.               [[ $SWISH == 1 && -r $tombmount/.swish ]] && {
+#.                   _message "Searching contents in tomb ::1 tomb name::" $tombname
+#.                   swish-e -w ${=@} -f $tombmount/.swish -H0 }
+#.           } || {
+#.               _warning "Skipping tomb ::1 tomb name::: not indexed." $tombname
+#. >             _warning "Run 'tomb index' to create indexes." }
+#.       done
+#.       _message "Search completed."
+#.   }
+#.   
+#: tomb:2229
 msgid "Run 'tomb index' to create indexes."
 msgstr ""
 
-#: message
+#. Fold: Index and search
+#. Function: search_tombs
+#.
+#. Code sample:
+#.                   _message "Searching contents in tomb ::1 tomb name::" $tombname
+#.                   swish-e -w ${=@} -f $tombmount/.swish -H0 }
+#.           } || {
+#.               _warning "Skipping tomb ::1 tomb name::: not indexed." $tombname
+#.               _warning "Run 'tomb index' to create indexes." }
+#.       done
+#. >     _message "Search completed."
+#.   }
+#.   
+#.   # }}} - Index and search
+#.   
+#: tomb:2231
 msgid "Search completed."
 msgstr ""
 
-#: message
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.   # {{{ Resize
+#.   
+#.   # resize tomb file size
+#.   resize_tomb() {
+#.       local tombpath="$1"    # First argument is the path to the tomb
+#.   
+#. >     _message "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes." $1 $OPTS[-s]
+#.   
+#.       [[ -z "$tombpath" ]] && _failure "No tomb name specified for resizing."
+#.       [[ ! -r $tombpath ]] && _failure "Cannot find ::1::" $tombpath
+#.   
+#: tomb:2242
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes."
 msgstr ""
 
-#: failure
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.   # resize tomb file size
+#.   resize_tomb() {
+#.       local tombpath="$1"    # First argument is the path to the tomb
+#.   
+#.       _message "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes." $1 $OPTS[-s]
+#.   
+#. >     [[ -z "$tombpath" ]] && _failure "No tomb name specified for resizing."
+#.       [[ ! -r $tombpath ]] && _failure "Cannot find ::1::" $tombpath
+#.   
+#.       newtombsize="`option_value -s`"
+#.       [[ -z "$newtombsize" ]] && {
+#: tomb:2244
 msgid "No tomb name specified for resizing."
 msgstr ""
 
-#: failure
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.   resize_tomb() {
+#.       local tombpath="$1"    # First argument is the path to the tomb
+#.   
+#.       _message "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes." $1 $OPTS[-s]
+#.   
+#.       [[ -z "$tombpath" ]] && _failure "No tomb name specified for resizing."
+#. >     [[ ! -r $tombpath ]] && _failure "Cannot find ::1::" $tombpath
+#.   
+#.       newtombsize="`option_value -s`"
+#.       [[ -z "$newtombsize" ]] && {
+#.           _failure "Aborting operations: new size was not specified, use -s" }
+#: tomb:2245
 msgid "Cannot find ::1::"
 msgstr ""
 
-#: failure
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.   
+#.       [[ -z "$tombpath" ]] && _failure "No tomb name specified for resizing."
+#.       [[ ! -r $tombpath ]] && _failure "Cannot find ::1::" $tombpath
+#.   
+#.       newtombsize="`option_value -s`"
+#.       [[ -z "$newtombsize" ]] && {
+#. >         _failure "Aborting operations: new size was not specified, use -s" }
+#.   
+#.       is_valid_tomb $tombpath        # Set TOMB{PATH,DIR,FILE,NAME}
+#.   
+#.       _load_key # Try loading new key from option -k and set TOMBKEYFILE
+#: tomb:2249
 msgid "Aborting operations: new size was not specified, use -s"
 msgstr ""
 
-#: failure
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.       local oldtombsize=$(( `stat -c %s "$TOMBPATH" 2>/dev/null` / 1048576 ))
+#.       local mounted_tomb=`mount -l |
+#.           awk -vtomb="[$TOMBNAME]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
+#.   
+#.       # Tomb must not be open
+#.       [[ -z "$mounted_tomb" ]] || {
+#. >         _failure "Please close the tomb ::1 tomb name:: before trying to resize it." $TOMBNAME }
+#.       # New tomb size must be specified
+#.       [[ -n "$newtombsize" ]] || {
+#.           _failure "You must specify the new size of ::1 tomb name::" $TOMBNAME }
+#.       # New tomb size must be an integer
+#: tomb:2261
 msgid "Please close the tomb ::1 tomb name:: before trying to resize it."
 msgstr ""
 
-#: failure
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.   
+#.       # Tomb must not be open
+#.       [[ -z "$mounted_tomb" ]] || {
+#.           _failure "Please close the tomb ::1 tomb name:: before trying to resize it." $TOMBNAME }
+#.       # New tomb size must be specified
+#.       [[ -n "$newtombsize" ]] || {
+#. >         _failure "You must specify the new size of ::1 tomb name::" $TOMBNAME }
+#.       # New tomb size must be an integer
+#.       [[ $newtombsize == <-> ]] || _failure "Size is not an integer."
+#.       # Tombs can only grow in size
+#.       [[ "$newtombsize" -gt "$oldtombsize" ]] || {
+#: tomb:2264
 msgid "You must specify the new size of ::1 tomb name::"
 msgstr ""
 
-#: failure
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.       [[ -z "$mounted_tomb" ]] || {
+#.           _failure "Please close the tomb ::1 tomb name:: before trying to resize it." $TOMBNAME }
+#.       # New tomb size must be specified
+#.       [[ -n "$newtombsize" ]] || {
+#.           _failure "You must specify the new size of ::1 tomb name::" $TOMBNAME }
+#.       # New tomb size must be an integer
+#. >     [[ $newtombsize == <-> ]] || _failure "Size is not an integer."
+#.       # Tombs can only grow in size
+#.       [[ "$newtombsize" -gt "$oldtombsize" ]] || {
+#.           _failure "The new size must be greater then old tomb size." }
+#.   
+#: tomb:2266
 msgid "Size is not an integer."
 msgstr ""
 
-#: failure
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.       [[ -n "$newtombsize" ]] || {
+#.           _failure "You must specify the new size of ::1 tomb name::" $TOMBNAME }
+#.       # New tomb size must be an integer
+#.       [[ $newtombsize == <-> ]] || _failure "Size is not an integer."
+#.       # Tombs can only grow in size
+#.       [[ "$newtombsize" -gt "$oldtombsize" ]] || {
+#. >         _failure "The new size must be greater then old tomb size." }
+#.   
+#.       delta="$(( $newtombsize - $oldtombsize ))"
+#.   
+#.       _message "Generating ::1 tomb file:: of ::2 size::MiB" $TOMBFILE $newtombsize
+#: tomb:2269
 msgid "The new size must be greater then old tomb size."
 msgstr ""
 
-#: failure
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.       _message "Generating ::1 tomb file:: of ::2 size::MiB" $TOMBFILE $newtombsize
+#.   
+#.       _verbose "Data dump using ::1:: from /dev/urandom" ${DD[1]}
+#.       ${=DD} if=/dev/urandom bs=1048576 count=${delta} >> $TOMBPATH
+#.   
+#.       [[ $? == 0 ]] || {
+#. >         _failure "Error creating the extra resize ::1 size::, operation aborted." $tmp_resize }
+#.   
+#.       { option_is_set --tomb-pwd } && {
+#.           tomb_pwd="`option_value --tomb-pwd`"
+#.           _verbose "tomb-pwd = ::1 tomb pass::" $tomb_pwd
+#: tomb:2279
 msgid "Error creating the extra resize ::1 size::, operation aborted."
 msgstr ""
 
-#: failure
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.       mapper="tomb.$TOMBNAME.$mapdate.$(basename $nstloop)"
+#.   
+#.       _cryptsetup luksOpen ${nstloop} ${mapper} || {
+#.           _failure "Failure mounting the encrypted file." }
+#.   
+#.       sudo cryptsetup resize "${mapper}" || {
+#. >         _failure "cryptsetup failed to resize ::1 mapper::" $mapper }
+#.   
+#.       sudo e2fsck -p -f /dev/mapper/${mapper} || {
+#.           _failure "e2fsck failed to check ::1 mapper::" $mapper }
+#.   
+#: tomb:2300
 msgid "cryptsetup failed to resize ::1 mapper::"
 msgstr ""
 
-#: failure
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.           _failure "Failure mounting the encrypted file." }
+#.   
+#.       sudo cryptsetup resize "${mapper}" || {
+#.           _failure "cryptsetup failed to resize ::1 mapper::" $mapper }
+#.   
+#.       sudo e2fsck -p -f /dev/mapper/${mapper} || {
+#. >         _failure "e2fsck failed to check ::1 mapper::" $mapper }
+#.   
+#.       sudo resize2fs /dev/mapper/${mapper} || {
+#.           _failure "resize2fs failed to resize ::1 mapper::" $mapper }
+#.   
+#: tomb:2303
 msgid "e2fsck failed to check ::1 mapper::"
 msgstr ""
 
-#: failure
+#. Fold: Resize
+#. Function: resize_tomb
+#.
+#. Code sample:
+#.           _failure "cryptsetup failed to resize ::1 mapper::" $mapper }
+#.   
+#.       sudo e2fsck -p -f /dev/mapper/${mapper} || {
+#.           _failure "e2fsck failed to check ::1 mapper::" $mapper }
+#.   
+#.       sudo resize2fs /dev/mapper/${mapper} || {
+#. >         _failure "resize2fs failed to resize ::1 mapper::" $mapper }
+#.   
+#.       # close and free the loop device
+#.       sudo cryptsetup luksClose "${mapper}"
+#.   
+#: tomb:2306
 msgid "resize2fs failed to resize ::1 mapper::"
 msgstr ""
 
-#: failure
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.           mounted_tombs=(`list_tomb_mounts`)
+#.       else
+#.           mounted_tombs=(`list_tomb_mounts $1`)
+#.       fi
+#.   
+#.       [[ ${#mounted_tombs} == 0 ]] && {
+#. >         _failure "There is no open tomb to be closed." }
+#.   
+#.       [[ ${#mounted_tombs} -gt 1 && -z "$1" ]] && {
+#.           _warning "Too many tombs mounted, please specify one (see tomb list)"
+#.           _warning "or issue the command 'tomb close all' to close them all."
+#: tomb:2330
 msgid "There is no open tomb to be closed."
 msgstr ""
 
-#: warning
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.       fi
+#.   
+#.       [[ ${#mounted_tombs} == 0 ]] && {
+#.           _failure "There is no open tomb to be closed." }
+#.   
+#.       [[ ${#mounted_tombs} -gt 1 && -z "$1" ]] && {
+#. >         _warning "Too many tombs mounted, please specify one (see tomb list)"
+#.           _warning "or issue the command 'tomb close all' to close them all."
+#.           _failure "Operation aborted." }
+#.   
+#.       for t in ${mounted_tombs}; do
+#: tomb:2333
 msgid "Too many tombs mounted, please specify one (see tomb list)"
 msgstr ""
 
-#: warning
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.   
+#.       [[ ${#mounted_tombs} == 0 ]] && {
+#.           _failure "There is no open tomb to be closed." }
+#.   
+#.       [[ ${#mounted_tombs} -gt 1 && -z "$1" ]] && {
+#.           _warning "Too many tombs mounted, please specify one (see tomb list)"
+#. >         _warning "or issue the command 'tomb close all' to close them all."
+#.           _failure "Operation aborted." }
+#.   
+#.       for t in ${mounted_tombs}; do
+#.           mapper=`basename ${t[(ws:;:)1]}`
+#: tomb:2334
 msgid "or issue the command 'tomb close all' to close them all."
 msgstr ""
 
-#: warning
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.   
+#.           _verbose "Name: ::1 tomb name::" $tombname
+#.           _verbose "Mount: ::1 mount point::" $tombmount
+#.           _verbose "Mapper: ::1 mapper::" $mapper
+#.   
+#.           [[ -e "$mapper" ]] && {
+#. >             _warning "Tomb not found: ::1 tomb file::" $1
+#.               _warning "Please specify an existing tomb."
+#.               return 0 }
+#.   
+#.           [[ -n $SLAM ]] && {
+#: tomb:2350
 msgid "Tomb not found: ::1 tomb file::"
 msgstr ""
 
-#: warning
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.           _verbose "Name: ::1 tomb name::" $tombname
+#.           _verbose "Mount: ::1 mount point::" $tombmount
+#.           _verbose "Mapper: ::1 mapper::" $mapper
+#.   
+#.           [[ -e "$mapper" ]] && {
+#.               _warning "Tomb not found: ::1 tomb file::" $1
+#. >             _warning "Please specify an existing tomb."
+#.               return 0 }
+#.   
+#.           [[ -n $SLAM ]] && {
+#.               _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
+#: tomb:2351
 msgid "Please specify an existing tomb."
 msgstr ""
 
-#: success
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.           [[ -e "$mapper" ]] && {
+#.               _warning "Tomb not found: ::1 tomb file::" $1
+#.               _warning "Please specify an existing tomb."
+#.               return 0 }
+#.   
+#.           [[ -n $SLAM ]] && {
+#. >             _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
+#.                   $tombname $tombmount
+#.               _message "Kill all processes busy inside the tomb."
+#.               { slam_tomb "$tombmount" } || {
+#.                   _failure "Cannot slam the tomb ::1 tomb name::" $tombname }
+#: tomb:2355
 msgid "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::"
 msgstr ""
 
-#: message
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.               _warning "Please specify an existing tomb."
+#.               return 0 }
+#.   
+#.           [[ -n $SLAM ]] && {
+#.               _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
+#.                   $tombname $tombmount
+#. >             _message "Kill all processes busy inside the tomb."
+#.               { slam_tomb "$tombmount" } || {
+#.                   _failure "Cannot slam the tomb ::1 tomb name::" $tombname }
+#.           } || {
+#.               _message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
+#: tomb:2357
 msgid "Kill all processes busy inside the tomb."
 msgstr ""
 
-#: failure
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.   
+#.           [[ -n $SLAM ]] && {
+#.               _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
+#.                   $tombname $tombmount
+#.               _message "Kill all processes busy inside the tomb."
+#.               { slam_tomb "$tombmount" } || {
+#. >                 _failure "Cannot slam the tomb ::1 tomb name::" $tombname }
+#.           } || {
+#.               _message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
+#.                   $tombname $tombmount }
+#.   
+#: tomb:2359
 msgid "Cannot slam the tomb ::1 tomb name::"
 msgstr ""
 
-#: message
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.               _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
+#.                   $tombname $tombmount
+#.               _message "Kill all processes busy inside the tomb."
+#.               { slam_tomb "$tombmount" } || {
+#.                   _failure "Cannot slam the tomb ::1 tomb name::" $tombname }
+#.           } || {
+#. >             _message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
+#.                   $tombname $tombmount }
+#.   
+#.           # check if there are binded dirs and close them
+#.           bind_tombs=(`list_tomb_binds $tombname`)
+#: tomb:2361
 msgid "Closing tomb ::1 tomb name:: mounted on ::2 mount point::"
 msgstr ""
 
-#: message
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.   
+#.           # check if there are binded dirs and close them
+#.           bind_tombs=(`list_tomb_binds $tombname`)
+#.           for b in ${bind_tombs}; do
+#.               bind_mapper="${b[(ws:;:)1]}"
+#.               bind_mount="${b[(ws:;:)2]}"
+#. >             _message "Closing tomb bind hook: ::1 hook::" $bind_mount
+#.               sudo umount $bind_mount || {
+#.                   [[ -n $SLAM ]] && {
+#.                       _success "Slamming tomb: killing all processes using this hook."
+#.                       slam_tomb "$bind_mount"
+#: tomb:2369
 msgid "Closing tomb bind hook: ::1 hook::"
 msgstr ""
 
-#: success
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.           for b in ${bind_tombs}; do
+#.               bind_mapper="${b[(ws:;:)1]}"
+#.               bind_mount="${b[(ws:;:)2]}"
+#.               _message "Closing tomb bind hook: ::1 hook::" $bind_mount
+#.               sudo umount $bind_mount || {
+#.                   [[ -n $SLAM ]] && {
+#. >                     _success "Slamming tomb: killing all processes using this hook."
+#.                       slam_tomb "$bind_mount"
+#.                       [[ $? == 1 ]] && {
+#.                           _failure "Cannot slam the bind hook ::1 hook::" $bind_mount }
+#.                       umount $bind_mount
+#: tomb:2372
 msgid "Slamming tomb: killing all processes using this hook."
 msgstr ""
 
-#: failure
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.               _message "Closing tomb bind hook: ::1 hook::" $bind_mount
+#.               sudo umount $bind_mount || {
+#.                   [[ -n $SLAM ]] && {
+#.                       _success "Slamming tomb: killing all processes using this hook."
+#.                       slam_tomb "$bind_mount"
+#.                       [[ $? == 1 ]] && {
+#. >                         _failure "Cannot slam the bind hook ::1 hook::" $bind_mount }
+#.                       umount $bind_mount
+#.                   } || {
+#.                       _warning "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount }
+#.               }
+#: tomb:2375
 msgid "Cannot slam the bind hook ::1 hook::"
 msgstr ""
 
-#: warning
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.                       _success "Slamming tomb: killing all processes using this hook."
+#.                       slam_tomb "$bind_mount"
+#.                       [[ $? == 1 ]] && {
+#.                           _failure "Cannot slam the bind hook ::1 hook::" $bind_mount }
+#.                       umount $bind_mount
+#.                   } || {
+#. >                     _warning "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount }
+#.               }
+#.           done
+#.   
+#.           # Execute post-hooks for eventual cleanup
+#: tomb:2378
 msgid "Tomb bind hook ::1 hook:: is busy, cannot close tomb."
 msgstr ""
 
-#: warning
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.           # Execute post-hooks for eventual cleanup
+#.           { option_is_set -n } || {
+#.               exec_safe_post_hooks ${tombmount%%/} close }
+#.   
+#.           _verbose "Performing umount of ::1 mount point::" $tombmount
+#.           sudo umount ${tombmount}
+#. >         [[ $? = 0 ]] || { _warning "Tomb is busy, cannot umount!"; return 1 }
+#.   
+#.           # If we used a default mountpoint and is now empty, delete it
+#.           [[ "$tombmount" == "/media/$tombname.tomb" ]] && { rmdir $tombmount }
+#.   
+#: tomb:2388
 msgid "Tomb is busy, cannot umount!"
 msgstr ""
 
-#: failure
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.   
+#.           # If we used a default mountpoint and is now empty, delete it
+#.           [[ "$tombmount" == "/media/$tombname.tomb" ]] && { rmdir $tombmount }
+#.   
+#.           sudo cryptsetup luksClose $mapper
+#.           [[ $? == 0 ]] || {
+#. >             _failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper }
+#.   
+#.           # Normally the loopback device is detached when unused
+#.           [[ -e "/dev/$tombloop" ]] && sudo losetup -d "/dev/$tombloop"
+#.           [[ $? = 0 ]] || {
+#: tomb:2395
 msgid "Error occurred in cryptsetup luksClose ::1 mapper::"
 msgstr ""
 
-#: success
+#. Fold: Close
+#. Function: umount_tomb
+#.
+#. Code sample:
+#.   
+#.           # Normally the loopback device is detached when unused
+#.           [[ -e "/dev/$tombloop" ]] && sudo losetup -d "/dev/$tombloop"
+#.           [[ $? = 0 ]] || {
+#.               _verbose "/dev/$tombloop was already closed." }
+#.   
+#. >         _success "Tomb ::1 tomb name:: closed: your bones will rest in peace." $tombname
+#.   
+#.       done # loop across mounted tombs
+#.   
+#.       return 0
+#: tomb:2402
 msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
 msgstr ""
 
-#: failure
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.               return 1
+#.           fi
+#.           return 0
+#.       fi
+#.       unset discardme
+#.       if ! zparseopts -M -E -D -Adiscardme ${every_opts}; then
+#. >         _failure "Error parsing."
+#.           return 127
+#.       fi
+#.       unset discardme
+#.       subcommand=$1
+#: tomb:2522
 msgid "Error parsing."
 msgstr ""
 
-#: warning
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.       subcommand=$1
+#.       if [[ -z $subcommand ]]; then
+#.           subcommand="__default"
+#.       fi
+#.   
+#.       if [[ -z ${(k)subcommands_opts[$subcommand]} ]]; then
+#. >         _warning "There's no such command \"::1 subcommand::\"." $subcommand
+#.           exitv=127 _failure "Please try -h for help."
+#.       fi
+#.       argv=("${(@)oldstar}")
+#.       unset oldstar
+#: tomb:2532
 msgid "There's no such command \"::1 subcommand::\"."
 msgstr ""
 
-#: failure
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.       if [[ -z $subcommand ]]; then
+#.           subcommand="__default"
+#.       fi
+#.   
+#.       if [[ -z ${(k)subcommands_opts[$subcommand]} ]]; then
+#.           _warning "There's no such command \"::1 subcommand::\"." $subcommand
+#. >         exitv=127 _failure "Please try -h for help."
+#.       fi
+#.       argv=("${(@)oldstar}")
+#.       unset oldstar
+#.   
+#: tomb:2533
 msgid "Please try -h for help."
 msgstr ""
 
-#: warning
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.       # zsh magic: ${=string} will split to multiple arguments when spaces occur
+#.       set -A cmd_opts ${main_opts} ${=subcommands_opts[$subcommand]}
+#.       # if there is no option, we don't need parsing
+#.       if [[ -n $cmd_opts ]]; then
+#.           zparseopts -M -E -D -AOPTS ${cmd_opts}
+#.           if [[ $? != 0 ]]; then
+#. >             _warning "Some error occurred during option processing."
+#.               exitv=127 _failure "See \"tomb help\" for more info."
+#.           fi
+#.       fi
+#.       #build PARAM (array of arguments) and check if there are unrecognized options
+#: tomb:2545
 msgid "Some error occurred during option processing."
 msgstr ""
 
-#: failure
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.       set -A cmd_opts ${main_opts} ${=subcommands_opts[$subcommand]}
+#.       # if there is no option, we don't need parsing
+#.       if [[ -n $cmd_opts ]]; then
+#.           zparseopts -M -E -D -AOPTS ${cmd_opts}
+#.           if [[ $? != 0 ]]; then
+#.               _warning "Some error occurred during option processing."
+#. >             exitv=127 _failure "See \"tomb help\" for more info."
+#.           fi
+#.       fi
+#.       #build PARAM (array of arguments) and check if there are unrecognized options
+#.       ok=0
+#: tomb:2546
 msgid "See \"tomb help\" for more info."
 msgstr ""
 
-#: failure
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.       for arg in $*; do
+#.           if [[ $arg == '--' || $arg == '-' ]]; then
+#.               ok=1
+#.               continue #it shouldnt be appended to PARAM
+#.           elif [[ $arg[1] == '-'  ]]; then
+#.               if [[ $ok == 0 ]]; then
+#. >                 exitv=127 _failure "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::" $arg $subcommand
+#.               fi
+#.           fi
+#.           PARAM+=$arg
+#.       done
+#: tomb:2558
 msgid "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::"
 msgstr ""
 
-#: failure
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.       # Use colors unless told not to
+#.       { ! option_is_set --no-color } && { autoload -Uz colors && colors }
+#.       # Some options are only available during insecure mode
+#.       { ! option_is_set --unsafe } && {
+#.           for opt in --tomb-pwd --use-urandom --tomb-old-pwd; do
+#.               { option_is_set $opt } && {
+#. >                 exitv=127 _failure "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsafe" $opt }
+#.           done
+#.       }
+#.       # read -t or --tmp flags to set a custom temporary directory
+#.       option_is_set --tmp && TMPPREFIX=$(option_value --tmp)
+#: tomb:2574
 msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsafe"
 msgstr ""
 
-#: warning
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.           help)
+#.               usage
+#.               ;;
+#.   
+#.           # DEPRECATION notice (leave here as 'create' is still present in old docs)
+#.           create)
+#. >             _warning "The create command is deprecated, please use dig, forge and lock instead."
+#.               _warning "For more informations see Tomb's manual page (man tomb)."
+#.               _failure "Operation aborted."
+#.               ;;
+#.   
+#: tomb:2608
 msgid "The create command is deprecated, please use dig, forge and lock instead."
 msgstr ""
 
-#: warning
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.               usage
+#.               ;;
+#.   
+#.           # DEPRECATION notice (leave here as 'create' is still present in old docs)
+#.           create)
+#.               _warning "The create command is deprecated, please use dig, forge and lock instead."
+#. >             _warning "For more informations see Tomb's manual page (man tomb)."
+#.               _failure "Operation aborted."
+#.               ;;
+#.   
+#.           # CREATE Step 1: dig -s NN file.tomb
+#: tomb:2609
 msgid "For more informations see Tomb's manual page (man tomb)."
 msgstr ""
 
-#: failure
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.               umount_tomb $PARAM[1]
+#.               ;;
+#.   
+#.           # Grow tomb's size
+#.           resize)
+#.               [[ $RESIZER == 0 ]] && {
+#. >                 _failure "Resize2fs not installed: cannot resize tombs." }
+#.               resize_tomb $PARAM[1]
+#.               ;;
+#.   
+#.           ## Contents manipulation
+#: tomb:2643
 msgid "Resize2fs not installed: cannot resize tombs."
 msgstr ""
 
-#: failure
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.   
+#.           ## Locking operations
+#.   
+#.           # Export key to QR Code
+#.           engrave)
+#.               [[ $QRENCODE == 0 ]] && {
+#. >                 _failure "QREncode not installed: cannot engrave keys on paper." }
+#.               engrave_key ${=PARAM}
+#.               ;;
+#.   
+#.           # Change password on existing key
+#: tomb:2669
 msgid "QREncode not installed: cannot engrave keys on paper."
 msgstr ""
 
-#: failure
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.               change_tomb_key ${=PARAM}
+#.               ;;
+#.   
+#.           # STEGANOGRAPHY: hide key inside an image
+#.           bury)
+#.               [[ $STEGHIDE == 0 ]] && {
+#. >                 _failure "Steghide not installed: cannot bury keys into images." }
+#.               bury_key $PARAM[1]
+#.               ;;
+#.   
+#.           # STEGANOGRAPHY: read key hidden in an image
+#: tomb:2686
 msgid "Steghide not installed: cannot bury keys into images."
 msgstr ""
 
-#: failure
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.               bury_key $PARAM[1]
+#.               ;;
+#.   
+#.           # STEGANOGRAPHY: read key hidden in an image
+#.           exhume)
+#.               [[ $STEGHIDE == 0 ]] && {
+#. >                 _failure "Steghide not installed: cannot exhume keys from images." }
+#.               exhume_key $PARAM[1]
+#.               ;;
+#.   
+#.           ## Internal commands useful to developers
+#: tomb:2693
 msgid "Steghide not installed: cannot exhume keys from images."
 msgstr ""
 
-#: print
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.   
+#.           # Ask user for a password interactively
+#.           askpass)    ask_password $PARAM[1] $PARAM[2] ;;
+#.   
+#.           # Default operation: presentation, or version information with -v
+#.           __default)
+#. >             _print "Tomb ::1 version:: - a strong and gentle undertaker for your secrets" $VERSION
+#.               _print "\000"
+#.               _print " Copyright (C) 2007-2015 Dyne.org Foundation, License GNU GPL v3+"
+#.               _print " This is free software: you are free to change and redistribute it"
+#.               _print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
+#: tomb:2707
 msgid "Tomb ::1 version:: - a strong and gentle undertaker for your secrets"
 msgstr ""
 
-#: print
-msgid " Copyright (C) 2007-2014 Dyne.org Foundation, License GNU GPL v3+"
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.           askpass)    ask_password $PARAM[1] $PARAM[2] ;;
+#.   
+#.           # Default operation: presentation, or version information with -v
+#.           __default)
+#.               _print "Tomb ::1 version:: - a strong and gentle undertaker for your secrets" $VERSION
+#.               _print "\000"
+#. >             _print " Copyright (C) 2007-2015 Dyne.org Foundation, License GNU GPL v3+"
+#.               _print " This is free software: you are free to change and redistribute it"
+#.               _print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
+#.               _print "\000"
+#.               option_is_set -v && {
+#: tomb:2709
+msgid " Copyright (C) 2007-2015 Dyne.org Foundation, License GNU GPL v3+"
 msgstr ""
 
-#: print
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.   
+#.           # Default operation: presentation, or version information with -v
+#.           __default)
+#.               _print "Tomb ::1 version:: - a strong and gentle undertaker for your secrets" $VERSION
+#.               _print "\000"
+#.               _print " Copyright (C) 2007-2015 Dyne.org Foundation, License GNU GPL v3+"
+#. >             _print " This is free software: you are free to change and redistribute it"
+#.               _print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
+#.               _print "\000"
+#.               option_is_set -v && {
+#.                   local langwas=$LANG
+#: tomb:2710
 msgid " This is free software: you are free to change and redistribute it"
 msgstr ""
 
-#: print
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.           # Default operation: presentation, or version information with -v
+#.           __default)
+#.               _print "Tomb ::1 version:: - a strong and gentle undertaker for your secrets" $VERSION
+#.               _print "\000"
+#.               _print " Copyright (C) 2007-2015 Dyne.org Foundation, License GNU GPL v3+"
+#.               _print " This is free software: you are free to change and redistribute it"
+#. >             _print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
+#.               _print "\000"
+#.               option_is_set -v && {
+#.                   local langwas=$LANG
+#.                   LANG=en
+#: tomb:2711
 msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
 msgstr ""
 
-#: print
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.               _print " This is free software: you are free to change and redistribute it"
+#.               _print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
+#.               _print "\000"
+#.               option_is_set -v && {
+#.                   local langwas=$LANG
+#.                   LANG=en
+#. >                 _print " This source code is distributed in the hope that it will be useful,"
+#.                   _print " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+#.                   _print " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+#.                   LANG=$langwas
+#.                   _print " When in need please refer to <http://dyne.org/support>."
+#: tomb:2716
 msgid " This source code is distributed in the hope that it will be useful,"
 msgstr ""
 
-#: print
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.               _print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
+#.               _print "\000"
+#.               option_is_set -v && {
+#.                   local langwas=$LANG
+#.                   LANG=en
+#.                   _print " This source code is distributed in the hope that it will be useful,"
+#. >                 _print " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+#.                   _print " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+#.                   LANG=$langwas
+#.                   _print " When in need please refer to <http://dyne.org/support>."
+#.                   _print "\000"
+#: tomb:2717
 msgid " but WITHOUT ANY WARRANTY; without even the implied warranty of"
 msgstr ""
 
-#: print
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.               _print "\000"
+#.               option_is_set -v && {
+#.                   local langwas=$LANG
+#.                   LANG=en
+#.                   _print " This source code is distributed in the hope that it will be useful,"
+#.                   _print " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+#. >                 _print " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+#.                   LANG=$langwas
+#.                   _print " When in need please refer to <http://dyne.org/support>."
+#.                   _print "\000"
+#.                   _print "System utils:"
+#: tomb:2718
 msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr ""
 
-#: print
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.                   local langwas=$LANG
+#.                   LANG=en
+#.                   _print " This source code is distributed in the hope that it will be useful,"
+#.                   _print " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+#.                   _print " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+#.                   LANG=$langwas
+#. >                 _print " When in need please refer to <http://dyne.org/support>."
+#.                   _print "\000"
+#.                   _print "System utils:"
+#.                   _print "\000"
+#.                   cat <<EOF
+#: tomb:2720
 msgid " When in need please refer to <http://dyne.org/support>."
 msgstr ""
 
-#: print
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.                   _print " This source code is distributed in the hope that it will be useful,"
+#.                   _print " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+#.                   _print " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+#.                   LANG=$langwas
+#.                   _print " When in need please refer to <http://dyne.org/support>."
+#.                   _print "\000"
+#. >                 _print "System utils:"
+#.                   _print "\000"
+#.                   cat <<EOF
+#.     `sudo -V | head -n1`
+#.     `cryptsetup --version`
+#: tomb:2722
 msgid "System utils:"
 msgstr ""
 
-#: print
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.     `cryptsetup --version`
+#.     `pinentry --version`
+#.     `gpg --version | head -n1` - key forging algorithms (GnuPG symmetric ciphers):
+#.     `list_gnupg_ciphers`
+#.   EOF
+#.                   _print "\000"
+#. >                 _print "Optional utils:"
+#.                   _print "\000"
+#.                   _list_optional_tools version
+#.                   return 0
+#.               }
+#: tomb:2732
 msgid "Optional utils:"
 msgstr ""
 
-#: warning
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.               }
+#.               usage
+#.               ;;
+#.   
+#.           # Reject unknown command and suggest help
+#.           *)
+#. >             _warning "Command \"::1 subcommand::\" not recognized." $subcommand
+#.               _message "Try -h for help."
+#.               return 1
+#.               ;;
+#.       esac
+#: tomb:2742
 msgid "Command \"::1 subcommand::\" not recognized."
 msgstr ""
 
-#: message
+#. Fold: Main routine
+#. Function: main
+#.
+#. Code sample:
+#.               usage
+#.               ;;
+#.   
+#.           # Reject unknown command and suggest help
+#.           *)
+#.               _warning "Command \"::1 subcommand::\" not recognized." $subcommand
+#. >             _message "Try -h for help."
+#.               return 1
+#.               ;;
+#.       esac
+#.       return $?
+#: tomb:2743
 msgid "Try -h for help."
 msgstr ""
 
