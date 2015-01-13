@@ -384,15 +384,21 @@ EOF`
         # customized gtk2 dialog with a skull (if extras are installed)
         if _is_found "pinentry-gtk-2"; then
 
+            gtkrc=""
             [[ "$DISPLAY" = "" ]] || {
                 theme=/share/themes/tomb/gtk-2.0-key/gtkrc
                 for i in /usr/local /usr; do
                     [[ -r $i/$theme ]] && {
-                        gtkrc=$i/$theme
-                        break }
-                done }
-
-            output=`cat <<EOF | GTK2_RC_FILES="$gtkrc" pinentry-gtk-2
+                        gtkrc="$i/$theme"
+                        break
+                    }
+                done
+            }
+            [[ "$gtkrc" = "" ]] || {
+                gtkrc_old="$GTK2_RC_FILES"
+                export GTK2_RC_FILES="$gtkrc"
+            }
+            output=`cat <<EOF | pinentry-gtk-2
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
 SETTITLE $title
@@ -400,6 +406,7 @@ SETDESC $description
 SETPROMPT Password:
 GETPIN
 EOF`
+            [[ "$gtkrc" = "" ]] || export GTK2_RC_FILES="$gtkrc_old"
 
             # TODO QT4 customization of dialog
         elif _is_found "pinentry-qt4"; then
