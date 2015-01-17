@@ -68,6 +68,7 @@ PINENTRY=(pinentry)
 # load zsh regex module
 zmodload zsh/regex
 zmodload zsh/mapfile
+zmodload -F zsh/stat b:zstat
 
 # make sure variables aren't exported
 unsetopt allexport
@@ -483,15 +484,29 @@ is_valid_tomb() {
     [[ -z "$1" ]] && {
         _failure "Tomb file is missing from arguments." }
 
+    _fail=0
     # Tomb file must be a readable, writable, not-empty regular file.
-    [[ ! -r "$1" ]] && {
-        _failure "Tomb file not found: ::1 tomb file::" $1 }
-    [[ ! -f "$1" ]] && {
-        _failure "Tomb file is not a regular file: ::1 tomb file::" $1 }
-    [[ ! -s "$1" ]] && {
-        _failure "Tomb file is empty (zero length): ::1 tomb file::" $1 }
     [[ ! -w "$1" ]] && {
-        _failure "Tomb file is not writable: ::1 tomb file::" $1 }
+        _warning "Tomb file is not writable: ::1 tomb file::" $1
+        _fail=1
+    }
+    [[ ! -f "$1" ]] && {
+        _warning "Tomb file is not a regular file: ::1 tomb file::" $1
+        _fail=1
+    }
+    [[ ! -s "$1" ]] && {
+        _warning "Tomb file is empty (zero length): ::1 tomb file::" $1
+        _fail=1
+    }
+
+    _uid="`zstat +uid $1`"
+    [[ "$_uid"  = "$UID" ]] || {
+        _user="`zstat -s +uid $1`"
+        _warning "Tomb file is owned by another user: ::1 tomb owner::" $_user
+    }
+    [[ $_fail = 1 ]] && {
+        _failure "Tomb command failed: ::1 command name::" $subcommand
+    }
 
     # TODO: split the rest of that function out.
     # We already have a valid tomb, now we're checking
@@ -1796,10 +1811,10 @@ mount_tomb() {
 
     # print out when was opened the last time, by whom and where
     [[ -r ${tombmount}/.last ]] && {
-        tombtty=$(_cat ${tombmount}/.tty | tr -d ' ')
-        tombhost=$(_cat ${tombmount}/.host | tr -d ' ')
+        tombtty=$(_cat ${tombmount}/.tty)
+        tombhost=$(_cat ${tombmount}/.host)
+        tomblast=$(_cat ${tombmount}/.last)
         tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
-        tomblast=$(_cat ${tombmount}/.last | tr -d ' ')
         for e in ${(f@)mapfile[/etc/passwd]}; do
             [[ "$e" =~ ":$tombuid:" ]] && {
                 tombuser="${e[(ws@:@)1]}" }
@@ -1962,11 +1977,11 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 
         # find out who opens it from where
         [[ -r ${tombmount}/.tty ]] && {
-            tombtty=$(_cat ${tombmount}/.tty | tr -d ' ')
-            tombhost=$(_cat ${tombmount}/.host | tr -d ' ')
+            tombtty=$(_cat ${tombmount}/.tty)
+            tombhost=$(_cat ${tombmount}/.host)
             tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
             for ee in ${(f@)mapfile[/etc/passwd]}; do
-                [[ "$ee" =~ ":$tombuid:" ]] && {
+                [[ "$ee" =~ ":${tombuid}:" ]] && {
                     tombuser="${ee[(ws@:@)1]}" }
             done
         }
