@@ -2392,12 +2392,11 @@ umount_tomb() {
             sudo umount $bind_mount || {
                 [[ -n $SLAM ]] && {
                     _success "Slamming tomb: killing all processes using this hook."
-                    slam_tomb "$bind_mount"
-                    [[ $? == 1 ]] && {
-                        _failure "Cannot slam the bind hook ::1 hook::" $bind_mount }
-                    umount $bind_mount
+                    slam_tomb "$bind_mount" || _failure "Cannot slam the bind hook ::1 hook::" $bind_mount
+                    umount $bind_mount || _failure "Cannot slam the bind hook ::1 hook::" $bind_mount
                 } || {
-                    _warning "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount }
+                    _failure "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount
+                }
             }
         done
 
