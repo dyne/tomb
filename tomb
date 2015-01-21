@@ -1688,31 +1688,22 @@ mount_tomb() {
     local tombpath="$1"    # First argument is the path to the tomb
     [[ -n "$tombpath" ]] || _failure "No tomb name specified for opening."
 
-    _message "Commanded to open tomb ::1 tomb name::" $1
+    _message "Commanded to open tomb ::1 tomb name::" $tombpath
 
     _check_swap
+
     is_valid_tomb $tombpath
-
-    # check file type (if its a Luks fs)
-    [[ "`file $TOMBPATH`" =~ "luks encrypted file" ]] || {
-        _warning "::1 tomb file:: is not a valid tomb file" $TOMBFILE
-        _failure "Operation aborted."
-    }
-
-    _verbose "Tomb found: ::1 tomb path::" $TOMBPATH
 
     _load_key # Try loading new key from option -k and set TOMBKEYFILE
 
-    tombmount=${2:-/media/$TOMBFILE}
-    [[ -z "$2" ]] && {
-        _message "Mountpoint not specified, using default: ::1 mount point::" $tombmount }
-
-    # Check if its already open
-    [[ "`mount -l`" -regex-match "${TOMBFILE}.*\[$TOMBNAME\]" ]] && {
-        _warning "::1 tomb name:: is already open." $TOMBNAME
-        _message "Here below its status is reported:"
-        list_tombs $TOMBNAME
-        return 0 }
+    tombmount="$2"
+    [[ "$tombmount" = "" ]] && {
+        tombmount=/media/$TOMBFILE
+        [[ -d /media ]] || { # no /media found, adopting /run/media/$USER (udisk2 compat)
+            tombmount=/run/media/$_USER/$TOMBFILE
+        }
+        _message "Mountpoint not specified, using default: ::1 mount point::" $tombmount
+    }
 
     _success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE $tombmount
 
@@ -2406,10 +2397,11 @@ umount_tomb() {
 
         _verbose "Performing umount of ::1 mount point::" $tombmount
         sudo umount ${tombmount}
-        [[ $? = 0 ]] || { _warning "Tomb is busy, cannot umount!"; return 1 }
+        [[ $? = 0 ]] || { _failure "Tomb is busy, cannot umount!" }
 
         # If we used a default mountpoint and is now empty, delete it
-        [[ "$tombmount" == "/media/$tombname.tomb" ]] && { rmdir $tombmount }
+        [[ "$tombmount" -regex-match "[/run]?/media[/$_USER]?/$tombname.tomb" ]] && {
+            rmdir $tombmount }
 
         sudo cryptsetup luksClose $mapper
         [[ $? == 0 ]] || {
