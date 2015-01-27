@@ -879,6 +879,12 @@ _load_key() {
 
     _verbose "load_key: ::1 key::" $TOMBKEYFILE
 
+    [[ "$TOMBKEY" = "" ]] && {
+        # something went wrong, there is no key to load
+        # this occurs especially when piping from stdin and aborted
+        _failure "Key not found, specify one using -k."
+    }
+
     is_valid_key $TOMBKEY || {
         _warning "The key seems invalid or its format is not known by this version of Tomb."
         _tomb_key_recover $TOMBKEY
