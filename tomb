@@ -364,6 +364,9 @@ ask_password() {
     # own fallback mechanisms. Pinentry supported: curses, gtk-2, qt4
     # and x11.
 
+    # make sure LANG is set, default to C
+    LANG=${LANG:-C}
+
     if [[ "$DISPLAY" = "" ]]; then
 
         if _is_found "pinentry-curses"; then
