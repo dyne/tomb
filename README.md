@@ -144,10 +144,11 @@ contents of a Tomb using a dm-crypt enabled Linux kernel, cryptsetup
 and GnuPG issuing the following commands as root:
 
 ```
- lo=$(losetup -f)
- losetup -f secret.tomb
- gpg -d secret.key | cryptsetup --key-file - luksOpen $lo secret
- mount /dev/mapper/secret $HOME/secret-contents
+lo=$(losetup -f)
+losetup -f secret.tomb
+pass="$(gpg -d secret.key)"
+echo -n -e "$pass" | cryptsetup --key-file - luksOpen $lo secret
+mount /dev/mapper/secret /mnt
 ```
 
 

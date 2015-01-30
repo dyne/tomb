@@ -620,12 +620,10 @@ usage() {
     _print " -s     size of the tomb file when creating/resizing one (in MB)"
     _print " -k     path to the key to be used ('-k -' to read from stdin)"
     _print " -n     don't process the hooks found in tomb"
-    _print " -o     options passed to local command, e.g.:"
-    _print "          - mount options used to open (default: rw,noatime,nodev)"
-    _print "          - an alternate cipher to forge and lock"
+    _print " -o     options passed to commands: open, lock, forge (see man)"
     _print " -f     force operation (i.e. even if swap is active)"
     [[ $KDF == 1 ]] && {
-        _print " --kdf  generate passwords armored against dictionary attacks"
+        _print " --kdf  forge keys armored against dictionary attacks"
     }
 
     _print "\000"
@@ -1990,6 +1988,8 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 
         _message "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::" \
             $tombname $tombmount $tombfsopts
+
+        _verbose "::1 tombname:: /dev/::2 tombloop:: device mounted (detach with losetup -d)" $tombname $tombloop
 
         _message "::1 tombname:: open since ::2 tombsince::" $tombname $tombsince
 
