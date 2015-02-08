@@ -278,6 +278,18 @@ _tmp_create() {
     return 0
 }
 
+# Check if a block device is encrypted
+# Synopsis: _is_encrypted_block /path/to/block/device
+# Return 0 if it is an encrypted block device
+_is_encrypted_block() {
+    local    b=$1 # Path to a block device
+
+    sudo lsblk -s -o TYPE -n $b 2>/dev/null \
+	| egrep -q '^crypt$'
+
+    return $?
+}
+
 # Check if swap is activated
 # Return 0 if NO swap is used, 1 if swap is used.
 # Return 1 if any of the swaps is not encrypted.
@@ -293,29 +305,12 @@ _ensure_safe_swap() {
     swaps="$(awk '/^\// { print $1 }' /proc/swaps 2>/dev/null)"
     [[ -z "$swaps" ]] && return 0 # No swap partition is active
 
-    for s in $=swaps; do
-        bone=$(_sudo file $s)
-        if [[ "$bone" =~ "swap file" ]]; then
-            # It's a regular (unencrypted) swap file
-            r=1
-            break
-
-        elif [[ "$bone" =~ "symbolic link" ]]; then
-            # Might link to a block
-            r=1
-            [[ "/dev/mapper" == "${s%/*}" ]] || { break }
-            is_crypt=$(_sudo dmsetup status "$s" | awk '/crypt/ {print $3}')
-            [[ $is_crypt == "crypt" ]] && { r=2 }
-
-        elif [[ "$bone" =~ "block special" ]]; then
-            # It's a block
-            r=1
-            is_crypt=`_sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
-            [[ $is_crypt == "crypt" ]] && { r=2 } || { break }
-
-        fi
-    done
     _message "An active swap partition is detected..."
+    for s in $=swaps; do
+        { _is_encrypted_block $s } \
+	    && { r=2 } || { r=1; break }
+    done
+
     if [[ $r -eq 2 ]]; then
         _success "All your swaps are belong to crypt.  Good."
     else
