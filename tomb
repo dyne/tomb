@@ -283,8 +283,15 @@ _tmp_create() {
 # Return 0 if it is an encrypted block device
 _is_encrypted_block() {
     local    b=$1 # Path to a block device
+    local    s="" # lsblk option -s (if available)
 
-    sudo lsblk -s -o TYPE -n $b 2>/dev/null \
+    # Issue #163
+    # lsblk --inverse appeared in util-linux 2.22
+    # but --version is not consistent...
+    lsblk --help | grep -q '\-\-inverse'
+    [[ $? -eq 0 ]] && s="--inverse"
+
+    sudo lsblk $s -o type -n $b 2>/dev/null \
 	| egrep -q '^crypt$'
 
     return $?
@@ -307,41 +314,10 @@ _ensure_safe_swap() {
 
     _message "An active swap partition is detected..."
 
-    # Issue #163
-    # lsblk --inverse appeared in util-linux 2.22
-    # but --version is not consistent...
-    local bug_163=0
-    lsblk --help | grep -q '\-\-inverse'
     if [[ $? -eq 0 ]]; then
 	for s in $=swaps; do
             { _is_encrypted_block $s } \
 		&& { r=2 } || { r=1; break }
-	done
-    else
-	# Use legacy code that does not detect plain swaps on
-	# encrypted volumes.  On such systems -f must be used.
-	bug_163=1
-	for s in $=swaps; do
-	    bone=$(sudo file $s)
-	    if [[ "$bone" =~ "swap file" ]]; then
-		# It's a regular (unencrypted) swap file
-		r=1
-		break
-
-	    elif [[ "$bone" =~ "symbolic link" ]]; then
-		# Might link to a block
-		r=1
-		[[ "/dev/mapper" == "${s%/*}" ]] || { break }
-		is_crypt=$(sudo dmsetup status "$s" | awk '/crypt/ {print $3}')
-		[[ $is_crypt == "crypt" ]] && { r=2 }
-
-	    elif [[ "$bone" =~ "block special" ]]; then
-		# It's a block
-		r=1
-		is_crypt=`sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
-		[[ $is_crypt == "crypt" ]] && { r=2 } || { break }
-
-	    fi
 	done
     fi
 
@@ -351,11 +327,8 @@ _ensure_safe_swap() {
         _warning "This poses a security risk."
         _warning "You can deactivate all swap partitions using the command:"
         _warning " swapoff -a"
+	_warning "[#163] I may not detect plain swaps on an encrypted volume."
         _warning "But if you want to proceed like this, use the -f (force) flag."
-	if [[ $bug_163 -eq 1 ]]; then
-	    _warning "[#163] I cannot detect plain swaps on an encrypted volume."
-	    _warning "[#163] Use -f, or upgrade util-linux to 2.22+."
-	fi
     fi
     return $r
 
