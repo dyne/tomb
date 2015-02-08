@@ -59,10 +59,9 @@ typeset -a OLDARGS
 for arg in "${(@)argv}"; do OLDARGS+=("$arg"); done
 
 # Special command requirements
-typeset -a DD WIPE MKFS PINENTRY
+typeset -a DD WIPE PINENTRY
 DD=(dd)
 WIPE=(rm -f)
-MKFS=(sudo mkfs.ext3 -q -F -j -L)
 PINENTRY=(pinentry)
 
 # load zsh regex module
@@ -120,6 +119,17 @@ export TEXTDOMAIN=tomb
 
 # {{{ Safety functions
 
+# Wrap sudo with a more visible message
+_sudo() {
+    local sudo_eng="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
+    local msg="$(gettext -s "$sudo_eng")"
+    msg=${(S)msg//::1*::/$USER}
+    sudo -p "
+$msg
+
+" ${@}
+}
+
 # Cleanup anything sensitive before exiting.
 _endgame() {
 
@@ -147,7 +157,7 @@ _endgame() {
 
     # Detach loop devices
     for l in $TOMBLOOPDEVS; do
-        sudo losetup -d "$l"
+        _sudo losetup -d "$l"
     done
     unset TOMBLOOPDEVS
 
@@ -249,7 +259,7 @@ _plot() {
 _tmp_create() {
     [[ -d "$TMPPREFIX" ]] || {
         # we create the tempdir with the sticky bit on
-        sudo mkdir -m 1777 "$TMPPREFIX"
+        _sudo mkdir -m 1777 "$TMPPREFIX"
         [[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPPREFIX"
     }
 
@@ -293,7 +303,7 @@ _ensure_safe_swap() {
     [[ -z "$swaps" ]] && return 0 # No swap partition is active
 
     for s in $=swaps; do
-        bone=$(sudo file $s)
+        bone=$(_sudo file $s)
         if [[ "$bone" =~ "swap file" ]]; then
             # It's a regular (unencrypted) swap file
             r=1
@@ -303,13 +313,13 @@ _ensure_safe_swap() {
             # Might link to a block
             r=1
             [[ "/dev/mapper" == "${s%/*}" ]] || { break }
-            is_crypt=$(sudo dmsetup status "$s" | awk '/crypt/ {print $3}')
+            is_crypt=$(_sudo dmsetup status "$s" | awk '/crypt/ {print $3}')
             [[ $is_crypt == "crypt" ]] && { r=2 }
 
         elif [[ "$bone" =~ "block special" ]]; then
             # It's a block
             r=1
-            is_crypt=`sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
+            is_crypt=`_sudo dmsetup status "$s" | awk '/crypt/ {print $3}'`
             [[ $is_crypt == "crypt" ]] && { r=2 } || { break }
 
         fi
@@ -536,7 +546,7 @@ lo_mount() {
     tpath="$1"
 
     # check if we have support for loop mounting
-    _nstloop=`sudo losetup -f`
+    _nstloop=`_sudo losetup -f`
     [[ $? = 0 ]] || {
         _warning "Loop mount of volumes is not possible on this machine, this error"
         _warning "often occurs on VPS and kernels that don't provide the loop module."
@@ -544,7 +554,7 @@ lo_mount() {
         _failure "Operation aborted."
     }
 
-    sudo losetup -f "$tpath" # allocates the next loopback for our file
+    _sudo losetup -f "$tpath" # allocates the next loopback for our file
 
     TOMBLOOPDEVS+=("$_nstloop") # add to array of lodevs used
 
@@ -1040,7 +1050,7 @@ ask_key_password() {
 # call cryptsetup with arguments using the currently known secret
 # echo flags eliminate newline and disable escape (BSD_ECHO)
 _cryptsetup() {
-    print -R -n - "$TOMBSECRET" | sudo cryptsetup --key-file - ${=@}
+    print -R -n - "$TOMBSECRET" | _sudo cryptsetup --key-file - ${=@}
     return $?
 }
 
@@ -1498,7 +1508,7 @@ forge_key() {
         _warning "Dumping contents to screen:"
         print "${mapfile[$TOMBKEY]}"
         _warning "--"
-        sudo umount ${keytmp}
+        _sudo umount ${keytmp}
         rm -r $keytmp
         _failure "Operation aborted."
     }
@@ -1544,7 +1554,7 @@ lock_tomb_with_key() {
     _verbose "Loop mounted on ::1 mount point::" $nstloop
 
     _message "Checking if the tomb is empty (we never step on somebody else's bones)."
-    sudo cryptsetup isLuks ${nstloop}
+    _sudo cryptsetup isLuks ${nstloop}
     if [ $? = 0 ]; then
         # is it a LUKS encrypted nest? then bail out and avoid reformatting it
         _warning "The tomb was already locked with another key."
@@ -1586,14 +1596,14 @@ lock_tomb_with_key() {
         _failure "Operation aborted." }
 
     _message "Formatting your Tomb with Ext3/Ext4 filesystem."
-    ${=MKFS} $TOMBNAME /dev/mapper/tomb.tmp
+    _sudo mkfs.ext4 -q -F -j -L $TOMBNAME /dev/mapper/tomb.tmp
 
     [[ $? == 0 ]] || {
         _warning "Tomb format returned an error."
         _warning "Your tomb ::1 tomb file:: may be corrupted." $TOMBFILE }
 
     # Sync
-    sudo cryptsetup luksClose tomb.tmp
+    _sudo cryptsetup luksClose tomb.tmp
 
     _message "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::" $TOMBNAME $cipher
     _success "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::" \
@@ -1619,7 +1629,7 @@ change_tomb_key() {
 
     lo_mount $TOMBPATH
     nstloop=`lo_new`
-    sudo cryptsetup isLuks ${nstloop}
+    _sudo cryptsetup isLuks ${nstloop}
     # is it a LUKS encrypted nest? we check one more time
     [[ $? == 0 ]] || {
         _failure "Not a valid LUKS encrypted volume: ::1 volume::" $TOMBPATH }
@@ -1651,7 +1661,7 @@ change_tomb_key() {
     old_secret=$TOMBSECRET
 
     # luksOpen the tomb (not really mounting, just on the loopback)
-    print -R -n - "$old_secret" | sudo cryptsetup --key-file - \
+    print -R -n - "$old_secret" | _sudo cryptsetup --key-file - \
         luksOpen ${nstloop} ${mapper}
     [[ $? == 0 ]] || _failure "Unexpected error in luksOpen."
 
@@ -1673,12 +1683,12 @@ change_tomb_key() {
     tmpnewkey=$TOMBTMP
     print -R -n - "$TOMBSECRET" >> $tmpnewkey
 
-    print -R -n - "$old_secret" | sudo cryptsetup --key-file - \
+    print -R -n - "$old_secret" | _sudo cryptsetup --key-file - \
         luksChangeKey "$nstloop" "$tmpnewkey"
 
     [[ $? == 0 ]] || _failure "Unexpected error in luksChangeKey."
 
-    sudo cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
+    _sudo cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
 
     _success "Succesfully changed key for tomb: ::1 tomb file::" $TOMBFILE
     _message "The new key is: ::1 new key::" $TOMBKEYFILE
@@ -1717,13 +1727,13 @@ mount_tomb() {
     lo_mount $TOMBPATH
     nstloop=`lo_new`
 
-    sudo cryptsetup isLuks ${nstloop} || {
+    _sudo cryptsetup isLuks ${nstloop} || {
         # is it a LUKS encrypted nest? see cryptsetup(1)
         _failure "::1 tomb file:: is not a valid Luks encrypted storage file." $TOMBFILE }
 
     _message "This tomb is a valid LUKS encrypted device."
 
-    luksdump="`sudo cryptsetup luksDump ${nstloop}`"
+    luksdump="`_sudo cryptsetup luksDump ${nstloop}`"
     tombdump=(`print $luksdump | awk '
         /^Cipher name/ {print $3}
         /^Cipher mode/ {print $3}
@@ -1765,7 +1775,7 @@ mount_tomb() {
     lo_preserve "$nstloop"
 
     # array: [ cipher, keysize, loopdevice ]
-    tombstat=(`sudo cryptsetup status ${mapper} | awk '
+    tombstat=(`_sudo cryptsetup status ${mapper} | awk '
     /cipher:/  {print $2}
     /keysize:/ {print $2}
     /device:/  {print $2}'`)
@@ -1773,12 +1783,12 @@ mount_tomb() {
     _verbose "Key size is ::1 size:: for cipher ::2 cipher::" $tombstat[2] $tombstat[1]
 
     _message "Checking filesystem via ::1::" $tombstat[3]
-    sudo fsck -p -C0 /dev/mapper/${mapper}
+    _sudo fsck -p -C0 /dev/mapper/${mapper}
     _verbose "Tomb engraved as ::1 tomb name::" $TOMBNAME
-    sudo tune2fs -L $TOMBNAME /dev/mapper/${mapper} > /dev/null
+    _sudo tune2fs -L $TOMBNAME /dev/mapper/${mapper} > /dev/null
 
     # we need root from here on
-    sudo mkdir -p $tombmount
+    _sudo mkdir -p $tombmount
 
     # Default mount options are overridden with the -o switch
     { option_is_set -o } && {
@@ -1787,7 +1797,7 @@ mount_tomb() {
 
     # TODO: safety check MOUNTOPTS
     # safe_mount_options && \
-    sudo mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
+    _sudo mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
     # Clean up if the mount failed
     [[ $? == 0 ]] || {
         _warning "Error mounting ::1 mapper:: on ::2 tombmount::" $mapper $tombmount
@@ -1795,13 +1805,13 @@ mount_tomb() {
           _warning "Are mount options '::1 mount options::' valid?" $MOUNTOPTS
         # TODO: move cleanup to _endgame()
         [[ -d $tombmount ]] && rmdir $tombmount
-        [[ -e /dev/mapper/$mapper ]] && sudo cryptsetup luksClose $mapper
+        [[ -e /dev/mapper/$mapper ]] && _sudo cryptsetup luksClose $mapper
         # The loop is taken care of in _endgame()
         _failure "Cannot mount ::1 tomb name::" $TOMBNAME
     }
 
-    sudo chown $UID:$GID ${tombmount}
-    sudo chmod 0711 ${tombmount}
+    _sudo chown $UID:$GID ${tombmount}
+    _sudo chmod 0711 ${tombmount}
 
     _success "Success opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE $tombmount
 
@@ -1900,7 +1910,7 @@ exec_safe_bind_hooks() {
 
         [[ "${${maps[$dir]}[1]}" == "/" || "${${maps[$dir]}[1,2]}" == ".." ]] && {
             _warning "bind-hooks map format: local/to/tomb local/to/\$HOME.  Rolling back"
-            for dir in ${mounted}; do sudo umount $dir; done
+            for dir in ${mounted}; do _sudo umount $dir; done
             return 1 }
 
         if [[ ! -r "$HOME/${maps[$dir]}" ]]; then
@@ -1908,7 +1918,7 @@ exec_safe_bind_hooks() {
         elif [[ ! -r "$mnt/$dir" ]]; then
             _warning "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::" $mnt $dir
         else
-            sudo mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]} \
+            _sudo mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]} \
                 && mounted+=("$HOME/${maps[$dir]}")
         fi
     done
@@ -2318,17 +2328,17 @@ resize_tomb() {
     _cryptsetup luksOpen ${nstloop} ${mapper} || {
         _failure "Failure mounting the encrypted file." }
 
-    sudo cryptsetup resize "${mapper}" || {
+    _sudo cryptsetup resize "${mapper}" || {
         _failure "cryptsetup failed to resize ::1 mapper::" $mapper }
 
-    sudo e2fsck -p -f /dev/mapper/${mapper} || {
+    _sudo e2fsck -p -f /dev/mapper/${mapper} || {
         _failure "e2fsck failed to check ::1 mapper::" $mapper }
 
-    sudo resize2fs /dev/mapper/${mapper} || {
+    _sudo resize2fs /dev/mapper/${mapper} || {
         _failure "resize2fs failed to resize ::1 mapper::" $mapper }
 
     # close and free the loop device
-    sudo cryptsetup luksClose "${mapper}"
+    _sudo cryptsetup luksClose "${mapper}"
 
     return 0
 }
@@ -2389,7 +2399,7 @@ umount_tomb() {
             bind_mapper="${b[(ws:;:)1]}"
             bind_mount="${b[(ws:;:)2]}"
             _message "Closing tomb bind hook: ::1 hook::" $bind_mount
-            sudo umount $bind_mount || {
+            _sudo umount $bind_mount || {
                 [[ -n $SLAM ]] && {
                     _success "Slamming tomb: killing all processes using this hook."
                     slam_tomb "$bind_mount" || _failure "Cannot slam the bind hook ::1 hook::" $bind_mount
@@ -2405,19 +2415,19 @@ umount_tomb() {
             exec_safe_post_hooks ${tombmount%%/} close }
 
         _verbose "Performing umount of ::1 mount point::" $tombmount
-        sudo umount ${tombmount}
+        _sudo umount ${tombmount}
         [[ $? = 0 ]] || { _failure "Tomb is busy, cannot umount!" }
 
         # If we used a default mountpoint and is now empty, delete it
         [[ "$tombmount" -regex-match "[/run]?/media[/$_USER]?/$tombname.tomb" ]] && {
             rmdir $tombmount }
 
-        sudo cryptsetup luksClose $mapper
+        _sudo cryptsetup luksClose $mapper
         [[ $? == 0 ]] || {
             _failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper }
 
         # Normally the loopback device is detached when unused
-        [[ -e "/dev/$tombloop" ]] && sudo losetup -d "/dev/$tombloop"
+        [[ -e "/dev/$tombloop" ]] && _sudo losetup -d "/dev/$tombloop"
         [[ $? = 0 ]] || {
             _verbose "/dev/$tombloop was already closed." }
 
