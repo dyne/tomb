@@ -313,12 +313,9 @@ _ensure_safe_swap() {
 
     _message "An active swap partition is detected..."
 
-    if [[ $? -eq 0 ]]; then
-	for s in $=swaps; do
-            { _is_encrypted_block $s } \
-		&& { r=2 } || { r=1; break }
-	done
-    fi
+    for s in $=swaps; do
+        { _is_encrypted_block $s } && { r=2 } || { r=1; break }
+    done
 
     if [[ $r -eq 2 ]]; then
         _success "All your swaps are belong to crypt.  Good."
