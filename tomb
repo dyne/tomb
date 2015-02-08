@@ -247,12 +247,6 @@ _plot() {
     [[ -z $TOMBNAME ]] && {
         _failure "Tomb won't work without a TOMBNAME." }
 
-    # Normalize tomb name
-    TOMBFILE="$TOMBNAME.tomb"
-
-    # Normalize tomb path
-    TOMBPATH="$TOMBDIR/$TOMBFILE"
-
 }
 
 # Provide a random filename in shared memory
