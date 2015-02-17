@@ -271,9 +271,6 @@ _tmp_create() {
     [[ $? == 0 ]] || {
         _failure "Fatal error creating a temporary file: ::1 temp file::" "$tfile" }
 
-    [[ $? == 0 ]] || {
-        _failure "Fatal error setting ownership on temporary file: ::1 temp file::" "$tfile" }
-
     _verbose "Created tempfile: ::1 temp file::" "$tfile"
     TOMBTMP="$tfile"
     TOMBTMPFILES+=("$tfile")
