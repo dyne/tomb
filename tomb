@@ -390,15 +390,13 @@ EOF`
         if _is_found "pinentry-gtk-2"; then
 
             gtkrc=""
-            [[ "$DISPLAY" = "" ]] || {
-                theme=/share/themes/tomb/gtk-2.0-key/gtkrc
-                for i in /usr/local /usr; do
-                    [[ -r $i/$theme ]] && {
-                        gtkrc="$i/$theme"
-                        break
-                    }
-                done
-            }
+            theme=/share/themes/tomb/gtk-2.0-key/gtkrc
+            for i in /usr/local /usr; do
+                [[ -r $i/$theme ]] && {
+                    gtkrc="$i/$theme"
+                    break
+                }
+            done
             [[ "$gtkrc" = "" ]] || {
                 gtkrc_old="$GTK2_RC_FILES"
                 export GTK2_RC_FILES="$gtkrc"
