@@ -193,10 +193,12 @@ what you are doing if you force an operation.
 When digging or resizing a tomb, this option must be used to specify
 the \fIsize\fR of the new file to be created. Units are megabytes (MiB).
 .B
-.IP "--kdf \fI<iterations>\fR"
+.IP "--kdf \fI<itertime>\fR"
 Activate the KDF feature against dictionary attacks when creating a
-key: forces a delay of \fI<iterations>\fR (integer multiplied by 10k)
-every time this key is used.
+key: forces a delay of \fI<itertime>\fR seconds every time this key is used.
+You should keep in mind that the actual iteration count is calculated based on
+the performance of the computer where you forge the key.
+The argument must be an integer, so you cannot say \fI--kdf 0.3\fR for 300ms.
 .B
 .IP "-h"
 Display a help text and quit.
