@@ -5,50 +5,56 @@ you are welcome to send patches to jaromil@dyne.org
 
 Issue tracking is now handled via GitHub, see http://github.com/dyne/Tomb
 
-Old roadmap notes:
+Roadmap notes:
 
+* Release 3.0
 
+*** [#A] support BtrFS and snapshots
+*** [#A] system to split passwords in parts (ssss)
+*** [#B] modular encryption system support
 
-* TODO Release 2.0							:00%:
+    to go beyond dm-crypt/cryptsetup
 
-Must be 100% backward compatible with tombs created with 1.0 
+    ecryptfs, tc-play
 
+    needs tomb marks appended at end of tombs
 
-** New features
-*** [#A] support for ZFS filesystem (revisioning, bitrot)
-*** [#A] support for partition-based tombs
-*** [#B] system to split keys in parts (ssss)
-*** [#A] udev rules to avoid usb automount of keyplug in gnome
-*** [#B] sign and verify tomb script integrity (executed as root)
-*** TODO [#B] Internationalization using gettext 		    :jaromil:
-
-    Started generating the strings, still need to figure out how to
-    install it
-
-*** [#B] make a gnome tomb undertaker using gnome-druid in glade
-*** DONE [#B] tomb locksmith for key management
-    a graphical tool or text wizard to move keys in/out steganography
-    as well split them
-
-*** DONE [#B] transport keys and integrity checksums on qrcodes
+*** [#B] udev rules to avoid usb automount of keyplug in gnome
+*** [#B] sign and verify tomb script integrity
+*** [#B] make a graphical tomb undertaker (gnome-druid in glade?)
 *** [#B] analyse and show tomb entropy using libdisorder
-*** [#B] indeep security analysis of possible vulnerabilities
-*** [#C] use inotify on tomb
-
+*** [#B] use inotify on tomb
     inotify can also count when was the last time tomb was used and
     unmount it automatically after a timeout, see how much free space
     is left and warn when the space is almost finished
-*** [#C] more gtk dialogs for configurations? keep it minimal!
 
 
-* Notes from #CybRes
+** Notes from #CybRes
+
 
 *** mlocall per swap )vecna) rompigli il caz su github
 *** steganografia migliore con outguess? (vecna)
 *** velocita' creazione : fallocate -l 10G (scuall8907@gm)
 
 
-* DONE Release 1.0							:100%:
+* DONE Release 2.0            :100%:
+
+** [#A] support for ZFS filesystem (revisioning, bitrot)
+** [#A] support for partition-based tombs
+** DONE [#B] Internationalization using gettext
+
+   Started generating the strings, still need to figure out how to
+   install it
+
+** DONE [#B] better tomb locksmith code for key management
+** DONE [#B] backup keys on qrcodes
+** DONE [#B] indeep security analysis of possible vulnerabilities
+** [#C] more gtk dialogs for configurations? keep it minimal!
+
+
+
+
+* DONE Release 1.0            :100%:
 
 ** TODO [#C] make one single status handle more tombs
 ** TODO [#C] decorate creation wizard with ASCII art
@@ -97,7 +103,7 @@ Must be 100% backward compatible with tombs created with 1.0
 ** DONE [#A] Should refuse opening a tomb that is already open	    :jaromil:
 
 
-* TODO Porting to Win$loth
+* TODO Porting to MS/Windows
 
   using FReeOTFE http://www.freeotfe.org
 
@@ -105,5 +111,5 @@ Must be 100% backward compatible with tombs created with 1.0
 
 * TODO Porting to Apple/OSX
 
-  still to be investigated what's there that supports cryptsetup-luks volumes
+  still to be investigated what's there that supports cryptsetup-luks volumes. hditool, tcplay...
 

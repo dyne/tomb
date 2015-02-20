@@ -2772,7 +2772,7 @@ EOF
 
 # {{{ Run
 
-main "$@" || exit $?   # Prevent `tomb source tomb` from exiting
+main "$@" || exit $?   # Prevent `source tomb source` from exiting
 
 # }}}
 
