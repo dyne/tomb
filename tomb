@@ -1138,8 +1138,8 @@ gen_key() {
             fi
             # --kdf takes one parameter: iter time (on present machine) in seconds
             local -i microseconds
-            microseconds=$(( itertime * 10000 ))
-            _success "Using KDF, iterations: ::1 microseconds::" $microseconds
+            microseconds=$(( itertime * 1000000 ))
+            _success "Using KDF, iteration time: ::1 microseconds::" $microseconds
             _message "generating salt"
             pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
             _message "calculating iterations"
