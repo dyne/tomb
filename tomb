@@ -278,7 +278,7 @@ _tmp_create() {
     return 0
 }
 
-# Check if a block device is encrypted
+# Check if a *block* device is encrypted
 # Synopsis: _is_encrypted_block /path/to/block/device
 # Return 0 if it is an encrypted block device
 _is_encrypted_block() {
@@ -288,7 +288,7 @@ _is_encrypted_block() {
     # Issue #163
     # lsblk --inverse appeared in util-linux 2.22
     # but --version is not consistent...
-    lsblk --help | grep -q '\-\-inverse'
+    lsblk --help | grep -Fq -- --inverse
     [[ $? -eq 0 ]] && s="--inverse"
 
     sudo lsblk $s -o type -n $b 2>/dev/null \
@@ -314,7 +314,13 @@ _ensure_safe_swap() {
 
     _message "An active swap partition is detected..."
     for s in $=swaps; do
-        { _is_encrypted_block $s } && { r=2 } || { r=1; break }
+        { _is_encrypted_block $s } && { r=2 } || {
+	    # We're dealing with unencrypted stuff.
+	    # Maybe it lives on an encrypted filesystem anyway.
+	    # @todo: verify it's actually on an encrypted FS (see #163 and !189)
+	    # Well, no: bail out.
+	    r=1; break
+	}
     done
 
     if [[ $r -eq 2 ]]; then
