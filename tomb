@@ -1036,7 +1036,6 @@ ask_key_password() {
         }
 
     fi
-    # print the password out in case caller needs to know it
     [[ $passok == 1 ]] || return 1
 
     TOMBPASSWORD=$tombpass
