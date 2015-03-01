@@ -950,7 +950,6 @@ get_lukskey() {
 
     _password="$1"
 
-    exhumedkey=""
 
     firstline="${TOMBKEY[(f)1]}"
 
