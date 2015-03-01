@@ -950,7 +950,6 @@ get_lukskey() {
 
     _password="$1"
 
-    exhumedkey=""
 
     firstline="${TOMBKEY[(f)1]}"
 
@@ -1037,7 +1036,6 @@ ask_key_password() {
         }
 
     fi
-    # print the password out in case caller needs to know it
     [[ $passok == 1 ]] || return 1
 
     TOMBPASSWORD=$tombpass
