@@ -72,7 +72,7 @@ resistance to omologation.
 
 ** Who needs Tomb
 
-[[file:tomb_and_bats.png]]
+[[file:https://github.com/dyne/Tomb/blob/master/extras/images/tomb_and_bats.png]]
 
 Tomb improves the usability patterns of every-day cryptography and
 relies on military-grade algorithms to grant a level of secrecy for
@@ -127,8 +127,6 @@ Tomb is an evolution of the /Nesting/ tool developed in 2001 for the
 Home directory of users and have it ready for use on different
 machines. At that time, Tomb was the first secure implementation of
 what nowadays we call /persistent storage/ in live operating systems.
-
-[[file:foster_privacy.png]]
 
 Later on we've felt the urgency to publishing this mechanism for other
 operating systems than dyne:bolic since the current situation in
