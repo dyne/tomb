@@ -882,7 +882,7 @@ msgstr ""
 #: tomb:Open:mount_tomb:1830
 msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
 msgstr ""
-"Dernière visite par ::1 user::(::2 tomb build) depuis ::3 tty:: sur ::4 "
+"Dernière visite par ::1 user::(::2 tomb build::) depuis ::3 tty:: sur ::4 "
 "host::"
 
 #: tomb:Open:mount_tomb:1831
@@ -1237,7 +1237,7 @@ msgstr ""
 #: tomb:Main routine:main:2718
 msgid "Steghide not installed: cannot bury keys into images."
 msgstr ""
-"Steghide n'est pas installé : Impossible de d'enterrer les clefs dans les "
+"Steghide n'est pas installé : Impossible d'enterrer les clefs dans les "
 "images. "
 
 #: tomb:Main routine:main:2725
