@@ -166,11 +166,11 @@ key is buried in any image or not.
 .B
 .B
 .IP "-k \fI<keyfile>\fR"
-When opening a tomb, this option can specify the location of the key
-file to use. Keys are created with the same name of the tomb file
-adding a '.key' suffix, but can be later renamed and transported on
-other media.  If \fI<keyfile>\fR is "-" (dash), it will read it from
-stdin.
+For all operations requiring a key, this option specifies the location
+of the key file to use. Arguments can also be \fIjpeg image\fR files
+where keys have been hidden using the \fIbury\fR command, or text
+files retrieved from \fIengraved\fR QR codes. If the \fIkeyfile\fR
+argument is "-" (dash), Tomb will read the key from stdin (blocking).
 .B
 .IP "-n"
 Skip processing of post-hooks and bind-hooks if found inside the tomb.
@@ -429,9 +429,9 @@ Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth.
 
 .SH COPYING
 
-This manual is Copyright (c) 2011-2014 by Denis Roio <\fIjaromil@dyne.org\fR>
+This manual is Copyright (c) 2011-2015 by Denis Roio <\fIjaromil@dyne.org\fR>
 
-This manual includes contributions by Boyska.
+This manual includes contributions by Boyska and Hellekin O. Wolf.
 
 Permission is  granted to copy,  distribute and/or modify  this manual
 under the terms of the  GNU Free Documentation License, Version 1.1 or
