@@ -230,6 +230,7 @@ _whoami() {
 
 # Define sepulture's plot (setup tomb-related arguments)
 # Synopsis: _plot /path/to/the.tomb
+# Set TOMB{PATH,DIR,FILE,NAME}
 _plot() {
 
     # We set global variables
@@ -1620,6 +1621,8 @@ change_tomb_key() {
     }
 
     _check_swap
+
+    # this also calls _plot()
     is_valid_tomb $tombpath
 
     lo_mount $TOMBPATH
@@ -1704,20 +1707,21 @@ mount_tomb() {
 
     _check_swap
 
+    # this also calls _plot()
     is_valid_tomb $tombpath
 
     _load_key # Try loading new key from option -k and set TOMBKEYFILE
 
     tombmount="$2"
     [[ "$tombmount" = "" ]] && {
-        tombmount=/media/$TOMBFILE
+        tombmount=/media/$TOMBNAME
         [[ -d /media ]] || { # no /media found, adopting /run/media/$USER (udisk2 compat)
-            tombmount=/run/media/$_USER/$TOMBFILE
+            tombmount=/run/media/$_USER/$TOMBNAME
         }
         _message "Mountpoint not specified, using default: ::1 mount point::" $tombmount
     }
 
-    _success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE $tombmount
+    _success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBNAME $tombmount
 
     lo_mount $TOMBPATH
     nstloop=`lo_new`
@@ -1799,7 +1803,7 @@ mount_tomb() {
         [[ $oldmountopts != $MOUNTOPTS ]] && \
           _warning "Are mount options '::1 mount options::' valid?" $MOUNTOPTS
         # TODO: move cleanup to _endgame()
-        [[ -d $tombmount ]] && rmdir $tombmount
+        [[ -d $tombmount ]] && _sudo rmdir $tombmount
         [[ -e /dev/mapper/$mapper ]] && _sudo cryptsetup luksClose $mapper
         # The loop is taken care of in _endgame()
         _failure "Cannot mount ::1 tomb name::" $TOMBNAME
@@ -2275,7 +2279,8 @@ resize_tomb() {
     [[ -z "$newtombsize" ]] && {
         _failure "Aborting operations: new size was not specified, use -s" }
 
-    is_valid_tomb $tombpath        # Set TOMB{PATH,DIR,FILE,NAME}
+    # this also calls _plot()
+    is_valid_tomb $tombpath
 
     _load_key # Try loading new key from option -k and set TOMBKEYFILE
 
@@ -2414,8 +2419,8 @@ umount_tomb() {
         [[ $? = 0 ]] || { _failure "Tomb is busy, cannot umount!" }
 
         # If we used a default mountpoint and is now empty, delete it
-        [[ "$tombmount" -regex-match "[/run]?/media[/$_USER]?/$tombname.tomb" ]] && {
-            rmdir $tombmount }
+        [[ "$tombmount" -regex-match "[/run]?/media[/$_USER]?/$tombname" ]] && {
+            _sudo rmdir $tombmount }
 
         _sudo cryptsetup luksClose $mapper
         [[ $? == 0 ]] || {

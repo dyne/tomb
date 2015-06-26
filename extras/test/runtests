@@ -84,15 +84,15 @@ test-tomb-create() {
 
 test-bind-hooks() {
     notice "Testing bind hooks"
-    tt list test
-    [[ $? = 0 ]] || {
-        tt --ignore-swap --unsafe --tomb-pwd ${dummypass} \
-            open /tmp/test.tomb -k /tmp/test.tomb.key }
+
+    tt --ignore-swap --unsafe --tomb-pwd ${dummypass} \
+        open /tmp/test.tomb -k /tmp/test.tomb.key
+
     rnd=$RANDOM
     bindtest="dyne-tomb-bind-test-$rnd"
-    echo $rnd > /media/test.tomb/$bindtest
-    rm -f /media/test.tomb/bind-hooks
-    echo "$bindtest $bindtest" > /media/test.tomb/bind-hooks
+    echo $rnd > /media/test/$bindtest
+    rm -f /media/test/bind-hooks
+    echo "$bindtest $bindtest" > /media/test/bind-hooks
     touch $HOME/$bindtest
     tt close test
     tt -k /tmp/test.tomb.key --unsafe --tomb-pwd ${dummypass} open /tmp/test.tomb
@@ -104,7 +104,7 @@ test-bind-hooks() {
     else
 	    error "Bind hook on file reports incongruence"
     fi
-    rm -f "/media/test.tomb/$bindtest"
+    rm -f "/media/test/$bindtest"
     tt close test
     # Remove test file in HOME
     rm -f "$HOME/$bindtest"
@@ -186,10 +186,10 @@ notice "Generating content for file integrity test"
 
 tt -k /tmp/test.tomb.key --unsafe --tomb-pwd ${dummypass} open /tmp/test.tomb
 
-tt dig -s 10 /media/test.tomb/datacheck.raw
+tt dig -s 10 /media/test/datacheck.raw
 
-crc="sha256 /media/test.tomb/datacheck.raw"
-echo "$crc" > /media/test.tomb/datacheck.sha
+crc="sha256 /media/test/datacheck.raw"
+echo "$crc" > /media/test/datacheck.sha
 
 tt --unsafe close test
 
@@ -208,7 +208,7 @@ tt -k /tmp/test.tomb.key --unsafe --tomb-pwd ${dummypass} open /tmp/test.tomb
 
 { test $? = 0 } && {
     
-    crc2="sha256 /media/test.tomb/datacheck.raw"
+    crc2="sha256 /media/test/datacheck.raw"
     
     { test "$crc" = "$crc2" } && { results+=(chksum SUCCESS) }
 
