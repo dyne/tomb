@@ -924,11 +924,11 @@ gpg_decrypt() {
 
     } || { # using status-file in gpg != 1.4.11
 
-        # TODO: use mkfifo
         TOMBSECRET=`print - "$gpgpass" | \
             gpg --batch --passphrase-fd 0 --no-tty --no-options \
             --status-fd 2 --no-mdc-warning --no-permission-warning \
-            --no-secmem-warning` 2>&1 | read -r -d'\n' gpgstatus
+            --no-secmem-warning` |& grep GNUPG: \
+            | read -r -d'\n' gpgstatus
 
         unset gpgpass
 
