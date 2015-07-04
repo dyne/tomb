@@ -377,10 +377,12 @@ ask_password() {
     # make sure LANG is set, default to C
     LANG=${LANG:-C}
 
+    _verbose "asking password with tty=$TTY lc-ctype=$LANG"
+
     if [[ "$DISPLAY" = "" ]]; then
 
         if _is_found "pinentry-curses"; then
-
+            _verbose "using pinentry-curses"
             output=`cat <<EOF | pinentry-curses
 OPTION ttyname=$TTY
 OPTION lc-ctype=$LANG
@@ -397,6 +399,7 @@ EOF`
 
         # customized gtk2 dialog with a skull (if extras are installed)
         if _is_found "pinentry-gtk-2"; then
+            _verbose "using pinentry-gtk2"
 
             gtkrc=""
             theme=/share/themes/tomb/gtk-2.0-key/gtkrc
@@ -422,6 +425,7 @@ EOF`
 
             # TODO QT4 customization of dialog
         elif _is_found "pinentry-qt4"; then
+            _verbose "using pinentry-qt4"
 
             output=`cat <<EOF | pinentry-qt4
 OPTION ttyname=$TTY
@@ -434,6 +438,7 @@ EOF`
 
             # TODO X11 customization of dialog
         elif _is_found "pinentry-x11"; then
+            _verbose "using pinentry-x11"
 
             output=`cat <<EOF | pinentry-x11
 OPTION ttyname=$TTY
@@ -447,6 +452,7 @@ EOF`
         else
 
             if _is_found "pinentry-curses"; then
+                _verbose "using pinentry-curses"
 
                 _warning "Detected DISPLAY, but only pinentry-curses is found."
                 output=`cat <<EOF | pinentry-curses
