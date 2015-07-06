@@ -126,23 +126,21 @@ usage, etc.
 
 Death is the only sure thing in life. That said, Tomb is a pretty
 secure tool especially because it is kept minimal, its source is
-always open, and its code is easy to review with a bit of shell script
-knowledge.
+always open to review (even when installed) and its code is easy to
+read with a bit of shell script knowledge.
 
 All encryption tools being used in Tomb are included as default in
 many GNU/Linux operating systems and therefore are regularly peer
 reviewed: we don't add anything else to them really, just a layer of
 usability.
 
-The code of Tomb is made to be read in literate programming style.
-
 The file [KNOWN_BUGS.md](KNOWN_BUGS.md) contains some notes on known
 vulnerabilities and threat model analysis.
 
-In absence of the Tomb script it is always possible to access the
-contents of a Tomb using a dm-crypt enabled Linux kernel, cryptsetup
-and GnuPG issuing the following commands as root:
-
+In absence or malfunction of the Tomb script it is always possible to
+access the contents of a Tomb only using a dm-crypt enabled Linux
+kernel, cryptsetup, GnuPG and any shell interpreter issuing the
+following commands as root:
 ```
 lo=$(losetup -f)
 losetup -f secret.tomb
@@ -150,7 +148,12 @@ pass="$(gpg -d secret.key)"
 echo -n -e "$pass" | cryptsetup --key-file - luksOpen $lo secret
 mount /dev/mapper/secret /mnt
 ```
-
+One can change the last argument `/mnt` to where the Tomb has to be
+mounted and made accessible. To close the tomb then use:
+```
+umount /mnt
+cryptsetup luksClose /dev/mapper/secret
+```
 
 # Stage of development
 

@@ -11,10 +11,10 @@ Gettext internationalization and Spanish translation is contributed by
 GDrooid, French translation by Hellekin, Russian translation by fsLeg,
 German translation by x3nu.
 
-Testing, reviews and documentation are contributed by Dreamer, Shining
-the Translucent, Mancausoft, Asbesto Molesto, Nignux, Vlax, The Grugq,
-Reiven, GDrooid, Alphazo, Brian May, TheJH, fsLeg, JoelMon and the
-Linux Action Show!
+Testing, reviews and documentation contributed by Dreamer, Vlax,
+Shining the Translucent, Mancausoft, Asbesto Molesto, Nignux, TheJH,
+The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon, Jim
+Turner, Maxime Arthaud and the Linux Action Show!
 
 Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth.
 

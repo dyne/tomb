@@ -37,18 +37,18 @@ After installation one can read the commandline help or read the manual:
 
 Once installed one can proceed creating a tomb, for instance:
 
-    tomb dig -s 10 secrets.tomb       (dig a 10MB Tomb, be patient)
-    tomb forge -k secrets.tomb.key    (be patient and follow instructions)
-    tomb lock  -k secrets.tomb.key secrets.tomb
+    tomb dig -s 10 secrets.tomb       (dig a 10MB Tomb)
+    tomb forge -k secrets.tomb.key    (create a new key and set its password)
+    tomb lock  -k secrets.tomb.key secrets.tomb (format the tomb, lock it with key)
 
 When this is done, the tomb can be opened with:
 
-    tomb open -k secrets.tomb.key secrets.tomb
+    tomb open -k secrets.tomb.key secrets.tomb (will ask for password)
 
 The key can also be hidden in an image, to be used as key later
 
-    tomb bury -k secrets.tomb.key nosferatu.jpg
-    tomb open -k nosferatu.jpg secrets.tomb
+    tomb bury -k secrets.tomb.key nosferatu.jpg (hide the key in a jpeg image)
+    tomb open -k nosferatu.jpg secrets.tomb (use the jpeg image to open the tomb)
 
 Or backupped to a QRCode that can be printed on paper and hidden in
 books. QRCodes can be scanned with any mobile application, resulting
@@ -72,10 +72,11 @@ executable | function
   steghide | bury and exhume keys inside images
   resizefs | extend the size of existing tomb volumes
   qrencode | engrave keys into printable qrcode sheets
-  mlocate  | have fast search of file names inside tombs
-  swish++  | have fast search of file contents inside tombs
-  unoconv  | have fast search of contents in PDF and DOC files
-  haveged  | have fast entropy generation for key forging
+  mlocate  | fast search of file names inside tombs
+  swish++  | fast search of file contents inside tombs
+  unoconv  | fast search of contents in PDF and DOC files
+  lesspipe | fast search of contents in compressed archives
+  haveged  | fast entropy generation for key forging
 
 As for requirements, also optional tools may be easy to install using
 the packages provided by each distribution.
@@ -184,4 +185,4 @@ let us know. Tomb is really meant to be maintained as a minimal tool
 for long-term compatibility when handling something so delicate as our
 secrets. For anything else we rely on your own initiative.
 
-Happy hacking! :&^)
+Happy hacking! ;^)

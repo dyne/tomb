@@ -44,8 +44,8 @@
 
 # {{{ Global variables
 
-typeset VERSION="2.0.1"
-typeset DATE="Dec/2014"
+typeset VERSION="2.1"
+typeset DATE="Jul/2015"
 typeset TOMBEXEC=$0
 typeset TMPPREFIX=${TMPPREFIX:-/tmp}
 # TODO: configure which tmp dir to use from a cli flag
@@ -2149,9 +2149,9 @@ index_tombs() {
         # here we use swish to index file contents
         [[ $SWISH == 1 ]] && {
             _message "Indexing ::1 tomb name:: contents..." $tombname
-            [[ -r ${tombmount}/.swishrc ]] || {
-                _message "Generating a new swish-e configuration file: ::1 swish conf::" ${tombmount}/.swishrc
-                cat <<EOF > ${tombmount}/.swishrc
+            rm -f ${tombmount}/.swishrc
+            _message "Generating a new swish-e configuration file: ::1 swish conf::" ${tombmount}/.swishrc
+            cat <<EOF > ${tombmount}/.swishrc
 # index directives
 DefaultContents TXT*
 IndexDir $tombmount
@@ -2190,7 +2190,6 @@ FileRules filename is sys
 FileRules filename is supervise
 FileRules filename regex /\.asc$/i
 FileRules filename regex /\.gpg$/i
-
 # pdf and postscript
 FileFilter .pdf pdftotext "'%p' -"
 FileFilter .ps  ps2txt "'%p' -"
@@ -2218,15 +2217,13 @@ FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.tex$/i
 IndexContents HTML* .htm .html .shtml
 IndexContents XML*  .xml
 EOF
-            }
 
             swish-e -c ${tombmount}/.swishrc -S fs -v3
-
         }
-
         _message "Search index updated."
     done
 }
+
 search_tombs() {
     { command -v locate 1>/dev/null 2>/dev/null } || {
         _failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
