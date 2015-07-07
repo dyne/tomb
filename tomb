@@ -1475,7 +1475,7 @@ forge_key() {
     _message "To make it faster you can move the mouse around."
     _message "If you are on a server, you can use an Entropy Generation Daemon."
 
-    # Use /dev/random as the entropy source, unless --use-random is specified
+    # Use /dev/random as the entropy source, unless --use-urandom is specified
     local random_source=/dev/random
     { option_is_set --use-urandom } && random_source=/dev/urandom
 
