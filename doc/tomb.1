@@ -52,7 +52,7 @@ system.
 .IP "lock"
 Initializes and locks an empty tomb (made with \fIdig\fR) using a key
 (made with \fIforge\fR), making it ready for usage. After this
-operation, the tomb can only be open in possession of the key and
+operation, the tomb can only be opened in possession of the key and
 knowing its password. As in any other command requiring a key, the
 option \fI-k\fR should be used to specify a key file. The \fI-o\fR
 option can be used to specify the cipher specification: default is
@@ -65,15 +65,16 @@ LUKS and Ext4), then set the key in its first LUKS slot.
 Opens an existing \fI.tomb\fR (first argument) using a key (\fI-k\fR),
 if a second argument is given it will indicate the \fImountpoint\fR
 where the tomb should be made accessible, else the tomb is mounted in
-a directory inside /media. The option \fI-o\fR can be used to pass
-mount(8) options (default: rw,noatime,nodev).
+a directory inside /media (if not available it uses /run/media/$USER).
+The option \fI-o\fR can be used to pass mount(8) options
+(default: rw,noatime,nodev).
 
 .B
 .IP "list"
 List all the tombs found open, including information about the time
 they were opened and the hooks that they mounted. If the first
 argument is present, then shows only the tomb named that way or
-returns an error if its not found. If the option
+returns an error if it's not found. If the option
 \fI--get-mountpoint\fR is used then print a simple list of currently
 open tomb mountpoint paths.
 
@@ -105,9 +106,9 @@ the tomb is in use by running processes (to force close, see
 
 .B
 .IP "slam"
-Closes a tomb like the command \fIclose\fR does, but it doesn't fails
+Closes a tomb like the command \fIclose\fR does, but it doesn't fail
 even if the tomb is in use by other application processes: it looks
-for them and violently kills \-9 each of them. This command may
+for and violently kills \-9 each of them. This command may
 provoke unsaved data loss, but assists users to face surprise
 situations.
 
@@ -133,7 +134,7 @@ key and the second and last argument the tomb file.
 .IP "resize"
 Increase the size of a tomb file to the amount specified by the
 \fI-s\fR option, which is the new size in megabytes (MiB). Full access to the tomb using
-a key (\fI-k\fR) and its password is requires. Tombs can only grow and
+a key (\fI-k\fR) and its password is required. Tombs can only grow and
 can never be made smaller. This command makes use of the cryptsetup
 resize feature and the resize2fs command: its much more practical than
 creating a new tomb and moving everything into it.
@@ -141,7 +142,7 @@ creating a new tomb and moving everything into it.
 .B
 .IP "engrave"
 This command transforms a tomb key into an image that can be printed
-on paper and phisically stored as backup, i.e. hidden in a book. It
+on paper and physically stored as backup, i.e. hidden in a book. It
 Renders a QRCode of the tomb key, still protected by its password: a
 PNG image (extension \fI.qr.png\fR) will be created in the current
 directory and can be later printed (fits an A4 or Letter format).  To
@@ -192,7 +193,7 @@ Force flag, currently used to override swap checks, might be
 overriding more wimpy behaviours in future, but make sure you know
 what you are doing if you force an operation.
 .B
-.IP "-s \fI<MBytes>\fR" 
+.IP "-s \fI<MBytes>\fR"
 When digging or resizing a tomb, this option must be used to specify
 the \fIsize\fR of the new file to be created. Units are megabytes (MiB).
 .B
@@ -228,7 +229,7 @@ wrappers and testing suite.
 .B
 .IP "--use-urandom"
 Use an inferior quality random source to improve the speed of key
-generation at the cost of security (neede for the testing suite).
+generation at the cost of security (needed for the testing suite).
 .B
 .IP "--sudo-pwd <string>"
 Use string as password when needed for privilege escalation via sudo.
@@ -275,8 +276,8 @@ example:
 .B
 .IP "post-hooks"
 This hook file gets executed as user by tomb right after opening it;
-it should be a regular shell script, starting with a shell bang. Tomb
-executes this hook as user (dropping root priviledges) and giving it
+it should be a regular shell script, starting with a shebang. Tomb
+executes this hook as user (dropping root privileges) and giving it
 two arguments: "$1" is "open" or "close" depending from the tomb
 command given, "$2" is the full path to the mountpoint where the tomb
 is open.
@@ -308,7 +309,7 @@ the DISPLAY environment var.
 .SH SWAP
 
 On execution of certain commands Tomb will complain about swap memory
-on disk when that is presend and \fIabort if your system has swap
+on disk when present and \fIabort if your system has swap
 activated\fR. You can disable this behaviour using the
 \fI--force\fR. Before doing that, however, you may be interested in
 knowing the risks of doing so:
@@ -346,7 +347,7 @@ Open a Tomb using the key from a remote SSH shell, without saving any
 local copy of it:
 
 .EX
-	ssh user@my.shell.net 'cat .secrets/tomb.key' | tomb open secret.tomb -k -	
+	ssh user@my.shell.net 'cat .secrets/tomb.key' | tomb open secret.tomb -k -
 .EE
 
 .IP \(bu
@@ -447,15 +448,21 @@ notice are preserved on all copies.
 
 The most recent version of Tomb sourcecode and up to date
 documentation is available for download from its website on
-\fIhttp://tomb.dyne.org\fR.
+\fIhttps://tomb.dyne.org\fR.
 
 .SH SEE ALSO
 
 .B
 .IP cryptsetup(8)
 
-GnuPG website on http://www.gnupg.org
+GnuPG website:
+.br
+https://www.gnupg.org
 
-DM-Crypt website on http://www.saout.de/misc/dm-crypt
+DM-Crypt website:
+.br
+https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt
 
-LUKS website, http://code.google.com/p/cryptsetup
+LUKS website:
+.br
+https://gitlab.com/cryptsetup/cryptsetup/wikis/home
