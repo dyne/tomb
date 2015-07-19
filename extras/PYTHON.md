@@ -15,7 +15,7 @@ functionalities in other languages.
 
 Tomber is still under development. Any contributions are greatly
 welcomed here or on its original repository
-https://github.com/reiven/Tomb
+https://github.com/reiven/tomber
 
 
 Installation
