@@ -60,6 +60,22 @@ There are some more things that tomb can do for you, make sure you
 have a look at the manpage and at the commandline help to find out
 more.
 
+## Basic usage notes
+
+Here we collect notes on common issues users may or may not experience
+and the commonly working solutions found.
+
+### Pinentry issues
+
+If pinentry has problems dealing with the password because of language
+or tty settings on your system, try running `gpg-agent` by launching it
+from the session initialization (~/.xsession or ~/.xinitrc) with this
+command:
+```
+eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
+```
+
+
 # Advanced usage
 
 ## Install optional tools
