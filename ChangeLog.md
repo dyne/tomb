@@ -1,5 +1,25 @@
 # Tomb ChangeLog
 
+## 2.1
+### July 2015
+
+All users updating should close their tombs first, then update and
+reopen them with this new version. However, lacking to do so will not
+cause any data loss, just an unclean umount of tombs.
+
+This new stable release including several bugfixes to smooth the user
+experience in various situations. Documentation is reviewed and
+extended and translations are updated.
+
+More in detail, fixes to: mountpoint removal, language localization,
+gtk-2 pinentry themeing, udisk2 compatibility (/run/media/$USER
+mountpoint support), handling of key failures, kdf documentation,
+swish-e file contents search and encrypted swap detection.
+
+Deniability is improved by allowing any filename to be used for tombs
+(also without .tomb extension). Code has been overall cleaned up.
+
+
 ## 2.0.1
 ### December 2014
 

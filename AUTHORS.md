@@ -13,8 +13,8 @@ German translation by x3nu.
 
 Testing, reviews and documentation contributed by Dreamer, Vlax,
 Shining the Translucent, Mancausoft, Asbesto Molesto, Nignux, TheJH,
-The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon, Jim
-Turner, Maxime Arthaud and the Linux Action Show!
+The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon,
+Narrat, x3nu, Jim Turner, Maxime Arthaud and the Linux Action Show!
 
 Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth.
 
@@ -23,4 +23,4 @@ Function v2" based on GCrypt and written by Anthony Thyssen.
 
 Tomb's developers can be contacted via GitHub issues on
 https://www.github.com/dyne/Tomb or over IRC https://irc.dyne.org
-channel **#dyne**.
+channel **#dyne** (or directly over port 9999 with SSL)

@@ -206,11 +206,11 @@ minimalist tool and its code should be readable. Guidelines on the
 coding style are illustrated in [doc/HACKING.txt](doc/HACKING.txt).
 
 Tomb's developers can be contacted using the issues on GitHub or over
-IRC on https://irc.dyne.org channel **#dyne**
+IRC on https://irc.dyne.org channel **#dyne** (or direct port 9999 SSL)
 
 # Licensing
 
-Tomb is Copyright (C) 2007-2014 by the Dyne.org Foundation
+Tomb is Copyright (C) 2007-2015 by the Dyne.org Foundation
 
 Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
 
