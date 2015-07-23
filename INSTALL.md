@@ -75,6 +75,17 @@ command:
 eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
 ```
 
+### Deleting history
+
+To improve deniability one has to avoid that tomb commands are
+recorded in the shell history. In order to do so the
+`HISTIGNORESPACE=1` environment setting of Zsh comes handy.  Anywhere
+in the `.zshrc` put:
+```
+export HISTIGNORESPACE=1
+alias tomb=' tomb'
+```
+
 
 # Advanced usage
 
