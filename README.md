@@ -192,7 +192,7 @@ tarball on https://files.dyne.org/tomb
 Donations are very welcome, please go to https://www.dyne.org/donate
 
 Translations are also needed: they can be contributed via this website
-https://poeditor.com/join/project?hash=33bdefea2e46b26f512a0caae55fbbb5
+https://poeditor.com/join/project/b276xMGAmB
 or simply sending the .po file. Start from `extras/po/tomb.pot`.
 
 The code is pretty short and readable: start looking around and the
