@@ -125,7 +125,7 @@ input, useful to not confuse it with other password inputs.
 
 To have it change directory `extras/gtk-tray` then
 
- 1. make sure libnotify and gtk+-3.0 dev packages are available
+ 1. make sure libnotify and gtk+-2.0 dev packages are available
  2. run `make` inside the directory to build `tomb-gtk-tray`
  3. run `sudo make install` (default PREFIX is `/usr/local`)
  4. start `tomb-gtk-tray tombname` after the tomb is open
