@@ -1,0 +1,1320 @@
+# Tomb - The Crypto Undertaker.
+# Copyright (C) 2007-2014 Dyne.org Foundation
+# Denis Roio <jaromil@dyne.org>, 2013.
+#
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2015-07-27 13:30+0100\n"
+"Last-Translator: Per L. Johansson <kosovoper@fastmail.se>\n"
+"Language: English\n"
+"Language-Team: Tomb developers <crypto@lists.dyne.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: Tomb 2.1\n"
+"POT-Creation-Date: \n"
+"X-Poedit-Language: Swedish\n"
+"X-Poedit-Country: SWEDEN\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: tomb:Safety
+#: functions:_sudo:124
+msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
+msgstr "[sudo] Ange lösenord för användare ::1 user:: för att få utökade behörigheter"
+
+#: tomb:Safety
+#: functions:_whoami:200
+msgid "Failing to identify the user who is calling us"
+msgstr "Kan ej identifiera användaren som anropar oss"
+
+#: tomb:Safety
+#: functions:_plot:248
+msgid "Tomb won't work without a TOMBNAME."
+msgstr "Tomb fungerar ej utan ett GRAV-NAMN"
+
+#: tomb:Safety
+#: functions:_tmp_create:263
+msgid "Fatal error creating the temporary directory: ::1 temp dir::"
+msgstr "Kritiskt fel vid skapandet av temporär katalog: ::1 temp dir::"
+
+#: tomb:Safety
+#: functions:_tmp_create:271
+msgid "Fatal error setting the permission umask for temporary files"
+msgstr "Kritiskt fel när temporära filer demaskeras"
+
+#: tomb:Safety
+#: functions:_tmp_create:274
+msgid "Someone is messing up with us trying to hijack temporary files."
+msgstr "Någon stökar med oss och försöker ta kontroll över temporära filer"
+
+#: tomb:Safety
+#: functions:_tmp_create:278
+msgid "Fatal error creating a temporary file: ::1 temp file::"
+msgstr "Kritiskt fel vid skapande av temporär fil: ::1 temp file::"
+
+#: tomb:Safety
+#: functions:_tmp_create:281
+msgid "Fatal error setting ownership on temporary file: ::1 temp file::"
+msgstr "Kritiskt fel för ägarebehörighet av temporär fil ::1 temp file::"
+
+#: tomb:Safety
+#: functions:_ensure_safe_swap:327
+msgid "An active swap partition is detected..."
+msgstr "En aktiv swap-partition är detekterad..."
+
+#: tomb:Safety
+#: functions:_ensure_safe_swap:329
+msgid "All your swaps are belong to crypt.  Good."
+msgstr "Alla swap-partioner är krypterade. Bra."
+
+#: tomb:Safety
+#: functions:_ensure_safe_swap:331
+msgid "This poses a security risk."
+msgstr "Detta innebär en säkerhetsrisk"
+
+#: tomb:Safety
+#: functions:_ensure_safe_swap:332
+msgid "You can deactivate all swap partitions using the command:"
+msgstr "Du kan deaktivera alla swap-partitioner med kommandot:"
+
+#: tomb:Safety
+#: functions:_ensure_safe_swap:333
+msgid " swapoff -a"
+msgstr " swapoff -a"
+
+#: tomb:Safety
+#: functions:_ensure_safe_swap:334
+msgid "But if you want to proceed like this, use the -f (force) flag."
+msgstr "Men om du vill fortsätta trots allt, använd -f (force) alternativet."
+
+#: tomb:Safety
+#: functions:_check_swap:353
+msgid "Operation aborted."
+msgstr "Åtgärden är avbruten"
+
+#: tomb:Safety
+#: functions:ask_password:393
+msgid "Cannot find pinentry-curses and no DISPLAY detected."
+msgstr "Kan ej hitta pinentry-curses och ingen DISPLAY detekterad."
+
+#: tomb:Safety
+#: functions:ask_password:453
+msgid "Detected DISPLAY, but only pinentry-curses is found."
+msgstr "Detekterad DISPLAY, men hittar endast pinentry-curses."
+
+#: tomb:Safety
+#: functions:ask_password:463
+msgid "Cannot find any pinentry: impossible to ask for password."
+msgstr "Hittar ej pinentry: Omöjligt att be om lösenord."
+
+#: tomb:Safety
+#: functions:ask_password:473
+msgid "Pinentry error: ::1 error::"
+msgstr "Pinentry-fel ::1 error::"
+
+#: tomb:Safety
+#: functions:ask_password:482
+msgid "Empty password"
+msgstr "Lösenord utan teckeninnehåll"
+
+#: tomb:Safety
+#: functions:is_valid_tomb:498
+msgid "Tomb file is missing from arguments."
+msgstr "Tomb-filen saknar argument"
+
+#: tomb:Safety
+#: functions:is_valid_tomb:503
+msgid "Tomb file is not writable: ::1 tomb file::"
+msgstr "Tomb-filen är ej skrivbar: ::1 tomb file::"
+
+#: tomb:Safety
+#: functions:is_valid_tomb:507
+msgid "Tomb file is not a regular file: ::1 tomb file::"
+msgstr "Tomb-filen är inte en vanlig fil: ::1 tomb file::"
+
+#: tomb:Safety
+#: functions:is_valid_tomb:511
+msgid "Tomb file is empty (zero length): ::1 tomb file::"
+msgstr "Tomb-filen är tom (innehållslös): ::1 tomb file::"
+
+#: tomb:Safety
+#: functions:is_valid_tomb:518
+msgid "Tomb file is owned by another user: ::1 tomb owner::"
+msgstr "Tomb-filen har en annan ägare: ::1 tomb owner::"
+
+#: tomb:Safety
+#: functions:is_valid_tomb:521
+msgid "Tomb command failed: ::1 command name::"
+msgstr "Tomb-kommando misslyckades: ::1 command name::"
+
+#: tomb:Safety
+#: functions:is_valid_tomb:530
+msgid "File is not yet a tomb: ::1 tomb file::"
+msgstr "Filen är inte en grav ännu: ::1 tomb file::"
+
+#: tomb:Safety
+#: functions:is_valid_tomb:536
+msgid "Tomb is currently in use: ::1 tomb name::"
+msgstr "Graven används: ::1 tomb name:: "
+
+#: tomb:Safety
+#: functions:is_valid_tomb:539
+msgid "Valid tomb file found: ::1 tomb path::"
+msgstr "Giltig grav-fil hittad: ::1 tomb path::"
+
+#: tomb:Safety
+#: functions:lo_mount:551
+msgid "Loop mount of volumes is not possible on this machine, this error"
+msgstr "Loop mount av enheter är inte möjligt på denna enheten. Detta fel"
+
+#: tomb:Safety
+#: functions:lo_mount:552
+msgid "often occurs on VPS and kernels that don't provide the loop module."
+msgstr "inträffar ofta tillsammans med VPS och kärnor som ej stöder loop module."
+
+#: tomb:Safety
+#: functions:lo_mount:553
+msgid "It is impossible to use Tomb on this machine at this conditions."
+msgstr "Det är inte möjligt att använda Tomb på denna enheten under dessa förutsättningar."
+
+#: tomb:Commandline
+#: interaction:usage:593
+msgid "Syntax: tomb [options] command [arguments]"
+msgstr "Syntax: tomb [alternativ] kommando [argument]"
+
+#: tomb:Commandline
+#: interaction:usage:595
+msgid "Commands:"
+msgstr "Kommando:"
+
+#: tomb:Commandline
+#: interaction:usage:597
+msgid " // Creation:"
+msgstr " // Skapa:"
+
+#: tomb:Commandline
+#: interaction:usage:598
+msgid " dig     create a new empty TOMB file of size -s in MB"
+msgstr " dig:     skapa en ny tom GRAV-fil med en storlek av -s i MB"
+
+#: tomb:Commandline
+#: interaction:usage:599
+msgid " forge   create a new KEY file and set its password"
+msgstr " forge   skapa en ny NYCKEL-fil (KEY) och ange dess lösenord"
+
+#: tomb:Commandline
+#: interaction:usage:600
+msgid " lock    installs a lock on a TOMB to use it with KEY"
+msgstr " lock    installerar ett lås på din GRAV som fugerar tillsamans med dess NYCKEL"
+
+#: tomb:Commandline
+#: interaction:usage:602
+msgid " // Operations on tombs:"
+msgstr " // Åtgärder för gravar"
+
+#: tomb:Commandline
+#: interaction:usage:603
+msgid " open    open an existing TOMB"
+msgstr " open    öppnar en befintlig GRAV"
+
+#: tomb:Commandline
+#: interaction:usage:604
+msgid " index   update the search indexes of tombs"
+msgstr " index   uppdaterar sökindexet av gravar"
+
+#: tomb:Commandline
+#: interaction:usage:605
+msgid " search  looks for filenames matching text patterns"
+msgstr " search  letar efter filnamn som matchar textmönstret"
+
+#: tomb:Commandline
+#: interaction:usage:606
+msgid " list    list of open TOMBs and information on them"
+msgstr " list    listar och visar information om öppna GRAVar "
+
+#: tomb:Commandline
+#: interaction:usage:607
+msgid " close   close a specific TOMB (or 'all')"
+msgstr " close   stänger en specifik GRAV (eller ange 'all' för att stänga alla)"
+
+#: tomb:Commandline
+#: interaction:usage:608
+msgid " slam    slam a TOMB killing all programs using it"
+msgstr " slam    stänger en GRAV och alla program som använder den."
+
+#: tomb:Commandline
+#: interaction:usage:610
+msgid " resize  resize a TOMB to a new size -s (can only grow)"
+msgstr " resize  ändrar storleken på en GRAV -s (kan endast växa)"
+
+#: tomb:Commandline
+#: interaction:usage:613
+msgid " // Operations on keys:"
+msgstr " // Åtgärder för nycklar"
+
+#: tomb:Commandline
+#: interaction:usage:614
+msgid " passwd  change the password of a KEY (needs old pass)"
+msgstr " passwd  ändra lösenord på en NYCKEL (gammalt lösenord krävs)"
+
+#: tomb:Commandline
+#: interaction:usage:615
+msgid " setkey  change the KEY locking a TOMB (needs old key and pass)"
+msgstr " setkey  byter NYCKEL som låser en GRAV (gammal NYCKEL och lösenord krävs)"
+
+#: tomb:Commandline
+#: interaction:usage:618
+msgid " // Backup on paper:"
+msgstr " // Säkerhetskopia på papper"
+
+#: tomb:Commandline
+#: interaction:usage:619
+msgid " engrave makes a QR code of a KEY to be saved on paper"
+msgstr " engrave skapar en QR-kod av en NYCKEL som kan skrivas ut på papper"
+
+#: tomb:Commandline
+#: interaction:usage:623
+msgid " // Steganography:"
+msgstr " // Steganografi"
+
+#: tomb:Commandline
+#: interaction:usage:624
+msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
+msgstr " bury    göm en NYCKEL inuti en JPEG-bild (används tillsammans med -k)"
+
+#: tomb:Commandline
+#: interaction:usage:625
+msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
+msgstr " exhume  extrahera en NYCKEL från en JPEG-bild (skriver till stdout)"
+
+#: tomb:Commandline
+#: interaction:usage:628
+msgid "Options:"
+msgstr "Alternativ"
+
+#: tomb:Commandline
+#: interaction:usage:630
+msgid " -s     size of the tomb file when creating/resizing one (in MB)"
+msgstr " -s     tomb-filens storlek, vid skapande eller ändring av storlek (i MB)"
+
+#: tomb:Commandline
+#: interaction:usage:631
+msgid " -k     path to the key to be used ('-k -' to read from stdin)"
+msgstr " -k     sökväg till nyckel som ska användas ('-k -' används för att läsa från stdin)"
+
+#: tomb:Commandline
+#: interaction:usage:632
+msgid " -n     don't process the hooks found in tomb"
+msgstr " -n     processa ej länkarna som fins i tomben"
+
+#: tomb:Commandline
+#: interaction:usage:633
+msgid " -o     options passed to commands: open, lock, forge (see man)"
+msgstr " -o     alternativ som skickas till åtgärd: open, lock, forge (se man)"
+
+#: tomb:Commandline
+#: interaction:usage:634
+msgid " -f     force operation (i.e. even if swap is active)"
+msgstr " -f     tvinga åtgärd (dvs. även vid aktiv swap)"
+
+#: tomb:Commandline
+#: interaction:usage:636
+msgid " --kdf  forge keys armored against dictionary attacks"
+msgstr " --kdf  smid nyckel skyddad mot ordboksattacker"
+
+#: tomb:Commandline
+#: interaction:usage:640
+msgid " -h     print this help"
+msgstr " -h     skriv ut denna hjälp"
+
+#: tomb:Commandline
+#: interaction:usage:641
+msgid " -v     print version, license and list of available ciphers"
+msgstr " -v     skriv ut version, licenser och en lista på tillgängliga chiffer"
+
+#: tomb:Commandline
+#: interaction:usage:642
+msgid " -q     run quietly without printing informations"
+msgstr " -q     kör utan att skriva någon information"
+
+#: tomb:Commandline
+#: interaction:usage:643
+msgid " -D     print debugging information at runtime"
+msgstr " -D     skriv ut debuggutskrifter vid körning"
+
+#: tomb:Commandline
+#: interaction:usage:645
+msgid "For more informations on Tomb read the manual: man tomb"
+msgstr "För mer information om Tomb läs manualen: man tomb"
+
+#: tomb:Commandline
+#: interaction:usage:646
+msgid "Please report bugs on <http://github.com/dyne/tomb/issues>."
+msgstr "Vänligen rapportera fel på <http://github.com/dyne/tomb/issues>."
+
+#: tomb:Commandline
+#: interaction:_ensure_dependencies:781
+msgid "Missing required dependency ::1 command::.  Please install it."
+msgstr "Saknar behövda beroenden ::1 command::. Var vänlig installera det."
+
+#: tomb:Key
+#: operations:is_valid_key:818
+msgid "cleartext key from stdin selected: this is unsafe."
+msgstr "klartextnyckel från stdin är vald: detta är osäkert."
+
+#: tomb:Key
+#: operations:is_valid_key:819
+msgid "please use --unsafe if you really want to do this."
+msgstr "var vänlig använd --unsafe om du verkligen vill göra detta."
+
+#: tomb:Key
+#: operations:is_valid_key:821
+msgid "received key in cleartext from stdin (unsafe mode)"
+msgstr "mottog nyckel i klartext från stdin (osäkert läge)"
+
+#: tomb:Key
+#: operations:is_valid_key:825
+msgid "is_valid_key() called without an argument."
+msgstr "is_valid_key() är anropad utan argument"
+
+#: tomb:Key
+#: operations:is_valid_key:833
+msgid "Key is an image, it might be valid."
+msgstr "Nyckeln är en bild, den kan vara giltig"
+
+#: tomb:Key
+#: operations:is_valid_key:837
+msgid "Key is valid."
+msgstr "Nyckeln är giltig"
+
+#: tomb:Key
+#: operations:_tomb_key_recover
+#: recover_key:847
+msgid "Attempting key recovery."
+msgstr "Försöker återskapa nyckel."
+
+#: tomb:Key
+#: operations:_load_key:871
+msgid "This operation requires a key file to be specified using the -k option."
+msgstr "Denna åtgärd kräver en nyckel specificerad med -k alternativet."
+
+#: tomb:Key
+#: operations:_load_key:875
+msgid "Waiting for the key to be piped from stdin... "
+msgstr "Väntar på att få nyckeln sklickad från stdin..."
+
+#: tomb:Key
+#: operations:_load_key:886
+msgid "Key not found, specify one using -k."
+msgstr "Nyckel ej hittad, ange en med -k."
+
+#: tomb:Key
+#: operations:_load_key:900
+msgid "The key seems invalid or its format is not known by this version of Tomb."
+msgstr "Nyckeln verkar ogiltig eller så är formatet okännt för denna versionen av Tomb."
+
+#: tomb:Key
+#: operations:get_lukskey:975
+msgid "No suitable program for KDF ::1 program::."
+msgstr "Inget passande program för KDF ::1 program::."
+
+#: tomb:Key
+#: operations:ask_key_password:1001
+msgid "Internal error: ask_key_password() called before _load_key()."
+msgstr "Internt fel: ask_key_password() anropad före load_key()."
+
+#: tomb:Key
+#: operations:ask_key_password:1007
+msgid "A password is required to use key ::1 key::"
+msgstr "Ett lösenord behövs för att använda nyckeln ::1 key::"
+
+#: tomb:Key
+#: operations:ask_key_password:1019
+msgid "User aborted password dialog."
+msgstr "Användaren avbröt lösenords-dialogen."
+
+#: tomb:Key
+#: operations:ask_key_password:1026
+msgid "Password OK."
+msgstr "Lösenord OK"
+
+#: tomb:Key
+#: operations:change_passwd:1064
+msgid "Commanded to change password for tomb key ::1 key::"
+msgstr "Beordrad att byta lösenord för tomb-nyckel ::1 key::"
+
+#: tomb:Key
+#: operations:change_passwd:1076
+msgid "No valid password supplied."
+msgstr "Inget giltig lösenord bifogat."
+
+#: tomb:Key
+#: operations:change_passwd:1078
+msgid "Changing password for ::1 key file::"
+msgstr "Byter lösenord för ::1 key file::"
+
+#: tomb:Key
+#: operations:change_passwd:1091
+msgid "Error: the newly generated keyfile does not seem valid."
+msgstr "Error: den nyligen skapade nyckelfilen verkar inte vara giltig."
+
+#: tomb:Key
+#: operations:change_passwd:1095
+msgid "Your passphrase was successfully updated."
+msgstr "Ditt lösenord är uppdaterat"
+
+#: tomb:Key
+#: operations:gen_key:1117
+msgid "User aborted."
+msgstr "Användaren avbröt."
+
+#: tomb:Key
+#: operations:gen_key:1120
+msgid "You set empty password, which is not possible."
+msgstr "Du har anget ett innehållslöst lösenord, vilket inte är möjligt."
+
+#: tomb:Key
+#: operations:gen_key:1148
+msgid "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+msgstr "Felaktiga argument för --kdf: måste vara ett heltal (antal sekunder att iterera)"
+
+#: tomb:Key
+#: operations:gen_key:1153
+msgid "Using KDF, iterations: ::1 microseconds::"
+msgstr "Använder KDF, iterationer: ::1 microseconds::"
+
+#: tomb:Key
+#: operations:gen_key:1154
+msgid "generating salt"
+msgstr "skapar salt"
+
+#: tomb:Key
+#: operations:gen_key:1156
+msgid "calculating iterations"
+msgstr "beräknar iterationer"
+
+#: tomb:Key
+#: operations:gen_key:1158
+msgid "encoding the password"
+msgstr "kodar lösenordet"
+
+#: tomb:Key
+#: operations:list_gnupg_ciphers:1189
+msgid "gpg (GnuPG) is not found, Tomb cannot function without it."
+msgstr "Hittar ej gpg (GnuPG), Tomb fungerar int utan detta."
+
+#: tomb:Key
+#: operations:bury_key:1210
+msgid "Encode failed: ::1 image file:: is not a jpeg image."
+msgstr "Kodning misslyckades: ::1 image file:: är inte en jpeg-bild."
+
+#: tomb:Key
+#: operations:bury_key:1214
+msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
+msgstr "Kodar nyckel ::1 tomb key:: inuti bild ::2 image file::"
+
+#: tomb:Key
+#: operations:bury_key:1215
+msgid "Please confirm the key password for the encoding"
+msgstr "Var god bekräfta lösenordet för kodningen"
+
+#: tomb:Key
+#: operations:bury_key:1231
+msgid "Wrong password supplied."
+msgstr "Felaktigt lösenord angivet."
+
+#: tomb:Key
+#: operations:bury_key:1232
+msgid "You shall not bury a key whose password is unknown to you."
+msgstr "Du skall ej begrava en nyckel vars lösenord är okänt för dig."
+
+#: tomb:Key
+#: operations:bury_key:1243
+msgid "Encoding error: steghide reports problems."
+msgstr "Kodningsfel: steghide raporterar problem."
+
+#: tomb:Key
+#: operations:bury_key:1246
+msgid "Tomb key encoded succesfully into image ::1 image file::"
+msgstr "Tomb-nyckel skapad i bild ::1 image file::"
+
+#: tomb:Key
+#: operations:exhume_key:1258
+msgid "Exhume failed, no image specified"
+msgstr "Extrahering misslyckades, ingen bild specificerad"
+
+#: tomb:Key
+#: operations:exhume_key:1268
+msgid "Exhume failed, image file not found: ::1 image file::"
+msgstr "Extrahering misslyckades, bild ej hittad: ::1 image file::"
+
+#: tomb:Key
+#: operations:exhume_key:1270
+msgid "Exhume failed: ::1 image file:: is not a jpeg image."
+msgstr "Extrahering misslyckad: ::1 image file:: är inte en jpeg-bild."
+
+#: tomb:Key
+#: operations:exhume_key:1277
+msgid "Wrong password or no steganographic key found"
+msgstr "Felaktigt lösenord eller steganografinyckel ej hittad"
+
+#: tomb:Key
+#: operations:exhume_key:1288
+msgid "printing exhumed key on stdout"
+msgstr "skriver extraherad nyckel till stdout"
+
+#: tomb:Key
+#: operations:exhume_key:1292
+msgid "File exists: ::1 tomb key::"
+msgstr "Filen fins: ::1 tomb key::"
+
+#: tomb:Key
+#: operations:exhume_key:1294
+msgid "Use of --force selected: overwriting."
+msgstr "Användning av --force vald: skriver över."
+
+#: tomb:Key
+#: operations:exhume_key:1297
+msgid "Make explicit use of --force to overwrite."
+msgstr "Använd uttalad användning av --force för att skriva över."
+
+#: tomb:Key
+#: operations:exhume_key:1298
+msgid "Refusing to overwrite file. Operation aborted."
+msgstr "Vägrar skriva över fil. Åtgärd avbruten."
+
+#: tomb:Key
+#: operations:exhume_key:1301
+msgid "Trying to exhume a key out of image ::1 image file::"
+msgstr "Försöker extrahera nyckel ur bild ::1 image file::"
+
+#: tomb:Key
+#: operations:exhume_key:1322
+msgid "Key succesfully exhumed to ::1 key::."
+msgstr "Nyckel extraherad till ::1 key::."
+
+#: tomb:Key
+#: operations:exhume_key:1324
+msgid "Nothing found in ::1 image file::"
+msgstr "Hittar inget i ::1 image file::"
+
+#: tomb:Key
+#: operations:engrave_key:1339
+msgid "Rendering a printable QRCode for key: ::1 tomb key file::"
+msgstr "Renderar en utskrivbar QR-kod för nyckel: ::1 tomb key file::"
+
+#: tomb:Key
+#: operations:engrave_key:1344
+msgid "QREncode reported an error."
+msgstr "QREncode raporterar ett fel."
+
+#: tomb:Key
+#: operations:engrave_key:1346
+msgid "Operation successful:"
+msgstr "Åtgärden lyckades:"
+
+#: tomb:Create:dig_tomb:1379
+msgid "Commanded to dig tomb ::1 tomb path::"
+msgstr "Beordrad att gräva en grav ::1 tomb path::"
+
+#: tomb:Create:dig_tomb:1381
+msgid "Missing path to tomb"
+msgstr "Saknar sökväg till grav"
+
+#: tomb:Create:dig_tomb:1382
+msgid "Size argument missing, use -s"
+msgstr "Saknar storleksargument för tomb, använd -s"
+
+#: tomb:Create:dig_tomb:1383
+msgid "Size must be an integer (megabytes)"
+msgstr "Storlek måste anges som ett heltal (megabytes)"
+
+#: tomb:Create:dig_tomb:1384
+msgid "Tombs can't be smaller than 10 megabytes"
+msgstr "Tomber kan inte vara mindre än 10 megabytes"
+
+#: tomb:Create:dig_tomb:1389
+msgid "A tomb exists already. I'm not digging here:"
+msgstr "En grav finns redan. Jag gräver inte här:"
+
+#: tomb:Create:dig_tomb:1394
+msgid "Creating a new tomb in ::1 tomb path::"
+msgstr "Skapar en ny grav i ::1 tomb path::"
+
+#: tomb:Create:dig_tomb:1396
+msgid "Generating ::1 tomb file:: of ::2 size::MiB"
+msgstr "Skapar ::1 tomb file:: som är ::2 size::MiB"
+
+#: tomb:Create:dig_tomb:1401
+msgid "Error creating the tomb ::1 tomb path::"
+msgstr "Fel vid grävandet av grav ::1 tomb path::"
+
+#: tomb:Create:dig_tomb:1416
+msgid "Done digging ::1 tomb name::"
+msgstr "Färdig med skapandet av ::1 tomb name::"
+
+#: tomb:Create:dig_tomb:1417
+msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
+msgstr "Din grav är ej färdig. Du måste smida en nyckel och låsa den."
+
+#: tomb:Create:dig_tomb:1418
+msgid "tomb forge ::1 tomb path::.key"
+msgstr "Smider nyckel ::tomb path::.key"
+
+#: tomb:Create:dig_tomb:1419
+msgid "tomb lock ::1 tomb path:: -k ::1 tomb path::.key"
+msgstr "tomb lock ::1 tomb path:: -k ::1 tomb path::.key"
+
+#: tomb:Create:forge_key:1440
+msgid "A filename needs to be specified using -k to forge a new key."
+msgstr "Ett filnamn måste anges med -k för att smida en ny nyckel."
+
+#: tomb:Create:forge_key:1442
+msgid "Commanded to forge key ::1 key::"
+msgstr "Beordrad att smida en nyckel ::1key::"
+
+#: tomb:Create:forge_key:1454
+msgid "Forging this key would overwrite an existing file. Operation aborted."
+msgstr "Smidandet av denna nyckel skulle skriva över en befintlig fil. Åtgärden avbruten."
+
+#: tomb:Create:forge_key:1458
+msgid "Cannot generate encryption key."
+msgstr "Kan ej skapa en kodad nyckel"
+
+#: tomb:Create:forge_key:1466
+msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
+msgstr "Beodrad att smida en nyckel ::1 key:: med chifferalgoritm ::2 algorithm::"
+
+#: tomb:Create:forge_key:1471
+msgid "This operation takes time, keep using this computer on other tasks,"
+msgstr "Denna åtgärden tar tid, fortsätt att använda enheten för andra uppgifter."
+
+#: tomb:Create:forge_key:1472
+msgid "once done you will be asked to choose a password for your tomb."
+msgstr "När åtgärden är utförd kommer du bli bedd om att skapa ett lösenord för din tomb."
+
+#: tomb:Create:forge_key:1473
+msgid "To make it faster you can move the mouse around."
+msgstr "För att påskynda processen kan du röra på musen."
+
+#: tomb:Create:forge_key:1474
+msgid "If you are on a server, you can use an Entropy Generation Daemon."
+msgstr "Om du är på en server så kan du använda en Entropy Generation Daemon."
+
+#: tomb:Create:forge_key:1488
+msgid "Choose the  password of your key: ::1 tomb key::"
+msgstr "Ange ett lösenord för din nyckel ::1 tomb key:."
+
+#: tomb:Create:forge_key:1489
+msgid "(You can also change it later using 'tomb passwd'.)"
+msgstr "(Du kan byta vid en senare tidpunkt med 'tomb passwd')"
+
+#: tomb:Create:forge_key:1507
+msgid "The key does not seem to be valid."
+msgstr "Nyckeln verkar vara giltig."
+
+#: tomb:Create:forge_key:1508
+msgid "Dumping contents to screen:"
+msgstr "Dumpar innehåll till skärm:"
+
+#: tomb:Create:forge_key:1516
+msgid "Done forging ::1 key file::"
+msgstr "Smide slutfört på ::1 key file::"
+
+#: tomb:Create:forge_key:1517
+msgid "Your key is ready:"
+msgstr "Din nyckel är färdig:"
+
+#: tomb:Create:lock_tomb_with_key:1537
+msgid "No tomb specified for locking."
+msgstr "Ingen grav är angiven för låsning."
+
+#: tomb:Create:lock_tomb_with_key:1538
+msgid "Usage: tomb lock file.tomb file.tomb.key"
+msgstr "Användning: tomb lock fil.tomb fil.tomb.key"
+
+#: tomb:Create:lock_tomb_with_key:1544
+msgid "Commanded to lock tomb ::1 tomb file::"
+msgstr "Beordrad att låsa tomb ::1 tomb file::"
+
+#: tomb:Create:lock_tomb_with_key:1547
+msgid "There is no tomb here. You have to dig it first."
+msgstr "Det finns ingen grav här. Du måste gräva den först."
+
+#: tomb:Create:lock_tomb_with_key:1556
+msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
+msgstr "Kontrollerar om graven är tom (vi gräver aldrig upp någon annans ben)."
+
+#: tomb:Create:lock_tomb_with_key:1560
+msgid "The tomb was already locked with another key."
+msgstr "Graven är redan låst med en annan nyckel."
+
+#: tomb:Create:lock_tomb_with_key:1561
+msgid "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
+msgstr "Åtgärden avbruten. Jag kan inte låsa en redan låst grav. Gräv dig en ny."
+
+#: tomb:Create:lock_tomb_with_key:1563
+msgid "Fine, this tomb seems empty."
+msgstr "Bra, denna graven verkar tom."
+
+#: tomb:Create:lock_tomb_with_key:1571
+msgid "Locking using cipher: ::1 cipher::"
+msgstr "Låser med hjälp av chiffer: ::1 cipher::"
+
+#: tomb:Create:lock_tomb_with_key:1583
+msgid "Locking ::1 tomb file:: with ::2 tomb key file::"
+msgstr "Låser ::1 tomb file:: med ::2 tomb key file::"
+
+#: tomb:Create:lock_tomb_with_key:1585
+msgid "Formatting Luks mapped device."
+msgstr "Formaterar Luks-mappad enhet."
+
+#: tomb:Create:lock_tomb_with_key:1590
+msgid "cryptsetup luksFormat returned an error."
+msgstr "cryptsetup luksFormat returnerar ett fel."
+
+#: tomb:Create:lock_tomb_with_key:1595
+msgid "cryptsetup luksOpen returned an error."
+msgstr "cryptsetup luksOpen returnerar ett fel."
+
+#: tomb:Create:lock_tomb_with_key:1598
+msgid "Formatting your Tomb with Ext3/Ext4 filesystem."
+msgstr "Formaterar din grav med Ext3/Ext4-filsystem."
+
+#: tomb:Create:lock_tomb_with_key:1602
+msgid "Tomb format returned an error."
+msgstr "Tomb format returnerar ett fel."
+
+#: tomb:Create:lock_tomb_with_key:1603
+msgid "Your tomb ::1 tomb file:: may be corrupted."
+msgstr "Din grav ::1 tomb file:: kan vara korrupt."
+
+#: tomb:Create:lock_tomb_with_key:1608
+msgid "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::"
+msgstr "Låst ::1 tomb name:: med hjälp av Luks dm-crypt ::2 cipher::"
+
+#: tomb:Create:lock_tomb_with_key:1609
+msgid "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::"
+msgstr "Din grav är redo i ::1 tomb path:: och låst med nyckeln ::2 tomb key::"
+
+#: tomb:Create:change_tomb_key:1619
+msgid "Commanded to reset key for tomb ::1 tomb path::"
+msgstr "Beordrad att återställa nyckel för grav ::1 tomb path::"
+
+#: tomb:Create:change_tomb_key:1622
+msgid "Command 'setkey' needs two arguments: the old key file and the tomb."
+msgstr "Kommandot 'setkey' kräver två argument: den gammla nyckeln och din grav."
+
+#: tomb:Create:change_tomb_key:1623
+msgid "I.e:  tomb -k new.tomb.key old.tomb.key secret.tomb"
+msgstr "Dvs.: tomb -k ny.tomb.key gammal.tomb.key hemlig.tomb"
+
+#: tomb:Create:change_tomb_key:1624
+msgid "Execution aborted."
+msgstr "Genomförandet avbrutet."
+
+#: tomb:Create:change_tomb_key:1635
+msgid "Not a valid LUKS encrypted volume: ::1 volume::"
+msgstr "Ej en giltig LUKS-kryptrerad enhet: ::1 volume::"
+
+#: tomb:Create:change_tomb_key:1643
+msgid "Changing lock on tomb ::1 tomb name::"
+msgstr "Byter lås på grav ::1 tomb name::"
+
+#: tomb:Create:change_tomb_key:1644
+msgid "Old key: ::1 old key::"
+msgstr "Gammal nyckel: ::1 old key::"
+
+#: tomb:Create:change_tomb_key:1660
+msgid "No valid password supplied for the old key."
+msgstr "Giltigt lösenord ej angivet för gammal nyckel."
+
+#: tomb:Create:change_tomb_key:1666
+msgid "Unexpected error in luksOpen."
+msgstr "Oväntat fel i luksOpen."
+
+#: tomb:Create:change_tomb_key:1670
+msgid "New key: ::1 key file::"
+msgstr "Ny nyckel: ::1 key file::"
+
+#: tomb:Create:change_tomb_key:1680
+msgid "No valid password supplied for the new key."
+msgstr "Giltigt lösenord ej angivet för ny nyckel."
+
+#: tomb:Create:change_tomb_key:1689
+msgid "Unexpected error in luksChangeKey."
+msgstr "Oväntat fel i luksChangeKey."
+
+#: tomb:Create:change_tomb_key:1691
+msgid "Unexpected error in luksClose."
+msgstr "Oväntat fel i luksClose."
+
+#: tomb:Create:change_tomb_key:1693
+msgid "Succesfully changed key for tomb: ::1 tomb file::"
+msgstr "Nyckel ändrad för grav: ::1 tomb file::"
+
+#: tomb:Create:change_tomb_key:1694
+msgid "The new key is: ::1 new key::"
+msgstr "Den nya nyckeln är: ::1 new key::"
+
+#: tomb:Open:mount_tomb:1706
+msgid "No tomb name specified for opening."
+msgstr "Ingen grav specificerad för öppning."
+
+#: tomb:Open:mount_tomb:1708
+msgid "Commanded to open tomb ::1 tomb name::"
+msgstr "Beordrad att öppna grav ::1 tomb name::"
+
+#: tomb:Open:mount_tomb:1722
+msgid "Mountpoint not specified, using default: ::1 mount point::"
+msgstr "Monteringspunkt ej angiven, använder standard: ::1 mount point::"
+
+#: tomb:Open:mount_tomb:1725
+msgid "Opening ::1 tomb file:: on ::2 mount point::"
+msgstr "Öppnar ::1 tomb file:: från ::2 mount point::"
+
+#: tomb:Open:mount_tomb:1732
+msgid "::1 tomb file:: is not a valid Luks encrypted storage file."
+msgstr "::1 tomb file:: är inte en giltig Luks-crypterad förvaringsfil."
+
+#: tomb:Open:mount_tomb:1734
+msgid "This tomb is a valid LUKS encrypted device."
+msgstr "Denna grav är en giltlig LUKS-kryptrerad enhet."
+
+#: tomb:Open:mount_tomb:1741
+msgid "Cipher is \"::1 cipher::\" mode \"::2 mode::\" hash \"::3 hash::\""
+msgstr "Chiffret är \"::1 cipher::\" mode \"::2 mode::\" hash \"::3 hash::\""
+
+#: tomb:Open:mount_tomb:1748
+msgid "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
+msgstr "Multipla nyckelhål är aktiverade på denna grav. Var uppmärksam: det kan finnas en bakdörr."
+
+#: tomb:Open:mount_tomb:1772
+msgid "Failure mounting the encrypted file."
+msgstr "Misslyckades att montera denna krypterade fil."
+
+#: tomb:Open:mount_tomb:1782
+msgid "Success unlocking tomb ::1 tomb name::"
+msgstr "Låst upp grav ::1 tomb name::"
+
+#: tomb:Open:mount_tomb:1785
+msgid "Checking filesystem via ::1::"
+msgstr "kontrollerar filsystem via ::1::"
+
+#: tomb:Open:mount_tomb:1803
+msgid "Error mounting ::1 mapper:: on ::2 tombmount::"
+msgstr "Fel vid montering av ::1 mapper:: på ::2 tombmount::"
+
+#: tomb:Open:mount_tomb:1805
+msgid "Are mount options '::1 mount options::' valid?"
+msgstr "Är monteringsalterativ '::1 mount options::' giltigt?"
+
+#: tomb:Open:mount_tomb:1810
+msgid "Cannot mount ::1 tomb name::"
+msgstr "Kan ej montera ::1 tomb name::"
+
+#: tomb:Open:mount_tomb:1816
+msgid "Success opening ::1 tomb file:: on ::2 mount point::"
+msgstr "Öppnade ::1 tomb file:: från ::2 mount point:: "
+
+#: tomb:Open:mount_tomb:1830
+msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
+msgstr "Senast använd av ::1 user::(2 tomb build::) från ::3 tty:: på ::4 host::"
+
+#: tomb:Open:mount_tomb:1831
+msgid "on date ::1 date::"
+msgstr "den ::1 date::"
+
+#: tomb:Open:exec_safe_bind_hooks:1879
+msgid "How pitiful!  A tomb, and no HOME."
+msgstr "Vad synd! En grav, och inget HOME."
+
+#: tomb:Open:exec_safe_bind_hooks:1883
+msgid "Cannot exec bind hooks without a mounted tomb."
+msgstr "Kan ej utföra länkningar utan en monterad grav."
+
+#: tomb:Open:exec_safe_bind_hooks:1899
+msgid "bind-hooks file is broken"
+msgstr "länk-fil är felaktig"
+
+#: tomb:Open:exec_safe_bind_hooks:1908
+msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
+msgstr "länkningsformat, exempel: local/to/tomb local/to/$HOME"
+
+#: tomb:Open:exec_safe_bind_hooks:1912
+msgid "bind-hooks map format: local/to/tomb local/to/$HOME.  Rolling back"
+msgstr "länkningsformat, exempel: local/to/tomb local/to/$HOME.  Återgår"
+
+#: tomb:Open:exec_safe_bind_hooks:1917
+msgid "bind-hook target not existent, skipping ::1 home::/::2 subdir::"
+msgstr "länkmål finns ej, hopar över ::1 home::/::2 subdir::"
+
+#: tomb:Open:exec_safe_bind_hooks:1919
+msgid "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
+msgstr "länkkälla hittas ej i grav, hoppar över ::1 mount point::/::2 subdir::"
+
+#: tomb:Open:exec_safe_post_hooks:1947
+msgid "Post hooks found, executing as user ::1 user name::."
+msgstr "Länkar hittade, exekverar som användare ::1 user name::."
+
+#: tomb:List:list_tombs:1966
+msgid "I can't see any ::1 status:: tomb, may they all rest in peace."
+msgstr "Jag kan ej se några ::1 status:: gravar, må de vila i frid."
+
+#: tomb:List:list_tombs:1999
+msgid "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::"
+msgstr "::1 tombname:: öppen på ::2 tombmount:: med ::3 tombfsopts::"
+
+#: tomb:List:list_tombs:2004
+msgid "::1 tombname:: open since ::2 tombsince::"
+msgstr "::1 tombname:: öppen sedan ::2 tombsince::"
+
+#: tomb:List:list_tombs:2007
+msgid "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::"
+msgstr "::1 tombname:: öppnad av ::2 tombuser:: från ::3 tombtty:: på ::4 tombhost::"
+
+#: tomb:List:list_tombs:2011
+msgid "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::%) is used: ::4 tombavail:: free "
+msgstr "::1 tombname:: storlek ::2 tombtot:: av vilket ::3 tombused:: (::5 tombpercent::%) är använt: ::4 tombavail:: ledigt "
+
+#: tomb:List:list_tombs:2015
+msgid "::1 tombname:: warning: your tomb is almost full!"
+msgstr "::1 tombname:: varning: din tomb är nästan full!"
+
+#: tomb:List:list_tombs:2021
+msgid "::1 tombname:: hooks ::2 hookname:: on ::3 hookdest::"
+msgstr "::1 tombname:: länkar till ::2 hookname:: på ::3 hookdest::"
+
+#: tomb:List:list_tomb_binds:2076
+msgid "Internal error: list_tomb_binds called without argument."
+msgstr "Internt fel: list_tomb_binds anropad utan argument."
+
+#: tomb:Index
+#: and search:index_tombs:2108
+msgid "Cannot index tombs on this system: updatedb (mlocate) not installed."
+msgstr "Kan ej indexera tomber på detta system: updatedb (mlocate) är ej installerat."
+
+#: tomb:Index
+#: and search:index_tombs:2112
+msgid "Cannot use GNU findutils for index/search commands."
+msgstr "Kan ej använda GNU findutils för indexering och sökning."
+
+#: tomb:Index
+#: and search:index_tombs:2114
+msgid "Index command needs 'mlocate' to be installed."
+msgstr "Indexeringskommando behöver ha 'mlocate' installerat."
+
+#: tomb:Index
+#: and search:index_tombs:2122
+msgid "There seems to be no open tomb engraved as [::1::]"
+msgstr "Det verkar inte finnas några graverade gravar som [::1::]"
+
+#: tomb:Index
+#: and search:index_tombs:2124
+msgid "I can't see any open tomb, may they all rest in peace."
+msgstr "Jag kan ej se några öppna gravar, må de vila i frid."
+
+#: tomb:Index
+#: and search:index_tombs:2126
+msgid "Creating and updating search indexes."
+msgstr "Skapar och uppdaterar sökindex."
+
+#: tomb:Index
+#: and search:index_tombs:2139
+msgid "Skipping ::1 tomb name:: (.noindex found)."
+msgstr "Hoppar över ::1 tomb name:: (.noindex hittade)."
+
+#: tomb:Index
+#: and search:index_tombs:2141
+msgid "Indexing ::1 tomb name:: filenames..."
+msgstr "Indexerar ::1 tomb name:: filnamn..."
+
+#: tomb:Index
+#: and search:index_tombs:2146
+msgid "Indexing ::1 tomb name:: contents..."
+msgstr "Indexerar ::1 tomb name:: innehåll..."
+
+#: tomb:Index
+#: and search:index_tombs:2148
+msgid "Generating a new swish-e configuration file: ::1 swish conf::"
+msgstr "Genererar en ny swish-e konfigutŕationsfil: ::1 swish conf::"
+
+#: tomb:Index
+#: and search:index_tombs:2222
+msgid "Search index updated."
+msgstr "Sökindex uppdaterat."
+
+#: tomb:Index
+#: and search:search_tombs:2242
+msgid "Searching for: ::1::"
+msgstr "Söker efter: ::1::"
+
+#: tomb:Index
+#: and search:search_tombs:2250
+msgid "Searching filenames in tomb ::1 tomb name::"
+msgstr "Söker filnamn i grav ::1 tomb name::"
+
+#: tomb:Index
+#: and search:search_tombs:2252
+msgid "Matches found: ::1 matches::"
+msgstr "Hittade träffar: ::1 matches::"
+
+#: tomb:Index
+#: and search:search_tombs:2257
+msgid "Searching contents in tomb ::1 tomb name::"
+msgstr "Söker innehåll i grav ::1 tomb name::"
+
+#: tomb:Index
+#: and search:search_tombs:2260
+msgid "Skipping tomb ::1 tomb name::: not indexed."
+msgstr "Hoppar över grav ::1 tomb name::: ej indexerad."
+
+#: tomb:Index
+#: and search:search_tombs:2261
+msgid "Run 'tomb index' to create indexes."
+msgstr "Kör 'tomb index' för att skapa index."
+
+#: tomb:Index
+#: and search:search_tombs:2263
+msgid "Search completed."
+msgstr "Sökning genomförd."
+
+#: tomb:Resize:resize_tomb:2274
+msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes."
+msgstr "Beordrad att förstora ::1 tomb name:: till ::2 size:: megabytes."
+
+#: tomb:Resize:resize_tomb:2276
+msgid "No tomb name specified for resizing."
+msgstr "Ingen grav specificerad att utöka."
+
+#: tomb:Resize:resize_tomb:2277
+msgid "Cannot find ::1::"
+msgstr "Hittar ej ::1::"
+
+#: tomb:Resize:resize_tomb:2281
+msgid "Aborting operations: new size was not specified, use -s"
+msgstr "Åtgärd avbruten: ny storlek var ej specificerad, använd -s"
+
+#: tomb:Resize:resize_tomb:2293
+msgid "Please close the tomb ::1 tomb name:: before trying to resize it."
+msgstr "Var vänlig stäng grav ::1 tomb name:: innan du försöker att ändra storleken."
+
+#: tomb:Resize:resize_tomb:2296
+msgid "You must specify the new size of ::1 tomb name::"
+msgstr "Du måste ange den nya storleken för ::1 tomb name::"
+
+#: tomb:Resize:resize_tomb:2298
+msgid "Size is not an integer."
+msgstr "Angiven storlek är ej ett heltal."
+
+#: tomb:Resize:resize_tomb:2301
+msgid "The new size must be greater then old tomb size."
+msgstr "Den nya storleken måste vara större än den gammla."
+
+#: tomb:Resize:resize_tomb:2311
+msgid "Error creating the extra resize ::1 size::, operation aborted."
+msgstr "Fel vid förstoringen av ::1 size::, åtgärden avbruten."
+
+#: tomb:Resize:resize_tomb:2332
+msgid "cryptsetup failed to resize ::1 mapper::"
+msgstr "cryptsetup misslyckaes att förstora ::1 mappaer::"
+
+#: tomb:Resize:resize_tomb:2335
+msgid "e2fsck failed to check ::1 mapper::"
+msgstr "e2fsck misslyckades att kontrollera ::1 mappaer::"
+
+#: tomb:Resize:resize_tomb:2338
+msgid "resize2fs failed to resize ::1 mapper::"
+msgstr "resize2fs misslyckades att förstora ::1 mapper::"
+
+#: tomb:Close:umount_tomb:2362
+msgid "There is no open tomb to be closed."
+msgstr "Det finns inga öppna gravar att stänga."
+
+#: tomb:Close:umount_tomb:2365
+msgid "Too many tombs mounted, please specify one (see tomb list)"
+msgstr "För många gravar monterade, var vänlig att specificera en (se 'tomb list')"
+
+#: tomb:Close:umount_tomb:2366
+msgid "or issue the command 'tomb close all' to close them all."
+msgstr "eller använd 'tomb clase all' för att stänga samtliga."
+
+#: tomb:Close:umount_tomb:2382
+msgid "Tomb not found: ::1 tomb file::"
+msgstr "Grav ej hittad: ::1 tomb file::"
+
+#: tomb:Close:umount_tomb:2383
+msgid "Please specify an existing tomb."
+msgstr "Var vänlig och ange en befintlig grav."
+
+#: tomb:Close:umount_tomb:2387
+msgid "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::"
+msgstr "Tvångsstänger ::1 tomb name:: monterad på ::2 mount point::"
+
+#: tomb:Close:umount_tomb:2389
+msgid "Kill all processes busy inside the tomb."
+msgstr "Döda alla pågående processer inuti graven."
+
+#: tomb:Close:umount_tomb:2391
+msgid "Cannot slam the tomb ::1 tomb name::"
+msgstr "Kan ej tvångsstänga graven ::1 tomb name::"
+
+#: tomb:Close:umount_tomb:2393
+msgid "Closing tomb ::1 tomb name:: mounted on ::2 mount point::"
+msgstr "Stänger grav ::1 tomb name:: monterad på ::2 mount point::"
+
+#: tomb:Close:umount_tomb:2401
+msgid "Closing tomb bind hook: ::1 hook::"
+msgstr "Stänger grav-länkar: ::1 hook::"
+
+#: tomb:Close:umount_tomb:2404
+msgid "Slamming tomb: killing all processes using this hook."
+msgstr "Tvångsstänger grav: avslutar alla länkade processer."
+
+#: tomb:Close:umount_tomb:2405
+msgid "Cannot slam the bind hook ::1 hook::"
+msgstr "Kan inte tvångsavsluta länkar ::1 hook::"
+
+#: tomb:Close:umount_tomb:2408
+msgid "Tomb bind hook ::1 hook:: is busy, cannot close tomb."
+msgstr "Grav-länk ::1 hook:: är upptagen, kan ej stänga grav."
+
+#: tomb:Close:umount_tomb:2419
+msgid "Tomb is busy, cannot umount!"
+msgstr "Graven är upptagen, kan ej avmontera."
+
+#: tomb:Close:umount_tomb:2427
+msgid "Error occurred in cryptsetup luksClose ::1 mapper::"
+msgstr "Ett fel inträffade i cryptsetup luksClose ::1mapper::"
+
+#: tomb:Close:umount_tomb:2434
+msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
+msgstr "Graven ::1 tomb name:: är stängd: må du vila i frid."
+
+#: tomb:Main
+#: routine:main:2554
+msgid "Error parsing."
+msgstr "Fel vid analysering."
+
+#: tomb:Main
+#: routine:main:2564
+msgid "There's no such command \"::1 subcommand::\"."
+msgstr "Kommandot saknas: \"::1 subcommand::\"."
+
+#: tomb:Main
+#: routine:main:2565
+msgid "Please try -h for help."
+msgstr "Prova att använda -h för hjälp"
+
+#: tomb:Main
+#: routine:main:2577
+msgid "Some error occurred during option processing."
+msgstr "Ett fel inträffade i samband med ett alternativkommando."
+
+#: tomb:Main
+#: routine:main:2578
+msgid "See \"tomb help\" for more info."
+msgstr "Se \"tomb help\" för mer information."
+
+#: tomb:Main
+#: routine:main:2590
+msgid "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::"
+msgstr "::1 arg:: är ett okänt alternativ för kommando ::2 subcommand::"
+
+#msgid ""
+#"You specified option ::1 option::, which is DANGEROUS and should only be used for testing\n"
+#"If you really want so, add --unsafe"
+#msgstr ""
+#"Du specificerade alternativ ::1 option:, detta är FARLIGT och bör endast användas för test\n"
+#"Är du riktigt säker på att du vill trots allt, använd --unsafe"
+#: tomb:Main
+#: routine:main:2606
+#: routine:main:2640
+msgid "The create command is deprecated, please use dig, forge and lock instead."
+msgstr "Kommandot create används inte längre, använd dig, forg och lock istället."
+
+#: tomb:Main
+#: routine:main:2641
+msgid "For more informations see Tomb's manual page (man tomb)."
+msgstr "För mer information se Tombs manualsidor (man tomb)."
+
+#: tomb:Main
+#: routine:main:2675
+msgid "Resize2fs not installed: cannot resize tombs."
+msgstr "Resize2fs när inte installerat: kan ej ändra storlek på tomber."
+
+#: tomb:Main
+#: routine:main:2701
+msgid "QREncode not installed: cannot engrave keys on paper."
+msgstr "QREncode är inte installerat: kan ej skapa en pappersnyckel."
+
+#: tomb:Main
+#: routine:main:2718
+msgid "Steghide not installed: cannot bury keys into images."
+msgstr "Steghide är inte installerat: kan ej begrava någon nyckel i bilder."
+
+#: tomb:Main
+#: routine:main:2725
+msgid "Steghide not installed: cannot exhume keys from images."
+msgstr "Steghide är inte installerat: kan ej extrahera någon nyckel från bilder."
+
+#: tomb:Main
+#: routine:main:2739
+msgid "Tomb ::1 version:: - a strong and gentle undertaker for your secrets"
+msgstr "Tomb ::1 version:: - en stark och varsam begravningentrepenör för dina hemligheter"
+
+#: tomb:Main
+#: routine:main:2741
+msgid " Copyright (C) 2007-2015 Dyne.org Foundation, License GNU GPL v3+"
+msgstr " Copyright (C) 2007-2015 Dyne.org Foundation, License GNU GPL v3+"
+
+#: tomb:Main
+#: routine:main:2742
+msgid " This is free software: you are free to change and redistribute it"
+msgstr " Detta är en öppen programvara: du har full frihet att ändra och återdistribuera den"
+
+#: tomb:Main
+#: routine:main:2743
+msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
+msgstr " För den senaste källkoden besök <http://dyne.org/software/tomb>"
+
+#: tomb:Main
+#: routine:main:2748
+msgid " This source code is distributed in the hope that it will be useful,"
+msgstr " Denna källkod är ditribuerad med förhoppningen att den kommer att vara användbar,"
+
+#: tomb:Main
+#: routine:main:2749
+msgid " but WITHOUT ANY WARRANTY; without even the implied warranty of"
+msgstr " men UTAN NÅGON GARANTi; utan någon underförstådd garanti om"
+
+#: tomb:Main
+#: routine:main:2750
+msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+msgstr " FUNKTIONALLITET eller LÄMPLIGHET FÖR NÅGOT SPECIELLT SYFTE."
+
+#: tomb:Main
+#: routine:main:2752
+msgid " When in need please refer to <http://dyne.org/support>."
+msgstr "Vid behov, vänd er till <http://dyne.org/support>."
+
+#: tomb:Main
+#: routine:main:2754
+msgid "System utils:"
+msgstr "Systemverktyg:"
+
+#: tomb:Main
+#: routine:main:2764
+msgid "Optional utils:"
+msgstr "Tilläggsverktyg:"
+
+#: tomb:Main
+#: routine:main:2774
+msgid "Command \"::1 subcommand::\" not recognized."
+msgstr "Kommandot \"::1 subcommand::\" känns ej igen."
+
+#: tomb:Main
+#: routine:main:2775
+msgid "Try -h for help."
+msgstr "Försök med -h för hjälp."
+
