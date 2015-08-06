@@ -1,5 +1,12 @@
 # Tomb ChangeLog
 
+## 2.1.1
+### August 2015
+
+Added translations to Italian and Swedish.
+Minor documentation updates.
+
+
 ## 2.1
 ### July 2015
 

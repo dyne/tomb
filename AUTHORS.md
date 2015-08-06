@@ -9,7 +9,8 @@ Tomb's artwork is contributed by Jordi aka Mon Mort and Logan VanCuren.
 
 Gettext internationalization and Spanish translation is contributed by
 GDrooid, French translation by Hellekin, Russian translation by fsLeg,
-German translation by x3nu.
+German translation by x3nu, Italian translation by Massimiliano
+Augello and Swedish translation by PLJ / Kosovoper.
 
 Testing, reviews and documentation contributed by Dreamer, Vlax,
 Shining the Translucent, Mancausoft, Asbesto Molesto, Nignux, TheJH,
