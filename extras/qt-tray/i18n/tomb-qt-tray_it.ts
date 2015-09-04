@@ -47,12 +47,12 @@ Uscita</translation>
     <message>
         <location filename="../tomb.cpp" line="38"/>
         <source>Tomb encrypted undertaker</source>
-        <translation type="unfinished"></translation>
+        <translation>Tomb encrypted undertaker</translation>
     </message>
     <message>
         <location filename="../tomb.cpp" line="38"/>
         <source>We started digging out bones</source>
-        <translation type="unfinished"></translation>
+        <translation>Abbiamo cominciato a tirare fuori gli scheletri</translation>
     </message>
     <message>
         <location filename="../tomb.cpp" line="120"/>
