@@ -3,7 +3,7 @@ Tomb is designed and written by Denis Roio aka Jaromil.
 
 Tomb includes code by Anathema, Boyska, Hellekin O. Wolf and GDrooid.
 
-The Qt5 desktop tray GUI is written by Michele Montecchi.
+The Qt5 desktop tray GUI is written by Gianluca Montecchi.
 
 Python Tomb wrappers are written by Reiven and Boyska.
 
