@@ -132,6 +132,12 @@ To have it change directory `extras/gtk-tray` then
 
 Of cource one can include the launch of tomb-gtk-tray scripts.
 
+### extras/qt-tray
+
+The QT tray adds a tomb tray in a QT desktop toolbar. It requires at
+least QT libraries of version 5.4 or above.
+Build with 'qmake' and then 'make'.
+
 ### extras/kdf-keys
 
 The KDF wrapper programs allows one to use KDF rounds on passwords in
