@@ -180,7 +180,7 @@ _cat() { local -a _arr;
 }
 
 _is_found() {
-    # returns 0 if binary if found in path
+    # returns 0 if binary is found in path
     [[ "$1" = "" ]] && return 1
     command -v "$1" 1>/dev/null 2>/dev/null
     return $?
@@ -209,7 +209,7 @@ _whoami() {
 
     _verbose "Identified caller: ::1 username:: (::2 UID:::::3  GID::)" $_USER $_UID $_GID
 
-    # Update USERNAME accordingly if we can
+    # Update USERNAME accordingly if possible
     [[ EUID == 0 && $_USER != $USERNAME ]] && {
         _verbose "Updating USERNAME from '::1 USERNAME::' to '::2 _USER::')" $USERNAME $_USER
         USERNAME=$_USER
@@ -258,7 +258,7 @@ _tmp_create() {
         [[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPPREFIX"
     }
 
-    # We're going to add one more $RANDOM for each time someone complain
+    # We're going to add one more $RANDOM for each time someone complains
     # about this being too weak of a random.
     tfile="${TMPPREFIX}/$RANDOM$RANDOM$RANDOM$RANDOM"   # Temporary file
     umask 066
@@ -302,7 +302,7 @@ _is_encrypted_block() {
 # Return 0 if NO swap is used, 1 if swap is used.
 # Return 1 if any of the swaps is not encrypted.
 # Return 2 if swap(s) is(are) used, but ALL encrypted.
-# Use _check_swap in functions, that will call this function but will
+# Use _check_swap in functions. It will call this function and
 # exit if unsafe swap is present.
 _ensure_safe_swap() {
 
@@ -316,16 +316,16 @@ _ensure_safe_swap() {
     _message "An active swap partition is detected..."
     for s in $=swaps; do
         { _is_encrypted_block $s } && { r=2 } || {
-	    # We're dealing with unencrypted stuff.
-	    # Maybe it lives on an encrypted filesystem anyway.
-	    # @todo: verify it's actually on an encrypted FS (see #163 and !189)
-	    # Well, no: bail out.
-	    r=1; break
-	}
+            # We're dealing with unencrypted stuff.
+            # Maybe it lives on an encrypted filesystem anyway.
+            # @todo: verify it's actually on an encrypted FS (see #163 and !189)
+            # Well, no: bail out.
+            r=1; break
+        }
     done
 
     if [[ $r -eq 2 ]]; then
-        _success "All your swaps are belong to crypt.  Good."
+        _success "All your swaps are belong to crypt. Good."
     else
         _warning "This poses a security risk."
         _warning "You can deactivate all swap partitions using the command:"
@@ -338,7 +338,7 @@ _ensure_safe_swap() {
 }
 
 # Wrapper to allow encrypted swap and remind the user about possible
-# data leaks to disk if swap is on, and not to be ignored.  It could
+# data leaks to disk if swap is on, which shouldn't be ignored. It could
 # be run once in main(), but as swap evolves, it's better to run it
 # whenever swap may be needed.
 # Exit if unencrypted swap is active on the system.
@@ -502,7 +502,7 @@ is_valid_tomb() {
         _failure "Tomb file is missing from arguments." }
 
     _fail=0
-    # Tomb file must be a readable, writable, not-empty regular file.
+    # Tomb file must be a readable, writable, non-empty regular file.
     [[ ! -w "$1" ]] && {
         _warning "Tomb file is not writable: ::1 tomb file::" $1
         _fail=1
@@ -535,7 +535,7 @@ is_valid_tomb() {
 
     _plot $1     # Set TOMB{PATH,DIR,FILE,NAME}
 
-    # Tomb cannot be already mounted (or we cannot alter it)
+    # Tomb already mounted (or we cannot alter it)
     [[ "`mount -l`" -regex-match "${TOMBFILE}.*\[$TOMBNAME\]$" ]] && {
         _failure "Tomb is currently in use: ::1 tomb name::" $TOMBNAME
     }
@@ -1103,7 +1103,7 @@ change_passwd() {
 # takes care to encrypt a key
 # honored options: --kdf  --tomb-pwd -o
 gen_key() {
-    # $1 the password to use, if not set then ask user
+    # $1 the password to use; if not set ask user
     # -o is the --cipher-algo to use (string taken by GnuPG)
     local algopt="`option_value -o`"
     local algo="${algopt:-AES256}"
@@ -1218,7 +1218,7 @@ bury_key() {
     # We ask the password and test if it is the same encoding the
     # base key, to insure that the same password is used for the
     # encryption and the steganography. This is a standard enforced
-    # by Tomb, but its not strictly necessary (and having different
+    # by Tomb, but it isn't strictly necessary (and having different
     # password would enhance security). Nevertheless here we prefer
     # usability.
 
@@ -1329,8 +1329,8 @@ exhume_key() {
     return $r
 }
 
-# Produces a printable image of the key contents so that it can be
-# backuped on paper and hidden in books etc.
+# Produces a printable image of the key contents so a backup on paper
+# can be made and hidden in books etc.
 engrave_key() {
 
     _load_key    # Try loading key from option -k and set TOMBKEYFILE
@@ -1721,7 +1721,7 @@ mount_tomb() {
     tombmount="$2"
     [[ "$tombmount" = "" ]] && {
         tombmount=/media/$TOMBNAME
-        [[ -d /media ]] || { # no /media found, adopting /run/media/$USER (udisk2 compat)
+        [[ -d /media ]] || { # no /media found, adopting /run/media/$USER (udisks2 compat)
             tombmount=/run/media/$_USER/$TOMBNAME
         }
         _message "Mountpoint not specified, using default: ::1 mount point::" $tombmount
@@ -1822,7 +1822,7 @@ mount_tomb() {
 
     local tombtty tombhost tombuid tombuser
 
-    # print out when was opened the last time, by whom and where
+    # print out when it was opened the last time, by whom and where
     [[ -r ${tombmount}/.last ]] && {
         tombtty=$(_cat ${tombmount}/.tty)
         tombhost=$(_cat ${tombmount}/.host)
@@ -2586,7 +2586,7 @@ main() {
     for arg in $*; do
         if [[ $arg == '--' || $arg == '-' ]]; then
             ok=1
-            continue #it shouldnt be appended to PARAM
+            continue #it shouldn't be appended to PARAM
         elif [[ $arg[1] == '-'  ]]; then
             if [[ $ok == 0 ]]; then
                 exitv=127 _failure "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::" $arg $subcommand
