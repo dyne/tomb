@@ -14,7 +14,7 @@ all:
 
 install:
 	install -Dm755 ${PROG} ${DESTDIR}${PREFIX}/bin/${PROG}
-	install -Dm666 doc/${PROG}.1 ${DESTDIR}${MANDIR}/man1/${PROG}.1
+	install -Dm644 doc/${PROG}.1 ${DESTDIR}${MANDIR}/man1/${PROG}.1
 	@echo
 	@echo "Tomb is installed succesfully. To install language translations, make sure"
 	@echo "gettext is also installed, then 'cd extras/po' and 'make install' there."
