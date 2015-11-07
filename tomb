@@ -599,7 +599,7 @@ usage() {
     _print "Commands:"
     _print "\000"
     _print " // Creation:"
-    _print " dig     create a new empty TOMB file of size -s in MB"
+    _print " dig     create a new empty TOMB file of size -s in MiB"
     _print " forge   create a new KEY file and set its password"
     _print " lock    installs a lock on a TOMB to use it with KEY"
     _print "\000"
@@ -631,7 +631,7 @@ usage() {
     _print "\000"
     _print "Options:"
     _print "\000"
-    _print " -s     size of the tomb file when creating/resizing one (in MB)"
+    _print " -s     size of the tomb file when creating/resizing one (in MiB)"
     _print " -k     path to the key to be used ('-k -' to read from stdin)"
     _print " -n     don't process the hooks found in tomb"
     _print " -o     options passed to commands: open, lock, forge (see man)"
@@ -1365,7 +1365,7 @@ engrave_key() {
 
 # Step one - Dig a tomb
 #
-# Synopsis: dig_tomb /path/to/tomb -s sizemegabytes
+# Synopsis: dig_tomb /path/to/tomb -s sizemebibytes
 #
 # It will create an empty file to be formatted as a loopback
 # filesystem.  Initially the file is filled with random data taken
@@ -1382,8 +1382,8 @@ dig_tomb() {
 
     [[ -n "$tombpath"   ]] || _failure "Missing path to tomb"
     [[ -n "$tombsize"   ]] || _failure "Size argument missing, use -s"
-    [[ $tombsize == <-> ]] || _failure "Size must be an integer (megabytes)"
-    [[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 megabytes"
+    [[ $tombsize == <-> ]] || _failure "Size must be an integer (mebibytes)"
+    [[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 mebibytes"
 
     _plot $tombpath          # Set TOMB{PATH,DIR,FILE,NAME}
 
@@ -2272,7 +2272,7 @@ search_tombs() {
 resize_tomb() {
     local tombpath="$1"    # First argument is the path to the tomb
 
-    _message "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes." $1 $OPTS[-s]
+    _message "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes." $1 $OPTS[-s]
 
     [[ -z "$tombpath" ]] && _failure "No tomb name specified for resizing."
     [[ ! -r $tombpath ]] && _failure "Cannot find ::1::" $tombpath
@@ -2298,19 +2298,28 @@ resize_tomb() {
         _failure "You must specify the new size of ::1 tomb name::" $TOMBNAME }
     # New tomb size must be an integer
     [[ $newtombsize == <-> ]] || _failure "Size is not an integer."
+
     # Tombs can only grow in size
-    [[ "$newtombsize" -gt "$oldtombsize" ]] || {
-        _failure "The new size must be greater then old tomb size." }
+    if [[ "$newtombsize" -gt "$oldtombsize" ]]; then
 
-    delta="$(( $newtombsize - $oldtombsize ))"
+        delta="$(( $newtombsize - $oldtombsize ))"
 
-    _message "Generating ::1 tomb file:: of ::2 size::MiB" $TOMBFILE $newtombsize
+        _message "Generating ::1 tomb file:: of ::2 size::MiB" $TOMBFILE $newtombsize
+           
+        _verbose "Data dump using ::1:: from /dev/urandom" ${DD[1]}
+        ${=DD} if=/dev/urandom bs=1048576 count=${delta} >> $TOMBPATH        
+        [[ $? == 0 ]] || {
+            _failure "Error creating the extra resize ::1 size::, operation aborted." \
+                     $tmp_resize }
 
-    _verbose "Data dump using ::1:: from /dev/urandom" ${DD[1]}
-    ${=DD} if=/dev/urandom bs=1048576 count=${delta} >> $TOMBPATH
-
-    [[ $? == 0 ]] || {
-        _failure "Error creating the extra resize ::1 size::, operation aborted." $tmp_resize }
+    # If same size this allows to re-launch resize if pinentry expires
+    # so that it will continue resizing without appending more space.
+    # Resizing the partition to the file size cannot harm data anyway.
+    elif [[ "$newtombsize" = "$oldtombsize" ]]; then
+        _message "Tomb seems resized already, operating filesystem stretch"
+    else
+        _failure "The new size must be greater then old tomb size."
+    fi
 
     { option_is_set --tomb-pwd } && {
         tomb_pwd="`option_value --tomb-pwd`"
@@ -2327,6 +2336,7 @@ resize_tomb() {
     mapdate=`date +%s`
     mapper="tomb.$TOMBNAME.$mapdate.$(basename $nstloop)"
 
+    _message "opening tomb"
     _cryptsetup luksOpen ${nstloop} ${mapper} || {
         _failure "Failure mounting the encrypted file." }
 
