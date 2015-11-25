@@ -184,8 +184,8 @@ msgstr " // Creazione:"
 
 #: tomb:Commandline
 #: interaction:usage:598
-msgid " dig     create a new empty TOMB file of size -s in MB"
-msgstr "␣dig     crea un nuovo file TOMB della grandezza di -s MB "
+msgid " dig     create a new empty TOMB file of size -s in MiB"
+msgstr "␣dig     crea un nuovo file TOMB della grandezza di -s MiB "
 
 #: tomb:Commandline
 #: interaction:usage:599
@@ -284,8 +284,8 @@ msgstr "Opzioni:"
 
 #: tomb:Commandline
 #: interaction:usage:630
-msgid " -s     size of the tomb file when creating/resizing one (in MB)"
-msgstr "␣-s     misura del file tomb in creazione/espansione (in MB)"
+msgid " -s     size of the tomb file when creating/resizing one (in MiB)"
+msgstr "␣-s     misura del file tomb in creazione/espansione (in MiB)"
 
 #: tomb:Commandline
 #: interaction:usage:631
@@ -616,12 +616,12 @@ msgid "Size argument missing, use -s"
 msgstr "Manca la dimensione, usare lo switch -s"
 
 #: tomb:Create:dig_tomb:1383
-msgid "Size must be an integer (megabytes)"
-msgstr "La dimensione deve essere un intero (in megabytes)"
+msgid "Size must be an integer (mebibytes)"
+msgstr "La dimensione deve essere un intero (in mebibytes)"
 
 #: tomb:Create:dig_tomb:1384
-msgid "Tombs can't be smaller than 10 megabytes"
-msgstr "I file tomb non possono essere inferiori a 10 megabyte"
+msgid "Tombs can't be smaller than 10 mebibytes"
+msgstr "I file tomb non possono essere inferiori a 10 mebibytes"
 
 #: tomb:Create:dig_tomb:1389
 msgid "A tomb exists already. I'm not digging here:"
@@ -1070,8 +1070,8 @@ msgid "Search completed."
 msgstr "Ricerca completata."
 
 #: tomb:Resize:resize_tomb:2274
-msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes."
-msgstr "Richiesta aumento dimensioni tombfile ::1 tomb name:: a ::2 size:: megabytes."
+msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
+msgstr "Richiesta aumento dimensioni tombfile ::1 tomb name:: a ::2 size:: mebibytes."
 
 #: tomb:Resize:resize_tomb:2276
 msgid "No tomb name specified for resizing."

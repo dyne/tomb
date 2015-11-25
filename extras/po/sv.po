@@ -194,8 +194,8 @@ msgstr " // Skapa:"
 
 #: tomb:Commandline
 #: interaction:usage:598
-msgid " dig     create a new empty TOMB file of size -s in MB"
-msgstr " dig:     skapa en ny tom GRAV-fil med en storlek av -s i MB"
+msgid " dig     create a new empty TOMB file of size -s in MiB"
+msgstr " dig:     skapa en ny tom GRAV-fil med en storlek av -s i MiB"
 
 #: tomb:Commandline
 #: interaction:usage:599
@@ -294,8 +294,8 @@ msgstr "Alternativ"
 
 #: tomb:Commandline
 #: interaction:usage:630
-msgid " -s     size of the tomb file when creating/resizing one (in MB)"
-msgstr " -s     tomb-filens storlek, vid skapande eller ändring av storlek (i MB)"
+msgid " -s     size of the tomb file when creating/resizing one (in MiB)"
+msgstr " -s     tomb-filens storlek, vid skapande eller ändring av storlek (i MiB)"
 
 #: tomb:Commandline
 #: interaction:usage:631
@@ -626,12 +626,12 @@ msgid "Size argument missing, use -s"
 msgstr "Saknar storleksargument för tomb, använd -s"
 
 #: tomb:Create:dig_tomb:1383
-msgid "Size must be an integer (megabytes)"
-msgstr "Storlek måste anges som ett heltal (megabytes)"
+msgid "Size must be an integer (mebibytes)"
+msgstr "Storlek måste anges som ett heltal (mebibytes)"
 
 #: tomb:Create:dig_tomb:1384
-msgid "Tombs can't be smaller than 10 megabytes"
-msgstr "Tomber kan inte vara mindre än 10 megabytes"
+msgid "Tombs can't be smaller than 10 mebibytes"
+msgstr "Tomber kan inte vara mindre än 10 mebibytes"
 
 #: tomb:Create:dig_tomb:1389
 msgid "A tomb exists already. I'm not digging here:"
@@ -1080,8 +1080,8 @@ msgid "Search completed."
 msgstr "Sökning genomförd."
 
 #: tomb:Resize:resize_tomb:2274
-msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes."
-msgstr "Beordrad att förstora ::1 tomb name:: till ::2 size:: megabytes."
+msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
+msgstr "Beordrad att förstora ::1 tomb name:: till ::2 size:: mebibytes."
 
 #: tomb:Resize:resize_tomb:2276
 msgid "No tomb name specified for resizing."

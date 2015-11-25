@@ -156,8 +156,8 @@ msgid " // Creation:"
 msgstr " // Erstellen:"
 
 #: tomb:Commandline interaction:usage:598
-msgid " dig     create a new empty TOMB file of size -s in MB"
-msgstr " dig     Neues GRAB erstellen mit der Größe -s in MB"
+msgid " dig     create a new empty TOMB file of size -s in MiB"
+msgstr " dig     Neues GRAB erstellen mit der Größe -s in MiB"
 
 #: tomb:Commandline interaction:usage:599
 msgid " forge   create a new KEY file and set its password"
@@ -242,9 +242,9 @@ msgid "Options:"
 msgstr "Optionen:"
 
 #: tomb:Commandline interaction:usage:630
-msgid " -s     size of the tomb file when creating/resizing one (in MB)"
+msgid " -s     size of the tomb file when creating/resizing one (in MiB)"
 msgstr ""
-" -s     Größe eines Grabes (beim Erstellen/neue Größe zuweisen) (in MB)"
+" -s     Größe eines Grabes (beim Erstellen/neue Größe zuweisen) (in MiB)"
 
 #: tomb:Commandline interaction:usage:631
 msgid " -k     path to the key to be used ('-k -' to read from stdin)"
@@ -524,12 +524,12 @@ msgid "Size argument missing, use -s"
 msgstr "Größenangabe fehlt. Benutzen Sie -s"
 
 #: tomb:Create:dig_tomb:1383
-msgid "Size must be an integer (megabytes)"
-msgstr "Größe muss eine Ganzzahl sein (Megabyte)"
+msgid "Size must be an integer (mebibytes)"
+msgstr "Größe muss eine Ganzzahl sein (Mebibyte)"
 
 #: tomb:Create:dig_tomb:1384
-msgid "Tombs can't be smaller than 10 megabytes"
-msgstr "Gräber können nicht kleiner als 10 Megabyte sein"
+msgid "Tombs can't be smaller than 10 mebibytes"
+msgstr "Gräber können nicht kleiner als 10 Mebibyte sein"
 
 #: tomb:Create:dig_tomb:1389
 msgid "A tomb exists already. I'm not digging here:"
@@ -1006,8 +1006,8 @@ msgid "Search completed."
 msgstr "Suche abgeschlossen."
 
 #: tomb:Resize:resize_tomb:2274
-msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes."
-msgstr "Grab ::1 tomb name:: wird auf ::2 size:: MB vergrössert."
+msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
+msgstr "Grab ::1 tomb name:: wird auf ::2 size:: MiB vergrössert."
 
 #: tomb:Resize:resize_tomb:2276
 msgid "No tomb name specified for resizing."

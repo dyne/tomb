@@ -169,7 +169,7 @@ msgid " // Creation:"
 msgstr " // Création :"
 
 #: tomb:Commandline interaction:usage:598
-msgid " dig     create a new empty TOMB file of size -s in MB"
+msgid " dig     create a new empty TOMB file of size -s in MiB"
 msgstr " dig     (creuser)       Créer une nouvelle TOMBE de taille -s Mo"
 
 #: tomb:Commandline interaction:usage:599
@@ -263,7 +263,7 @@ msgid "Options:"
 msgstr "Options :"
 
 #: tomb:Commandline interaction:usage:630
-msgid " -s     size of the tomb file when creating/resizing one (in MB)"
+msgid " -s     size of the tomb file when creating/resizing one (in MiB)"
 msgstr ""
 " -s        taille de la tombe lors de sa création ou son agrandissement (en "
 "Mo)"
@@ -560,12 +560,12 @@ msgid "Size argument missing, use -s"
 msgstr "Utiliser -s pour préciser la taille de la tombe en Mo."
 
 #: tomb:Create:dig_tomb:1383
-msgid "Size must be an integer (megabytes)"
-msgstr "La taille doit être un entier (en megaoctets)"
+msgid "Size must be an integer (mebibytes)"
+msgstr "La taille doit être un entier (en mebibytes)"
 
 #: tomb:Create:dig_tomb:1384
-msgid "Tombs can't be smaller than 10 megabytes"
-msgstr "Les tombes ne peuvent pas être plus petites que 10 Mo"
+msgid "Tombs can't be smaller than 10 mebibytes"
+msgstr "Les tombes ne peuvent pas être plus petites que 10 MiB"
 
 #: tomb:Create:dig_tomb:1389
 msgid "A tomb exists already. I'm not digging here:"
@@ -1067,8 +1067,8 @@ msgstr "La recherche est terminée."
 
 #: tomb:Resize:resize_tomb:2274
 #, fuzzy
-msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: megabytes."
-msgstr "Agrandissement de la tombe ::1 tomb file:: ::2 size::s] Mo."
+msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
+msgstr "Agrandissement de la tombe ::1 tomb file:: ::2 size::s] MiB."
 
 #: tomb:Resize:resize_tomb:2276
 msgid "No tomb name specified for resizing."

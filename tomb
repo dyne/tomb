@@ -1375,7 +1375,7 @@ engrave_key() {
 
 dig_tomb() {
     local    tombpath="$1"    # Path to tomb
-    # Require the specification of the size of the tomb (-s) in MB
+    # Require the specification of the size of the tomb (-s) in MiB
     local -i tombsize=$(option_value -s)
 
     _message "Commanded to dig tomb ::1 tomb path::" $tombpath
