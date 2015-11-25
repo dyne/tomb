@@ -212,8 +212,6 @@ IRC on https://irc.dyne.org channel **#dyne** (or direct port 9999 SSL)
 
 Tomb is Copyright (C) 2007-2015 by the Dyne.org Foundation
 
-Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
-
 More information on all the developers involved is found in the
 [AUTHORS](AUTHORS.md) file.
 

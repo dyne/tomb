@@ -1,7 +1,11 @@
 
-Tomb is designed and written by Denis Roio aka Jaromil.
+Cryptsetup is written by Christophe Saout and Clemens Fruhwirth.
 
-Tomb includes code by Anathema, Boyska, Hellekin O. Wolf and GDrooid.
+Tomb is written and directed by Denis Roio <jaromil@dyne.org>
+
+Tomb includes code and advices by Anathema, Boyska, Hellekin O. Wolf and GDrooid.
+
+The minimal Zenity GUI is being written by Parazyd
 
 The Qt5 desktop tray GUI is written by Gianluca Montecchi.
 
@@ -19,7 +23,6 @@ Shining the Translucent, Mancausoft, Asbesto Molesto, Nignux, TheJH,
 The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon,
 Narrat, x3nu, Jim Turner, Maxime Arthaud and the Linux Action Show!
 
-Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth.
 
 Tomb includes an implementation of the "Password-Based Key Derivation
 Function v2" based on GCrypt and written by Anthony Thyssen.
