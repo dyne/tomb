@@ -604,7 +604,7 @@ usage() {
     _print " lock    installs a lock on a TOMB to use it with KEY"
     _print "\000"
     _print " // Operations on tombs:"
-    _print " open    open an existing TOMB"
+    _print " open    open an existing TOMB (-k KEY file or - for stdin)"
     _print " index   update the search indexes of tombs"
     _print " search  looks for filenames matching text patterns"
     _print " list    list of open TOMBs and information on them"

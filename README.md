@@ -66,7 +66,7 @@ For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md)
    lock    installs a lock on a TOMB to use it with KEY
 
    // Operations on tombs:
-   open    open an existing TOMB
+   open    open an existing TOMB (-k specify KEY file)
    index   update the search indexes of tombs
    search  looks for filenames matching text patterns
    list    list of open TOMBs and information on them
