@@ -165,13 +165,13 @@ Please note that it doesn't makes much sense to use KDF keys and
 steganography, since the latter will invalidate the brute-forcing
 protection. For details on the issue see [KNOWN_BUGS.md](KNOWN_BUGS).
 
-### extras/po (translations)
+### extras/translations/
 
 There are translations available for Tomb and they are installed by
 default. If you wish to update them manually navigate to extras/po
 and run 'make install' as root:
 
-    cd extras/po
+    cd extras/translations
     sudo make install
 
 # Tomb support in other applications
