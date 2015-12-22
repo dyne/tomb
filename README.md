@@ -13,13 +13,15 @@
 
 *A minimalistic commandline tool to manage encrypted volumes* aka **The Crypto Undertaker**
 
-![](https://github.com/dyne/Tomb/blob/master/extras/images/monmort.png)
+[![software by Dyne.org](https://www.dyne.org/wp-content/uploads/2015/12/software_by_dyne.png)](http://www.dyne.org)
 
 Updates on website: https://www.dyne.org/software/tomb
 
 Get the stable .tar.gz signed release for production use!
 
 Download it from https://files.dyne.org/tomb
+
+![tomb's logo](https://github.com/dyne/Tomb/blob/master/extras/images/monmort.png)
 
 # What is Tomb, the crypto undertaker?
 
