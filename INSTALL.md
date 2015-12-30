@@ -174,6 +174,15 @@ and run 'make install' as root:
     cd extras/translations
     sudo make install
 
+### extras/gtomb/
+
+This is a minimalistic graphical user interface scripted in ZSh
+depending from Zenity to display dialog boxes. It covers all basic
+operations in Tomb and facilitates the setup of hooks.
+
+    cd extras/gtomb
+    ./gtomb
+
 # Tomb support in other applications
 
 Can Tomb be used by other applications?

@@ -212,7 +212,7 @@ IRC on https://irc.dyne.org channel **#dyne** (or direct port 9999 SSL)
 
 # Licensing
 
-Tomb is Copyright (C) 2007-2015 by the Dyne.org Foundation
+Tomb is Copyright (C) 2007-2016 by the Dyne.org Foundation
 
 More information on all the developers involved is found in the
 [AUTHORS](AUTHORS.md) file.

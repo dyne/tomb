@@ -1,5 +1,17 @@
 # Tomb ChangeLog
 
+## 2.2
+### December 2015
+
+New Qt5 desktop tray in extras/qt-tray.
+New Zenity based Gtk interface in extras/gtomb (experimental).
+Better resizing procedure recovers from failure without starting over
+with a new dig.  Fixes for correct handling of bind-hooks mountpoints
+containing whitespaces, implying a refactoring of how the mtab is
+parsed, along with workaround for Debian bugs. Updated all strings to
+report MiB sizes. Fix to correctly show last time opened. Fix to EUID
+detection and to installed manpage permissions.
+
 ## 2.1.1
 ### August 2015
 

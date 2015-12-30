@@ -1,9 +1,9 @@
-
 Cryptsetup is written by Christophe Saout and Clemens Fruhwirth.
 
 Tomb is written and directed by Denis Roio <jaromil@dyne.org>
 
-Tomb includes code and advices by Anathema, Boyska, Hellekin O. Wolf and GDrooid.
+Tomb includes code and advices by Anathema, Boyska, Hellekin O. Wolf,
+GDrooid, Parazyd.
 
 The minimal Zenity GUI is being written by Parazyd
 
