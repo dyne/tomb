@@ -1,0 +1,985 @@
+#!/usr/bin/env zsh
+#
+# gtomb - a GUI wrapper for Tomb 
+# 
+# Maintained and written by parazyd <parazyd AT dyne DOT org>
+# https://github.com/parazyd/gtomb
+# https://github.com/dyne/Tomb
+#
+# gtomb is experimental software. It still does not work completely as 
+# intended and should be used with caution.
+#
+# {{{ License
+# gtomb - A GUI wrapper for Tomb, the crypto undertaker
+# Copyright (C) 2015 Parazyd <parazyd AT dyne DOT org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see http://www.gnu.org/licenses/
+#
+# }}}
+
+#set -x
+#set -v
+ver="0.6.2"
+TOMBPATH="/usr/bin/tomb" # Set this to your tomb executable's path
+KDFPATH="/usr/bin/" # Set this to the path of your KDF binaries (if you're using them)
+# The ones below should not need changing
+HEXENC="$KDFPATH/tomb-kdb-hexencode"
+GENSALT="$KDFPATH/tomb-kdb-pbkdf2-gensalt"
+GETITER="$KDFPATH/tomb-kdb-pbkdf2-getiter"
+PBKDF="$KDFPATH/tomb-kdb-pbkdf2"
+
+# {{{ monmort icon
+MONMORT="/tmp/monmort.png"
+ICONB64="iVBORw0KGgoAAAANSUhEUgAAACAAAAAgEAQAAACJ4248AAAAAmJLR0T//xSrMc0AAAAJcEhZcwAA\n
+AEgAAABIAEbJaz4AAAAJdnBBZwAAACAAAAAgAIf6nJ0AAADrSURBVFjD5ZZBEsMgCEU/TO/l2XMx\n
+04VjQ1K1CDYswkwWJnH+E/EL4RP7jluDCACoim/bvfIpFQiKEJcQHCN9xEtLCgDMQM7f33sZrPNG\n
+/05loCXujfAtCAVgNgLwIuycjQAra8G9Fm823ADabPRA1QDelfZAVUZktWrNvL8ew5YTnsStx3Am\n
+AyOInJVbYF1prZuU+tsR1g9UMDqGuo5oFWhtSEQNEGmeVrqv73Tj0pIZirANMYqRhyw5Bb9MauSW\n
+SwA8l9OzG5LnAsiiDQGQRRvaEwInK54J390hndAIYIeQ4k6AAjE/h06ab0SjP08MA1xDAAAAJXRF\n
+WHRkYXRlOmNyZWF0ZQAyMDExLTAxLTEyVDA5OjM0OjI0KzAxOjAwo//d7wAAACV0RVh0ZGF0ZTpt\n
+b2RpZnkAMjAxMS0wMS0xMlQwOTozNDoyNCswMTowMNKiZVMAAAAASUVORK5CYII="
+echo -e "$ICONB64" | base64 --decode > $MONMORT
+# }}}
+
+function _ { _clean } # I like cleaning :)
+
+# {{{ sudo function
+function _sudowrong {
+    if [[ $? == 1 ]]; then
+        sudoassword=$(ask_password "Wrong password. Insert sudo password for user $USER")
+        echo -e "$sudoassword\n" | sudo -S -v
+        _sudowrong
+    fi
+}
+# }}}
+
+# {{{ Zenity dialogs
+function _zenques {
+    zenity \
+        --window-icon="$MONMORT" \
+        --question \
+        --text="$1"
+}
+
+function _fsel {
+    zenity \
+        --window-icon="$MONMORT" \
+        --file-selection \
+        --title="$1"
+}
+function _fsave {
+    zenity \
+        --window-icon="$MONMORT" \
+        --file-selection \
+        --save \
+        --title="$1" \
+        --filename="$2"
+}
+function _zenwarn {
+    zenity \
+        --window-icon="$MONMORT" \
+        --warning \
+        --title="$1" \
+        --text="$2"
+}
+function _zeninfo {
+    zenity \
+        --window-icon="$MONMORT" \
+        --info \
+        --title="$1" \
+        --text="$2"
+}
+function _zenerr {
+    zenity \
+        --window-icon="$MONMORT" \
+        --error \
+        --title="$1" \
+        --text="$2"
+}
+function _zenprog {
+    zenity \
+        --window-icon="$MONMORT" \
+        --progress \
+        --auto-close \
+        --pulsate \
+        --title="$1" \
+        --text="$2"
+}
+function _zenprognc {
+    zenity \
+        --window-icon="$MONMORT" \
+        --progress \
+        --auto-close \
+        --no-cancel \
+        --pulsate \
+        --title="$1" \
+        --text="$2"
+}
+function _zenentry {
+    zenity \
+        --window-icon="$MONMORT" \
+        --entry \
+        --title="$1" \
+        --text="$2" \
+        --entry-text="$3"
+}
+# }}}
+
+# {{{ Some pinentry code shamelessly stolen from tomb
+# Ask user for a password
+# Wraps around the pinentry command, from the GnuPG project, as it
+# provides better security and conveniently use the right toolkit.
+ask_password() {
+
+    local description="$1"
+    local title="${2:-Enter tomb password.}"
+    local output
+    local password
+    local gtkrc
+    local theme
+
+    # Distributions have broken wrappers for pinentry: they do
+    # implement fallback, but they disrupt the output somehow.  We are
+    # better off relying on less intermediaries, so we implement our
+    # own fallback mechanisms. Pinentry supported: curses, gtk-2, qt4
+    # and x11.
+
+    # make sure LANG is set, default to C
+    LANG=${LANG:-C}
+
+    _verbose "asking password with tty=$TTY lc-ctype=$LANG"
+
+    if [[ "$DISPLAY" = "" ]]; then
+
+        if _is_found "pinentry-curses"; then
+            _verbose "using pinentry-curses"
+            output=`cat <<EOF | pinentry-curses
+OPTION ttyname=$TTY
+OPTION lc-ctype=$LANG
+SETTITLE $title
+SETDESC $description
+SETPROMPT Password:
+GETPIN
+EOF`
+        else
+            _failure "Cannot find pinentry-curses and no DISPLAY detected."
+        fi
+
+    else # a DISPLAY is found to be active
+
+        # customized gtk2 dialog with a skull (if extras are installed)
+        if _is_found "pinentry-gtk-2"; then
+            _verbose "using pinentry-gtk2"
+
+            gtkrc=""
+            theme=/share/themes/tomb/gtk-2.0-key/gtkrc
+            for i in /usr/local /usr; do
+                [[ -r $i/$theme ]] && {
+                    gtkrc="$i/$theme"
+                    break
+                }
+            done
+            [[ "$gtkrc" = "" ]] || {
+                gtkrc_old="$GTK2_RC_FILES"
+                export GTK2_RC_FILES="$gtkrc"
+            }
+            output=`cat <<EOF | pinentry-gtk-2
+OPTION ttyname=$TTY
+OPTION lc-ctype=$LANG
+SETTITLE $title
+SETDESC $description
+SETPROMPT Password:
+GETPIN
+EOF`
+            [[ "$gtkrc" = "" ]] || export GTK2_RC_FILES="$gtkrc_old"
+
+            # TODO QT4 customization of dialog
+        elif _is_found "pinentry-qt4"; then
+            _verbose "using pinentry-qt4"
+
+            output=`cat <<EOF | pinentry-qt4
+OPTION ttyname=$TTY
+OPTION lc-ctype=$LANG
+SETTITLE $title
+SETDESC $description
+SETPROMPT Password:
+GETPIN
+EOF`
+
+            # TODO X11 customization of dialog
+        elif _is_found "pinentry-x11"; then
+            _verbose "using pinentry-x11"
+
+            output=`cat <<EOF | pinentry-x11
+OPTION ttyname=$TTY
+OPTION lc-ctype=$LANG
+SETTITLE $title
+SETDESC $description
+SETPROMPT Password:
+GETPIN
+EOF`
+
+        else
+
+            if _is_found "pinentry-curses"; then
+                _verbose "using pinentry-curses"
+
+                _warning "Detected DISPLAY, but only pinentry-curses is found."
+                output=`cat <<EOF | pinentry-curses
+OPTION ttyname=$TTY
+OPTION lc-ctype=$LANG
+SETTITLE $title
+SETDESC $description
+SETPROMPT Password:
+GETPIN
+EOF`
+            else
+                _failure "Cannot find any pinentry: impossible to ask for password."
+            fi
+
+        fi
+
+    fi # end of DISPLAY block
+
+    # parse the pinentry output
+    for i in ${(f)output}; do
+        [[ "$i" =~ "^ERR.*" ]] && {
+            _warning "Pinentry error: ::1 error::" ${i[(w)3]}
+            print "canceled"
+            return 1 }
+
+        # here the password is found
+        [[ "$i" =~ "^D .*" ]] && password="${i##D }"
+    done
+
+    [[ "$password" = "" ]] && {
+        _warning "Empty password"
+        print "empty"
+        return 1 }
+
+    print "$password"
+    return 0
+}
+
+_is_found() {
+    # returns 0 if binary is found in path
+    [[ "$1" = "" ]] && return 1
+    command -v "$1" 1>/dev/null 2>/dev/null
+    return $?
+}
+
+function _warning  no() {
+    option_is_set -q || _msg warning $@
+    return 1
+}
+
+function _verbose xxx() {
+    option_is_set -D && _msg verbose $@
+    return 0
+}
+
+function _failure die() {
+    typeset -i exitcode=${exitv:-1}
+    option_is_set -q || _msg failure $@
+    # be sure we forget the secrets we were told
+    exit $exitcode
+}
+# }}}
+
+# {{{ _clean - Clean function, removes sensitive stuff from memory
+function _clean {
+    
+    echo "Cleaning..." # For debugging.
+    unset $?
+    local rr="$RANDOM"
+    while [[ ${#rr} -lt 500 ]]; do
+        rr+="$RANDOM"
+    done
+
+    command="$rr";      unset command
+    tombname="$rr";     unset tombname
+    tombsize="$rr";     unset tombsize
+    keyfile="$rr";      unset keyfile
+    sudoassword="$rr";  unset sudoassword
+    tombtmp=/tmp/tombtmp
+    if [ -f $tombtmp ]
+    then
+        dd if=/dev/urandom of=$tombtmp bs=800 count=1
+        rm -f $tombtmp
+    fi
+    tombtmp="$rr";      unset tombtmp
+    newkey="$rr";       unset newkey
+    jpegfile="$rr";     unset jpegfile
+}
+# }}}
+
+# {{{ _main - Main window
+function _main {
+    _clean
+    command=`zenity \
+        --window-icon="$MONMORT" \
+        --title="gtomb" \
+        --width=640 \
+        --height=420 \
+        --list \
+        --hide-header \
+        --text="gtomb v$ver\nThe GUI wrapper for Tomb, the crypto undertaker." \
+        --separator=" & " \
+        --column=Function \
+        --column=Description \
+        "dig" "Dig a new tomb of chosen size" \
+        "forge" "Forge a new key used to lock tombs" \
+        "lock" "Lock a non-locked tomb using an existing key" \
+        "open" "Open an existing tomb" \
+        "index" "Index the contents of all tombs." \
+        "search" "Search the content of indexed tombs." \
+        "list" "List all open tombs and information on them" \
+        "close" "Close a specific tomb (or all)" \
+        "slam" "Slam a tomb (or all) killing all programs using it" \
+        "resize" "Resize a tomb to a new size (can only grow)" \
+        "passwd" "Change the passphrase of a key" \
+        "setkey" "Change the key of an existing tomb" \
+        "engrave" "Generates a QR code of a key to be saved on paper" \
+        "bury" "Hide a key inside a JPEG image" \
+        "exhume" "Extract a key from a JPEG image"`
+
+    eval "_$command"
+}
+# }}}
+
+# {{{ dig - Dig a new tomb
+function _dig {
+
+    tombname=`_fsave "Choose where to dig your tomb" "secret.tomb"`
+
+    res=$?
+
+    if [[ -f $tombname ]]; then
+        _zenerr "Error" "This tomb already exists. I am not digging here."
+        exec _main
+    elif [[ $tombname == "" ]]; then
+        _zenwarn "Warning" "Try again."
+        exec _main
+    fi
+
+    case $res in
+        0)
+            tombsize=`_zenentry "Tomb digging" "Enter the size of your tomb in MiB (min. 10 MiB)" "10"`
+
+            res=$?
+
+            re='^[0-9]+$'
+            if ! [[ $tombsize =~ $re ]]; then
+                _zenerr "Error" "Please choose a valid number."
+                exec _main
+            elif [[ $tombsize == "" ]]; then
+                _zenwarn "Warning" "Try again."
+                exec _main
+            fi
+
+            case $res in
+                0)
+                    $TOMBPATH dig -s $tombsize $tombname | \
+                        _zenprog "Digging new tomb" "Please wait while your tomb is being dug..." &
+
+                    PID_ZEN=$(ps -C zenity h -o pid,command | grep "Digging new tomb" | awk '{print $1}')
+
+                    while [ "$PID_ZEN" != "" ]; do
+                        PID_ZEN=$(ps h -o pid -p ${PID_ZEN})
+                        PID_DD=$(ps -C dd h -o pid,command | grep "$tombname" | awk '{print $1}')
+                        sleep 1
+                    done
+
+                    if [[ "$PID_DD" != "" && "$PID_ZEN" == "" ]]; then
+                        kill -9 $PID_DD
+                        _zenwarn "Warning" "Tomb digging canceled."
+                        rm -f $tombname
+                        exec _main
+                    fi
+
+                    _clean
+                    _zeninfo "Success" "Your tomb has been dug."
+                    exec _main
+                    ;;
+                1)
+                    _zenwarn "Warning" "Tomb digging canceled."
+                    exec _main
+                    ;;
+            1)
+                exec _main
+                ;;
+            esac
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ forge - Forge a new key
+function _forge {
+    keyfile=`_fsave "Choose where to forge your key" "secret.tomb.key"`
+    
+    res=$?
+
+    if [[ -f $keyfile ]]; then
+        _zenerr "Error" "This key already exists. I am not overwriting."
+        exec _main
+    elif [[ $keyfile == "" ]]; then
+        _zenwarn "Warning" "Try again."
+        exec _main
+    fi
+
+    if [[ -f $HEXENC ]] && [[ -f $GENSALT ]] && [[ -f $GETITER ]] && [[ -f $PBKDF ]]; then
+        kdf=""
+        kdfiter=""
+        _zenques "Do you want to use KDF? (Generates passwords armored against dictionary attacks)" 
+        if [[ $? == "0" ]]; then
+            kdf="--kdf"
+            kdfiter=`_zenentry "Iterations" "Enter the delay (itertime) in seconds for each time this key is used:" "2"`
+        fi
+    fi
+
+    case $res in
+        0)
+            $TOMBPATH forge $keyfile $kdf $kdfiter | \
+                _zenprog "Forging key" "Please wait while your key is being forged...\n\
+You can move your mouse around and use your computer to speed up the process." &
+
+            PID_ZEN=$(ps -C zenity h -o pid,command | grep "Forging key" | awk '{print $1}')
+
+            while [ "$PID_ZEN" != "" ]; do
+                PID_ZEN=$(ps h -o pid -p ${PID_ZEN})
+                PID_DD=$(ps -C dd h -o pid,command | grep " if=" | awk '{print $1}')
+                sleep 1
+            done
+
+            if [[ "$PID_DD" != "" && "$PID_ZEN" == "" ]]; then
+                kill -9 $PID_DD
+                _zenwarn "Warning" "Forging canceled."
+                rm -f $keyfile
+                exec _main
+            fi
+
+            _clean
+            _zeninfo "Success" "Your key is now forged."
+            exec _main
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ lock - Lock a non-locked tomb
+function _lock {
+    tombname=`_fsel "Select a tomb to lock"`
+
+    res=$?
+    
+    if [[ $tombname == "" ]]; then
+        _zenwarn "Warning" "Try again."
+        exec _main
+    fi
+    
+    case $res in
+        0)
+            keyfile=`_fsel "Choose the key for your tomb"`
+
+            res=$?
+
+            if [[ $keyfile == "" ]]; then
+                _zenwarn "Warning" "Try again."
+                exec _main
+            fi
+
+            case $res in
+                0)  
+                    sudoassword=$(ask_password "Insert sudo password for user $USER")
+                    echo -e "$sudoassword\n" | sudo -S -v
+                    _sudowrong
+
+                    $TOMBPATH lock $tombname -k $keyfile | \
+                        _zenprognc "Locking your tomb" "Please wait while your tomb is being locked..."
+                    
+                    _clean # Clean sensitive stuff from memory
+                    _zeninfo "Success" "Your tomb is now locked."
+                    exec _main
+                    ;;
+                1)
+                    exec _main
+                    ;;
+            esac
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ open - Open an existing tomb
+function _open {
+    tombname=`_fsel "Choose a tomb to open"`
+
+    res=$?
+    case $res in
+        0)
+            keyfile=`_fsel "Choose the key for your tomb"`
+
+            res=$?
+            case $res in
+                0)
+                    sudoassword=$(ask_password "Insert sudo password for user $USER")
+                    echo -e "$sudoassword\n" | sudo -S -v
+                    _sudowrong
+
+                    $TOMBPATH open $tombname -k $keyfile
+
+                    _clean # Clean sensitive stuff from memory
+                    _zeninfo "Success" "Your tomb is now open."
+                    exec _main
+                    ;;
+                1)
+                    exec _main
+                    ;;
+            esac
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ list - list all open tombs, along with their mountpoint
+function _list {
+    tombtmp="/tmp/tombtmp"
+    $TOMBPATH list --get-mountpoint > $tombtmp
+    tombname=`cat $tombtmp | \
+        sed 's/.*\/\([^\/]*\)$/\1\n &/' | \
+        zenity \
+            --title="Currently open tombs" \
+            --window-icon="$MONMORT" \
+            --width=640 --height=380 --list \
+            --separator=" & " \
+            --text="Here are your open tombs" \
+            --column=Tomb \
+            --column=Path `
+
+    res=$?
+    case $res in
+        0)
+            listchoice=`zenity \
+                --title="Choose action" \
+                --window-icon="$MONMORT" \
+                --width=640 --height=400 --list \
+                --separator=" & " \
+                --text="What do you want to do with this tomb?" \
+                --column=Command \
+                --column=Description \
+                "disindex" "Disable indexing of this tomb." \
+                "enindex" "Enable indexing of this tomb."   \
+                "close" "Close the selected tomb." \
+                "slam" "Slam the selected tomb." \
+                "binds" "Edit current bind-hooks." \
+                "posts" "Edit current post-hooks."`
+
+            if [[ $? == 1 ]]; then
+                exec _main
+            fi
+
+            case $listchoice in
+                close)
+                    sudoassword=$(ask_password "Insert sudo password for user $USER") 
+                    echo -e "$sudoassword\n" | sudo -S -v
+                    _sudowrong
+
+                    $TOMBPATH close $tombname
+                    _zeninfo "Success" "Tomb closed successfully!"
+                    exec _main
+                    ;;
+                slam)
+                    sudoassword=$(ask_password "Insert sudo password for user $USER") 
+                    echo -e "$sudoassword\n" | sudo -S -v
+                    _sudowrong
+
+                    $TOMBPATH slam $tombname
+                    _zeninfo "Success" "Tomb slammed successfully!"
+                    exec _main
+                    ;;
+                disindex)
+                    tombloc=`$TOMBPATH list $tombname --get-mountpoint`
+                    touch "$tombloc/.noindex"
+                    _zeninfo "Success" "Indexing disabled for this tomb."
+                    exec _main
+                    ;;
+                enindex)
+                    tombloc=`$TOMBPATH list $tombname --get-mountpoint`
+                    rm "$tombloc/.noindex"
+                    _zeninfo "Success" "Indexing of this tomb is enabled."
+                    exec _main
+                    ;;
+                binds)
+                    tombloc=`$TOMBPATH list $tombname --get-mountpoint` 
+                    bindhooks=`zenity \
+                        --text-info \
+                        --filename="$tombloc/bind-hooks" \
+                        --editable`
+                    if [[ $? == "0" ]]; then
+                        echo "$bindhooks" > "$tombloc/bind-hooks"
+                    fi
+                    exec _main
+                    ;;
+                posts)
+                    tombloc=`$TOMBPATH list $tombname --get-mountpoint`
+                    
+                    posthooks=`zenity \
+                        --text-info \
+                        --filename="$tombloc/post-hooks" \
+                        --editable`
+                    if [[ $? == "0" ]]; then
+                        echo "$posthooks" > "$tombloc/post-hooks"
+                        chmod +x $tombloc/post-hooks
+                    fi
+                    exec _main
+                    ;;
+  
+                # See what else to add
+            esac
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ close - Close open tomb(s)
+function _close {
+    tombtmp="/tmp/tombtmp"
+    $TOMBPATH list --get-mountpoint > $tombtmp
+    echo "/all" >> $tombtmp
+    tombname=`cat $tombtmp | \
+        sed 's/.*\/\([^\/]*\)$/\1\n &/' | \
+        zenity \
+            --title="Choose a tomb to close" \
+            --window-icon="$MONMORT" \
+            --width=640 --height=380 --list \
+            --separator=" & " \
+            --column=Tomb \
+            --column=Path `
+
+        res=$?
+        case $res in
+            0)
+                sudoassword=$(ask_password "Insert sudo password for user $USER")
+                echo -e "$sudoassword\n" | sudo -S -v
+                _sudowrong
+
+                $TOMBPATH close $tombname
+
+                _clean # Clean sensitive stuff from memory
+                _zeninfo "Success" "Tomb(s) closed successfully!"
+                exec _main
+                ;;
+            1)
+                exec _main
+                ;;
+        esac
+}
+# }}}
+
+# {{{ slam - Slam open tombs
+function _slam {
+    tombtmp="/tmp/tombtmp"
+    $TOMBPATH list --get-mountpoint > $tombtmp
+    echo "/all" >> $tombtmp
+    tombname=`cat $tombtmp | \
+        sed 's/.*\/\([^\/]*\)$/\1\n &/' | \
+        zenity \
+            --title="Choose a tomb to slam" \
+            --window-icon="$MONMORT" \
+            --width=640 --height=380 --list \
+            --separator=" & " \
+            --column=Tomb \
+            --column=Path `
+            
+    res=$?
+    case $res in
+        0)
+            sudoassword=$(ask_password "Insert sudo password for user $USER")
+            echo -e "$sudoassword\n" | sudo -S -v
+            _sudowrong
+
+            $TOMBPATH slam $tombname
+
+            _clean # Clean sensitive stuff from memory
+            _zeninfo "Success" "Tomb(s) slammed successfully!"
+            exec _main
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ resize - Resize an existing *closed* tomb
+function _resize {
+    tombname=`_fsel "Choose a tomb to resize"`
+
+    res=$?
+    case $res in
+        0)
+            tombsize=`_zenentry "New tomb size" "Enter the new size of your tomb in MiB. Must be higher than the current size." "100"`
+
+            res=$?
+            case $res in
+                0)
+                    keyfile=`_fsel "Choose according keyfile"`
+
+                    res=$?
+                    case $res in
+                        0)
+                            sudoassword=$(ask_password "Insert sudo password for user $USER")
+                            echo -e "$sudoassword\n" | sudo -S -v
+                            _sudowrong
+
+                            $TOMBPATH resize $tombname -s $tombsize -k $keyfile | \
+                                _zenprognc "Resizing tomb." "Please wait while your tomb is being resized..."
+
+                            _clean # Clean sensitive stuff from memory
+                            _zeninfo "Success" "Tomb resized successfully!"
+                            exec _main
+                            ;;
+                        1)
+                            exec _main
+                            ;;
+                    esac
+                    ;;
+                1)
+                    exec _main
+                    ;;
+            esac
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ passwd - Change existing key's passphrase
+function _passwd {
+    keyfile=`_fsel "Choose a keyfile"`
+
+    res=$?
+    case $res in
+        0)
+            $TOMBPATH passwd -k $keyfile | \
+                _zenprognc "Changing passphrase" "Please wait while your key's passphrase is being changed..."
+            
+            _clean # Clean sensitive stuff from memory
+            _zeninfo "Success" "Passphrase changed successfully!"
+            exec _main
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ setkey - Change a tomb's keyfile
+function _setkey {
+    tombname=`_fsel "Choose a tomb to change its keyfile"`
+
+    res=$?
+    case $res in
+        0)
+            keyfile=`_fsel "Chosse your tomb's old keyfile"`
+
+            res=$?
+            case $res in
+                0)
+                    newkey=`_fsel "Choose your tomb's new keyfile"`
+
+                    res=$?
+                    case $res in
+                        0)
+                            sudoassword=$(ask_password "Insert sudo password for $USER")
+                            echo -e "$sudoassword\n" | sudo -S -v
+                            _sudowrong
+
+                            $TOMBPATH setkey -k $newkey $keyfile $tombname | \
+                                _zenprognc "Changing key" "Please wait while your tomb's key is being changed..."
+
+                            _clean
+                            _zeninfo "Success" "Tomb's keyfile successfully changed!"
+                            exec _main
+                            ;;
+                        1)
+                            exec _main
+                            ;;
+                    esac
+                    ;;
+                1)
+                    exec _main
+                    ;;
+            esac
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ engrave - generate QR code of a key
+function _engrave {
+    which qrencode || _zenwarn "Warning" "qrencode is not installed. Install it and try again" && exec _main
+    keyfile=`_fsel "Choose a keyfile to engrave"`
+
+    res=$?
+    case $res in
+        0)
+            jpegfile=`_fsave "Choose where to save your keyfile (PNG format)"`
+            
+            res=$?
+            case $res in
+                0)
+                    awk '/^-----/ {next}; /^Version/ {next}; {print $0}' $keyfile \
+                        | qrencode --size 4 --level H --casesensitive -o $jpegfile
+                    
+                    _zeninfo "Success" "QR code generated in $jpegfile"
+                    exec _main
+                    ;;
+                1)
+                    exec _main
+                    ;;
+            esac
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ bury - hide a keyfile in a JPEG image
+function _bury {
+    which steghide || _zenwarn "Warning" "steghide is not installed. Install it and try again" && exec _main
+    keyfile=`_fsel "Choose keyfile"`
+
+    res=$?
+    case $res in
+        0)
+            jpegfile=`_fsel "Choose JPEG file"`
+
+            res=$?
+            case $res in
+                0)
+                    $TOMBPATH bury -k $keyfile $jpegfile
+
+                    _zeninfo "Success" "Your key is now hidden in $jpegfile"
+                    _clean # Clean sensitive stuff from memory
+                    exec _main
+                    ;;
+                1)
+                    exec _main
+                    ;;
+            esac
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ exhume - extract keyfile from JPEG
+function _exhume {
+    which steghide || _zenwarn "Warning" "steghide is not installed. Install it and try again" && exec _main
+    jpegfile=`_fsel "Choose JPEG file"`
+
+    res=$?
+    case $res in
+        0)
+            keyfile=`_fsave "Choose where to extract your key"`
+
+            res=$?
+            case $res in
+                0)
+                    $TOMBPATH exhume -k $keyfile $jpegfile
+
+                    _zeninfo "Success" "Your keyfile is extracted to $keyfile"
+                    _clean # Clean sensitive stuff from memory
+                    exec _main
+                    ;;
+                1)
+                    exec _main
+                    ;;
+            esac
+            ;;
+        1)
+            exec _main
+            ;;
+    esac
+}
+# }}}
+
+# {{{ index - index the contents of open tombs
+function _index {
+    which mlocate || _zenwarn "Warning" "mlocate is not installed. Install it and try again" && exec _main
+
+    $TOMBPATH index | _zenprognc "Indexing" "Please wait while the open tombs are being indexed..."
+    _zeninfo "Success" "Tombs indexed!"
+    
+    exec _main
+}
+# }}}
+
+# {{{ search - searches the contents of indexed tombs
+function _search {
+    strings=""
+
+    function _searchstring {
+        srchstring=`_zenentry "Search" "Enter an argument to search. Cancel to finish."`
+        res=$?
+        strings="$strings $srchstring"
+        
+        if [[ $res == "1" ]]; then
+            tombtmp="/tmp/tombtmp"
+            $TOMBPATH search $strings > $tombtmp
+            #cat $tombtmp | \
+                zenity \
+                    --text-info \
+                    --title="Search results" \
+                    --filename=$tombtmp
+        else
+            _searchstring
+        fi
+    }
+    _searchstring
+}
+# }}}
+
+if [ ! -f $TOMBPATH ]; then
+    _zenwarn "Warning" "Tomb binary is nonexistent in the current path. Install it or edit the script to point to the correct path."
+else
+    _main
+fi
