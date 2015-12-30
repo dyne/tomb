@@ -1824,6 +1824,8 @@ mount_tomb() {
 
     # print out when it was opened the last time, by whom and where
     [[ -r ${tombmount}/.last ]] && {
+        tombsince=$(_cat ${tombmount}/.last)
+        tombsince=$(date --date=@$tombsince +%c)
         tombtty=$(_cat ${tombmount}/.tty)
         tombhost=$(_cat ${tombmount}/.host)
         tomblast=$(_cat ${tombmount}/.last)
@@ -1833,7 +1835,7 @@ mount_tomb() {
         tombuser=${tombuser[(ws@:@)1]}
 
         _message "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::" $tombuser $tombuid $tombtty $tombhost
-        _message "on date ::1 date::" "`date --date=@${tomblast} +%c`"
+        _message "on date ::1 date::" $tombsince
     }
     # write down the UID and TTY that opened the tomb
     rm -f ${tombmount}/.uid
@@ -1986,10 +1988,15 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
         tombavail=${ts[(ws:;:)3]}
         tombpercent=${ts[(ws:;:)4]}
         tombp=${tombpercent%%%}
-        tombsince=`date --date=@${mapper[(ws:.:)3]} +%c`
+
+        # obsolete way to get the last open date from /dev/mapper
+        # which doesn't work when tomb filename contain dots
+        # tombsince=`date --date=@${mapper[(ws:.:)3]} +%c`
 
         # find out who opens it from where
         [[ -r ${tombmount}/.tty ]] && {
+            tombsince=$(_cat ${tombmount}/.last)
+            tombsince=$(date --date=@$tombsince +%c)
             tombtty=$(_cat ${tombmount}/.tty)
             tombhost=$(_cat ${tombmount}/.host)
             tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
@@ -2081,10 +2088,10 @@ list_tomb_binds() {
 
     # list bind hooks on util-linux 2.20 (Debian 7)
     mount -l \
-        | awk -vtomb="$1" '
+        | awk -vname="$1" '
 BEGIN { main="" }
 /^\/dev\/mapper\/tomb/ {
-  if($7!=tomb) next;
+  if($7!=name) next;
   if(main=="") { main=$1; next; }
   if(main==$1)
     print $1 ";" $3 ";" $5 ";" $6 ";" $7
@@ -2305,9 +2312,9 @@ resize_tomb() {
         delta="$(( $newtombsize - $oldtombsize ))"
 
         _message "Generating ::1 tomb file:: of ::2 size::MiB" $TOMBFILE $newtombsize
-           
+
         _verbose "Data dump using ::1:: from /dev/urandom" ${DD[1]}
-        ${=DD} if=/dev/urandom bs=1048576 count=${delta} >> $TOMBPATH        
+        ${=DD} if=/dev/urandom bs=1048576 count=${delta} >> $TOMBPATH
         [[ $? == 0 ]] || {
             _failure "Error creating the extra resize ::1 size::, operation aborted." \
                      $tmp_resize }
