@@ -2027,7 +2027,7 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
         }
 
         # Now check hooks
-        mounted_hooks=(`list_tomb_binds $tombname`)
+        mounted_hooks=(`list_tomb_binds $tombname $tombmount`)
         for h in ${mounted_hooks}; do
             _message "::1 tombname:: hooks ::2 hookname:: on ::3 hookdest::" \
                 $tombname "`basename ${h[(ws:;:)1]}`" ${h[(ws:;:)2]}
@@ -2081,31 +2081,43 @@ BEGIN { main="" }
 # list_tomb_binds
 # print out an array of mounted bind hooks (internal use)
 # format is semi-colon separated list of attributes
-# needs an argument: name of tomb whose hooks belong
+# needs two arguments: name of tomb whose hooks belong
+#                      mount tomb
 list_tomb_binds() {
-    [[ -z "$1" ]] && {
+    [[ -z "$2" ]] && {
         _failure "Internal error: list_tomb_binds called without argument." }
 
-    # list bind hooks on util-linux 2.20 (Debian 7)
-    mount -l \
-        | awk -vname="$1" '
-BEGIN { main="" }
-/^\/dev\/mapper\/tomb/ {
-  if($7!=name) next;
-  if(main=="") { main=$1; next; }
-  if(main==$1)
-    print $1 ";" $3 ";" $5 ";" $6 ";" $7
-}
-'
+    # OK well, prepare for some insanity: parsing the mount table on GNU/Linux
+    # is like combing a Wookie while he is riding a speedbike down a valley.
 
-    # list bind hooks on util-linux 2.17 (Debian 6)
-    tombmount=`mount -l \
-      | awk -vtomb="$1" '
-/^\/dev\/mapper\/tomb/ { if($7!=tomb) next; print $3; exit; }'`
+    typeset -A tombs
+    typeset -a binds
+    for t in "${(f)$(mount -l | grep '/dev/mapper/tomb.*]$')}"; do
+        len="${(w)#t}"
+        [[ "${t[(w)$len]}" = "$1" ]] || continue
+        tombs+=( ${t[(w)1]} ${t[(w)$len]} )
 
-    mount -l | grep "^$tombmount" \
-        | awk -vtomb="$1" '
-        /bind/ { print $1 ";" $3 ";" $5 ";" $6 ";" $7 }'
+    done
+
+    for m in ${(k)tombs}; do
+        for p in "${(f)$(cat /proc/mounts):s/\\040(deleted)/}"; do
+            # Debian's kernel appends a '\040(deleted)' to the mountpoint in /proc/mounts
+            # so if we parse the string as-is then this will break the parsing. How nice of them!
+            # Some bugs related to this are more than 10yrs old. Such Debian! Much stable! Very parsing!
+            # Bug #711183  umount parser for /proc/mounts broken on stale nfs mount (gets renamed to "/mnt/point (deleted)")
+            # Bug #711184  mount should not stat mountpoints on mount
+            # Bug #711187  linux-image-3.2.0-4-amd64: kernel should not rename mountpoint if nfs server is dead/unreachable
+            [[ "${p[(w)1]}" = "$m" ]] && {
+                [[ "${(q)p[(w)2]}" != "${(q)2}" ]] && {
+                    # Our output format:
+                    # mapper;mountpoint;fs;flags;name
+                    binds+=("$m;${(q)p[(w)2]};${p[(w)3]};${p[(w)4]};${tombs[$m]}") }
+            }
+        done
+    done
+
+    # print the results out line by line
+    for b in $binds; do print - "$b"; done
 }
 
 # }}} - Tomb list
@@ -2387,6 +2399,8 @@ umount_tomb() {
 
     for t in ${mounted_tombs}; do
         mapper=`basename ${t[(ws:;:)1]}`
+
+        # strip square parens from tombname
         tombname=${t[(ws:;:)5]}
         tombmount=${t[(ws:;:)2]}
         tombfs=${t[(ws:;:)3]}
@@ -2413,16 +2427,16 @@ umount_tomb() {
                 $tombname $tombmount }
 
         # check if there are binded dirs and close them
-        bind_tombs=(`list_tomb_binds $tombname`)
+        bind_tombs=(`list_tomb_binds $tombname $tombmount`)
         for b in ${bind_tombs}; do
             bind_mapper="${b[(ws:;:)1]}"
             bind_mount="${b[(ws:;:)2]}"
             _message "Closing tomb bind hook: ::1 hook::" $bind_mount
-            _sudo umount $bind_mount || {
+            _sudo umount "`print - ${bind_mount}`" || {
                 [[ -n $SLAM ]] && {
                     _success "Slamming tomb: killing all processes using this hook."
-                    slam_tomb "$bind_mount" || _failure "Cannot slam the bind hook ::1 hook::" $bind_mount
-                    umount $bind_mount || _failure "Cannot slam the bind hook ::1 hook::" $bind_mount
+                    slam_tomb "`print - ${bind_mount}`" || _failure "Cannot slam the bind hook ::1 hook::" $bind_mount
+                    umount "`print - ${bind_mount}`" || _failure "Cannot slam the bind hook ::1 hook::" $bind_mount
                 } || {
                     _failure "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount
                 }
@@ -2438,7 +2452,10 @@ umount_tomb() {
         [[ $? = 0 ]] || { _failure "Tomb is busy, cannot umount!" }
 
         # If we used a default mountpoint and is now empty, delete it
-        [[ "$tombmount" -regex-match "[/run]?/media[/$_USER]?/$tombname" ]] && {
+        tombname_regex=${tombname//\[/}
+        tombname_regex=${tombname_regex//\]/}
+
+        [[ "$tombmount" -regex-match "[/run]?/media[/$_USER]?/$tombname_regex" ]] && {
             _sudo rmdir $tombmount }
 
         _sudo cryptsetup luksClose $mapper
