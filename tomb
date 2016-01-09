@@ -969,6 +969,7 @@ get_lukskey() {
                 kdf_salt="${firstline[(ws:_:)3]}"
                 kdf_ic="${firstline[(ws:_:)4]}"
                 kdf_len="${firstline[(ws:_:)5]}"
+                _message "Unlocking KDF key protection ($kdf_hash)"
                 _verbose "KDF salt: $kdf_salt"
                 _verbose "KDF ic: $kdf_ic"
                 _verbose "KDF len: $kdf_len"
@@ -1147,7 +1148,9 @@ gen_key() {
             if [[ "$itertime" != <-> ]]; then
                 unset tombpass
                 unset tombpasstmp
-                _failure "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+                _error "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+                _error "Depending on the speed of machines using this tomb, use 1 to 10, or more"
+                return 1
             fi
             # --kdf takes one parameter: iter time (on present machine) in seconds
             local -i microseconds
@@ -1441,7 +1444,7 @@ forge_key() {
     [[ -z "$destkey" ]] && {
         _failure "A filename needs to be specified using -k to forge a new key." }
 
-    _message "Commanded to forge key ::1 key::" $destkey
+#    _message "Commanded to forge key ::1 key::" $destkey
 
     _check_swap # Ensure the available memory is safe to use
 
@@ -1468,12 +1471,16 @@ forge_key() {
     _message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" \
         $destkey $algo
 
+    [[ $KDF == 1 ]] && {
+        _message "Using KDF to protect the key password (`option_value --kdf` rounds)"
+    }
+
     TOMBKEYFILE="$destkey"    # Set global variable
 
-    _message "This operation takes time, keep using this computer on other tasks,"
-    _message "once done you will be asked to choose a password for your tomb."
-    _message "To make it faster you can move the mouse around."
-    _message "If you are on a server, you can use an Entropy Generation Daemon."
+    _warning "This operation takes time, keep using this computer on other tasks,"
+    _warning "once done you will be asked to choose a password for your tomb."
+    _warning "To make it faster you can move the mouse around."
+    _warning "If you are on a server, you can use an Entropy Generation Daemon."
 
     # Use /dev/random as the entropy source, unless --use-urandom is specified
     local random_source=/dev/random

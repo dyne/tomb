@@ -57,6 +57,8 @@ knowing its password. As in any other command requiring a key, the
 option \fI-k\fR should be used to specify a key file. The \fI-o\fR
 option can be used to specify the cipher specification: default is
 "aes-xts-plain64:sha256", old versions of Tomb used "aes-cbc-essiv:sha256".
+If you are looking for something exotic, also try "serpent-xts-plain64".
+More options may be found in cryptsetup(8) and Linux documentation.
 This operation requires root privileges to loopback mount, format the tomb (using
 LUKS and Ext4), then set the key in its first LUKS slot.
 
@@ -135,7 +137,7 @@ key and the second and last argument the tomb file.
 Increase the size of a tomb file to the amount specified by the
 \fI-s\fR option, which is the new size in megabytes (MiB). Full access to the tomb using
 a key (\fI-k\fR) and its password is required. Tombs can only grow and
-can never be made smaller. This command makes use of the cryptsetup
+can never be made smaller. This command makes use of the cryptsetup(8)
 resize feature and the resize2fs command: its much more practical than
 creating a new tomb and moving everything into it.
 
