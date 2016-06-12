@@ -23,6 +23,9 @@ Download it from https://files.dyne.org/tomb
 
 ![tomb's logo](https://github.com/dyne/Tomb/blob/master/extras/images/monmort.png)
 
+[![Build Status](https://travis-ci.org/dyne/Tomb.svg?branch=master)](https://travis-ci.org/dyne/Tomb)
+
+
 # What is Tomb, the crypto undertaker?
 
 Tomb aims to be a free and open source system for easy encryption and

@@ -1,0 +1,10 @@
+language: c
+sudo: required
+dist: trusty
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install --no-install-recommends -y zsh sudo gnupg cryptsetup pinentry-curses gawk
+
+script:
+  - make test
+
