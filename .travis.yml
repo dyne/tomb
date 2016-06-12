@@ -3,8 +3,10 @@ sudo: required
 dist: trusty
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install --no-install-recommends -y zsh sudo gnupg cryptsetup pinentry-curses gawk
+  - sudo apt-get install --no-install-recommends -y zsh sudo gnupg cryptsetup pinentry-curses gawk  libgcrypt20-dev steghide qrencode e2fsprogs
 
 script:
+  - make -C extras/kdf-keys
+  - sudo make -C extras/kdf-keys install
   - make test
 
