@@ -325,7 +325,7 @@ _ensure_safe_swap() {
     done
 
     if [[ $r -eq 2 ]]; then
-        _success "All your swaps are belong to crypt. Good."
+        _success "The undertaker found that all swap partitions are encrypted. Good."
     else
         _warning "This poses a security risk."
         _warning "You can deactivate all swap partitions using the command:"
