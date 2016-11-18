@@ -1,6 +1,10 @@
 language: c
 sudo: required
 dist: trusty
+
+env:
+  - DEBIAN_FRONTEND=noninteractive
+
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install --no-install-recommends -y zsh sudo gnupg cryptsetup pinentry-curses gawk  libgcrypt20-dev steghide qrencode e2fsprogs
