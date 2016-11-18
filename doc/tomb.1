@@ -201,10 +201,10 @@ the \fIsize\fR of the new file to be created. Units are megabytes (MiB).
 .B
 .IP "--kdf \fI<itertime>\fR"
 Activate the KDF feature against dictionary attacks when creating a
-key: forces a delay of \fI<itertime>\fR seconds every time this key is used.
-You should keep in mind that the actual iteration count is calculated based on
-the performance of the computer where you forge the key.
-The argument must be an integer, so you cannot say \fI--kdf 0.3\fR for 300ms.
+key: forces a delay of \fI<itertime>\fR times every time this key is
+used.  The actual time to wait depends on the CPU speed of the
+computer where the key is used.  Using 5 or 10 is a sane amount for
+modern computers, the value is multiplied by 1 million.
 .B
 .IP "-h"
 Display a help text and quit.

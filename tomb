@@ -1148,8 +1148,8 @@ gen_key() {
             if [[ "$itertime" != <-> ]]; then
                 unset tombpass
                 unset tombpasstmp
-                _error "Wrong argument for --kdf: must be an integer number (iteration seconds)."
-                _error "Depending on the speed of machines using this tomb, use 1 to 10, or more"
+                _warning "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+                _failure "Depending on the speed of machines using this tomb, use 1 to 10, or more"
                 return 1
             fi
             # --kdf takes one parameter: iter time (on present machine) in seconds
