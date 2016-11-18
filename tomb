@@ -210,10 +210,10 @@ _whoami() {
     _verbose "Identified caller: ::1 username:: (::2 UID:::::3  GID::)" $_USER $_UID $_GID
 
     # Update USERNAME accordingly if possible
-    [[ $EUID == 0 && $_USER != $USERNAME ]] && {
-        _verbose "Updating USERNAME from '::1 USERNAME::' to '::2 _USER::')" $USERNAME $_USER
-        USERNAME=$_USER
-    }
+    # [[ $EUID == 0 && $_USER != $USERNAME ]] && {
+    #     _verbose "Updating USERNAME from '::1 USERNAME::' to '::2 _USER::')" $USERNAME $_USER
+    #     USERNAME=$_USER
+    # }
 
     # Force HOME to _USER's HOME if necessary
     local home=$(awk -F: "/^$_USER:/ { print \$6 }" /etc/passwd 2>/dev/null)
