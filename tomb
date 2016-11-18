@@ -1956,7 +1956,7 @@ exec_safe_post_hooks() {
     [[ -x $mnt/post-hooks ]] || return
 
     # If the file starts with a shebang, run it.
-    cat $mnt/post-hooks | head -n1 | grep '^#!\s*/' &> /dev/null
+    head -n1 $mnt/post-hooks | grep '^#!\s*/'
     [[ $? == 0 ]] && {
         _success "Post hooks found, executing as user ::1 user name::." $USERNAME
         $mnt/post-hooks $act $mnt
