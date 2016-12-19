@@ -25,6 +25,9 @@ Download it from https://files.dyne.org/tomb
 
 [![Build Status](https://travis-ci.org/dyne/Tomb.svg?branch=master)](https://travis-ci.org/dyne/Tomb)
 
+# Breaking news (literally)
+
+Those who upgraded the ZSh interpreter to version 5.3 (released very recently) will have problems opening tombs. [This problem is known](https://github.com/dyne/Tomb/issues/232) and will be fixed soon. There is no data loss for your tombs, of course. Meanwhile we advise to downgrade ZSh to 5.2.
 
 # What is Tomb, the crypto undertaker?
 
