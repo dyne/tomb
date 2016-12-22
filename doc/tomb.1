@@ -64,12 +64,13 @@ LUKS and Ext4), then set the key in its first LUKS slot.
 
 .B
 .IP "open"
-Opens an existing \fI.tomb\fR (first argument) using a key (\fI-k\fR),
-if a second argument is given it will indicate the \fImountpoint\fR
-where the tomb should be made accessible, else the tomb is mounted in
-a directory inside /media (if not available it uses /run/media/$USER).
-The option \fI-o\fR can be used to pass mount(8) options
-(default: rw,noatime,nodev).
+Opens an existing \fI.tomb\fR (first argument) using a key (\fI-k\fR)
+which can also be an \fIjpeg image\fR (see
+\fIbury\fR/\fIexhume\fR). If a second argument is given it will
+indicate the \fImountpoint\fR where the tomb should be made
+accessible, else the tomb is mounted in a directory inside /media (if
+not available it uses /run/media/$USER).  The option \fI-o\fR can be
+used to pass mount(8) options (default: rw,noatime,nodev).
 
 .B
 .IP "list"
