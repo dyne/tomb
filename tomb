@@ -919,6 +919,7 @@ gpg_decrypt() {
     local gpgver=$(gpg --version --no-permission-warning | awk '/^gpg/ {print $3}')
     local gpgpass="$1\n$TOMBKEY"
     local gpgstatus
+    local tmpres
 
     [[ $gpgver == "1.4.11" ]] && {
         _verbose "GnuPG is version 1.4.11 - adopting status fix."
@@ -927,23 +928,24 @@ gpg_decrypt() {
             gpg --batch --passphrase-fd 0 --no-tty --no-options`
         ret=$?
         unset gpgpass
-
-    } || { # using status-file in gpg != 1.4.11
-
-        TOMBSECRET=`print - "$gpgpass" | \
-            gpg --batch --passphrase-fd 0 --no-tty --no-options \
-            --status-fd 2 --no-mdc-warning --no-permission-warning \
-            --no-secmem-warning` |& grep GNUPG: \
-            | read -r -d'\n' gpgstatus
-
-        unset gpgpass
-
-        ret=1
-
-        [[ "${gpgstatus}" =~ "DECRYPTION_OKAY" ]] && { ret=0 }
-
-
+        return $ret
     }
+
+    _tmp_create
+    tmpres=$TOMBTMP
+    print - "$gpgpass" | \
+        gpg --batch --passphrase-fd 0 --no-tty --no-options \
+            --status-fd 2 --no-mdc-warning --no-permission-warning \
+            --no-secmem-warning 2> $tmpres \
+        | read -r -d'\n' TOMBSECRET
+
+    unset gpgpass
+
+    ret=1
+    for i in ${(f)"$(cat $tmpres)"}; do
+        _verbose "$i"
+        [[ "$i" =~ "DECRYPTION_OKAY" ]] && { ret=0 }
+    done
     return $ret
 
 }
