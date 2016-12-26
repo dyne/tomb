@@ -1,8 +1,26 @@
-#!/usr/bin/zsh
+#!/usr/bin/env zsh
 #
-# Iterates through various tests on the tomb script
+# Copyright (C) 2007-2016 Dyne.org Foundation
+#
+# Tomb test units by Denis Roio <jaromil@dyne.org>
+#
+# This source code is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This source code is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  Please refer
+# to the GNU Public License for more details.
+#
+# You should have received a copy of the GNU Public License along with
+# this source code; if not, write to: Free Software Foundation, Inc.,
+# 675 Mass Ave, Cambridge, MA 02139, USA.
+
 
 T="../../tomb"
+
 source ${T} source
 dummypass=test
 dummypassnew=changetest
@@ -136,6 +154,52 @@ test-set-key() {
 }
 
 
+test-regression() {
+
+	url=${1:-https://files.dyne.org/tomb/tomb-2.2.tar.gz}
+	notice "Regression tests using $url"
+
+	curl $url > /tmp/tomb-regression.tar.gz
+	mkdir -p /tmp/tomb-regression
+	tar xfz /tmp/tomb-regression.tar.gz \
+		--strip-components 1 -C /tmp/tomb-regression
+
+	OLDT="/tmp/tomb-regression/tomb"
+	version=`${OLDT} -v |& awk 'NR==1 {print $3}'`
+	yes "tomb version: $version"
+	tests+=(oldnew-$version newold-$version)
+
+	sudo rm -f /tmp/regression-test.tomb{,.key}
+
+	${OLDT} -D dig -s 10 /tmp/regression-test.tomb
+	${OLDT} -D forge /tmp/regression-test.tomb.key \
+			--ignore-swap --unsafe --tomb-pwd ${dummypass} --use-urandom
+	${OLDT} -D lock /tmp/regression-test.tomb -k /tmp/regression-test.tomb.key \
+			--ignore-swap --unsafe --tomb-pwd ${dummypass}
+
+	notice "opening old tomb and key using the new tomb"
+
+	tt -k /tmp/regression-test.tomb.key --unsafe \
+	   --tomb-pwd ${dummypass} open /tmp/regression-test.tomb
+
+	[[ $? = 0 ]] && results+=(oldnew-$version SUCCESS)
+
+	tt close regression-test
+
+	notice "opening new tomb and key using the old tomb"
+
+	${OLDT} -D -k /tmp/test.tomb.key --unsafe \
+			--tomb-pwd ${dummypass} open /tmp/test.tomb
+
+	[[ $? = 0 ]] && results+=(newold-$version SUCCESS)
+
+	${OLDT} close test
+}
+
+
+
+
+
 startloops=(`sudo losetup -a |cut -d: -f1`)
 
 [[ $1 = "source" ]] && { return 0 }
@@ -165,6 +229,8 @@ tt -k /tmp/test.tomb.key --unsafe --tomb-pwd ${dummypass} open /tmp/test.tomb
 tt close test
 
 { test $? = 0 } && { results+=(close SUCCESS) }
+
+
 
 
 
@@ -216,8 +282,10 @@ tt -k /tmp/test.tomb.key --unsafe --tomb-pwd ${dummypass} open /tmp/test.tomb
 }
 
 
-
-
+# regression tests with previous stable versions
+test-regression https://files.dyne.org/tomb/tomb-2.2.tar.gz
+test-regression https://files.dyne.org/tomb/old-releases/Tomb-2.1.1.tar.gz
+test-regression https://files.dyne.org/tomb/old-releases/Tomb-2.0.1.tar.gz
 
 
 # isolated function
@@ -233,10 +301,6 @@ test-bind-hooks
 
 # iso func
 test-set-key
-
-
-
-
 
 
 
