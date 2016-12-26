@@ -507,20 +507,27 @@ is_valid_tomb() {
         _warning "Tomb file is not writable: ::1 tomb file::" $1
         _fail=1
     }
+	_verbose "tomb file is readable"
+
     [[ ! -f "$1" ]] && {
         _warning "Tomb file is not a regular file: ::1 tomb file::" $1
         _fail=1
     }
+	_verbose "tomb file is a regular file"
+
     [[ ! -s "$1" ]] && {
         _warning "Tomb file is empty (zero length): ::1 tomb file::" $1
         _fail=1
     }
+	_verbose "tomb file is not empty"
 
     _uid="`zstat +uid $1`"
     [[ "$_uid"  = "$UID" ]] || {
         _user="`zstat -s +uid $1`"
         _warning "Tomb file is owned by another user: ::1 tomb owner::" $_user
     }
+	_verbose "tomb is not owned by another user"
+
     [[ $_fail = 1 ]] && {
         _failure "Tomb command failed: ::1 command name::" $subcommand
     }
@@ -536,9 +543,12 @@ is_valid_tomb() {
     _plot $1     # Set TOMB{PATH,DIR,FILE,NAME}
 
     # Tomb already mounted (or we cannot alter it)
-    [[ "`mount -l`" -regex-match "${TOMBFILE}.*\[$TOMBNAME\]$" ]] && {
+	[[ "`mount -l |
+        awk -vtomb="[$TOMBNAME]" '
+/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`" = "" ]] || {
         _failure "Tomb is currently in use: ::1 tomb name::" $TOMBNAME
     }
+	_verbose "tomb file is not currently in use"
 
     _message "Valid tomb file found: ::1 tomb path::" $TOMBPATH
 
