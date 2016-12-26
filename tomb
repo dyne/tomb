@@ -1172,13 +1172,18 @@ gen_key() {
 
     print $header
 
-    # TODO: check result of gpg operation
-    cat <<EOF | gpg --openpgp --force-mdc --cipher-algo ${algo} \
-        --batch --no-options --no-tty --passphrase-fd 0 --status-fd 2 \
-        -o - -c -a
-${tombpass}
-$TOMBSECRET
-EOF
+	_tmp_create
+	local tmpres=$TOMBTMP
+
+    print -n - "${tombpass}\n$TOMBSECRET" \
+		| gpg --openpgp --force-mdc --cipher-algo ${algo} --batch \
+			  --no-options --no-tty --passphrase-fd 0 \
+			  --status-fd 2 -o - -c -a 2> $tmpres
+    # check result of gpg operation
+    for i in ${(f)"$(cat $tmpres)"}; do
+        _verbose "$i"
+    done
+
     # print -n "${tombpass}" \
     #     | gpg --openpgp --force-mdc --cipher-algo ${algo} \
     #     --batch --no-options --no-tty --passphrase-fd 0 --status-fd 2 \
