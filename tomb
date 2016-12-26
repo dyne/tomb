@@ -933,11 +933,10 @@ gpg_decrypt() {
 
     _tmp_create
     tmpres=$TOMBTMP
-    print - "$gpgpass" | \
+    TOMBSECRET=`print - "$gpgpass" | \
         gpg --batch --passphrase-fd 0 --no-tty --no-options \
             --status-fd 2 --no-mdc-warning --no-permission-warning \
-            --no-secmem-warning 2> $tmpres \
-        | read -r -d'\n' TOMBSECRET
+            --no-secmem-warning 2> $tmpres`
 
     unset gpgpass
 
