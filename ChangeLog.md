@@ -1,5 +1,18 @@
 # Tomb ChangeLog
 
+## 2.3
+### December 2016
+
+Fix to bug occurring when using ZSh version 5.3 or higher. Fix to
+inclusion of final newline in keys generated with 2.2. Enhanced
+continuous integration script with regression tests on usage of old
+stable versions of Tomb.  Improved parser and post-hooks to avoid
+usage of external binaries (grep and cat) also improving security when
+decrypting keys. Fix for clean execution via sudo. Updated
+extras/gtomb to latest stable version.  Updates to the documentation
+about kdf and using images as keys. New experimental port to Android
+platforms in extras.
+
 ## 2.2
 ### December 2015
 

@@ -7,7 +7,7 @@
 
 # {{{ License
 
-# Copyright (C) 2007-2016 Dyne.org Foundation
+# Copyright (C) 2007-2017 Dyne.org Foundation
 #
 # Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
 #
@@ -44,8 +44,8 @@
 
 # {{{ Global variables
 
-typeset VERSION="2.2"
-typeset DATE="Dec/2015"
+typeset VERSION="2.3"
+typeset DATE="Dec/2016"
 typeset TOMBEXEC=$0
 typeset TMPPREFIX=${TMPPREFIX:-/tmp}
 # TODO: configure which tmp dir to use from a cli flag
@@ -2797,7 +2797,7 @@ main() {
         __default)
             _print "Tomb ::1 version:: - a strong and gentle undertaker for your secrets" $VERSION
             _print "\000"
-            _print " Copyright (C) 2007-2015 Dyne.org Foundation, License GNU GPL v3+"
+            _print " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
             _print " This is free software: you are free to change and redistribute it"
             _print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
             _print "\000"

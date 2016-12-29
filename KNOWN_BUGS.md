@@ -23,6 +23,18 @@
  a good practice to change it using the `setkey` command on a secure
  machine, possibly while off-line or in single user mode.
 
+# Ending newline in tomb keys
+## 2.2
+
+ When used to forge new keys, Tomb version 2.2 incorrectly added a new
+ line ('\n', 0x0A) character at the end of each key's secret sequence
+ before encoding it with GnuPG. This does not affect Tomb regression
+ and compatibility with other Tomb versions as this final newline is
+ ignored in any case, but third party software may have
+ problems. Those writing a software that supports opening Tomb files
+ should always ignore the final newline when present in the secret
+ material obtained after decoding the key with the password.
+ 
 # Versioning and stdin key
 ## 1.5
 

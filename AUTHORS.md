@@ -3,13 +3,13 @@ Cryptsetup is written by Christophe Saout and Clemens Fruhwirth.
 Tomb is written and directed by Denis Roio <jaromil@dyne.org>
 
 Tomb includes code and advices by Anathema, Boyska, Hellekin O. Wolf,
-GDrooid, Parazyd.
+GDrooid and Parazyd.
 
-The minimal Zenity GUI is being written by Parazyd
+The 'gtomb' minimal GUI is being written by Parazyd.
 
 The Qt5 desktop tray GUI is written by Gianluca Montecchi.
 
-Python Tomb wrappers are written by Reiven and Boyska.
+Python Tomb wrappers are contributed by Reiven and Boyska.
 
 Artwork is contributed by Jordi aka Mon Mort and Logan VanCuren.
 
@@ -21,8 +21,8 @@ Augello and Swedish translation by PLJ / Kosovoper.
 Testing, reviews and documentation contributed by Dreamer, Vlax,
 Shining the Translucent, Mancausoft, Asbesto Molesto, Nignux, TheJH,
 The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon,
-Narrat, x3nu, Jim Turner, Maxime Arthaud and the Linux Action Show!
-
+Narrat, x3nu, Jim Turner, Maxime Arthaud, RobertMX, and...
+the Linux Action Show!
 
 Tomb includes an implementation of the "Password-Based Key Derivation
 Function v2" based on GCrypt and written by Anthony Thyssen.
