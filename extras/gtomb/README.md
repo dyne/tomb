@@ -11,7 +11,7 @@ list and the script will run it for you. Easy-peasy.
 
 ### Random notes
 * If you type in your sudo password once correctly, in the next 5 (or whatever your sudoers timeout is) minutes, you can type in the wrong password as well.
-* The function for catching cancellation sometimes fails because of bad ps syntax. No idea why yet.
+* The function for catching cancellation sometimes fails because of bad ps syntax. (Possibly fixed, needs more testing)
 
 ## Dependencies
 * [tomb](https://github.com/dyne/Tomb) (also get tomb's dependencies)
@@ -19,8 +19,8 @@ list and the script will run it for you. Easy-peasy.
 
 ## TODO
 * Complete error checking
-* Figure out why ps fails sometimes
 * and more stuff 
 
 ## What you need to do
 * Be patient or help with coding :)
+* Request features
