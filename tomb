@@ -478,7 +478,8 @@ EOF`
         [[ "$i" =~ "^ERR.*" ]] && {
             _warning "Pinentry error: ::1 error::" ${i[(w)3]}
             print "canceled"
-            return 1 }
+            return 1
+		}
 
         # here the password is found
         [[ "$i" =~ "^D .*" ]] && password="${i##D }";
@@ -487,7 +488,8 @@ EOF`
     [[ "$password" = "" ]] && {
         _warning "Empty password"
         print "empty"
-        return 1 }
+        return 1
+	}
 
     print "$password"
     return 0
@@ -792,8 +794,7 @@ _list_optional_tools() {
 _ensure_dependencies() {
 
     # Check for required programs
-	local deps=(cryptsetup pinentry sudo gpg mkfs.ext4 e2fsck)
-    for req in $deps; do
+    for req in cryptsetup pinentry sudo gpg mkfs.ext4 e2fsck; do
         command -v $req 1>/dev/null 2>/dev/null || {
             _failure "Missing required dependency ::1 command::.  Please install it." $req; }
     done
