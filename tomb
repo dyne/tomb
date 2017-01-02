@@ -45,7 +45,7 @@
 # {{{ Global variables
 
 typeset VERSION="2.3"
-typeset DATE="Dec/2016"
+typeset DATE="Jan/2017"
 typeset TOMBEXEC=$0
 typeset TMPPREFIX=${TMPPREFIX:-/tmp}
 # TODO: configure which tmp dir to use from a cli flag
@@ -525,12 +525,13 @@ is_valid_tomb() {
     }
 	_verbose "tomb file is not empty"
 
-    _uid="`zstat +uid $1`"
-    [[ "$_uid"  = "$UID" ]] || {
-        _user="`zstat -s +uid $1`"
-        _warning "Tomb file is owned by another user: ::1 tomb owner::" $_user
-    }
-	_verbose "tomb is not owned by another user"
+	# no more checking on the uid
+    # _uid="`zstat +uid $1`"
+    # [[ "$_uid"  = "$UID" ]] || {
+    #     _user="`zstat -s +uid $1`"
+    #     _warning "Tomb file is owned by another user: ::1 tomb owner::" $_user
+    # }
+	# _verbose "tomb is not owned by another user"
 
     [[ $_fail = 1 ]] && {
         _failure "Tomb command failed: ::1 command name::" $subcommand
@@ -1842,8 +1843,9 @@ mount_tomb() {
         _failure "Cannot mount ::1 tomb name::" $TOMBNAME
     }
 
-    _sudo chown $UID:$GID ${tombmount}
-    _sudo chmod 0711 ${tombmount}
+	# we do not change ownership anymore when mounting tombs
+    # _sudo chown $UID:$GID ${tombmount}
+    # _sudo chmod 0711 ${tombmount}
 
     _success "Success opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE $tombmount
 
