@@ -47,7 +47,7 @@ foreach (@lines) {
     $force = 0;
 
     # It's a fold title
-    if (m/^# +{{{ +(.*)$/) {
+    if (m/^# +\{\{\{ +(.*)$/) {
         $fold = $1;
         next;
     }

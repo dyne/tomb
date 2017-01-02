@@ -985,7 +985,7 @@ get_lukskey() {
                 kdf_salt="${firstline[(ws:_:)3]}"
                 kdf_ic="${firstline[(ws:_:)4]}"
                 kdf_len="${firstline[(ws:_:)5]}"
-                _message "Unlocking KDF key protection ($kdf_hash)"
+                _message "Unlocking KDF key protection (::1 kdf::)" $kdf_hash
                 _verbose "KDF salt: $kdf_salt"
                 _verbose "KDF ic: $kdf_ic"
                 _verbose "KDF len: $kdf_len"
