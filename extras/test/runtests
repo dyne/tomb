@@ -27,7 +27,7 @@ dummypassnew=changetest
 
 GLOBAL_RESULT=0
 
-notice() { print; yes "${@}"; print; }
+notice() { print; _message "${@}"; print; }
 error() { _warning "     ${@}"; }
 tt() {
 	start_loops=(`sudo losetup -a |cut -d: -f1`)
@@ -122,10 +122,7 @@ test-bind-hooks() {
     else
 	    error "Bind hook on file reports incongruence"
     fi
-    rm -f "/media/test/$bindtest"
     tt close test
-    # Remove test file in HOME
-    rm -f "$HOME/$bindtest"
 }
 
 test-set-key() {
@@ -166,7 +163,7 @@ test-regression() {
 
 	OLDT="/tmp/tomb-regression/tomb"
 	version=`${OLDT} -v |& awk 'NR==1 {print $3}'`
-	yes "tomb version: $version"
+	_message "tomb version: $version"
 	tests+=(oldnew-$version newold-$version)
 
 	sudo rm -f /tmp/regression-test.tomb{,.key}
