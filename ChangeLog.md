@@ -1,7 +1,7 @@
 # Tomb ChangeLog
 
 ## 2.3
-### December 2016
+### January 2017
 
 Fix to bug occurring when using ZSh version 5.3 or higher. Fix to
 inclusion of final newline in keys generated with 2.2. Enhanced

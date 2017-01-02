@@ -21,8 +21,8 @@ Augello and Swedish translation by PLJ / Kosovoper.
 Testing, reviews and documentation contributed by Dreamer, Vlax,
 Shining the Translucent, Mancausoft, Asbesto Molesto, Nignux, TheJH,
 The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon,
-Narrat, x3nu, Jim Turner, Maxime Arthaud, RobertMX, and...
-the Linux Action Show!
+Narrat, x3nu, Jim Turner, Maxime Arthaud, RobertMX, mhogomchungu
+and...  the Linux Action Show!
 
 Tomb includes an implementation of the "Password-Based Key Derivation
 Function v2" based on GCrypt and written by Anthony Thyssen.

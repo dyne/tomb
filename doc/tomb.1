@@ -327,6 +327,36 @@ If you don't need swap, execute \fI swapoff -a\fR. If you really need
 it, you could make an encrypted swap partition. Tomb doesn't detect if
 your swap is encrypted, and will complain anyway.
 
+.SH DENIABILITY
+
+The possibility to have an encrypted volume which is invisible and
+cannot be detected is called "deniability". The cryptographic layer of
+the device mapper in Linux (dm-crypt) does not implement
+deniability. Tomb is just a wrapper on top of that and it doesn't add
+cryptographic deniability. However a certain way of using tomb can
+facilitate a weak sort of deniability outside of the scenario of
+seized devices and forensic analysis of files and blocks on disc.
+
+For instance to eliminate any trace of tomb usage from the shell
+history ZSh users can activate the "HISTIGNORESPACE" feature and
+prefix all invokations of tomb with a blank space, including two lines
+in ".zshrc":
+
+.EX
+export HISTIGNORESPACE=1
+alias tomb=' tomb'
+.EE
+
+.SH PASSWORD INPUT
+
+Tomb uses the external program "pinentry" to let users type the key password into a terminal or a graphical window. This program works in conjunction with "gpg-agent", a daemon running in background to facilitate secret key management with gpg. It is recommended one runs "gpg-agent" launching it from the X session initialization ("~/.xsession" or "~/.xinitrc" files) with this command:
+
+.EX
+eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
+.EE
+
+In the future it may become mandatory to run gpg-agent when using tomb.
+
 .SH EXAMPLES
 
 .IP \(bu
@@ -410,26 +440,8 @@ Please report bugs on the Github issue tracker at
 .UR https://github.com/dyne/Tomb/issues
 .UE
 
-One can also try to get in touch with developers via the #dyne chat channel on \fIhttps://irc.dyne.org\fR.
-
-.SH AUTHORS
-
-Tomb is designed, written and maintained by Denis Roio aka Jaromil.
-
-Tomb includes code by Anathema, Boyska, Hellekin O. Wolf and GDrooid.
-
-Tomb's artwork is contributed by Jordi aka Mon Mort and Logan VanCuren.
-
-Gettext internationalization and Spanish translation is contributed by
-GDrooid, French translation by Hellekin, Russian translation by fsLeg,
-German translation by x3nu.
-
-Testing, reviews and documentation are contributed by Dreamer, Shining
-the Translucent, Mancausoft, Asbesto Molesto, Nignux, Vlax, The Grugq,
-Reiven, GDrooid, Alphazo, Brian May, TheJH, fsLeg, JoelMon and the
-Linux Action Show!
-
-Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth.
+One can also try to get in touch with developers via the #dyne chat
+channel on \fIhttps://irc.dyne.org\fR.
 
 .SH COPYING
 
@@ -454,15 +466,13 @@ documentation is available for download from its website on
 
 .B
 .IP cryptsetup(8)
+.B
+.IP pinentry(1)
+.B
+.IP gpg-agent(1)
 
-GnuPG website:
-.br
-https://www.gnupg.org
+GnuPG website: https://www.gnupg.org
 
-DM-Crypt website:
-.br
-https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt
+DM-Crypt website: https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt
 
-LUKS website:
-.br
-https://gitlab.com/cryptsetup/cryptsetup/wikis/home
+LUKS website: https://gitlab.com/cryptsetup/cryptsetup/wikis/home

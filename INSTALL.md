@@ -20,12 +20,12 @@ To install Tomb simply download the source distribution (the tar.gz file)
 from https://files.dyne.org/tomb and decompress it. From a terminal:
 
     cd Downloads
-    tar xvfz Tomb-2.0.1.tar.gz (correct with actual file name)
+    tar xvfz Tomb-2.3.tar.gz (correct with actual file name)
 
 Then enter its directory and run 'make install' as root, this will install
 Tomb into /usr/local:
 
-    cd Tomb-2.0.1 (correct with actual directory name)
+    cd Tomb-2.3 (correct with actual directory name)
     sudo make install
 
 After installation one can read the commandline help or read the manual:
@@ -60,36 +60,7 @@ There are some more things that tomb can do for you, make sure you
 have a look at the manpage and at the commandline help to find out
 more.
 
-## Basic usage notes
-
-Here we collect notes on common issues users may or may not experience
-and the commonly working solutions found.
-
-### Pinentry issues
-
-If pinentry has problems dealing with the password because of language
-or tty settings on your system, try running `gpg-agent` by launching it
-from the session initialization (~/.xsession or ~/.xinitrc) with this
-command:
-```
-eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
-```
-
-### Deleting history
-
-To improve deniability one has to avoid that tomb commands are
-recorded in the shell history. In order to do so the
-`HISTIGNORESPACE=1` environment setting of Zsh comes handy.  Anywhere
-in the `.zshrc` put:
-```
-export HISTIGNORESPACE=1
-alias tomb=' tomb'
-```
-
-
-# Advanced usage
-
-## Install optional tools
+# Optional tools
 
 Tomb can use some optional tools to extend its functionalities:
 
@@ -110,12 +81,12 @@ the packages provided by each distribution.
 
 Once any of the above is installed Tomb will find the tool automatically.
 
-## Install Tomb Extras
+# Extras
 
 Tomb comes with a bunch of extra tools that contribute to enhance its
 functionality or integrate it into particular system environments.
 
-### extras/gtk-tray
+## extras/gtk-tray
 
 The Gtk tray adds a nifty tomb skull into the desktop toolbar: one can
 use it to close, slam and explore the open tomb represented by it.
@@ -132,13 +103,13 @@ To have it change directory `extras/gtk-tray` then
 
 Of cource one can include the launch of tomb-gtk-tray scripts.
 
-### extras/qt-tray
+## extras/qt-tray
 
 The QT tray adds a tomb tray in a QT desktop toolbar. It requires at
 least QT libraries of version 5.4 or above.
 Build with 'qmake' and then 'make'.
 
-### extras/kdf-keys
+## extras/kdf-keys
 
 The KDF wrapper programs allows one to use KDF rounds on passwords in
 order to obstruct dictionary based and similar brute-forcing attacks.
@@ -165,7 +136,7 @@ Please note that it doesn't makes much sense to use KDF keys and
 steganography, since the latter will invalidate the brute-forcing
 protection. For details on the issue see [KNOWN_BUGS.md](KNOWN_BUGS).
 
-### extras/translations/
+## extras/translations/
 
 There are translations available for Tomb and they are installed by
 default. If you wish to update them manually navigate to extras/po
@@ -174,7 +145,7 @@ and run 'make install' as root:
     cd extras/translations
     sudo make install
 
-### extras/gtomb/
+## extras/gtomb/
 
 This is a minimalistic graphical user interface scripted in ZSh
 depending from Zenity to display dialog boxes. It covers all basic
@@ -204,6 +175,14 @@ other people logged on the same system can easily log your passwords
 while such commands are executing.
 We only recommend using the pinentry to input your passwords.
 
+At the time of writing another free software graphical application
+supports opening and closing Tombs via a plugin installed by
+default: [zuluCrypt](https://mhogomchungu.github.io/zuluCrypt/). One
+needs to activate the Tomb plugin included in the zuluCrypt source to
+be able to create, open and close tombs. Beware zuluCrypt may miss
+advanced Tomb functionalities that are only available from the
+command-line.
+
 ## Python
 
 ![](extras/images/python_for_tomb.png)
@@ -211,14 +190,6 @@ We only recommend using the pinentry to input your passwords.
 A Python wrapper is under development and already usable, but it
 introduces some vulnerabilities mentioned above. Find it in
 `extras/tomber`. For more information see [PYTHON](extras/PYTHON.md).
-
-## Graphical applications
-
-So far the only graphical application supporting Tomb volumes is
-[ZuluCrypt](https://github.com/mhogomchungu/zuluCrypt). One needs to
-activate the Tomb plugin included in its source and will be able to
-create, open and close tombs. It might still miss advanced Tomb
-functionalities that are only available from the command-line.
 
 ## Let us know!
 
