@@ -24,3 +24,6 @@ install:
 
 test:
 	make -C extras/test
+
+lint:
+	shellcheck -s zsh -e SC1073,SC1027,SC1072,SC1083,SC1009 tomb

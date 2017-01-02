@@ -315,13 +315,15 @@ _ensure_safe_swap() {
 
     _message "An active swap partition is detected..."
     for s in $=swaps; do
-        { _is_encrypted_block $s } && { r=2 } || {
+        if _is_encrypted_block $s; then
+			r=2;
+		else
             # We're dealing with unencrypted stuff.
             # Maybe it lives on an encrypted filesystem anyway.
             # @todo: verify it's actually on an encrypted FS (see #163 and !189)
             # Well, no: bail out.
-            r=1; break
-        }
+            r=1; break;
+        fi
     done
 
     if [[ $r -eq 2 ]]; then
@@ -479,7 +481,7 @@ EOF`
             return 1 }
 
         # here the password is found
-        [[ "$i" =~ "^D .*" ]] && password="${i##D }"
+        [[ "$i" =~ "^D .*" ]] && password="${i##D }";
     done
 
     [[ "$password" = "" ]] && {
@@ -736,29 +738,29 @@ function _msg() {
     return $returncode
 }
 
-function _message say() {
+function _message() {
     local notice="message"
     [[ "$1" = "-n" ]] && shift && notice="inline"
     option_is_set -q || _msg "$notice" $@
     return 0
 }
 
-function _verbose xxx() {
+function _verbose() {
     option_is_set -D && _msg verbose $@
     return 0
 }
 
-function _success yes() {
+function _success() {
     option_is_set -q || _msg success $@
     return 0
 }
 
-function _warning  no() {
+function _warning() {
     option_is_set -q || _msg warning $@
     return 1
 }
 
-function _failure die() {
+function _failure() {
     typeset -i exitcode=${exitv:-1}
     option_is_set -q || _msg failure $@
     # be sure we forget the secrets we were told
@@ -790,9 +792,10 @@ _list_optional_tools() {
 _ensure_dependencies() {
 
     # Check for required programs
-    for req in cryptsetup pinentry sudo gpg mkfs.ext4 e2fsck; do
+	local deps=(cryptsetup pinentry sudo gpg mkfs.ext4 e2fsck)
+    for req in $deps; do
         command -v $req 1>/dev/null 2>/dev/null || {
-            _failure "Missing required dependency ::1 command::.  Please install it." $req }
+            _failure "Missing required dependency ::1 command::.  Please install it." $req; }
     done
 
     # Ensure system binaries are available in the PATH
@@ -855,7 +858,7 @@ is_valid_key() {
 }
 
 # $1 is a string containing an encrypted key
-_tomb_key_recover recover_key() {
+recover_key() {
     local key="${1}"    # Unique argument is an encrypted key
 
     _warning "Attempting key recovery."
@@ -912,7 +915,7 @@ _load_key() {
 
     is_valid_key $TOMBKEY || {
         _warning "The key seems invalid or its format is not known by this version of Tomb."
-        _tomb_key_recover $TOMBKEY
+		recover_key $TOMBKEY
     }
 
     # Declared TOMBKEYFILE (path)
@@ -953,7 +956,7 @@ gpg_decrypt() {
     ret=1
     for i in ${(f)"$(cat $tmpres)"}; do
         _verbose "$i"
-        [[ "$i" =~ "DECRYPTION_OKAY" ]] && { ret=0 }
+        [[ "$i" =~ "DECRYPTION_OKAY" ]] && ret=0;
     done
     return $ret
 
