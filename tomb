@@ -176,7 +176,7 @@ TRAPSTOP() { _endgame STOP  }
 
 _cat() { local -a _arr;
     # read file using mapfile, newline fix
-    _arr=("${(f@)${mapfile[${1}]%$’\n’}}"); print "$_arr"
+    _arr=("${(f@)${mapfile[${1}]%$'\n'}}"); print "$_arr"
 }
 
 _is_found() {
