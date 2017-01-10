@@ -32,7 +32,7 @@ def execute(cmd):
     """
     Execute given cmd. return boolean based on exit status and error string
     """
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+    p = Popen(cmd.split(), stdout=PIPE, stderr=PIPE)
     stdout, stderr = p.communicate()
     p_status = p.wait()
     if p_status == 0:
@@ -65,7 +65,7 @@ def tforge(keyfile, passphrase, force=False):
     cmd = ' '.join(['tomb',
         'forge',
         keyfile,
-        '--unsecure-dev-mode',
+        '--unsafe',
         '--tomb-pwd',
         sanitize_passphrase(passphrase),
         '--no-color'])
@@ -83,7 +83,7 @@ def tlock(tombfile, keyfile, passphrase):
         tombfile,
         '-k',
         keyfile,
-        '--unsecure-dev-mode',
+        '--unsafe',
         '--tomb-pwd',
         sanitize_passphrase(passphrase),
         '--no-color'])
@@ -102,7 +102,7 @@ def topen(tombfile, keyfile, passphrase, mountpath=False):
         tombfile,
         '-k',
         keyfile,
-        '--unsecure-dev-mode',
+        '--unsafe',
         '--tomb-pwd',
         sanitize_passphrase(passphrase),
         '--no-color',
@@ -128,7 +128,7 @@ def tresize(tombfile, keyfile, passphrase, newsize):
         tombfile,
         '-k',
         keyfile,
-        '--unsecure-dev-mode',
+        '--unsafe',
         '--tomb-pwd',
         sanitize_passphrase(passphrase),
         '-s',
@@ -145,7 +145,7 @@ def tbury(keyfile, passphrase, imagefile):
         'bury',
         '-k',
         keyfile,
-        '--unsecure-dev-mode',
+        '--unsafe',
         '--tomb-pwd',
         sanitize_passphrase(passphrase),
         imagefile,
@@ -161,7 +161,7 @@ def texhume(keyfile, passphrase, imagefile):
         'exhume',
         '-k',
         keyfile,
-        '--unsecure-dev-mode',
+        '--unsafe',
         '--tomb-pwd',
         sanitize_passphrase(passphrase),
         imagefile,
@@ -177,7 +177,7 @@ def tpasswd(keyfile, newpassphrase, oldpassphrase):
         'passwd',
         '-k',
         keyfile,
-        '--unsecure-dev-mode',
+        '--unsafe',
         '--tomb-pwd',
         sanitize_passphrase(newpassphrase),
         '--tomb-old-pwd',
@@ -193,14 +193,14 @@ def tsetkey(oldkeyfile, tombfile, newkeyfile, newpassphrase, oldpassphrase):
     """
     cmd = ' '.join(['tomb',
         'setkey',
-        oldkeyfile,
-        tombfile,
         '-k',
         newkeyfile,
-        '--unsecure-dev-mode',
-        '--tomb-pwd',
-        sanitize_passphrase(newpassphrase),
+        oldkeyfile,
+        tombfile,
+        '--unsafe',
         '--tomb-old-pwd',
+        sanitize_passphrase(newpassphrase),
+        '--tomb-pwd',
         sanitize_passphrase(oldpassphrase),
         '--no-color'])
     return execute(cmd)
