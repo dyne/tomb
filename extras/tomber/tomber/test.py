@@ -15,12 +15,13 @@ class tomberTester(unittest.TestCase):
         self.keyfile2 = '.'.join([self.pid, '2ndkey'])
         self.exhumedkey = '.'.join([self.pid, 'exhumed'])
         self.mountpath = './tmptomb'
+        os.mkdir(self.mountpath)
         # generate a passphrase with spaces
         self.passphrase = str(randrange(2 ** 64)).replace("", " ")[1:-1]
         self.passphrase2 = str(randrange(2 ** 64))
         self.imagefile = '.'.join([self.pid, 'jpg'])
         copyfile(
-            '/'.join([os.path.dirname(__file__), 'test.jpg']),
+            '/'.join([os.path.dirname(os.path.abspath(__file__)), 'test.jpg']),
             self.imagefile)
 
     @classmethod
@@ -30,7 +31,7 @@ class tomberTester(unittest.TestCase):
         os.unlink(self.keyfile2)
         os.unlink(self.imagefile)
         os.unlink(self.exhumedkey)
-        rmtree(self.mountpath)
+        rmtree(self.mountpath, ignore_errors=True)
 
     def test_01_dig(self):
         """ Dig a tomb of 10mb"""
@@ -90,14 +91,14 @@ class tomberTester(unittest.TestCase):
                 self.keyfile,
                 self.tombfile,
                 self.keyfile2,
-                self.passphrase,
-                self.passphrase2
+                self.passphrase2,
+                self.passphrase
                 )[0]
             )
 
     def test_11_slam(self):
         """ Slam open tombs """
-        topen(self.tombfile, self.keyfile, self.passphrase2, self.mountpath)
+        topen(self.tombfile, self.keyfile2, self.passphrase, self.mountpath)
         self.assertTrue(tslam()[0])
 
 if __name__ == '__main__':
