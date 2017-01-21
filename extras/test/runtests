@@ -85,7 +85,7 @@ test-tomb-create() {
     { test $? = 0 } && { 
         results+=(forge SUCCESS)
         # 
-        say "Dump of clear key contents to examine them:"
+        notice "Dump of clear key contents to examine them:"
         print ${dummypass} \
 	        | gpg --batch --passphrase-fd 0 --no-tty --no-options -d /tmp/test.tomb.key \
 	        | hexdump -C
@@ -140,7 +140,7 @@ test-set-key() {
     [[ $? = 0 ]] && {
         notice "Setkey succesfully swapped tomb key"
         results+=(setkey SUCCESS)
-        say "Dump of clear key contents to examine them:"
+        notice "Dump of clear key contents to examine them:"
         print ${dummypass} \
 	        | gpg --batch --passphrase-fd 0 --no-tty --no-options -d /tmp/test.tomb.new.key \
 	        | hexdump -C
@@ -153,7 +153,7 @@ test-set-key() {
 
 test-regression() {
 
-	url=${1:-https://files.dyne.org/tomb/tomb-2.2.tar.gz}
+	url=${1:-https://files.dyne.org/tomb/old-releases/Tomb-2.2.tar.gz}
 	notice "Regression tests using $url"
 
 	curl $url > /tmp/tomb-regression.tar.gz
@@ -280,7 +280,7 @@ tt -k /tmp/test.tomb.key --unsafe --tomb-pwd ${dummypass} open /tmp/test.tomb
 
 
 # regression tests with previous stable versions
-test-regression https://files.dyne.org/tomb/tomb-2.2.tar.gz
+test-regression https://files.dyne.org/tomb/old-releases/Tomb-2.2.tar.gz
 test-regression https://files.dyne.org/tomb/old-releases/Tomb-2.1.1.tar.gz
 test-regression https://files.dyne.org/tomb/old-releases/Tomb-2.0.1.tar.gz
 
