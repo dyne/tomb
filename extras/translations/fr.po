@@ -1178,11 +1178,11 @@ msgid "Tombs can't be smaller than 10 mebibytes"
 msgstr ""
 
 #: tomb:Open:exec_safe_bind_hooks:1944
-msgid "bind-hooks map format: local/to/tomb local/to/\$HOME"
+msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
 msgstr ""
 
 #: tomb:Open:exec_safe_bind_hooks:1948
-msgid "bind-hooks map format: local/to/tomb local/to/\$HOME.  Rolling back"
+msgid "bind-hooks map format: local/to/tomb local/to/$HOME.  Rolling back"
 msgstr ""
 
 #: tomb:Resize:resize_tomb:2323
