@@ -72,6 +72,9 @@ foreach (@lines) {
         $str = $2;
     }
 
+    # Remove conflicting quotes (\)
+    $str =~ s/\\\$/\$/g;
+
     # Next if it was seen before
     $seen{$str}++;
     next if $seen{$str} > 1;
