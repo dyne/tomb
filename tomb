@@ -1508,7 +1508,7 @@ forge_key() {
     { option_is_set --use-urandom } && random_source=/dev/urandom
 
     _verbose "Data dump using ::1:: from ::2 source::" ${DD[1]} $random_source
-    TOMBSECRET=$(${=DD} bs=1 count=256 if=$random_source)
+    TOMBSECRET=$(${=DD} bs=1 count=512 if=$random_source)
     [[ $? == 0 ]] || {
         _warning "Cannot generate encryption key."
         _failure "Operation aborted." }
