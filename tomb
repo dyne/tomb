@@ -1614,7 +1614,7 @@ lock_tomb_with_key() {
 
     _message "Formatting Luks mapped device."
     _cryptsetup --batch-mode \
-        --cipher ${cipher} --key-size 256 --key-slot 0 \
+        --cipher ${cipher} --key-size 512 --key-slot 0 \
         luksFormat ${nstloop}
     [[ $? == 0 ]] || {
         _warning "cryptsetup luksFormat returned an error."
