@@ -56,11 +56,19 @@ command -v qrencode > /dev/null || QRENCODE=0
 
 
 typeset -A results
-tests=(dig forge lock badpass open close passwd chksum bind setkey)
+tests=(dig forge lock badpass open close passwd chksum bind setkey
+recip-dig recip-forge recip-lock recip-open recip-close)
 { test $RESIZER = 1 } && { tests+=(resize) }
 { test $KDF = 1 } && { tests+=(kdforge kdfpass kdflock kdfopen) }
 { test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen stgpipe stgimpl) }
 { test $QRENCODE = 1 } && { tests+=(qrenc) }
+
+# GnuPG Conf.
+# Note: the assumption is the test keys are unencrypted.
+export GNUPGHOME="gnupg/"
+chmod 700 "$GNUPGHOME"
+gpgid_1="A4857CD176B31435F9709D25F0E573B8289439CD"
+gpgid_2="0B2235E660753AB0475FB3E23DC836481F44B31E"
 
 notice "Loading test suite"
 
@@ -98,6 +106,35 @@ test-tomb-create() {
         --ignore-swap --unsafe --tomb-pwd ${dummypass} 
 
     { test $? = 0 } && { results+=(lock SUCCESS) }
+}
+
+test-tomb-recip() {
+
+    notice "wiping all recip.tomb* in /tmp"
+    local tomb=/tmp/recip.tomb
+    local tomb_key=/tmp/recip.tomb.key
+    sudo rm -f "$tomb" "$tomb_key"
+
+    notice "Testing tomb with recipient creation: dig"
+    tt dig -s 20 $tomb
+    { test $? = 0 } && { results+=(recip-dig SUCCESS) }
+    
+    notice "Testing tomb with recipient creation: forge"
+    tt forge $tomb_key -r $gpgid_1 --ignore-swap --unsafe --use-urandom
+    { test $? = 0 } && { results+=(recip-forge SUCCESS) } 
+    
+    notice "Testing tomb with recipient creation: lock"
+    tt lock $tomb -k $tomb_key -r $gpgid_1 --ignore-swap --unsafe
+    { test $? = 0 } && { results+=(recip-lock SUCCESS) }
+    
+    notice "Testing tomb with recipient opening: open"
+    tt open $tomb -k $tomb_key -r $gpgid_1
+    { test $? = 0 } && { results+=(recip-open SUCCESS) }
+    
+    notice "Testing tomb with recipient closing: close"
+    tt close recip
+    { test $? = 0 } && { results+=(recip-close SUCCESS) }
+    
 }
 
 test-bind-hooks() {
@@ -208,6 +245,7 @@ startloops=(`sudo losetup -a |cut -d: -f1`)
 
 # isolated function (also called with source)
 test-tomb-create
+test-tomb-recip
 
 notice "Testing open with wrong password"
 
