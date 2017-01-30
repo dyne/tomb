@@ -389,11 +389,9 @@ notice "Test results summary"
 print "${#startloops} loop devices busy at start"
 
 for t in $tests; do
-    echo "$t\t${results[$t]:-FAIL}"
-done
-
-for r in ${(v)results}; do
-    [[ "$r" == "SUCCESS" ]] || GLOBAL_RESULT=1
+    res=${results[$t]:-FAIL}
+    [[ "$res" == "SUCCESS" ]] || GLOBAL_RESULT=1
+    echo "$t\t$res"
 done
 
 print "${#endloops} loop devices busy at end"
