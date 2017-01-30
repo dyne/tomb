@@ -889,7 +889,12 @@ _load_key() {
     [[ -z $keyfile ]] && {
         _failure "This operation requires a key file to be specified using the -k option." }
 
-    if [[ $keyfile == "-" ]]; then
+    if option_is_set -r; then
+        _verbose "load_key delegating password handling to GnuPG"
+        _message "Waiting for GnuPG to handle password authentication... "
+        TOMBKEYFILE=$keyfile
+        TOMBKEY="${mapfile[$TOMBKEYFILE]}"
+    elif [[ $keyfile == "-" ]]; then
         _verbose "load_key reading from stdin."
         _message "Waiting for the key to be piped from stdin... "
         TOMBKEYFILE=stdin
@@ -1024,6 +1029,12 @@ ask_key_password() {
         _verbose "no password needed, using secret bytes from stdin"
         return 0 }
 
+    if option_is_set -r; then
+        _verbose "no password needed, using GPG key"
+        get_lukskey
+        return $?
+    fi
+    
     _message "A password is required to use key ::1 key::" $TOMBKEYFILE
     passok=0
     tombpass=""
