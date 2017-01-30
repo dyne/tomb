@@ -2563,15 +2563,15 @@ main() {
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe)
     subcommands_opts[__default]=""
     # -o in open and mount is used to pass alternate mount options
-    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: "
+    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: r: "
     subcommands_opts[mount]=${subcommands_opts[open]}
 
     subcommands_opts[create]="" # deprecated, will issue warning
 
     # -o in forge and lock is used to pass an alternate cipher.
-    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom "
+    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom r: "
     subcommands_opts[dig]="-ignore-swap s: -size=s "
-    subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: "
+    subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: r: "
     subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
     subcommands_opts[engrave]="k: "
 
