@@ -1014,20 +1014,22 @@ get_lukskey() {
 
         # key needs to be exhumed from an image
     elif [[ -r $TOMBKEYFILE && $(file $TOMBKEYFILE) =~ "JP.G" ]]; then
-        # When using a GPG key, the tomb key is buried using a steganography password
-        if option_is_set -r && option_is_set --tomb-pwd; then
-            _password="`option_value --tomb-pwd`"
-            _verbose "tomb-pwd = ::1 tomb pass::" $_password
-        elif option_is_set -r; then
-            _password=$(ask_password "Insert password to exhume key from $imagefile")
-            [[ $? != 0 ]] && {
-                _warning "User aborted password dialog."
-                return 1
-            }
-        fi
-        exhume_key $TOMBKEYFILE "$_password"
         if option_is_set -r; then
+            # When using a GPG key, the tomb key is buried using a steganography password
+            if option_is_set --tomb-pwd; then
+                _password="`option_value --tomb-pwd`"
+                _verbose "tomb-pwd = ::1 tomb pass::" $_password
+            else
+                _password=$(ask_password "Insert password to exhume key from $imagefile")
+                [[ $? != 0 ]] && {
+                    _warning "User aborted password dialog."
+                    return 1
+                }
+            fi
+            exhume_key $TOMBKEYFILE "$_password"
             unset _password
+        else
+            exhume_key $TOMBKEYFILE "$_password"
         fi
     fi
 
