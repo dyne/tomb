@@ -142,22 +142,21 @@ test-tomb-recip() {
         cp -f arditi.jpg /tmp/recip.jpg
         sudo rm -f /tmp/recip.steg.key
     	
-        # The implementation does not support "--unsafe --tomb-pwd ${dummypass}" yet
-        tt bury -k /tmp/recip.tomb.key \
+        tt --unsafe --tomb-pwd ${dummypass} bury -k /tmp/recip.tomb.key \
             /tmp/recip.jpg -r "$gpgid_1"
         { test $? = 0 } && { results+=(recip-stgin SUCCESS) }
 
-        tt exhume -k /tmp/recip.steg.key \
-                    /tmp/recip.jpg
+        tt --unsafe --tomb-pwd ${dummypass} exhume -k /tmp/recip.steg.key \
+            /tmp/recip.jpg
         { test $? = 0 } && { results+=(recip-stgout SUCCESS) }
 
-        tt open -k /tmp/recip.steg.key \
+        tt --unsafe --tomb-pwd ${dummypass} open -k /tmp/recip.steg.key \
             /tmp/recip.tomb -r "$gpgid_1"
         { test $? = 0 } && { results+=(recip-stgopen SUCCESS) }
         ${T} close recip
 
         notice "test using open -k image.jpeg"
-        tt open -k /tmp/recip.jpg \
+        tt --unsafe --tomb-pwd ${dummypass} open -k /tmp/recip.jpg \
             /tmp/recip.tomb -r "$gpgid_1"
         { test $? = 0 } && { results+=(recip-stgimpl SUCCESS) }
         tt close recip

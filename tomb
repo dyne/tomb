@@ -1015,7 +1015,10 @@ get_lukskey() {
         # key needs to be exhumed from an image
     elif [[ -r $TOMBKEYFILE && $(file $TOMBKEYFILE) =~ "JP.G" ]]; then
         # When using a GPG key, the tomb key is buried using a steganography password
-        if option_is_set -r; then
+        if option_is_set -r && option_is_set --tomb-pwd; then
+            _password="`option_value --tomb-pwd`"
+            _verbose "tomb-pwd = ::1 tomb pass::" $_password
+        elif option_is_set -r; then
             _password=$(ask_password "Insert password to exhume key from $imagefile")
             [[ $? != 0 ]] && {
                 _warning "User aborted password dialog."
@@ -1289,9 +1292,9 @@ bury_key() {
     # usability.
     # However, steganography cannot be done with GPG key. Therefore,
     # if using a GPG key, we test if the user can decrypt the tomb 
-    # with its key and we ask for a the steganography password.
+    # with its key and we ask for a steganography password.
 
-    { option_is_set --tomb-pwd } && {
+    { option_is_set --tomb-pwd } && { ! option_is_set -r } && {
         local tombpwd="`option_value --tomb-pwd`"
         _verbose "tomb-pwd = ::1 tomb pass::" $tombpwd
         ask_key_password "$tombpwd"
@@ -1302,7 +1305,10 @@ bury_key() {
         _warning "Wrong password supplied."
         _failure "You shall not bury a key whose password is unknown to you." }
 
-    if option_is_set -r; then
+    if option_is_set -r && option_is_set --tomb-pwd; then
+        TOMBPASSWORD="`option_value --tomb-pwd`"
+        _verbose "tomb-pwd = ::1 tomb pass::" $TOMBPASSWORD
+    elif option_is_set -r; then
         tombpass=""
         tombpasstmp=""
         while true; do
@@ -1862,7 +1868,7 @@ mount_tomb() {
     # take the name only, strip extensions
     _verbose "Tomb name: ::1 tomb name:: (to be engraved)" $TOMBNAME
 
-    { option_is_set --tomb-pwd } && {
+    { option_is_set --tomb-pwd } && { ! option_is_set -r } && {
         tomb_pwd="`option_value --tomb-pwd`"
         _verbose "tomb-pwd = ::1 tomb pass::" $tomb_pwd
         ask_key_password "$tomb_pwd"
