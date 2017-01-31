@@ -825,6 +825,15 @@ _ensure_dependencies() {
 
 # {{{ Key operations
 
+# $1 is the key ID we are checking
+is_valid_recipients() {
+    local gpg_id="$1"       # Unique argument is the GPG ID to test
+    _verbose "is_valid_recipients"
+    
+	gpg --list-secret-keys "$gpg_id" &> /dev/null
+    return $?
+}
+
 # $1 is the encrypted key contents we are checking
 is_valid_key() {
     local key="$1"       # Unique argument is an encrypted key to test
@@ -1202,10 +1211,14 @@ gen_key() {
 	local tmpres=$TOMBTMP
 
     if option_is_set -r; then
+        local gpgkey="`option_value -r`"
+        { is_valid_recipients "$gpgkey" } || { 
+             _failure "You set an invalid GPG ID."
+        }
         print -n - "${tombpass}\n$TOMBSECRET" \
 		    | gpg --openpgp --force-mdc --cipher-algo ${algo} --batch \
-		    	  --no-options --no-tty --recipient `option_value -r` \
-		    	  --status-fd 2 -o - --encrypt --armor 2> $tmpres    
+		    	  --no-options --no-tty --recipient "$gpgkey" \
+		    	  --status-fd 2 -o - --encrypt --armor 2> $tmpres
     else
         print -n - "${tombpass}\n$TOMBSECRET" \
 		    | gpg --openpgp --force-mdc --cipher-algo ${algo} --batch \
