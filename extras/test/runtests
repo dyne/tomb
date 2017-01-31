@@ -60,7 +60,8 @@ tests=(dig forge lock badpass open close passwd chksum bind setkey
 recip-dig recip-forge recip-lock recip-open recip-close)
 { test $RESIZER = 1 } && { tests+=(resize) }
 { test $KDF = 1 } && { tests+=(kdforge kdfpass kdflock kdfopen) }
-{ test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen stgpipe stgimpl) }
+{ test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen stgpipe stgimpl
+recip-stgin recip-stgout recip-stgopen recip-stgimpl) }
 { test $QRENCODE = 1 } && { tests+=(qrenc) }
 
 # GnuPG Conf.
@@ -134,6 +135,33 @@ test-tomb-recip() {
     notice "Testing tomb with recipient closing: close"
     tt close recip
     { test $? = 0 } && { results+=(recip-close SUCCESS) }
+    
+    { test $STEGHIDE = 1 } && {
+        notice "Testing tomb with recipient steganographic hiding of keys"
+        
+        cp -f arditi.jpg /tmp/recip.jpg
+        sudo rm -f /tmp/recip.steg.key
+    	
+        # The implementation does not support "--unsafe --tomb-pwd ${dummypass}" yet
+        tt bury -k /tmp/recip.tomb.key \
+            /tmp/recip.jpg -r "$gpgid_1"
+        { test $? = 0 } && { results+=(recip-stgin SUCCESS) }
+
+        tt exhume -k /tmp/recip.steg.key \
+                    /tmp/recip.jpg
+        { test $? = 0 } && { results+=(recip-stgout SUCCESS) }
+
+        tt open -k /tmp/recip.steg.key \
+            /tmp/recip.tomb -r "$gpgid_1"
+        { test $? = 0 } && { results+=(recip-stgopen SUCCESS) }
+        ${T} close recip
+
+        notice "test using open -k image.jpeg"
+        tt open -k /tmp/recip.jpg \
+            /tmp/recip.tomb -r "$gpgid_1"
+        { test $? = 0 } && { results+=(recip-stgimpl SUCCESS) }
+        tt close recip
+    }
     
 }
 
