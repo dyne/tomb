@@ -1014,9 +1014,18 @@ get_lukskey() {
 
         # key needs to be exhumed from an image
     elif [[ -r $TOMBKEYFILE && $(file $TOMBKEYFILE) =~ "JP.G" ]]; then
-
+        # When using a GPG key, the tomb key is buried using a steganography password
+        if option_is_set -r; then
+            _password=$(ask_password "Insert password to exhume key from $imagefile")
+            [[ $? != 0 ]] && {
+                _warning "User aborted password dialog."
+                return 1
+            }
+        fi
         exhume_key $TOMBKEYFILE "$_password"
-
+        if option_is_set -r; then
+            unset _password
+        fi
     fi
 
     gpg_decrypt "$_password" # Save decrypted contents into $TOMBSECRET
@@ -1269,13 +1278,18 @@ bury_key() {
     }
 
     _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $TOMBKEY $imagefile
-    _message "Please confirm the key password for the encoding"
+    { option_is_set -r } || {
+        _message "Please confirm the key password for the encoding" }
+    
     # We ask the password and test if it is the same encoding the
     # base key, to insure that the same password is used for the
     # encryption and the steganography. This is a standard enforced
     # by Tomb, but it isn't strictly necessary (and having different
     # password would enhance security). Nevertheless here we prefer
     # usability.
+    # However, steganography cannot be done with GPG key. Therefore,
+    # if using a GPG key, we test if the user can decrypt the tomb 
+    # with its key and we ask for a the steganography password.
 
     { option_is_set --tomb-pwd } && {
         local tombpwd="`option_value --tomb-pwd`"
@@ -1288,6 +1302,32 @@ bury_key() {
         _warning "Wrong password supplied."
         _failure "You shall not bury a key whose password is unknown to you." }
 
+    if option_is_set -r; then
+        tombpass=""
+        tombpasstmp=""
+        while true; do
+            # 3 tries to write two times a matching password
+            tombpass=`ask_password "Type a password to bury your key"`
+            if [[ $? != 0 ]]; then
+                _failure "User aborted."
+            fi
+            if [ -z $tombpass ]; then
+                _failure "You set empty password, which is not possible."
+            fi
+            tombpasstmp=$tombpass
+            tombpass=`ask_password "Type a password to bury your key (again)"`
+            if [[ $? != 0 ]]; then
+                _failure "User aborted."
+            fi
+            if [ "$tombpasstmp" = "$tombpass" ]; then
+                break;
+            fi
+            unset tombpasstmp
+            unset tombpass
+        done
+        TOMBPASSWORD="$tombpass"
+    fi
+    
     # We omit armor strings since having them as constants can give
     # ground to effective attacks on steganography
     print - "$TOMBKEY" | awk '
@@ -2616,8 +2656,8 @@ main() {
     subcommands_opts[search]=""
 
     subcommands_opts[help]=""
-    subcommands_opts[bury]="k: -tomb-pwd: "
-    subcommands_opts[exhume]="k: -tomb-pwd: "
+    subcommands_opts[bury]="k: -tomb-pwd: r: "
+    subcommands_opts[exhume]="k: -tomb-pwd: r: "
     # subcommands_opts[decompose]=""
     # subcommands_opts[recompose]=""
     # subcommands_opts[install]=""
