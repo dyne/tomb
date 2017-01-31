@@ -1139,72 +1139,79 @@ gen_key() {
     tombpass=""
     tombpasstmp=""
 
-    if [ "$1" = "" ]; then
-        while true; do
-            # 3 tries to write two times a matching password
-            tombpass=`ask_password "Type the new password to secure your key"`
-            if [[ $? != 0 ]]; then
-                _failure "User aborted."
-            fi
-            if [ -z $tombpass ]; then
-                _failure "You set empty password, which is not possible."
-            fi
-            tombpasstmp=$tombpass
-            tombpass=`ask_password "Type the new password to secure your key (again)"`
-            if [[ $? != 0 ]]; then
-                _failure "User aborted."
-            fi
-            if [ "$tombpasstmp" = "$tombpass" ]; then
-                break;
-            fi
-            unset tombpasstmp
-            unset tombpass
-        done
-    else
-        tombpass="$1"
-        _verbose "gen_key takes tombpass from CLI argument: ::1 tomb pass::" $tombpass
-    fi
-
-    header=""
-    [[ $KDF == 1 ]] && {
-        { option_is_set --kdf } && {
-            # KDF is a new key strenghtening technique against brute forcing
-            # see: https://github.com/dyne/Tomb/issues/82
-            itertime="`option_value --kdf`"
-            # removing support of floating points because they can't be type checked well
-            if [[ "$itertime" != <-> ]]; then
-                unset tombpass
+    { ! option_is_set -r } && {
+        if [ "$1" = "" ]; then
+            while true; do
+                # 3 tries to write two times a matching password
+                tombpass=`ask_password "Type the new password to secure your key"`
+                if [[ $? != 0 ]]; then
+                    _failure "User aborted."
+                fi
+                if [ -z $tombpass ]; then
+                    _failure "You set empty password, which is not possible."
+                fi
+                tombpasstmp=$tombpass
+                tombpass=`ask_password "Type the new password to secure your key (again)"`
+                if [[ $? != 0 ]]; then
+                    _failure "User aborted."
+                fi
+                if [ "$tombpasstmp" = "$tombpass" ]; then
+                    break;
+                fi
                 unset tombpasstmp
-                _warning "Wrong argument for --kdf: must be an integer number (iteration seconds)."
-                _failure "Depending on the speed of machines using this tomb, use 1 to 10, or more"
-                return 1
-            fi
-            # --kdf takes one parameter: iter time (on present machine) in seconds
-            local -i microseconds
-            microseconds=$(( itertime * 1000000 ))
-            _success "Using KDF, iteration time: ::1 microseconds::" $microseconds
-            _message "generating salt"
-            pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
-            _message "calculating iterations"
-            pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
-            _message "encoding the password"
-            # We use a length of 64bytes = 512bits (more than needed!?)
-            tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
+                unset tombpass
+            done
+        else
+            tombpass="$1"
+            _verbose "gen_key takes tombpass from CLI argument: ::1 tomb pass::" $tombpass
+        fi
 
-            header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+        header=""
+        [[ $KDF == 1 ]] && {
+            { option_is_set --kdf } && {
+                # KDF is a new key strenghtening technique against brute forcing
+                # see: https://github.com/dyne/Tomb/issues/82
+                itertime="`option_value --kdf`"
+                # removing support of floating points because they can't be type checked well
+                if [[ "$itertime" != <-> ]]; then
+                    unset tombpass
+                    unset tombpasstmp
+                    _warning "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+                    _failure "Depending on the speed of machines using this tomb, use 1 to 10, or more"
+                    return 1
+                fi
+                # --kdf takes one parameter: iter time (on present machine) in seconds
+                local -i microseconds
+                microseconds=$(( itertime * 1000000 ))
+                _success "Using KDF, iteration time: ::1 microseconds::" $microseconds
+                _message "generating salt"
+                pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
+                _message "calculating iterations"
+                pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
+                _message "encoding the password"
+                # We use a length of 64bytes = 512bits (more than needed!?)
+                tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
+
+                header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+            }
         }
+        print $header
     }
-
-
-    print $header
 
 	_tmp_create
 	local tmpres=$TOMBTMP
 
-    print -n - "${tombpass}\n$TOMBSECRET" \
-		| gpg --openpgp --force-mdc --cipher-algo ${algo} --batch \
-			  --no-options --no-tty --passphrase-fd 0 \
-			  --status-fd 2 -o - -c -a 2> $tmpres
+    if option_is_set -r; then
+        print -n - "${tombpass}\n$TOMBSECRET" \
+		    | gpg --openpgp --force-mdc --cipher-algo ${algo} --batch \
+		    	  --no-options --no-tty --recipient `option_value -r` \
+		    	  --status-fd 2 -o - --encrypt --armor 2> $tmpres    
+    else
+        print -n - "${tombpass}\n$TOMBSECRET" \
+		    | gpg --openpgp --force-mdc --cipher-algo ${algo} --batch \
+		    	  --no-options --no-tty --passphrase-fd 0 \
+		    	  --status-fd 2 -o - --symmetric --armor 2> $tmpres
+	fi
     # check result of gpg operation
     for i in ${(f)"$(cat $tmpres)"}; do
         _verbose "$i"
