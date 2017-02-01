@@ -151,6 +151,7 @@ losetup -f secret.tomb
 pass="$(gpg -d secret.key)"
 echo -n -e "$pass" | cryptsetup --key-file - luksOpen $lo secret
 mount /dev/mapper/secret /mnt
+unset pass
 ```
 One can change the last argument `/mnt` to where the Tomb has to be
 mounted and made accessible. To close the tomb then use:
@@ -174,6 +175,22 @@ reviewed by forensics analysts and it can be considered to be safe for
 military grade use where the integrity of information stored depends
 on the user's behaviour and the strength of a standard AES-256 (XTS
 plain) encryption algorithm.
+
+## Compliancy
+
+Tomb volumes are fully compliant FIPS 197 and with:
+
+- [ISO/IEC 18033-1:2015](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=54530) Information technology -- Security techniques -- Encryption algorithms -- Part 1: General
+- [ISO/IEC 18033-3:2010](http://www.iso.org/iso/home/store/catalogue_ics/catalogue_detail_ics.htm?csnumber=54531) Information technology -- Security techniques -- Encryption algorithms -- Part 3: Block ciphers
+
+Tomb implementation is known to address at least partially issues raised in:
+
+- [ISO/IEC 11770-1:2010](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=53456) Information technology -- Security techniques -- Key management -- Part 1: Framework
+- [ISO/IEC 11770-2:2008](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=46370) Information technology -- Security techniques -- Key management -- Part 2: Mechanisms using symmetric techniques
+- [ISO/IEC 27005:2011](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=56742) Information technology -- Security techniques -- Information security risk management
+- [ISO/IEC 24759:2014](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=59142) Information technology -- Security techniques -- Test requirements for cryptographic modules 
+
+As such Tomb qualifies sound for use on information rated as "top secret" when used on an underlying stack of carefully reviewed hardware (random number generator and other components) and software (Linux kernel build, crypto modules, device manager, compiler used to built, shell interpreter and packaged dependencies).
 
 # Use stable releases in production!
 
