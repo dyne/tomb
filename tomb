@@ -1173,7 +1173,12 @@ gen_key() {
     tombpasstmp=""
 
     { option_is_set -r } && {
-        local gpgkey=`option_value -r`
+        { option_is_set -R } && {
+            local gpgkey=`option_value -R`
+        } || {
+            local gpgkey=`option_value -r`
+        }
+        
         _verbose "using $gpgkey to encrypt a tomb key"
         { is_valid_recipients "$gpgkey" } || {
             _failure "You set an invalid GPG ID."
@@ -2669,7 +2674,7 @@ main() {
     subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
     subcommands_opts[engrave]="k: "
 
-    subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
+    subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: R: "
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""

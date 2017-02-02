@@ -57,7 +57,7 @@ command -v qrencode > /dev/null || QRENCODE=0
 
 typeset -A results
 tests=(dig forge lock badpass open close passwd chksum bind setkey
-recip-dig recip-forge recip-lock recip-open recip-close)
+recip-dig recip-forge recip-lock recip-open recip-close recip-passwd)
 { test $RESIZER = 1 } && { tests+=(resize) }
 { test $KDF = 1 } && { tests+=(kdforge kdfpass kdflock kdfopen) }
 { test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen stgpipe stgimpl
@@ -162,6 +162,16 @@ test-tomb-recip() {
         tt close recip
     }
     
+	notice "Testing tomb with recipient changing gpg key: passwd"
+	res=0
+	tt passwd -k $tomb_key -r $gpgid_1 -R $gpgid_2
+	{ test $? = 0 } || { res=1 }
+	tt open $tomb -k $tomb_key -r $gpgid_2
+	{ test $? = 0 } || { res=1 }
+	tt close recip
+	{ test $? = 0 } || { res=1 }
+	{ test $res = 0 } && { results+=(recip-passwd SUCCESS) }
+	
 }
 
 test-bind-hooks() {
