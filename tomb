@@ -992,7 +992,7 @@ gpg_decrypt() {
     { option_is_set -r } && {
         typeset -a recipients
         recipients=(${(s:,:)$(option_value -r)})
-        { is_valid_recipients $recipients } || {
+        { ! is_valid_recipients $recipients } && { ! option_is_set -f } && {
              _failure "You set an invalid GPG ID."
         }
         gpgpass="$TOMBKEY"
