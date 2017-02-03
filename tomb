@@ -937,8 +937,8 @@ _load_key() {
         _failure "This operation requires a key file to be specified using the -k option." }
 
     if option_is_set -r; then
-        _verbose "load_key delegating password handling to GnuPG"
-        _message "Waiting for GnuPG to handle password authentication... "
+        _verbose "load_key key encrypted with a GnuPG Key"
+        _message "Key encrypted with a GnuPG Key"
         TOMBKEYFILE=$keyfile
         TOMBKEY="${mapfile[$TOMBKEYFILE]}"
     elif [[ $keyfile == "-" ]]; then
@@ -1160,7 +1160,11 @@ change_passwd() {
     _check_swap  # Ensure swap is secure, if any
     _load_key    # Try loading key from option -k and set TOMBKEYFILE
 
-    _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
+    { option_is_set -r } && {
+        _message "Commanded to change GnuPG key for tomb key ::1 key::" $TOMBKEYFILE
+    } || { 
+        _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
+    }
 
     _tmp_create
     tmpnewkey=$TOMBTMP
@@ -1174,7 +1178,11 @@ change_passwd() {
     fi
     [[ $? == 0 ]] || _failure "No valid password supplied."
 
-    _success "Changing password for ::1 key file::" $TOMBKEYFILE
+    { option_is_set -r } && {
+        _success "Changing GnuPG key for ::1 key file::" $TOMBKEYFILE
+    } || { 
+        _success "Changing password for ::1 key file::" $TOMBKEYFILE
+    }
 
     # Here $TOMBSECRET contains the key material in clear
 
@@ -1191,7 +1199,11 @@ change_passwd() {
 
     # Copy the new key as the original keyfile name
     cp -f "${tmpnewkey}" $TOMBKEYFILE
-    _success "Your passphrase was successfully updated."
+    { option_is_set -r } && {
+        _success "Your GnuPG key was successfully changed"
+    } || { 
+        _success "Your passphrase was successfully updated."
+    }
 
     return 0
 }
@@ -1354,8 +1366,11 @@ bury_key() {
     }
 
     _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $TOMBKEY $imagefile
-    { option_is_set -r } || {
-        _message "Please confirm the key password for the encoding" }
+    { option_is_set -r } && {
+        _message "Using GnuPG Key ID"
+    } || {
+        _message "Please confirm the key password for the encoding" 
+    }
     
     # We ask the password and test if it is the same encoding the
     # base key, to insure that the same password is used for the
@@ -1375,7 +1390,7 @@ bury_key() {
         ask_key_password
     }
     [[ $? != 0 ]] && {
-        _warning "Wrong password supplied."
+        _warning "Wrong password/GnuPG ID supplied."
         _failure "You shall not bury a key whose password is unknown to you." }
 
     if option_is_set -r && option_is_set --tomb-pwd; then
@@ -1642,7 +1657,7 @@ forge_key() {
     _message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" \
         $destkey $algo
 
-    [[ $KDF == 1 ]] && {
+    [[ $KDF == 1 ]] && { ! option_is_set -r } && {
         _message "Using KDF to protect the key password (`option_value --kdf` rounds)"
     }
 
@@ -1665,7 +1680,15 @@ forge_key() {
 
     # Here the global variable TOMBSECRET contains the naked secret
 
-    _success "Choose the  password of your key: ::1 tomb key::" $TOMBKEYFILE
+    { option_is_set -r } && {
+        { option_is_set --shared } && {
+            _success "Using GnuPG keys to encrypt and share your key: ::1 tomb key::" $TOMBKEYFILE
+        } || {
+            _success "Using the GnuPG key ::1:: to encrypt the key: ::2 tomb key::" `option_value -r` $TOMBKEYFILE
+        }
+    } || {
+        _success "Choose the password of your key: ::1 tomb key::" $TOMBKEYFILE
+    }
     _message "(You can also change it later using 'tomb passwd'.)"
     # _user_file $TOMBKEYFILE
 
