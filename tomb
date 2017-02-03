@@ -864,6 +864,14 @@ _recipients_arg() {
     return 0
 }
 
+# $1 is a GPG key recipient
+# Print the fingerprint of the GPG key
+_fingerprint() {
+    local recipient="$1"
+    gpg --with-colons --fingerprint "$recipient" | grep fpr | head -1 | cut -d ':' -f 10 | sed 's/.\{4\}/& /g'
+}
+
+
 # $1 is the encrypted key contents we are checking
 is_valid_key() {
     local key="$1"       # Unique argument is an encrypted key to test
@@ -1208,6 +1216,19 @@ gen_key() {
             recipients=(${(s:,:)$(option_value -R)})
         } || {
             recipients=(${(s:,:)$(option_value -r)})
+        }
+        
+        [ "${#recipients}" -gt 1 ] && {
+            if option_is_set --shared; then
+                _warning "You are going to encrypt a tomb key with ${#recipients} recipients."
+                _warning "It is your responsibility to check the fingerprint of these recipients."
+                _warning "The fingerprints are:"
+                for gpg_id in ${recipients[@]}; do
+                    _warning "    `_fingerprint "$gpg_id"`"
+                done
+            else
+                _failure "You need to use the option '--shared' to enable sharing support"
+            fi
         }
         
         { is_valid_recipients $recipients } || {
@@ -2698,13 +2719,13 @@ main() {
     subcommands_opts[create]="" # deprecated, will issue warning
 
     # -o in forge and lock is used to pass an alternate cipher.
-    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom r: "
+    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom r: -shared "
     subcommands_opts[dig]="-ignore-swap s: -size=s "
     subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: r: "
-    subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: "
+    subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: -shared "
     subcommands_opts[engrave]="k: "
 
-    subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: R: "
+    subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: R: -shared "
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
