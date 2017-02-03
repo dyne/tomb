@@ -651,6 +651,9 @@ usage() {
     _print " -n     don't process the hooks found in tomb"
     _print " -o     options passed to commands: open, lock, forge (see man)"
     _print " -f     force operation (i.e. even if swap is active)"
+    _print " -r     GnuPG users IDs to encrypt a tomb key (separated by ,)"
+    _print " -R     new recipients to use (separated by ,)"
+    _print " --shared active sharing feature"
     [[ $KDF == 1 ]] && {
         _print " --kdf  forge keys armored against dictionary attacks"
     }
