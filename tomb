@@ -981,6 +981,7 @@ _load_key() {
 # takes two args just like get_lukskey
 # prints out the decrypted content
 # contains tweaks for different gpg versions
+# support both symmetric and asymmetric encryption
 gpg_decrypt() {
     # fix for gpg 1.4.11 where the --status-* options don't work ;^/
     local gpgver=$(gpg --version --no-permission-warning | awk '/^gpg/ {print $3}')
@@ -1210,7 +1211,7 @@ change_passwd() {
 
 
 # takes care to encrypt a key
-# honored options: --kdf  --tomb-pwd -o
+# honored options: --kdf  --tomb-pwd -o -r -R
 gen_key() {
     # $1 the password to use; if not set ask user
     # -o is the --cipher-algo to use (string taken by GnuPG)
@@ -1614,11 +1615,13 @@ dig_tomb() {
 
 # Step two -- Create a detached key to lock a tomb with
 #
-# Synopsis: forge_key [destkey|-k destkey] [-o cipher]
+# Synopsis: forge_key [destkey|-k destkey] [-o cipher] [-r gpgid] [--shared]
 #
 # Arguments:
 # -k                path to destination keyfile
 # -o                Use an alternate algorithm
+# -r                GPG recipients to be used
+# --shared          Activate sharing capability
 #
 forge_key() {
     # can be specified both as simple argument or using -k
@@ -1723,7 +1726,7 @@ forge_key() {
 
 # Step three -- Lock tomb
 #
-# Synopsis: tomb_lock file.tomb file.tomb.key [-o cipher]
+# Synopsis: tomb_lock file.tomb file.tomb.key [-o cipher] [-r gpgid]
 #
 # Lock the given tomb with the given key file, in fact formatting the
 # loopback volume as a LUKS device.
