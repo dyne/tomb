@@ -2691,7 +2691,7 @@ main() {
     # subcommands_opts[install]=""
     subcommands_opts[askpass]=""
     subcommands_opts[source]=""
-    subcommands_opts[resize]="-ignore-swap s: -size=s k: -tomb-pwd: "
+    subcommands_opts[resize]="-ignore-swap s: -size=s k: -tomb-pwd: r: "
     subcommands_opts[check]="-ignore-swap "
     #    subcommands_opts[translate]=""
 
