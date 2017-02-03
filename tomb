@@ -825,13 +825,43 @@ _ensure_dependencies() {
 
 # {{{ Key operations
 
-# $1 is the key ID we are checking
+# $@ is the list of all the recipient used to encrypt a tomb key
 is_valid_recipients() {
-    local gpg_id="$1"       # Unique argument is the GPG ID to test
+    typeset -a recipients
+    recipients=($@)
+    
     _verbose "is_valid_recipients"
     
-	gpg --list-secret-keys "$gpg_id" &> /dev/null
-    return $?
+    # All the keys ID must be valid (the public keys must be present in the database)
+    for gpg_id in ${recipients[@]}; do
+        gpg --list-keys "$gpg_id" &> /dev/null
+        [[ $? != 0 ]] && {
+            _warning "$gpg_id is not a valid key ID."
+            return 1
+        }
+    done
+
+    # At least one private key must be present
+    for gpg_id in $recipients; do
+        gpg --list-secret-keys "$gpg_id" &> /dev/null
+        [[ $? = 0 ]] && { 
+            return 0
+        }
+    done
+
+    return 1
+}
+
+# $@ is the list of all the recipient used to encrypt a tomb key
+# Print the recipient arg to be used in gpg.
+_recipients_arg() {
+    typeset -a recipients
+    recipients=($@)
+    
+    for gpg_id in ${recipients[@]}; do
+        print -R -n "--recipient $gpg_id "
+    done
+    return 0
 }
 
 # $1 is the encrypted key contents we are checking
@@ -952,9 +982,9 @@ gpg_decrypt() {
     gpgpopt=(--passphrase-fd 0)
 
     { option_is_set -r } && {
-        local gpgkey=`option_value -r`
-        _verbose "using $gpgkey to decrypt a tomb key"
-        { ! is_valid_recipients "$gpgkey" } && {
+        typeset -a recipients
+        recipients=(${(s:,:)$(option_value -r)})
+        { is_valid_recipients $recipients } || {
              _failure "You set an invalid GPG ID."
         }
         gpgpass="$TOMBKEY"
@@ -1173,20 +1203,20 @@ gen_key() {
     tombpasstmp=""
 
     { option_is_set -r } && {
+        typeset -a recipients 
         { option_is_set -R } && {
-            local gpgkey=`option_value -R`
+            recipients=(${(s:,:)$(option_value -R)})
         } || {
-            local gpgkey=`option_value -r`
+            recipients=(${(s:,:)$(option_value -r)})
         }
         
-        _verbose "using $gpgkey to encrypt a tomb key"
-        { is_valid_recipients "$gpgkey" } || {
+        { is_valid_recipients $recipients } || {
             _failure "You set an invalid GPG ID."
         }
         
         # Set gpg inputs and options
         gpgpass="$TOMBSECRET"
-        gpgopt=(--encrypt --recipient "$gpgkey")
+        gpgopt=(--encrypt `_recipients_arg $recipients`)
         opt=''
     } || {
         if [ "$1" = "" ]; then

@@ -58,7 +58,7 @@ command -v qrencode > /dev/null || QRENCODE=0
 typeset -A results
 tests=(dig forge lock badpass open close passwd chksum bind setkey recip-dig 
 recip-forge recip-lock recip-open recip-close recip-passwd recip-resize 
-recip-setkey)
+recip-setkey shared shared-passwd shared-setkey)
 { test $RESIZER = 1 } && { tests+=(resize) }
 { test $KDF = 1 } && { tests+=(kdforge kdfpass kdflock kdfopen) }
 { test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen stgpipe stgimpl
@@ -191,6 +191,44 @@ test-tomb-recip() {
     tt close recip
 }
 
+test-tomb-shared() {
+
+	notice "wiping all shared.tomb* in /tmp"
+    rm -f /tmp/shared.tomb /tmp/shared.tomb.key
+    
+    notice "Testing sharing a tomb"
+    res=0
+    tt dig -s 20 /tmp/shared.tomb
+    { test $? = 0 } || { res=1 }
+    tt forge /tmp/shared.tomb.key -r $gpgid_1,$gpgid_2 \
+        --ignore-swap --unsafe --use-urandom 
+    { test $? = 0 } || { res=1 }
+    tt lock /tmp/shared.tomb -k /tmp/shared.tomb.key \
+        --ignore-swap --unsafe -r $gpgid_1
+    { test $? = 0 } || { res=1 }
+    tt open /tmp/shared.tomb -k /tmp/shared.tomb.key -r $gpgid_1
+    { test $? = 0 } || { res=1 }
+    tt close shared
+    { test $? = 0 } || { res=1 }
+    { test $res = 0 } && { results+=(shared SUCCESS) }
+    
+    notice "Testing changing recipients on a shared Tomb"
+    tt passwd -k /tmp/shared.tomb.key -r $gpgid_1,$gpgid_2 \
+        -R $gpgid_2,$gpgid_1
+    { test $? = 0 } && { results+=(shared-passwd SUCCESS) }
+    
+    notice "Testing setkey on a shared Tomb"
+    rm -f /tmp/new.shared.tomb.key
+    res=0
+    tt forge /tmp/new.shared.tomb.key -r $gpgid_1,$gpgid_2 \
+        --ignore-swap --unsafe --use-urandom
+    { test $? = 0 } || { res=1 }
+    tt setkey -k /tmp/new.shared.tomb.key /tmp/shared.tomb.key /tmp/shared.tomb \
+        -r $gpgid_2,$gpgid_1
+    { test $? = 0 } || { res=1 }
+    { test $res = 0 } && { results+=(shared-setkey SUCCESS) }
+}
+
 test-bind-hooks() {
     notice "Testing bind hooks"
 
@@ -300,6 +338,7 @@ startloops=(`sudo losetup -a |cut -d: -f1`)
 # isolated function (also called with source)
 test-tomb-create
 test-tomb-recip
+test-tomb-shared
 
 notice "Testing open with wrong password"
 
