@@ -56,8 +56,9 @@ command -v qrencode > /dev/null || QRENCODE=0
 
 
 typeset -A results
-tests=(dig forge lock badpass open close passwd chksum bind setkey
-recip-dig recip-forge recip-lock recip-open recip-close recip-passwd recip-resize)
+tests=(dig forge lock badpass open close passwd chksum bind setkey recip-dig 
+recip-forge recip-lock recip-open recip-close recip-passwd recip-resize 
+recip-setkey)
 { test $RESIZER = 1 } && { tests+=(resize) }
 { test $KDF = 1 } && { tests+=(kdforge kdfpass kdflock kdfopen) }
 { test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen stgpipe stgimpl
@@ -176,6 +177,18 @@ test-tomb-recip() {
     tt resize -s 30 $tomb -k $tomb_key -r $gpgid_2
     { test $? = 0 } && { results+=(recip-resize SUCCESS) }
     
+    notice "Testing tomb with recipient setting a new key: setkey"
+    sudo rm -f /tmp/new.recip.tomb.key
+    res=0
+    tt forge /tmp/new.recip.tomb.key -r $gpgid_2 \
+        --ignore-swap --unsafe --use-urandom
+    { test $? = 0 } || { res=1 }
+    tt setkey -k /tmp/new.recip.tomb.key $tomb_key $tomb -r $gpgid_2
+    { test $? = 0 } || { res=1 }
+    tt open -k /tmp/new.recip.tomb.key $tomb -r $gpgid_2
+    { test $? = 0 } || { res=1 }
+    { test $res = 0 } && { results+=(recip-setkey SUCCESS) }
+    tt close recip
 }
 
 test-bind-hooks() {
