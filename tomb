@@ -242,9 +242,9 @@ _plot() {
 
     TOMBFILE=$(basename $TOMBPATH)
 
-    # The tomb name is TOMBFILE without an extension.
-    # It can start with dots: ..foo.tomb -> ..foo
-    TOMBNAME="${TOMBFILE%\.[^\.]*}"
+    # The tomb name is TOMBFILE without an extension and underscores instead of spaces (for mount and cryptsetup)
+    # It can start with dots: ..foo bar baz.tomb -> ..foo_bar_baz
+    TOMBNAME=${${TOMBFILE// /_}%.*}
     [[ -z $TOMBNAME ]] && {
         _failure "Tomb won't work without a TOMBNAME." }
 
@@ -1069,7 +1069,7 @@ ask_key_password() {
 # call cryptsetup with arguments using the currently known secret
 # echo flags eliminate newline and disable escape (BSD_ECHO)
 _cryptsetup() {
-    print -R -n - "$TOMBSECRET" | _sudo cryptsetup --key-file - ${=@}
+    print -R -n - "$TOMBSECRET" | _sudo cryptsetup --key-file - ${@}
     return $?
 }
 
@@ -2304,7 +2304,7 @@ search_tombs() {
             # Use swish-e to search over contents
             [[ $SWISH == 1 && -r $tombmount/.swish ]] && {
                 _message "Searching contents in tomb ::1 tomb name::" $tombname
-                swish-e -w ${=@} -f $tombmount/.swish -H0 }
+                swish-e -w ${@} -f $tombmount/.swish -H0 }
         } || {
             _warning "Skipping tomb ::1 tomb name::: not indexed." $tombname
             _warning "Run 'tomb index' to create indexes." }
@@ -2709,22 +2709,22 @@ main() {
 
         # CREATE Step 1: dig -s NN file.tomb
         dig)
-            dig_tomb ${=PARAM}
+            dig_tomb $PARAM
             ;;
 
         # CREATE Step 2: forge file.tomb.key
         forge)
-            forge_key ${=PARAM}
+            forge_key $PARAM
             ;;
 
         # CREATE Step 2: lock -k file.tomb.key file.tomb
         lock)
-            lock_tomb_with_key ${=PARAM}
+            lock_tomb_with_key $PARAM
             ;;
 
         # Open the tomb
         mount|open)
-            mount_tomb ${=PARAM}
+            mount_tomb $PARAM
             ;;
 
         # Close the tomb
@@ -2755,7 +2755,7 @@ main() {
 
         # Search tomb contents
         search)
-            search_tombs ${=PARAM}
+            search_tombs $PARAM
             ;;
 
         ## Locking operations
@@ -2764,7 +2764,7 @@ main() {
         engrave)
             [[ $QRENCODE == 0 ]] && {
                 _failure "QREncode not installed: cannot engrave keys on paper." }
-            engrave_key ${=PARAM}
+            engrave_key $PARAM
             ;;
 
         # Change password on existing key
@@ -2774,7 +2774,7 @@ main() {
 
         # Change tomb key
         setkey)
-            change_tomb_key ${=PARAM}
+            change_tomb_key $PARAM
             ;;
 
         # STEGANOGRAPHY: hide key inside an image
