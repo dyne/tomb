@@ -9,7 +9,6 @@ Tomb needs a few programs to be installed on a system in order to work:
  * gnupg
  * cryptsetup
  * pinentry-curses (and/or -gtk-2, -x11, -qt)
- * lsof
 
 Most systems provide these tools in their package collection, for
 instance on Debian/Ubuntu one can use `apt-get install` on Fedora and
@@ -67,6 +66,7 @@ Tomb can use some optional tools to extend its functionalities:
 
 executable | function
 ---------- | ---------------------------------------------------
+  lsof     | slam a tomb (close even if open programs)
   dcfldd   | show progress while digging tombs and keys
   steghide | bury and exhume keys inside images
   resizefs | extend the size of existing tomb volumes
