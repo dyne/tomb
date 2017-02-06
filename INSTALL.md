@@ -66,6 +66,7 @@ Tomb can use some optional tools to extend its functionalities:
 
 executable | function
 ---------- | ---------------------------------------------------
+  lsof     | slam a tomb (close even if open programs)
   dcfldd   | show progress while digging tombs and keys
   steghide | bury and exhume keys inside images
   resizefs | extend the size of existing tomb volumes

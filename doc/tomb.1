@@ -1,4 +1,4 @@
-.TH tomb 1 "November 26, 2014" "tomb"
+.TH tomb 1 "February 05, 2017" "tomb"
 
 .SH NAME
 Tomb \- the Crypto Undertaker
@@ -111,9 +111,9 @@ the tomb is in use by running processes (to force close, see
 .IP "slam"
 Closes a tomb like the command \fIclose\fR does, but it doesn't fail
 even if the tomb is in use by other application processes: it looks
-for and violently kills \-9 each of them. This command may
+for and closes each of them (in order: TERM, HUP, KILL). This command may
 provoke unsaved data loss, but assists users to face surprise
-situations.
+situations. It requires \fIlsof\fR else it falls back to \fIclose\fR.
 
 
 .B
