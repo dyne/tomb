@@ -122,15 +122,15 @@ test-tomb-recip() {
     { test $? = 0 } && { results+=(recip-dig SUCCESS) }
     
     notice "Testing tomb with recipient creation: forge"
-    tt forge $tomb_key -r $gpgid_1 --ignore-swap --unsafe --use-urandom
+    tt forge $tomb_key -g -r $gpgid_1 --ignore-swap --unsafe --use-urandom
     { test $? = 0 } && { results+=(recip-forge SUCCESS) } 
     
     notice "Testing tomb with recipient creation: lock"
-    tt lock $tomb -k $tomb_key -r $gpgid_1 --ignore-swap --unsafe
+    tt lock $tomb -k $tomb_key -g -r $gpgid_1 --ignore-swap --unsafe
     { test $? = 0 } && { results+=(recip-lock SUCCESS) }
     
     notice "Testing tomb with recipient opening: open"
-    tt open $tomb -k $tomb_key -r $gpgid_1
+    tt open $tomb -k $tomb_key -g
     { test $? = 0 } && { results+=(recip-open SUCCESS) }
     
     notice "Testing tomb with recipient closing: close"
@@ -144,7 +144,7 @@ test-tomb-recip() {
         sudo rm -f /tmp/recip.steg.key
     	
         tt --unsafe --tomb-pwd ${dummypass} bury -k /tmp/recip.tomb.key \
-            /tmp/recip.jpg -r "$gpgid_1"
+            /tmp/recip.jpg -g -r "$gpgid_1"
         { test $? = 0 } && { results+=(recip-stgin SUCCESS) }
 
         tt --unsafe --tomb-pwd ${dummypass} exhume -k /tmp/recip.steg.key \
@@ -152,40 +152,40 @@ test-tomb-recip() {
         { test $? = 0 } && { results+=(recip-stgout SUCCESS) }
 
         tt --unsafe --tomb-pwd ${dummypass} open -k /tmp/recip.steg.key \
-            /tmp/recip.tomb -r "$gpgid_1"
+            /tmp/recip.tomb -g
         { test $? = 0 } && { results+=(recip-stgopen SUCCESS) }
         ${T} close recip
 
         notice "test using open -k image.jpeg"
         tt --unsafe --tomb-pwd ${dummypass} open -k /tmp/recip.jpg \
-            /tmp/recip.tomb -r "$gpgid_1"
+            /tmp/recip.tomb -g
         { test $? = 0 } && { results+=(recip-stgimpl SUCCESS) }
         tt close recip
     }
     
 	notice "Testing tomb with recipient changing gpg key: passwd"
 	res=0
-	tt passwd -k $tomb_key -r $gpgid_1 -R $gpgid_2
+	tt passwd -k $tomb_key -g -r $gpgid_2
 	{ test $? = 0 } || { res=1 }
-	tt open $tomb -k $tomb_key -r $gpgid_2
+	tt open $tomb -k $tomb_key -g
 	{ test $? = 0 } || { res=1 }
 	tt close recip
 	{ test $? = 0 } || { res=1 }
 	{ test $res = 0 } && { results+=(recip-passwd SUCCESS) }
 	
 	notice "Testing tomb with recipient resizing a tomb: resize"
-    tt resize -s 30 $tomb -k $tomb_key -r $gpgid_2
+    tt resize -s 30 $tomb -k $tomb_key -g -r $gpgid_2
     { test $? = 0 } && { results+=(recip-resize SUCCESS) }
     
     notice "Testing tomb with recipient setting a new key: setkey"
     sudo rm -f /tmp/new.recip.tomb.key
     res=0
-    tt forge /tmp/new.recip.tomb.key -r $gpgid_2 \
+    tt forge /tmp/new.recip.tomb.key -g -r $gpgid_2 \
         --ignore-swap --unsafe --use-urandom
     { test $? = 0 } || { res=1 }
-    tt setkey -k /tmp/new.recip.tomb.key $tomb_key $tomb -r $gpgid_2
+    tt setkey -k /tmp/new.recip.tomb.key $tomb_key $tomb -g -r $gpgid_2
     { test $? = 0 } || { res=1 }
-    tt open -k /tmp/new.recip.tomb.key $tomb -r $gpgid_2
+    tt open -k /tmp/new.recip.tomb.key $tomb -g
     { test $? = 0 } || { res=1 }
     { test $res = 0 } && { results+=(recip-setkey SUCCESS) }
     tt close recip
@@ -200,31 +200,30 @@ test-tomb-shared() {
     res=0
     tt dig -s 20 /tmp/shared.tomb
     { test $? = 0 } || { res=1 }
-    tt forge /tmp/shared.tomb.key -r $gpgid_1,$gpgid_2 --shared \
+    tt forge /tmp/shared.tomb.key -g -r $gpgid_1,$gpgid_2 --shared \
         --ignore-swap --unsafe --use-urandom 
     { test $? = 0 } || { res=1 }
     tt lock /tmp/shared.tomb -k /tmp/shared.tomb.key \
-        --ignore-swap --unsafe -r $gpgid_1
+        --ignore-swap --unsafe -g -r $gpgid_1
     { test $? = 0 } || { res=1 }
-    tt open /tmp/shared.tomb -k /tmp/shared.tomb.key -r $gpgid_1
+    tt open /tmp/shared.tomb -k /tmp/shared.tomb.key -g
     { test $? = 0 } || { res=1 }
     tt close shared
     { test $? = 0 } || { res=1 }
     { test $res = 0 } && { results+=(shared SUCCESS) }
     
     notice "Testing changing recipients on a shared Tomb"
-    tt passwd -k /tmp/shared.tomb.key -r $gpgid_1,$gpgid_2 \
-        -R $gpgid_2,$gpgid_1 --shared
+    tt passwd -k /tmp/shared.tomb.key -g -r $gpgid_2,$gpgid_1 --shared
     { test $? = 0 } && { results+=(shared-passwd SUCCESS) }
     
     notice "Testing setkey on a shared Tomb"
     rm -f /tmp/new.shared.tomb.key
     res=0
-    tt forge /tmp/new.shared.tomb.key -r $gpgid_1,$gpgid_2 --shared\
+    tt forge /tmp/new.shared.tomb.key -g -r $gpgid_1,$gpgid_2 --shared\
         --ignore-swap --unsafe --use-urandom
     { test $? = 0 } || { res=1 }
     tt setkey -k /tmp/new.shared.tomb.key /tmp/shared.tomb.key /tmp/shared.tomb \
-        -r $gpgid_2,$gpgid_1 --shared
+        -g -r $gpgid_2,$gpgid_1 --shared
     { test $? = 0 } || { res=1 }
     { test $res = 0 } && { results+=(shared-setkey SUCCESS) }
 }

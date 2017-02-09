@@ -651,8 +651,8 @@ usage() {
     _print " -n     don't process the hooks found in tomb"
     _print " -o     options passed to commands: open, lock, forge (see man)"
     _print " -f     force operation (i.e. even if swap is active)"
-    _print " -r     GnuPG users IDs to encrypt a tomb key (separated by ,)"
-    _print " -R     new recipients to use (separated by ,)"
+    _print " -g     use a GnuPG key to encrypt a tomb key"
+    _print " -r     provide GnuPG recipients (separated by coma)"
     _print " --shared active sharing feature"
     [[ $KDF == 1 ]] && {
         _print " --kdf  forge keys armored against dictionary attacks"
@@ -939,7 +939,7 @@ _load_key() {
     [[ -z $keyfile ]] && {
         _failure "This operation requires a key file to be specified using the -k option." }
 
-    if option_is_set -r; then
+    if option_is_set -g; then
         _verbose "load_key key encrypted with a GnuPG Key"
         _message "Key encrypted with a GnuPG Key"
         TOMBKEYFILE=$keyfile
@@ -993,12 +993,7 @@ gpg_decrypt() {
     typeset -a gpgopt
     gpgpopt=(--passphrase-fd 0)
 
-    { option_is_set -r } && {
-        typeset -a recipients
-        recipients=(${(s:,:)$(option_value -r)})
-        { ! is_valid_recipients $recipients } && { ! option_is_set -f } && {
-             _failure "You set an invalid GPG ID."
-        }
+    { option_is_set -g } && {
         gpgpass="$TOMBKEY"
         gpgpopt=()
     }
@@ -1064,7 +1059,7 @@ get_lukskey() {
 
         # key needs to be exhumed from an image
     elif [[ -r $TOMBKEYFILE && $(file $TOMBKEYFILE) =~ "JP.G" ]]; then
-        if option_is_set -r; then
+        if option_is_set -g; then
             # When using a GPG key, the tomb key is buried using a steganography password
             if option_is_set --tomb-pwd; then
                 _password="`option_value --tomb-pwd`"
@@ -1102,7 +1097,7 @@ ask_key_password() {
         _verbose "no password needed, using secret bytes from stdin"
         return 0 }
 
-    if option_is_set -r; then
+    if option_is_set -g; then
         _verbose "no password needed, using GPG key"
         get_lukskey
         return $?
@@ -1164,7 +1159,7 @@ change_passwd() {
     _check_swap  # Ensure swap is secure, if any
     _load_key    # Try loading key from option -k and set TOMBKEYFILE
 
-    { option_is_set -r } && {
+    { option_is_set -g } && {
         _message "Commanded to change GnuPG key for tomb key ::1 key::" $TOMBKEYFILE
     } || { 
         _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
@@ -1182,7 +1177,7 @@ change_passwd() {
     fi
     [[ $? == 0 ]] || _failure "No valid password supplied."
 
-    { option_is_set -r } && {
+    { option_is_set -g } && {
         _success "Changing GnuPG key for ::1 key file::" $TOMBKEYFILE
     } || { 
         _success "Changing password for ::1 key file::" $TOMBKEYFILE
@@ -1203,7 +1198,7 @@ change_passwd() {
 
     # Copy the new key as the original keyfile name
     cp -f "${tmpnewkey}" $TOMBKEYFILE
-    { option_is_set -r } && {
+    { option_is_set -g } && {
         _success "Your GnuPG key was successfully changed"
     } || { 
         _success "Your passphrase was successfully updated."
@@ -1226,14 +1221,13 @@ gen_key() {
     tombpass=""
     tombpasstmp=""
 
-    { option_is_set -r } && {
-        typeset -a recipients 
-        { option_is_set -R } && {
-            recipients=(${(s:,:)$(option_value -R)})
-        } || {
-            recipients=(${(s:,:)$(option_value -r)})
+    { option_is_set -g } && {
+        { option_is_set -r } || {
+            _failure "A GPG recipient needs to be specified using -r."
         }
-        
+
+        typeset -a recipients
+        recipients=(${(s:,:)$(option_value -r)})
         [ "${#recipients}" -gt 1 ] && {
             if option_is_set --shared; then
                 _warning "You are going to encrypt a tomb key with ${#recipients} recipients."
@@ -1370,7 +1364,7 @@ bury_key() {
     }
 
     _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $TOMBKEY $imagefile
-    { option_is_set -r } && {
+    { option_is_set -g } && {
         _message "Using GnuPG Key ID"
     } || {
         _message "Please confirm the key password for the encoding" 
@@ -1386,7 +1380,7 @@ bury_key() {
     # if using a GPG key, we test if the user can decrypt the tomb 
     # with its key and we ask for a steganography password.
 
-    { option_is_set --tomb-pwd } && { ! option_is_set -r } && {
+    { option_is_set --tomb-pwd } && { ! option_is_set -g } && {
         local tombpwd="`option_value --tomb-pwd`"
         _verbose "tomb-pwd = ::1 tomb pass::" $tombpwd
         ask_key_password "$tombpwd"
@@ -1397,10 +1391,10 @@ bury_key() {
         _warning "Wrong password/GnuPG ID supplied."
         _failure "You shall not bury a key whose password is unknown to you." }
 
-    if option_is_set -r && option_is_set --tomb-pwd; then
+    if option_is_set -g && option_is_set --tomb-pwd; then
         TOMBPASSWORD="`option_value --tomb-pwd`"
         _verbose "tomb-pwd = ::1 tomb pass::" $TOMBPASSWORD
-    elif option_is_set -r; then
+    elif option_is_set -g; then
         tombpass=""
         tombpasstmp=""
         while true; do
@@ -1663,7 +1657,7 @@ forge_key() {
     _message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" \
         $destkey $algo
 
-    [[ $KDF == 1 ]] && { ! option_is_set -r } && {
+    [[ $KDF == 1 ]] && { ! option_is_set -g } && {
         _message "Using KDF to protect the key password (`option_value --kdf` rounds)"
     }
 
@@ -1686,7 +1680,7 @@ forge_key() {
 
     # Here the global variable TOMBSECRET contains the naked secret
 
-    { option_is_set -r } && {
+    { option_is_set -g } && {
         { option_is_set --shared } && {
             _success "Using GnuPG keys to encrypt and share your key: ::1 tomb key::" $TOMBKEYFILE
         } || {
@@ -1970,7 +1964,7 @@ mount_tomb() {
     # take the name only, strip extensions
     _verbose "Tomb name: ::1 tomb name:: (to be engraved)" $TOMBNAME
 
-    { option_is_set --tomb-pwd } && { ! option_is_set -r } && {
+    { option_is_set --tomb-pwd } && { ! option_is_set -g } && {
         tomb_pwd="`option_value --tomb-pwd`"
         _verbose "tomb-pwd = ::1 tomb pass::" $tomb_pwd
         ask_key_password "$tomb_pwd"
@@ -2739,10 +2733,10 @@ main() {
     # can only use the non-abbreviated long-option version like:
     # -force and NOT -f
     #
-    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe)
+    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g)
     subcommands_opts[__default]=""
     # -o in open and mount is used to pass alternate mount options
-    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: r: "
+    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: "
     subcommands_opts[mount]=${subcommands_opts[open]}
 
     subcommands_opts[create]="" # deprecated, will issue warning
@@ -2754,7 +2748,7 @@ main() {
     subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: -shared "
     subcommands_opts[engrave]="k: "
 
-    subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: R: -shared "
+    subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: -shared "
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
