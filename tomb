@@ -858,11 +858,12 @@ is_valid_recipients() {
 # $@ is the list of all the recipient used to encrypt a tomb key
 # Print the recipient arg to be used in gpg.
 _recipients_arg() {
+    local arg="$1"; shift
     typeset -a recipients
     recipients=($@)
     
     for gpg_id in ${recipients[@]}; do
-        print -R -n "--recipient $gpg_id "
+        print -R -n "$arg $gpg_id "
     done
     return 0
 }
@@ -996,6 +997,16 @@ gpg_decrypt() {
     { option_is_set -g } && {
         gpgpass="$TOMBKEY"
         gpgpopt=()
+        
+        # GPG option '--try-secret-key' exist since GPG 2.1
+        { option_is_set -r } && [[ $gpgver =~ "2.1." ]] && {
+            typeset -a recipients
+            recipients=(${(s:,:)$(option_value -r)})
+            { ! is_valid_recipients $recipients } && {
+                 _failure "You set an invalid GPG ID."
+            }
+            gpgpopt=(`_recipients_arg "--try-secret-key" $recipients`)
+        }
     }
     
     [[ $gpgver == "1.4.11" ]] && {
@@ -1209,7 +1220,7 @@ change_passwd() {
 
 
 # takes care to encrypt a key
-# honored options: --kdf  --tomb-pwd -o -r -R
+# honored options: --kdf  --tomb-pwd -o -g -r
 gen_key() {
     # $1 the password to use; if not set ask user
     # -o is the --cipher-algo to use (string taken by GnuPG)
@@ -1247,7 +1258,7 @@ gen_key() {
         
         # Set gpg inputs and options
         gpgpass="$TOMBSECRET"
-        gpgopt=(--encrypt `_recipients_arg $recipients`)
+        gpgopt=(--encrypt `_recipients_arg "--hidden-recipient" $recipients`)
         opt=''
     } || {
         if [ "$1" = "" ]; then
@@ -2736,7 +2747,7 @@ main() {
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g)
     subcommands_opts[__default]=""
     # -o in open and mount is used to pass alternate mount options
-    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: "
+    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: r: "
     subcommands_opts[mount]=${subcommands_opts[open]}
 
     subcommands_opts[create]="" # deprecated, will issue warning
