@@ -810,7 +810,7 @@ _ensure_dependencies() {
     command -v wipe 1>/dev/null 2>/dev/null && WIPE=(wipe -f -s)
 
     # Check for lsof for slamming tombs
-    command -v lsof -h 1>/dev/null 2>/dev/null || LSOF=0
+    command -v lsof 1>/dev/null 2>/dev/null || LSOF=0
     # Check for steghide
     command -v steghide 1>/dev/null 2>/dev/null || STEGHIDE=0
     # Check for resize
