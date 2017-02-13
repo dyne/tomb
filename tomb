@@ -507,7 +507,8 @@ is_valid_tomb() {
 
     _fail=0
     # Tomb file must be a readable, writable, non-empty regular file.
-    [[ ! -w "$1" ]] && {
+    # If passed the "ro" mount option, the writable check is skipped.
+    [[ ! -w "$1" ]] && [[ $(option_value -o) != *"ro"* ]] && {
         _warning "Tomb file is not writable: ::1 tomb file::" $1
         _fail=1
     }
