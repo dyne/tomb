@@ -56,7 +56,7 @@ command -v qrencode > /dev/null || QRENCODE=0
 
 
 typeset -A results
-tests=(dig forge lock badpass open close passwd chksum bind setkey)
+tests=(dig forge lock badpass open close openro passwd chksum bind setkey)
 { test $RESIZER = 1 } && { tests+=(resize) }
 { test $KDF = 1 } && { tests+=(kdforge kdfpass kdflock kdfopen) }
 { test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen stgpipe stgimpl) }
@@ -194,7 +194,32 @@ test-regression() {
 }
 
 
+test-open-read-only() {
 
+    notice "wiping all testro.tomb* in /tmp"
+    sudo rm -f /tmp/testro.tomb{,.key,.new.key}
+
+    # Create new
+    tt dig -s 20 /tmp/testro.tomb
+    tt forge /tmp/testro.tomb.key \
+        --ignore-swap --unsafe --tomb-pwd ${dummypass} --use-urandom
+    tt lock /tmp/testro.tomb -k /tmp/testro.tomb.key \
+        --ignore-swap --unsafe --tomb-pwd ${dummypass} 
+
+    notice "Testing open read only"
+
+    # Remove write privilege on test.tomb
+    chmod -w /tmp/testro.tomb
+
+    # Attempt to open the unwritable tomb with the read-only mount option
+    tt open /tmp/testro.tomb -k /tmp/testro.tomb.key \
+        --ignore-swap --unsafe --tomb-pwd ${dummypass} -o ro,noatime,nodev
+
+    { test $? = 0 } && {
+        results+=(openro SUCCESS)
+        tt close testro
+    }
+}
 
 
 startloops=(`sudo losetup -a |cut -d: -f1`)
@@ -227,8 +252,8 @@ tt close test
 
 { test $? = 0 } && { results+=(close SUCCESS) }
 
-
-
+# isolated function
+test-open-read-only
 
 
 notice "Testing changing tomb password"
