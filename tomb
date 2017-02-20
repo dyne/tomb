@@ -242,9 +242,9 @@ _plot() {
 
     TOMBFILE=$(basename $TOMBPATH)
 
-    # The tomb name is TOMBFILE without an extension.
-    # It can start with dots: ..foo.tomb -> ..foo
-    TOMBNAME="${TOMBFILE%\.[^\.]*}"
+    # The tomb name is TOMBFILE without an extension and underscores instead of spaces (for mount and cryptsetup)
+    # It can start with dots: ..foo bar baz.tomb -> ..foo_bar_baz
+    TOMBNAME=${${TOMBFILE// /_}%.*}
     [[ -z $TOMBNAME ]] && {
         _failure "Tomb won't work without a TOMBNAME." }
 
@@ -507,7 +507,8 @@ is_valid_tomb() {
 
     _fail=0
     # Tomb file must be a readable, writable, non-empty regular file.
-    [[ ! -w "$1" ]] && {
+    # If passed the "ro" mount option, the writable check is skipped.
+    [[ ! -w "$1" ]] && [[ $(option_value -o) != *"ro"* ]] && {
         _warning "Tomb file is not writable: ::1 tomb file::" $1
         _fail=1
     }
@@ -812,6 +813,8 @@ _ensure_dependencies() {
     # Which wipe command to use
     command -v wipe 1>/dev/null 2>/dev/null && WIPE=(wipe -f -s)
 
+    # Check for lsof for slamming tombs
+    command -v lsof 1>/dev/null 2>/dev/null || LSOF=0
     # Check for steghide
     command -v steghide 1>/dev/null 2>/dev/null || STEGHIDE=0
     # Check for resize
@@ -1159,7 +1162,7 @@ ask_key_password() {
 # call cryptsetup with arguments using the currently known secret
 # echo flags eliminate newline and disable escape (BSD_ECHO)
 _cryptsetup() {
-    print -R -n - "$TOMBSECRET" | _sudo cryptsetup --key-file - ${=@}
+    print -R -n - "$TOMBSECRET" | _sudo cryptsetup --key-file - ${@}
     return $?
 }
 
@@ -2488,7 +2491,7 @@ search_tombs() {
             # Use swish-e to search over contents
             [[ $SWISH == 1 && -r $tombmount/.swish ]] && {
                 _message "Searching contents in tomb ::1 tomb name::" $tombname
-                swish-e -w ${=@} -f $tombmount/.swish -H0 }
+                swish-e -w ${@} -f $tombmount/.swish -H0 }
         } || {
             _warning "Skipping tomb ::1 tomb name::: not indexed." $tombname
             _warning "Run 'tomb index' to create indexes." }
@@ -2690,20 +2693,20 @@ umount_tomb() {
 # Kill all processes using the tomb
 slam_tomb() {
     # $1 = tomb mount point
-    if [[ -z `fuser -m "$1" 2>/dev/null` ]]; then
+    if [[ -z `lsof -t +D "$1" 2>/dev/null` ]]; then
         return 0
     fi
     #Note: shells are NOT killed by INT or TERM, but they are killed by HUP
     for s in TERM HUP KILL; do
         _verbose "Sending ::1:: to processes inside the tomb:" $s
         if option_is_set -D; then
-            ps -fp `fuser -m /media/a.tomb 2>/dev/null`|
+            ps -fp `lsof -t +D "$1" 2>/dev/null`|
             while read line; do
                 _verbose $line
             done
         fi
-        fuser -s -m "$1" -k -M -$s
-        if [[ -z `fuser -m "$1" 2>/dev/null` ]]; then
+        kill -$s `lsof -t +D "$1"`
+        if [[ -z `lsof -t +D "$1" 2>/dev/null` ]]; then
             return 0
         fi
         if ! option_is_set -f; then
@@ -2893,28 +2896,33 @@ main() {
 
         # CREATE Step 1: dig -s NN file.tomb
         dig)
-            dig_tomb ${=PARAM}
+            dig_tomb $PARAM
             ;;
 
         # CREATE Step 2: forge file.tomb.key
         forge)
-            forge_key ${=PARAM}
+            forge_key $PARAM
             ;;
 
         # CREATE Step 2: lock -k file.tomb.key file.tomb
         lock)
-            lock_tomb_with_key ${=PARAM}
+            lock_tomb_with_key $PARAM
             ;;
 
         # Open the tomb
         mount|open)
-            mount_tomb ${=PARAM}
+            mount_tomb $PARAM
             ;;
 
         # Close the tomb
         # `slam` is used to force closing.
         umount|close|slam)
-            [[ "$subcommand" ==  "slam" ]] && SLAM=1
+            [[ "$subcommand" ==  "slam" ]] && {
+                SLAM=1
+                [[ $LSOF == 0 ]] && {
+                    unset SLAM
+                    _warning "lsof not installed: cannot slam tombs."
+                    _warning "Trying a regular close." }}
             umount_tomb $PARAM[1]
             ;;
 
@@ -2939,7 +2947,7 @@ main() {
 
         # Search tomb contents
         search)
-            search_tombs ${=PARAM}
+            search_tombs $PARAM
             ;;
 
         ## Locking operations
@@ -2948,7 +2956,7 @@ main() {
         engrave)
             [[ $QRENCODE == 0 ]] && {
                 _failure "QREncode not installed: cannot engrave keys on paper." }
-            engrave_key ${=PARAM}
+            engrave_key $PARAM
             ;;
 
         # Change password on existing key
@@ -2958,7 +2966,7 @@ main() {
 
         # Change tomb key
         setkey)
-            change_tomb_key ${=PARAM}
+            change_tomb_key $PARAM
             ;;
 
         # STEGANOGRAPHY: hide key inside an image
