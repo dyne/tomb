@@ -46,7 +46,8 @@ supported ciphers use \fI-v\fR. For additional protection against
 dictionary attacks on keys, the (experimental) \fI--kdf\fR option can
 be used when forging a key, making sure that the \fItomb-kdb-pbkdf2\fR
 binaries in \fIextras/kdf\fR were compiled and installed on the
-system.
+system. Use the \fI-r\fR option to encrypt the key with a GPG key
+instead of a password.
 
 .B
 .IP "lock"
@@ -60,7 +61,8 @@ option can be used to specify the cipher specification: default is
 If you are looking for something exotic, also try "serpent-xts-plain64".
 More options may be found in cryptsetup(8) and Linux documentation.
 This operation requires root privileges to loopback mount, format the tomb (using
-LUKS and Ext4), then set the key in its first LUKS slot.
+LUKS and Ext4), then set the key in its first LUKS slot. Use the \fI-r\fR
+option to lock the tomb using a GPG key.
 
 .B
 .IP "open"
@@ -70,7 +72,8 @@ which can also be an \fIjpeg image\fR (see
 indicate the \fImountpoint\fR where the tomb should be made
 accessible, else the tomb is mounted in a directory inside /media (if
 not available it uses /run/media/$USER).  The option \fI-o\fR can be
-used to pass mount(8) options (default: rw,noatime,nodev).
+used to pass mount(8) options (default: rw,noatime,nodev). Use the
+\fI-r\fR option to open the tomb using a GPG key.
 
 .B
 .IP "list"
@@ -123,7 +126,8 @@ Changes the password protecting a key file specified using
 its content will be decoded and reencoded using the new one. This
 action can't be forced if the current password is not known. If the
 key file is broken (missing headers) this function also attempts its
-recovery.
+recovery. Use the \fI-r\fR option to unlock the tomb using your old
+GPG key and the \fI-R\fR option to provide the new GPG key.
 
 .B
 .IP "setkey"
@@ -131,7 +135,8 @@ Changes the key file that locks a tomb, substituting the old one with
 a new one. Both the old and the new key files are needed for this
 operation and their passwords must be known. The new key must be
 specified using the \fI-k\fR option, the first argument should be the old
-key and the second and last argument the tomb file.
+key and the second and last argument the tomb file. Use the \fI-r\fR
+option to unlock the tomb with a GPG key.
 
 .B
 .IP "resize"
@@ -158,7 +163,8 @@ Hides a tomb key (\fI-k\fR) inside a \fIjpeg image\fR (first argument)
 using \fIsteganography\fR: the image will change in a way that cannot
 be noticed by human eye and hardly detected by data analysis. This
 option is useful to backup tomb keys in unsuspected places; it depends
-from the availability of \fIsteghide\fR.
+from the availability of \fIsteghide\fR. Use the \fI-r\fR
+option to unlock the tomb with a GPG key.
 
 .B
 .IP "exhume"
@@ -199,6 +205,21 @@ what you are doing if you force an operation.
 .IP "-s \fI<MBytes>\fR"
 When digging or resizing a tomb, this option must be used to specify
 the \fIsize\fR of the new file to be created. Units are megabytes (MiB).
+.B
+.IP "-r \fI<gpg_id>[,<gpg_id2>]\fR"
+Tell tomb to use a asymmetric GnuPG key instead of a passphrase to
+encrypt a tomb key. \fIgpg_id\fR is the key recipient in your GPG
+database, you must hold both the public and the private key. If more
+than one recipient is present the --shared flag must be present.
+The recipients are separed by a ','.
+.B
+.IP "-R \fI<gpg_id>[,<gpg_id2>]\fR"
+Provide a new set of recipient to encrypt a tomb key. This option is
+only used in the \fIpasswd\fR command.
+.B
+.IP "--shared"
+Activate the capability to share a tomb. This flag must be enabled
+when using the \fI-r\fR option with more than one recipient.
 .B
 .IP "--kdf \fI<itertime>\fR"
 Activate the KDF feature against dictionary attacks when creating a
@@ -356,6 +377,16 @@ eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
 .EE
 
 In the future it may become mandatory to run gpg-agent when using tomb.
+
+.SH SHARE A TOMB
+A tomb key can be encrypted with more than one recipient. Therefore,
+a tomb can be shared between different user. The multiple recipients
+are given using the \fI-r\fR (or/and \fI-R\fR) option and must be
+separated by a coma: \fI,\fR. It is a very sensitive action, and the user
+needs to trust all the GPG public keys it is going to share its tomb.
+This is why this feature needs to be explicitly activated using in
+more the flag \fI--shared\fR. The \fI--shared\fR option can be used
+in the tomb commands: \fIforge\fR \fIsetkey\fR and \fIpasswd\fR.
 
 .SH EXAMPLES
 

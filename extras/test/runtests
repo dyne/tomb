@@ -56,11 +56,23 @@ command -v qrencode > /dev/null || QRENCODE=0
 
 
 typeset -A results
-tests=(dig forge lock badpass open close openro passwd chksum bind setkey)
+
+tests=(dig forge lock badpass open close passwd chksum bind setkey recip-dig 
+		recip-forge recip-lock recip-open recip-close recip-passwd recip-resize 
+		recip-setkey shared shared-passwd shared-setkey)
+
 { test $RESIZER = 1 } && { tests+=(resize) }
 { test $KDF = 1 } && { tests+=(kdforge kdfpass kdflock kdfopen) }
-{ test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen stgpipe stgimpl) }
+{ test $STEGHIDE = 1 } && { tests+=(stgin stgout stgopen stgpipe stgimpl
+recip-stgin recip-stgout recip-stgopen recip-stgimpl) }
 { test $QRENCODE = 1 } && { tests+=(qrenc) }
+
+# GnuPG Conf.
+# Note: the assumption is the test keys are unencrypted.
+export GNUPGHOME="gnupg/"
+chmod 700 "$GNUPGHOME"
+gpgid_1="A4857CD176B31435F9709D25F0E573B8289439CD"
+gpgid_2="0B2235E660753AB0475FB3E23DC836481F44B31E"
 
 notice "Loading test suite"
 
@@ -98,6 +110,124 @@ test-tomb-create() {
         --ignore-swap --unsafe --tomb-pwd ${dummypass} 
 
     { test $? = 0 } && { results+=(lock SUCCESS) }
+}
+
+test-tomb-recip() {
+
+    notice "wiping all recip.tomb* in /tmp"
+    local tomb=/tmp/recip.tomb
+    local tomb_key=/tmp/recip.tomb.key
+    sudo rm -f "$tomb" "$tomb_key"
+
+    notice "Testing tomb with recipient creation: dig"
+    tt dig -s 20 $tomb
+    { test $? = 0 } && { results+=(recip-dig SUCCESS) }
+    
+    notice "Testing tomb with recipient creation: forge"
+    tt forge $tomb_key -g -r $gpgid_1 --ignore-swap --unsafe --use-urandom
+    { test $? = 0 } && { results+=(recip-forge SUCCESS) } 
+    
+    notice "Testing tomb with recipient creation: lock"
+    tt lock $tomb -k $tomb_key -g -r $gpgid_1 --ignore-swap --unsafe
+    { test $? = 0 } && { results+=(recip-lock SUCCESS) }
+    
+    notice "Testing tomb with recipient opening: open"
+    tt open $tomb -k $tomb_key -g
+    { test $? = 0 } && { results+=(recip-open SUCCESS) }
+    
+    notice "Testing tomb with recipient closing: close"
+    tt close recip
+    { test $? = 0 } && { results+=(recip-close SUCCESS) }
+    
+    { test $STEGHIDE = 1 } && {
+        notice "Testing tomb with recipient steganographic hiding of keys"
+        
+        cp -f arditi.jpg /tmp/recip.jpg
+        sudo rm -f /tmp/recip.steg.key
+    	
+        tt --unsafe --tomb-pwd ${dummypass} bury -k /tmp/recip.tomb.key \
+            /tmp/recip.jpg -g -r "$gpgid_1"
+        { test $? = 0 } && { results+=(recip-stgin SUCCESS) }
+
+        tt --unsafe --tomb-pwd ${dummypass} exhume -k /tmp/recip.steg.key \
+            /tmp/recip.jpg
+        { test $? = 0 } && { results+=(recip-stgout SUCCESS) }
+
+        tt --unsafe --tomb-pwd ${dummypass} open -k /tmp/recip.steg.key \
+            /tmp/recip.tomb -g
+        { test $? = 0 } && { results+=(recip-stgopen SUCCESS) }
+        ${T} close recip
+
+        notice "test using open -k image.jpeg"
+        tt --unsafe --tomb-pwd ${dummypass} open -k /tmp/recip.jpg \
+            /tmp/recip.tomb -g
+        { test $? = 0 } && { results+=(recip-stgimpl SUCCESS) }
+        tt close recip
+    }
+    
+	notice "Testing tomb with recipient changing gpg key: passwd"
+	res=0
+	tt passwd -k $tomb_key -g -r $gpgid_2
+	{ test $? = 0 } || { res=1 }
+	tt open $tomb -k $tomb_key -g
+	{ test $? = 0 } || { res=1 }
+	tt close recip
+	{ test $? = 0 } || { res=1 }
+	{ test $res = 0 } && { results+=(recip-passwd SUCCESS) }
+	
+	notice "Testing tomb with recipient resizing a tomb: resize"
+    tt resize -s 30 $tomb -k $tomb_key -g -r $gpgid_2
+    { test $? = 0 } && { results+=(recip-resize SUCCESS) }
+    
+    notice "Testing tomb with recipient setting a new key: setkey"
+    sudo rm -f /tmp/new.recip.tomb.key
+    res=0
+    tt forge /tmp/new.recip.tomb.key -g -r $gpgid_2 \
+        --ignore-swap --unsafe --use-urandom
+    { test $? = 0 } || { res=1 }
+    tt setkey -k /tmp/new.recip.tomb.key $tomb_key $tomb -g -r $gpgid_2
+    { test $? = 0 } || { res=1 }
+    tt open -k /tmp/new.recip.tomb.key $tomb -g
+    { test $? = 0 } || { res=1 }
+    { test $res = 0 } && { results+=(recip-setkey SUCCESS) }
+    tt close recip
+}
+
+test-tomb-shared() {
+
+	notice "wiping all shared.tomb* in /tmp"
+    rm -f /tmp/shared.tomb /tmp/shared.tomb.key
+    
+    notice "Testing sharing a tomb"
+    res=0
+    tt dig -s 20 /tmp/shared.tomb
+    { test $? = 0 } || { res=1 }
+    tt forge /tmp/shared.tomb.key -g -r $gpgid_1,$gpgid_2 --shared \
+        --ignore-swap --unsafe --use-urandom 
+    { test $? = 0 } || { res=1 }
+    tt lock /tmp/shared.tomb -k /tmp/shared.tomb.key \
+        --ignore-swap --unsafe -g -r $gpgid_1
+    { test $? = 0 } || { res=1 }
+    tt open /tmp/shared.tomb -k /tmp/shared.tomb.key -g
+    { test $? = 0 } || { res=1 }
+    tt close shared
+    { test $? = 0 } || { res=1 }
+    { test $res = 0 } && { results+=(shared SUCCESS) }
+    
+    notice "Testing changing recipients on a shared Tomb"
+    tt passwd -k /tmp/shared.tomb.key -g -r $gpgid_2,$gpgid_1 --shared
+    { test $? = 0 } && { results+=(shared-passwd SUCCESS) }
+    
+    notice "Testing setkey on a shared Tomb"
+    rm -f /tmp/new.shared.tomb.key
+    res=0
+    tt forge /tmp/new.shared.tomb.key -g -r $gpgid_1,$gpgid_2 --shared\
+        --ignore-swap --unsafe --use-urandom
+    { test $? = 0 } || { res=1 }
+    tt setkey -k /tmp/new.shared.tomb.key /tmp/shared.tomb.key /tmp/shared.tomb \
+        -g -r $gpgid_2,$gpgid_1 --shared
+    { test $? = 0 } || { res=1 }
+    { test $res = 0 } && { results+=(shared-setkey SUCCESS) }
 }
 
 test-bind-hooks() {
@@ -233,6 +363,8 @@ startloops=(`sudo losetup -a |cut -d: -f1`)
 
 # isolated function (also called with source)
 test-tomb-create
+test-tomb-recip
+test-tomb-shared
 
 notice "Testing open with wrong password"
 
@@ -414,11 +546,9 @@ notice "Test results summary"
 print "${#startloops} loop devices busy at start"
 
 for t in $tests; do
-    echo "$t\t${results[$t]:-FAIL}"
-done
-
-for r in ${(v)results}; do
-    [[ "$r" == "SUCCESS" ]] || GLOBAL_RESULT=1
+    res=${results[$t]:-FAIL}
+    [[ "$res" == "SUCCESS" ]] || GLOBAL_RESULT=1
+    echo "$t\t$res"
 done
 
 print "${#endloops} loop devices busy at end"

@@ -652,6 +652,9 @@ usage() {
     _print " -n     don't process the hooks found in tomb"
     _print " -o     options passed to commands: open, lock, forge (see man)"
     _print " -f     force operation (i.e. even if swap is active)"
+    _print " -g     use a GnuPG key to encrypt a tomb key"
+    _print " -r     provide GnuPG recipients (separated by coma)"
+    _print " --shared active sharing feature"
     [[ $KDF == 1 ]] && {
         _print " --kdf  forge keys armored against dictionary attacks"
     }
@@ -828,6 +831,54 @@ _ensure_dependencies() {
 
 # {{{ Key operations
 
+# $@ is the list of all the recipient used to encrypt a tomb key
+is_valid_recipients() {
+    typeset -a recipients
+    recipients=($@)
+    
+    _verbose "is_valid_recipients"
+    
+    # All the keys ID must be valid (the public keys must be present in the database)
+    for gpg_id in ${recipients[@]}; do
+        gpg --list-keys "$gpg_id" &> /dev/null
+        [[ $? != 0 ]] && {
+            _warning "$gpg_id is not a valid key ID."
+            return 1
+        }
+    done
+
+    # At least one private key must be present
+    for gpg_id in ${recipients[@]}; do
+        gpg --list-secret-keys "$gpg_id" &> /dev/null
+        [[ $? = 0 ]] && { 
+            return 0
+        }
+    done
+
+    return 1
+}
+
+# $@ is the list of all the recipient used to encrypt a tomb key
+# Print the recipient arg to be used in gpg.
+_recipients_arg() {
+    local arg="$1"; shift
+    typeset -a recipients
+    recipients=($@)
+    
+    for gpg_id in ${recipients[@]}; do
+        print -R -n "$arg $gpg_id "
+    done
+    return 0
+}
+
+# $1 is a GPG key recipient
+# Print the fingerprint of the GPG key
+_fingerprint() {
+    local recipient="$1"
+    gpg --with-colons --fingerprint "$recipient" | grep fpr | head -1 | cut -d ':' -f 10 | sed 's/.\{4\}/& /g'
+}
+
+
 # $1 is the encrypted key contents we are checking
 is_valid_key() {
     local key="$1"       # Unique argument is an encrypted key to test
@@ -892,7 +943,12 @@ _load_key() {
     [[ -z $keyfile ]] && {
         _failure "This operation requires a key file to be specified using the -k option." }
 
-    if [[ $keyfile == "-" ]]; then
+    if option_is_set -g; then
+        _verbose "load_key key encrypted with a GnuPG Key"
+        _message "Key encrypted with a GnuPG Key"
+        TOMBKEYFILE=$keyfile
+        TOMBKEY="${mapfile[$TOMBKEYFILE]}"
+    elif [[ $keyfile == "-" ]]; then
         _verbose "load_key reading from stdin."
         _message "Waiting for the key to be piped from stdin... "
         TOMBKEYFILE=stdin
@@ -932,18 +988,34 @@ _load_key() {
 # takes two args just like get_lukskey
 # prints out the decrypted content
 # contains tweaks for different gpg versions
+# support both symmetric and asymmetric encryption
 gpg_decrypt() {
     # fix for gpg 1.4.11 where the --status-* options don't work ;^/
     local gpgver=$(gpg --version --no-permission-warning | awk '/^gpg/ {print $3}')
     local gpgpass="$1\n$TOMBKEY"
-    local gpgstatus
-    local tmpres
+    local tmpres ret
+    typeset -a gpgopt
+    gpgpopt=(--passphrase-fd 0)
 
+    { option_is_set -g } && {
+        gpgpass="$TOMBKEY"
+        gpgpopt=()
+        
+        # GPG option '--try-secret-key' exist since GPG 2.1
+        { option_is_set -r } && [[ $gpgver =~ "2.1." ]] && {
+            typeset -a recipients
+            recipients=(${(s:,:)$(option_value -r)})
+            { ! is_valid_recipients $recipients } && {
+                 _failure "You set an invalid GPG ID."
+            }
+            gpgpopt=(`_recipients_arg "--try-secret-key" $recipients`)
+        }
+    }
+    
     [[ $gpgver == "1.4.11" ]] && {
         _verbose "GnuPG is version 1.4.11 - adopting status fix."
-
         TOMBSECRET=`print - "$gpgpass" | \
-            gpg --batch --passphrase-fd 0 --no-tty --no-options`
+            gpg --batch ${gpgpopt[@]} --no-tty --no-options`
         ret=$?
         unset gpgpass
         return $ret
@@ -952,12 +1024,10 @@ gpg_decrypt() {
     _tmp_create
     tmpres=$TOMBTMP
     TOMBSECRET=`print - "$gpgpass" | \
-        gpg --batch --passphrase-fd 0 --no-tty --no-options \
+        gpg --batch ${gpgpopt[@]} --no-tty --no-options \
             --status-fd 2 --no-mdc-warning --no-permission-warning \
             --no-secmem-warning 2> $tmpres`
-
     unset gpgpass
-
     ret=1
     for i in ${(f)"$(cat $tmpres)"}; do
         _verbose "$i"
@@ -1003,9 +1073,23 @@ get_lukskey() {
 
         # key needs to be exhumed from an image
     elif [[ -r $TOMBKEYFILE && $(file $TOMBKEYFILE) =~ "JP.G" ]]; then
-
-        exhume_key $TOMBKEYFILE "$_password"
-
+        if option_is_set -g; then
+            # When using a GPG key, the tomb key is buried using a steganography password
+            if option_is_set --tomb-pwd; then
+                _password="`option_value --tomb-pwd`"
+                _verbose "tomb-pwd = ::1 tomb pass::" $_password
+            else
+                _password=$(ask_password "Insert password to exhume key from $imagefile")
+                [[ $? != 0 ]] && {
+                    _warning "User aborted password dialog."
+                    return 1
+                }
+            fi
+            exhume_key $TOMBKEYFILE "$_password"
+            unset _password
+        else
+            exhume_key $TOMBKEYFILE "$_password"
+        fi
     fi
 
     gpg_decrypt "$_password" # Save decrypted contents into $TOMBSECRET
@@ -1027,6 +1111,12 @@ ask_key_password() {
         _verbose "no password needed, using secret bytes from stdin"
         return 0 }
 
+    if option_is_set -g; then
+        _verbose "no password needed, using GPG key"
+        get_lukskey
+        return $?
+    fi
+    
     _message "A password is required to use key ::1 key::" $TOMBKEYFILE
     passok=0
     tombpass=""
@@ -1083,7 +1173,11 @@ change_passwd() {
     _check_swap  # Ensure swap is secure, if any
     _load_key    # Try loading key from option -k and set TOMBKEYFILE
 
-    _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
+    { option_is_set -g } && {
+        _message "Commanded to change GnuPG key for tomb key ::1 key::" $TOMBKEYFILE
+    } || { 
+        _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
+    }
 
     _tmp_create
     tmpnewkey=$TOMBTMP
@@ -1097,7 +1191,11 @@ change_passwd() {
     fi
     [[ $? == 0 ]] || _failure "No valid password supplied."
 
-    _success "Changing password for ::1 key file::" $TOMBKEYFILE
+    { option_is_set -g } && {
+        _success "Changing GnuPG key for ::1 key file::" $TOMBKEYFILE
+    } || { 
+        _success "Changing password for ::1 key file::" $TOMBKEYFILE
+    }
 
     # Here $TOMBSECRET contains the key material in clear
 
@@ -1114,89 +1212,128 @@ change_passwd() {
 
     # Copy the new key as the original keyfile name
     cp -f "${tmpnewkey}" $TOMBKEYFILE
-    _success "Your passphrase was successfully updated."
+    { option_is_set -g } && {
+        _success "Your GnuPG key was successfully changed"
+    } || { 
+        _success "Your passphrase was successfully updated."
+    }
 
     return 0
 }
 
 
 # takes care to encrypt a key
-# honored options: --kdf  --tomb-pwd -o
+# honored options: --kdf  --tomb-pwd -o -g -r
 gen_key() {
     # $1 the password to use; if not set ask user
     # -o is the --cipher-algo to use (string taken by GnuPG)
     local algopt="`option_value -o`"
     local algo="${algopt:-AES256}"
+    local gpgpass opt
+    typeset -a gpgopt
     # here user is prompted for key password
     tombpass=""
     tombpasstmp=""
 
-    if [ "$1" = "" ]; then
-        while true; do
-            # 3 tries to write two times a matching password
-            tombpass=`ask_password "Type the new password to secure your key"`
-            if [[ $? != 0 ]]; then
-                _failure "User aborted."
-            fi
-            if [ -z $tombpass ]; then
-                _failure "You set empty password, which is not possible."
-            fi
-            tombpasstmp=$tombpass
-            tombpass=`ask_password "Type the new password to secure your key (again)"`
-            if [[ $? != 0 ]]; then
-                _failure "User aborted."
-            fi
-            if [ "$tombpasstmp" = "$tombpass" ]; then
-                break;
-            fi
-            unset tombpasstmp
-            unset tombpass
-        done
-    else
-        tombpass="$1"
-        _verbose "gen_key takes tombpass from CLI argument: ::1 tomb pass::" $tombpass
-    fi
-
-    header=""
-    [[ $KDF == 1 ]] && {
-        { option_is_set --kdf } && {
-            # KDF is a new key strenghtening technique against brute forcing
-            # see: https://github.com/dyne/Tomb/issues/82
-            itertime="`option_value --kdf`"
-            # removing support of floating points because they can't be type checked well
-            if [[ "$itertime" != <-> ]]; then
-                unset tombpass
-                unset tombpasstmp
-                _warning "Wrong argument for --kdf: must be an integer number (iteration seconds)."
-                _failure "Depending on the speed of machines using this tomb, use 1 to 10, or more"
-                return 1
-            fi
-            # --kdf takes one parameter: iter time (on present machine) in seconds
-            local -i microseconds
-            microseconds=$(( itertime * 1000000 ))
-            _success "Using KDF, iteration time: ::1 microseconds::" $microseconds
-            _message "generating salt"
-            pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
-            _message "calculating iterations"
-            pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
-            _message "encoding the password"
-            # We use a length of 64bytes = 512bits (more than needed!?)
-            tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
-
-            header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+    { option_is_set -g } && {
+        { option_is_set -r } || {
+            _failure "A GPG recipient needs to be specified using -r."
         }
+
+        typeset -a recipients
+        recipients=(${(s:,:)$(option_value -r)})
+        [ "${#recipients}" -gt 1 ] && {
+            if option_is_set --shared; then
+                _warning "You are going to encrypt a tomb key with ${#recipients} recipients."
+                _warning "It is your responsibility to check the fingerprint of these recipients."
+                _warning "The fingerprints are:"
+                for gpg_id in ${recipients[@]}; do
+                    _warning "    `_fingerprint "$gpg_id"`"
+                done
+            else
+                _failure "You need to use the option '--shared' to enable sharing support"
+            fi
+        }
+        
+        { is_valid_recipients $recipients } || {
+            _failure "You set an invalid GPG ID."
+        }
+        
+        # Set gpg inputs and options
+        gpgpass="$TOMBSECRET"
+        gpgopt=(--encrypt `_recipients_arg "--hidden-recipient" $recipients`)
+        opt=''
+    } || {
+        if [ "$1" = "" ]; then
+            while true; do
+                # 3 tries to write two times a matching password
+                tombpass=`ask_password "Type the new password to secure your key"`
+                if [[ $? != 0 ]]; then
+                    _failure "User aborted."
+                fi
+                if [ -z $tombpass ]; then
+                    _failure "You set empty password, which is not possible."
+                fi
+                tombpasstmp=$tombpass
+                tombpass=`ask_password "Type the new password to secure your key (again)"`
+                if [[ $? != 0 ]]; then
+                    _failure "User aborted."
+                fi
+                if [ "$tombpasstmp" = "$tombpass" ]; then
+                    break;
+                fi
+                unset tombpasstmp
+                unset tombpass
+            done
+        else
+            tombpass="$1"
+            _verbose "gen_key takes tombpass from CLI argument: ::1 tomb pass::" $tombpass
+        fi
+
+        header=""
+        [[ $KDF == 1 ]] && {
+            { option_is_set --kdf } && {
+                # KDF is a new key strenghtening technique against brute forcing
+                # see: https://github.com/dyne/Tomb/issues/82
+                itertime="`option_value --kdf`"
+                # removing support of floating points because they can't be type checked well
+                if [[ "$itertime" != <-> ]]; then
+                    unset tombpass
+                    unset tombpasstmp
+                    _warning "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+                    _failure "Depending on the speed of machines using this tomb, use 1 to 10, or more"
+                    return 1
+                fi
+                # --kdf takes one parameter: iter time (on present machine) in seconds
+                local -i microseconds
+                microseconds=$(( itertime * 1000000 ))
+                _success "Using KDF, iteration time: ::1 microseconds::" $microseconds
+                _message "generating salt"
+                pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
+                _message "calculating iterations"
+                pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
+                _message "encoding the password"
+                # We use a length of 64bytes = 512bits (more than needed!?)
+                tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
+
+                header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+            }
+        }
+        print $header
+
+        # Set gpg inputs and options
+        gpgpass="${tombpass}\n$TOMBSECRET"
+        gpgopt=(--passphrase-fd 0 --symmetric)
+        opt='-n'
     }
 
-
-    print $header
-
-	_tmp_create
-	local tmpres=$TOMBTMP
-
-    print -n - "${tombpass}\n$TOMBSECRET" \
-		| gpg --openpgp --force-mdc --cipher-algo ${algo} --batch \
-			  --no-options --no-tty --passphrase-fd 0 \
-			  --status-fd 2 -o - -c -a 2> $tmpres
+    _tmp_create
+    local tmpres=$TOMBTMP
+    print $opt - "$gpgpass" \
+        | gpg --openpgp --force-mdc --cipher-algo ${algo} --batch \
+              --no-options --no-tty ${gpgopt[@]} \
+              --status-fd 2 -o - --armor 2> $tmpres
+    unset gpgpass
     # check result of gpg operation
     for i in ${(f)"$(cat $tmpres)"}; do
         _verbose "$i"
@@ -1241,15 +1378,23 @@ bury_key() {
     }
 
     _success "Encoding key ::1 tomb key:: inside image ::2 image file::" $TOMBKEY $imagefile
-    _message "Please confirm the key password for the encoding"
+    { option_is_set -g } && {
+        _message "Using GnuPG Key ID"
+    } || {
+        _message "Please confirm the key password for the encoding" 
+    }
+    
     # We ask the password and test if it is the same encoding the
     # base key, to insure that the same password is used for the
     # encryption and the steganography. This is a standard enforced
     # by Tomb, but it isn't strictly necessary (and having different
     # password would enhance security). Nevertheless here we prefer
     # usability.
+    # However, steganography cannot be done with GPG key. Therefore,
+    # if using a GPG key, we test if the user can decrypt the tomb 
+    # with its key and we ask for a steganography password.
 
-    { option_is_set --tomb-pwd } && {
+    { option_is_set --tomb-pwd } && { ! option_is_set -g } && {
         local tombpwd="`option_value --tomb-pwd`"
         _verbose "tomb-pwd = ::1 tomb pass::" $tombpwd
         ask_key_password "$tombpwd"
@@ -1257,9 +1402,38 @@ bury_key() {
         ask_key_password
     }
     [[ $? != 0 ]] && {
-        _warning "Wrong password supplied."
+        _warning "Wrong password/GnuPG ID supplied."
         _failure "You shall not bury a key whose password is unknown to you." }
 
+    if option_is_set -g && option_is_set --tomb-pwd; then
+        TOMBPASSWORD="`option_value --tomb-pwd`"
+        _verbose "tomb-pwd = ::1 tomb pass::" $TOMBPASSWORD
+    elif option_is_set -g; then
+        tombpass=""
+        tombpasstmp=""
+        while true; do
+            # 3 tries to write two times a matching password
+            tombpass=`ask_password "Type a password to bury your key"`
+            if [[ $? != 0 ]]; then
+                _failure "User aborted."
+            fi
+            if [ -z $tombpass ]; then
+                _failure "You set empty password, which is not possible."
+            fi
+            tombpasstmp=$tombpass
+            tombpass=`ask_password "Type a password to bury your key (again)"`
+            if [[ $? != 0 ]]; then
+                _failure "User aborted."
+            fi
+            if [ "$tombpasstmp" = "$tombpass" ]; then
+                break;
+            fi
+            unset tombpasstmp
+            unset tombpass
+        done
+        TOMBPASSWORD="$tombpass"
+    fi
+    
     # We omit armor strings since having them as constants can give
     # ground to effective attacks on steganography
     print - "$TOMBKEY" | awk '
@@ -1452,11 +1626,13 @@ dig_tomb() {
 
 # Step two -- Create a detached key to lock a tomb with
 #
-# Synopsis: forge_key [destkey|-k destkey] [-o cipher]
+# Synopsis: forge_key [destkey|-k destkey] [-o cipher] [-r gpgid] [--shared]
 #
 # Arguments:
 # -k                path to destination keyfile
 # -o                Use an alternate algorithm
+# -r                GPG recipients to be used
+# --shared          Activate sharing capability
 #
 forge_key() {
     # can be specified both as simple argument or using -k
@@ -1495,7 +1671,7 @@ forge_key() {
     _message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" \
         $destkey $algo
 
-    [[ $KDF == 1 ]] && {
+    [[ $KDF == 1 ]] && { ! option_is_set -g } && {
         _message "Using KDF to protect the key password (`option_value --kdf` rounds)"
     }
 
@@ -1518,7 +1694,15 @@ forge_key() {
 
     # Here the global variable TOMBSECRET contains the naked secret
 
-    _success "Choose the  password of your key: ::1 tomb key::" $TOMBKEYFILE
+    { option_is_set -g } && {
+        { option_is_set --shared } && {
+            _success "Using GnuPG keys to encrypt and share your key: ::1 tomb key::" $TOMBKEYFILE
+        } || {
+            _success "Using the GnuPG key ::1:: to encrypt the key: ::2 tomb key::" `option_value -r` $TOMBKEYFILE
+        }
+    } || {
+        _success "Choose the password of your key: ::1 tomb key::" $TOMBKEYFILE
+    }
     _message "(You can also change it later using 'tomb passwd'.)"
     # _user_file $TOMBKEYFILE
 
@@ -1553,7 +1737,7 @@ forge_key() {
 
 # Step three -- Lock tomb
 #
-# Synopsis: tomb_lock file.tomb file.tomb.key [-o cipher]
+# Synopsis: tomb_lock file.tomb file.tomb.key [-o cipher] [-r gpgid]
 #
 # Lock the given tomb with the given key file, in fact formatting the
 # loopback volume as a LUKS device.
@@ -1794,7 +1978,7 @@ mount_tomb() {
     # take the name only, strip extensions
     _verbose "Tomb name: ::1 tomb name:: (to be engraved)" $TOMBNAME
 
-    { option_is_set --tomb-pwd } && {
+    { option_is_set --tomb-pwd } && { ! option_is_set -g } && {
         tomb_pwd="`option_value --tomb-pwd`"
         _verbose "tomb-pwd = ::1 tomb pass::" $tomb_pwd
         ask_key_password "$tomb_pwd"
@@ -2563,22 +2747,22 @@ main() {
     # can only use the non-abbreviated long-option version like:
     # -force and NOT -f
     #
-    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe)
+    main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g)
     subcommands_opts[__default]=""
     # -o in open and mount is used to pass alternate mount options
-    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: "
+    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: r: "
     subcommands_opts[mount]=${subcommands_opts[open]}
 
     subcommands_opts[create]="" # deprecated, will issue warning
 
     # -o in forge and lock is used to pass an alternate cipher.
-    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom "
+    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom r: -shared "
     subcommands_opts[dig]="-ignore-swap s: -size=s "
-    subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: "
-    subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
+    subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: r: "
+    subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: -shared "
     subcommands_opts[engrave]="k: "
 
-    subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
+    subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: -shared "
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
@@ -2588,14 +2772,14 @@ main() {
     subcommands_opts[search]=""
 
     subcommands_opts[help]=""
-    subcommands_opts[bury]="k: -tomb-pwd: "
-    subcommands_opts[exhume]="k: -tomb-pwd: "
+    subcommands_opts[bury]="k: -tomb-pwd: r: "
+    subcommands_opts[exhume]="k: -tomb-pwd: r: "
     # subcommands_opts[decompose]=""
     # subcommands_opts[recompose]=""
     # subcommands_opts[install]=""
     subcommands_opts[askpass]=""
     subcommands_opts[source]=""
-    subcommands_opts[resize]="-ignore-swap s: -size=s k: -tomb-pwd: "
+    subcommands_opts[resize]="-ignore-swap s: -size=s k: -tomb-pwd: r: "
     subcommands_opts[check]="-ignore-swap "
     #    subcommands_opts[translate]=""
 
