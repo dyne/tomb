@@ -2108,7 +2108,7 @@ exec_safe_bind_hooks() {
 
     [[ -r "$mnt/bind-hooks" ]] || {
         _verbose "bind-hooks not found in ::1 mount point::" $mnt
-        return 1 }
+        return 0 }
 
     typeset -Al maps        # Maps of files and directories to mount
     typeset -al mounted     # Track already mounted files and directories
@@ -2134,7 +2134,7 @@ exec_safe_bind_hooks() {
         [[ "${${maps[$dir]}[1]}" == "/" || "${${maps[$dir]}[1,2]}" == ".." ]] && {
             _warning "bind-hooks map format: local/to/tomb local/to/\$HOME.  Rolling back"
             for dir in ${mounted}; do _sudo umount $dir; done
-            return 1 }
+            return 0 }
 
         if [[ ! -r "$HOME/${maps[$dir]}" ]]; then
             _warning "bind-hook target not existent, skipping ::1 home::/::2 subdir::" $HOME ${maps[$dir]}
