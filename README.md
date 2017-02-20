@@ -178,19 +178,24 @@ plain) encryption algorithm.
 
 ## Compliancy
 
-Tomb volumes are fully compliant FIPS 197 and with:
+Tomb qualifies as sound for use on information rated as "top secret" when used on an underlying stack of carefully reviewed hardware (random number generator and other components) and software (Linux kernel build, crypto modules, device manager, compiler used to built, shell interpreter and packaged dependencies).
 
-- [ISO/IEC 18033-1:2015](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=54530) Information technology -- Security techniques -- Encryption algorithms -- Part 1: General
-- [ISO/IEC 18033-3:2010](http://www.iso.org/iso/home/store/catalogue_ics/catalogue_detail_ics.htm?csnumber=54531) Information technology -- Security techniques -- Encryption algorithms -- Part 3: Block ciphers
+Tomb volumes are fully compliant with the FIPS 197 advanced encryption standard published by NIST and with the following industry standards:
+
+- Information technology -- Security techniques -- Encryption algorithms
+	- [ISO/IEC 18033-1:2015](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=54530)  -- Part 1: General
+	- [ISO/IEC 18033-3:2010](http://www.iso.org/iso/home/store/catalogue_ics/catalogue_detail_ics.htm?csnumber=54531) -- Part 3: Block ciphers
 
 Tomb implementation is known to address at least partially issues raised in:
 
-- [ISO/IEC 11770-1:2010](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=53456) Information technology -- Security techniques -- Key management -- Part 1: Framework
-- [ISO/IEC 11770-2:2008](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=46370) Information technology -- Security techniques -- Key management -- Part 2: Mechanisms using symmetric techniques
+- Information technology -- Security techniques -- Key management
+	- [ISO/IEC 11770-1:2010](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=53456)  -- Part 1: Framework
+	- [ISO/IEC 11770-2:2008](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=46370)  -- Part 2: Mechanisms using symmetric techniques
 - [ISO/IEC 27005:2011](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=56742) Information technology -- Security techniques -- Information security risk management
 - [ISO/IEC 24759:2014](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=59142) Information technology -- Security techniques -- Test requirements for cryptographic modules 
 
-As such Tomb qualifies sound for use on information rated as "top secret" when used on an underlying stack of carefully reviewed hardware (random number generator and other components) and software (Linux kernel build, crypto modules, device manager, compiler used to built, shell interpreter and packaged dependencies).
+Any help on further verification of compliancy is very welcome, as the access to ISO/IEC document is limited due to its expensive nature.
+
 
 # Use stable releases in production!
 
