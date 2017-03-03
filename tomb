@@ -654,6 +654,7 @@ usage() {
     _print " -f     force operation (i.e. even if swap is active)"
     _print " -g     use a GnuPG key to encrypt a tomb key"
     _print " -r     provide GnuPG recipients (separated by coma)"
+    _print " -R     provide GnuPG hidden recipients (separated by coma)"
     _print " --shared active sharing feature"
     [[ $KDF == 1 ]] && {
         _print " --kdf  forge keys armored against dictionary attacks"
@@ -1002,10 +1003,10 @@ gpg_decrypt() {
         gpgpopt=()
         
         # GPG option '--try-secret-key' exist since GPG 2.1
-        { option_is_set -r } && [[ $gpgver =~ "2.1." ]] && {
+        { option_is_set -R } && [[ $gpgver =~ "2.1." ]] && {
             typeset -a recipients
-            recipients=(${(s:,:)$(option_value -r)})
-            { ! is_valid_recipients $recipients } && {
+            recipients=(${(s:,:)$(option_value -R)})
+            { is_valid_recipients $recipients } || {
                  _failure "You set an invalid GPG ID."
             }
             gpgpopt=(`_recipients_arg "--try-secret-key" $recipients`)
@@ -1230,6 +1231,7 @@ gen_key() {
     local algopt="`option_value -o`"
     local algo="${algopt:-AES256}"
     local gpgpass opt
+    local recipients_opt
     typeset -a gpgopt
     # here user is prompted for key password
     tombpass=""
@@ -1237,10 +1239,17 @@ gen_key() {
 
     { option_is_set -g } && {
         gpgopt=(--encrypt)
-        
-        { option_is_set -r } && {
+
+        { option_is_set -r || option_is_set -R } && {
             typeset -a recipients
-            recipients=(${(s:,:)$(option_value -r)})
+            { option_is_set -r } && {
+                recipients=(${(s:,:)$(option_value -r)})
+                recipients_opt="--recipient"
+            } || {
+                recipients=(${(s:,:)$(option_value -R)})
+                recipients_opt="--hidden-recipient"
+            }
+                
             [ "${#recipients}" -gt 1 ] && {
                 if option_is_set --shared; then
                     _warning "You are going to encrypt a tomb key with ${#recipients} recipients."
@@ -1258,7 +1267,7 @@ gen_key() {
                 _failure "You set an invalid GPG ID."
             }
             
-            gpgopt+=(`_recipients_arg "--hidden-recipient" $recipients`)
+            gpgopt+=(`_recipients_arg "$recipients_opt" $recipients`)
         } || {
             _message "No recipient specified, using default GPG key."
             gpgopt+=("--default-recipient-self")
@@ -2754,19 +2763,19 @@ main() {
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g)
     subcommands_opts[__default]=""
     # -o in open and mount is used to pass alternate mount options
-    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: r: "
+    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: r: R: "
     subcommands_opts[mount]=${subcommands_opts[open]}
 
     subcommands_opts[create]="" # deprecated, will issue warning
 
     # -o in forge and lock is used to pass an alternate cipher.
-    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom r: -shared "
+    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom r: R: -shared "
     subcommands_opts[dig]="-ignore-swap s: -size=s "
-    subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: r: "
-    subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: -shared "
+    subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: r: R: "
+    subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: R: -shared "
     subcommands_opts[engrave]="k: "
 
-    subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: -shared "
+    subcommands_opts[passwd]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: R: -shared "
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
@@ -2776,14 +2785,14 @@ main() {
     subcommands_opts[search]=""
 
     subcommands_opts[help]=""
-    subcommands_opts[bury]="k: -tomb-pwd: r: "
-    subcommands_opts[exhume]="k: -tomb-pwd: r: "
+    subcommands_opts[bury]="k: -tomb-pwd: r: R: "
+    subcommands_opts[exhume]="k: -tomb-pwd: r: R: "
     # subcommands_opts[decompose]=""
     # subcommands_opts[recompose]=""
     # subcommands_opts[install]=""
     subcommands_opts[askpass]=""
     subcommands_opts[source]=""
-    subcommands_opts[resize]="-ignore-swap s: -size=s k: -tomb-pwd: r: "
+    subcommands_opts[resize]="-ignore-swap s: -size=s k: -tomb-pwd: r: R: "
     subcommands_opts[check]="-ignore-swap "
     #    subcommands_opts[translate]=""
 
