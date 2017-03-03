@@ -59,7 +59,7 @@ typeset -A results
 
 tests=(dig forge lock badpass open close passwd chksum bind setkey recip-dig 
 		recip-forge recip-lock recip-open recip-close recip-passwd recip-resize 
-		recip-setkey shared shared-passwd shared-setkey)
+		recip-setkey shared shared-passwd shared-setkey recip-default)
 
 { test $RESIZER = 1 } && { tests+=(resize) }
 { test $KDF = 1 } && { tests+=(kdforge kdfpass kdflock kdfopen) }
@@ -191,6 +191,23 @@ test-tomb-recip() {
     { test $? = 0 } || { res=1 }
     { test $res = 0 } && { results+=(recip-setkey SUCCESS) }
     tt close recip
+}
+
+test-tomb-default() {
+
+	notice "wiping all default.tomb* in /tmp"
+	rm -f /tmp/default.tomb /tmp/default.tomb.key
+	
+	notice "Testing tomb with the default recipient"
+	res=0
+    tt dig -s 20 /tmp/default.tomb
+    { test $? = 0 } || { res=1 }
+    tt forge /tmp/default.tomb.key -g --ignore-swap --unsafe --use-urandom
+    { test $? = 0 } || { res=1 }
+	tt lock /tmp/default.tomb -k /tmp/default.tomb.key \
+        --ignore-swap --unsafe -g
+    { test $? = 0 } || { res=1 }
+    { test $res = 0 } && { results+=(recip-default SUCCESS) }
 }
 
 test-tomb-shared() {
@@ -364,6 +381,7 @@ startloops=(`sudo losetup -a |cut -d: -f1`)
 # isolated function (also called with source)
 test-tomb-create
 test-tomb-recip
+test-tomb-default
 test-tomb-shared
 
 notice "Testing open with wrong password"

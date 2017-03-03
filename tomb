@@ -1236,32 +1236,36 @@ gen_key() {
     tombpasstmp=""
 
     { option_is_set -g } && {
-        { option_is_set -r } || {
-            _failure "A GPG recipient needs to be specified using -r."
-        }
-
-        typeset -a recipients
-        recipients=(${(s:,:)$(option_value -r)})
-        [ "${#recipients}" -gt 1 ] && {
-            if option_is_set --shared; then
-                _warning "You are going to encrypt a tomb key with ${#recipients} recipients."
-                _warning "It is your responsibility to check the fingerprint of these recipients."
-                _warning "The fingerprints are:"
-                for gpg_id in ${recipients[@]}; do
-                    _warning "    `_fingerprint "$gpg_id"`"
-                done
-            else
-                _failure "You need to use the option '--shared' to enable sharing support"
-            fi
-        }
+        gpgopt=(--encrypt)
         
-        { is_valid_recipients $recipients } || {
-            _failure "You set an invalid GPG ID."
+        { option_is_set -r } && {
+            typeset -a recipients
+            recipients=(${(s:,:)$(option_value -r)})
+            [ "${#recipients}" -gt 1 ] && {
+                if option_is_set --shared; then
+                    _warning "You are going to encrypt a tomb key with ${#recipients} recipients."
+                    _warning "It is your responsibility to check the fingerprint of these recipients."
+                    _warning "The fingerprints are:"
+                    for gpg_id in ${recipients[@]}; do
+                        _warning "    `_fingerprint "$gpg_id"`"
+                    done
+                else
+                    _failure "You need to use the option '--shared' to enable sharing support"
+                fi
+            }
+            
+            { is_valid_recipients $recipients } || {
+                _failure "You set an invalid GPG ID."
+            }
+            
+            gpgopt+=(`_recipients_arg "--hidden-recipient" $recipients`)
+        } || {
+            _message "No recipient specified, using default GPG key."
+            gpgopt+=("--default-recipient-self")
         }
         
         # Set gpg inputs and options
         gpgpass="$TOMBSECRET"
-        gpgopt=(--encrypt `_recipients_arg "--hidden-recipient" $recipients`)
         opt=''
     } || {
         if [ "$1" = "" ]; then
