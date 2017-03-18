@@ -176,6 +176,25 @@ military grade use where the integrity of information stored depends
 on the user's behaviour and the strength of a standard AES-256 (XTS
 plain) encryption algorithm.
 
+## Compatibility
+
+Tomb can be used in conjunction with some other software applications,
+some are developed by Dyne.org, but some also by third parties.
+
+- [Secrets](https://secrets.dyne.org) is a software that can be operated on-line and on-site to split a Tomb key in shares to be distributed to peers: some of them have to agree to combine back the shares in order to retrieve the key.
+
+- [zuluCrypt](https://mhogomchungu.github.io/zuluCrypt/) is a graphical application to manage various types of encrypted volumes on GNU/Linux, among them also Tombs, written in C++.
+
+- [Mausoleum](https://github.com/mandeep/Mausoleum) is a graphical interface to facilitate the creation and management of tombs, written in Python.
+
+
+- [pass-tomb](https://github.com/roddhjav/pass-tomb) is a console based wrapper of the excellent password keeping program [pass](https://www.passwordstore.org) that helps to keep the whole tree of password encrypted inside a tomb. It is written in Bash.
+
+- [OpenTomb](https://sourceforge.net/projects/opentomb/files/) is just an open-source community maintained version of Tomb Raider and we just wish we'd have anything to do with it... ;^)
+
+If you are writing a project supporting tomb volumes or wrapping tomb, let us know!
+
+
 ## Compliancy
 
 Tomb qualifies as sound for use on information rated as "top secret" when used on an underlying stack of carefully reviewed hardware (random number generator and other components) and software (Linux kernel build, crypto modules, device manager, compiler used to built, shell interpreter and packaged dependencies).
