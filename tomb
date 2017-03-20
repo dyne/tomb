@@ -996,11 +996,11 @@ gpg_decrypt() {
     local gpgpass="$1\n$TOMBKEY"
     local tmpres ret
     typeset -a gpgopt
-    gpgpopt=(--passphrase-fd 0)
+    gpgpopt=(--batch --no-tty --passphrase-fd 0)
 
     { option_is_set -g } && {
         gpgpass="$TOMBKEY"
-        gpgpopt=()
+        gpgpopt=(--yes)
         
         # GPG option '--try-secret-key' exist since GPG 2.1
         { option_is_set -R } && [[ $gpgver =~ "2.1." ]] && {
@@ -1009,14 +1009,14 @@ gpg_decrypt() {
             { is_valid_recipients $recipients } || {
                  _failure "You set an invalid GPG ID."
             }
-            gpgpopt=(`_recipients_arg "--try-secret-key" $recipients`)
+            gpgpopt+=(`_recipients_arg "--try-secret-key" $recipients`)
         }
     }
     
     [[ $gpgver == "1.4.11" ]] && {
         _verbose "GnuPG is version 1.4.11 - adopting status fix."
         TOMBSECRET=`print - "$gpgpass" | \
-            gpg --batch ${gpgpopt[@]} --no-tty --no-options`
+            gpg ${gpgpopt[@]} --no-options`
         ret=$?
         unset gpgpass
         return $ret
@@ -1025,7 +1025,7 @@ gpg_decrypt() {
     _tmp_create
     tmpres=$TOMBTMP
     TOMBSECRET=`print - "$gpgpass" | \
-        gpg --batch ${gpgpopt[@]} --no-tty --no-options \
+        gpg ${gpgpopt[@]} --no-options  \
             --status-fd 2 --no-mdc-warning --no-permission-warning \
             --no-secmem-warning 2> $tmpres`
     unset gpgpass
