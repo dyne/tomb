@@ -30,25 +30,27 @@ harddisk and its key file on a USB stick.
 .IP "dig"
 Generates a file that can be used as a tomb and will occupy as much
 space as its desired initial size, the unlocked \fI.tomb\fR file can
-then be locked using a \fIkey\fR. It takes a mandatory \fI-s\fR option which is
-the size in megabytes (MiB). Tombs are digged using
-low-quality random data (/dev/urandom).
+then be locked using a \fIkey\fR. It takes a mandatory \fI-s\fR option
+which is the size in megabytes (MiB). Tombs are digged using random
+data gathered from a non-blocking source (/dev/urandom).
 
 .B
 .IP "forge"
 Creates a new \fIkey\fR and prompts the user for a \fIpassword\fR to
-protect its usage using symmetric encryption. This operation requires
-high quality random data using /dev/random and can take long when run
-on a server with low entropy. The \fI-g\fR option switches on the use
-of a GPG key instead of a password (asymmetric encryption), then the
-\fI-r\fR option indicates the recipient key; more recipient GPG ids
-can be indicated (comma separated) if the option is followed by the
-\fI--shared\fR flag. The default cipher to protect the key is AES256,
-a custom one can be specified using the \fI-o\fR option, for a list of
-supported ciphers use \fI-v\fR. For additional protection against
-dictionary attacks on keys, the \fI--kdf\fR option can be used when
-forging a key, making sure that the \fItomb-kdb-pbkdf2\fR binaries in
-\fIextras/kdf\fR were compiled and installed on the system.
+protect its usage using symmetric encryption. This operation uses
+random data from a blocking source (/dev/random) and it may take long
+when run on a server with low entropy; to switch using a non-blocking
+source the \fI--use-urandom\fR flag can be used. The \fI-g\fR option
+switches on the use of a GPG key instead of a password (asymmetric
+encryption), then the \fI-r\fR option indicates the recipient key;
+more recipient GPG ids can be indicated (comma separated) if the
+option is followed by the \fI--shared\fR flag. The default cipher to
+protect the key is AES256, a custom one can be specified using the
+\fI-o\fR option, for a list of supported ciphers use \fI-v\fR. For
+additional protection against dictionary attacks on keys, the
+\fI--kdf\fR option can be used when forging a key, making sure that
+the \fItomb-kdb-pbkdf2\fR binaries in \fIextras/kdf\fR were compiled
+and installed on the system.
 
 .B
 .IP "lock"
@@ -259,8 +261,10 @@ commandline options. This is mostly used needed for execution by
 wrappers and testing suite.
 .B
 .IP "--use-urandom"
-Use an inferior quality random source to improve the speed of key
-generation at the cost of security (needed for the testing suite).
+Use a non-blocking random source to improve the speed of the
+\fIforge\fR command (key generation): tomb uses /dev/urandom instead
+of /dev/random. According to some people using the non-blocking source
+of Linux kernel doesn't degrades the quality of random.
 .B
 .IP "--tomb-pwd <string>"
 Use string as password when needed on tomb.
