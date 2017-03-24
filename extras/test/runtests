@@ -236,7 +236,7 @@ test-tomb-shared() {
     res=0
     tt dig -s 20 /tmp/shared.tomb
     { test $? = 0 } || { res=1 }
-    tt forge /tmp/shared.tomb.key -g -r $gpgid_1,$gpgid_2 --shared \
+    tt forge /tmp/shared.tomb.key -g -r $gpgid_1,$gpgid_2 \
         --ignore-swap --unsafe --use-urandom 
     { test $? = 0 } || { res=1 }
     tt lock /tmp/shared.tomb -k /tmp/shared.tomb.key \
@@ -249,17 +249,17 @@ test-tomb-shared() {
     { test $res = 0 } && { results+=(shared SUCCESS) }
     
     notice "Testing changing recipients on a shared Tomb"
-    tt passwd -k /tmp/shared.tomb.key -g -r $gpgid_2,$gpgid_1 --shared
+    tt passwd -k /tmp/shared.tomb.key -g -r $gpgid_2,$gpgid_1
     { test $? = 0 } && { results+=(shared-passwd SUCCESS) }
     
     notice "Testing setkey on a shared Tomb"
     rm -f /tmp/new.shared.tomb.key
     res=0
-    tt forge /tmp/new.shared.tomb.key -g -r $gpgid_1,$gpgid_2 --shared\
+    tt forge /tmp/new.shared.tomb.key -g -r $gpgid_1,$gpgid_2 \
         --ignore-swap --unsafe --use-urandom
     { test $? = 0 } || { res=1 }
     tt setkey -k /tmp/new.shared.tomb.key /tmp/shared.tomb.key /tmp/shared.tomb \
-        -g -r $gpgid_2,$gpgid_1 --shared
+        -g -r $gpgid_2,$gpgid_1
     { test $? = 0 } || { res=1 }
     { test $res = 0 } && { results+=(shared-setkey SUCCESS) }
 }
