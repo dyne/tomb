@@ -196,7 +196,7 @@ test-tomb-recip() {
 test-tomb-recip-default() {
 
 	notice "wiping all default.tomb* in /tmp"
-	rm -f /tmp/default.tomb /tmp/default.tomb.key
+	rm -f /tmp/default.tomb /tmp/default.tomb.key /tmp/default.tmp 
 	
 	notice "Testing tomb with the default recipient"
 	res=0
@@ -207,6 +207,8 @@ test-tomb-recip-default() {
 	tt lock /tmp/default.tomb -k /tmp/default.tomb.key \
         --ignore-swap --unsafe -g
     { test $? = 0 } || { res=1 }
+    gpg -d --status-fd 2 /tmp/default.tomb.key 1> /dev/null 2> /tmp/default.tmp 
+    [[ -z "$(grep 'Tomb Test 2' /tmp/default.tmp)" ]] && { res=1 }
     { test $res = 0 } && { results+=(recip-default SUCCESS) }
 }
 

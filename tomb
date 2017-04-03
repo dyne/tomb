@@ -995,7 +995,7 @@ gpg_decrypt() {
     local gpgpass="$1\n$TOMBKEY"
     local tmpres ret
     typeset -a gpgopt
-    gpgpopt=(--batch --no-tty --passphrase-fd 0)
+    gpgpopt=(--batch --no-tty --passphrase-fd 0 --no-options)
 
     { option_is_set -g } && {
         gpgpass="$TOMBKEY"
@@ -1015,7 +1015,7 @@ gpg_decrypt() {
     [[ $gpgver == "1.4.11" ]] && {
         _verbose "GnuPG is version 1.4.11 - adopting status fix."
         TOMBSECRET=`print - "$gpgpass" | \
-            gpg --decrypt ${gpgpopt[@]} --no-options`
+            gpg --decrypt ${gpgpopt[@]}`
         ret=$?
         unset gpgpass
         return $ret
@@ -1024,7 +1024,7 @@ gpg_decrypt() {
     _tmp_create
     tmpres=$TOMBTMP
     TOMBSECRET=`print - "$gpgpass" | \
-        gpg --decrypt ${gpgpopt[@]} --no-options  \
+        gpg --decrypt ${gpgpopt[@]}  \
             --status-fd 2 --no-mdc-warning --no-permission-warning \
             --no-secmem-warning 2> $tmpres`
     unset gpgpass
@@ -1329,15 +1329,15 @@ gen_key() {
 
         # Set gpg inputs and options
         gpgpass="${tombpass}\n$TOMBSECRET"
-        gpgopt=(--passphrase-fd 0 --symmetric)
+        gpgopt=(--passphrase-fd 0 --symmetric --no-options)
         opt='-n'
     }
 
     _tmp_create
     local tmpres=$TOMBTMP
     print $opt - "$gpgpass" \
-        | gpg --openpgp --force-mdc --cipher-algo ${algo} --batch \
-              --no-options --no-tty ${gpgopt[@]} \
+        | gpg --openpgp --force-mdc --cipher-algo ${algo} \
+              --batch --no-tty ${gpgopt[@]} \
               --status-fd 2 -o - --armor 2> $tmpres
     unset gpgpass
     # check result of gpg operation
