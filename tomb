@@ -943,12 +943,7 @@ _load_key() {
     [[ -z $keyfile ]] && {
         _failure "This operation requires a key file to be specified using the -k option." }
 
-    if option_is_set -g; then
-        _verbose "load_key key encrypted with a GnuPG Key"
-        _message "Key encrypted with a GnuPG Key"
-        TOMBKEYFILE=$keyfile
-        TOMBKEY="${mapfile[$TOMBKEYFILE]}"
-    elif [[ $keyfile == "-" ]]; then
+    if [[ $keyfile == "-" ]]; then
         _verbose "load_key reading from stdin."
         _message "Waiting for the key to be piped from stdin... "
         TOMBKEYFILE=stdin
