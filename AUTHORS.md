@@ -21,9 +21,6 @@ Russian translation by fsLeg, German translation by Jerry Polfer,
 Italian translation by Massimiliano Augello and Swedish translation by
 PLJ / Kosovoper.
 
-Tomb received the attention and minor contributions of , Jim Turner
-
-
 Testing, reviews and documentation contributed by Dreamer, Vlax,
 Shining the Translucent, Mancausoft, Asbesto Molesto, Nignux, TheJH,
 The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon,
