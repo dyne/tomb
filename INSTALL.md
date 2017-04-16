@@ -20,12 +20,12 @@ To install Tomb simply download the source distribution (the tar.gz file)
 from https://files.dyne.org/tomb and decompress it. From a terminal:
 
     cd Downloads
-    tar xvfz Tomb-2.3.tar.gz (correct with actual file name)
+    tar xvfz Tomb-2.4.tar.gz (correct with actual file name)
 
 Then enter its directory and run 'make install' as root, this will install
 Tomb into /usr/local:
 
-    cd Tomb-2.3 (correct with actual directory name)
+    cd Tomb-2.4 (correct with actual directory name)
     sudo make install
 
 After installation one can read the commandline help or read the manual:
