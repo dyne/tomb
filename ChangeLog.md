@@ -1,5 +1,19 @@
 # Tomb ChangeLog
 
+## 2.4
+### April 2017
+
+This release introduces a major new feature with support for
+asymmetric encryption of Tomb keys using public/private GPG key
+pairs. It is now possible to protect a Tomb key using a GPG key (which
+can also be password-less for automations) as well encrypt a Tomb key
+for multiple recipients (list of GPG ids). Other improvements include:
+a fix to the 'slam' command with better detection of running programs
+using 'lsof' (new optional dependency); a fix to 'forge' key creation
+to really use 512 bits long keys to really trigger usage of AES256;
+correct support for opening tombs in read-only mode; update of the
+Tomber python wrapper in extras. Documentation has been updated.
+
 ## 2.3
 ### January 2017
 

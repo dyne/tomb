@@ -1,3 +1,27 @@
+# Usage of AES128 due to shorter keysize
+## 2.4
+
+All tomb keys forged using Tomb version 2.3 or preceeding are 256 bits
+large, which is insufficient to trigger usage of AES-256 encryption in
+XTS mode, which is the default. Therefore all tombs locked using
+smaller keys are silently encrypted using AES-128, according to the
+cryptsetup manual:
+> "By default a 256 bit key-size is used. Note however that XTS splits the supplied key in half, so to use AES-256 instead of AES-128 you have to set the XTS key-size to 512."
+
+This problem has been noticed and corrected in Tomb version 2.4 where
+now the 'forge' command will automatically generate 512 bits keys. To
+switch to AES-256 encrypted tombs the only possibility is to create
+new keys, new tombs and copy the contents across, since the LUKS
+formatting occurs when the 'lock' command is issued using a new
+key. Using 'setkey' to switch key does not suffice to switch to
+AES-256.
+
+This problem is minor and doesn't seem to heavily affect the security
+of Tombs created before 2.4 as the cryptographic strenght of AES-128
+and AES-256 is comparable; yet it is reasonable to think that larger
+key sizes resist better to Quantum computing attacks.
+
+
 # Vulnerability to password bruteforcing
 ## Issue affecting keys used in steganography
 

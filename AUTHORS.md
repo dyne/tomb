@@ -1,9 +1,11 @@
-Cryptsetup is written by Christophe Saout and Clemens Fruhwirth.
+Cryptsetup was originally written in 2004 by Jana Saout
 
-Tomb is written and directed by Denis Roio <jaromil@dyne.org>
+LUKS extensions are written in 2006 by Clemens Fruhwirth
+
+Tomb is written and maintained since 2007 by Denis Roio <jaromil@dyne.org>
 
 Tomb includes code and advices by Anathema, Boyska, Hellekin O. Wolf,
-GDrooid and Parazyd.
+Daniel Rodriguez, Parazyd and Alexandre Pujol.
 
 The 'gtomb' minimal GUI is being written by Parazyd.
 
@@ -14,15 +16,20 @@ Python Tomb wrappers are contributed by Reiven and Boyska.
 Artwork is contributed by Jordi aka Mon Mort and Logan VanCuren.
 
 Gettext internationalization and Spanish translation is contributed by
-GDrooid, French translation by Hellekin, Russian translation by fsLeg,
-German translation by x3nu, Italian translation by Massimiliano
-Augello and Swedish translation by PLJ / Kosovoper.
+Daniel Rodriguez. French translation by Hellekin and Roy Lockhart,
+Russian translation by fsLeg, German translation by Jerry Polfer,
+Italian translation by Massimiliano Augello and Swedish translation by
+PLJ / Kosovoper.
+
+Tomb received the attention and minor contributions of , Jim Turner
+
 
 Testing, reviews and documentation contributed by Dreamer, Vlax,
 Shining the Translucent, Mancausoft, Asbesto Molesto, Nignux, TheJH,
 The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon,
-Narrat, x3nu, Jim Turner, Maxime Arthaud, RobertMX, mhogomchungu
-and...  the Linux Action Show!
+Narrat, Jerry Polfer, Jim Turner, Maxime Arthaud, RobertMX,
+mhogomchungu Mandeep Bhutani, Emil Lundberg, Joel Montes de Oca, Armin
+Mesbah, Arusekk, Stephan Schindel and...  the Linux Action Show!
 
 Tomb includes an implementation of the "Password-Based Key Derivation
 Function v2" based on GCrypt and written by Anthony Thyssen.
