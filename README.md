@@ -15,7 +15,7 @@
 
 [![software by Dyne.org](https://www.dyne.org/wp-content/uploads/2015/12/software_by_dyne.png)](http://www.dyne.org)
 
-Updates on website: https://www.dyne.org/software/tomb
+More information and updates on website: https://www.dyne.org/software/tomb
 
 Get the stable .tar.gz signed release for production use!
 
@@ -65,12 +65,12 @@ For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md)
   Commands:
 
    // Creation:
-   dig     create a new empty TOMB file of size -s in MB
+   dig     create a new empty TOMB file of size -s in MiB
    forge   create a new KEY file and set its password
    lock    installs a lock on a TOMB to use it with KEY
 
    // Operations on tombs:
-   open    open an existing TOMB (-k specify KEY file)
+   open    open an existing TOMB (-k KEY file or - for stdin)
    index   update the search indexes of tombs
    search  looks for filenames matching text patterns
    list    list of open TOMBs and information on them
@@ -87,16 +87,19 @@ For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md)
 
    // Steganography:
    bury    hide a KEY inside a JPEG image (for use with -k)
-   exhume  extract a KEY from a JPEG image (prints to stout)
+   exhume  extract a KEY from a JPEG image (prints to stdout)
 
   Options:
 
-   -s     size of the tomb file when creating/resizing one (in MB)
+   -s     size of the tomb file when creating/resizing one (in MiB)
    -k     path to the key to be used ('-k -' to read from stdin)
    -n     don't process the hooks found in tomb
-   -o     mount options used to open (default: rw,noatime,nodev)
+   -o     options passed to commands: open, lock, forge (see man)
    -f     force operation (i.e. even if swap is active)
-   --kdf  generate passwords armored against dictionary attacks
+   -g     use a GnuPG key to encrypt a tomb key
+   -r     provide GnuPG recipients (separated by coma)
+   -R     provide GnuPG hidden recipients (separated by coma)
+   --kdf  forge keys armored against dictionary attacks
 
    -h     print this help
    -v     print version, license and list of available ciphers
@@ -190,8 +193,6 @@ some are developed by Dyne.org, but some also by third parties.
 
 - [pass-tomb](https://github.com/roddhjav/pass-tomb) is a console based wrapper of the excellent password keeping program [pass](https://www.passwordstore.org) that helps to keep the whole tree of password encrypted inside a tomb. It is written in Bash.
 
-- [OpenTomb](https://sourceforge.net/projects/opentomb/files/) is just an open-source community maintained version of Tomb Raider and we just wish we'd have anything to do with it... ;^)
-
 If you are writing a project supporting tomb volumes or wrapping tomb, let us know!
 
 
@@ -211,7 +212,7 @@ Tomb implementation is known to address at least partially issues raised in:
 	- [ISO/IEC 11770-1:2010](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=53456)  -- Part 1: Framework
 	- [ISO/IEC 11770-2:2008](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=46370)  -- Part 2: Mechanisms using symmetric techniques
 - [ISO/IEC 27005:2011](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=56742) Information technology -- Security techniques -- Information security risk management
-- [ISO/IEC 24759:2014](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=59142) Information technology -- Security techniques -- Test requirements for cryptographic modules 
+- [ISO/IEC 24759:2014](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=59142) Information technology -- Security techniques -- Test requirements for cryptographic modules
 
 Any help on further verification of compliancy is very welcome, as the access to ISO/IEC document is limited due to its expensive nature.
 
