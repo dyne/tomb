@@ -2621,6 +2621,7 @@ umount_tomb() {
 
         _verbose "Name: ::1 tomb name::" $tombname
         _verbose "Mount: ::1 mount point::" $tombmount
+		_verbose "Loop: ::1 mount loop::" $tombloop
         _verbose "Mapper: ::1 mapper::" $mapper
 
         [[ -e "$mapper" ]] && {
