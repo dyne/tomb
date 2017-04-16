@@ -842,7 +842,7 @@ is_valid_recipients() {
     for gpg_id in ${recipients[@]}; do
         gpg --list-keys "$gpg_id" &> /dev/null
         [[ $? != 0 ]] && {
-            _warning "$gpg_id is not a valid key ID."
+            _warning "Not a valid GPG key ID: ::1 gpgid:: " $gpg_id
             return 1
         }
     done
@@ -1248,7 +1248,7 @@ gen_key() {
                 _failure "You set an invalid GPG ID."
             }
                 
-            _warning "You are going to encrypt a tomb key with ${#recipients} recipient(s)."
+            _warning "You are going to encrypt a tomb key with ::1 nrecipients:: recipient(s)."  ${#recipients}
             _warning "It is your responsibility to check these fingerprints."
             _warning "The fingerprints are:"
             for gpg_id in ${recipients[@]}; do
