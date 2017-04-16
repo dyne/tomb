@@ -1,4 +1,4 @@
-.TH tomb 1 "February 05, 2017" "tomb"
+.TH tomb 1 "April 16, 2017" "tomb"
 
 .SH NAME
 Tomb \- the Crypto Undertaker
@@ -43,14 +43,13 @@ when run on a server with low entropy; to switch using a non-blocking
 source the \fI--use-urandom\fR flag can be used. The \fI-g\fR option
 switches on the use of a GPG key instead of a password (asymmetric
 encryption), then the \fI-r\fR option indicates the recipient key;
-more recipient GPG ids can be indicated (comma separated) if the
-option is followed by the \fI--shared\fR flag. The default cipher to
-protect the key is AES256, a custom one can be specified using the
-\fI-o\fR option, for a list of supported ciphers use \fI-v\fR. For
-additional protection against dictionary attacks on keys, the
-\fI--kdf\fR option can be used when forging a key, making sure that
-the \fItomb-kdb-pbkdf2\fR binaries in \fIextras/kdf\fR were compiled
-and installed on the system.
+more recipient GPG ids can be indicated (comma separated). The default
+cipher to protect the key is AES256, a custom one can be specified
+using the \fI-o\fR option, for a list of supported ciphers use
+\fI-v\fR. For additional protection against dictionary attacks on
+keys, the \fI--kdf\fR option can be used when forging a key, making
+sure that the \fItomb-kdb-pbkdf2\fR binaries in \fIextras/kdf\fR were
+compiled and installed on the system.
 
 .B
 .IP "lock"
@@ -129,12 +128,11 @@ situations. It requires \fIlsof\fR else it falls back to \fIclose\fR.
 Changes the password protecting a key file specified using
 \fI-k\fR. With keys encrypted for GPG recipients use \fI-g\fR followed
 by \fI-r\fR to indicate the new recipient key, or a comma separated
-list followed by the \fI--shared\fR flag if more than one. The user
-will need to know the key's current password, or possess at least one
-of the current recipients GPG secret keys, because the key contents
-will be decoded and reencoded using the new passwords or keys. If the
-key file is broken (missing headers) this function also attempts its
-recovery.
+list.. The user will need to know the key's current password, or
+possess at least one of the current recipients GPG secret keys,
+because the key contents will be decoded and reencoded using the new
+passwords or keys. If the key file is broken (missing headers) this
+function also attempts its recovery.
 
 .B
 .IP "setkey"
@@ -144,8 +142,8 @@ operation and their passwords or GPG recipient(s) secret keys must be
 available. The new key must be specified using the \fI-k\fR option,
 the first argument should be the old key and the second and last
 argument the tomb file. Use the \fI-g\fR option to unlock the tomb
-with a GPG key, the \fI-r\fR to indicate the recipient and the
-\fI--shared\fR option if encrypting for more than one recipient.
+with a GPG key, the \fI-r\fR to indicate the recipient or a comma
+separated list for more than one recipient.
 
 .B
 .IP "resize"
@@ -218,17 +216,11 @@ the \fIsize\fR of the new file to be created. Units are megabytes (MiB).
 .B
 .IP "-g"
 Tell tomb to use a asymmetric GnuPG key encryption instead of a
-symmetric passphrase to protect a tomb key. This option can be followed by \fI-r\fR when the command needs to specify recipient(s) and by the \fI--shared\fR flag when recipients are more than one.
+symmetric passphrase to protect a tomb key. This option can be followed by \fI-r\fR when the command needs to specify recipient(s).
 .B
 .IP "-r \fI<gpg_id>[,<gpg_id2>]\fR"
-Provide a new set of recipient to encrypt a tomb key. \fIgpg_ids\fR
-can be one or more (comma separated), if more than one recipient is
-present the --shared flag must be present.
-.B
-.IP "--shared"
-Activate the capability to share an asymmetrically encrypted tomb key
-among multiple recipients. When this flag is enabled the \fI-r\fR
-option should indicate more than one recipient, comma separated.
+Provide a new set of recipient(s) to encrypt a tomb key. \fIgpg_ids\fR
+can be one or more GPG key ID, comma separated.
 .B
 .IP "--kdf \fI<itertime>\fR"
 Activate the KDF feature against dictionary attacks when creating a
@@ -390,14 +382,16 @@ eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
 In the future it may become mandatory to run gpg-agent when using tomb.
 
 .SH SHARE A TOMB
-A tomb key can be encrypted with more than one recipient. Therefore,
-a tomb can be shared between different user. The multiple recipients
-are given using the \fI-r\fR (or/and \fI-R\fR) option and must be
-separated by a coma: \fI,\fR. It is a very sensitive action, and the user
-needs to trust all the GPG public keys it is going to share its tomb.
-This is why this feature needs to be explicitly activated using in
-more the flag \fI--shared\fR. The \fI--shared\fR option can be used
-in the tomb commands: \fIforge\fR \fIsetkey\fR and \fIpasswd\fR.
+A tomb key can be encrypted with more than one recipient. Therefore, a
+tomb can be shared between different users. The recipients are given
+using the \fI-r\fR (or/and \fI-R\fR) option and if multiple each GPG
+key ID must be separated by a comma (\fI,\fR). Sharing a tomb is a
+very sensitive action and the user needs to trust that all the GPG
+public keys used are kept safe. If one of them its stolen or lost, it
+will be always possible to use it to access the tomb key unless all
+its copies are destroyed. The \fI-r\fR option can be used in the tomb
+commands: \fIopen\fR, \fIforge\fR \fIsetkey\fR, \fIpasswd\fR,
+\fIbury\fR, \fIexhume\fR and \fIresize\fR.
 
 .SH EXAMPLES
 
@@ -487,7 +481,7 @@ channel on \fIhttps://irc.dyne.org\fR.
 
 .SH COPYING
 
-This manual is Copyright (c) 2011-2015 by Denis Roio <\fIjaromil@dyne.org\fR>
+This manual is Copyright (c) 2011-2017 by Denis Roio <\fIjaromil@dyne.org\fR>
 
 This manual includes contributions by Boyska and Hellekin O. Wolf.
 
