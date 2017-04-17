@@ -782,7 +782,7 @@ function _print() {
 _list_optional_tools() {
     typeset -a _deps
     _deps=(gettext dcfldd wipe steghide)
-    _deps+=(resize2fs tomb-kdb-pbkdf2 qrencode swish-e unoconv)
+    _deps+=(resize2fs tomb-kdb-pbkdf2 qrencode swish-e unoconv lsof)
     for d in $_deps; do
         _print "`which $d`"
     done
