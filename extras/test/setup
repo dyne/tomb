@@ -33,7 +33,6 @@ PROJECT_HOME="$(dirname "$EXT_HOME")"
 export SHARNESS_TEST_EXTENSION="sh"
 source ./sharness
 TMP="/tmp/tomb"
-MEDIA="/run/media" # for bind hooks
 
 
 # Check Tomb sources
@@ -43,6 +42,9 @@ if [[ ! -e "${T}" ]]; then
 	echo "Could not find tomb command"
 	exit 1
 fi
+
+MEDIA="/media"
+[[ -d /media ]] || MEDIA="/run/media/$USER/"
 
 # Check for auxiliary programs
 command -v steghide > /dev/null && test_set_prereq STEGHIDE
