@@ -103,3 +103,11 @@ tt_forge() { tt forge "$tomb_key" --ignore-swap --unsafe --use-urandom "${@}"; }
 tt_lock() { tt lock "$tomb" -k "$tomb_key" --ignore-swap --unsafe "${@}"; }
 tt_open() { tt open "$tomb" -k "$tomb_key" --ignore-swap --unsafe "${@}"; }
 tt_close() { tt close "$testname" "${@}"; }
+
+tomb_set_ownership() {
+	local dir="$1"
+	local uid=$(id -u $USERNAME)
+	local gid=$(id -g $USERNAME)
+	sudo chown -R "$uid:$gid" "$dir"
+	sudo chmod 0711 "$dir"
+}
