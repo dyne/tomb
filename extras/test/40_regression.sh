@@ -4,7 +4,10 @@ export test_description="Tomb regression tests"
 
 source ./setup
 
-TOMB_VERSION=("2.3")
+TOMB_VERSION=("2.3" "2.2" "2.0.1" "2.1")
+zshversion=$(zsh --version | awk 'NR==1 {print $2}')
+[[ $zshversion =~ "5.3" ]] && TOMB_VERSION=("2.3")
+
 for version in "${TOMB_VERSION[@]}"; do
     URL="https://files.dyne.org/tomb/old-releases/Tomb-$version.tar.gz"
 
