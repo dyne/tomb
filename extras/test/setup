@@ -44,7 +44,7 @@ if [[ ! -e "${T}" ]]; then
 fi
 
 MEDIA="/media"
-[[ -d /media ]] || MEDIA="/run/media/$USER/"
+[[ -d "/media" ]] || MEDIA="/run/media/$USER"
 
 # Check for auxiliary programs
 command -v steghide > /dev/null && test_set_prereq STEGHIDE
@@ -71,6 +71,7 @@ export DUMMYPASSNEW=changetest
 
 test_cleanup() {
 	"${T}" slam all &> /dev/null
+	rm -f "/home/$USER/dyne-tomb-bind-test-"*
 	sudo rm -rf "$TMP"
 	mkdir -p "$TMP"
 }
@@ -106,7 +107,7 @@ tt_lock() { tt lock "$tomb" -k "$tomb_key" --ignore-swap --unsafe "${@}"; }
 tt_open() { tt open "$tomb" -k "$tomb_key" --ignore-swap --unsafe "${@}"; }
 tt_close() { tt close "$testname" "${@}"; }
 
-tomb_set_ownership() {
+tt_set_ownership() {
 	local dir="$1"
 	local uid=$(id -u $USERNAME)
 	local gid=$(id -g $USERNAME)
