@@ -1,15 +1,25 @@
-language: c
-sudo: required
 dist: trusty
+sudo: required
+language: c
 
-env:
-  - DEBIAN_FRONTEND=noninteractive
+addons:
+  apt:
+    packages:
+      - zsh
+      - gnupg
+      - cryptsetup
+      - pinentry-curses
+      - gawk
+      - libgcrypt20-dev
+      - steghide
+      - qrencode
+      - e2fsprogs
+      - shellcheck
 
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install --no-install-recommends -y zsh sudo gnupg cryptsetup pinentry-curses gawk  libgcrypt20-dev steghide qrencode e2fsprogs shellcheck
+before_script:
+  - make --directory=extras/kdf-keys
+  - sudo make --directory=extras/kdf-keys install
 
 script:
   - make lint
   - make test
-
