@@ -1,0 +1,116 @@
+#!/usr/bin/env zsh
+#
+# Copyright (C) 2007-2016 Dyne.org Foundation
+#
+# Tomb test units by Denis Roio <jaromil@dyne.org>
+#
+# This source code is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This source code is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  Please refer
+# to the GNU Public License for more details.
+#
+# You should have received a copy of the GNU Public License along with
+# this source code; if not, write to: Free Software Foundation, Inc.,
+# 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+
+#
+# This file should be sourced by all test-scripts
+#
+
+# Project directory
+TEST_HOME="$(pwd)"
+EXT_HOME="$(dirname "$TEST_HOME")"
+PROJECT_HOME="$(dirname "$EXT_HOME")"
+
+
+# Sharness config
+export SHARNESS_TEST_EXTENSION="sh"
+source ./sharness
+TMP="/tmp/tomb"
+
+
+# Check Tomb sources
+T="$PROJECT_HOME/tomb" 	# Can link to old tomb version
+TOMB_BIN="${T}"			# Always to the dev version
+if [[ ! -e "${T}" ]]; then
+	echo "Could not find tomb command"
+	exit 1
+fi
+
+MEDIA="/media"
+[[ -d "/media" ]] || MEDIA="/run/media/$USER"
+
+# Check for auxiliary programs
+command -v steghide > /dev/null && test_set_prereq STEGHIDE
+command -v e2fsck resize2fs > /dev/null && test_set_prereq RESIZER
+command -v tomb-kdb-pbkdf2 > /dev/null && test_set_prereq KDF
+command -v qrencode > /dev/null && test_set_prereq QRENCODE
+
+
+# GnuPG config
+unset GNUPGHOME
+unset GPG_AGENT_INFO
+export GNUPGHOME="$TEST_HOME/gnupg/"
+export KEY1="A4857CD176B31435F9709D25F0E573B8289439CD"
+export KEY2="0B2235E660753AB0475FB3E23DC836481F44B31E"
+chmod 700 "$GNUPGHOME"
+
+
+# Dummy passwords used in the tests suite
+export DUMMYPASS=test
+export DUMMYPASSNEW=changetest
+
+
+# Test helpers
+
+test_cleanup() {
+	"${T}" slam all &> /dev/null
+	rm -f "/home/$USER/dyne-tomb-bind-test-"*
+	sudo rm -rf "$TMP"
+	mkdir -p "$TMP"
+}
+
+test_export() {
+	export testname="$1"
+	export tomb="$TMP/$testname.tomb"
+	export tomb_key="$TMP/$testname.tomb.key"
+	export tomb_key_new="$TMP/$testname.new.tomb.key"
+	export tomb_key_steg="$TMP/$testname.steg.tomb.key"
+	export tomb_img="$TMP/$testname.jpg"
+}
+
+tt() {
+	start_loops=(`sudo losetup -a |cut -d: -f1`)
+	start_temps=(`find /dev/shm -name 'tomb*'`)
+	"${T}" -D ${=@}
+	res=$?
+	loops=(`sudo losetup -a |cut -d: -f1`)
+	temps=(`find /dev/shm -name 'tomb*'`)
+
+	{ test "${#start_loops}" = "${#loops}" } || {
+	    print "loop device usage change to ${#loops}" }
+	{ test "${#start_temps}" = "${#temps}" } || {
+	    print "temp files usage change to ${#temps}" }
+	print "     Tomb command returns $res"
+	return $res
+}
+
+tt_dig() { tt dig "$tomb" "${@}"; }
+tt_forge() { tt forge "$tomb_key" --ignore-swap --unsafe --use-urandom "${@}"; }
+tt_lock() { tt lock "$tomb" -k "$tomb_key" --ignore-swap --unsafe "${@}"; }
+tt_open() { tt open "$tomb" -k "$tomb_key" --ignore-swap --unsafe "${@}"; }
+tt_close() { tt close "$testname" "${@}"; }
+
+tt_set_ownership() {
+	local dir="$1"
+	local uid=$(id -u $USERNAME)
+	local gid=$(id -g $USERNAME)
+	sudo chown -R "$uid:$gid" "$dir"
+	sudo chmod 0711 "$dir"
+}
