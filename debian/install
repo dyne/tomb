@@ -1,0 +1,3 @@
+doc/tomb.1 /usr/share/man/man1
+extras/desktop/dyne-tomb.xml /usr/share/mime/packages
+tomb /usr/bin

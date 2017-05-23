@@ -1,0 +1,21 @@
+Source: tomb
+Section: misc
+Priority: optional
+Maintainer: boyska <piuttosto@logorroici.org>, paskao <paskao@hacari.org>, vinc3nt <vinc3nt@riseup.net>
+Homepage: http://tomb.dyne.org/
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.9.2
+
+Package: tomb
+Architecture: all
+Depends: zsh, cryptsetup, pinentry-gtk2 | pinentry, gnupg, sudo, file, gettext-base
+Suggests: wipe, dcfldd, steghide
+Description: the crypto undertaker
+ Derived from the dyne:bolic nesting mechanism, Tomb is a free and
+ easy to operate desktop application for fairly strong encryption of
+ personal files. A tomb is like a locked folder that can be
+ transported and hidden in filesystems; its keys are password
+ protected and can be kept separate, for instance keeping a tomb file
+ in your computer's harddisk and its key file on a USB stick.
+ Tomb relies on dm-crypt (and cryptsetup) as an encryption backend
+ using the aes-cbc-essiv:sha256 cypher.
