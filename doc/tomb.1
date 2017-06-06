@@ -300,12 +300,12 @@ example:
 .B
 .IP "exec-hooks"
 This hook file gets executed as user by tomb with the first argument
-determining the step of execution: "pre-open", "post-open",
-"pre-close" or "post-close". The exec-hooks file should be an
-executable (ELF or shell script). Tomb executes this hook as user
-supplying two or more arguments, the first being the step, followed by
-the mountpoint of the tomb and, on close events, its name, loopback
-device and dev-mapper device paths.
+determining the step of execution: "open" or "close". The exec-hooks
+file should be an executable (ELF or shell script) present inside the
+Tomb. Tomb executes this hook as user supplying two or more arguments,
+the first being the step, followed by the mountpoint of the tomb and,
+on close events, its name, loopback device and dev-mapper device
+paths.
 
 .SH PRIVILEGE ESCALATION
 

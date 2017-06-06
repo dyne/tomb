@@ -1940,10 +1940,6 @@ mount_tomb() {
 
     _success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBNAME $tombmount
 
-	# execute pre-open hooks if present
-    option_is_set -n ||
-        exec_safe_func_hooks pre-open ${tombmount} 
-
     lo_mount $TOMBPATH
     nstloop=`lo_new`
 
@@ -2072,7 +2068,7 @@ mount_tomb() {
     # and exec-hooks (execute on open)
     option_is_set -n || {
         exec_safe_bind_hooks ${tombmount}
-        exec_safe_func_hooks post-open ${tombmount} 
+        exec_safe_func_hooks open ${tombmount} 
 	}
 
     return 0
@@ -2152,7 +2148,7 @@ exec_safe_bind_hooks() {
 #
 # Synopsis: exec_safe_func_hooks /path/to/mounted/tomb 
 #
-# If an executable file named 'post-hooks' is found inside the tomb,
+# If an executable file named 'exec-hooks' is found inside the tomb,
 # run it as a user.  This might need a dialog for security on what is
 # being run, however we expect you know well what is inside your tomb.
 # If you're mounting an untrusted tomb, be safe and use the -n switch
@@ -2164,7 +2160,9 @@ exec_safe_func_hooks() {
         _success "Exec hook: ::1 exec hook:: ::2 action:: ::3 argument::" \
 				 "${mnt}/exec-hooks" "$1" "$2"
         $mnt/exec-hooks "$1" "$2"
+		return $?
     }
+	return 0
 }
 
 # }}} - Tomb open
@@ -2628,9 +2626,15 @@ umount_tomb() {
             _warning "Please specify an existing tomb."
             return 0 }
 
-		option_is_set -n ||
+		option_is_set -n || {
 			exec_safe_func_hooks \
-				pre-close "$tombmount" "$tombname" "$tombloop" "$mapper"
+				close "$tombmount" "$tombname" "$tombloop" "$mapper"
+			exec_hook_res=$?
+			[[ $exec_hook_res = 0 ]] || {
+				_warning "close exec-hook returns a non-zero error code: ::1 error::" $exec_hook_res
+				_failure "Operation aborted"
+			}
+		}
 	   
         [[ -n $SLAM ]] && {
             _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
@@ -2679,11 +2683,6 @@ umount_tomb() {
 			_sudo losetup -d "/dev/$tombloop"
 			[[ $? = 0 ]] || _verbose "/dev/$tombloop was already closed."
 		}
-
-        # Execute post-hooks for eventual cleanup
-        option_is_set -n ||
-            exec_safe_func_hooks \
-				post-close "$tombmount" "$tombname" "$tombloop" "$mapper"
 
         _success "Tomb ::1 tomb name:: closed: your bones will rest in peace." $tombname
 
