@@ -1940,6 +1940,10 @@ mount_tomb() {
 
     _success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBNAME $tombmount
 
+	# execute pre-open hooks if present
+    option_is_set -n ||
+        exec_safe_func_hooks pre-open ${tombmount} 
+
     lo_mount $TOMBPATH
     nstloop=`lo_new`
 
@@ -2065,10 +2069,11 @@ mount_tomb() {
 
 
     # process bind-hooks (mount -o bind of directories)
-    # and post-hooks (execute on open)
-    { option_is_set -n } || {
+    # and exec-hooks (execute on open)
+    option_is_set -n || {
         exec_safe_bind_hooks ${tombmount}
-        exec_safe_post_hooks ${tombmount} open }
+        exec_safe_func_hooks post-open ${tombmount} 
+	}
 
     return 0
 }
@@ -2145,7 +2150,7 @@ exec_safe_bind_hooks() {
 
 # Execute automated actions configured in the tomb.
 #
-# Synopsis: exec_safe_post_hooks /path/to/mounted/tomb [open|close]
+# Synopsis: exec_safe_func_hooks /path/to/mounted/tomb 
 #
 # If an executable file named 'post-hooks' is found inside the tomb,
 # run it as a user.  This might need a dialog for security on what is
@@ -2153,18 +2158,12 @@ exec_safe_bind_hooks() {
 # If you're mounting an untrusted tomb, be safe and use the -n switch
 # to verify what it would run if you let it.  This feature opens the
 # possibility to make encrypted executables.
-exec_safe_post_hooks() {
-    local mnt=$1     # First argument is where the tomb is mounted
-    local act=$2     # Either 'open' or 'close'
-
+exec_safe_func_hooks() {
     # Only run if post-hooks has the executable bit set
-    [[ -x $mnt/post-hooks ]] || return
-
-    # If the file starts with a shebang, run it.
-    head -n1 $mnt/post-hooks | grep '^#!\s*/'
-    [[ $? == 0 ]] && {
-        _success "Post hooks found, executing as user ::1 user name::." $USERNAME
-        $mnt/post-hooks $act $mnt
+    [[ -x $mnt/exec-hooks ]] && {
+        _success "Exec hook: ::1 exec hook:: ::2 action:: ::3 argument::" \
+				 "${mnt}/exec-hooks" "$1" "$2"
+        $mnt/exec-hooks "$1" "$2"
     }
 }
 
@@ -2629,6 +2628,10 @@ umount_tomb() {
             _warning "Please specify an existing tomb."
             return 0 }
 
+		option_is_set -n ||
+			exec_safe_func_hooks \
+				pre-close "$tombmount" "$tombname" "$tombloop" "$mapper"
+	   
         [[ -n $SLAM ]] && {
             _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
                 $tombname $tombmount
@@ -2656,10 +2659,6 @@ umount_tomb() {
             }
         done
 
-        # Execute post-hooks for eventual cleanup
-        { option_is_set -n } || {
-            exec_safe_post_hooks ${tombmount%%/} close }
-
         _verbose "Performing umount of ::1 mount point::" $tombmount
         _sudo umount ${tombmount}
         [[ $? = 0 ]] || { _failure "Tomb is busy, cannot umount!" }
@@ -2676,9 +2675,15 @@ umount_tomb() {
             _failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper }
 
         # Normally the loopback device is detached when unused
-        [[ -e "/dev/$tombloop" ]] && _sudo losetup -d "/dev/$tombloop"
-        [[ $? = 0 ]] || {
-            _verbose "/dev/$tombloop was already closed." }
+        [[ -e "/dev/$tombloop" ]] && {
+			_sudo losetup -d "/dev/$tombloop"
+			[[ $? = 0 ]] || _verbose "/dev/$tombloop was already closed."
+		}
+
+        # Execute post-hooks for eventual cleanup
+        option_is_set -n ||
+            exec_safe_func_hooks \
+				post-close "$tombmount" "$tombname" "$tombloop" "$mapper"
 
         _success "Tomb ::1 tomb name:: closed: your bones will rest in peace." $tombname
 

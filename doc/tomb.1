@@ -298,13 +298,14 @@ example:
 .EE
 
 .B
-.IP "post-hooks"
-This hook file gets executed as user by tomb right after opening it;
-it should be a regular shell script, starting with a shebang. Tomb
-executes this hook as user (dropping root privileges) and giving it
-two arguments: "$1" is "open" or "close" depending from the tomb
-command given, "$2" is the full path to the mountpoint where the tomb
-is open.
+.IP "exec-hooks"
+This hook file gets executed as user by tomb with the first argument
+determining the step of execution: "pre-open", "post-open",
+"pre-close" or "post-close". The exec-hooks file should be an
+executable (ELF or shell script). Tomb executes this hook as user
+supplying two or more arguments, the first being the step, followed by
+the mountpoint of the tomb and, on close events, its name, loopback
+device and dev-mapper device paths.
 
 .SH PRIVILEGE ESCALATION
 
