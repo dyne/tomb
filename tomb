@@ -570,7 +570,7 @@ lo_mount() {
     [[ $? = 0 ]] || {
         _warning "Loop mount of volumes is not possible on this machine, this error"
         _warning "often occurs on VPS and kernels that don't provide the loop module."
-        _warning "It is impossible to use Tomb on this machine at this conditions."
+        _warning "It is impossible to use Tomb on this machine under these conditions."
         _failure "Operation aborted."
     }
 
@@ -665,7 +665,7 @@ usage() {
     _print " -q     run quietly without printing informations"
     _print " -D     print debugging information at runtime"
     _print "\000"
-    _print "For more informations on Tomb read the manual: man tomb"
+    _print "For more information on Tomb read the manual: man tomb"
     _print "Please report bugs on <http://github.com/dyne/tomb/issues>."
 }
 
@@ -1677,8 +1677,8 @@ forge_key() {
 
     TOMBKEYFILE="$destkey"    # Set global variable
 
-    _warning "This operation takes time, keep using this computer on other tasks,"
-    _warning "once done you will be asked to choose a password for your tomb."
+    _warning "This operation takes time. Keep using this computer on other tasks."
+    _warning "Once done you will be asked to choose a password for your tomb."
     _warning "To make it faster you can move the mouse around."
     _warning "If you are on a server, you can use an Entropy Generation Daemon."
 
