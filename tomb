@@ -835,9 +835,9 @@ _ensure_dependencies() {
 is_valid_recipients() {
     typeset -a recipients
     recipients=($@)
-    
+
     _verbose "is_valid_recipients"
-    
+
     # All the keys ID must be valid (the public keys must be present in the database)
     for gpg_id in ${recipients[@]}; do
         gpg --list-keys "$gpg_id" &> /dev/null
@@ -850,7 +850,7 @@ is_valid_recipients() {
     # At least one private key must be present
     for gpg_id in ${recipients[@]}; do
         gpg --list-secret-keys "$gpg_id" &> /dev/null
-        [[ $? = 0 ]] && { 
+        [[ $? = 0 ]] && {
             return 0
         }
     done
@@ -864,7 +864,7 @@ _recipients_arg() {
     local arg="$1"; shift
     typeset -a recipients
     recipients=($@)
-    
+
     for gpg_id in ${recipients[@]}; do
         print -R -n "$arg $gpg_id "
     done
@@ -995,7 +995,7 @@ gpg_decrypt() {
     { option_is_set -g } && {
         gpgpass="$TOMBKEY"
         gpgpopt=(--yes)
-        
+
         # GPG option '--try-secret-key' exist since GPG 2.1
         { option_is_set -R } && [[ $gpgver =~ "2.1." ]] && {
             typeset -a recipients
@@ -1006,7 +1006,7 @@ gpg_decrypt() {
             gpgpopt+=(`_recipients_arg "--try-secret-key" $recipients`)
         }
     }
-    
+
     [[ $gpgver == "1.4.11" ]] && {
         _verbose "GnuPG is version 1.4.11 - adopting status fix."
         TOMBSECRET=`print - "$gpgpass" | \
@@ -1111,7 +1111,7 @@ ask_key_password() {
         get_lukskey
         return $?
     fi
-    
+
     _message "A password is required to use key ::1 key::" $TOMBKEYFILE
     passok=0
     tombpass=""
@@ -1170,7 +1170,7 @@ change_passwd() {
 
     { option_is_set -g } && {
         _message "Commanded to change GnuPG key for tomb key ::1 key::" $TOMBKEYFILE
-    } || { 
+    } || {
         _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
     }
 
@@ -1188,7 +1188,7 @@ change_passwd() {
 
     { option_is_set -g } && {
         _success "Changing GnuPG key for ::1 key file::" $TOMBKEYFILE
-    } || { 
+    } || {
         _success "Changing password for ::1 key file::" $TOMBKEYFILE
     }
 
@@ -1209,7 +1209,7 @@ change_passwd() {
     cp -f "${tmpnewkey}" $TOMBKEYFILE
     { option_is_set -g } && {
         _success "Your GnuPG key was successfully changed"
-    } || { 
+    } || {
         _success "Your passphrase was successfully updated."
     }
 
@@ -1243,24 +1243,24 @@ gen_key() {
                 recipients=(${(s:,:)$(option_value -R)})
                 recipients_opt="--hidden-recipient"
             }
-            
+
             { is_valid_recipients $recipients } || {
                 _failure "You set an invalid GPG ID."
             }
-                
+
             _warning "You are going to encrypt a tomb key with ::1 nrecipients:: recipient(s)."  ${#recipients}
             _warning "It is your responsibility to check these fingerprints."
             _warning "The fingerprints are:"
             for gpg_id in ${recipients[@]}; do
                _warning "    `_fingerprint "$gpg_id"`"
             done
-            
+
             gpgopt+=(`_recipients_arg "$recipients_opt" $recipients`)
         } || {
             _message "No recipient specified, using default GPG key."
             gpgopt+=("--default-recipient-self")
         }
-        
+
         # Set gpg inputs and options
         gpgpass="$TOMBSECRET"
         opt=''
@@ -1382,9 +1382,9 @@ bury_key() {
     { option_is_set -g } && {
         _message "Using GnuPG Key ID"
     } || {
-        _message "Please confirm the key password for the encoding" 
+        _message "Please confirm the key password for the encoding"
     }
-    
+
     # We ask the password and test if it is the same encoding the
     # base key, to insure that the same password is used for the
     # encryption and the steganography. This is a standard enforced
@@ -1392,7 +1392,7 @@ bury_key() {
     # password would enhance security). Nevertheless here we prefer
     # usability.
     # However, steganography cannot be done with GPG key. Therefore,
-    # if using a GPG key, we test if the user can decrypt the tomb 
+    # if using a GPG key, we test if the user can decrypt the tomb
     # with its key and we ask for a steganography password.
 
     { option_is_set --tomb-pwd } && { ! option_is_set -g } && {
@@ -1434,7 +1434,7 @@ bury_key() {
         done
         TOMBPASSWORD="$tombpass"
     fi
-    
+
     # We omit armor strings since having them as constants can give
     # ground to effective attacks on steganography
     print - "$TOMBKEY" | awk '
@@ -2068,7 +2068,7 @@ mount_tomb() {
     # and exec-hooks (execute on open)
     option_is_set -n || {
         exec_safe_bind_hooks ${tombmount}
-        exec_safe_func_hooks open ${tombmount} 
+        exec_safe_func_hooks open ${tombmount}
 	}
 
     return 0
@@ -2146,7 +2146,7 @@ exec_safe_bind_hooks() {
 
 # Execute automated actions configured in the tomb.
 #
-# Synopsis: exec_safe_func_hooks /path/to/mounted/tomb 
+# Synopsis: exec_safe_func_hooks /path/to/mounted/tomb
 #
 # If an executable file named 'exec-hooks' is found inside the tomb,
 # run it as a user.  This might need a dialog for security on what is
@@ -2635,7 +2635,7 @@ umount_tomb() {
 				_failure "Operation aborted"
 			}
 		}
-	   
+
         [[ -n $SLAM ]] && {
             _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
                 $tombname $tombmount
@@ -2663,9 +2663,29 @@ umount_tomb() {
             }
         done
 
-        _verbose "Performing umount of ::1 mount point::" $tombmount
-        _sudo umount ${tombmount}
-        [[ $? = 0 ]] || { _failure "Tomb is busy, cannot umount!" }
+        # check if the tomb is actually still mounted. Background:
+        # When mounted on a binded directory in appears twice in 'list_tomb_binds'
+        # and will get umounted automatically through the above function
+        # causing an error and a remaining (decrypted!) loop device
+        # posing a security risk.
+        # See https://github.com/dyne/Tomb/issues/273
+
+        # checking for tombs
+        mount | grep "/dev/mapper/tomb*" >/dev/null
+        mount_status=$?
+        # return value of 0 for grep means it found at least one entry
+        # return value of 1 means nothing was found, implying, the tomb
+        # mount was already umounted.
+        if [ $mount_status = 0 ]; then
+          # Tomb was not umounted through the above command
+          # Will do so now
+          _verbose "Performing umount of ::1 mount point::" $tombmount
+          _sudo umount ${tombmount}
+          [[ $? = 0 ]] || { _failure "Tomb is busy, cannot umount!" }
+        else
+          # Tomb was already umounted, will not do it again
+          _warning "Tomb was already umounted, possibly through a binded directory"
+        fi
 
         # If we used a default mountpoint and is now empty, delete it
         tombname_regex=${tombname//\[/}
