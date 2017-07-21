@@ -14,12 +14,10 @@ addons:
       - steghide
       - qrencode
       - e2fsprogs
-      - shellcheck
 
 before_script:
   - make --directory=extras/kdf-keys
   - sudo make --directory=extras/kdf-keys install
 
 script:
-  - make lint
   - make test
