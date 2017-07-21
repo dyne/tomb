@@ -2662,7 +2662,6 @@ umount_tomb() {
                 }
             }
         done
-
         # check if the tomb is actually still mounted. Background:
         # When mounted on a binded directory in appears twice in 'list_tomb_binds'
         # and will get umounted automatically through the above function
