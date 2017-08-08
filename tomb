@@ -2662,10 +2662,30 @@ umount_tomb() {
                 }
             }
         done
+        
+        # check if the tomb is actually still mounted. Background:
+        # When mounted on a binded directory in appears twice in 'list_tomb_binds'
+        # and will get umounted automatically through the above function
+        # causing an error and a remaining (decrypted!) loop device
+        # posing a security risk.
+        # See https://github.com/dyne/Tomb/issues/273
 
-        _verbose "Performing umount of ::1 mount point::" $tombmount
-        _sudo umount ${tombmount}
-        [[ $? = 0 ]] || { _failure "Tomb is busy, cannot umount!" }
+        # checking for tombs
+        mount | grep -w "$tombmount" >/dev/null
+        mount_status=$?
+        # return value of 0 for grep means it found at least one entry
+        # return value of 1 means nothing was found, implying, the tomb
+        # mount was already umounted.
+        if [ $mount_status = 0 ]; then
+          # Tomb was not umounted through the above command
+          # Will do so now
+          _verbose "Performing umount of ::1 mount point::" $tombmount
+          _sudo umount ${tombmount}
+          [[ $? = 0 ]] || { _failure "Tomb is busy, cannot umount!" }
+        else
+          # Tomb was already umounted, will not do it again
+          _warning "Tomb was already umounted, possibly through a binded directory"
+        fi
 
         # If we used a default mountpoint and is now empty, delete it
         tombname_regex=${tombname//\[/}
