@@ -549,7 +549,7 @@ is_valid_tomb() {
     _plot $1     # Set TOMB{PATH,DIR,FILE,NAME}
 
     # Tomb already mounted (or we cannot alter it)
-	[[ "`_sudo findmnt -lvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL |
+	[[ "`_sudo findmnt -lrvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL |
         awk -vtomb="[$TOMBNAME]" '
 /^\/dev\/mapper\/tomb/ { if($5==tomb) print $1 }'`" = "" ]] || {
         _failure "Tomb is currently in use: ::1 tomb name::" $TOMBNAME
@@ -2263,7 +2263,7 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 list_tomb_mounts() {
     [[ -z "$1" ]] && {
         # list all open tombs
-        _sudo findmnt -lvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
+        _sudo findmnt -lrvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
             | awk '
 BEGIN { main="" }
 /^\/dev\/mapper\/tomb/ {
@@ -2274,7 +2274,7 @@ BEGIN { main="" }
 '
     } || {
         # list a specific tomb
-        _sudo findmnt -lvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
+        _sudo findmnt -lrvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
             | awk -vtomb="[$1]" '
 BEGIN { main="" }
 /^\/dev\/mapper\/tomb/ {
@@ -2302,7 +2302,7 @@ list_tomb_binds() {
 
     # note that this code assumes that the tomb name is provided in square brackets
 
-    _sudo findmnt -lo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
+    _sudo findmnt -lro SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
             | grep -F "/dev/mapper/tomb" \
             | awk -vpattern="$1" '
 BEGIN { }
@@ -2501,7 +2501,7 @@ resize_tomb() {
     _load_key # Try loading new key from option -k and set TOMBKEYFILE
 
     local oldtombsize=$(( `stat -c %s "$TOMBPATH" 2>/dev/null` / 1048576 ))
-    local mounted_tomb=`_sudo findmnt -lvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL |
+    local mounted_tomb=`_sudo findmnt -lrvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL |
         awk -vtomb="[$TOMBNAME]" '/^\/dev\/mapper\/tomb/ { if($5==tomb) print $1 }'`
 
     # Tomb must not be open
