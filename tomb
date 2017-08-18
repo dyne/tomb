@@ -2302,7 +2302,8 @@ list_tomb_binds() {
 
     # note that this code assumes that the tomb name is provided in square brackets
 
-    findmnt -lo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL /dev/mapper/tomb* \
+    findmnt -lo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
+            | grep -F "/dev/mapper/tomb" \
             | awk -vpattern="$1" '
 BEGIN { }
 {
