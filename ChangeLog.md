@@ -25,7 +25,7 @@ stable versions of Tomb and shellcheck linting.  Improved parser and
 post-hooks to avoid usage of external binaries (grep and cat) also
 improving security when decrypting keys. Fix for clean execution via
 sudo nopasswd. Updated extras/gtomb to latest stable version.  Various
-documentation updatesabout kdf, using images as keys, deniability and
+documentation updates about kdf, using images as keys, deniability and
 gpg-agent usage. New experimental port to Android platforms in extras.
 
 ## 2.2
