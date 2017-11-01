@@ -9,7 +9,7 @@ all:
 	@echo "To install it in /usr/local together with its manpage use 'make install'."
 	@echo
 	@echo "To run Tomb one needs to have some tools installed on the system:"
-	@echo "Sudo, cryptsetup, pinentry and gnupg. Also wipe is recommended."
+	@echo "Sudo, cryptsetup, pinentry and gnupg."
 	@echo
 
 install:
