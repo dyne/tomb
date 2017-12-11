@@ -701,9 +701,9 @@ option_value() {
 # Messaging function with pretty coloring
 function _msg() {
     local msg="$2"
+	local i
     command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$2")"
-    for i in $(seq 3 ${#});
-    do
+    for i in {3..${#}}; do
         msg=${(S)msg//::$(($i - 2))*::/$*[$i]}
     done
 
