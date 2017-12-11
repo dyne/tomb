@@ -2638,31 +2638,17 @@ umount_tomb() {
 			}
 		}
 	   
-        [[ -n $SLAM ]] && {
-            _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
-                $tombname $tombmount
-            _message "Kill all processes busy inside the tomb."
-            { slam_tomb "$tombmount" } || {
-                _failure "Cannot slam the tomb ::1 tomb name::" $tombname }
-        } || {
-            _message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
-                $tombname $tombmount }
+        _message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
+                 $tombname $tombmount
 
         # check if there are binded dirs and close them
         bind_tombs=(`list_tomb_binds $tombname $tombmount`)
-        for b in ${bind_tombs}; do
+        for b in ${(f)"$(list_tomb_binds $tombname $tombmount)"}; do
             bind_mapper="${b[(ws:;:)1]}"
             bind_mount="${b[(ws:;:)2]}"
             _message "Closing tomb bind hook: ::1 hook::" $bind_mount
-            _sudo umount "`print - ${bind_mount}`" || {
-                [[ -n $SLAM ]] && {
-                    _success "Slamming tomb: killing all processes using this hook."
-                    slam_tomb "`print - ${bind_mount}`" || _failure "Cannot slam the bind hook ::1 hook::" $bind_mount
-                    umount "`print - ${bind_mount}`" || _failure "Cannot slam the bind hook ::1 hook::" $bind_mount
-                } || {
-                    _failure "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount
-                }
-            }
+            _sudo umount $bind_mount || 
+                _failure "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount
         done
         
         # check if the tomb is actually still mounted. Background:
@@ -2696,14 +2682,13 @@ umount_tomb() {
         [[ "$tombmount" -regex-match "[/run]?/media[/$_USER]?/$tombname_regex" ]] && {
             _sudo rmdir $tombmount }
 
-        _sudo cryptsetup luksClose $mapper
-        [[ $? == 0 ]] || {
-            _failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper }
+        _sudo cryptsetup luksClose $mapper ||
+            _failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper
 
         # Normally the loopback device is detached when unused
         [[ -e "/dev/$tombloop" ]] && {
-			_sudo losetup -d "/dev/$tombloop"
-			[[ $? = 0 ]] || _verbose "/dev/$tombloop was already closed."
+			_sudo losetup -d "/dev/$tombloop" ||
+				_verbose "/dev/$tombloop was already closed."
 		}
 
         _success "Tomb ::1 tomb name:: closed: your bones will rest in peace." $tombname
