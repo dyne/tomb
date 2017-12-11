@@ -2702,7 +2702,8 @@ list_processes() {
 	# $1 = (optional) name of tomb
 	# returns a list of process UIDs, one per line
 	local mounted_tombs i
-	local pnum puid pcmd powner
+	local pnum puid pcmd powner found
+	found=0
 	mounted_tombs=(`list_tomb_mounts $1`)
 	if [[ "${#mounted_tombs}" -gt 0 ]]; then
 		if [[ "$1" = "" ]]; then
@@ -2716,17 +2717,20 @@ list_processes() {
 			tombmount=${i[(ws:;:)2]}
 			tombname=${i[(ws:;:)5]}
 			for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
+				found=$(($found + 1))
 				_verbose "process found: $pnum"
 				puid=`cat /proc/${pnum}/loginuid`
 				pcmd=`cat /proc/${pnum}/cmdline`
-				if [[ "$puid" = "$UID" ]]; then
-					powner="owned"
-				else powner=$puid; fi
-				_message "::1 tombname:: ::2 cmd:: (::3 owner::) on ::4 tombmount::" \
-						 $tombname $pcmd $powner $tombmount
+				powner=$(getent passwd $puid)
+				powner=${powner[(ws@:@)1]}
+				_verbose "process found: $pnum $pcmd ($powner)"
+				_message "::1 tombname:: ::2 cmd:: (::3 owner::)" \
+						 $tombname $pcmd $powner
 			done
 		done
 	fi
+	_message "::1 foundproc:: running processes found inside ::2 numtombs:: open tombs" \
+			 $found ${#mounted_tombs}
 }
 
 # Kill all processes using the tomb
@@ -2759,22 +2763,23 @@ slam_tomb() {
 		for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
 			puid=`cat /proc/${pnum}/loginuid`
 			pcmd=`cat /proc/${pnum}/cmdline`
-			_verbose "process found: $pnum $pcmd ($puid)"
-			if [[ "$puid" = "$UID" ]]; then
-				powner="owned"
-			else powner=$puid; fi
+			powner=$(getent passwd $puid)
+			powner=${powner[(ws@:@)1]}
+			_verbose "process found: $pnum $pcmd ($powner)"
 			# iterate through 3 different signals to send, break on success
 			for s in TERM HUP KILL; do
 				_message "::1 tombname:: sending ::2 sig:: to ::3 cmd:: (::4 uid::)" \
 						 ${tombname} ${s} ${pcmd} ${powner}
-				kill -$s $pnum
+				_sudo kill -$s $pnum
+				# give some time to the process for a clean quit
+				sleep .5
 				# stop sending other signals if kill was succesfull
 				[[ -r /proc/$pnum ]] || break
 			done
 			# if process still running then signal failure
 			[[ -r /proc/$pnum ]] && {
-				_warning "Can't kill ::1 puid:: ::2 pcmd:: (::3 powner::)" \
-						 $puid $pcmd $powner
+				_warning "Can't kill ::1 process:: ::2 pcmd:: (::3 powner::)" \
+						 $pnum $pcmd $powner
 				result=1 }
 		done
 		# if it failed killing a process, report it 
