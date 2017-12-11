@@ -2720,8 +2720,8 @@ list_processes() {
 			for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
 				found=$(($found + 1))
 				_verbose "process found: $pnum"
-				puid=`cat /proc/${pnum}/loginuid`
-				pcmd=`cat /proc/${pnum}/cmdline`
+				puid=$(_cat /proc/${pnum}/loginuid)
+				pcmd=$(_cat /proc/${pnum}/cmdline)
 				powner=$(getent passwd $puid)
 				powner=${powner[(ws@:@)1]}
 				_verbose "process found: $pnum $pcmd ($powner)"
@@ -2762,8 +2762,8 @@ slam_tomb() {
 				 ${tombname} ${tombmount}
 		# iterate through all processes running in mounted tombs
 		for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
-			puid=`cat /proc/${pnum}/loginuid`
-			pcmd=`cat /proc/${pnum}/cmdline`
+			puid=$(_cat /proc/${pnum}/loginuid)
+			pcmd=$(_cat /proc/${pnum}/cmdline)
 			powner=$(getent passwd $puid)
 			powner=${powner[(ws@:@)1]}
 			_verbose "process found: $pnum $pcmd ($powner)"
