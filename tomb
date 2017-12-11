@@ -2698,30 +2698,89 @@ umount_tomb() {
     return 0
 }
 
+list_processes() {
+	# $1 = (optional) name of tomb
+	# returns a list of process UIDs, one per line
+	local mounted_tombs i
+	local pnum puid pcmd powner
+	mounted_tombs=(`list_tomb_mounts $1`)
+	if [[ "${#mounted_tombs}" -gt 0 ]]; then
+		if [[ "$1" = "" ]]; then
+			_success "Listing processes running inside all open tombs..."
+		else
+			_success "Listing processes running inside tomb '::1 tombname::'..." "$1"
+		fi
+
+        for i in ${mounted_tombs}; do
+			_verbose "scanning tomb: ::1 tombmount::" $i
+			tombmount=${i[(ws:;:)2]}
+			tombname=${i[(ws:;:)5]}
+			for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
+				_verbose "process found: $pnum"
+				puid=`cat /proc/${pnum}/loginuid`
+				pcmd=`cat /proc/${pnum}/cmdline`
+				if [[ "$puid" = "$UID" ]]; then
+					powner="owned"
+				else powner=$puid; fi
+				_message "::1 tombname:: ::2 cmd:: (::3 owner::) on ::4 tombmount::" \
+						 $tombname $pcmd $powner $tombmount
+			done
+		done
+	fi
+}
+
 # Kill all processes using the tomb
 slam_tomb() {
-    # $1 = tomb mount point
-    if [[ -z `lsof -t +D "$1" 2>/dev/null` ]]; then
-        return 0
+	# $1 = (optional) name of tomb to slam, or "all" if more mounted
+
+    if [ "$1" = "all" ]; then
+        mounted_tombs=(`list_tomb_mounts`)
+    else
+        mounted_tombs=(`list_tomb_mounts $1`)
     fi
-    #Note: shells are NOT killed by INT or TERM, but they are killed by HUP
-    for s in TERM HUP KILL; do
-        _verbose "Sending ::1:: to processes inside the tomb:" $s
-        if option_is_set -D; then
-            ps -fp `lsof -t +D "$1" 2>/dev/null`|
-            while read line; do
-                _verbose $line
-            done
-        fi
-        kill -$s `lsof -t +D "$1"`
-        if [[ -z `lsof -t +D "$1" 2>/dev/null` ]]; then
-            return 0
-        fi
-        if ! option_is_set -f; then
-            sleep 3
-        fi
-    done
-    return 1
+
+    [[ ${#mounted_tombs} == 0 ]] && {
+        _failure "There is no open tomb to be closed." }
+
+    [[ ${#mounted_tombs} -gt 1 && -z "$1" ]] && {
+        _warning "Too many tombs mounted, please specify one (see tomb list)"
+        _warning "or issue the command 'tomb close all' to close them all."
+        _failure "Operation aborted." }
+
+	local pnum puid pcmd powner result
+	result=0
+	# iterate through all mounted tomb affected
+    for i in ${mounted_tombs}; do
+		tombname=${i[(ws:;:)5]}
+		tombmount=${i[(ws:;:)2]}
+		_success "Slamming tomb ::1 tombname:: mounted on ::2 tombmount::" \
+				 ${tombname} ${tombmount}
+		# iterate through all processes running in mounted tombs
+		for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
+			puid=`cat /proc/${pnum}/loginuid`
+			pcmd=`cat /proc/${pnum}/cmdline`
+			_verbose "process found: $pnum $pcmd ($puid)"
+			if [[ "$puid" = "$UID" ]]; then
+				powner="owned"
+			else powner=$puid; fi
+			# iterate through 3 different signals to send, break on success
+			for s in TERM HUP KILL; do
+				_message "::1 tombname:: sending ::2 sig:: to ::3 cmd:: (::4 uid::)" \
+						 ${tombname} ${s} ${pcmd} ${powner}
+				kill -$s $pnum
+				# stop sending other signals if kill was succesfull
+				[[ -r /proc/$pnum ]] || break
+			done
+			# if process still running then signal failure
+			[[ -r /proc/$pnum ]] && {
+				_warning "Can't kill ::1 puid:: ::2 pcmd:: (::3 powner::)" \
+						 $puid $pcmd $powner
+				result=1 }
+		done
+		# if it failed killing a process, report it 
+		[[ $result = 0 ]] && umount_tomb $tombname
+	done
+	return $result
 }
 
 # }}} - Tomb close
@@ -2774,6 +2833,7 @@ main() {
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
+	subcommands_opts[ps]=""
     subcommands_opts[list]="-get-mountpoint "
 
     subcommands_opts[index]=""
@@ -2922,9 +2982,19 @@ main() {
             mount_tomb $PARAM
             ;;
 
+		# List all processes using a tomb
+		ps)
+			list_processes $PARAM
+			;;
+
+		# Slam a tomb killing all processes running inside
+		slam)
+			slam_tomb $PARAM
+			;;
+
         # Close the tomb
         # `slam` is used to force closing.
-        umount|close|slam)
+        umount|close)
             [[ "$subcommand" ==  "slam" ]] && {
                 SLAM=1
                 [[ $LSOF == 0 ]] && {
