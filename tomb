@@ -923,7 +923,11 @@ recover_key() {
 
     TOMBKEY=""        # Reset global variable
 
-    [[ $_head =~ "^_KDF_" ]] && TOMBKEY+="$_head\n"
+    [[ $_head =~ "^_KDF_" ]] && {
+        TOMBKEY+="$_head\n\n"
+        # Remove first line from key
+        key="$(echo "$key" | sed 1,1d)"
+    }
 
     TOMBKEY+="-----BEGIN PGP MESSAGE-----\n"
     TOMBKEY+="$key\n"
@@ -1517,15 +1521,33 @@ exhume_key() {
     }
 
     # Extract the key from the image
-    steghide extract -sf $imagefile -p ${tombpass} -xf $destkey
+    TOMBKEY=$(steghide extract -sf "$imagefile" -p "$tombpass" -xf -)
     r=$?
 
+    # Report any error and return
+    [[ $r != 0 ]] && {
+        _warning "Nothing found in ::1 image file::" $imagefile
+        return $r
+    }
+
+    # Check whether key recovery is needed
+    recover_key $TOMBKEY
+
+    # Output key
+    [[ "$destkey" = "-" ]] && {
+        echo "${TOMBKEY}"
+        r=$?
+        destkey="stdout"
+    } || {
+        echo "${TOMBKEY}" > "$destkey"
+        r=$?
+    }
+
     # Report to the user
-    [[ "$destkey" = "-" ]] && destkey="stdout"
     [[ $r == 0 ]] && {
         _success "Key succesfully exhumed to ::1 key::." $destkey
     } || {
-        _warning "Nothing found in ::1 image file::" $imagefile
+        _warning "Error writing key to ::1 key::." $destkey
     }
 
     return $r
