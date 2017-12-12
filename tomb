@@ -549,9 +549,9 @@ is_valid_tomb() {
     _plot $1     # Set TOMB{PATH,DIR,FILE,NAME}
 
     # Tomb already mounted (or we cannot alter it)
-	[[ "`mount -l |
+	[[ "`_sudo findmnt -lrvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL |
         awk -vtomb="[$TOMBNAME]" '
-/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`" = "" ]] || {
+/^\/dev\/mapper\/tomb/ { if($5==tomb) print $1 }'`" = "" ]] || {
         _failure "Tomb is currently in use: ::1 tomb name::" $TOMBNAME
     }
 	_verbose "tomb file is not currently in use"
@@ -835,9 +835,9 @@ _ensure_dependencies() {
 is_valid_recipients() {
     typeset -a recipients
     recipients=($@)
-    
+
     _verbose "is_valid_recipients"
-    
+
     # All the keys ID must be valid (the public keys must be present in the database)
     for gpg_id in ${recipients[@]}; do
         gpg --list-keys "$gpg_id" &> /dev/null
@@ -850,7 +850,7 @@ is_valid_recipients() {
     # At least one private key must be present
     for gpg_id in ${recipients[@]}; do
         gpg --list-secret-keys "$gpg_id" &> /dev/null
-        [[ $? = 0 ]] && { 
+        [[ $? = 0 ]] && {
             return 0
         }
     done
@@ -864,7 +864,7 @@ _recipients_arg() {
     local arg="$1"; shift
     typeset -a recipients
     recipients=($@)
-    
+
     for gpg_id in ${recipients[@]}; do
         print -R -n "$arg $gpg_id "
     done
@@ -995,7 +995,7 @@ gpg_decrypt() {
     { option_is_set -g } && {
         gpgpass="$TOMBKEY"
         gpgpopt=(--yes)
-        
+
         # GPG option '--try-secret-key' exist since GPG 2.1
         { option_is_set -R } && [[ $gpgver =~ "2.1." ]] && {
             typeset -a recipients
@@ -1006,7 +1006,7 @@ gpg_decrypt() {
             gpgpopt+=(`_recipients_arg "--try-secret-key" $recipients`)
         }
     }
-    
+
     [[ $gpgver == "1.4.11" ]] && {
         _verbose "GnuPG is version 1.4.11 - adopting status fix."
         TOMBSECRET=`print - "$gpgpass" | \
@@ -1111,7 +1111,7 @@ ask_key_password() {
         get_lukskey
         return $?
     fi
-    
+
     _message "A password is required to use key ::1 key::" $TOMBKEYFILE
     passok=0
     tombpass=""
@@ -1170,7 +1170,7 @@ change_passwd() {
 
     { option_is_set -g } && {
         _message "Commanded to change GnuPG key for tomb key ::1 key::" $TOMBKEYFILE
-    } || { 
+    } || {
         _message "Commanded to change password for tomb key ::1 key::" $TOMBKEYFILE
     }
 
@@ -1188,7 +1188,7 @@ change_passwd() {
 
     { option_is_set -g } && {
         _success "Changing GnuPG key for ::1 key file::" $TOMBKEYFILE
-    } || { 
+    } || {
         _success "Changing password for ::1 key file::" $TOMBKEYFILE
     }
 
@@ -1209,7 +1209,7 @@ change_passwd() {
     cp -f "${tmpnewkey}" $TOMBKEYFILE
     { option_is_set -g } && {
         _success "Your GnuPG key was successfully changed"
-    } || { 
+    } || {
         _success "Your passphrase was successfully updated."
     }
 
@@ -1243,24 +1243,24 @@ gen_key() {
                 recipients=(${(s:,:)$(option_value -R)})
                 recipients_opt="--hidden-recipient"
             }
-            
+
             { is_valid_recipients $recipients } || {
                 _failure "You set an invalid GPG ID."
             }
-                
+
             _warning "You are going to encrypt a tomb key with ::1 nrecipients:: recipient(s)."  ${#recipients}
             _warning "It is your responsibility to check these fingerprints."
             _warning "The fingerprints are:"
             for gpg_id in ${recipients[@]}; do
                _warning "    `_fingerprint "$gpg_id"`"
             done
-            
+
             gpgopt+=(`_recipients_arg "$recipients_opt" $recipients`)
         } || {
             _message "No recipient specified, using default GPG key."
             gpgopt+=("--default-recipient-self")
         }
-        
+
         # Set gpg inputs and options
         gpgpass="$TOMBSECRET"
         opt=''
@@ -1382,9 +1382,9 @@ bury_key() {
     { option_is_set -g } && {
         _message "Using GnuPG Key ID"
     } || {
-        _message "Please confirm the key password for the encoding" 
+        _message "Please confirm the key password for the encoding"
     }
-    
+
     # We ask the password and test if it is the same encoding the
     # base key, to insure that the same password is used for the
     # encryption and the steganography. This is a standard enforced
@@ -1392,7 +1392,7 @@ bury_key() {
     # password would enhance security). Nevertheless here we prefer
     # usability.
     # However, steganography cannot be done with GPG key. Therefore,
-    # if using a GPG key, we test if the user can decrypt the tomb 
+    # if using a GPG key, we test if the user can decrypt the tomb
     # with its key and we ask for a steganography password.
 
     { option_is_set --tomb-pwd } && { ! option_is_set -g } && {
@@ -1434,7 +1434,7 @@ bury_key() {
         done
         TOMBPASSWORD="$tombpass"
     fi
-    
+
     # We omit armor strings since having them as constants can give
     # ground to effective attacks on steganography
     print - "$TOMBKEY" | awk '
@@ -2068,7 +2068,7 @@ mount_tomb() {
     # and exec-hooks (execute on open)
     option_is_set -n || {
         exec_safe_bind_hooks ${tombmount}
-        exec_safe_func_hooks open ${tombmount} 
+        exec_safe_func_hooks open ${tombmount}
 	}
 
     return 0
@@ -2146,7 +2146,7 @@ exec_safe_bind_hooks() {
 
 # Execute automated actions configured in the tomb.
 #
-# Synopsis: exec_safe_func_hooks /path/to/mounted/tomb 
+# Synopsis: exec_safe_func_hooks /path/to/mounted/tomb
 #
 # If an executable file named 'exec-hooks' is found inside the tomb,
 # run it as a user.  This might need a dialog for security on what is
@@ -2263,24 +2263,24 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 list_tomb_mounts() {
     [[ -z "$1" ]] && {
         # list all open tombs
-        mount -l \
+        _sudo findmnt -lrvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
             | awk '
 BEGIN { main="" }
 /^\/dev\/mapper\/tomb/ {
   if(main==$1) next;
-  print $1 ";" $3 ";" $5 ";" $6 ";" $7
+  print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
   main=$1
 }
 '
     } || {
         # list a specific tomb
-        mount -l \
+        _sudo findmnt -lrvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
             | awk -vtomb="[$1]" '
 BEGIN { main="" }
 /^\/dev\/mapper\/tomb/ {
-  if($7!=tomb) next;
+  if("["$5"]"!=tomb) next;
   if(main==$1) next;
-  print $1 ";" $3 ";" $5 ";" $6 ";" $7
+  print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
   main=$1
 }
 '
@@ -2296,37 +2296,23 @@ list_tomb_binds() {
     [[ -z "$2" ]] && {
         _failure "Internal error: list_tomb_binds called without argument." }
 
-    # OK well, prepare for some insanity: parsing the mount table on GNU/Linux
-    # is like combing a Wookie while he is riding a speedbike down a valley.
+    # much simpler than the crazy from before
+    # in fact, the second parameter is now redundant
+    # as we only need the tomb name
 
-    typeset -A tombs
-    typeset -a binds
-    for t in "${(f)$(mount -l | grep '/dev/mapper/tomb.*]$')}"; do
-        len="${(w)#t}"
-        [[ "${t[(w)$len]}" = "$1" ]] || continue
-        tombs+=( ${t[(w)1]} ${t[(w)$len]} )
+    # note that this code assumes that the tomb name is provided in square brackets
 
-    done
-
-    for m in ${(k)tombs}; do
-        for p in "${(f)$(cat /proc/mounts):s/\\040(deleted)/}"; do
-            # Debian's kernel appends a '\040(deleted)' to the mountpoint in /proc/mounts
-            # so if we parse the string as-is then this will break the parsing. How nice of them!
-            # Some bugs related to this are more than 10yrs old. Such Debian! Much stable! Very parsing!
-            # Bug #711183  umount parser for /proc/mounts broken on stale nfs mount (gets renamed to "/mnt/point (deleted)")
-            # Bug #711184  mount should not stat mountpoints on mount
-            # Bug #711187  linux-image-3.2.0-4-amd64: kernel should not rename mountpoint if nfs server is dead/unreachable
-            [[ "${p[(w)1]}" = "$m" ]] && {
-                [[ "${(q)p[(w)2]}" != "${(q)2}" ]] && {
-                    # Our output format:
-                    # mapper;mountpoint;fs;flags;name
-                    binds+=("$m;${(q)p[(w)2]};${p[(w)3]};${p[(w)4]};${tombs[$m]}") }
-            }
-        done
-    done
-
-    # print the results out line by line
-    for b in $binds; do print - "$b"; done
+    _sudo findmnt -lro SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
+            | grep -F "/dev/mapper/tomb" \
+            | awk -vpattern="$1" '
+BEGIN { }
+{
+  if("["$5"]"!=pattern) next;
+  if(index($1,"[")==0) next;
+  gsub("[[][^]]*[]]","",$1);
+  print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
+}
+'
 }
 
 # }}} - Tomb list
@@ -2515,8 +2501,8 @@ resize_tomb() {
     _load_key # Try loading new key from option -k and set TOMBKEYFILE
 
     local oldtombsize=$(( `stat -c %s "$TOMBPATH" 2>/dev/null` / 1048576 ))
-    local mounted_tomb=`mount -l |
-        awk -vtomb="[$TOMBNAME]" '/^\/dev\/mapper\/tomb/ { if($7==tomb) print $1 }'`
+    local mounted_tomb=`_sudo findmnt -lrvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL |
+        awk -vtomb="[$TOMBNAME]" '/^\/dev\/mapper\/tomb/ { if($5==tomb) print $1 }'`
 
     # Tomb must not be open
     [[ -z "$mounted_tomb" ]] || {
@@ -2635,7 +2621,7 @@ umount_tomb() {
 				_failure "Operation aborted"
 			}
 		}
-	   
+
         [[ -n $SLAM ]] && {
             _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
                 $tombname $tombmount
@@ -2662,7 +2648,7 @@ umount_tomb() {
                 }
             }
         done
-        
+
         # check if the tomb is actually still mounted. Background:
         # When mounted on a binded directory in appears twice in 'list_tomb_binds'
         # and will get umounted automatically through the above function
