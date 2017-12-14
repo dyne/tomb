@@ -624,6 +624,7 @@ usage() {
     _print " index   update the search indexes of tombs"
     _print " search  looks for filenames matching text patterns"
     _print " list    list of open TOMBs and information on them"
+	_print " ps      list of running processes inside open TOMBs"
     _print " close   close a specific TOMB (or 'all')"
     _print " slam    slam a TOMB killing all programs using it"
     [[ $RESIZER == 1 ]] && {
@@ -2272,10 +2273,13 @@ BEGIN { main="" }
   main=$1
 }
 '
-    } || {
-        # list a specific tomb
+    } || { # list a specific tomb
+		# add square parens if not present
+		local tname
+		if [[ "${1[1]}" = "[" ]]; then tname=$1
+		else tname="[$1]"; fi
         mount -l \
-            | awk -vtomb="[$1]" '
+            | awk -vtomb="$tname" '
 BEGIN { main="" }
 /^\/dev\/mapper\/tomb/ {
   if($7!=tomb) next;
@@ -2609,7 +2613,6 @@ umount_tomb() {
     for t in ${mounted_tombs}; do
         mapper=`basename ${t[(ws:;:)1]}`
 
-        # strip square parens from tombname
         tombname=${t[(ws:;:)5]}
         tombmount=${t[(ws:;:)2]}
         tombfs=${t[(ws:;:)3]}
@@ -2636,31 +2639,17 @@ umount_tomb() {
 			}
 		}
 	   
-        [[ -n $SLAM ]] && {
-            _success "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::" \
-                $tombname $tombmount
-            _message "Kill all processes busy inside the tomb."
-            { slam_tomb "$tombmount" } || {
-                _failure "Cannot slam the tomb ::1 tomb name::" $tombname }
-        } || {
-            _message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
-                $tombname $tombmount }
+        _message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
+                 $tombname $tombmount
 
         # check if there are binded dirs and close them
         bind_tombs=(`list_tomb_binds $tombname $tombmount`)
-        for b in ${bind_tombs}; do
+        for b in ${(f)"$(list_tomb_binds $tombname $tombmount)"}; do
             bind_mapper="${b[(ws:;:)1]}"
             bind_mount="${b[(ws:;:)2]}"
             _message "Closing tomb bind hook: ::1 hook::" $bind_mount
-            _sudo umount "`print - ${bind_mount}`" || {
-                [[ -n $SLAM ]] && {
-                    _success "Slamming tomb: killing all processes using this hook."
-                    slam_tomb "`print - ${bind_mount}`" || _failure "Cannot slam the bind hook ::1 hook::" $bind_mount
-                    umount "`print - ${bind_mount}`" || _failure "Cannot slam the bind hook ::1 hook::" $bind_mount
-                } || {
-                    _failure "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount
-                }
-            }
+            _sudo umount $bind_mount || 
+                _failure "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount
         done
         
         # check if the tomb is actually still mounted. Background:
@@ -2694,14 +2683,13 @@ umount_tomb() {
         [[ "$tombmount" -regex-match "[/run]?/media[/$_USER]?/$tombname_regex" ]] && {
             _sudo rmdir $tombmount }
 
-        _sudo cryptsetup luksClose $mapper
-        [[ $? == 0 ]] || {
-            _failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper }
+        _sudo cryptsetup luksClose $mapper ||
+            _failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper
 
         # Normally the loopback device is detached when unused
         [[ -e "/dev/$tombloop" ]] && {
-			_sudo losetup -d "/dev/$tombloop"
-			[[ $? = 0 ]] || _verbose "/dev/$tombloop was already closed."
+			_sudo losetup -d "/dev/$tombloop" ||
+				_verbose "/dev/$tombloop was already closed."
 		}
 
         _success "Tomb ::1 tomb name:: closed: your bones will rest in peace." $tombname
@@ -2711,30 +2699,94 @@ umount_tomb() {
     return 0
 }
 
+list_processes() {
+	# $1 = (optional) name of tomb
+	# returns a list of process UIDs, one per line
+	local mounted_tombs i
+	local pnum puid pcmd powner found
+	found=0
+	mounted_tombs=(`list_tomb_mounts $1`)
+	if [[ "${#mounted_tombs}" -gt 0 ]]; then
+		if [[ "$1" = "" ]]; then
+			_success "Listing processes running inside all open tombs..."
+		else
+			_success "Listing processes running inside tomb '::1 tombname::'..." "$1"
+		fi
+
+        for i in ${mounted_tombs}; do
+			_verbose "scanning tomb: ::1 tombmount::" $i
+			tombmount=${i[(ws:;:)2]}
+			tombname=${i[(ws:;:)5]}
+			for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
+				found=$(($found + 1))
+				_verbose "process found: $pnum"
+				puid=$(_cat /proc/${pnum}/loginuid)
+				pcmd=$(_cat /proc/${pnum}/cmdline)
+				powner=$(getent passwd $puid)
+				powner=${powner[(ws@:@)1]}
+				_verbose "process found: $pnum $pcmd ($powner)"
+				_message "::1 tombname:: ::2 cmd:: (::3 owner::)" \
+						 $tombname $pcmd $powner
+			done
+		done
+	fi
+	_message "::1 foundproc:: running processes found inside ::2 numtombs:: open tombs" \
+			 $found ${#mounted_tombs}
+}
+
 # Kill all processes using the tomb
 slam_tomb() {
-    # $1 = tomb mount point
-    if [[ -z `lsof -t +D "$1" 2>/dev/null` ]]; then
-        return 0
+	# $1 = (optional) name of tomb to slam, or "all" if more mounted
+
+    if [ "$1" = "all" ]; then
+        mounted_tombs=(`list_tomb_mounts`)
+    else
+        mounted_tombs=(`list_tomb_mounts $1`)
     fi
-    #Note: shells are NOT killed by INT or TERM, but they are killed by HUP
-    for s in TERM HUP KILL; do
-        _verbose "Sending ::1:: to processes inside the tomb:" $s
-        if option_is_set -D; then
-            ps -fp `lsof -t +D "$1" 2>/dev/null`|
-            while read line; do
-                _verbose $line
-            done
-        fi
-        kill -$s `lsof -t +D "$1"`
-        if [[ -z `lsof -t +D "$1" 2>/dev/null` ]]; then
-            return 0
-        fi
-        if ! option_is_set -f; then
-            sleep 3
-        fi
-    done
-    return 1
+
+    [[ ${#mounted_tombs} == 0 ]] && {
+        _failure "There is no open tomb to be closed." }
+
+    [[ ${#mounted_tombs} -gt 1 && -z "$1" ]] && {
+        _warning "Too many tombs mounted, please specify one (see tomb list)"
+        _warning "or issue the command 'tomb close all' to close them all."
+        _failure "Operation aborted." }
+
+	local pnum puid pcmd powner result
+	result=0
+	# iterate through all mounted tomb affected
+    for i in ${mounted_tombs}; do
+		tombname=${i[(ws:;:)5]}
+		tombmount=${i[(ws:;:)2]}
+		_success "Slamming tomb ::1 tombname:: mounted on ::2 tombmount::" \
+				 ${tombname} ${tombmount}
+		# iterate through all processes running in mounted tombs
+		for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
+			puid=$(_cat /proc/${pnum}/loginuid)
+			pcmd=$(_cat /proc/${pnum}/cmdline)
+			powner=$(getent passwd $puid)
+			powner=${powner[(ws@:@)1]}
+			_verbose "process found: $pnum $pcmd ($powner)"
+			# iterate through 3 different signals to send, break on success
+			for s in TERM HUP KILL; do
+				_message "::1 tombname:: sending ::2 sig:: to ::3 cmd:: (::4 uid::)" \
+						 ${tombname} ${s} ${pcmd} ${powner}
+				_sudo kill -$s $pnum
+				# give some time to the process for a clean quit
+				sleep .5
+				# stop sending other signals if kill was succesfull
+				[[ -r /proc/$pnum ]] || break
+			done
+			# if process still running then signal failure
+			[[ -r /proc/$pnum ]] && {
+				_warning "Can't kill ::1 process:: ::2 pcmd:: (::3 powner::)" \
+						 $pnum $pcmd $powner
+				result=1 }
+		done
+		# if it failed killing a process, report it 
+		[[ $result = 0 ]] && umount_tomb $tombname
+	done
+	return $result
 }
 
 # }}} - Tomb close
@@ -2787,6 +2839,7 @@ main() {
     subcommands_opts[close]=""
     subcommands_opts[help]=""
     subcommands_opts[slam]=""
+	subcommands_opts[ps]=""
     subcommands_opts[list]="-get-mountpoint "
 
     subcommands_opts[index]=""
@@ -2935,9 +2988,19 @@ main() {
             mount_tomb $PARAM
             ;;
 
+		# List all processes using a tomb
+		ps)
+			list_processes $PARAM
+			;;
+
+		# Slam a tomb killing all processes running inside
+		slam)
+			slam_tomb $PARAM
+			;;
+
         # Close the tomb
         # `slam` is used to force closing.
-        umount|close|slam)
+        umount|close)
             [[ "$subcommand" ==  "slam" ]] && {
                 SLAM=1
                 [[ $LSOF == 0 ]] && {

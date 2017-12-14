@@ -74,6 +74,7 @@ For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md)
    index   update the search indexes of tombs
    search  looks for filenames matching text patterns
    list    list of open TOMBs and information on them
+   ps      list of running processes inside open TOMBs
    close   close a specific TOMB (or 'all')
    slam    slam a TOMB killing all programs using it
    resize  resize a TOMB to a new size -s (can only grow)
@@ -95,10 +96,10 @@ For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md)
    -k     path to the key to be used ('-k -' to read from stdin)
    -n     don't process the hooks found in tomb
    -o     options passed to commands: open, lock, forge (see man)
-   -f     force operation (i.e. even if swap is active)
+   -f     force operation (i.e. open even if swap is active)
    -g     use a GnuPG key to encrypt a tomb key
-   -r     provide GnuPG recipients (separated by coma)
-   -R     provide GnuPG hidden recipients (separated by coma)
+   -r     provide GnuPG recipients (separated by comma)
+   -R     provide GnuPG hidden recipients (separated by comma)
    --kdf  forge keys armored against dictionary attacks
 
    -h     print this help

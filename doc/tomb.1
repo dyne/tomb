@@ -89,6 +89,14 @@ returns an error if it's not found. If the option
 open tomb mountpoint paths.
 
 .B
+.IP "ps"
+List all the processes found running inside the tombs that are open,
+printing out their PIDs and owners. This is useful to have an overview
+of programs that are keeping the tombs busy and would eventually be
+killed by the \fIslam\fR command. The lsof(8) utility is used
+internally to enumerate processes running in one or all tombs.
+
+.B
 .IP "index"
 Creates or updates the search indexes of all tombs currently open:
 enables use of the \fIsearch\fR command using simple word patterns on
