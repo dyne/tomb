@@ -65,7 +65,6 @@ WIPE=(rm -f)
 PINENTRY=(pinentry)
 
 # load zsh regex module
-zmodload zsh/regex
 zmodload zsh/mapfile
 zmodload -F zsh/stat b:zstat
 
@@ -2664,7 +2663,7 @@ umount_tomb() {
         tombname_regex=${tombname//\[/}
         tombname_regex=${tombname_regex//\]/}
 
-        [[ "$tombmount" -regex-match "[/run]?/media[/$_USER]?/$tombname_regex" ]] && {
+        [[ "$tombmount" =~ "(/run)?/media(/$_USER)?/$tombname_regex" ]] && {
             _sudo rmdir $tombmount }
 
         _sudo cryptsetup luksClose $mapper ||
