@@ -26,7 +26,8 @@ Shining the Translucent, Mancausoft, Asbesto Molesto, Nignux, TheJH,
 The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon,
 Narrat, Jerry Polfer, Jim Turner, Maxime Arthaud, RobertMX,
 mhogomchungu Mandeep Bhutani, Emil Lundberg, Joel Montes de Oca, Armin
-Mesbah, Arusekk, Stephan Schindel and...  the Linux Action Show!
+Mesbah, Arusekk, Stephan Schindel, Asbjørn Apeland, Victor Calvert
+and...  the Linux Action Show!
 
 Tomb includes an implementation of the "Password-Based Key Derivation
 Function v2" based on GCrypt and written by Anthony Thyssen.

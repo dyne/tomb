@@ -7,7 +7,7 @@
 
 # {{{ License
 
-# Copyright (C) 2007-2017 Dyne.org Foundation
+# Copyright (C) 2007-2018 Dyne.org Foundation
 #
 # Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
 #
@@ -44,8 +44,8 @@
 
 # {{{ Global variables
 
-typeset VERSION="2.4"
-typeset DATE="Apr/2017"
+typeset VERSION="2.5-SNAPSHOT"
+typeset DATE="Jan/2018"
 typeset TOMBEXEC=$0
 typeset TMPPREFIX=${TMPPREFIX:-/tmp}
 # TODO: configure which tmp dir to use from a cli flag
@@ -3085,6 +3085,7 @@ main() {
   `sudo -V | head -n1`
   `cryptsetup --version`
   `pinentry --version`
+  `findmnt -V`
   `gpg --version | head -n1` - key forging algorithms (GnuPG symmetric ciphers):
   `list_gnupg_ciphers`
 EOF

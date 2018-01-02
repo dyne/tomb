@@ -29,7 +29,13 @@ Download it from https://files.dyne.org/tomb
 
 Tomb aims to be a free and open source system for easy encryption and
 backup of personal files, written in code that is easy to review and
-links shared GNU/Linux components.
+links well reliable GNU/Linux components.
+
+Tomb's ambition is to provide military-grade security by way of:
+
+- a minimalist design consisting in small and well readable code
+- facilitation of good practices, i.e: key/storage physical separation
+- adoption of a few standard and well tested implementations.
 
 At present, Tomb consists of a simple shell script (Zsh) using
 standard filesystem tools (GNU) and the cryptographic API of the Linux
@@ -111,24 +117,24 @@ For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md)
 # What is this for, exactly?
 
 This tool can be used to dig .tomb files (LUKS volumes), forge keys
-protected by a password (GnuPG symmetric encryption) and use the keys
-to lock the tombs. Tombs are like single files whose contents are
-inaccessible in the absence of the key they were locked with and its
-password.
+protected by a password (GnuPG encryption) and use the keys to lock
+the tombs. Tombs are like single files whose contents are inaccessible
+in the absence of the key they were locked with and its password.
 
 Once open, the tombs are just like normal folders and can contain
 different files, plus they offer advanced functionalities like bind
 and execution hooks and fast search, or they can be slammed close even
-if busy. Keys can be stored on separate media like USB sticks, NFC, or
-bluetooth devices to make the transport of data safer: one always
-needs both the tomb and the key, plus its password, to access it.
+if busy. Keys can be stored on separate media like USB sticks, NFC,
+on-line SSH servers or bluetooth devices to make the transport of data
+safer: one always needs both the tomb and the key, plus its password,
+to access it.
 
 The tomb script takes care of several details to improve user's
-behaviour and the security of tombs in everyday usage: secures the
+behaviour and the security of tombs in everyday usage: protects the
 typing of passwords from keyloggers, facilitates hiding keys inside
-images, indexes and search a tomb's contents, lists open tombs and
-selectively closes them, warns the user about free space and last time
-usage, etc.
+images, indexes and search a tomb's contents, mounts directories in
+place, lists open tombs and selectively closes them, warns the user
+about free space and last time usage, etc.
 
 # How secure is this?
 
@@ -185,6 +191,15 @@ plain) encryption algorithm.
 Tomb can be used in conjunction with some other software applications,
 some are developed by Dyne.org, but some also by third parties.
 
+### Included extra applications
+
+- [GTomb](extras/gtomb) is a graphical interface using zenity
+- [gtk-tray](extras/gtk-tray) is a graphical tray icon for GTK panels
+- [qt-tray](extras/qt-tray) is a graphical tray icon for QT panels
+- [tomber](extras/tomber) is a wrapper to use Tomb in Python scripts
+
+### External applications
+
 - [Secrets](https://secrets.dyne.org) is a software that can be operated on-line and on-site to split a Tomb key in shares to be distributed to peers: some of them have to agree to combine back the shares in order to retrieve the key.
 
 - [zuluCrypt](https://mhogomchungu.github.io/zuluCrypt/) is a graphical application to manage various types of encrypted volumes on GNU/Linux, among them also Tombs, written in C++.
@@ -199,9 +214,14 @@ If you are writing a project supporting tomb volumes or wrapping tomb, let us kn
 
 ## Compliancy
 
-Tomb qualifies as sound for use on information rated as "top secret" when used on an underlying stack of carefully reviewed hardware (random number generator and other components) and software (Linux kernel build, crypto modules, device manager, compiler used to built, shell interpreter and packaged dependencies).
+Tomb qualifies as sound for use on information rated as "top secret"
+when used on an underlying stack of carefully reviewed hardware
+(random number generator and other components) and software (Linux
+kernel build, crypto modules, device manager, compiler used to built,
+shell interpreter and packaged dependencies).
 
-Tomb volumes are fully compliant with the FIPS 197 advanced encryption standard published by NIST and with the following industry standards:
+Tomb volumes are fully compliant with the FIPS 197 advanced encryption
+standard published by NIST and with the following industry standards:
 
 - Information technology -- Security techniques -- Encryption algorithms
 	- [ISO/IEC 18033-1:2015](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=54530)  -- Part 1: General
@@ -215,7 +235,8 @@ Tomb implementation is known to address at least partially issues raised in:
 - [ISO/IEC 27005:2011](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=56742) Information technology -- Security techniques -- Information security risk management
 - [ISO/IEC 24759:2014](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=59142) Information technology -- Security techniques -- Test requirements for cryptographic modules
 
-Any help on further verification of compliancy is very welcome, as the access to ISO/IEC document is limited due to its expensive nature.
+Any help on further verification of compliancy is very welcome, as the
+access to ISO/IEC document is limited due to its expensive nature.
 
 
 # Use stable releases in production!
@@ -238,15 +259,13 @@ tarball on https://files.dyne.org/tomb
 
 Donations are very welcome, please go to https://www.dyne.org/donate
 
-Translations are also needed: they can be contributed via this website
-https://poeditor.com/join/project/b276xMGAmB
-or simply sending the .po file. Start from `extras/po/tomb.pot`.
+Translations are also welcome: they can be contributed editing sending
+the .po files in [extras/translations](extras/translations).
 
-The code is pretty short and readable: start looking around and the
-materials found in `doc/` which are good pointers at security measures
-to be further implemented.
+The code is pretty short and readable. There is also a collection of
+specifications and design materials in the [doc](doc) directory.
 
-For the bleeding edge visit https://github.com/dyne/Tomb
+To contribute code and reviews visit https://github.com/dyne/Tomb
 
 If you plan to commit code into Tomb, please keep in mind this is a
 minimalist tool and its code should be readable. Guidelines on the
@@ -257,7 +276,7 @@ IRC on https://irc.dyne.org channel **#dyne** (or direct port 9999 SSL)
 
 # Licensing
 
-Tomb is Copyright (C) 2007-2017 by the Dyne.org Foundation and
+Tomb is Copyright (C) 2007-2018 by the Dyne.org Foundation and
 maintained by Denis Roio <jaromil@dyne.org>. More information on all
 the developers involved is found in the [AUTHORS](AUTHORS.md) file.
 
