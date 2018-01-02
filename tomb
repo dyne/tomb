@@ -2274,8 +2274,12 @@ BEGIN { main="" }
 '
     } || {
         # list a specific tomb
+		# add square parens if not present (detection)
+		local tname
+		if [[ "${1[1]}" = "[" ]]; then tname="$1"
+		else tname="[$1]"; fi
         _sudo findmnt -rvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
-            | awk -vtomb="[$1]" '
+            | awk -vtomb="$tname" '
 BEGIN { main="" }
 /^\/dev\/mapper\/tomb/ {
   if("["$5"]"!=tomb) next;
