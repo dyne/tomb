@@ -1002,7 +1002,7 @@ gpg_decrypt() {
         gpgpopt=(--yes)
         
         # GPG option '--try-secret-key' exist since GPG 2.1
-        { option_is_set -R } && [[ $gpgver =~ "2.1." ]] && {
+        { option_is_set -R } && { autoload -U is-at-least && is-at-least "2.1" $gpgver } && {
             typeset -a recipients
             recipients=(${(s:,:)$(option_value -R)})
             { is_valid_recipients $recipients } || {

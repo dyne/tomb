@@ -72,7 +72,6 @@ export DUMMYPASSNEW=changetest
 
 test_cleanup() {
 	"${T}" slam all &> /dev/null
-	rm -f "/home/$USER/dyne-tomb-bind-test-"*
 	sudo rm -rf "$TMP"
 	mkdir -p "$TMP"
 }
