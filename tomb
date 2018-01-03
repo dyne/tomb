@@ -244,8 +244,13 @@ _plot() {
     # The tomb name is TOMBFILE without an extension and underscores instead of spaces (for mount and cryptsetup)
     # It can start with dots: ..foo bar baz.tomb -> ..foo_bar_baz
     TOMBNAME=${${TOMBFILE// /_}%.*}
-    [[ -z $TOMBNAME ]] && {
-        _failure "Tomb won't work without a TOMBNAME." }
+	# use the entire filename if the previous transformation returns
+	# an empty string. This handles the corner case of tomb being
+	# hidden files (starting with a dot) and have no extension (only
+	# one dot in string)
+	TOMBNAME=${TOMBNAME:-${TOMBFILE}}
+    [[ "$TOMBNAME" = "" ]] &&
+        _failure "Tomb won't work without a TOMBNAME."
 
 }
 
