@@ -9,8 +9,14 @@ Roadmap notes:
 
 * Release 3.0
 
+*** [#A] integrate the zenroom for custom crypto functions
+	https://decodeproject.github.io/lua-zenroom
+
+*** [#A] study cryptsetup 2.0 and integrate it
+
+	In particular kernel keystore functionalities
+
 *** [#A] support BtrFS and snapshots
-*** [#A] system to split passwords in parts (ssss)
 *** [#B] modular encryption system support
 
     to go beyond dm-crypt/cryptsetup
@@ -21,12 +27,20 @@ Roadmap notes:
 
 *** [#B] udev rules to avoid usb automount of keyplug in gnome
 *** [#B] sign and verify tomb script integrity
-*** [#B] make a graphical tomb undertaker (gnome-druid in glade?)
 *** [#B] analyse and show tomb entropy using libdisorder
 *** [#B] use inotify on tomb
     inotify can also count when was the last time tomb was used and
     unmount it automatically after a timeout, see how much free space
     is left and warn when the space is almost finished
+
+*** DONE [#A] system to split passwords in parts
+	CLOSED: [2018-01-03 Wed 19:48]
+
+	solved with secrets.dyne.org
+*** DONE [#B] make a graphical tomb undertaker (gnome-druid in glade?)
+	CLOSED: [2018-01-03 Wed 19:49]
+
+	solved by gtomb and qtomb
 
 
 ** Notes from #CybRes

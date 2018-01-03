@@ -7,7 +7,7 @@ Tomb is written and maintained since 2007 by Denis Roio <jaromil@dyne.org>
 Tomb includes code and advices by Anathema, Boyska, Hellekin O. Wolf,
 Daniel Rodriguez, Parazyd and Alexandre Pujol.
 
-The 'gtomb' minimal GUI is being written by Parazyd.
+The 'gtomb' GUI based on Zenity is written by Parazyd.
 
 The Qt5 desktop tray GUI is written by Gianluca Montecchi.
 

@@ -1,5 +1,26 @@
 # Tomb ChangeLog
 
+## 2.5
+### January 2018
+
+This is mostly a bugfix release, including two internal
+refactorings. An important change is the re-introduction (since v2.3)
+of ownership change of all files inside tombs, to facilitate single
+user usage, which is now default and can be prevented using the '-p'
+flag on 'open' commands. The first refactoring concerns the test
+units, now using the 'sharness' framework. The other refactoring
+concerns 'post-hooks' now renamed to 'exec-hooks' and launched on
+'open' and 'close' commands with a defined set of arguments. Another
+internal change concerns the use of 'findmnt' instead of parsing the
+output of 'mount -l', which grants compatibility with more recent
+versions of util-linux. A fix was made to the 'slam' command for a
+better process detection and the introduction of a new 'ps' command to
+just list processes using tombs. Another fix was made to support tomb
+hidden filenames (starting with a dot) without any extension. Some
+more minor fixes were made to messaging and translations, plus all the
+documentation is updated.
+
+
 ## 2.4
 ### April 2017
 

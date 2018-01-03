@@ -21,6 +21,8 @@ Get the stable .tar.gz signed release for production use!
 
 Download it from https://files.dyne.org/tomb
 
+For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md).
+
 ![tomb's logo](https://github.com/dyne/Tomb/blob/master/extras/images/monmort.png)
 
 [![Build Status](https://travis-ci.org/dyne/Tomb.svg?branch=master)](https://travis-ci.org/dyne/Tomb)
@@ -44,6 +46,8 @@ output to facilitate its use inside graphical applications.
 
 # How does it work?
 
+![tomb and bats](https://github.com/dyne/Tomb/blob/master/extras/images/tomb_and_bats.png)
+
 To create a Tomb, do:
 ```
  $ tomb dig -s 100 secret.tomb
@@ -62,8 +66,6 @@ or if you are in a hurry
 ```
  $ tomb slam all
 ```
-
-For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md).
 
 ```
   Syntax: tomb [options] command [arguments]
@@ -198,6 +200,8 @@ some are developed by Dyne.org, but some also by third parties.
 - [qt-tray](extras/qt-tray) is a graphical tray icon for QT panels
 - [tomber](extras/tomber) is a wrapper to use Tomb in Python scripts
 
+![skulls and pythons](https://github.com/dyne/Tomb/blob/master/extras/images/python_for_tomb.png)
+
 ### External applications
 
 - [Secrets](https://secrets.dyne.org) is a software that can be operated on-line and on-site to split a Tomb key in shares to be distributed to peers: some of them have to agree to combine back the shares in order to retrieve the key.
@@ -254,6 +258,8 @@ features and develop patches.
 So be warned: do not use the latest Git version in production
 environments, but use a stable release versioned and packed as
 tarball on https://files.dyne.org/tomb
+
+![Day of the dead](https://github.com/dyne/Tomb/blob/master/extras/images/DayOfTheDead.jpg)
 
 # How can you help
 

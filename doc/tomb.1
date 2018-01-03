@@ -301,12 +301,14 @@ base root of the tomb.
 
 .B
 .IP "bind-hooks"
-This hook file consists of a simple two column list of files or
-directories inside the tomb to be made directly accessible inside the
-current user's home directory. Tomb will use the "mount \-o bind"
-command to bind locations inside the tomb to locations found in $HOME
-so in the first column are indicated paths relative to the tomb and in
-the second column are indicated paths relative to $HOME contents, for
+This hook file consists of a simple text file named \fIbind-hooks\fR
+containing a two column list of paths to files or directories inside
+the tomb. The files and directories will be be made directly
+accessible by the tomb \fIopen\fR command inside the current user's
+home directory. Tomb uses internally the "mount \-o bind" command to
+bind locations inside the tomb to locations found in $HOME. In the
+first column are indicated paths relative to the tomb and in the
+second column are indicated paths relative to $HOME contents, for
 example:
 .EX
   mail          mail
@@ -318,12 +320,12 @@ example:
 .B
 .IP "exec-hooks"
 This hook file gets executed as user by tomb with the first argument
-determining the step of execution: "open" or "close". The exec-hooks
-file should be an executable (ELF or shell script) present inside the
-Tomb. Tomb executes this hook as user supplying two or more arguments,
-the first being the step, followed by the mountpoint of the tomb and,
-on close events, its name, loopback device and dev-mapper device
-paths.
+determining the step of execution (\fIopen\fR or \fIclose\fR) and the second
+being the full path to the mountpoint. The \fIexec-hooks\fR file should be
+executable (ELF or shell script) and present inside the Tomb. Tomb
+executes this hook as user and adds the name, loopback device and
+dev-mapper device paths as additional arguments for the \fIclose\fR
+command.
 
 .SH PRIVILEGE ESCALATION
 
