@@ -4,11 +4,7 @@ Style guidelines
 Indentation
 -----------
 
-Code must be indented using four spaces.
-In vim, this can be accomplished using
-
-	set shiftwidth=4
-	set expandtab
+Code must be indented using hard tabs.
 
 Naming
 ------
