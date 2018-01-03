@@ -2160,11 +2160,17 @@ exec_safe_bind_hooks() {
 # to verify what it would run if you let it.  This feature opens the
 # possibility to make encrypted executables.
 exec_safe_func_hooks() {
+	local mnt
+	mnt="$2"
     # Only run if post-hooks has the executable bit set
     [[ -x $mnt/exec-hooks ]] && {
-        _success "Exec hook: ::1 exec hook:: ::2 action:: ::3 argument::" \
-				 "${mnt}/exec-hooks" "$1" "$2"
-        $mnt/exec-hooks "$1" "$2"
+        _success "Exec hook: ::1 exec hook:: ::2 action::" \
+				 "${mnt}/exec-hooks" "$1"
+		# here call two actions: open or close. Synopsis:
+		# $1     $2           $3          $4          $5
+		# open  "$tombmount"
+		# close "$tombmount" "$tombname" "$tombloop" "$mapper"
+        $mnt/exec-hooks "$1" "$2" "$3" "$4" "$5"
 		return $?
     }
 	return 0
