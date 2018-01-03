@@ -654,12 +654,14 @@ usage() {
     _print "\000"
     _print " -s     size of the tomb file when creating/resizing one (in MiB)"
     _print " -k     path to the key to be used ('-k -' to read from stdin)"
-    _print " -n     don't process the hooks found in tomb"
+    _print " -n     don't launch the execution hooks found in tomb"
+	_print " -p     preserve the ownership of all files in tomb"
     _print " -o     options passed to commands: open, lock, forge (see man)"
     _print " -f     force operation (i.e. even if swap is active)"
     _print " -g     use a GnuPG key to encrypt a tomb key"
     _print " -r     provide GnuPG recipients (separated by coma)"
     _print " -R     provide GnuPG hidden recipients (separated by coma)"
+
     [[ $KDF == 1 ]] && {
         _print " --kdf  forge keys armored against dictionary attacks"
     }
@@ -1920,6 +1922,18 @@ change_tomb_key() {
 
 # {{{ Open
 
+_update_control_file() {
+	# replaces a control file with new contents and gives it user ownership
+	# stdin = contents
+	# $1 = path to control file
+	# $2 = contents
+	[[ "$2" = "" ]] && return 1
+	[[ -r "$1" ]] && rm -f "$1"
+	print "$2" > "$1"
+	_sudo chown ${_UID}:${_GID} "$1"
+	_verbose "updated control file $1 = $2"
+}
+
 # $1 = tombfile $2(optional) = mountpoint
 mount_tomb() {
     local tombpath="$1"    # First argument is the path to the tomb
@@ -2031,10 +2045,6 @@ mount_tomb() {
         _failure "Cannot mount ::1 tomb name::" $TOMBNAME
     }
 
-	# we do not change ownership anymore when mounting tombs
-    # _sudo chown $UID:$GID ${tombmount}
-    # _sudo chmod 0711 ${tombmount}
-
     _success "Success opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE $tombmount
 
     local tombtty tombhost tombuid tombuser
@@ -2054,20 +2064,16 @@ mount_tomb() {
         _message "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::" $tombuser $tombuid $tombtty $tombhost
         _message "on date ::1 date::" $tombsince
     }
+
     # write down the UID and TTY that opened the tomb
-    rm -f ${tombmount}/.uid
-    print $_UID > ${tombmount}/.uid
-    rm -f ${tombmount}/.tty
-    print $_TTY > ${tombmount}/.tty
+    _update_control_file ${tombmount}/.uid $_UID
+    _update_control_file ${tombmount}/.tty $_TTY
     # also the hostname
-    rm -f ${tombmount}/.host
-    hostname > ${tombmount}/.host
+    _update_control_file ${tombmount}/.host `hostname`
     # and the "last time opened" information
     # in minutes since 1970, this is printed at next open
-    rm -f ${tombmount}/.last
-    date +%s > ${tombmount}/.last
+    _update_control_file ${tombmount}/.last `date +%s`
     # human readable: date --date=@"`cat .last`" +%c
-
 
     # process bind-hooks (mount -o bind of directories)
     # and exec-hooks (execute on open)
@@ -2075,6 +2081,12 @@ mount_tomb() {
         exec_safe_bind_hooks ${tombmount}
         exec_safe_func_hooks open ${tombmount} 
 	}
+
+	# Changes ownership to current user. This facilitates a lot
+	# usability by single users. If a Tomb is "multiuser" and contains
+	# ACL "by convention" using UNIX ownership that needs to be
+	# preserved then this behavior can be deactivated using -p
+    option_is_set -p || _sudo chown -R ${_UID}:${_GID} ${tombmount}
 
     return 0
 }
@@ -2821,7 +2833,7 @@ main() {
     main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g)
     subcommands_opts[__default]=""
     # -o in open and mount is used to pass alternate mount options
-    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: r: R: "
+    subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: r: R: p -preserve-ownership=p"
     subcommands_opts[mount]=${subcommands_opts[open]}
 
     subcommands_opts[create]="" # deprecated, will issue warning

@@ -207,6 +207,14 @@ argument is "-" (dash), Tomb will read the key from stdin (blocking).
 Skip processing of post-hooks and bind-hooks if found inside the tomb.
 See the \fIHOOKS\fR section in this manual for more information.
 .B
+.IP "-p"
+When opening a tomb, preserves the ownership of all files and
+directories contained in it. Normally the \fIopen\fR command changes
+the ownership of a tomb's contents to the UID and GID of the user who
+has succesfully opened it: it is a usability feature in case a tomb is
+used by a single user across different systems. This flag deactivates
+this behaviour.
+.B
 .IP "-o"
 Manually specify mount options to be used when opening a tomb instead
 of the default \fIrw,noatime,nodev\fR, i.e. to mount a tomb read-only
