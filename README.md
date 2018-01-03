@@ -46,8 +46,6 @@ output to facilitate its use inside graphical applications.
 
 # How does it work?
 
-![tomb and bats](https://github.com/dyne/Tomb/blob/master/extras/images/tomb_and_bats.png)
-
 To create a Tomb, do:
 ```
  $ tomb dig -s 100 secret.tomb

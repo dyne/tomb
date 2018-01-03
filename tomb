@@ -44,7 +44,7 @@
 
 # {{{ Global variables
 
-typeset VERSION="2.5-SNAPSHOT"
+typeset VERSION="2.5"
 typeset DATE="Jan/2018"
 typeset TOMBEXEC=$0
 typeset TMPPREFIX=${TMPPREFIX:-/tmp}
