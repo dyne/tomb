@@ -156,11 +156,13 @@ separated list for more than one recipient.
 .B
 .IP "resize"
 Increase the size of a tomb file to the amount specified by the
-\fI-s\fR option, which is the new size in megabytes (MiB). Full access to the tomb using
-a key (\fI-k\fR) and its password is required. Tombs can only grow and
-can never be made smaller. This command makes use of the cryptsetup(8)
-resize feature and the resize2fs command: its much more practical than
-creating a new tomb and moving everything into it.
+\fI-s\fR option, which is the new size in megabytes (MiB). Full access
+to the tomb using a key (\fI-k\fR) and its password is required. Tombs
+can only grow and can never be made smaller. This command makes use of
+the cryptsetup(8) resize feature and the resize2fs command: its much
+more practical than creating a new tomb and moving everything into
+it. There is no data-loss if a failure occurs during resize: the
+command can be re-launched and the resize operation will complete.
 
 .B
 .IP "engrave"
