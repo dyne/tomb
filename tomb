@@ -1362,10 +1362,12 @@ list_gnupg_ciphers() {
 	# prints an error if GnuPG is not found
 	which gpg &>/dev/null || _failure "gpg (GnuPG) is not found, Tomb cannot function without it."
 
+	# On gpg1 and gpg2 line 10 always point to available ciphers.
+	# Print those until the next section is found
 	ciphers=(`gpg --version | awk '
 BEGIN { ciphers=0 }
-/^Cipher:/ { gsub(/,/,""); sub(/^Cipher:/,""); print; ciphers=1; next }
-/^Hash:/ { ciphers=0 }
+NR==11 { gsub(/,/,""); sub(/^.*:/,""); print; ciphers=1; next }
+/^.*:/ { ciphers=0 }
 { if(ciphers==0) { next } else { gsub(/,/,""); print; } }
 '`)
 	print "${ciphers}"
