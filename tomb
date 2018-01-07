@@ -1359,9 +1359,6 @@ gen_key() {
 
 # prints an array of ciphers available in gnupg (to encrypt keys)
 list_gnupg_ciphers() {
-	# prints an error if GnuPG is not found
-	which gpg &>/dev/null || _failure "gpg (GnuPG) is not found, Tomb cannot function without it."
-
 	# On gpg1 and gpg2 line 10 always point to available ciphers.
 	# Print those until the next section is found
 	ciphers=(`gpg --version | awk '
