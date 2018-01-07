@@ -3106,7 +3106,7 @@ main() {
 				cat <<EOF
   `sudo -V | head -n1`
   `cryptsetup --version`
-  `pinentry --version`
+  `pinentry --version | head -n1`
   `findmnt -V`
   `gpg --version | head -n1` - key forging algorithms (GnuPG symmetric ciphers):
   `list_gnupg_ciphers`
