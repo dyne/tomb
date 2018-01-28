@@ -377,7 +377,7 @@ ask_password() {
 	# Distributions have broken wrappers for pinentry: they do
 	# implement fallback, but they disrupt the output somehow.	We are
 	# better off relying on less intermediaries, so we implement our
-	# own fallback mechanisms. Pinentry supported: curses, gtk-2, qt4
+	# own fallback mechanisms. Pinentry supported: curses, gtk-2, qt4, qt5
 	# and x11.
 
 	# make sure LANG is set, default to C
@@ -428,6 +428,19 @@ SETPROMPT Password:
 GETPIN
 EOF`
 			[[ "$gtkrc" = "" ]] || export GTK2_RC_FILES="$gtkrc_old"
+
+			# TODO QT5 customization of dialog
+		elif _is_found "pinentry-qt5"; then
+			_verbose "using pinentry-qt5"
+
+			output=`cat <<EOF | pinentry-qt5
+OPTION ttyname=$TTY
+OPTION lc-ctype=$LANG
+SETTITLE $title
+SETDESC $description
+SETPROMPT Password:
+GETPIN
+EOF`
 
 			# TODO QT4 customization of dialog
 		elif _is_found "pinentry-qt4"; then
