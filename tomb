@@ -362,6 +362,19 @@ _check_swap() {
 	fi
 }
 
+pinentry_assuan_getpass() {
+	# simply prints out commands for pinentry's stdin to activate the
+	# password dialog
+	cat <<EOF
+OPTION ttyname=$TTY
+OPTION lc-ctype=$LANG
+SETTITLE $title
+SETDESC $description
+SETPROMPT Password:
+GETPIN
+EOF
+}
+
 # Ask user for a password
 # Wraps around the pinentry command, from the GnuPG project, as it
 # provides better security and conveniently use the right toolkit.
@@ -389,14 +402,7 @@ ask_password() {
 
 		if _is_found "pinentry-curses"; then
 			_verbose "using pinentry-curses"
-			output=`cat <<EOF | pinentry-curses
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE $title
-SETDESC $description
-SETPROMPT Password:
-GETPIN
-EOF`
+			output=$(pinentry_assuan_getpass | pinentry-curses)
 		else
 			_failure "Cannot find pinentry-curses and no DISPLAY detected."
 		fi
@@ -419,54 +425,25 @@ EOF`
 				gtkrc_old="$GTK2_RC_FILES"
 				export GTK2_RC_FILES="$gtkrc"
 			}
-			output=`cat <<EOF | pinentry-gtk-2
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE $title
-SETDESC $description
-SETPROMPT Password:
-GETPIN
-EOF`
+			output=$(pinentry_assuan_getpass | pinentry-gtk-2)
 			[[ "$gtkrc" = "" ]] || export GTK2_RC_FILES="$gtkrc_old"
 
 			# TODO QT5 customization of dialog
 		elif _is_found "pinentry-qt5"; then
 			_verbose "using pinentry-qt5"
 
-			output=`cat <<EOF | pinentry-qt5
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE $title
-SETDESC $description
-SETPROMPT Password:
-GETPIN
-EOF`
+			output=$(pinentry_assuan_getpass | pinentry-qt5)
 
 			# TODO QT4 customization of dialog
 		elif _is_found "pinentry-qt4"; then
 			_verbose "using pinentry-qt4"
 
-			output=`cat <<EOF | pinentry-qt4
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE $title
-SETDESC $description
-SETPROMPT Password:
-GETPIN
-EOF`
-
+			output=$(pinentry_assuan_getpass | pinentry-qt4)
 			# TODO X11 customization of dialog
 		elif _is_found "pinentry-x11"; then
 			_verbose "using pinentry-x11"
 
-			output=`cat <<EOF | pinentry-x11
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE $title
-SETDESC $description
-SETPROMPT Password:
-GETPIN
-EOF`
+			output=$(pinentry_assuan_getpass | pinentry-x11)
 
 		else
 
@@ -474,14 +451,7 @@ EOF`
 				_verbose "using pinentry-curses"
 
 				_warning "Detected DISPLAY, but only pinentry-curses is found."
-				output=`cat <<EOF | pinentry-curses
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE $title
-SETDESC $description
-SETPROMPT Password:
-GETPIN
-EOF`
+				output=$(pinentry_assuan_getpass | pinentry-curses)
 			else
 				_failure "Cannot find any pinentry: impossible to ask for password."
 			fi
