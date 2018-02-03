@@ -108,6 +108,11 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	/* Read password char by char.
+	 *
+	 * Doing in this way we make sure that blanks (even null bytes) end up
+	 * in the password
+	 */
 	int j = 0;
 	while (j < (BUFFER_SIZE + 1)) {
 		char c = getchar();
