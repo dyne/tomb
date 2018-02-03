@@ -7,6 +7,10 @@ all:
 	$(CC) -O2 -o tomb-kdb-pbkdf2-gensalt gen_salt.c -lgcrypt
 	$(CC) -O2 -o tomb-kdb-hexencode hexencode.c
 
+test:
+	@echo "Running Tomb-kdb tests"
+	./test.sh
+
 clean:
 	rm -f tomb-kdb-pbkdf2 tomb-kdb-pbkdf2-getiter tomb-kdb-pbkdf2-gensalt tomb-kdb-hexencode
 
