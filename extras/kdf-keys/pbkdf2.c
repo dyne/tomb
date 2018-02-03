@@ -43,6 +43,9 @@
 
 #include <gcrypt.h>
 
+/* Max password size */
+#define BUFFER_SIZE 1024
+
 /* TODO: move print_hex and hex_to_binary to utils.h, with separate compiling */
 void print_hex(unsigned char *buf, int len)
 {
@@ -75,7 +78,7 @@ int hex_to_binary(unsigned char *buf, char *hex)
 
 int main(int argc, char *argv[])
 {
-	char *pass = NULL;
+	char pass[BUFFER_SIZE];
 	unsigned char *salt;
 	int salt_len;                  // salt length in bytes
 	int ic=0;                        // iterative count
@@ -105,9 +108,18 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	fscanf(stdin, "%ms", &pass);
-	if ( pass[strlen(pass)-1] == '\n' )
-		pass[strlen(pass)-1] = '\0';
+	int j = 0;
+	while (j < (BUFFER_SIZE + 1)) {
+		char c = getchar();
+		if (c == EOF) break;
+		pass[j] = c;
+		j++;
+	}
+	if (j == BUFFER_SIZE + 1) {
+		fprintf(stderr, "Error: password is too long\n");
+		exit(1);
+		}
+	pass[j-1] = '\0';
 
 	// PBKDF 2
 	result = calloc(result_len, sizeof(unsigned char*));
@@ -124,7 +136,7 @@ int main(int argc, char *argv[])
 	/* Tell Libgcrypt that initialization has completed. */
 	gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
 
-	gcry_kdf_derive( pass, strlen(pass), GCRY_KDF_PBKDF2, GCRY_MD_SHA1, salt, salt_len, ic, result_len, result);
+	gcry_kdf_derive(pass, j-1, GCRY_KDF_PBKDF2, GCRY_MD_SHA1, salt, salt_len, ic, result_len, result);
 	print_hex(result, result_len);            // Key + IV   (as hex string)
 
 	//clear and free everything
@@ -133,7 +145,6 @@ int main(int argc, char *argv[])
 	free(result);
 	for(i=0; i<strlen(pass); i++) //blank
 		pass[i]=0;
-	free(pass);
 	for(i=0; i<strlen(argv[1])/2+3; i++) //blank
 		salt[i]=0;
 	free(salt);
