@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 	int ic=0;                        // iterative count
 	int result_len;
 	unsigned char *result;       // result (binary - 32+16 chars)
-	int i;
+	int i, j;
 
 	if ( argc != 4 ) {
 		fprintf(stderr, "usage: %s salt count len <passwd >binary_key_iv\n", argv[0]);
@@ -111,19 +111,24 @@ int main(int argc, char *argv[])
 	/* Read password char by char.
 	 *
 	 * Doing in this way we make sure that blanks (even null bytes) end up
-	 * in the password
+	 * in the password.
+	 *
+	 * passwords containing just a bunch of spaces are valid
 	 */
-	int j = 0;
 	while (j < (BUFFER_SIZE + 1)) {
 		char c = getchar();
 		if (c == EOF) break;
 		pass[j] = c;
 		j++;
 	}
-	if (j == BUFFER_SIZE + 1) {
+	if (j >= BUFFER_SIZE + 1) {
 		fprintf(stderr, "Error: password is too long\n");
 		exit(1);
-		}
+	}
+	if (j <= 1) {
+		fprintf(stderr, "Error: password is empty\n");
+		exit(1);
+	}
 	pass[j-1] = '\0';
 
 	// PBKDF 2
