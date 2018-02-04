@@ -47,24 +47,14 @@ check_password_len() {
 	iter=4096
 	keylen=20
 	./tomb-kdb-pbkdf2 $hexsalt $iter $keylen 2>/dev/null <<<"" && {
-        echo "Empty passwords are accepted"
-        error=$((error + 1))
-    }
-    boundpassword=`perl -e 'print "a"x1023'`
-    ./tomb-kdb-pbkdf2 $hexsalt $iter $keylen &>/dev/null <<<"$boundpassword" || {
-        echo "Passwords bound to limit are not accepted"
-        error=$((error + 1))
-    }
-    bigpassword=`perl -e 'print "a"x1024'`
-    ./tomb-kdb-pbkdf2 $hexsalt $iter $keylen &>/dev/null <<<"$bigpassword" && {
-        echo "Passwords overriding buffer are accepted"
-        error=$((error + 1))
-    }
-    bigpassword=`perl -e 'print "a"x1025'`
-    ./tomb-kdb-pbkdf2 $hexsalt $iter $keylen &>/dev/null <<<"$bigpassword" && {
-        echo "Passwords overriding buffer are accepted"
-        error=$((error + 1))
-    }
+		echo "Empty passwords are accepted"
+		error=$((error + 1))
+	}
+	bigpassword=`perl -e 'print "a"x3000'`
+	./tomb-kdb-pbkdf2 $hexsalt $iter $keylen &>/dev/null <<<"$bigpassword" || {
+		echo "Error when using long password"
+		error=$((error + 1))
+	}
 }
 
 check_kdf

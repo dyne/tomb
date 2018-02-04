@@ -43,8 +43,8 @@
 
 #include <gcrypt.h>
 
-/* Max password size */
-#define BUFFER_SIZE 1024
+/* block size for password buffer */
+#define BLOCK_SIZE 40
 
 /* TODO: move print_hex and hex_to_binary to utils.h, with separate compiling */
 void print_hex(unsigned char *buf, int len)
@@ -76,15 +76,37 @@ int hex_to_binary(unsigned char *buf, char *hex)
 	return count;
 }
 
+void cleanup(char *result, int result_len, char *pass, char *salt, int salt_len) {
+	int i;
+
+	//clear and free everything
+	if (result) {
+		for(i=0; i<result_len;i++)
+			result[i]=0;
+		free(result);
+	}
+	if (pass) {
+		for(i=0; i<strlen(pass); i++) //blank
+			pass[i]=0;
+		free(pass);
+	}
+	if (salt) {
+		for(i=0; i<salt_len; i++) //blank
+			salt[i]=0;
+		free(salt);
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	char pass[BUFFER_SIZE];
-	unsigned char *salt;
+	char *pass = NULL;
+	unsigned char *salt = NULL;
 	int salt_len;                  // salt length in bytes
 	int ic=0;                        // iterative count
 	int result_len;
-	unsigned char *result;       // result (binary - 32+16 chars)
-	int i, pw_lenght;
+	unsigned char *result = NULL;       // result (binary - 32+16 chars)
+	int i, pw_len = 0;
+	int buff_len = BLOCK_SIZE;
 
 	if ( argc != 4 ) {
 		fprintf(stderr, "usage: %s salt count len <passwd >binary_key_iv\n", argv[0]);
@@ -92,7 +114,8 @@ int main(int argc, char *argv[])
 	}
 
 	//TODO: move to base64decode
-	salt=calloc(strlen(argv[1])/2+3, sizeof(char));
+	salt_len = strlen(argv[1])/2+3;
+	salt = calloc(salt_len, sizeof(char));
 	salt_len=hex_to_binary(salt, argv[1]);
 	if( salt_len <= 0 ) {
 		fprintf(stderr, "Error: %s is not a valid salt (it must be a hexadecimal string)\n", argv[1]);
@@ -115,26 +138,34 @@ int main(int argc, char *argv[])
 	 *
 	 * passwords containing just a bunch of spaces are valid
 	 */
-	while (pw_lenght <= BUFFER_SIZE) {
-		char c = getchar();
-		if (c == EOF) break;
-		pass[pw_lenght] = c;
-		pw_lenght++;
+	pass = calloc(buff_len, sizeof(char)); 
+	char c = getchar();
+	while (c != EOF) {
+		if (pw_len == buff_len) {
+			buff_len *= 2;
+			pass = realloc(pass, buff_len);
+			if (!pass) {
+				fprintf(stderr, "Error allocating memory");
+				cleanup(result, result_len, pass, salt, salt_len);
+				exit(3);
+			}
+		}
+		pass[pw_len] = c;
+		pw_len++;
+		c = getchar();
 	}
-	if (pw_lenght > BUFFER_SIZE) {
-		fprintf(stderr, "Error: password is too long\n");
-		exit(1);
-	}
-	if (pw_lenght <= 1) {
+	if (pw_len <= 1) {
 		fprintf(stderr, "Error: password is empty\n");
+		cleanup(result, result_len, pass, salt, salt_len);
 		exit(1);
 	}
-	pass[pw_lenght-1] = '\0';
+	pass[pw_len-1] = '\0';
 
 	// PBKDF 2
 	result = calloc(result_len, sizeof(unsigned char*));
 	if (!gcry_check_version ("1.5.0")) {
 		fputs ("libgcrypt version mismatch\n", stderr);
+		cleanup(result, result_len, pass, salt, salt_len);
 		exit (2);
 	}
 	/* Allocate a pool of 16k secure memory.  This make the secure memory
@@ -146,18 +177,10 @@ int main(int argc, char *argv[])
 	/* Tell Libgcrypt that initialization has completed. */
 	gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
 
-	gcry_kdf_derive(pass, pw_lenght-1, GCRY_KDF_PBKDF2, GCRY_MD_SHA1, salt, salt_len, ic, result_len, result);
+	gcry_kdf_derive(pass, pw_len-1, GCRY_KDF_PBKDF2, GCRY_MD_SHA1, salt, salt_len, ic, result_len, result);
 	print_hex(result, result_len);            // Key + IV   (as hex string)
 
-	//clear and free everything
-	for(i=0; i<result_len;i++)
-		result[i]=0;
-	free(result);
-	for(i=0; i<strlen(pass); i++) //blank
-		pass[i]=0;
-	for(i=0; i<strlen(argv[1])/2+3; i++) //blank
-		salt[i]=0;
-	free(salt);
+	cleanup(result, result_len, pass, salt, salt_len);
 
 	return(0);
 }
