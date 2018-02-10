@@ -1600,7 +1600,8 @@ dig_tomb() {
 	${=DD} if=/dev/urandom bs=1048576 count=$tombsize of=$TOMBPATH
 
 	[[ $? == 0 && -e $TOMBPATH ]] && {
-		ls -lh $TOMBPATH
+		_sudo chown ${_UID}:${_GID} "$TOMBPATH"
+		ls -lh "$TOMBPATH"
 	} || {
 		_warning "Error creating the tomb ::1 tomb path::" $TOMBPATH
 		_failure "Operation aborted."
@@ -1715,6 +1716,7 @@ forge_key() {
 		_failure "Operation aborted."
 	}
 
+	_sudo chown ${_UID}:${_GID} "$TOMBKEYFILE"
 	_message "Done forging ::1 key file::" $TOMBKEYFILE
 	_success "Your key is ready:"
 	ls -lh $TOMBKEYFILE
