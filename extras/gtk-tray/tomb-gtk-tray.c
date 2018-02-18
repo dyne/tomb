@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
   }
 
   snprintf(filename,255, "%s", argv[1]);
-  snprintf(mountpoint,255, "/media/%s.tomb", argv[1]);
+  snprintf(mountpoint,255, "/media/%s", argv[1]);
 
   // libnotify
   notify_init("Tomb");
