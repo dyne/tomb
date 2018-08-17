@@ -1242,7 +1242,7 @@ gen_key() {
 			_warning "It is your responsibility to check these fingerprints."
 			_warning "The fingerprints are:"
 			for gpg_id in ${recipients[@]}; do
-				_warning "	  `_fingerprint "$gpg_id"`"
+				_warning "	  `_fingerprint "$gpg_id" ($gpg_id)`"
 			done
 
 			gpgopt+=(`_recipients_arg "$recipients_opt" $recipients`)
@@ -1322,7 +1322,7 @@ gen_key() {
 	local tmpres=$TOMBTMP
 	print $opt - "$gpgpass" \
 		| gpg --openpgp --force-mdc --cipher-algo ${algo} \
-			  --batch --no-tty ${gpgopt[@]} \
+			  --batch --no-tty ${gpgopt} \
 			  --status-fd 2 -o - --armor 2> $tmpres
 	unset gpgpass
 	# check result of gpg operation
