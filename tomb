@@ -1242,7 +1242,7 @@ gen_key() {
 			_warning "It is your responsibility to check these fingerprints."
 			_warning "The fingerprints are:"
 			for gpg_id in ${recipients[@]}; do
-				_warning "	  `_fingerprint "$gpg_id" ($gpg_id)`"
+				_warning "	  `_fingerprint "$gpg_id"` ($gpg_id)"
 			done
 
 			gpgopt+=(`_recipients_arg "$recipients_opt" $recipients`)
