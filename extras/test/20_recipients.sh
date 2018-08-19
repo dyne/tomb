@@ -32,6 +32,13 @@ test_expect_success 'Testing tomb with GnuPG keys using hidden recipient' '
     tt_lock -g -R $KEY1
     '
 
+test_export "subkeys"
+test_expect_success 'Testing tomb with GnuPG subkeys' '
+    tt_dig -s 20 &&
+    tt_forge -g -R $SUBKEY2 &&
+    tt_lock -g -R $SUBKEY2
+    '
+
 test_export "shared"
 test_expect_success 'Testing tomb with GnuPG keys and shared tomb' '
     tt_dig -s 20 &&
