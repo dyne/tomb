@@ -5,7 +5,7 @@ export test_description="Tomb regression tests"
 source ./setup
 autoload -U is-at-least
 
-TOMB_VERSION=("2.3" "2.2" "2.0.1" "2.1")
+TOMB_VERSION=("2.4" "2.3" "2.2" "2.0.1" "2.1")
 zshversion=$(zsh --version | awk 'NR==1 {print $2}')
 { is-at-least "5.3" $zshversion } && TOMB_VERSION=("2.3")
 
