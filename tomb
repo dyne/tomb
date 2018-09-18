@@ -426,6 +426,10 @@ ask_password() {
 				export GTK2_RC_FILES="$gtkrc"
 			}
 			output=$(pinentry_assuan_getpass | pinentry-gtk-2)
+
+			# issue 313: unescape pinentry %25 --> %
+			output=$(sed 's/%25/%/g' <<<"$output")
+
 			[[ "$gtkrc" = "" ]] || export GTK2_RC_FILES="$gtkrc_old"
 
 			# TODO QT5 customization of dialog
