@@ -13,7 +13,7 @@
 
 *A minimalistic commandline tool to manage encrypted volumes* aka **The Crypto Undertaker**
 
-[![software by Dyne.org](https://www.dyne.org/wp-content/uploads/2015/12/software_by_dyne.png)](http://www.dyne.org)
+[![software by Dyne.org](https://files.dyne.org/software_by_dyne.png)](http://www.dyne.org)
 
 More information and updates on website: https://www.dyne.org/software/tomb
 
@@ -33,7 +33,7 @@ Tomb aims to be a free and open source system for easy encryption and
 backup of personal files, written in code that is easy to review and
 links well reliable GNU/Linux components.
 
-Tomb's ambition is to provide military-grade security by way of:
+Tomb's ambition is to improve safety by way of:
 
 - a minimalist design consisting in small and well readable code
 - facilitation of good practices, i.e: key/storage physical separation
@@ -181,10 +181,11 @@ shell routines kept being maintained and used for dyne:bolic until
 
 As of today, Tomb is a very stable tool also used in mission critical
 situations by a number of activists in dangerous zones. It has been
-reviewed by forensics analysts and it can be considered to be safe for
-military grade use where the integrity of information stored depends
-on the user's behaviour and the strength of a standard AES-256 (XTS
-plain) encryption algorithm.
+reviewed by forensics analysts and it can be considered safe for
+adoption where the integrity of information stored depends on the
+user's behaviour and the strength of a standard AES-256 (XTS plain)
+encryption algorithm (current default) or, at one's option, other
+equivalent standards supported by the Linux kernel.
 
 ## Compatibility
 
@@ -192,6 +193,9 @@ Tomb can be used in conjunction with some other software applications,
 some are developed by Dyne.org, but some also by third parties.
 
 ### Included extra applications
+
+These auxiliary applications are found in the extras/ subdirectory of
+distributed Tomb's sourcecode:
 
 - [GTomb](extras/gtomb) is a graphical interface using zenity
 - [gtk-tray](extras/gtk-tray) is a graphical tray icon for GTK panels
@@ -202,6 +206,9 @@ some are developed by Dyne.org, but some also by third parties.
 
 ### External applications
 
+The following applications are not included in Tomb's distributed
+sourcecode, but are known and tested to be compatible with Tomb:
+
 - [Secrets](https://secrets.dyne.org) is a software that can be operated on-line and on-site to split a Tomb key in shares to be distributed to peers: some of them have to agree to combine back the shares in order to retrieve the key.
 
 - [zuluCrypt](https://mhogomchungu.github.io/zuluCrypt/) is a graphical application to manage various types of encrypted volumes on GNU/Linux, among them also Tombs, written in C++.
@@ -211,7 +218,7 @@ some are developed by Dyne.org, but some also by third parties.
 
 - [pass-tomb](https://github.com/roddhjav/pass-tomb) is a console based wrapper of the excellent password keeping program [pass](https://www.passwordstore.org) that helps to keep the whole tree of password encrypted inside a tomb. It is written in Bash.
 
-If you are writing a project supporting tomb volumes or wrapping tomb, let us know!
+If you are writing a project supporting Tomb volumes or wrapping Tomb, let us know!
 
 
 ## Compliancy
