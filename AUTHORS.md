@@ -27,10 +27,11 @@ The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon,
 Narrat, Jerry Polfer, Jim Turner, Maxime Arthaud, RobertMX,
 mhogomchungu Mandeep Bhutani, Emil Lundberg, Joel Montes de Oca, Armin
 Mesbah, Arusekk, Stephan Schindel, Asbjørn Apeland, Victor Calvert,
-bjonnh, SargoDevel and...  the Linux Action Show!
+bjonnh, SargoDevel, AitorATuin and...  the Linux Action Show!
 
 Tomb includes an implementation of the "Password-Based Key Derivation
-Function v2" based on GCrypt and written by Anthony Thyssen.
+Function v2" based on GCrypt and written by Anthony Thyssen, with
+fixes contributed by AitorATuin.
 
 Tomb developers can be contacted via GitHub issues on
 https://www.github.com/dyne/Tomb or over IRC https://irc.dyne.org
