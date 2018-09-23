@@ -20,4 +20,5 @@ before_script:
   - sudo make --directory=extras/kdf-keys install
 
 script:
+  - make --directory=extras/kdf-keys test
   - make test
