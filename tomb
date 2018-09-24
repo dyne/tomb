@@ -107,6 +107,7 @@ typeset -H TOMBTMP			  # Filename of secure temp just created (see _tmp_create()
 
 typeset -aH TOMBTMPFILES	  # Keep track of temporary files
 typeset -aH TOMBLOOPDEVS	  # Keep track of used loop devices
+typeset -A TOMBFILESSTAT      # Keep track of access date attributes
 
 # Make sure sbin is in PATH (man zshparam)
 path+=( /sbin /usr/sbin )
@@ -131,6 +132,9 @@ $msg
 
 # Cleanup anything sensitive before exiting.
 _endgame() {
+
+	# Restore access time of sensitive files
+    [[ -z $TOMBFILESSTAT ]] || _restore_stat
 
 	# Prepare some random material to overwrite vars
 	local rr="$RANDOM"
@@ -183,6 +187,27 @@ _is_found() {
 	[[ "$1" = "" ]] && return 1
 	command -v "$1" 1>/dev/null 2>/dev/null
 	return $?
+}
+
+# Track acces and modification time of tomb files.
+# $1: file to track
+# date format: seconds since Epoch
+# stat format: <last access>:<last modified>
+_track_stat() {
+    local file="$1"
+    local stat=$(stat --format="%X:%Y" "$file")
+    TOMBFILESSTAT+=("$file" "$stat")
+}
+
+# Restore files stats
+_restore_stat() {
+    local file stat
+    for file stat in "${(@kv)TOMBFILESSTAT}"; do
+        stats=("${(@s.:.)stat}")
+        _verbose "Restoring access and modification time for ::1 file::" $file
+        [[ -z "${stats[1]}" ]] || touch -a --date="@${stats[1]}" "$file"
+        [[ -z "${stats[2]}" ]] || touch -m --date="@${stats[2]}" "$file"
+    done
 }
 
 # Identify the running user
@@ -947,6 +972,7 @@ _load_key() {
 	else
 		_verbose "load_key argument: ::1 key file::" $keyfile
 		[[ -r $keyfile ]] || _failure "Key not found, specify one using -k."
+		_track_stat "$keyfile"
 		TOMBKEYFILE=$keyfile
 		TOMBKEY="${mapfile[$TOMBKEYFILE]}"
 	fi
@@ -1929,6 +1955,8 @@ mount_tomb() {
 
 	# this also calls _plot()
 	is_valid_tomb $tombpath
+
+	_track_stat "$tombpath"
 
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
 
