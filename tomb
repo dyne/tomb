@@ -206,7 +206,7 @@ _restore_stat() {
         stats=("${(@s.:.)stat}")
         _verbose "Restoring access and modification time for ::1 file::" $file
         [[ -z "${stats[1]}" ]] || touch -a --date="@${stats[1]}" "$file"
-        [[ -z "${stats[2]}" ]] || touch -m --date="@${stats[1]}" "$file"
+        [[ -z "${stats[2]}" ]] || touch -m --date="@${stats[2]}" "$file"
     done
 }
 
