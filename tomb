@@ -109,6 +109,8 @@ typeset -aH TOMBTMPFILES	  # Keep track of temporary files
 typeset -aH TOMBLOOPDEVS	  # Keep track of used loop devices
 typeset -A TOMBFILESSTAT      # Keep track of access date attributes
 
+typeset _MSG_FD_OVERRIDE # if set, _msg will write to this file descriptor
+
 # Make sure sbin is in PATH (man zshparam)
 path+=( /sbin /usr/sbin )
 
@@ -623,14 +625,14 @@ dump_secrets() {
 
 usage() {
 	_print "Syntax: tomb [options] command [arguments]"
-	_print "\000"
+	echo
 	_print "Commands:"
-	_print "\000"
+	echo
 	_print " // Creation:"
 	_print " dig	 create a new empty TOMB file of size -s in MiB"
 	_print " forge	 create a new KEY file and set its password"
 	_print " lock	 installs a lock on a TOMB to use it with KEY"
-	_print "\000"
+	echo
 	_print " // Operations on tombs:"
 	_print " open	 open an existing TOMB (-k KEY file or - for stdin)"
 	_print " index	 update the search indexes of tombs"
@@ -642,24 +644,24 @@ usage() {
 	[[ $RESIZER == 1 ]] && {
 		_print " resize	 resize a TOMB to a new size -s (can only grow)"
 	}
-	_print "\000"
+	echo
 	_print " // Operations on keys:"
 	_print " passwd	 change the password of a KEY (needs old pass)"
 	_print " setkey	 change the KEY locking a TOMB (needs old key and pass)"
-	_print "\000"
+	echo
 	[[ $QRENCODE == 1 ]] && {
 		_print " // Backup on paper:"
 		_print " engrave makes a QR code of a KEY to be saved on paper"
 	}
-	_print "\000"
+	echo
 	[[ $STEGHIDE == 1 ]] && {
 		_print " // Steganography:"
 		_print " bury	 hide a KEY inside a JPEG image (for use with -k)"
 		_print " exhume	 extract a KEY from a JPEG image (prints to stdout)"
 	}
-	_print "\000"
+	echo
 	_print "Options:"
-	_print "\000"
+	echo
 	_print " -s		size of the tomb file when creating/resizing one (in MiB)"
 	_print " -k		path to the key to be used ('-k -' to read from stdin)"
 	_print " -n		don't launch the execution hooks found in tomb"
@@ -674,12 +676,12 @@ usage() {
 		_print " --kdf	forge keys armored against dictionary attacks"
 	}
 
-	_print "\000"
+	echo
 	_print " -h		print this help"
 	_print " -v		print version, license and list of available ciphers"
 	_print " -q		run quietly without printing informations"
 	_print " -D		print debugging information at runtime"
-	_print "\000"
+	echo
 	_print "For more information on Tomb read the manual: man tomb"
 	_print "Please report bugs on <http://github.com/dyne/tomb/issues>."
 }
@@ -723,8 +725,10 @@ function _msg() {
 	done
 
 	local command="print -P"
-	local progname="$fg[magenta]${TOMBEXEC##*/}$reset_color"
-	local message="$fg_bold[normal]$fg_no_bold[normal]$msg$reset_color"
+	local progname="${TOMBEXEC##*/}"
+	local pchars=""
+	local pcolor="normal"
+	local fd=1
 	local -i returncode
 
 	case "$1" in
@@ -732,19 +736,20 @@ function _msg() {
 			command+=" -n"; pchars=" > "; pcolor="yellow"
 			;;
 		message)
-			pchars=" . "; pcolor="white"; message="$fg_no_bold[$pcolor]$msg$reset_color"
+			pchars=" . "; pcolor="white"
 			;;
 		verbose)
 			pchars="[D]"; pcolor="blue"
 			;;
 		success)
-			pchars="(*)"; pcolor="green"; message="$fg_no_bold[$pcolor]$msg$reset_color"
+			pchars="(*)"; pcolor="green"
 			;;
 		warning)
-			pchars="[W]"; pcolor="yellow"; message="$fg_no_bold[$pcolor]$msg$reset_color"
+			pchars="[W]"; pcolor="yellow"
 			;;
 		failure)
-			pchars="[E]"; pcolor="red"; message="$fg_no_bold[$pcolor]$msg$reset_color"
+			pchars="[E]"; pcolor="red"
+			fd=2
 			returncode=1
 			;;
 		print)
@@ -752,11 +757,21 @@ function _msg() {
 			;;
 		*)
 			pchars="[F]"; pcolor="red"
-			message="Developer oops!  Usage: _msg MESSAGE_TYPE \"MESSAGE_CONTENT\""
+			msg="Developer oops!  Usage: _msg MESSAGE_TYPE \"MESSAGE_CONTENT\""
+			fd=2
 			returncode=127
 			;;
 	esac
-	${=command} "${progname} $fg_bold[$pcolor]$pchars$reset_color ${message}$color[reset_color]" >&2
+
+	[[ -n $_MSG_FD_OVERRIDE ]] && fd=$_MSG_FD_OVERRIDE
+
+	if [[ -t $fd ]]; then
+	       [[ -n "$progname" ]] && progname="$fg[magenta]$progname$reset_color"
+	       [[ -n "$pchars" ]] && pchars="$fg_bold[$pcolor]$pchars$reset_color"
+	       msg="$fg[$pcolor]$msg$reset_color"
+	fi
+
+	${=command} "${progname}" "${pchars}" "${msg}" >&$fd
 	return $returncode
 }
 
@@ -1221,9 +1236,9 @@ change_passwd() {
 	{ option_is_set --tomb-pwd } && {
 		local tombpwd="`option_value --tomb-pwd`"
 		_verbose "tomb-pwd = ::1 new pass::" $tombpwd
-		gen_key "$tombpwd" >> "$tmpnewkey"
+		gen_key "$tmpnewkey" "$tombpwd"
 	} || {
-		gen_key >> "$tmpnewkey"
+		gen_key "$tmpnewkey"
 	}
 
 	{ is_valid_key "${mapfile[$tmpnewkey]}" } || {
@@ -1244,7 +1259,8 @@ change_passwd() {
 # takes care to encrypt a key
 # honored options: --kdf  --tomb-pwd -o -g -r
 gen_key() {
-	# $1 the password to use; if not set ask user
+	# $1 key file
+	# $2 the password to use; if not set ask user
 	# -o is the --cipher-algo to use (string taken by GnuPG)
 	local algopt="`option_value -o`"
 	local algo="${algopt:-AES256}"
@@ -1289,7 +1305,7 @@ gen_key() {
 		gpgpass="$TOMBSECRET"
 		opt=''
 	} || {
-		if [ "$1" = "" ]; then
+		if [ "$2" = "" ]; then
 			while true; do
 				# 3 tries to write two times a matching password
 				tombpass=`ask_password "Type the new password to secure your key"`
@@ -1311,7 +1327,7 @@ gen_key() {
 				unset tombpass
 			done
 		else
-			tombpass="$1"
+			tombpass="$2"
 			_verbose "gen_key takes tombpass from CLI argument: ::1 tomb pass::" $tombpass
 		fi
 
@@ -1344,7 +1360,7 @@ gen_key() {
 				header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
 			}
 		}
-		print $header
+		print $header >> "$1"
 
 		# Set gpg inputs and options
 		gpgpass="${tombpass}\n$TOMBSECRET"
@@ -1357,7 +1373,7 @@ gen_key() {
 	print $opt - "$gpgpass" \
 		| gpg --openpgp --force-mdc --cipher-algo ${algo} \
 			  --batch --no-tty ${gpgopt} \
-			  --status-fd 2 -o - --armor 2> $tmpres
+			  --status-fd 2 -o - --armor 2> $tmpres >> "$1"
 	unset gpgpass
 	# check result of gpg operation
 	for i in ${(f)"$(cat $tmpres)"}; do
@@ -1490,6 +1506,9 @@ exhume_key() {
 	# result (- for stdout)
 	local r=1			  # Return code (default: fail)
 
+	# write all messages to stderr to avoid polluting stdout
+	_MSG_FD_OVERRIDE=2
+
 	# Ensure the image file is a readable JPEG
 	[[ ! -r $imagefile ]] && {
 		_failure "Exhume failed, image file not found: ::1 image file::" "${imagefile:-none}" }
@@ -1550,6 +1569,8 @@ exhume_key() {
 	} || {
 		_warning "Nothing found in ::1 image file::" $imagefile
 	}
+
+	unset _MSG_FD_OVERRIDE
 
 	return $r
 }
@@ -1731,9 +1752,9 @@ forge_key() {
 	{ option_is_set --tomb-pwd } && {
 		local tombpwd="`option_value --tomb-pwd`"
 		_verbose "tomb-pwd = ::1 new pass::" $tombpwd
-		gen_key "$tombpwd" >> $TOMBKEYFILE
+		gen_key $TOMBKEYFILE "$tombpwd"
 	} || {
-		gen_key >> $TOMBKEYFILE
+		gen_key $TOMBKEYFILE
 	}
 
 	# load the key contents (set global variable)
@@ -3107,11 +3128,11 @@ main() {
 		# Default operation: presentation, or version information with -v
 		__default)
 			_print "Tomb ::1 version:: - a strong and gentle undertaker for your secrets" $VERSION
-			_print "\000"
+			echo
 			_print " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
 			_print " This is free software: you are free to change and redistribute it"
 			_print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
-			_print "\000"
+			echo
 			option_is_set -v && {
 				local langwas=$LANG
 				LANG=en
@@ -3120,9 +3141,9 @@ main() {
 				_print " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 				LANG=$langwas
 				_print " When in need please refer to <http://dyne.org/support>."
-				_print "\000"
+				echo
 				_print "System utils:"
-				_print "\000"
+				echo
 				cat <<EOF
   `sudo -V | head -n1`
   `cryptsetup --version`
@@ -3131,9 +3152,9 @@ main() {
   `gpg --version | head -n1` - key forging algorithms (GnuPG symmetric ciphers):
   `list_gnupg_ciphers`
 EOF
-				_print "\000"
+				echo
 				_print "Optional utils:"
-				_print "\000"
+				echo
 				_list_optional_tools version
 				return 0
 			}
