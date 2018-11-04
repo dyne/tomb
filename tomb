@@ -921,6 +921,14 @@ is_valid_key() {
 		_message "Key is an image, it might be valid."
 		return 0 }
 
+	[[ $KDF == 1 ]] && { ! option_is_set -g } && { option_is_set --kdf } && {
+		_head="${key[(f)1]}"
+		[[ $_head =~ '^_KDF_' ]] || {
+			_warning "Key is missing KDF header."
+			return 1
+		}
+	}
+
 	[[ $key =~ "BEGIN PGP" ]] && {
 		_message "Key is valid."
 		return 0 }
