@@ -629,58 +629,58 @@ usage() {
 	_print "Commands:"
 	echo
 	_print " // Creation:"
-	_print " dig	 create a new empty TOMB file of size -s in MiB"
-	_print " forge	 create a new KEY file and set its password"
-	_print " lock	 installs a lock on a TOMB to use it with KEY"
+	_print " dig          create a new empty TOMB file of size -s in MiB"
+	_print " forge        create a new KEY file and set its password"
+	_print " lock         installs a lock on a TOMB to use it with KEY"
 	echo
 	_print " // Operations on tombs:"
-	_print " open	 open an existing TOMB (-k KEY file or - for stdin)"
-	_print " index	 update the search indexes of tombs"
-	_print " search	 looks for filenames matching text patterns"
-	_print " list	 list of open TOMBs and information on them"
-	_print " ps		 list of running processes inside open TOMBs"
-	_print " close	 close a specific TOMB (or 'all')"
-	_print " slam	 slam a TOMB killing all programs using it"
+	_print " open         open an existing TOMB (-k KEY file or - for stdin)"
+	_print " index        update the search indexes of tombs"
+	_print " search       looks for filenames matching text patterns"
+	_print " list         list of open TOMBs and information on them"
+	_print " ps           list of running processes inside open TOMBs"
+	_print " close        close a specific TOMB (or 'all')"
+	_print " slam         slam a TOMB killing all programs using it"
 	[[ $RESIZER == 1 ]] && {
-		_print " resize	 resize a TOMB to a new size -s (can only grow)"
+		_print " resize       resize a TOMB to a new size -s (can only grow)"
 	}
 	echo
 	_print " // Operations on keys:"
-	_print " passwd	 change the password of a KEY (needs old pass)"
-	_print " setkey	 change the KEY locking a TOMB (needs old key and pass)"
+	_print " passwd       change the password of a KEY (needs old pass)"
+	_print " setkey       change the KEY locking a TOMB (needs old key and pass)"
 	echo
 	[[ $QRENCODE == 1 ]] && {
 		_print " // Backup on paper:"
 		_print " engrave makes a QR code of a KEY to be saved on paper"
+		echo
 	}
-	echo
 	[[ $STEGHIDE == 1 ]] && {
 		_print " // Steganography:"
-		_print " bury	 hide a KEY inside a JPEG image (for use with -k)"
-		_print " exhume	 extract a KEY from a JPEG image (prints to stdout)"
+		_print " bury         hide a KEY inside a JPEG image (for use with -k)"
+		_print " exhume       extract a KEY from a JPEG image (prints to stdout)"
+		echo
 	}
-	echo
 	_print "Options:"
 	echo
-	_print " -s		size of the tomb file when creating/resizing one (in MiB)"
-	_print " -k		path to the key to be used ('-k -' to read from stdin)"
-	_print " -n		don't launch the execution hooks found in tomb"
-	_print " -p		preserve the ownership of all files in tomb"
-	_print " -o		options passed to commands: open, lock, forge (see man)"
-	_print " -f		force operation (i.e. even if swap is active)"
-	_print " -g		use a GnuPG key to encrypt a tomb key"
-	_print " -r		provide GnuPG recipients (separated by coma)"
-	_print " -R		provide GnuPG hidden recipients (separated by coma)"
+	_print " -s           size of the tomb file when creating/resizing one (in MiB)"
+	_print " -k           path to the key to be used ('-k -' to read from stdin)"
+	_print " -n           don't launch the execution hooks found in tomb"
+	_print " -p           preserve the ownership of all files in tomb"
+	_print " -o           options passed to commands: open, lock, forge (see man)"
+	_print " -f           force operation (i.e. even if swap is active)"
+	_print " -g           use a GnuPG key to encrypt a tomb key"
+	_print " -r           provide GnuPG recipients (separated by comma)"
+	_print " -R           provide GnuPG hidden recipients (separated by comma)"
 
 	[[ $KDF == 1 ]] && {
-		_print " --kdf	forge keys armored against dictionary attacks"
+		_print " --kdf        forge keys armored against dictionary attacks"
 	}
 
 	echo
-	_print " -h		print this help"
-	_print " -v		print version, license and list of available ciphers"
-	_print " -q		run quietly without printing informations"
-	_print " -D		print debugging information at runtime"
+	_print " -h           print this help"
+	_print " -v           print version, license and list of available ciphers"
+	_print " -q           run quietly without printing informations"
+	_print " -D           print debugging information at runtime"
 	echo
 	_print "For more information on Tomb read the manual: man tomb"
 	_print "Please report bugs on <http://github.com/dyne/tomb/issues>."
