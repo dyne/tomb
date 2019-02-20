@@ -238,7 +238,8 @@ symmetric passphrase to protect a tomb key. This option can be followed by \fI-r
 .B
 .IP "-r \fI<gpg_id>[,<gpg_id2>]\fR"
 Provide a new set of recipient(s) to encrypt a tomb key. \fIgpg_ids\fR
-can be one or more GPG key ID, comma separated.
+can be one or more GPG key ID, comma separated. All GPG keys must be
+trusted keys in GPG.
 .B
 .IP "--kdf \fI<itertime>\fR"
 Activate the KDF feature against dictionary attacks when creating a
