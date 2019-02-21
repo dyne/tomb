@@ -14,10 +14,12 @@ addons:
       - steghide
       - qrencode
       - e2fsprogs
+      - python2.7
 
 before_script:
   - make --directory=extras/kdf-keys
   - sudo make --directory=extras/kdf-keys install
+  - sudo ./extras/install_cloakify.sh
 
 script:
   - make --directory=extras/kdf-keys test

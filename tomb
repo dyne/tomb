@@ -74,6 +74,8 @@ unsetopt allexport
 # Flag optional commands if available (see _ensure_dependencies())
 typeset -i KDF=1
 typeset -i STEGHIDE=1
+typeset -i CLOAKIFY=1
+typeset -i DECLOAKIFY=1
 typeset -i RESIZER=1
 typeset -i SWISH=1
 typeset -i QRENCODE=1
@@ -654,10 +656,18 @@ usage() {
 		_print " engrave makes a QR code of a KEY to be saved on paper"
 		echo
 	}
-	[[ $STEGHIDE == 1 ]] && {
+	[[ $STEGHIDE == 1 || $CLOAKIFY == 1 || $DECLOAKIFY == 1 ]] && {
 		_print " // Steganography:"
-		_print " bury         hide a KEY inside a JPEG image (for use with -k)"
-		_print " exhume       extract a KEY from a JPEG image (prints to stdout)"
+		[[ $STEGHIDE == 1 ]] && {
+			_print " bury         hide a KEY inside a JPEG image (for use with -k)"
+			_print " exhume       extract a KEY from a JPEG image (prints to stdout)"
+		}
+		[[ $CLOAKIFY == 1 ]] && {
+			_print " cloak        transform a KEY into TEXT using CIPHER (for use with -k)"
+		}
+		[[ $DECLOAKIFY == 1 ]] && {
+			_print " uncloak      extract a KEY from a TEXT using CIPHER (prints to stdout)"
+		}
 		echo
 	}
 	_print "Options:"
@@ -847,6 +857,12 @@ _ensure_dependencies() {
 	command -v lsof 1>/dev/null 2>/dev/null || LSOF=0
 	# Check for steghide
 	command -v steghide 1>/dev/null 2>/dev/null || STEGHIDE=0
+	# Check for python2
+	command -v python2 -V 1>/dev/null 2>/dev/null || PYTHON2=0
+	# Check for cloakify
+	command -v cloakify 1>/dev/null 2>/dev/null || CLOAKIFY=0
+	# Check for decloakify
+	command -v decloakify 1>/dev/null 2>/dev/null || DECLOAKIFY=0
 	# Check for resize
 	command -v resize2fs 1>/dev/null 2>/dev/null || RESIZER=0
 	# Check for KDF auxiliary tools
@@ -1568,6 +1584,110 @@ exhume_key() {
 		_success "Key succesfully exhumed to ::1 key::." $destkey
 	} || {
 		_warning "Nothing found in ::1 image file::" $imagefile
+	}
+
+	unset _MSG_FD_OVERRIDE
+
+	return $r
+}
+
+# Steganographic function to transform a key into harmless-looking text
+# using a cipher
+# Requires cloakify to be installed
+#
+# mandatory 1st arg: the cipher to use
+# optional 2nd arg: the output file where to save the result (none for stdout)
+cloakify_key() {
+
+	_load_key	 # Try loading key from option -k and set TOMBKEY
+
+	local cipher="$1"    # The cipher to use
+	local destfile="$2"  # (Optional) the output file where to save the
+	# result (none for stdout)
+
+	_success "Encoding key ::1 tomb key:: using cipher ::2 cipher file::" $TOMBKEYFILE $cipher
+
+	# Ensure we have a valid destination for the cloaked key
+	[[ -z $destfile ]] && {
+		  destfile="/dev/stdout" # No file was specified: fallback to stdout
+		  _message "printing cloaked key on stdout" }
+
+	# Bail out if destination exists, unless -f (force) was passed
+	[[ $destfile != "/dev/stdout" && -s $destfile ]] && {
+		  _warning "File exists: ::1 output file::" $destfile
+		  { option_is_set -f } && {
+			    _warning "Use of --force selected: overwriting."
+			    rm -f $destfile
+		  } || {
+			    _warning "Make explicit use of --force to overwrite."
+			    _failure "Refusing to overwrite file. Operation aborted." }
+	}
+
+	# Cipher the key
+	cloakify $TOMBKEYFILE $cipher >$destfile
+	if [ $? != 0 ]; then
+		_warning "Encoding error: cloakify reports problems."
+		res=1
+	else
+		_success "Tomb key encoded succesfully"
+		res=0
+	fi
+
+	return $res
+}
+
+# mandatory 1st arg: the text file where key is supposed to be
+# mandatory 2nd arg: the cipher to use
+# optional 3rd arg: the key where to save the result (none for stdout)
+decloakify_key() {
+	[[ "$1" = "" ]] && {
+		  _failure "Uncloak failed, no text file specified" }
+	[[ "$2" = "" ]] && {
+		  _failure "Uncloak failed, no cipher file specified" }
+
+	local textfile="$1"   # The text file where to look for the key
+	local cipher="$2"     # The cipher to use
+	local destkey="$3"    # (Optional) the key file where to save the
+	# result (none for stdout)
+	local r=1			  # Return code (default: fail)
+
+	# write all messages to stderr to avoid polluting stdout
+	_MSG_FD_OVERRIDE=2
+
+	# Ensure the text file is readable
+	[[ ! -r $textfile ]] && {
+		_failure "Uncloak failed, text file not found: ::1 text file::" "${textfile:-none}" }
+	# Ensure the cipher file is readable
+	[[ ! -r $cipher ]] && {
+		_failure "Uncloak failed, cipher file not found: ::1 cipher file::" "${cipher:-none}" }
+
+	# Ensure we have a valid destination for the key
+	[[ -z $destkey ]] && { option_is_set -k } && destkey=$(option_value -k)
+	[[ -z $destkey ]] && {
+		destkey="/dev/stdout" # No key was specified: fallback to stdout
+		_message "printing uncloaked key on stdout" }
+
+	# Bail out if destination exists, unless -f (force) was passed
+	[[ $destkey != "/dev/stdout" && -s $destkey ]] && {
+		_warning "File exists: ::1 tomb key::" $destkey
+		{ option_is_set -f } && {
+			_warning "Use of --force selected: overwriting."
+			rm -f $destkey
+		} || {
+			_warning "Make explicit use of --force to overwrite."
+			_failure "Refusing to overwrite file. Operation aborted." }
+	}
+
+	# Extract the key from the text file
+	decloakify $textfile $cipher >$destkey
+	r=$?
+
+	# Report to the user
+	[[ "$destkey" = "/dev/stdout" ]] && destkey="stdout"
+	[[ $r == 0 ]] && {
+		_success "Key succesfully uncloaked to ::1 key::." $destkey
+	} || {
+		_warning "Nothing found in ::1 text file::" $textfile
 	}
 
 	unset _MSG_FD_OVERRIDE
@@ -2898,6 +3018,8 @@ main() {
 	subcommands_opts[help]=""
 	subcommands_opts[bury]="k: -tomb-pwd: r: R: "
 	subcommands_opts[exhume]="k: -tomb-pwd: r: R: "
+	subcommands_opts[cloak]="k: "
+	subcommands_opts[uncloak]="k: "
 	# subcommands_opts[decompose]=""
 	# subcommands_opts[recompose]=""
 	# subcommands_opts[install]=""
@@ -3116,6 +3238,21 @@ main() {
 				_failure "Steghide not installed: cannot exhume keys from images." }
 			exhume_key $PARAM[1]
 			;;
+
+		# STEGANOGRAPHY: transform key into text using cipher
+		cloak)
+			[[ $CLOAKIFY == 0 ]] && {
+				_failure "Cloakify not installed: cannot cipher keys into texts" }
+			cloakify_key $PARAM
+			;;
+
+		# STEGANOGRAPHY: read key from text using cipher
+		uncloak)
+			[[ $DECLOAKIFY == 0 ]] && {
+				_failure "Decloakify not installed: cannot decipher keys from texts" }
+			decloakify_key $PARAM
+			;;
+
 
 		## Internal commands useful to developers
 

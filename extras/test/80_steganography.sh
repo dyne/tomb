@@ -62,4 +62,13 @@ if test_have_prereq STEGHIDE; then
         '
 fi
 
+if test_have_prereq PYTHON2 CLOAKIFY DECLOAKIFY; then
+    test_expect_success 'Testing tomb and steganographic: cloak' '
+        tt cloak -k $tomb_key $TEST_HOME/cipher-amphibians $tomb_text
+        '
+
+    test_expect_success 'Testing tomb and steganographic: uncloak' '
+        tt uncloak -k $tomb_key_cloak $tomb_text $TEST_HOME/cipher-amphibians
+        '
+fi
 test_done
