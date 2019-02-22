@@ -52,6 +52,9 @@ command -v e2fsck resize2fs > /dev/null && test_set_prereq RESIZER
 command -v tomb-kdb-pbkdf2 > /dev/null && test_set_prereq KDF
 command -v qrencode > /dev/null && test_set_prereq QRENCODE
 command -v lsof > /dev/null && test_set_prereq LSOF
+command -v python2 > /dev/null && test_set_prereq PYTHON2
+command -v cloakify > /dev/null && test_set_prereq CLOAKIFY
+command -v decloakify > /dev/null && test_set_prereq DECLOAKIFY
 
 
 # GnuPG config
@@ -86,6 +89,8 @@ test_export() {
 	export tomb_key_new="$TMP/$testname.new.tomb.key"
 	export tomb_key_steg="$TMP/$testname.steg.tomb.key"
 	export tomb_img="$TMP/$testname.jpg"
+	export tomb_text="$TMP/$testname.txt"
+	export tomb_key_cloak="$TMP/$testname.cloak.tomb.key"
 }
 
 tt() {

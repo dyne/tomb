@@ -95,6 +95,8 @@ or if you are in a hurry
    // Steganography:
    bury    hide a KEY inside a JPEG image (for use with -k)
    exhume  extract a KEY from a JPEG image (prints to stdout)
+   cloak   transform a KEY into a TEXT using CIPHER (for use with -k)
+   uncloak extract a KEY from a TEXT file using CIPHER (prints to stdout)
 
   Options:
 
