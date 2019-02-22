@@ -71,8 +71,9 @@ key in its first LUKS slot.
 .B
 .IP "open"
 Opens an existing \fItomb file\fR (first argument) using a key
-(\fI-k\fR) which can also be an \fIjpeg image\fR (see
-\fIbury\fR/\fIexhume\fR). If a second argument is given it will
+(\fI-k\fR) which can also be hidden inside a \fIjpeg image\fR (see
+\fIbury\fR/\fIexhume\fR) or a long text file
+(see\fIcloak\fR/\fIuncloak\fR). If a second argument is given it will
 indicate the \fImountpoint\fR where the tomb should be made
 accessible, else the tomb is mounted in a directory inside /media (if
 not available it uses /run/media/$USER).  The option \fI-o\fR can be
@@ -193,15 +194,35 @@ containing a key. If the right key password is given, the key will be
 exhumed. If the password is not known, it is very hard to verify if a
 key is buried in any image or not.
 
+.B
+.IP "cloak"
+Hides a tomb key (\fI-k\fR) inside a \fIlong plain-text file\fR (first
+argument) using \fIsteganography\fR: the text will change in a way
+that can hardly be noticed by human eye and hardly detected by data
+analysis. This option is useful to backup tomb keys in unsuspected
+places; it depends from the availability of \fIcloakify\fR and
+consequently \fIpython2\fR. This function does not support asymmetric
+encryption using the \fI-g\fR flag.
+
+.B
+.IP "uncloak"
+This command recovers from long plain-text files the keys that were
+previously hidden into them using \fIcloak\fR.  Cloak requires a key
+filename (\fI-k\fR) and a \fIplain-text\fR file (first argument) known
+to be containing a key. If the right key password is given, the key
+will be exhumed. If the password is not known, it is quite hard to
+verify if a key is buried in a text or not.
+
 .SH OPTIONS
 .B
 .B
 .IP "-k \fI<keyfile>\fR"
 For all operations requiring a key, this option specifies the location
 of the key file to use. Arguments can also be \fIjpeg image\fR files
-where keys have been hidden using the \fIbury\fR command, or text
-files retrieved from \fIengraved\fR QR codes. If the \fIkeyfile\fR
-argument is "-" (dash), Tomb will read the key from stdin (blocking).
+where keys have been hidden using the \fIbury\fR or \fIcloak\fR
+commands, or text files retrieved from \fIengraved\fR QR codes. If the
+\fIkeyfile\fR argument is "-" (dash), Tomb will read the key from
+stdin (blocking).
 .B
 .IP "-n"
 Skip processing of post-hooks and bind-hooks if found inside the tomb.

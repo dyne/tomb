@@ -5,7 +5,8 @@ LUKS extensions are written in 2006 by Clemens Fruhwirth
 Tomb is written and maintained since 2007 by Denis Roio <jaromil@dyne.org>
 
 Tomb includes code and advices by Anathema, Boyska, Hellekin O. Wolf,
-Daniel Rodriguez, Parazyd and Alexandre Pujol.
+Daniel Rodriguez, Parazyd, Alexandre Pujol, AitorATuin, Narrat and
+Artur Malimonov.
 
 The 'gtomb' GUI based on Zenity is written by Parazyd.
 
