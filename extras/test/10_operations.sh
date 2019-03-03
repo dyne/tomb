@@ -44,4 +44,13 @@ if test_have_prereq LSOF; then
         '
 fi
 
+if test_have_prereq SPHINX ORACLE; then
+    test_export "sphinx_test" # Using already generated tomb
+    test_expect_success 'Testing open with good password (sphinx)' '
+        tt_open --tomb-pwd $DUMMYPASS --sphx-user $DUMMYUSER --sphx-host $DUMMYHOST &&
+        tt_close
+        '
+fi
+
+
 test_done

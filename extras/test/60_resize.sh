@@ -16,4 +16,11 @@ if test_have_prereq RESIZER; then
         '
 fi
 
+if test_have_prereq RESIZER SPHINX ORACLE; then 
+       test_export "sphinx_test" # Using already generated tomb
+       test_expect_success 'Testing resize to 30 MB tomb (sphinx)' '
+        tt resize -s 30 $tomb -k $tomb_key --unsafe --tomb-pwd $DUMMYPASS --sphx-user $DUMMYUSER --sphx-host $DUMMYHOST
+        '
+fi
+
 test_done

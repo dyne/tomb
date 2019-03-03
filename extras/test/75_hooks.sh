@@ -2,6 +2,8 @@
 
 export test_description="Testing tomb bind hooks"
 
+TEMPHOME=$HOME
+
 source ./setup
 
 test_export "test" # Using already generated tomb
@@ -14,9 +16,9 @@ test_expect_success 'Testing bind hooks' '
     rm -f "$MEDIA/$testname/bind-hooks" &&
     echo "$bindtest $bindtest" > "$MEDIA/$testname/bind-hooks" &&
     tt_close &&
-    touch "/home/$USER/$bindtest" &&
+    touch "$TEMPHOME/$bindtest" &&
     tt_open --tomb-pwd $DUMMYPASS &&
-    RND2=$(cat "/home/$USER/$bindtest") &&
+    RND2=$(cat "$TEMPHOME/$bindtest") &&
     [[ "$RND" = "$RND2" ]] &&
     tt list $testname &&
     tt_close
