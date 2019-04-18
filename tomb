@@ -1914,7 +1914,7 @@ lock_tomb_with_key() {
 
 	[[ -n $tombpath ]] || {
 		_warning "No tomb specified for locking."
-		_warning "Usage: tomb lock file.tomb file.tomb.key"
+		_warning "Usage: tomb lock file.tomb -k file.tomb.key"
 		return 1
 	}
 
