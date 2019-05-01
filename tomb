@@ -1908,7 +1908,7 @@ lock_tomb_with_key() {
 	# old default was aes-cbc-essiv:sha256
 	# Override with -o
 	# for more alternatives refer to cryptsetup(8)
-	local cipher="aes-xts-plain64:sha256"
+	local cipher="aes-xts-plain64"
 
 	local tombpath="$1"		 # First argument is the path to the tomb
 
@@ -1963,13 +1963,13 @@ lock_tomb_with_key() {
 
 	_message "Formatting Luks mapped device."
 	_cryptsetup --batch-mode \
-				--cipher ${cipher} --key-size 512 --key-slot 0 \
+				--cipher ${cipher} --hash sha512 --key-size 512 --key-slot 0 \
 				luksFormat ${nstloop}
 	[[ $? == 0 ]] || {
 		_warning "cryptsetup luksFormat returned an error."
 		_failure "Operation aborted." }
 
-	_cryptsetup --cipher ${cipher} luksOpen ${nstloop} tomb.tmp
+	_cryptsetup --cipher ${cipher} --hash sha512 luksOpen ${nstloop} tomb.tmp
 	[[ $? == 0 ]] || {
 		_warning "cryptsetup luksOpen returned an error."
 		_failure "Operation aborted." }
