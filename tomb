@@ -988,10 +988,12 @@ _recipients_arg() {
 
 # $1 is a GPG key recipient
 # Print the fingerprint of the GPG key
-_fingerprint() {
-	local recipient="$1"
-	gpg --with-colons --fingerprint "$recipient" | grep fpr | head -1 | cut -d ':' -f 10 | sed 's/.\{4\}/& /g'
-}
+_gpg_fingerprint() {
+	gpg --with-colons --fingerprint "$1" |
+		awk 'BEGIN { FS=":" } /^fpr/ { print $10; exit }' }
+_gpg_uid() {
+	gpg --with-colons --list-key "$1" |
+		awk 'BEGIN { FS=":" } /^uid/ { print $10; exit}' }
 
 
 # $1 is the encrypted key contents we are checking
@@ -1395,7 +1397,7 @@ gen_key() {
 			_warning "It is your responsibility to check these fingerprints."
 			_warning "The fingerprints are:"
 			for gpg_id in ${recipients[@]}; do
-				_warning "	  `_fingerprint "$gpg_id"` ($gpg_id)"
+				_warning "	  `_gpg_fingerprint "$gpg_id"` :: `_gpg_uid "$gpg_id"`"
 			done
 
 			gpgopt+=(`_recipients_arg "$recipients_opt" $recipients`)
