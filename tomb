@@ -527,15 +527,14 @@ sphinx_get_password() {
 	{ option_is_set --sphx-user && option_is_set --sphx-host } && {
 		# value error in sphinx doesn't set exit code
 		# using tempfile as a workaround to notice the error
-		errorfile=$(mktemp /tmp/tomb_error.XXXXXXXXX)
+		_tmp_create
+		errorfile=$TOMBTMP
 		password=$(echo "$1" | sphinx get $(option_value --sphx-user) $(option_value --sphx-host) 2>$errorfile)
 		if  ! grep -q "ValueError: fail" $errorfile ; then
 			echo "$password"
-			rm $errorfile
 			return 0
 		else
 			_warning "sphinx returns error: ::1 error::" $(cat $errorfile)
-			rm $errorfile
 			_failure "Failed to retrieve actual password with sphinx."
 		fi
 	} || {
@@ -552,24 +551,22 @@ sphinx_set_password() {
 	{ option_is_set --sphx-user && option_is_set --sphx-host } && {
 		# value error in sphinx doesn't set exit code
 		# using tempfile as a workaround to notice the error
-		errorfile=$(mktemp /tmp/tomb_error.XXXXXXXXX)
+		_tmp_create
+		errorfile=$TOMBTMP
 		# check first if this host/user combination exists in store
 		# if yes, there is no need to make a call to create
 		password=$(echo "$1" | sphinx get $(option_value --sphx-user) $(option_value --sphx-host) 2>$errorfile)
 		if  ! grep -q "ValueError: fail" $errorfile ; then
 			echo "$password"
-			rm $errorfile
 			return 0
 		fi
 		# no such host/user combination in store, create one
 		password=$(echo "$1" | sphinx create $(option_value --sphx-user) $(option_value --sphx-host) ulsd 0 2>$errorfile)
 		if  ! grep -q "ValueError: fail" $errorfile ; then
 			echo "$password"
-			rm $errorfile
 			return 0
 		else
 			_warning "sphinx returns error: ::1 error::" $(cat $errorfile)
-			rm $errorfile
 			_failure "Failed to create password with sphinx"
 		fi
 	} || {
