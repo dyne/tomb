@@ -55,6 +55,8 @@ command -v lsof > /dev/null && test_set_prereq LSOF
 command -v python2 > /dev/null && test_set_prereq PYTHON2
 command -v cloakify > /dev/null && test_set_prereq CLOAKIFY
 command -v decloakify > /dev/null && test_set_prereq DECLOAKIFY
+command -v sphinx > /dev/null && test_set_prereq SPHINX
+command -v oracle > /dev/null && test_set_prereq ORACLE
 
 
 # GnuPG config
@@ -72,6 +74,10 @@ chmod 700 "$GNUPGHOME"
 # Dummy passwords used in the tests suite
 export DUMMYPASS=test
 export DUMMYPASSNEW=changetest
+
+# Dummy host and username for sphinx
+export DUMMYHOST=example.com
+export DUMMYUSER=user
 
 
 # Test helpers
