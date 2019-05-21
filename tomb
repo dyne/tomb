@@ -2223,6 +2223,14 @@ mount_tomb() {
 		_message "Mountpoint not specified, using default: ::1 mount point::" $tombmount
 	}
 
+	# check if the mountpoint is already used
+	mounted_tombs=(`list_tomb_mounts`)
+	for t in ${mounted_tombs}; do
+		usedmount=${t[(ws:;:)2]}
+		[[ "$usedmount" == "$tombmount" ]] &&
+			_failure "Mountpoint already in use: ::1 mount point::" $tombmount
+	done
+
 	_success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBNAME $tombmount
 
 	lo_mount $TOMBPATH
