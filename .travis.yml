@@ -5,8 +5,9 @@ services:
   - docker
 
 before_script:
+  - cp -v extras/test/Dockerfile .
   - docker build -t dyne/tomb .
   - docker run -it --privileged dyne/tomb /bin/bash -c "oracle & make test"
 
 script:
-  - docker run -it --privileged dyne/tomb /bin/bash -c "make --directory=extras/kdf-keys test"
+  - docker run -it --privileged dyne/tomb /bin/bash -c "make -C extras/kdf-keys test"
