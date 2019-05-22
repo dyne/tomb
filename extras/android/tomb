@@ -1428,9 +1428,9 @@ forge_key() {
     _warning "To make it faster you can move the mouse around."
     _warning "If you are on a server, you can use an Entropy Generation Daemon."
 
-    # Use /dev/random as the entropy source, unless --use-urandom is specified
-    local random_source=/dev/random
-    { option_is_set --use-urandom } && random_source=/dev/urandom
+    # Use /dev/random as the entropy source, unless --use-random is specified
+    local random_source=/dev/urandom
+    { option_is_set --use-random } && random_source=/dev/random
 
     _verbose "Data dump using ::1:: from ::2 source::" ${DD[1]} $random_source
     TOMBSECRET=$(${=DD} bs=1 count=256 if=$random_source)
@@ -2474,7 +2474,7 @@ main() {
     subcommands_opts[create]="" # deprecated, will issue warning
 
     # -o in forge and lock is used to pass an alternate cipher.
-    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-urandom "
+    subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-random "
     subcommands_opts[dig]="-ignore-swap s: -size=s "
     subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: "
     subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: "
@@ -2571,7 +2571,7 @@ main() {
     { ! option_is_set --no-color } && { autoload -Uz colors && colors }
     # Some options are only available during insecure mode
     { ! option_is_set --unsafe } && {
-        for opt in --tomb-pwd --use-urandom --tomb-old-pwd; do
+        for opt in --tomb-pwd --use-random --tomb-old-pwd; do
             { option_is_set $opt } && {
                 exitv=127 _failure "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsafe" $opt }
         done

@@ -116,7 +116,7 @@ tt() {
 }
 
 tt_dig() { tt dig "$tomb" "${@}"; }
-tt_forge() { tt forge "$tomb_key" --ignore-swap --unsafe --use-urandom "${@}"; }
+tt_forge() { tt forge "$tomb_key" --ignore-swap --unsafe "${@}"; }
 tt_lock() { tt lock "$tomb" -k "$tomb_key" --ignore-swap --unsafe "${@}"; }
 tt_open() { tt open "$tomb" -k "$tomb_key" --ignore-swap --unsafe "${@}"; }
 tt_close() { tt close "$testname" "${@}"; }
