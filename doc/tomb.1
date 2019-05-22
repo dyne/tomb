@@ -1,4 +1,4 @@
-.TH tomb 1 "April 16, 2017" "tomb"
+.TH tomb 1 "May 22, 2019" "tomb"
 
 .SH NAME
 Tomb \- the Crypto Undertaker
@@ -38,18 +38,18 @@ data gathered from a non-blocking source (/dev/urandom).
 .IP "forge"
 Creates a new \fIkey\fR and prompts the user for a \fIpassword\fR to
 protect its usage using symmetric encryption. This operation uses
-random data from a blocking source (/dev/random) and it may take long
-when run on a server with low entropy; to switch using a non-blocking
-source the \fI--use-urandom\fR flag can be used. The \fI-g\fR option
-switches on the use of a GPG key instead of a password (asymmetric
-encryption), then the \fI-r\fR option indicates the recipient key;
-more recipient GPG ids can be indicated (comma separated). The default
-cipher to protect the key is AES256, a custom one can be specified
-using the \fI-o\fR option, for a list of supported ciphers use
-\fI-v\fR. For additional protection against dictionary attacks on
-keys, the \fI--kdf\fR option can be used when forging a key, making
-sure that the \fItomb-kdb-pbkdf2\fR binaries in \fIextras/kdf\fR were
-compiled and installed on the system.
+random data from a non-blocking source (/dev/urandom) and it may take
+long only in some cases; to switch using a blocking source the
+\fI--use-random\fR flag can be used. The \fI-g\fR option switches on
+the use of a GPG key instead of a password (asymmetric encryption),
+then the \fI-r\fR option indicates the recipient key; more recipient
+GPG ids can be indicated (comma separated). The default cipher to
+protect the key is AES256, a custom one can be specified using the
+\fI-o\fR option, for a list of supported ciphers use \fI-v\fR. For
+additional protection against dictionary attacks on keys, the
+\fI--kdf\fR option can be used when forging a key, making sure that
+the \fItomb-kdb-pbkdf2\fR binaries in \fIextras/kdf\fR were compiled
+and installed on the system.
 
 .B
 .IP "lock"
@@ -292,11 +292,10 @@ Enable using dev-mode arguments, i.e. to pass passwords from
 commandline options. This is mostly used needed for execution by
 wrappers and testing suite.
 .B
-.IP "--use-urandom"
-Use a non-blocking random source to improve the speed of the
-\fIforge\fR command (key generation): tomb uses /dev/urandom instead
-of /dev/random. According to some people using the non-blocking source
-of Linux kernel doesn't degrades the quality of random.
+.IP "--use-random"
+Use a blocking random source. Tomb uses by default /dev/urandom since
+the non-blocking source of Linux kernel doesn't degrades the quality
+of random.
 .B
 .IP "--tomb-pwd <string>"
 Use string as password when needed on tomb.
@@ -533,7 +532,7 @@ channel on \fIhttps://irc.dyne.org\fR.
 
 .SH COPYING
 
-This manual is Copyright (c) 2011-2017 by Denis Roio <\fIjaromil@dyne.org\fR>
+This manual is Copyright (c) 2011-2019 by Denis Roio <\fIjaromil@dyne.org\fR>
 
 This manual includes contributions by Boyska and Hellekin O. Wolf.
 

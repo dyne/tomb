@@ -57,8 +57,8 @@ command -v qrencode > /dev/null || QRENCODE=0
 
 typeset -A results
 
-tests=(dig forge lock badpass open close passwd chksum bind setkey recip-dig 
-		recip-forge recip-lock recip-open recip-close recip-passwd recip-resize 
+tests=(dig forge lock badpass open close passwd chksum bind setkey recip-dig
+		recip-forge recip-lock recip-open recip-close recip-passwd recip-resize
 		recip-setkey recip-default recip-hidden shared shared-passwd shared-setkey)
 
 { test $RESIZER = 1 } && { tests+=(resize) }
@@ -92,11 +92,11 @@ test-tomb-create() {
     notice "Testing creation: forge"
 
     tt forge /tmp/test.tomb.key \
-        --ignore-swap --unsafe --tomb-pwd ${dummypass} --use-urandom 
+        --ignore-swap --unsafe --tomb-pwd ${dummypass}
 
-    { test $? = 0 } && { 
+    { test $? = 0 } && {
         results+=(forge SUCCESS)
-        # 
+        #
         notice "Dump of clear key contents to examine them:"
         print ${dummypass} \
 	        | gpg --batch --passphrase-fd 0 --no-tty --no-options -d /tmp/test.tomb.key \
@@ -107,7 +107,7 @@ test-tomb-create() {
     notice "Testing creation: lock"
 
     tt lock /tmp/test.tomb -k /tmp/test.tomb.key \
-        --ignore-swap --unsafe --tomb-pwd ${dummypass} 
+        --ignore-swap --unsafe --tomb-pwd ${dummypass}
 
     { test $? = 0 } && { results+=(lock SUCCESS) }
 }
@@ -122,29 +122,29 @@ test-tomb-recip() {
     notice "Testing tomb with recipient creation: dig"
     tt dig -s 20 $tomb
     { test $? = 0 } && { results+=(recip-dig SUCCESS) }
-    
+
     notice "Testing tomb with recipient creation: forge"
-    tt forge $tomb_key -g -r $gpgid_1 --ignore-swap --unsafe --use-urandom
-    { test $? = 0 } && { results+=(recip-forge SUCCESS) } 
-    
+    tt forge $tomb_key -g -r $gpgid_1 --ignore-swap --unsafe
+    { test $? = 0 } && { results+=(recip-forge SUCCESS) }
+
     notice "Testing tomb with recipient creation: lock"
     tt lock $tomb -k $tomb_key -g -r $gpgid_1 --ignore-swap --unsafe
     { test $? = 0 } && { results+=(recip-lock SUCCESS) }
-    
+
     notice "Testing tomb with recipient opening: open"
     tt open $tomb -k $tomb_key -g
     { test $? = 0 } && { results+=(recip-open SUCCESS) }
-    
+
     notice "Testing tomb with recipient closing: close"
     tt close recip
     { test $? = 0 } && { results+=(recip-close SUCCESS) }
-    
+
     { test $STEGHIDE = 1 } && {
         notice "Testing tomb with recipient steganographic hiding of keys"
-        
+
         cp -f arditi.jpg /tmp/recip.jpg
         sudo rm -f /tmp/recip.steg.key
-    	
+
         tt --unsafe --tomb-pwd ${dummypass} bury -k /tmp/recip.tomb.key \
             /tmp/recip.jpg -g -r "$gpgid_1"
         { test $? = 0 } && { results+=(recip-stgin SUCCESS) }
@@ -164,7 +164,7 @@ test-tomb-recip() {
         { test $? = 0 } && { results+=(recip-stgimpl SUCCESS) }
         tt close recip
     }
-    
+
 	notice "Testing tomb with recipient changing gpg key: passwd"
 	res=0
 	tt passwd -k $tomb_key -g -r $gpgid_2
@@ -174,16 +174,16 @@ test-tomb-recip() {
 	tt close recip
 	{ test $? = 0 } || { res=1 }
 	{ test $res = 0 } && { results+=(recip-passwd SUCCESS) }
-	
+
 	notice "Testing tomb with recipient resizing a tomb: resize"
     tt resize -s 30 $tomb -k $tomb_key -g -r $gpgid_2
     { test $? = 0 } && { results+=(recip-resize SUCCESS) }
-    
+
     notice "Testing tomb with recipient setting a new key: setkey"
     sudo rm -f /tmp/new.recip.tomb.key
     res=0
     tt forge /tmp/new.recip.tomb.key -g -r $gpgid_2 \
-        --ignore-swap --unsafe --use-urandom
+        --ignore-swap --unsafe
     { test $? = 0 } || { res=1 }
     tt setkey -k /tmp/new.recip.tomb.key $tomb_key $tomb -g -r $gpgid_2
     { test $? = 0 } || { res=1 }
@@ -196,18 +196,18 @@ test-tomb-recip() {
 test-tomb-recip-default() {
 
 	notice "wiping all default.tomb* in /tmp"
-	rm -f /tmp/default.tomb /tmp/default.tomb.key /tmp/default.tmp 
-	
+	rm -f /tmp/default.tomb /tmp/default.tomb.key /tmp/default.tmp
+
 	notice "Testing tomb with the default recipient"
 	res=0
     tt dig -s 20 /tmp/default.tomb
     { test $? = 0 } || { res=1 }
-    tt forge /tmp/default.tomb.key -g --ignore-swap --unsafe --use-urandom
+    tt forge /tmp/default.tomb.key -g --ignore-swap --unsafe
     { test $? = 0 } || { res=1 }
 	tt lock /tmp/default.tomb -k /tmp/default.tomb.key \
         --ignore-swap --unsafe -g
     { test $? = 0 } || { res=1 }
-    gpg -d --status-fd 2 /tmp/default.tomb.key 1> /dev/null 2> /tmp/default.tmp 
+    gpg -d --status-fd 2 /tmp/default.tomb.key 1> /dev/null 2> /tmp/default.tmp
     [[ -z "$(grep 'Tomb Test 2' /tmp/default.tmp)" ]] && { res=1 }
     { test $res = 0 } && { results+=(recip-default SUCCESS) }
 }
@@ -216,12 +216,12 @@ test-tomb-recip-hidden() {
 
 	notice "wiping all hidden.tomb* in /tmp"
 	rm -f /tmp/hidden.tomb /tmp/hidden.tomb.key
-	
+
 	notice "Testing tomb with hidden recipient"
 	res=0
     tt dig -s 20 /tmp/hidden.tomb
     { test $? = 0 } || { res=1 }
-    tt forge /tmp/hidden.tomb.key -g -R $gpgid_1 --ignore-swap --unsafe --use-urandom
+    tt forge /tmp/hidden.tomb.key -g -R $gpgid_1 --ignore-swap --unsafe
     { test $? = 0 } || { res=1 }
 	tt lock /tmp/hidden.tomb -k /tmp/hidden.tomb.key \
         --ignore-swap --unsafe -g -R $gpgid_1
@@ -233,13 +233,13 @@ test-tomb-shared() {
 
 	notice "wiping all shared.tomb* in /tmp"
     rm -f /tmp/shared.tomb /tmp/shared.tomb.key
-    
+
     notice "Testing sharing a tomb"
     res=0
     tt dig -s 20 /tmp/shared.tomb
     { test $? = 0 } || { res=1 }
     tt forge /tmp/shared.tomb.key -g -r $gpgid_1,$gpgid_2 \
-        --ignore-swap --unsafe --use-urandom 
+        --ignore-swap --unsafe
     { test $? = 0 } || { res=1 }
     tt lock /tmp/shared.tomb -k /tmp/shared.tomb.key \
         --ignore-swap --unsafe -g -r $gpgid_1
@@ -249,16 +249,16 @@ test-tomb-shared() {
     tt close shared
     { test $? = 0 } || { res=1 }
     { test $res = 0 } && { results+=(shared SUCCESS) }
-    
+
     notice "Testing changing recipients on a shared Tomb"
     tt passwd -k /tmp/shared.tomb.key -g -r $gpgid_2,$gpgid_1
     { test $? = 0 } && { results+=(shared-passwd SUCCESS) }
-    
+
     notice "Testing setkey on a shared Tomb"
     rm -f /tmp/new.shared.tomb.key
     res=0
     tt forge /tmp/new.shared.tomb.key -g -r $gpgid_1,$gpgid_2 \
-        --ignore-swap --unsafe --use-urandom
+        --ignore-swap --unsafe
     { test $? = 0 } || { res=1 }
     tt setkey -k /tmp/new.shared.tomb.key /tmp/shared.tomb.key /tmp/shared.tomb \
         -g -r $gpgid_2,$gpgid_1
@@ -297,7 +297,7 @@ test-set-key() {
 
     sudo rm -f /tmp/test.tomb.new.key
 
-    tt forge -k /tmp/test.tomb.new.key --force --unsafe --tomb-pwd ${dummypass} --use-urandom
+    tt forge -k /tmp/test.tomb.new.key --force --unsafe --tomb-pwd ${dummypass}
 
     tt setkey -k /tmp/test.tomb.new.key --unsafe --tomb-pwd ${dummypass} --tomb-old-pwd ${dummypass} /tmp/test.tomb.key /tmp/test.tomb
 
@@ -336,7 +336,7 @@ test-regression() {
 
 	${OLDT} -D dig -s 10 /tmp/regression-test.tomb
 	${OLDT} -D forge /tmp/regression-test.tomb.key \
-			--ignore-swap --unsafe --tomb-pwd ${dummypass} --use-urandom
+			--ignore-swap --unsafe --tomb-pwd ${dummypass}
 	${OLDT} -D lock /tmp/regression-test.tomb -k /tmp/regression-test.tomb.key \
 			--ignore-swap --unsafe --tomb-pwd ${dummypass}
 
@@ -368,9 +368,9 @@ test-open-read-only() {
     # Create new
     tt dig -s 20 /tmp/testro.tomb
     tt forge /tmp/testro.tomb.key \
-        --ignore-swap --unsafe --tomb-pwd ${dummypass} --use-urandom
+        --ignore-swap --unsafe --tomb-pwd ${dummypass}
     tt lock /tmp/testro.tomb -k /tmp/testro.tomb.key \
-        --ignore-swap --unsafe --tomb-pwd ${dummypass} 
+        --ignore-swap --unsafe --tomb-pwd ${dummypass}
 
     notice "Testing open read only"
 
@@ -453,9 +453,9 @@ tt --unsafe close test
 
 { test $RESIZER = 1 } && {
     notice "Testing resize to 30 MiB"
-    
+
     tt --unsafe --tomb-pwd ${dummypass} -k /tmp/test.tomb.key resize /tmp/test.tomb -s 30
-    
+
     { test $? = 0 } && { results+=(resize SUCCESS) }
 
 }
@@ -465,9 +465,9 @@ notice "Testing contents integrity"
 tt -k /tmp/test.tomb.key --unsafe --tomb-pwd ${dummypass} open /tmp/test.tomb
 
 { test $? = 0 } && {
-    
+
     crc2="sha256 /media/test/datacheck.raw"
-    
+
     { test "$crc" = "$crc2" } && { results+=(chksum SUCCESS) }
 
     tt close test
@@ -497,33 +497,33 @@ test-set-key
 
 
 
-{ test $KDF = 1 } && { 
-    
+{ test $KDF = 1 } && {
+
     notice "Testing KDF key"
     sudo rm -f /tmp/test.tomb.kdf /tmp/kdf.tomb
-    
-    tt --unsafe --tomb-pwd ${dummypass} --use-urandom --kdf 1 forge -k /tmp/test.tomb.kdf
-    
+
+    tt --unsafe --tomb-pwd ${dummypass}  --kdf 1 forge -k /tmp/test.tomb.kdf
+
     { test $? = 0 } && { results+=(kdforge SUCCESS) }
-    
+
     tt passwd --unsafe --tomb-old-pwd ${dummypass} --tomb-pwd ${dummypassnew} --kdf 1 -k /tmp/test.tomb.kdf
-    
+
     { test $? = 0 } && { results+=(kdfpass SUCCESS) }
-    
+
     tt dig -s 10 /tmp/kdf.tomb
-    
+
     tt lock /tmp/kdf.tomb -k /tmp/test.tomb.kdf \
         --ignore-swap --unsafe --tomb-pwd ${dummypassnew} --kdf 1
-    
+
     { test $? = 0 } && { results+=(kdflock SUCCESS) }
-    
+
     tt open /tmp/kdf.tomb -k /tmp/test.tomb.kdf \
         --ignore-swap --unsafe --tomb-pwd ${dummypassnew} --kdf 1
-    
+
     { test $? = 0 } && { results+=(kdfopen SUCCESS) }
-    
+
     ${T} close kdf
-    
+
 }
 
 { test $STEGHIDE = 1 } && {
@@ -532,7 +532,7 @@ test-set-key
 
     cp -f arditi.jpg /tmp/tomb.jpg
     sudo rm -f /tmp/test.steg.key
-    
+
     tt --unsafe --tomb-pwd ${dummypass} bury -k /tmp/test.tomb.key /tmp/tomb.jpg
 
     { test $? = 0 } && { results+=(stgin SUCCESS) }
@@ -559,7 +559,7 @@ test-set-key
 
     notice "test using open -k image.jpeg"
 
-    tt --unsafe --tomb-pwd ${dummypass} open -k /tmp/tomb.jpg /tmp/test.tomb 
+    tt --unsafe --tomb-pwd ${dummypass} open -k /tmp/tomb.jpg /tmp/test.tomb
     { test $? = 0 } && { results+=(stgimpl SUCCESS) }
 
     tt close test
@@ -576,7 +576,7 @@ test-set-key
 }
 
 # rm /tmp/test.tomb{,.key} -f || exit 1
-    
+
 endloops=(`sudo losetup -a |cut -d: -f1`)
 
 notice "Test results summary"
