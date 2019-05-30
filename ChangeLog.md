@@ -1,5 +1,19 @@
 # Tomb ChangeLog
 
+## 2.6
+### May 2019
+
+This release adds new features and provides an important fix for usage
+of Tomb with cryptsetup 2.1 and future versions; it also fixes a
+whitespace bug in KDF passwords, all fixes are documented in
+KNOWN_BUGS. A notable new feature is the libsphinx integration for
+password-authenticated key agreement (PAKE). Another feature is the
+integration of cloakify to support new cloak/uncloak commands that
+hide keys inside long text files. Also support for gpg sub-keys has
+been added and overall gpg asymmetric key protection is improved.
+
+
+
 ## 2.5
 ### January 2018
 

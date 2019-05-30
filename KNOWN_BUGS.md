@@ -1,3 +1,14 @@
+# Cryptsetup change of default to luks2
+## Issue opening tombs with cryptsetup >2.0
+
+Tomb uses the cryptsetup LUKS volume header default to type luks1
+which has been for long the default in cryptsetup. But starting from
+cryptsetup v2.1 a new default has been introduced (luks2) and the
+--type option added to specify the old luks1.
+
+Using Tomb version 2.6 (and future releases) the problem opening tombs
+using recent GNU/Linux distributions is fixed.
+
 # Whitespaces in KDF passwords
 ## Issue affecting passwords used with PBKDF2 keys (<2.6)
 

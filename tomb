@@ -7,7 +7,7 @@
 
 # {{{ License
 
-# Copyright (C) 2007-2018 Dyne.org Foundation
+# Copyright (C) 2007-2019 Dyne.org Foundation
 #
 # Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
 #
@@ -44,8 +44,8 @@
 
 # {{{ Global variables
 
-typeset VERSION="2.5"
-typeset DATE="Jan/2018"
+typeset VERSION="2.6"
+typeset DATE="May/2019"
 typeset TOMBEXEC=$0
 typeset TMPPREFIX=${TMPPREFIX:-/tmp}
 # TODO: configure which tmp dir to use from a cli flag
