@@ -2192,7 +2192,7 @@ _update_control_file() {
 	# $1 = path to control file
 	# $2 = contents
 	[[ "$2" = "" ]] && return 1
-	[[ -r "$1" ]] && rm -f "$1"
+	_sudo touch "$1"
 	print "$2" > "$1"
 	_sudo chown ${_UID}:${_GID} "$1"
 	_verbose "updated control file $1 = $2"
