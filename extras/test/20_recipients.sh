@@ -48,4 +48,10 @@ test_expect_success 'Testing tomb with GnuPG keys and shared tomb' '
     tt_close
     '
 
+test_export "untrusted"
+test_expect_success 'Testing tomb creation with untrusted GnuPG keys' '
+    tt_dig -s 20 &&
+    test_must_fail tt_forge -g -r $KEY_UNTRUSTED
+    '
+
 test_done

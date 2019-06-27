@@ -953,14 +953,20 @@ _ensure_dependencies() {
 is_valid_recipients() {
 	typeset -a recipients
 	recipients=($@)
+	trusted=(m f u w s)
 
 	_verbose "is_valid_recipients"
 
 	# All the keys ID must be valid (the public keys must be present in the database)
 	for gpg_id in ${recipients[@]}; do
-		gpg --with-colons --batch --list-keys "$gpg_id" &> /dev/null
+		trust="$(gpg --with-colons --batch --list-keys "$gpg_id" 2> /dev/null |
+				 	awk 'BEGIN { FS=":" } /^pub/ { print $2; exit}')"
 		[[ $? != 0 ]] && {
 			_warning "Not a valid GPG key ID: ::1 gpgid:: " $gpg_id
+			return 1
+		}
+		[[ ${trusted[(r)$trust]} != $trust ]] && {
+			_warning "The key ::1 gpgid:: is not trusted enough" $gpg_id
 			return 1
 		}
 	done
