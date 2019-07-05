@@ -102,7 +102,7 @@ internally to enumerate processes running in one or all tombs.
 Creates or updates the search indexes of all tombs currently open:
 enables use of the \fIsearch\fR command using simple word patterns on
 file names. Indexes are created using mlocate's updatedb(8) and
-swish-e(1) if they are found on the system. Indexes allow to search
+swish-e(1) if they are found on the system. Indexes allow one to search
 very fast for filenames and contents inside a tomb, they are stored
 inside it and are not accessible if the Tomb is closed. To avoid
 indexing a specific tomb simply touch a \fI.noindex\fR file in it.
@@ -232,7 +232,7 @@ See the \fIHOOKS\fR section in this manual for more information.
 When opening a tomb, preserves the ownership of all files and
 directories contained in it. Normally the \fIopen\fR command changes
 the ownership of a tomb's contents to the UID and GID of the user who
-has succesfully opened it: it is a usability feature in case a tomb is
+has successfully opened it: it is a usability feature in case a tomb is
 used by a single user across different systems. This flag deactivates
 this behaviour.
 .B
@@ -426,7 +426,7 @@ seized devices and forensic analysis of files and blocks on disc.
 
 For instance to eliminate any trace of tomb usage from the shell
 history ZSh users can activate the "HISTIGNORESPACE" feature and
-prefix all invokations of tomb with a blank space, including two lines
+prefix all invocations of tomb with a blank space, including two lines
 in ".zshrc":
 
 .EX
