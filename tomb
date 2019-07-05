@@ -126,8 +126,8 @@ export TEXTDOMAIN=tomb
 
 # Wrap sudo with a more visible message
 _sudo() {
-	local sudo_eng="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
-	local msg="$(gettext -s "$sudo_eng")"
+	local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
+	command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
 	msg=${(S)msg//::1*::/$USER}
 	sudo -p "
 $msg
