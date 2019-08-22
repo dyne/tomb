@@ -4,6 +4,23 @@
 If you like to see our nifty little skull on the upper right corner of
 your desktop, then compile and install this little auxiliary program.
 
+## Build
+
+Make sure that Gcc, GNU Make, pkg-config, Gtk 2.0 and libnotify
+development packages are installed: in Debian and Ubuntu the packages
+are:
+
+- gcc
+- make
+- pkg-config
+- libgtk2.0-dev
+- libnotify-dev
+
+Then launch the `make` command which will build the `tomb-gtk-tray`
+executable one can copy to the path (for instance `~/bin`).
+
+## Usage
+
 Use by launching `tomb-gtk-tray` followed by the name of your tomb as
 reported by `tomb list`. For instance if your tomb is `secrets.tomb`:
 
