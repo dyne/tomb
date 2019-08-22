@@ -245,7 +245,7 @@ _whoami() {
 	# }
 
 	# Force HOME to _USER's HOME if necessary
-	local home=$(awk -F: "/^$_USER:/ { print \$6 }" /etc/passwd 2>/dev/null)
+	local home=`_get_home $_USER`
 	[[ $home == $HOME ]] || {
 		_verbose "Updating HOME to match user's: ::1 home:: (was ::2 HOME::)" \
 				 $home $HOME
@@ -1004,6 +1004,9 @@ _gpg_uid() {
 	gpg --with-colons --list-key "$1" |
 		awk 'BEGIN { FS=":" } /^uid/ { print $10; exit}' }
 
+# helpers to retrieve data from passwd using getent
+_get_username() { print ${"$(getent passwd ${1})"[(ws@:@)1]} }
+_get_home() { print ${"$(getent passwd ${1})"[(ws@:@)6]} }
 
 # $1 is the encrypted key contents we are checking
 is_valid_key() {
@@ -2336,8 +2339,7 @@ mount_tomb() {
 		tomblast=$(_cat ${tombmount}/.last)
 		tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
 
-		tombuser=$(getent passwd $tombuid)
-		tombuser=${tombuser[(ws@:@)1]}
+		tombuser=`_get_username $tombuid`
 
 		_message "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::" $tombuser $tombuid $tombtty $tombhost
 		_message "on date ::1 date::" $tombsince
@@ -2511,8 +2513,7 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 			tombhost=$(_cat ${tombmount}/.host)
 			tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
 
-			tombuser=$(getent passwd $tombuid)
-			tombuser=${tombuser[(ws@:@)1]}
+			tombuser=`_get_username $tombuid`
 		}
 
 		{ option_is_set --get-mountpoint } && { print $tombmount; continue }
@@ -3006,8 +3007,7 @@ list_processes() {
 				_verbose "process found: $pnum"
 				puid=$(_cat /proc/${pnum}/loginuid)
 				pcmd=$(_cat /proc/${pnum}/cmdline)
-				powner=$(getent passwd $puid)
-				powner=${powner[(ws@:@)1]}
+				powner=`_get_username $puid`
 				_verbose "process found: $pnum $pcmd ($powner)"
 				_message "::1 tombname:: ::2 cmd:: (::3 owner::)" \
 						 $tombname $pcmd $powner
@@ -3048,8 +3048,7 @@ slam_tomb() {
 		for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
 			puid=$(_cat /proc/${pnum}/loginuid)
 			pcmd=$(_cat /proc/${pnum}/cmdline)
-			powner=$(getent passwd $puid)
-			powner=${powner[(ws@:@)1]}
+			powner=`_get_username $puid`
 			_verbose "process found: $pnum $pcmd ($powner)"
 			# iterate through 3 different signals to send, break on success
 			for s in TERM HUP KILL; do
