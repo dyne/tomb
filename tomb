@@ -1997,8 +1997,8 @@ forge_key() {
 		_warning "Dumping contents to screen:"
 		print "${mapfile[$TOMBKEY]}"
 		_warning "--"
-		_sudo umount ${keytmp}
-		rm -r $keytmp
+		_sudo umount ${TOMBKEYFILE}
+		rm -f ${TOMBKEYFILE}
 		_failure "Operation aborted."
 	}
 
