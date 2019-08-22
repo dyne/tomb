@@ -504,9 +504,9 @@ ask_password() {
 
 	# if sphinx mode is chosen, use the provided input
 	# as master password to retrieve the actual password
-	{ option_is_set --sphx-user } || { option_is_set --sphx-host } && {
+	if option_is_set --sphx-user || option_is_set --sphx-host; then
 		password=$(sphinx_get_password "$password")
-	}
+	fi
 
 	[[ "$password" = "" ]] && {
 		_warning "Empty password"
@@ -524,7 +524,7 @@ ask_password() {
 sphinx_get_password() {
 	local errorfile
 	local password
-	{ option_is_set --sphx-user && option_is_set --sphx-host } && {
+	if option_is_set --sphx-user && option_is_set --sphx-host; then
 		# value error in sphinx doesn't set exit code
 		# using tempfile as a workaround to notice the error
 		errorfile=$(mktemp /tmp/tomb_error.XXXXXXXXX)
@@ -538,9 +538,9 @@ sphinx_get_password() {
 			rm $errorfile
 			_failure "Failed to retrieve actual password with sphinx."
 		fi
-	} || {
+	else
 		_failure "Both host and user have to be set to use sphinx"
-	}
+	fi
 }
 
 # Create PASSWORD in sphinx
@@ -549,7 +549,7 @@ sphinx_get_password() {
 sphinx_set_password() {
 	local errorfile
 	local password
-	{ option_is_set --sphx-user && option_is_set --sphx-host } && {
+	if option_is_set --sphx-user && option_is_set --sphx-host; then
 		# value error in sphinx doesn't set exit code
 		# using tempfile as a workaround to notice the error
 		errorfile=$(mktemp /tmp/tomb_error.XXXXXXXXX)
@@ -572,9 +572,9 @@ sphinx_set_password() {
 			rm $errorfile
 			_failure "Failed to create password with sphinx"
 		fi
-	} || {
+	else
 		_failure "Both host and user have to be set to use sphinx"
-	}
+	fi
 }
 
 
@@ -1278,9 +1278,9 @@ ask_key_password() {
 
 		# if sphinx mode is chosen, use the provided input
 		# as master password to retrieve the actual password
-		{ option_is_set --sphx-user } || { option_is_set --sphx-host } && {
+		if option_is_set --sphx-user || option_is_set --sphx-host; then
 			tombpass=$(sphinx_get_password "$tombpass")
-		}
+		fi
 
 		get_lukskey "$tombpass"
 
@@ -1376,29 +1376,29 @@ gen_key() {
 	tombpasstmp=""
 
 	# remove sphinx opts not to mess with initial password prompt
-	{ option_is_set --sphx-user } && {
+	option_is_set --sphx-user && {
 		sphx_user_tmp="$(option_value --sphx-user)"
 		unset "OPTS[--sphx-user]"
 	}
-	{ option_is_set --sphx-host } && {
+	option_is_set --sphx-host && {
 		sphx_host_tmp="$(option_value --sphx-host)"
 		unset "OPTS[--sphx-host]"
 	}
 
-	{ option_is_set -g } && {
+	if option_is_set -g; then
 		gpgopt=(--encrypt)
 
-		{ option_is_set -r || option_is_set -R } && {
+		if option_is_set -r || option_is_set -R; then
 			typeset -a recipients
-			{ option_is_set -r } && {
+			if option_is_set -r; then
 				recipients=(${(s:,:)$(option_value -r)})
 				recipients_opt="--recipient"
-			} || {
+			else
 				recipients=(${(s:,:)$(option_value -R)})
 				recipients_opt="--hidden-recipient"
-			}
+			fi
 
-			{ is_valid_recipients $recipients } || {
+		    is_valid_recipients $recipients || {
 				_failure "You set an invalid GPG ID."
 			}
 
@@ -1410,15 +1410,15 @@ gen_key() {
 			done
 
 			gpgopt+=(`_recipients_arg "$recipients_opt" $recipients`)
-		} || {
+		else
 			_message "No recipient specified, using default GPG key."
 			gpgopt+=("--default-recipient-self")
-		}
+		fi
 
 		# Set gpg inputs and options
 		gpgpass="$TOMBSECRET"
 		opt=''
-	} || {
+	else 
 		if [ "$2" = "" ]; then
 			while true; do
 				# 3 tries to write two times a matching password
@@ -1447,7 +1447,7 @@ gen_key() {
 
 		# if sphinx mode is chosen, use the provided input
 		# as master password to generate the actual password
-		if [[ $sphx_host_tmp ]] || [[ $sphx_user_tmp ]]; then 
+		if [[ "$sphx_host_tmp" != "" ]] || [[ "$sphx_user_tmp" != "" ]]; then 
 			OPTS[--sphx-user]=$sphx_user_tmp
 			OPTS[--sphx-host]=$sphx_host_tmp
 			unset sphx_user_tmp
@@ -1493,7 +1493,7 @@ gen_key() {
 		gpgpass="${tombpass}\n$TOMBSECRET"
 		gpgopt=(--passphrase-fd 0 --symmetric --no-options)
 		opt='-n'
-	}
+	fi
 
 	_tmp_create
 	local tmpres=$TOMBTMP
