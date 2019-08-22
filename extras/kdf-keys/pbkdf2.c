@@ -140,18 +140,18 @@ int main(int argc, char *argv[])
 	 * passwords containing just a bunch of spaces are valid
 	 */
 	pass = calloc(buff_len, sizeof(char)); 
-	char c = getchar();
+	int c = getchar();
 	while (c != EOF) {
 		if (pw_len == buff_len) {
 			buff_len *= 2;
 			pass = realloc(pass, buff_len);
 			if (!pass) {
-				fprintf(stderr, "Error allocating memory");
+				fprintf(stderr, "Error allocating memory\n");
 				cleanup(result, result_len, pass, salt, salt_len);
 				exit(3);
 			}
 		}
-		pass[pw_len] = c;
+		pass[pw_len] = (char)c;
 		pw_len++;
 		c = getchar();
 	}

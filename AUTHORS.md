@@ -28,8 +28,8 @@ The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon,
 Narrat, Jerry Polfer, Jim Turner, Maxime Arthaud, RobertMX,
 mhogomchungu Mandeep Bhutani, Emil Lundberg, Joel Montes de Oca, Armin
 Mesbah, Arusekk, Stephan Schindel, Asbjørn Apeland, Victor Calvert,
-bjonnh, SargoDevel, AitorATuin, Alexis Danizan and...  the Linux
-Action Show!
+bjonnh, SargoDevel, AitorATuin, Alexis Danizan, Sven Geuer and...
+the Linux Action Show!
 
 Tomb includes an implementation of the "Password-Based Key Derivation
 Function v2" based on GCrypt and written by Anthony Thyssen, with
