@@ -1005,8 +1005,8 @@ _gpg_uid() {
 		awk 'BEGIN { FS=":" } /^uid/ { print $10; exit}' }
 
 # helpers to retrieve data from passwd using getent
-_get_username() { print ${"$(getent passwd ${1})"[(ws@:@)1]} }
-_get_home() { print ${"$(getent passwd ${1})"[(ws@:@)6]} }
+_get_username() { getent passwd ${1} | awk -F: '{print $1}' }
+_get_home()     { getent passwd ${1} | awk -F: '{print $6}' }
 
 # $1 is the encrypted key contents we are checking
 is_valid_key() {
