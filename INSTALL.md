@@ -102,7 +102,7 @@ To have it change directory `extras/gtk-tray` then
  3. run `sudo make install` (default PREFIX is `/usr/local`)
  4. start `tomb-gtk-tray tombname` after the tomb is open
 
-Of cource one can include the launch of tomb-gtk-tray scripts.
+Of course, one can include the launch of tomb-gtk-tray scripts.
 
 ## extras/qt-tray
 
