@@ -1,5 +1,12 @@
 # Tomb ChangeLog
 
+## 2.7
+### Oct 2019
+
+Fixed getent parsing of passwd and notation of conditionals
+normalised.  A few other minor fixes and documentation improvements.
+
+
 ## 2.6
 ### May 2019
 

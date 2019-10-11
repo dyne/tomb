@@ -44,8 +44,8 @@
 
 # {{{ Global variables
 
-typeset VERSION="2.6"
-typeset DATE="May/2019"
+typeset VERSION="2.7"
+typeset DATE="Oct/2019"
 typeset TOMBEXEC=$0
 typeset TMPPREFIX=${TMPPREFIX:-/tmp}
 # TODO: configure which tmp dir to use from a cli flag
