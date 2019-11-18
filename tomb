@@ -2016,7 +2016,7 @@ forge_key() {
 #
 # Lock the given tomb with the given key file, in fact formatting the
 # loopback volume as a LUKS device.
-# Default cipher 'aes-xts-plain64:sha256'can be overridden with -o
+# Default cipher 'aes-xts-plain64'can be overridden with -o
 lock_tomb_with_key() {
 	# old default was aes-cbc-essiv:sha256
 	# Override with -o
