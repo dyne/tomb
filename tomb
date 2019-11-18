@@ -2195,14 +2195,15 @@ change_tomb_key() {
 # {{{ Open
 
 _update_control_file() {
-	# replaces a control file with new contents and gives it user ownership
+	# make sure a control file exists, gives it user ownership
+	# and replaces it with new contents
 	# stdin = contents
 	# $1 = path to control file
 	# $2 = contents
 	[[ "$2" = "" ]] && return 1
 	_sudo touch "$1"
-	print "$2" > "$1"
 	_sudo chown ${_UID}:${_GID} "$1"
+	print "$2" > "$1"
 	_verbose "updated control file $1 = $2"
 }
 
