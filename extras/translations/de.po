@@ -1,11 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
+"PO-Revision-Date: 2020-01-24 01:21+0000\n"
+"Last-Translator: Milo Ivir <mail@milotype.de>\n"
+"Language-Team: German <https://hosted.weblate.org/projects/tomb/tomb/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: POEditor.com\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.11-dev\n"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -339,7 +343,7 @@ msgstr "Angewiesen das Passwort des Schlüssels ::1 key:: zu ändern"
 
 #: tomb:Key operations:change_passwd:1095
 msgid "No valid password supplied."
-msgstr "Kein gültiges Passwort angegeben"
+msgstr "Kein gültiges Passwort angegeben."
 
 #: tomb:Key operations:change_passwd:1097
 msgid "Changing password for ::1 key file::"
@@ -531,7 +535,9 @@ msgstr "Verschlüsselungsschlüssel konnte nicht erstellt werden."
 
 #: tomb:Create:forge_key:1492
 msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
-msgstr "Der Schlüssel ::1 key:: wird mit dem Verschlüsselungsalgorithmus ::2 algorithm:: geschmiedet."
+msgstr ""
+"Der Schlüssel ::1 key:: wird mit dem Verschlüsselungsalgorithmus ::2 "
+"algorithm:: gefälscht"
 
 #: tomb:Create:forge_key:1501
 msgid "This operation takes time, keep using this computer on other tasks,"
@@ -623,7 +629,7 @@ msgstr "'cryptsetup luksFormat' hat einen Fehler ausgegeben."
 
 #: tomb:Create:lock_tomb_with_key:1625
 msgid "cryptsetup luksOpen returned an error."
-msgstr "'cryptsetup luksOpen' hat einen Fehler ausgegeben"
+msgstr "'cryptsetup luksOpen' hat einen Fehler ausgegeben."
 
 #: tomb:Create:lock_tomb_with_key:1628
 msgid "Formatting your Tomb with Ext3/Ext4 filesystem."
@@ -731,7 +737,9 @@ msgstr "Dieses Grab ist ein gültiges LUKS verschlüsseltes Gerät."
 
 #: tomb:Open:mount_tomb:1774
 msgid "Cipher is \"::1 cipher::\" mode \"::2 mode::\" hash \"::3 hash::\""
-msgstr "Verschlüsselung \"::1 cipher::\" im Modus \"::2 mode::\" und der Hashfunktion \"::3 hash::\"."
+msgstr ""
+"Verschlüsselung \"::1 cipher::\" im Modus \"::2 mode::\" und der "
+"Hashfunktion \"::3 hash::\""
 
 #: tomb:Open:mount_tomb:1781
 msgid "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
@@ -851,7 +859,7 @@ msgstr "Ich sehe kein geöffnetes Grab. Mögen Sie alle in Frieden ruhen."
 
 #: tomb:Index and search:index_tombs:2178
 msgid "Creating and updating search indexes."
-msgstr "Erstellen und aktualisieren von Suchindexen"
+msgstr "Erstellen und aktualisieren von Suchindexen."
 
 #: tomb:Index and search:index_tombs:2191
 msgid "Skipping ::1 tomb name:: (.noindex found)."
@@ -975,11 +983,11 @@ msgstr "Abbrechen aller im Grab laufenden Prozesse."
 
 #: tomb:Close:umount_tomb:2453
 msgid "Cannot slam the tomb ::1 tomb name::"
-msgstr "::1 tomb name:: kann nicht zugeschlagen werden!"
+msgstr "::1 tomb name:: kann nicht zugeschlagen werden"
 
 #: tomb:Close:umount_tomb:2455
 msgid "Closing tomb ::1 tomb name:: mounted on ::2 mount point::"
-msgstr "Grab ::1 tomb name:: eingehängt in ::2 mount point:: wird geschlossen."
+msgstr "Grab ::1 tomb name:: eingehängt in ::2 mount point:: wird geschlossen"
 
 #: tomb:Close:umount_tomb:2463
 msgid "Closing tomb bind hook: ::1 hook::"
@@ -1003,7 +1011,9 @@ msgstr "Das Grab ist beschäftigt und kann nicht ausgehängt werden!"
 
 #: tomb:Close:umount_tomb:2492
 msgid "Error occurred in cryptsetup luksClose ::1 mapper::"
-msgstr "Ein Fehler ist beim ausführen von 'cryptsetup luksClose ::1 mapper::' aufgetreten."
+msgstr ""
+"Ein Fehler ist beim ausführen von 'cryptsetup luksClose ::1 mapper::' "
+"aufgetreten"
 
 #: tomb:Close:umount_tomb:2499
 msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
@@ -1170,4 +1180,3 @@ msgstr ""
 #: tomb:Main routine:main:2806
 msgid " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
 msgstr " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
-
