@@ -225,7 +225,7 @@ commands, or text files retrieved from \fIengraved\fR QR codes. If the
 stdin (blocking).
 .B
 .IP "-n"
-Skip processing of post-hooks and bind-hooks if found inside the tomb.
+Skip processing of exec-hooks and bind-hooks if found inside the tomb.
 See the \fIHOOKS\fR section in this manual for more information.
 .B
 .IP "-p"
@@ -329,7 +329,7 @@ Switch to this TTY terminal when dropping privileges.
 
 Hooks are special files that can be placed inside the tomb and trigger
 actions when it is opened and closed; there are two kinds of such
-files: \fIbind-hooks\fR and \fIpost-hooks\fR can be placed in the
+files: \fIbind-hooks\fR and \fIexec-hooks\fR can be placed in the
 base root of the tomb.
 
 .B
@@ -523,13 +523,13 @@ keeping all its profile data inside it:
 
 .EX
 	tomb open FOX.tomb -k FOX.tomb.key
-	cat <<EOF > /media/FOX.tomb/post-hooks
+	cat <<EOF > /media/FOX.tomb/exec-hooks
 #!/bin/sh
 if [ "$1" = "open" ]; then
   firefox -no-remote -profile "$2"/firefox-pro &
 fi
 EOF
-	chmod +x     /media/FOX.tomb/post-hooks
+	chmod +x     /media/FOX.tomb/exec-hooks
 .EE
 
 .IP \(bu
@@ -540,7 +540,7 @@ Script a tomb to archive Pictures using Shotwell, launching it on open:
 	cat <<EOF > /media/Pictures.tomb/bind-hooks
 Pictures Pictures
 EOF
-        cat <<EOF > /media/Pictures.tomb/post-hooks
+        cat <<EOF > /media/Pictures.tomb/exec-hooks
 #!/bin/sh
 if [ "$1" = "open" ]; then
   which shotwell > /dev/null
@@ -549,7 +549,7 @@ if [ "$1" = "open" ]; then
   fi
 fi
 EOF
-	chmod +x /media/Pictures.tomb/post-hooks
+	chmod +x /media/Pictures.tomb/exec-hooks
 .EE
 
 .SH BUGS
