@@ -491,16 +491,21 @@ ask_password() {
 	fi # end of DISPLAY block
 
 	# parse the pinentry output
+  local pinentry_error
 	for i in ${(f)output}; do
-		[[ "$i" =~ "^ERR.*" ]] && {
-			_warning "Pinentry error: ::1 error::" ${i[(w)3]}
-			print "canceled"
-			return 1
+    [[ "$i" =~ "^ERR.*" ]] && {
+      pinentry_error="${i[(w)3]}"
 		}
 
 		# here the password is found
 		[[ "$i" =~ "^D .*" ]] && password="${i##D }";
 	done
+
+  [[ ! -z "$pinentry_error" ]] && [[ "$password" = "" ]] && {
+    _warning "Pinentry error: ::1 error::" ${pinentry_error}
+    print "canceled"
+    return 1
+  }
 
 	# if sphinx mode is chosen, use the provided input
 	# as master password to retrieve the actual password
