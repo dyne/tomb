@@ -1,19 +1,25 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
+"PO-Revision-Date: 2020-04-18 06:11+0000\n"
+"Last-Translator: Jeannette L <j.lavoie@net-c.ca>\n"
+"Language-Team: French <https://hosted.weblate.org/projects/tomb/tomb/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: POEditor.com\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 4.0.2-dev\n"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
 msgstr ""
+"[sudo] Entrez le mot de passe pour l'utilisateur ::1 user:: pour obtenir les "
+"privilèges de superutilisateur"
 
 #: tomb:Safety functions:_whoami:200
 msgid "Failing to identify the user who is calling us"
-msgstr "Impossible d'identifier l'utilisateur qui nous appelle."
+msgstr "Impossible d'identifier l'utilisateur qui nous appelle"
 
 #: tomb:Safety functions:_plot:249
 msgid "Tomb won't work without a TOMBNAME."
@@ -29,7 +35,9 @@ msgstr "Erreur fatale lors de l'assignation des permissions umask pour les fichi
 
 #: tomb:Safety functions:_tmp_create:269
 msgid "Someone is messing up with us trying to hijack temporary files."
-msgstr "Quelqu'un essaye de nous nuire en s'introduisant dans les fichiers temporaires"
+msgstr ""
+"Quelqu'un essaye de nous nuire en s'introduisant dans les fichiers "
+"temporaires."
 
 #: tomb:Safety functions:_tmp_create:273
 msgid "Fatal error creating a temporary file: ::1 temp file::"
@@ -77,7 +85,7 @@ msgstr "Erreur avec pinentry : ::1 error::"
 
 #: tomb:Safety functions:ask_password:489
 msgid "Empty password"
-msgstr "Mot de passe vide."
+msgstr "Mot de passe vide"
 
 #: tomb:Safety functions:is_valid_tomb:506
 msgid "Tomb file is missing from arguments."
@@ -1200,4 +1208,3 @@ msgstr ""
 #: tomb:Main routine:main:2806
 msgid " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
 msgstr " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
-
