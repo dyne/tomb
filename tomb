@@ -820,6 +820,7 @@ function _msg() {
 			;;
 		verbose)
 			pchars="[D]"; pcolor="blue"
+			fd=2
 			;;
 		success)
 			pchars="(*)"; pcolor="green"
