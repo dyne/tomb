@@ -1,6 +1,6 @@
 FROM dyne/devuan:beowulf
 
-RUN apt-get update -y -q && apt-get install -y -q zsh cryptsetup gawk libgcrypt20-dev steghide qrencode python python2.7 python3-pip python3-dev libsodium-dev libssl-dev make gcc g++ sudo gettext file bsdmainutils
+RUN apt-get update -y -q --allow-releaseinfo-change && apt-get install -y -q zsh cryptsetup gawk libgcrypt20-dev steghide qrencode python python2.7 python3-pip python3-dev libsodium-dev libssl-dev make gcc g++ sudo gettext file bsdmainutils
 RUN pip3 install setuptools wheel
 
 COPY . /Tomb/
