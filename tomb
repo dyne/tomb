@@ -480,7 +480,7 @@ ask_password() {
 			if _is_found "pinentry-curses"; then
 				_verbose "using pinentry-curses"
 
-				_warning "Detected DISPLAY, but only pinentry-curses is found."
+				_verbose "Detected DISPLAY, but only pinentry-curses is found."
 				output=$(pinentry_assuan_getpass | pinentry-curses)
 			else
 				_failure "Cannot find any pinentry: impossible to ask for password."
