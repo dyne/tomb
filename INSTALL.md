@@ -163,7 +163,7 @@ Sure as Hell it can! Licensing issues aside ([GNU GPLv3+](COPYING)
 terms) Tomb provides machine-readable output and interaction via some
 flags:
 
-         flag   | function
+flag            | function
 --------------- | ------------------------------------------------
  --no-color     | avoids coloring output to allow parsing
  --unsafe       | allows passwords options and cleartext key from stdin
