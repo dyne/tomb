@@ -5,9 +5,9 @@ RUN pip3 install setuptools wheel
 
 COPY . /Tomb/
 
-WORKDIR /Tomb/extras
-RUN ./install_sphinx.sh
-RUN cp test/sphinx.cfg /etc/sphinx/config
+# WORKDIR /Tomb/extras
+# RUN ./install_sphinx.sh
+# RUN cp test/sphinx.cfg /etc/sphinx/config
 
 WORKDIR /Tomb
 RUN make --directory=extras/kdf-keys
