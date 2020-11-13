@@ -1934,9 +1934,10 @@ forge_key() {
 	_check_swap # Ensure the available memory is safe to use
 
 	# Ensure GnuPG won't exit with an error before first run
-	[[ -r $HOME/.gnupg/pubring.gpg ]] || {
-		mkdir -m 0700 $HOME/.gnupg
-		touch $HOME/.gnupg/pubring.gpg }
+	local gpghome=${GNUPGHOME:-$HOME/.gnupg}
+	[[ -r $gpghome/pubring.gpg ]] || {
+        mkdir -p -m 0700 $gpghome
+        touch $gpghome/pubring.gpg }
 
 	# Do not overwrite any files accidentally
 	[[ -r "$destkey" ]] && {
