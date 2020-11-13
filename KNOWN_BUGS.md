@@ -1,3 +1,16 @@
+# Password bug in X11 when using pinentry-curses
+## Issue with Tomb version 2.0 to 2.7
+
+This bug affects systems with a running X11 DISPLAY, but where only
+pinentry-ncurses is installed. It wrongly reads the input password: no
+matter what string is chosen, the password becomes:
+
+tomb [W] Detected DISPLAY, but only pinentry-curses is found.
+
+Following the fix in Tomb 2.8 affected users will need to use the line
+above as password to open their tomb and should change their key with
+a new password using 'tomb passwd'.
+
 # Cryptsetup change of default to luks2
 ## Issue opening tombs with cryptsetup >2.0
 
