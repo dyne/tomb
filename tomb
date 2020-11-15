@@ -654,7 +654,7 @@ render_mapper() {
 		_failure "cannot render mapper: missing \$tombpath"
 	[[ "$TOMBNAME" == "" ]] &&
 		_failure "cannot render mapper: missing \$TOMBNAME"
-	local maphash=`print $tombpath | sha256sum -z`
+	local maphash=`realpath $tombpath | sha256sum -z`
 	mapper="tomb.$TOMBNAME.${maphash[(w)1]}"
 	local mounted_tombs=(`list_tomb_mounts`)
 	local usedmapper
