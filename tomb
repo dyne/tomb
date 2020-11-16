@@ -416,6 +416,7 @@ ask_password() {
 	local password
 	local gtkrc
 	local theme
+	local pass_asked
 
 	# Distributions have broken wrappers for pinentry: they do
 	# implement fallback, but they disrupt the output somehow.	We are
@@ -428,70 +429,54 @@ ask_password() {
 
 	_verbose "asking password with tty=$TTY lc-ctype=$LANG"
 
-	if [[ "$DISPLAY" = "" ]]; then
+	pass_asked=0
 
-		if _is_found "pinentry-curses"; then
-			_verbose "using pinentry-curses"
-			output=$(pinentry_assuan_getpass | pinentry-curses)
-		else
-			_failure "Cannot find pinentry-curses and no DISPLAY detected."
-		fi
-
-	else # a DISPLAY is found to be active
-
-		# customized gtk2 dialog with a skull (if extras are installed)
+	if [[ "$WAYLAND_DISPLAY" ]]; then
+		_verbose "wayland display detected"
+		_is_found "pinentry-gnome3" && {
+			_verbose "using pinentry-gnome3 on wayland"
+			output=$(pinentry_assuan_getpass | pinentry-gnome3)
+			pass_asked=1
+		}
+	fi
+	if [[ "$DISPLAY" ]] && [[ "$pass_asked" == 0 ]]; then
+		_verbose "X11 display detected"
 		if _is_found "pinentry-gtk-2"; then
 			_verbose "using pinentry-gtk2"
-
-			gtkrc=""
-			theme=/share/themes/tomb/gtk-2.0-key/gtkrc
-			for i in /usr/local /usr; do
-				[[ -r $i/$theme ]] && {
-					gtkrc="$i/$theme"
-					break
-				}
-			done
-			[[ "$gtkrc" = "" ]] || {
-				gtkrc_old="$GTK2_RC_FILES"
-				export GTK2_RC_FILES="$gtkrc"
-			}
 			output=$(pinentry_assuan_getpass | pinentry-gtk-2)
-			[[ "$gtkrc" = "" ]] || export GTK2_RC_FILES="$gtkrc_old"
-
-			# TODO QT5 customization of dialog
-		elif _is_found "pinentry-qt5"; then
-			_verbose "using pinentry-qt5"
-
-			output=$(pinentry_assuan_getpass | pinentry-qt5)
-
-			# TODO QT4 customization of dialog
-		elif _is_found "pinentry-qt4"; then
-			_verbose "using pinentry-qt4"
-
-			output=$(pinentry_assuan_getpass | pinentry-qt4)
-			# TODO X11 customization of dialog
+			pass_asked=1
 		elif _is_found "pinentry-x11"; then
 			_verbose "using pinentry-x11"
-
 			output=$(pinentry_assuan_getpass | pinentry-x11)
-
-		else
-
-			if _is_found "pinentry-curses"; then
-				_verbose "using pinentry-curses"
-
-				_verbose "Detected DISPLAY, but only pinentry-curses is found."
-				output=$(pinentry_assuan_getpass | pinentry-curses)
-			else
-				_failure "Cannot find any pinentry: impossible to ask for password."
-			fi
-
+			pass_asked=1
+		elif _is_found "pinentry-gnome3"; then
+			_verbose "using pinentry-gnome3 on X11"
+			output=$(pinentry_assuan_getpass | pinentry-gnome3)
+			pass_asked=1
+		elif _is_found "pinentry-qt5"; then
+			_verbose "using pinentry-qt5"
+			output=$(pinentry_assuan_getpass | pinentry-qt5)
+			pass_asked=1
+		elif _is_found "pinentry-qt4"; then
+			_verbose "using pinentry-qt4"
+			output=$(pinentry_assuan_getpass | pinentry-qt4)
+			pass_asked=1
 		fi
+	fi
+	if [[ "$pass_asked" == 0 ]]; then
+		_verbose "no display detected"
+		_is_found "pinentry-curses" && {
+			_verbose "using pinentry-curses with no display"
+			output=$(pinentry_assuan_getpassgetpasspass | pinentry-curses)
+			pass_asked=1
+		}
+	fi
 
-	fi # end of DISPLAY block
+	[[ "$pass_asked" == 0 ]] &&
+		_failure "Cannot find any pinentry-curses and no DISPLAY detected."
 
 	# parse the pinentry output
-  local pinentry_error
+	local pinentry_error
 	for i in ${(f)output}; do
     [[ "$i" =~ "^ERR.*" ]] && {
       pinentry_error="${i[(w)3]}"
@@ -501,11 +486,11 @@ ask_password() {
 		[[ "$i" =~ "^D .*" ]] && password="${i##D }";
 	done
 
-  [[ ! -z "$pinentry_error" ]] && [[ "$password" = "" ]] && {
-    _warning "Pinentry error: ::1 error::" ${pinentry_error}
-    print "canceled"
-    return 1
-  }
+	[[ ! -z "$pinentry_error" ]] && [[ "$password" = "" ]] && {
+		_warning "Pinentry error: ::1 error::" ${pinentry_error}
+		print "canceled"
+		return 1
+	}
 
 	# if sphinx mode is chosen, use the provided input
 	# as master password to retrieve the actual password
