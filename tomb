@@ -257,33 +257,6 @@ _whoami() {
 
 }
 
-# Define sepulture's plot (setup tomb-related arguments)
-# Synopsis: _plot /path/to/the.tomb
-# Set TOMB{PATH,DIR,FILE,NAME}
-_plot() {
-
-	# We set global variables
-	typeset -g TOMBPATH TOMBDIR TOMBFILE TOMBNAME
-
-	TOMBPATH="$1"
-
-	TOMBDIR=$(dirname $TOMBPATH)
-
-	TOMBFILE=$(basename $TOMBPATH)
-
-	# The tomb name is TOMBFILE without an extension and underscores instead of spaces (for mount and cryptsetup)
-	# It can start with dots: ..foo bar baz.tomb -> ..foo_bar_baz
-	TOMBNAME=${${TOMBFILE// /_}%.*}
-	# use the entire filename if the previous transformation returns
-	# an empty string. This handles the corner case of tomb being
-	# hidden files (starting with a dot) and have no extension (only
-	# one dot in string)
-	TOMBNAME=${TOMBNAME:-${TOMBFILE}}
-	[[ "$TOMBNAME" = "" ]] &&
-		_failure "Tomb won't work without a TOMBNAME."
-
-}
-
 # Provide a random filename in shared memory
 _tmp_create() {
 	[[ -d "$TMPPREFIX" ]] || {
@@ -567,97 +540,90 @@ sphinx_set_password() {
 	fi
 }
 
-
 # Check if a filename is a valid tomb
 is_valid_tomb() {
-	_verbose "is_valid_tomb ::1 tomb file::" $1
+	local tombpath=$1
+	_verbose "is_valid_tomb ::1 tomb file::" $tombpath
 
 	# First argument must be the path to a tomb
-	[[ -z "$1" ]] && {
+	[[ -z "$tombpath" ]] && {
 		_failure "Tomb file is missing from arguments." }
 
 	_fail=0
 	# Tomb file must be a readable, writable, non-empty regular file.
 	# If passed the "ro" mount option, the writable check is skipped.
-	[[ ! -w "$1" ]] && [[ $(option_value -o) != *"ro"* ]] && {
-		_warning "Tomb file is not writable: ::1 tomb file::" $1
+	[[ ! -w "$tombpath" ]] && [[ $(option_value -o) != *"ro"* ]] && {
+		_warning "Tomb file is not writable: ::1 tomb file::" $tombpath
 		_fail=1
 	}
 	_verbose "tomb file is readable"
 
-	[[ ! -f "$1" ]] && {
-		_warning "Tomb file is not a regular file: ::1 tomb file::" $1
+	[[ ! -f "$tombpath" ]] && {
+		_warning "Tomb file is not a regular file: ::1 tomb file::" $tombpath
 		_fail=1
 	}
 	_verbose "tomb file is a regular file"
 
-	[[ ! -s "$1" ]] && {
-		_warning "Tomb file is empty (zero length): ::1 tomb file::" $1
+	[[ ! -s "$tombpath" ]] && {
+		_warning "Tomb file is empty (zero length): ::1 tomb file::" $tombpath
 		_fail=1
 	}
 	_verbose "tomb file is not empty"
-
-	# no more checking on the uid
-	# _uid="`zstat +uid $1`"
-	# [[ "$_uid"  = "$UID" ]] || {
-	#	  _user="`zstat -s +uid $1`"
-	#	  _warning "Tomb file is owned by another user: ::1 tomb owner::" $_user
-	# }
-	# _verbose "tomb is not owned by another user"
 
 	[[ $_fail = 1 ]] && {
 		_failure "Tomb command failed: ::1 command name::" $subcommand
 	}
 
-	# TODO: split the rest of that function out.
-	# We already have a valid tomb, now we're checking
-	# whether we can alter it.
-
 	# Tomb file may be a LUKS FS (or we are creating it)
-	[[ "`file $1`" =~ "luks encrypted file" ]] || {
-		_warning "File is not yet a tomb: ::1 tomb file::" $1 }
+	[[ "`file $tombpath`" =~ "luks encrypted file" ]] || {
+		_warning "File is not yet a tomb: ::1 tomb file::" $tombpath }
 
-	_plot $1	 # Set TOMB{PATH,DIR,FILE,NAME}
+	# We set global variables
+	typeset -g TOMBPATH TOMBDIR TOMBFILE TOMBNAME TOMBMAPPER
 
-	# Tomb already mounted (or we cannot alter it)
-	[[ "`_sudo findmnt -rvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL |
-		awk -vtomb="[$TOMBNAME]" '
-/^\/dev\/mapper\/tomb/ { if($5==tomb) print $1 }'`" = "" ]] || {
-		_failure "Tomb is currently in use: ::1 tomb name::" $TOMBNAME
-	}
-	_verbose "tomb file is not currently in use"
+	TOMBPATH="$1"
 
-	_message "Valid tomb file found: ::1 tomb path::" $TOMBPATH
+	TOMBDIR=$(dirname $TOMBPATH)
 
-	return 0
-}
+	TOMBFILE=$(basename $TOMBPATH)
 
-# render the path to the unique /dev/mapper using an hash of the path
-# of the tombfile and its name. Checks for duplicates (tomb is in use)
-render_mapper() {
-	[[ "$tombpath" == "" ]] &&
-		_failure "cannot render mapper: missing \$tombpath"
-	[[ "$TOMBNAME" == "" ]] &&
-		_failure "cannot render mapper: missing \$TOMBNAME"
+	# The tomb name is TOMBFILE without an extension and underscores instead of spaces (for mount and cryptsetup)
+	# It can start with dots: ..foo bar baz.tomb -> ..foo_bar_baz
+	TOMBNAME=${${TOMBFILE// /_}%.*}
+	# use the entire filename if the previous transformation returns
+	# an empty string. This handles the corner case of tomb being
+	# hidden files (starting with a dot) and have no extension (only
+	# one dot in string)
+	TOMBNAME=${TOMBNAME:-${TOMBFILE}}
+	[[ "$TOMBNAME" = "" ]] &&
+		_failure "Tomb won't work without a TOMBNAME."
+
+	# checks if Tomb already mounted (or we cannot alter it)
 	local maphash=`realpath $tombpath | sha256sum -z`
-	mapper="tomb.$TOMBNAME.${maphash[(w)1]}.loop"
+	local nextloop=`losetup -f`
+	TOMBMAPPER="tomb.$TOMBNAME.${maphash[(w)1]}.`basename $nextloop`"
 	local mounted_tombs=(`list_tomb_mounts`)
 	local usedmapper
 	for t in ${mounted_tombs}; do
 		usedmapper=`basename "${t[(ws:;:)1]}"`
-		[[ "$usedmapper" == "$mapper" ]] &&
-			_failure "Tomb file already in use: ::1 tombname::" $TOMBNAME 
+		[[ "${usedmapper%.*}" == "${TOMBMAPPER%.*}" ]] &&
+			_failure "Tomb file already in use: ::1 tombname::" $TOMBPATH
 	done
-	_verbose "Mapper: ::1 mapper::" $mapper
-	print "$mapper"
+	_verbose "Mapper: ::1 mapper::" $TOMBMAPPER
+
+	_verbose "tomb file is not currently in use"
+
+	_message "Valid tomb file found: ::1 tomb path::" $TOMBPATH
+	return 0
 }
+
 
 # $1 is the tomb file to be lomounted
 lo_mount() {
 	tpath="$1"
 
 	# check if we have support for loop mounting
-	_nstloop=`_sudo losetup -f`
+	TOMBLOOP=`_sudo losetup -f`
 	[[ $? = 0 ]] || {
 		_warning "Loop mount of volumes is not possible on this machine, this error"
 		_warning "often occurs on VPS and kernels that don't provide the loop module."
@@ -667,8 +633,7 @@ lo_mount() {
 
 	_sudo losetup -f "$tpath" # allocates the next loopback for our file
 
-	TOMBLOOPDEVS+=("$_nstloop") # add to array of lodevs used
-
+	TOMBLOOPDEVS+=("$TOMBLOOP") # add to array of lodevs used
 	return 0
 }
 
@@ -1876,7 +1841,7 @@ dig_tomb() {
 	[[ $tombsize == <-> ]] || _failure "Size must be an integer (mebibytes)"
 	[[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 mebibytes"
 
-	_plot $tombpath			 # Set TOMB{PATH,DIR,FILE,NAME}
+	is_valid_tomb $tombpath
 
 	[[ -e $TOMBPATH ]] && {
 		_warning "A tomb exists already. I'm not digging here:"
@@ -2043,7 +2008,8 @@ lock_tomb_with_key() {
 		return 1
 	}
 
-	_plot $tombpath
+	
+	is_valid_tomb $tombpath
 
 	_message "Commanded to lock tomb ::1 tomb file::" $TOMBFILE
 
@@ -2053,12 +2019,11 @@ lock_tomb_with_key() {
 	_verbose "Tomb found: ::1 tomb path::" $TOMBPATH
 
 	lo_mount $TOMBPATH
-	nstloop=`lo_new`
 
-	_verbose "Loop mounted on ::1 mount point::" $nstloop
+	_verbose "Loop mounted on ::1 mount point::" $TOMBLOOP
 
 	_message "Checking if the tomb is empty (we never step on somebody else's bones)."
-	_sudo cryptsetup isLuks ${nstloop}
+	_sudo cryptsetup isLuks ${TOMBLOOP}
 	if [ $? = 0 ]; then
 		# is it a LUKS encrypted nest? then bail out and avoid reformatting it
 		_warning "The tomb was already locked with another key."
@@ -2089,12 +2054,12 @@ lock_tomb_with_key() {
 	_message "Formatting Luks mapped device."
 	_cryptsetup --batch-mode \
 				--cipher ${cipher} --hash sha512 --key-size 512 --key-slot 0 \
-				luksFormat ${nstloop}
+				luksFormat ${TOMBLOOP}
 	[[ $? == 0 ]] || {
 		_warning "cryptsetup luksFormat returned an error."
 		_failure "Operation aborted." }
 
-	_cryptsetup --cipher ${cipher} --hash sha512 luksOpen ${nstloop} tomb.tmp
+	_cryptsetup --cipher ${cipher} --hash sha512 luksOpen ${TOMBLOOP} tomb.tmp
 	[[ $? == 0 ]] || {
 		_warning "cryptsetup luksOpen returned an error."
 		_failure "Operation aborted." }
@@ -2130,20 +2095,17 @@ change_tomb_key() {
 
 	_check_swap
 
-	# this also calls _plot()
 	is_valid_tomb $tombpath
 
 	lo_mount $TOMBPATH
-	nstloop=`lo_new`
-	_sudo cryptsetup isLuks ${nstloop}
+
+	_sudo cryptsetup isLuks ${TOMBLOOP}
 	# is it a LUKS encrypted nest? we check one more time
 	[[ $? == 0 ]] || {
 		_failure "Not a valid LUKS encrypted volume: ::1 volume::" $TOMBPATH }
 
 	_load_key $tombkey	  # Try loading given key and set TOMBKEY
 
-	mapper=`render_mapper`
-	[[ "$mapper" == "" ]] && _failure "Operation aborted."
 
 	# TOMBKEYFILE
 	local oldkey=$TOMBKEY
@@ -2167,7 +2129,7 @@ change_tomb_key() {
 
 	# luksOpen the tomb (not really mounting, just on the loopback)
 	print -R -n - "$old_secret" | _sudo cryptsetup --key-file - \
-										luksOpen ${nstloop} ${mapper}
+										luksOpen ${TOMBLOOP} ${TOMBMAPPER}
 	[[ $? == 0 ]] || _failure "Unexpected error in luksOpen."
 
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
@@ -2189,11 +2151,11 @@ change_tomb_key() {
 	print -R -n - "$TOMBSECRET" >> $tmpnewkey
 
 	print -R -n - "$old_secret" | _sudo cryptsetup --key-file - \
-										luksChangeKey "$nstloop" "$tmpnewkey"
+										luksChangeKey "$TOMBLOOP" "$tmpnewkey"
 
 	[[ $? == 0 ]] || _failure "Unexpected error in luksChangeKey."
 
-	_sudo cryptsetup luksClose "${mapper}" || _failure "Unexpected error in luksClose."
+	_sudo cryptsetup luksClose "${TOMBMAPPER}" || _failure "Unexpected error in luksClose."
 
 	_success "Succesfully changed key for tomb: ::1 tomb file::" $TOMBFILE
 	_message "The new key is: ::1 new key::" $TOMBKEYFILE
@@ -2220,22 +2182,17 @@ _update_control_file() {
 
 # $1 = tombfile $2(optional) = mountpoint
 mount_tomb() {
-	local tombpath="$1"	   # First argument is the path to the tomb
-	[[ -n "$tombpath" ]] || _failure "No tomb name specified for opening."
+	[[ -n "$1" ]] || _failure "No tomb name specified for opening."
 
-	_message "Commanded to open tomb ::1 tomb name::" $tombpath
+	_message "Commanded to open tomb ::1 tomb name::" $1
 
 	_check_swap
 
-	# this also calls _plot()
-	is_valid_tomb $tombpath
+	is_valid_tomb $1
 
-	_track_stat "$tombpath"
+	_track_stat "$TOMBPATH"
 
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
-
-	mapper=`render_mapper`
-	[[ "$mapper" == "" ]] && _failure "Operation aborted."
 
 	tombmount="$2"
 	[[ "$tombmount" = "" ]] && {
@@ -2257,15 +2214,14 @@ mount_tomb() {
 	done
 
 	lo_mount $TOMBPATH
-	nstloop=`lo_new`
 
-	_sudo cryptsetup isLuks ${nstloop} || {
+	_sudo cryptsetup isLuks ${TOMBLOOP} || {
 		# is it a LUKS encrypted nest? see cryptsetup(1)
 		_failure "::1 tomb file:: is not a valid Luks encrypted storage file." $TOMBFILE }
 
 	_message "This tomb is a valid LUKS encrypted device."
 
-	luksdump="`_sudo cryptsetup luksDump ${nstloop}`"
+	luksdump="`_sudo cryptsetup luksDump ${TOMBLOOP}`"
 	tombdump=(`print $luksdump | awk '
 		/^Cipher name/ {print $3}
 		/^Cipher mode/ {print $3}
@@ -2293,15 +2249,15 @@ mount_tomb() {
 	}
 	[[ $? == 0 ]] || _failure "No valid password supplied."
 
-	_cryptsetup luksOpen ${nstloop} ${mapper}
+	_cryptsetup luksOpen ${TOMBLOOP} ${TOMBMAPPER}
 	[[ $? = 0 ]] || {
 		_failure "Failure mounting the encrypted file." }
 
 	# preserve the loopdev after exit
-	lo_preserve "$nstloop"
+	lo_preserve "$TOMBLOOP"
 
 	# array: [ cipher, keysize, loopdevice ]
-	tombstat=(`_sudo cryptsetup status ${mapper} | awk '
+	tombstat=(`_sudo cryptsetup status ${TOMBMAPPER} | awk '
 	/cipher:/  {print $2}
 	/keysize:/ {print $2}
 	/device:/  {print $2}'`)
@@ -2309,9 +2265,9 @@ mount_tomb() {
 	_verbose "Key size is ::1 size:: for cipher ::2 cipher::" $tombstat[2] $tombstat[1]
 
 	_message "Checking filesystem via ::1::" $tombstat[3]
-	_sudo fsck -p -C0 /dev/mapper/${mapper}
+	_sudo fsck -p -C0 /dev/mapper/${TOMBMAPPER}
 	_verbose "Tomb engraved as ::1 tomb name::" $TOMBNAME
-	_sudo tune2fs -L $TOMBNAME /dev/mapper/${mapper} > /dev/null
+	_sudo tune2fs -L $TOMBNAME /dev/mapper/${TOMBMAPPER} > /dev/null
 
 	# we need root from here on
 	_sudo mkdir -p $tombmount
@@ -2322,15 +2278,15 @@ mount_tomb() {
 		MOUNTOPTS="$(option_value -o)" }
 	# TODO: safety check MOUNTOPTS
 	# safe_mount_options &&
-	_sudo mount -o $MOUNTOPTS /dev/mapper/${mapper} ${tombmount}
+	_sudo mount -o $MOUNTOPTS /dev/mapper/${TOMBMAPPER} ${tombmount}
 	# Clean up if the mount failed
 	[[ $? == 0 ]] || {
-		_warning "Error mounting ::1 mapper:: on ::2 tombmount::" $mapper $tombmount
+		_warning "Error mounting ::1 mapper:: on ::2 tombmount::" $TOMBMAPPER $tombmount
 		[[ $oldmountopts != $MOUNTOPTS ]] && \
 			_warning "Are mount options '::1 mount options::' valid?" $MOUNTOPTS
 		# TODO: move cleanup to _endgame()
 		[[ -d $tombmount ]] && _sudo rmdir $tombmount
-		[[ -e /dev/mapper/$mapper ]] && _sudo cryptsetup luksClose $mapper
+		[[ -e /dev/mapper/$TOMBMAPPER ]] && _sudo cryptsetup luksClose $TOMBMAPPER
 		# The loop is taken care of in _endgame()
 		_failure "Cannot mount ::1 tomb name::" $TOMBNAME
 	}
@@ -2470,7 +2426,7 @@ exec_safe_func_hooks() {
 		# here call two actions: open or close. Synopsis:
 		# $1	 $2			  $3		  $4		  $5
 		# open	"$tombmount"
-		# close "$tombmount" "$tombname" "$tombloop" "$mapper"
+		# close "$tombmount" "$tombname" "$tombloop" "$TOMBMAPPER"
 		$mnt/exec-hooks "$1" "$2" "$3" "$4" "$5"
 		return $?
 	}
@@ -2502,7 +2458,7 @@ list_tombs() {
 		tombloop=${mapper[(ws:.:)4]}
 
 		# calculate tomb size
-		ts=`df -hP /dev/mapper/$mapper |
+		ts=`df -hP /dev/mapper/$TOMBMAPPER |
 awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 		tombtot=${ts[(ws:;:)1]}
 		tombused=${ts[(ws:;:)2]}
@@ -2803,8 +2759,8 @@ resize_tomb() {
 
 	_message "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes." $1 $OPTS[-s]
 
-	[[ -z "$tombpath" ]] && _failure "No tomb name specified for resizing."
-	[[ ! -r $tombpath ]] && _failure "Cannot find ::1::" $tombpath
+	[[ -z "$1" ]] && _failure "No tomb name specified for resizing."
+	[[ ! -r "$1" ]] && _failure "Cannot find ::1::" $1
 
 	newtombsize="`option_value -s`"
 	[[ -z "$newtombsize" ]] && {
@@ -2814,9 +2770,6 @@ resize_tomb() {
 	is_valid_tomb $tombpath
 
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
-
-	mapper=`render_mapper`
-	[[ "$mapper" == "" ]] && _failure "Operation aborted."
 
 	if option_is_set --tomb-pwd; then
 		tomb_pwd="`option_value --tomb-pwd`"
@@ -2858,23 +2811,22 @@ resize_tomb() {
 	fi
 
 	lo_mount "$TOMBPATH"
-	nstloop=`lo_new`
 
 	_message "opening tomb"
-	_cryptsetup luksOpen ${nstloop} ${mapper} || {
+	_cryptsetup luksOpen ${TOMBLOOP} ${TOMBMAPPER} || {
 		_failure "Failure mounting the encrypted file." }
 
-	_sudo cryptsetup resize "${mapper}" || {
-		_failure "cryptsetup failed to resize ::1 mapper::" $mapper }
+	_sudo cryptsetup resize "${TOMBMAPPER}" || {
+		_failure "cryptsetup failed to resize ::1 mapper::" $TOMBMAPPER }
 
-	_sudo e2fsck -p -f /dev/mapper/${mapper} || {
-		_failure "e2fsck failed to check ::1 mapper::" $mapper }
+	_sudo e2fsck -p -f /dev/mapper/${TOMBMAPPER} || {
+		_failure "e2fsck failed to check ::1 mapper::" $TOMBMAPPER }
 
-	_sudo resize2fs /dev/mapper/${mapper} || {
-		_failure "resize2fs failed to resize ::1 mapper::" $mapper }
+	_sudo resize2fs /dev/mapper/${TOMBMAPPER} || {
+		_failure "resize2fs failed to resize ::1 mapper::" $TOMBMAPPER }
 
 	# close and free the loop device
-	_sudo cryptsetup luksClose "${mapper}"
+	_sudo cryptsetup luksClose "${TOMBMAPPER}"
 
 	return 0
 }
@@ -2915,16 +2867,16 @@ umount_tomb() {
 		_verbose "Name: ::1 tomb name::" $tombname
 		_verbose "Mount: ::1 mount point::" $tombmount
 		_verbose "Loop: ::1 mount loop::" $tombloop
-		_verbose "Mapper: ::1 mapper::" $mapper
+		_verbose "Mapper: ::1 mapper::" $TOMBMAPPER
 
-		[[ -e "$mapper" ]] && {
+		[[ -e "$TOMBMAPPER" ]] && {
 			_warning "Tomb not found: ::1 tomb file::" $1
 			_warning "Please specify an existing tomb."
 			return 0 }
 
 		option_is_set -n || {
 			exec_safe_func_hooks \
-				close "$tombmount" "$tombname" "$tombloop" "$mapper"
+				close "$tombmount" "$tombname" "$tombloop" "$TOMBMAPPER"
 			exec_hook_res=$?
 			[[ $exec_hook_res = 0 ]] || {
 				_warning "close exec-hook returns a non-zero error code: ::1 error::" $exec_hook_res
@@ -2972,8 +2924,8 @@ umount_tomb() {
 		[[ "$tombmount" =~ "(/run)?/media(/$_USER)?/$tombname_regex" ]] && {
 			_sudo rmdir $tombmount }
 
-		_sudo cryptsetup luksClose $mapper ||
-			_failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper
+		_sudo cryptsetup luksClose $TOMBMAPPER ||
+			_failure "Error occurred in cryptsetup luksClose ::1 mapper::" $TOMBMAPPER
 
 		# Normally the loopback device is detached when unused
 		[[ -e "/dev/$tombloop" ]] && {
