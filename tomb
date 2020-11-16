@@ -647,6 +647,26 @@ is_valid_tomb() {
 	return 0
 }
 
+# render the path to the unique /dev/mapper using an hash of the path
+# of the tombfile and its name. Checks for duplicates (tomb is in use)
+render_mapper() {
+	[[ "$tombpath" == "" ]] &&
+		_failure "cannot render mapper: missing \$tombpath"
+	[[ "$TOMBNAME" == "" ]] &&
+		_failure "cannot render mapper: missing \$TOMBNAME"
+	local maphash=`realpath $tombpath | sha256sum -z`
+	mapper="tomb.$TOMBNAME.${maphash[(w)1]}.loop"
+	local mounted_tombs=(`list_tomb_mounts`)
+	local usedmapper
+	for t in ${mounted_tombs}; do
+		usedmapper=`basename "${t[(ws:;:)1]}"`
+		[[ "$usedmapper" == "$mapper" ]] &&
+			_failure "Tomb file already in use: ::1 tombname::" $TOMBNAME 
+	done
+	_verbose "Mapper: ::1 mapper::" $mapper
+	print "$mapper"
+}
+
 # $1 is the tomb file to be lomounted
 lo_mount() {
 	tpath="$1"
@@ -2135,7 +2155,11 @@ change_tomb_key() {
 	[[ $? == 0 ]] || {
 		_failure "Not a valid LUKS encrypted volume: ::1 volume::" $TOMBPATH }
 
-	_load_key $tombkey	  # Try loading given key and set TOMBKEY and
+	_load_key $tombkey	  # Try loading given key and set TOMBKEY
+
+	mapper=`render_mapper`
+	[[ "$mapper" == "" ]] && _failure "Operation aborted."
+
 	# TOMBKEYFILE
 	local oldkey=$TOMBKEY
 	local oldkeyfile=$TOMBKEYFILE
@@ -2143,11 +2167,6 @@ change_tomb_key() {
 	# we have everything, prepare to mount
 	_success "Changing lock on tomb ::1 tomb name::" $TOMBNAME
 	_message "Old key: ::1 old key::" $oldkeyfile
-
-	# render the mapper
-	mapdate=`date +%s`
-	# save date of mount in minutes since 1970
-	mapper="tomb.$TOMBNAME.$mapdate.$(basename $nstloop)"
 
 	# load the old key
 	if option_is_set --tomb-old-pwd; then
@@ -2230,6 +2249,9 @@ mount_tomb() {
 
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
 
+	mapper=`render_mapper`
+	[[ "$mapper" == "" ]] && _failure "Operation aborted."
+
 	tombmount="$2"
 	[[ "$tombmount" = "" ]] && {
 		tombmount=/media/$TOMBNAME
@@ -2239,6 +2261,8 @@ mount_tomb() {
 		_message "Mountpoint not specified, using default: ::1 mount point::" $tombmount
 	}
 
+	_success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBNAME $tombmount
+
 	# check if the mountpoint is already used
 	mounted_tombs=(`list_tomb_mounts`)
 	for t in ${mounted_tombs}; do
@@ -2246,8 +2270,6 @@ mount_tomb() {
 		[[ "$usedmount" == "$tombmount" ]] &&
 			_failure "Mountpoint already in use: ::1 mount point::" $tombmount
 	done
-
-	_success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBNAME $tombmount
 
 	lo_mount $TOMBPATH
 	nstloop=`lo_new`
@@ -2272,12 +2294,6 @@ mount_tomb() {
 	[[ "$slotwarn" == "WARN" ]] && {
 		_warning "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor." }
 
-	# save date of mount in minutes since 1970
-	mapdate=`date +%s`
-
-	mapper="tomb.$TOMBNAME.$mapdate.$(basename $nstloop)"
-
-	_verbose "dev mapper device: ::1 mapper::" $mapper
 	_verbose "Tomb key: ::1 key file::" $TOMBKEYFILE
 
 	# take the name only, strip extensions
@@ -2814,13 +2830,11 @@ resize_tomb() {
 
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
 
-	local oldtombsize=$(( `stat -c %s "$TOMBPATH" 2>/dev/null` / 1048576 ))
-	local mounted_tomb=`_sudo findmnt -rvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL |
-		awk -vtomb="[$TOMBNAME]" '/^\/dev\/mapper\/tomb/ { if($5==tomb) print $1 }'`
+	mapper=`render_mapper`
+	[[ "$mapper" == "" ]] && _failure "Operation aborted."
 
-	# Tomb must not be open
-	[[ -z "$mounted_tomb" ]] || {
-		_failure "Please close the tomb ::1 tomb name:: before trying to resize it." $TOMBNAME }
+	local oldtombsize=$(( `stat -c %s "$TOMBPATH" 2>/dev/null` / 1048576 ))
+
 	# New tomb size must be specified
 	[[ -n "$newtombsize" ]] || {
 		_failure "You must specify the new size of ::1 tomb name::" $TOMBNAME }
@@ -2860,9 +2874,6 @@ resize_tomb() {
 
 	lo_mount "$TOMBPATH"
 	nstloop=`lo_new`
-
-	mapdate=`date +%s`
-	mapper="tomb.$TOMBNAME.$mapdate.$(basename $nstloop)"
 
 	_message "opening tomb"
 	_cryptsetup luksOpen ${nstloop} ${mapper} || {
