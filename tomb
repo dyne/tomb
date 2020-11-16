@@ -2818,6 +2818,15 @@ resize_tomb() {
 	mapper=`render_mapper`
 	[[ "$mapper" == "" ]] && _failure "Operation aborted."
 
+	if option_is_set --tomb-pwd; then
+		tomb_pwd="`option_value --tomb-pwd`"
+		_verbose "tomb-pwd = ::1 tomb pass::" $tomb_pwd
+		ask_key_password "$tomb_pwd"
+	else
+		ask_key_password
+	fi
+	[[ $? == 0 ]] || _failure "No valid password supplied."
+
 	local oldtombsize=$(( `stat -c %s "$TOMBPATH" 2>/dev/null` / 1048576 ))
 
 	# New tomb size must be specified
@@ -2847,15 +2856,6 @@ resize_tomb() {
 	else
 		_failure "The new size must be greater then old tomb size."
 	fi
-
-	{ option_is_set --tomb-pwd } && {
-		tomb_pwd="`option_value --tomb-pwd`"
-		_verbose "tomb-pwd = ::1 tomb pass::" $tomb_pwd
-		ask_key_password "$tomb_pwd"
-	} || {
-		ask_key_password
-	}
-	[[ $? == 0 ]] || _failure "No valid password supplied."
 
 	lo_mount "$TOMBPATH"
 	nstloop=`lo_new`
