@@ -95,7 +95,7 @@ typeset -Hi _UID			  # Running user identifier
 typeset -Hi _GID			  # Running user group identifier
 typeset -H	_TTY			  # Connected input terminal
 
-# Tomb context (see _plot())
+# Tomb context (see is_valid_tomb())
 typeset -H TOMBPATH			  # Full path to the tomb
 typeset -H TOMBDIR			  # Directory where the tomb is
 typeset -H TOMBFILE			  # File name of the tomb
@@ -542,41 +542,40 @@ sphinx_set_password() {
 
 # Check if a filename is a valid tomb
 is_valid_tomb() {
-	local tombpath=$1
-	_verbose "is_valid_tomb ::1 tomb file::" $tombpath
+
+	_verbose "is_valid_tomb ::1 tomb file::" $1
 
 	# First argument must be the path to a tomb
-	[[ -z "$tombpath" ]] && {
-		_failure "Tomb file is missing from arguments." }
+	[[ $1 ]] ||	_failure "Tomb file is missing from arguments."
 
-	_fail=0
+	local _fail=0
 	# Tomb file must be a readable, writable, non-empty regular file.
 	# If passed the "ro" mount option, the writable check is skipped.
-	[[ ! -w "$tombpath" ]] && [[ $(option_value -o) != *"ro"* ]] && {
-		_warning "Tomb file is not writable: ::1 tomb file::" $tombpath
+	[[ ! -w "$1" ]] && [[ $(option_value -o) != *"ro"* ]] && {
+		_warning "Tomb file is not writable: ::1 tomb file::" $1
 		_fail=1
 	}
 	_verbose "tomb file is readable"
 
-	[[ ! -f "$tombpath" ]] && {
-		_warning "Tomb file is not a regular file: ::1 tomb file::" $tombpath
+	[[ ! -f "$1" ]] && {
+		_warning "Tomb file is not a regular file: ::1 tomb file::" $1
 		_fail=1
 	}
 	_verbose "tomb file is a regular file"
 
-	[[ ! -s "$tombpath" ]] && {
-		_warning "Tomb file is empty (zero length): ::1 tomb file::" $tombpath
+	[[ ! -s "$1" ]] && {
+		_warning "Tomb file is empty (zero length): ::1 tomb file::" $1
 		_fail=1
 	}
 	_verbose "tomb file is not empty"
 
-	[[ $_fail = 1 ]] && {
+	[[ $_fail == 1 ]] && {
 		_failure "Tomb command failed: ::1 command name::" $subcommand
 	}
 
 	# Tomb file may be a LUKS FS (or we are creating it)
-	[[ "`file $tombpath`" =~ "luks encrypted file" ]] || {
-		_warning "File is not yet a tomb: ::1 tomb file::" $tombpath }
+	[[ "`file $1`" =~ "luks encrypted file" ]] || {
+		_warning "File is not yet a tomb: ::1 tomb file::" $1 }
 
 	# We set global variables
 	typeset -g TOMBPATH TOMBDIR TOMBFILE TOMBNAME TOMBMAPPER
@@ -599,7 +598,7 @@ is_valid_tomb() {
 		_failure "Tomb won't work without a TOMBNAME."
 
 	# checks if Tomb already mounted (or we cannot alter it)
-	local maphash=`realpath $tombpath | sha256sum -z`
+	local maphash=`realpath $TOMBPATH | sha256sum -z`
 	local nextloop=`losetup -f`
 	TOMBMAPPER="tomb.$TOMBNAME.${maphash[(w)1]}.`basename $nextloop`"
 	local mounted_tombs=(`list_tomb_mounts`)
@@ -1830,52 +1829,43 @@ engrave_key() {
 # which blocks in the filesystem contain that data.
 
 dig_tomb() {
-	local	 tombpath="$1"	  # Path to tomb
+	# $1 arg is path to tomb
+
 	# Require the specification of the size of the tomb (-s) in MiB
 	local -i tombsize=$(option_value -s)
 
 	_message "Commanded to dig tomb ::1 tomb path::" $tombpath
 
-	[[ -n "$tombpath"	]] || _failure "Missing path to tomb"
+	[[ $1 ]] || _failure "Missing path to tomb"
 	[[ -n "$tombsize"	]] || _failure "Size argument missing, use -s"
 	[[ $tombsize == <-> ]] || _failure "Size must be an integer (mebibytes)"
 	[[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 mebibytes"
 
-	is_valid_tomb $tombpath
-
-	[[ -e $TOMBPATH ]] && {
+	[[ -e $1 ]] && {
 		_warning "A tomb exists already. I'm not digging here:"
-		ls -lh $TOMBPATH
+		ls -lh $1
 		return 1
 	}
 
-	_success "Creating a new tomb in ::1 tomb path::" $TOMBPATH
+	_success "Creating a new tomb in ::1 tomb path::" $1
+	_message "Generating ::1 tomb file:: of ::2 size::MiB" $1 $tombsize
 
-	_message "Generating ::1 tomb file:: of ::2 size::MiB" $TOMBFILE $tombsize
-
-	# Ensure that file permissions are safe even if interrupted
-	touch $TOMBPATH
+	touch "$1"
 	[[ $? = 0 ]] || {
-		_warning "Error creating the tomb ::1 tomb path::" $TOMBPATH
+		_warning "Error creating the tomb ::1 tomb path::" $1
 		_failure "Operation aborted."
 	}
-	chmod 0600 $TOMBPATH
-
+	# Ensure that file permissions are safe even if interrupted
+	_sudo chown ${_UID}:${_GID} "$1"
+	chmod 0600 $1
 	_verbose "Data dump using ::1:: from /dev/urandom" ${DD[1]}
-	${=DD} if=/dev/urandom bs=1048576 count=$tombsize of=$TOMBPATH
+	${=DD} if=/dev/urandom bs=1048576 count=$tombsize of=$1
+	ls -lh "$1"
 
-	[[ $? == 0 && -e $TOMBPATH ]] && {
-		_sudo chown ${_UID}:${_GID} "$TOMBPATH"
-		ls -lh "$TOMBPATH"
-	} || {
-		_warning "Error creating the tomb ::1 tomb path::" $TOMBPATH
-		_failure "Operation aborted."
-	}
-
-	_success "Done digging ::1 tomb name::" $TOMBNAME
+	_success "Done digging ::1 tomb name::" $1
 	_message "Your tomb is not yet ready, you need to forge a key and lock it:"
-	_message "tomb forge ::1 tomb path::.key" $TOMBPATH
-	_message "tomb lock ::1 tomb path:: -k ::1 tomb path::.key" $TOMBPATH
+	_message "tomb forge ::1 tomb path::.key" $1
+	_message "tomb lock ::1 tomb path:: -k ::1 tomb path::.key" $1
 
 	return 0
 }
@@ -2766,7 +2756,6 @@ resize_tomb() {
 	[[ -z "$newtombsize" ]] && {
 		_failure "Aborting operations: new size was not specified, use -s" }
 
-	# this also calls _plot()
 	is_valid_tomb $tombpath
 
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
@@ -2867,16 +2856,16 @@ umount_tomb() {
 		_verbose "Name: ::1 tomb name::" $tombname
 		_verbose "Mount: ::1 mount point::" $tombmount
 		_verbose "Loop: ::1 mount loop::" $tombloop
-		_verbose "Mapper: ::1 mapper::" $TOMBMAPPER
+		_verbose "Mapper: ::1 mapper::" $mapper
 
-		[[ -e "$TOMBMAPPER" ]] && {
+		[[ -e "$mapper" ]] && {
 			_warning "Tomb not found: ::1 tomb file::" $1
 			_warning "Please specify an existing tomb."
 			return 0 }
 
 		option_is_set -n || {
 			exec_safe_func_hooks \
-				close "$tombmount" "$tombname" "$tombloop" "$TOMBMAPPER"
+				close "$tombmount" "$tombname" "$tombloop" "$mapper"
 			exec_hook_res=$?
 			[[ $exec_hook_res = 0 ]] || {
 				_warning "close exec-hook returns a non-zero error code: ::1 error::" $exec_hook_res
@@ -2924,8 +2913,8 @@ umount_tomb() {
 		[[ "$tombmount" =~ "(/run)?/media(/$_USER)?/$tombname_regex" ]] && {
 			_sudo rmdir $tombmount }
 
-		_sudo cryptsetup luksClose $TOMBMAPPER ||
-			_failure "Error occurred in cryptsetup luksClose ::1 mapper::" $TOMBMAPPER
+		_sudo cryptsetup luksClose $mapper ||
+			_failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper
 
 		# Normally the loopback device is detached when unused
 		[[ -e "/dev/$tombloop" ]] && {
