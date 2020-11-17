@@ -2,7 +2,7 @@ Cryptsetup was originally written in 2004 by Jana Saout
 
 LUKS extensions are written in 2006 by Clemens Fruhwirth
 
-Tomb is written and maintained since 2007 by Denis Roio <jaromil@dyne.org>
+Tomb is written and maintained since 2007 by Denis Roio <J@dyne.org>
 
 Tomb includes code and advices by Anathema, Boyska, Hellekin O. Wolf,
 Daniel Rodriguez, Parazyd, Alexandre Pujol, AitorATuin, Narrat and
@@ -24,11 +24,12 @@ PLJ / Kosovoper.
 
 Testing, reviews and documentation contributed by Dreamer, Vlax,
 Shining the Translucent, Mancausoft, Asbesto Molesto, Nignux, TheJH,
-The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, JoelMon,
-Narrat, Jerry Polfer, Jim Turner, Maxime Arthaud, RobertMX,
-mhogomchungu Mandeep Bhutani, Emil Lundberg, Joel Montes de Oca, Armin
-Mesbah, Arusekk, Stephan Schindel, Asbjørn Apeland, Victor Calvert,
-bjonnh, SargoDevel, AitorATuin, Alexis Danizan, Sven Geuer and...
+The Grugq, Reiven, GDrooid, Alphazo, Brian May, fsLeg, Narrat, Jerry
+Polfer, Jim Turner, Maxime Arthaud, RobertMX, mhogomchungu Mandeep
+Bhutani, Emil Lundberg, Joel Montes de Oca, Armin Mesbah, Arusekk,
+Stephan Schindel, Asbjørn Apeland, Victor Calvert, bjonnh, SargoDevel,
+AitorATuin, Alexis Danizan, Sven Geuer, Greg Tczap, Aaron Janse, Mark
+Mykkanen, Alexis Danizan, Steve Litt, James R, and...
 the Linux Action Show!
 
 Tomb includes an implementation of the "Password-Based Key Derivation

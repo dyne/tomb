@@ -1,5 +1,21 @@
 # Tomb ChangeLog
 
+## 2.8
+### Nov 2020
+
+This new release updates the documentation, improves usability and
+fixes two bugs. A bug has been found (CVE-2020-28638) to corrupt
+passwords entered using pinentry-curses on desktops using a X11
+DISPLAY, the documentation in KNOWN_BUGS outlines how to fix
+regressions. Another bug has been fixed to prevent mounting tombs that
+are already opened, a situation leading to potential data loss.
+Changes mentioned lead to a small internal refactoring and cleanup,
+leading to a change in the way volumes appear in /dev/mapper. Along
+the usability improvements are the support of GNUPGHOME environment
+variable to support non-standard GnuPG home locations as well updated
+translations and the fact that debug messages are now written to
+stderr, making it easier to parse stdout.
+
 ## 2.7
 ### Oct 2019
 

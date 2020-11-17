@@ -211,6 +211,9 @@ distributed Tomb's sourcecode:
 The following applications are not included in Tomb's distributed
 sourcecode, but are known and tested to be compatible with Tomb:
 
+- [Docker-tomb](https://github.com/gregtczap/docker-tomb) is a wrapper to use Tomb in any operating system supporting capable of running a Docker container with `--privileged` permissions.
+
+
 - [Secrets](https://secrets.dyne.org) is a software that can be operated on-line and on-site to split a Tomb key in shares to be distributed to peers: some of them have to agree to combine back the shares in order to retrieve the key.
 
 - [zuluCrypt](https://mhogomchungu.github.io/zuluCrypt/) is a graphical application to manage various types of encrypted volumes on GNU/Linux, among them also Tombs, written in C++.
@@ -289,8 +292,8 @@ IRC on https://irc.dyne.org channel **#dyne** (or direct port 9999 SSL)
 
 # Licensing
 
-Tomb is Copyright (C) 2007-2019 by the Dyne.org Foundation and
-maintained by Denis Roio <jaromil@dyne.org>. More information on all
+Tomb is Copyright (C) 2007-2020 by the Dyne.org Foundation and
+maintained by Denis Roio <J@dyne.org>. More information on all
 the developers involved is found in the [AUTHORS](AUTHORS.md) file.
 
 This source code is free software; you can redistribute it and/or

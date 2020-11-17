@@ -7,25 +7,12 @@
 
 # {{{ License
 
-# Copyright (C) 2007-2019 Dyne.org Foundation
+# Copyright (C) 2007-2020 Dyne.org Foundation
 #
 # Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
 #
-# With contributions by Anathema, Boyska, Hellekin O. Wolf and GDrooid
+# Please refer to the AUTHORS file for more information.
 #
-# Gettext internationalization and Spanish translation is contributed by
-# GDrooid, French translation by Hellekin, Russian translation by fsLeg,
-# German translation by x3nu.
-#
-# Testing, reviews and documentation are contributed by Dreamer, Shining
-# the Translucent, Mancausoft, Asbesto Molesto, Nignux, Vlax, The Grugq,
-# Reiven, GDrooid, Alphazo, Brian May, TheJH, fsLeg, JoelMon and the
-# Linux Action Show!
-#
-# Tomb's artwork is contributed by Jordi aka Mon Mort and Logan VanCuren.
-#
-# Cryptsetup was developed by Christophe Saout and Clemens Fruhwirth.
-
 # This source code is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -37,15 +24,14 @@
 # to the GNU Public License for more details.
 #
 # You should have received a copy of the GNU Public License along with
-# this source code; if not, write to: Free Software Foundation, Inc.,
-# 675 Mass Ave, Cambridge, MA 02139, USA.
+# this source code; if not, , see <https://www.gnu.org/licenses/>.
 
 # }}} - License
 
 # {{{ Global variables
 
-typeset VERSION="2.7"
-typeset DATE="Oct/2019"
+typeset VERSION="2.8"
+typeset DATE="Nov/2020"
 typeset TOMBEXEC=$0
 typeset TMPPREFIX=${TMPPREFIX:-/tmp}
 # TODO: configure which tmp dir to use from a cli flag
