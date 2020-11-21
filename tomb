@@ -426,7 +426,7 @@ ask_password() {
 		_verbose "no display detected"
 		_is_found "pinentry-curses" && {
 			_verbose "using pinentry-curses with no display"
-			output=$(pinentry_assuan_getpassgetpasspass | pinentry-curses)
+			output=$(pinentry_assuan_getpass | pinentry-curses)
 			pass_asked=1
 		}
 	fi
