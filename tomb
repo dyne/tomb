@@ -585,7 +585,7 @@ is_valid_tomb() {
 
 	# checks if Tomb already mounted (or we cannot alter it)
 	local maphash=`realpath $TOMBPATH | sha256sum -z`
-	local nextloop=`losetup -f`
+	local nextloop=`_sudo losetup -f`
 	TOMBMAPPER="tomb.$TOMBNAME.${maphash[(w)1]}.`basename $nextloop`"
 	local mounted_tombs=(`list_tomb_mounts`)
 	local usedmapper
