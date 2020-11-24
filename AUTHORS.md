@@ -14,6 +14,8 @@ The Qt5 desktop tray GUI is written by Gianluca Montecchi.
 
 Python Tomb wrappers are contributed by Reiven and Boyska.
 
+The Docker Tomb wrapper is contributed by Greg Tczap
+
 Artwork is contributed by Jordi aka Mon Mort and Logan VanCuren.
 
 Gettext internationalization and Spanish translation is contributed by

@@ -203,6 +203,7 @@ distributed Tomb's sourcecode:
 - [gtk-tray](extras/gtk-tray) is a graphical tray icon for GTK panels
 - [qt-tray](extras/qt-tray) is a graphical tray icon for QT panels
 - [tomber](extras/tomber) is a wrapper to use Tomb in Python scripts
+- [docker](extras/docker) is a wrapper to use Tomb through Docker
 
 ![skulls and pythons](https://github.com/dyne/Tomb/blob/master/extras/images/python_for_tomb.png)
 
@@ -210,9 +211,6 @@ distributed Tomb's sourcecode:
 
 The following applications are not included in Tomb's distributed
 sourcecode, but are known and tested to be compatible with Tomb:
-
-- [Docker-tomb](https://github.com/gregtczap/docker-tomb) is a wrapper to use Tomb in any operating system supporting capable of running a Docker container with `--privileged` permissions.
-
 
 - [Secrets](https://secrets.dyne.org) is a software that can be operated on-line and on-site to split a Tomb key in shares to be distributed to peers: some of them have to agree to combine back the shares in order to retrieve the key.
 
