@@ -2434,7 +2434,7 @@ list_tombs() {
 		tombloop=${mapper[(ws:.:)4]}
 
 		# calculate tomb size
-		ts=`df -hP /dev/mapper/$TOMBMAPPER |
+		ts=`df -hP /dev/mapper/$mapper |
 awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 		tombtot=${ts[(ws:;:)1]}
 		tombused=${ts[(ws:;:)2]}
@@ -2481,8 +2481,8 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 		# Now check hooks
 		mounted_hooks=(`list_tomb_binds $tombname $tombmount`)
 		for h in ${mounted_hooks}; do
-			_message "::1 tombname:: hooks ::2 hookname:: on ::3 hookdest::" \
-					 $tombname "`basename ${h[(ws:;:)1]}`" ${h[(ws:;:)2]}
+			_message "::1 tombname:: hooks ::2 hookdest::" \
+					 $tombname ${h[(ws:;:)2]}
 		done
 	done
 }
