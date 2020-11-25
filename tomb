@@ -768,7 +768,7 @@ function _msg() {
 	local progname="${TOMBEXEC##*/}"
 	local pchars=""
 	local pcolor="normal"
-	local fd=1
+	local fd=2
 	local -i returncode
 
 	case "$1" in
@@ -780,7 +780,6 @@ function _msg() {
 			;;
 		verbose)
 			pchars="[D]"; pcolor="blue"
-			fd=2
 			;;
 		success)
 			pchars="(*)"; pcolor="green"
@@ -790,16 +789,15 @@ function _msg() {
 			;;
 		failure)
 			pchars="[E]"; pcolor="red"
-			fd=2
 			returncode=1
 			;;
 		print)
 			progname=""
+			fd=1
 			;;
 		*)
 			pchars="[F]"; pcolor="red"
 			msg="Developer oops!  Usage: _msg MESSAGE_TYPE \"MESSAGE_CONTENT\""
-			fd=2
 			returncode=127
 			;;
 	esac
@@ -3310,7 +3308,7 @@ main() {
 		__default)
 			_print "Tomb ::1 version:: - a strong and gentle undertaker for your secrets" $VERSION
 			echo
-			_print " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
+			_print " Copyright (C) 2007-2020 Dyne.org Foundation, License GNU GPL v3+"
 			_print " This is free software: you are free to change and redistribute it"
 			_print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
 			echo
