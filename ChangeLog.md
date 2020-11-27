@@ -1,5 +1,16 @@
 # Tomb ChangeLog
 
+## 2.8.1
+### Nov 2020
+
+This is a minor bugfix release. It fixes two bugs introduced by the
+previous release: the release of loopback devices and a typo affecting
+password insertion in text-only mode. It also provides a cosmetic fix
+for the output of 'tomb list' that now displays correct sizes. At
+last, the docker wrapper has been included in extras/ to be shipped in
+Tomb. The span of CVE-2020-28638 has been assessed with more precision
+and KNOWN_BUGS updated accordingly.
+
 ## 2.8
 ### Nov 2020
 

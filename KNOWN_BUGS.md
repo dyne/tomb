@@ -1,5 +1,5 @@
 # Password bug in X11 when using pinentry-curses
-## Issue with Tomb version 2.0 to 2.7
+## Issue with Tomb version 2.6 and 2.7
 
 This bug affects systems with a running X11 DISPLAY, but where only
 pinentry-ncurses is installed. It wrongly reads the input password: no
