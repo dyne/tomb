@@ -175,7 +175,7 @@ _cat() { local -a _arr;
 
 _is_found() {
 	# returns 0 if binary is found in path
-	[[ "$1" = "" ]] && return 1
+	[[ -z $1 ]] && return 1
 	command -v "$1" 1>/dev/null 2>/dev/null
 	return $?
 }
@@ -209,9 +209,9 @@ _whoami() {
 
 	# Set username from UID or environment
 	_USER=$SUDO_USER
-	[[ "$_USER" = "" ]] && { _USER=$USERNAME }
-	[[ "$_USER" = "" ]] && { _USER=$(id -u)	 }
-	[[ "$_USER" = "" ]] && {
+	[[ -z $_USER ]] && { _USER=$USERNAME }
+	[[ -z $_USER ]] && { _USER=$(id -u)	 }
+	[[ -z $_USER ]] && {
 		_failure "Failing to identify the user who is calling us" }
 
 	# Get GID from option -G or the environment
@@ -390,7 +390,7 @@ ask_password() {
 
 	pass_asked=0
 
-	if [[ "$WAYLAND_DISPLAY" ]]; then
+	if [[ ! -z $WAYLAND_DISPLAY ]]; then
 		_verbose "wayland display detected"
 		_is_found "pinentry-gnome3" && {
 			_verbose "using pinentry-gnome3 on wayland"
@@ -398,7 +398,7 @@ ask_password() {
 			pass_asked=1
 		}
 	fi
-	if [[ "$DISPLAY" ]] && [[ "$pass_asked" == 0 ]]; then
+	if [[ ! -z $DISPLAY ]] && [[ -z $pass_asked ]]; then
 		_verbose "X11 display detected"
 		if _is_found "pinentry-gtk-2"; then
 			_verbose "using pinentry-gtk2"
@@ -422,7 +422,7 @@ ask_password() {
 			pass_asked=1
 		fi
 	fi
-	if [[ "$pass_asked" == 0 ]]; then
+	if [[ -z $pass_asked ]]; then
 		_verbose "no display detected"
 		_is_found "pinentry-curses" && {
 			_verbose "using pinentry-curses with no display"
@@ -431,7 +431,7 @@ ask_password() {
 		}
 	fi
 
-	[[ "$pass_asked" == 0 ]] &&
+	[[ -z $pass_asked ]] &&
 		_failure "Cannot find any pinentry-curses and no DISPLAY detected."
 
 	# parse the pinentry output
@@ -445,7 +445,7 @@ ask_password() {
 		[[ "$i" =~ "^D .*" ]] && password="${i##D }";
 	done
 
-	[[ ! -z "$pinentry_error" ]] && [[ "$password" = "" ]] && {
+	[[ ! -z $pinentry_error ]] && [[ -z $password ]] && {
 		_warning "Pinentry error: ::1 error::" ${pinentry_error}
 		print "canceled"
 		return 1
@@ -457,7 +457,7 @@ ask_password() {
 		password=$(sphinx_get_password "$password")
 	fi
 
-	[[ "$password" = "" ]] && {
+	[[ -z $password ]] && {
 		_warning "Empty password"
 		print "empty"
 		return 1
@@ -532,7 +532,7 @@ is_valid_tomb() {
 	_verbose "is_valid_tomb ::1 tomb file::" $1
 
 	# First argument must be the path to a tomb
-	[[ $1 ]] ||	_failure "Tomb file is missing from arguments."
+	[[ ! -z $1 ]] ||	_failure "Tomb file is missing from arguments."
 
 	local _fail=0
 	# Tomb file must be a readable, writable, non-empty regular file.
@@ -580,7 +580,7 @@ is_valid_tomb() {
 	# hidden files (starting with a dot) and have no extension (only
 	# one dot in string)
 	TOMBNAME=${TOMBNAME:-${TOMBFILE}}
-	[[ "$TOMBNAME" = "" ]] &&
+	[[ -z $TOMBNAME ]] &&
 		_failure "Tomb won't work without a TOMBNAME."
 
 	# checks if Tomb already mounted (or we cannot alter it)
@@ -1060,7 +1060,7 @@ _load_key() {
 
 	_verbose "load_key: ::1 key::" $TOMBKEYFILE
 
-	[[ "$TOMBKEY" = "" ]] && {
+	[[ -z $TOMBKEY ]] && {
 		# something went wrong, there is no key to load
 		# this occurs especially when piping from stdin and aborted
 		_failure "Key not found, specify one using -k."
@@ -1212,7 +1212,7 @@ ask_key_password() {
 	_message "A password is required to use key ::1 key::" $TOMBKEYFILE
 	passok=0
 	tombpass=""
-	if [[ "$1" = "" ]]; then
+	if [[ -z $1 ]]; then
 
 		for c in 1 2 3; do
 			if [[ $c == 1 ]]; then
@@ -1409,7 +1409,7 @@ gen_key() {
 
 		# if sphinx mode is chosen, use the provided input
 		# as master password to generate the actual password
-		if [[ "$sphx_host_tmp" != "" ]] || [[ "$sphx_user_tmp" != "" ]]; then 
+		if [[ ! -z $sphx_host_tmp ]] || [[ ! -z $sphx_user_tmp ]]; then 
 			OPTS[--sphx-user]=$sphx_user_tmp
 			OPTS[--sphx-host]=$sphx_host_tmp
 			unset sphx_user_tmp
@@ -1586,7 +1586,7 @@ bury_key() {
 # optional 2nd arg: the password to use (same as key, internal use)
 # optional 3rd arg: the key where to save the result (- for stdout)
 exhume_key() {
-	[[ "$1" = "" ]] && {
+	[[ -z $1 ]] && {
 		_failure "Exhume failed, no image specified" }
 
 	local imagefile="$1"  # The image file where to look for the key
@@ -1713,9 +1713,9 @@ cloakify_key() {
 # mandatory 2nd arg: the cipher to use
 # optional 3rd arg: the key where to save the result (none for stdout)
 decloakify_key() {
-	[[ "$1" = "" ]] && {
+	[[ -z $1 ]] && {
 		  _failure "Uncloak failed, no text file specified" }
-	[[ "$2" = "" ]] && {
+	[[ -z $2 ]] && {
 		  _failure "Uncloak failed, no cipher file specified" }
 
 	local textfile="$1"   # The text file where to look for the key
@@ -1820,7 +1820,7 @@ dig_tomb() {
 
 	_message "Commanded to dig tomb ::1 tomb path::" $tombpath
 
-	[[ $1 ]] || _failure "Missing path to tomb"
+	[[ ! -z $1 ]] || _failure "Missing path to tomb"
 	[[ -n "$tombsize"	]] || _failure "Size argument missing, use -s"
 	[[ $tombsize == <-> ]] || _failure "Size must be an integer (mebibytes)"
 	[[ $tombsize -ge 10 ]] || _failure "Tombs can't be smaller than 10 mebibytes"
@@ -2147,7 +2147,7 @@ _update_control_file() {
 	# stdin = contents
 	# $1 = path to control file
 	# $2 = contents
-	[[ "$2" = "" ]] && return 1
+	[[ -z $2 ]] && return 1
 	_sudo touch "$1"
 	_sudo chown ${_UID}:${_GID} "$1"
 	print "$2" > "$1"
@@ -2169,7 +2169,7 @@ mount_tomb() {
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
 
 	tombmount="$2"
-	[[ "$tombmount" = "" ]] && {
+	[[ -z $tombmount ]] && {
 		tombmount=/media/$TOMBNAME
 		[[ -d /media ]] || { # no /media found, adopting /run/media/$USER (udisks2 compat)
 			tombmount=/run/media/$_USER/$TOMBNAME
@@ -2352,8 +2352,8 @@ exec_safe_bind_hooks() {
 	for h in ${(f)_bindhooks}; do
 		s="${h[(w)1]}"
 		d="${h[(w)2]}"
-		[[ "$s" = "" ]] && { _warning "bind-hooks file is broken"; return 1 }
-		[[ "$d" = "" ]] && { _warning "bind-hooks file is broken"; return 1 }
+		[[ -z $s ]] && { _warning "bind-hooks file is broken"; return 1 }
+		[[ -z $d ]] && { _warning "bind-hooks file is broken"; return 1 }
 		maps+=($s $d)
 		_verbose "bind-hook found: $s -> $d"
 	done
@@ -2921,7 +2921,7 @@ list_processes() {
 	found=0
 	mounted_tombs=(`list_tomb_mounts $1`)
 	if [[ "${#mounted_tombs}" -gt 0 ]]; then
-		if [[ "$1" = "" ]]; then
+		if [[ -z $1 ]]; then
 			_success "Listing processes running inside all open tombs..."
 		else
 			_success "Listing processes running inside tomb '::1 tombname::'..." "$1"
@@ -3154,7 +3154,7 @@ main() {
 	# permissions for the calling user and drop privileges
 	_whoami # Reset _UID, _GID, _TTY
 
-	[[ "$PARAM" == "" ]] && {
+	[[ -z $PARAM ]] && {
 		_verbose "Tomb command: ::1 subcommand::" $subcommand
 	} || {
 		_verbose "Tomb command: ::1 subcommand:: ::2 param::" $subcommand $PARAM
