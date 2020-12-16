@@ -5,6 +5,7 @@
 Tomb needs a few programs to be installed on a system in order to work:
 
  * zsh
+ * file
  * sudo
  * gnupg
  * cryptsetup
