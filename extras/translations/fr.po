@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
-"PO-Revision-Date: 2020-04-18 06:11+0000\n"
-"Last-Translator: Jeannette L <j.lavoie@net-c.ca>\n"
+"PO-Revision-Date: 2020-12-22 07:17+0000\n"
+"Last-Translator: luzhen <luzhen@uniontech.com>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/tomb/tomb/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.0.2-dev\n"
+"X-Generator: Weblate 4.4-dev\n"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -73,7 +73,7 @@ msgstr "Impossible de trouver pinentry-curses et aucun DISPLAY n'a été détect
 
 #: tomb:Safety functions:ask_password:459
 msgid "Detected DISPLAY, but only pinentry-curses is found."
-msgstr ""
+msgstr "DISPLAY détecté, mais seuls les malédictions de pinentry sont trouvées."
 
 #: tomb:Safety functions:ask_password:469
 msgid "Cannot find any pinentry: impossible to ask for password."
@@ -285,7 +285,7 @@ msgstr "Il manque la dépendance requise ::1 command::. Merci de l'installer."
 
 #: tomb:Key operations:is_valid_key:837
 msgid "cleartext key from stdin selected: this is unsafe."
-msgstr ""
+msgstr "Clé en clair de stdin sélectionnée: ceci n'est pas sûr."
 
 #: tomb:Key operations:is_valid_key:838
 msgid "please use --unsafe if you really want to do this."
@@ -293,7 +293,7 @@ msgstr "Merci d'utiliser --unsafe si vous souhaitez vraiment faire cela."
 
 #: tomb:Key operations:is_valid_key:840
 msgid "received key in cleartext from stdin (unsafe mode)"
-msgstr ""
+msgstr "a reçu la clé en clair de stdin (mode non sécurisé)"
 
 #: tomb:Key operations:is_valid_key:844
 msgid "is_valid_key() called without an argument."
