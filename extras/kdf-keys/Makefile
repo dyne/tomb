@@ -2,10 +2,10 @@
 PREFIX ?= /usr/local
 
 all:
-	$(CC) -O2 -o tomb-kdb-pbkdf2 pbkdf2.c -lgcrypt
-	$(CC) -O2 -o tomb-kdb-pbkdf2-getiter benchmark.c -lgcrypt
-	$(CC) -O2 -o tomb-kdb-pbkdf2-gensalt gen_salt.c -lgcrypt
-	$(CC) -O2 -o tomb-kdb-hexencode hexencode.c
+	$(CC) -O2 $(CFLAGS) -o tomb-kdb-pbkdf2 pbkdf2.c -lgcrypt
+	$(CC) -O2 $(CFLAGS) -o tomb-kdb-pbkdf2-getiter benchmark.c -lgcrypt
+	$(CC) -O2 $(CFLAGS) -o tomb-kdb-pbkdf2-gensalt gen_salt.c -lgcrypt
+	$(CC) -O2 $(CFLAGS) -o tomb-kdb-hexencode hexencode.c
 
 test:
 	@echo "Running Tomb-kdb tests"
