@@ -2043,7 +2043,8 @@ lock_tomb_with_key() {
 
 	[[ $? == 0 ]] || {
 		_warning "Tomb format returned an error."
-		_warning "Your tomb ::1 tomb file:: may be corrupted." $TOMBFILE }
+		_sudo cryptsetup luksClose tomb.tmp
+		_failure "Your tomb ::1 tomb file:: may be corrupted." $TOMBFILE }
 
 	# Sync
 	_sudo cryptsetup luksClose tomb.tmp
