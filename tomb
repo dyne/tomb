@@ -1992,6 +1992,21 @@ lock_tomb_with_key() {
 
 	_verbose "Tomb found: ::1 tomb path::" $TOMBPATH
 
+	local filesystem=ext4
+    option_is_set --filesystem && {
+		filesystem=`option_value --filesystem`
+		case $filesystem in
+			ext3|ext4) ;;
+			btrfs) ;;
+			*)
+				_failure "Filesystem not supported: ::1 filesystem::" $filesystem
+				return 1
+				;;
+		esac
+		# TODO: check validity, only ext3 or 4 or btrfs support
+		_message "Selected filesystem type $filesystem."
+	}
+
 	lo_mount $TOMBPATH
 
 	_verbose "Loop mounted on ::1 mount point::" $TOMBLOOP
@@ -2038,8 +2053,15 @@ lock_tomb_with_key() {
 		_warning "cryptsetup luksOpen returned an error."
 		_failure "Operation aborted." }
 
-	_message "Formatting your Tomb with Ext3/Ext4 filesystem."
-	_sudo mkfs.ext4 -q -F -j -L $TOMBNAME /dev/mapper/tomb.tmp
+	_message "Formatting your Tomb with $filesystem filesystem."
+	case $filesystem in
+		ext3|ext4)
+			_sudo mkfs.${filesystem} -q -F -j -L $TOMBNAME /dev/mapper/tomb.tmp
+			;;
+		btrfs) # TODO: cover with test
+			_sudo mkfs.${filesystem} -q -L $TOMBNAME /dev/mapper/tomb.tmp
+			;;
+	esac
 
 	[[ $? == 0 ]] || {
 		_warning "Tomb format returned an error."
@@ -2155,6 +2177,12 @@ _update_control_file() {
 	_verbose "updated control file $1 = $2"
 }
 
+_detect_filesystem() {
+	local device=$1
+	_verbose "detecting filesystem of ::1 device::" $device
+	print "`lsblk -in -o FSTYPE $device`"
+}
+
 # $1 = tombfile $2(optional) = mountpoint
 mount_tomb() {
 	[[ -n "$1" ]] || _failure "No tomb name specified for opening."
@@ -2239,10 +2267,24 @@ mount_tomb() {
 	_success "Success unlocking tomb ::1 tomb name::" $TOMBNAME
 	_verbose "Key size is ::1 size:: for cipher ::2 cipher::" $tombstat[2] $tombstat[1]
 
-	_message "Checking filesystem via ::1::" $tombstat[3]
-	_sudo fsck -p -C0 /dev/mapper/${TOMBMAPPER}
+	filesystem=`_detect_filesystem /dev/mapper/${TOMBMAPPER}`
+	_message "Filesystem detected: ::1 filesystem::" $filesystem
+	# TODO: check if FS is supported, else close luks and loop
+
 	_verbose "Tomb engraved as ::1 tomb name::" $TOMBNAME
-	_sudo tune2fs -L $TOMBNAME /dev/mapper/${TOMBMAPPER} > /dev/null
+
+	_message "Checking filesystem via ::1::" $tombstat[3]
+	case $filesystem in
+		ext3|ext4)
+			_sudo fsck -p -C0 /dev/mapper/${TOMBMAPPER}
+			# TODO:     btrfs filesystem label [<device>|<mount_point>] [<newlabel>]
+			_sudo tune2fs -L $TOMBNAME /dev/mapper/${TOMBMAPPER} > /dev/null
+			;;
+		btrfs)
+			_sudo btrfs check /dev/mapper/${TOMBMAPPER}
+			_sudo btrfs filesystem label /dev/mapper/${TOMBMAPPER} ${TOMBNAME}
+			;;
+	esac
 
 	# we need root from here on
 	_sudo mkdir -p $tombmount
@@ -2796,11 +2838,36 @@ resize_tomb() {
 	_sudo cryptsetup resize "${TOMBMAPPER}" || {
 		_failure "cryptsetup failed to resize ::1 mapper::" $TOMBMAPPER }
 
-	_sudo e2fsck -p -f /dev/mapper/${TOMBMAPPER} || {
-		_failure "e2fsck failed to check ::1 mapper::" $TOMBMAPPER }
 
-	_sudo resize2fs /dev/mapper/${TOMBMAPPER} || {
-		_failure "resize2fs failed to resize ::1 mapper::" $TOMBMAPPER }
+	filesystem=`_detect_filesystem /dev/mapper/${TOMBMAPPER}`
+	_message "Filesystem detected: ::1 filesystem::" $filesystem
+	case $filesystem in
+		ext3|ext4)
+			_sudo e2fsck -p -f /dev/mapper/${TOMBMAPPER} || {
+				_sudo cryptsetup luksClose "${TOMBMAPPER}"
+				_failure "e2fsck failed to check ::1 mapper::" $TOMBMAPPER }
+			_sudo resize2fs /dev/mapper/${TOMBMAPPER} || {
+				_sudo cryptsetup luksClose "${TOMBMAPPER}"
+				_failure "resize2fs failed to resize ::1 mapper::" $TOMBMAPPER }
+			;;
+		btrfs)
+			_sudo btrfs check /dev/mapper/${TOMBMAPPER} || {
+				_sudo cryptsetup luksClose "${TOMBMAPPER}"
+				_failure "filesystem check failed on ::1 mapper::" $TOMBMAPPER }
+			# btrfs requires mounting before resize
+			local mp=${TOMBNAME}.tomb.resize
+			mkdir -p /tmp/${mp}
+			_sudo mount /dev/mapper/${TOMBMAPPER} /tmp/${mp}
+			_sudo btrfs filesystem resize max /tmp/${mp} || {
+				_sudo umount /tmp/${mp}
+				_sudo cryptsetup luksClose "${TOMBMAPPER}"
+				rmdir /tmp/${mp}
+				_failure "filesystem resize failed on ::1 mapper::" $TOMBMAPPER }
+			_sudo umount /tmp/${mp}
+			rmdir /tmp/${mp}
+			;;
+		# TODO: report error on unrecognized filesystem
+	esac
 
 	# close and free the loop device
 	_sudo cryptsetup luksClose "${TOMBMAPPER}"
@@ -3048,7 +3115,7 @@ main() {
 	# -o in forge and lock is used to pass an alternate cipher.
 	subcommands_opts[forge]="-ignore-swap k: -kdf: o: -tomb-pwd: -use-random r: R: -sphx-host: -sphx-user: "
 	subcommands_opts[dig]="-ignore-swap s: -size=s "
-	subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[lock]="-ignore-swap k: -kdf: o: -tomb-pwd: r: R: -sphx-host: -sphx-user: -filesystem: "
 	subcommands_opts[setkey]="k: -ignore-swap -kdf: -tomb-old-pwd: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
 	subcommands_opts[engrave]="k: "
 
