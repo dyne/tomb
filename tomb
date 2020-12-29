@@ -398,7 +398,7 @@ ask_password() {
 			pass_asked=1
 		}
 	fi
-	if [[ ! -z $DISPLAY ]] && [[ -z $pass_asked ]]; then
+	if [[ ! -z $DISPLAY ]] && [[ $pass_asked == 0 ]]; then
 		_verbose "X11 display detected"
 		if _is_found "pinentry-gtk-2"; then
 			_verbose "using pinentry-gtk2"
@@ -422,7 +422,7 @@ ask_password() {
 			pass_asked=1
 		fi
 	fi
-	if [[ -z $pass_asked ]]; then
+	if [[ $pass_asked == 0 ]]; then
 		_verbose "no display detected"
 		_is_found "pinentry-curses" && {
 			_verbose "using pinentry-curses with no display"
@@ -431,14 +431,14 @@ ask_password() {
 		}
 	fi
 
-	[[ -z $pass_asked ]] &&
+	[[ $pass_asked == 0 ]] &&
 		_failure "Cannot find any pinentry-curses and no DISPLAY detected."
 
 	# parse the pinentry output
 	local pinentry_error
 	for i in ${(f)output}; do
-    [[ "$i" =~ "^ERR.*" ]] && {
-      pinentry_error="${i[(w)3]}"
+		[[ "$i" =~ "^ERR.*" ]] && {
+			pinentry_error="${i[(w)3]}"
 		}
 
 		# here the password is found
