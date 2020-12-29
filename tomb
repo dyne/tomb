@@ -3324,6 +3324,7 @@ main() {
 				_print "System utils:"
 				echo
 				cat <<EOF
+  `zsh --version`
   `sudo -V | head -n1`
   `cryptsetup --version`
   `pinentry --version | head -n1`
