@@ -2052,7 +2052,7 @@ lock_tomb_with_key() {
 	_message "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::" $TOMBNAME $cipher
 	_success "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::" \
 			 $TOMBPATH $TOMBKEYFILE
-
+	return 0
 }
 
 # This function changes the key that locks a tomb
@@ -2484,6 +2484,7 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 					 $tombname ${h[(ws:;:)2]}
 		done
 	done
+	return 0
 }
 
 
@@ -2681,6 +2682,7 @@ EOF
 		}
 		_message "Search index updated."
 	done
+	return 0
 }
 
 search_tombs() {
@@ -2722,6 +2724,7 @@ search_tombs() {
 			_warning "Run 'tomb index' to create indexes." }
 	done
 	_message "Search completed."
+	return 0
 }
 
 # }}} - Index and search
@@ -2946,6 +2949,7 @@ list_processes() {
 	fi
 	_message "::1 foundproc:: running processes found inside ::2 numtombs:: open tombs" \
 			 $found ${#mounted_tombs}
+	return 0
 }
 
 # Kill all processes using the tomb
