@@ -1840,7 +1840,7 @@ dig_tomb() {
 		_failure "Operation aborted."
 	}
 	# Ensure that file permissions are safe even if interrupted
-	_sudo chown ${_UID}:${_GID} "$1"
+	[[ -n $SUDO_USER ]] && chown ${_UID}:${_GID} "$1"
 	chmod 0600 $1
 	_verbose "Data dump using ::1:: from /dev/urandom" ${DD[1]}
 	${=DD} if=/dev/urandom bs=1048576 count=$tombsize of=$1
