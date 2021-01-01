@@ -33,7 +33,7 @@
 typeset VERSION="2.8.1"
 typeset DATE="Nov/2020"
 typeset TOMBEXEC=$0
-typeset TMPPREFIX=${TMPPREFIX:-/tmp}
+typeset TMPDIR=${${TMPPREFIX%/*}:-/tmp}
 # TODO: configure which tmp dir to use from a cli flag
 
 # Tomb is using some global variables set by the shell:
@@ -245,15 +245,15 @@ _whoami() {
 
 # Provide a random filename in shared memory
 _tmp_create() {
-	[[ -d "$TMPPREFIX" ]] || {
+	[[ -d "$TMPDIR" ]] || {
 		# we create the tempdir with the sticky bit on
-		_sudo mkdir -m 1777 "$TMPPREFIX"
-		[[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPPREFIX"
+		_sudo mkdir -m 1777 "$TMPDIR"
+		[[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPDIR"
 	}
 
 	# We're going to add one more $RANDOM for each time someone complains
 	# about this being too weak of a random.
-	tfile="${TMPPREFIX}/$RANDOM$RANDOM$RANDOM$RANDOM"	# Temporary file
+	tfile="${TMPDIR}/$RANDOM$RANDOM$RANDOM$RANDOM"	# Temporary file
 	umask 066
 	[[ $? == 0 ]] || {
 		_failure "Fatal error setting the permission umask for temporary files" }
@@ -3219,7 +3219,7 @@ main() {
 		done
 	}
 	# read -t or --tmp flags to set a custom temporary directory
-	option_is_set --tmp && TMPPREFIX=$(option_value --tmp)
+	option_is_set --tmp && TMPDIR=$(option_value --tmp)
 
 
 	# When we run as root, we remember the original uid:gid to set
@@ -3237,7 +3237,7 @@ main() {
 				 $_UID $_GID $_TTY
 	}
 
-	_verbose "Temporary directory: $TMPPREFIX"
+	_verbose "Temporary directory: $TMPDIR"
 
 	# Process subcommand
 	case "$subcommand" in
