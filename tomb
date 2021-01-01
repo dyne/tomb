@@ -76,10 +76,10 @@ unsetopt CASE_MATCH
 typeset -AH OPTS			  # Command line options (see main())
 
 # Command context (see _whoami())
-typeset -H	_USER			  # Running username
+typeset -H _USER			  # Running username
 typeset -Hi _UID			  # Running user identifier
 typeset -Hi _GID			  # Running user group identifier
-typeset -H	_TTY			  # Connected input terminal
+typeset -H  _TTY			  # Connected input terminal
 
 # Tomb context (see is_valid_tomb())
 typeset -H TOMBPATH			  # Full path to the tomb
@@ -210,7 +210,7 @@ _whoami() {
 	# Set username from UID or environment
 	_USER=$SUDO_USER
 	[[ -z $_USER ]] && { _USER=$USERNAME }
-	[[ -z $_USER ]] && { _USER=$(id -un)	 }
+	[[ -z $_USER ]] && { _USER=$(id -un) }
 	[[ -z $_USER ]] && {
 		_failure "Failing to identify the user who is calling us" }
 
@@ -1116,7 +1116,7 @@ gpg_decrypt() {
 	_tmp_create
 	tmpres=$TOMBTMP
 	TOMBSECRET=`print - "$gpgpass" | \
-		gpg --decrypt ${gpgpopt[@]}	 \
+		gpg --decrypt ${gpgpopt[@]} \
 			--status-fd 2 --no-mdc-warning --no-permission-warning \
 			--no-secmem-warning 2> $tmpres`
 	unset gpgpass
@@ -1409,7 +1409,7 @@ gen_key() {
 
 		# if sphinx mode is chosen, use the provided input
 		# as master password to generate the actual password
-		if [[ ! -z $sphx_host_tmp ]] || [[ ! -z $sphx_user_tmp ]]; then 
+		if [[ ! -z $sphx_host_tmp ]] || [[ ! -z $sphx_user_tmp ]]; then
 			OPTS[--sphx-user]=$sphx_user_tmp
 			OPTS[--sphx-host]=$sphx_host_tmp
 			unset sphx_user_tmp
@@ -2717,7 +2717,7 @@ FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.rtf.*/i
 FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.tex$/i
 # native html support
 IndexContents HTML* .htm .html .shtml
-IndexContents XML*	.xml
+IndexContents XML* .xml
 EOF
 
 			swish-e -c ${tombmount}/.swishrc -S fs -v3
@@ -3197,7 +3197,7 @@ main() {
 		if [[ $arg == '--' || $arg == '-' ]]; then
 			ok=1
 			continue #it shouldn't be appended to PARAM
-		elif [[ $arg[1] == '-'	]]; then
+		elif [[ $arg[1] == '-' ]]; then
 			if [[ $ok == 0 ]]; then
 				exitv=127 _failure "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::" $arg $subcommand
 			fi
@@ -3264,7 +3264,7 @@ main() {
 			forge_key $PARAM
 			;;
 
-		# CREATE Step 2: lock -k file.tomb.key file.tomb
+		# CREATE Step 3: lock -k file.tomb.key file.tomb
 		lock)
 			lock_tomb_with_key $PARAM
 			;;
@@ -3287,7 +3287,7 @@ main() {
 		# Close the tomb
 		# `slam` is used to force closing.
 		umount|close)
-			[[ "$subcommand" ==	 "slam" ]] && {
+			[[ "$subcommand" == "slam" ]] && {
 				SLAM=1
 				[[ $LSOF == 0 ]] && {
 					unset SLAM
