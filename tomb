@@ -1955,7 +1955,7 @@ forge_key() {
 		_failure "Operation aborted."
 	}
 
-	_sudo chown ${_UID}:${_GID} "$TOMBKEYFILE"
+	[[ -n $SUDO_USER ]] && chown ${_UID}:${_GID} "$TOMBKEYFILE"
 	_message "Done forging ::1 key file::" $TOMBKEYFILE
 	_success "Your key is ready:"
 	ls -lh $TOMBKEYFILE
