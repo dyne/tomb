@@ -210,7 +210,7 @@ _whoami() {
 	# Set username from UID or environment
 	_USER=$SUDO_USER
 	[[ -z $_USER ]] && { _USER=$USERNAME }
-	[[ -z $_USER ]] && { _USER=$(id -u)	 }
+	[[ -z $_USER ]] && { _USER=$(id -un)	 }
 	[[ -z $_USER ]] && {
 		_failure "Failing to identify the user who is calling us" }
 
