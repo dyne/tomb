@@ -1,5 +1,21 @@
 # Tomb ChangeLog
 
+## 2.9
+### Jan 2021
+
+This release fixes all bugs introduced by the unfortunate 2.8 release
+series in 2020 as well introduces support for BTRFS formatted
+Tombs. The fixes are for password insertion to work on all desktops,
+as well the fix to a regression when using old Zsh versions. The new
+feature is activated by the '--filesystem' flag on 'lock' commands.
+It only supports BTRFS as internal filesystem of a Tomb instead of the
+default EXT4; resizing works as well to create and send or receive
+subvolumes and snapshots inside a Tomb. There are also some cleanups,
+small error handling improvements and no more need for suid actions by
+'forge' and 'dig' commands.
+
+
+
 ## 2.8.1
 ### Nov 2020
 

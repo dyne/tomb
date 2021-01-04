@@ -31,7 +31,7 @@ Polfer, Jim Turner, Maxime Arthaud, RobertMX, mhogomchungu Mandeep
 Bhutani, Emil Lundberg, Joel Montes de Oca, Armin Mesbah, Arusekk,
 Stephan Schindel, Asbjørn Apeland, Victor Calvert, bjonnh, SargoDevel,
 AitorATuin, Alexis Danizan, Sven Geuer, Greg Tczap, Aaron Janse, Mark
-Mykkanen, Alexis Danizan, Steve Litt, James R, and...
+Mykkanen, Alexis Danizan, Steve Litt, James R, Matthieu Crapet and...
 the Linux Action Show!
 
 Tomb includes an implementation of the "Password-Based Key Derivation
