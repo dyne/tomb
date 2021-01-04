@@ -33,7 +33,7 @@
 typeset VERSION="2.8.1"
 typeset DATE="Nov/2020"
 typeset TOMBEXEC=$0
-typeset TMPPREFIX=${TMPPREFIX:-/tmp}
+typeset TMPDIR=${${TMPPREFIX%/*}:-/tmp}
 # TODO: configure which tmp dir to use from a cli flag
 
 # Tomb is using some global variables set by the shell:
@@ -76,10 +76,10 @@ unsetopt CASE_MATCH
 typeset -AH OPTS			  # Command line options (see main())
 
 # Command context (see _whoami())
-typeset -H	_USER			  # Running username
+typeset -H _USER			  # Running username
 typeset -Hi _UID			  # Running user identifier
 typeset -Hi _GID			  # Running user group identifier
-typeset -H	_TTY			  # Connected input terminal
+typeset -H  _TTY			  # Connected input terminal
 
 # Tomb context (see is_valid_tomb())
 typeset -H TOMBPATH			  # Full path to the tomb
@@ -210,7 +210,7 @@ _whoami() {
 	# Set username from UID or environment
 	_USER=$SUDO_USER
 	[[ -z $_USER ]] && { _USER=$USERNAME }
-	[[ -z $_USER ]] && { _USER=$(id -u)	 }
+	[[ -z $_USER ]] && { _USER=$(id -un) }
 	[[ -z $_USER ]] && {
 		_failure "Failing to identify the user who is calling us" }
 
@@ -245,15 +245,15 @@ _whoami() {
 
 # Provide a random filename in shared memory
 _tmp_create() {
-	[[ -d "$TMPPREFIX" ]] || {
+	[[ -d "$TMPDIR" ]] || {
 		# we create the tempdir with the sticky bit on
-		_sudo mkdir -m 1777 "$TMPPREFIX"
-		[[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPPREFIX"
+		_sudo mkdir -m 1777 "$TMPDIR"
+		[[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPDIR"
 	}
 
 	# We're going to add one more $RANDOM for each time someone complains
 	# about this being too weak of a random.
-	tfile="${TMPPREFIX}/$RANDOM$RANDOM$RANDOM$RANDOM"	# Temporary file
+	tfile="${TMPDIR}/$RANDOM$RANDOM$RANDOM$RANDOM"	# Temporary file
 	umask 066
 	[[ $? == 0 ]] || {
 		_failure "Fatal error setting the permission umask for temporary files" }
@@ -1116,7 +1116,7 @@ gpg_decrypt() {
 	_tmp_create
 	tmpres=$TOMBTMP
 	TOMBSECRET=`print - "$gpgpass" | \
-		gpg --decrypt ${gpgpopt[@]}	 \
+		gpg --decrypt ${gpgpopt[@]} \
 			--status-fd 2 --no-mdc-warning --no-permission-warning \
 			--no-secmem-warning 2> $tmpres`
 	unset gpgpass
@@ -1409,7 +1409,7 @@ gen_key() {
 
 		# if sphinx mode is chosen, use the provided input
 		# as master password to generate the actual password
-		if [[ ! -z $sphx_host_tmp ]] || [[ ! -z $sphx_user_tmp ]]; then 
+		if [[ ! -z $sphx_host_tmp ]] || [[ ! -z $sphx_user_tmp ]]; then
 			OPTS[--sphx-user]=$sphx_user_tmp
 			OPTS[--sphx-host]=$sphx_host_tmp
 			unset sphx_user_tmp
@@ -1840,7 +1840,7 @@ dig_tomb() {
 		_failure "Operation aborted."
 	}
 	# Ensure that file permissions are safe even if interrupted
-	_sudo chown ${_UID}:${_GID} "$1"
+	[[ -n $SUDO_USER ]] && chown ${_UID}:${_GID} "$1"
 	chmod 0600 $1
 	_verbose "Data dump using ::1:: from /dev/urandom" ${DD[1]}
 	${=DD} if=/dev/urandom bs=1048576 count=$tombsize of=$1
@@ -1955,7 +1955,7 @@ forge_key() {
 		_failure "Operation aborted."
 	}
 
-	_sudo chown ${_UID}:${_GID} "$TOMBKEYFILE"
+	[[ -n $SUDO_USER ]] && chown ${_UID}:${_GID} "$TOMBKEYFILE"
 	_message "Done forging ::1 key file::" $TOMBKEYFILE
 	_success "Your key is ready:"
 	ls -lh $TOMBKEYFILE
@@ -2717,7 +2717,7 @@ FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.rtf.*/i
 FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.tex$/i
 # native html support
 IndexContents HTML* .htm .html .shtml
-IndexContents XML*	.xml
+IndexContents XML* .xml
 EOF
 
 			swish-e -c ${tombmount}/.swishrc -S fs -v3
@@ -3197,7 +3197,7 @@ main() {
 		if [[ $arg == '--' || $arg == '-' ]]; then
 			ok=1
 			continue #it shouldn't be appended to PARAM
-		elif [[ $arg[1] == '-'	]]; then
+		elif [[ $arg[1] == '-' ]]; then
 			if [[ $ok == 0 ]]; then
 				exitv=127 _failure "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::" $arg $subcommand
 			fi
@@ -3219,7 +3219,7 @@ main() {
 		done
 	}
 	# read -t or --tmp flags to set a custom temporary directory
-	option_is_set --tmp && TMPPREFIX=$(option_value --tmp)
+	option_is_set --tmp && TMPDIR=$(option_value --tmp)
 
 
 	# When we run as root, we remember the original uid:gid to set
@@ -3237,7 +3237,7 @@ main() {
 				 $_UID $_GID $_TTY
 	}
 
-	_verbose "Temporary directory: $TMPPREFIX"
+	_verbose "Temporary directory: $TMPDIR"
 
 	# Process subcommand
 	case "$subcommand" in
@@ -3264,7 +3264,7 @@ main() {
 			forge_key $PARAM
 			;;
 
-		# CREATE Step 2: lock -k file.tomb.key file.tomb
+		# CREATE Step 3: lock -k file.tomb.key file.tomb
 		lock)
 			lock_tomb_with_key $PARAM
 			;;
@@ -3287,7 +3287,7 @@ main() {
 		# Close the tomb
 		# `slam` is used to force closing.
 		umount|close)
-			[[ "$subcommand" ==	 "slam" ]] && {
+			[[ "$subcommand" == "slam" ]] && {
 				SLAM=1
 				[[ $LSOF == 0 ]] && {
 					unset SLAM
