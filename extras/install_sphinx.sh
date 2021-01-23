@@ -5,8 +5,11 @@ cd libsphinx
 git submodule update --init --recursive --remote
 cd src
 sed -i 's|/usr/local|/usr|' makefile
-make
-sudo make install
-ldconfig
-pip3 install pwdsphinx
-sudo mkdir -p /etc/sphinx
+make && make install && ldconfig
+cd ../..
+git clone https://github.com/stef/pwdsphinx
+cd pwdsphinx
+python3 setup.py install
+mkdir -p /etc/sphinx && cp ../test/sphinx.cfg /etc/sphinx/config && cd /etc/sphinx
+openssl req -new -x509 -nodes -out server.crt -keyout server.key -subj '/CN=localhost'
+sphinx init

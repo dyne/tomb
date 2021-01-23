@@ -505,14 +505,14 @@ sphinx_set_password() {
 		# check first if this host/user combination exists in store
 		# if yes, there is no need to make a call to create
 		password=$(echo "$1" | sphinx get $(option_value --sphx-user) $(option_value --sphx-host) 2>$errorfile)
-		if  ! grep -q "ValueError: fail" $errorfile ; then
+		if  ! grep -q "error: sphinx protocol failure" $errorfile ; then
 			echo "$password"
 			rm $errorfile
 			return 0
 		fi
 		# no such host/user combination in store, create one
 		password=$(echo "$1" | sphinx create $(option_value --sphx-user) $(option_value --sphx-host) ulsd 0 2>$errorfile)
-		if  ! grep -q "ValueError: fail" $errorfile ; then
+		if  ! grep -q "error: sphinx protocol failure" $errorfile ; then
 			echo "$password"
 			rm $errorfile
 			return 0
