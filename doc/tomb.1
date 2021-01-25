@@ -32,7 +32,10 @@ Generates a file that can be used as a tomb and will occupy as much
 space as its desired initial size, the unlocked \fI.tomb\fR file can
 then be locked using a \fIkey\fR. It takes a mandatory \fI-s\fR option
 which is the size in megabytes (MiB). Tombs are digged using random
-data gathered from a non-blocking source (/dev/urandom).
+data gathered from a non-blocking source (/dev/urandom). For very
+large tombs this may take up too much time and entropy, then it is
+possible to use \fIfallocate(1)\fR being aware it does not pre-fill
+with random data, decreasing the tomb's security.
 
 .B
 .IP "forge"
