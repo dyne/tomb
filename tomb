@@ -124,8 +124,10 @@ $msg
 # Cleanup anything sensitive before exiting.
 _endgame() {
 
-	# Restore access time of sensitive files
-    [[ -z $TOMBFILESSTAT ]] || _restore_stat
+	option_value_contains -o ro || {
+		# Restore access time of sensitive files
+		[[ -z $TOMBFILESSTAT ]] || _restore_stat
+	}
 
 	# Prepare some random material to overwrite vars
 	local rr="$RANDOM"
@@ -537,9 +539,11 @@ is_valid_tomb() {
 	local _fail=0
 	# Tomb file must be a readable, writable, non-empty regular file.
 	# If passed the "ro" mount option, the writable check is skipped.
-	[[ ! -w "$1" ]] && [[ $(option_value -o) != *"ro"* ]] && {
-		_warning "Tomb file is not writable: ::1 tomb file::" $1
-		_fail=1
+	option_value_contains -o ro || {
+		[[ ! -w "$1" ]] && {
+			_warning "Tomb file is not writable: ::1 tomb file::" $1
+			_fail=1
+		}
 	}
 	_verbose "tomb file is readable"
 
@@ -753,6 +757,16 @@ option_is_set() {
 # Unique argument is the commandline flag (e.g., "-s").
 option_value() {
 	print -n - "${OPTS[$1]}"
+}
+
+# check if the option value contains a string between commas
+option_value_contains() {
+	local opt="${OPTS[$1]}"
+	local str="$2"
+	for i in ${(s:,:)opt}; do
+		[[ "$i" == "$2" ]] && return 0
+	done
+	return 1
 }
 
 # Messaging function with pretty coloring
@@ -2004,7 +2018,7 @@ lock_tomb_with_key() {
 				;;
 		esac
 		# TODO: check validity, only ext3 or 4 or btrfs support
-		_message "Selected filesystem type $filesystem."
+		_success "Selected filesystem type $filesystem."
 	}
 
 	lo_mount $TOMBPATH
@@ -2273,18 +2287,22 @@ mount_tomb() {
 
 	_verbose "Tomb engraved as ::1 tomb name::" $TOMBNAME
 
-	_message "Checking filesystem via ::1::" $tombstat[3]
-	case $filesystem in
-		ext3|ext4)
-			_sudo fsck -p -C0 /dev/mapper/${TOMBMAPPER}
-			# TODO:     btrfs filesystem label [<device>|<mount_point>] [<newlabel>]
-			_sudo tune2fs -L $TOMBNAME /dev/mapper/${TOMBMAPPER} > /dev/null
-			;;
-		btrfs)
-			_sudo btrfs check /dev/mapper/${TOMBMAPPER}
-			_sudo btrfs filesystem label /dev/mapper/${TOMBMAPPER} ${TOMBNAME}
-			;;
-	esac
+	if option_value_contains -o ro; then
+		_message "Skipping filesystem checks in read-only"
+	else
+		_message "Checking filesystem via ::1::" $tombstat[3]
+		case $filesystem in
+			ext3|ext4)
+				_sudo fsck -p -C0 /dev/mapper/${TOMBMAPPER}
+				# TODO:     btrfs filesystem label [<device>|<mount_point>] [<newlabel>]
+				_sudo tune2fs -L $TOMBNAME /dev/mapper/${TOMBMAPPER} > /dev/null
+				;;
+			btrfs)
+				_sudo btrfs check /dev/mapper/${TOMBMAPPER}
+				_sudo btrfs filesystem label /dev/mapper/${TOMBMAPPER} ${TOMBNAME}
+				;;
+		esac
+	fi
 
 	# we need root from here on
 	_sudo mkdir -p $tombmount
@@ -2328,15 +2346,16 @@ mount_tomb() {
 	}
 
 	# write down the UID and TTY that opened the tomb
-	_update_control_file ${tombmount}/.uid $_UID
-	_update_control_file ${tombmount}/.tty $_TTY
-	# also the hostname
-	_update_control_file ${tombmount}/.host `hostname`
-	# and the "last time opened" information
-	# in minutes since 1970, this is printed at next open
-	_update_control_file ${tombmount}/.last `date +%s`
-	# human readable: date --date=@"`cat .last`" +%c
-
+	option_value_contains -o ro || {
+		_update_control_file ${tombmount}/.uid $_UID
+		_update_control_file ${tombmount}/.tty $_TTY
+		# also the hostname
+		_update_control_file ${tombmount}/.host `hostname`
+		# and the "last time opened" information
+		# in minutes since 1970, this is printed at next open
+		_update_control_file ${tombmount}/.last `date +%s`
+		# human readable: date --date=@"`cat .last`" +%c
+	}
 	# process bind-hooks (mount -o bind of directories)
 	# and exec-hooks (execute on open)
 	option_is_set -n || {
@@ -2345,10 +2364,14 @@ mount_tomb() {
 	}
 
 	# Changes ownership to current user. This facilitates a lot
-	# usability by single users. If a Tomb is "multiuser" and contains
-	# ACL "by convention" using UNIX ownership that needs to be
-	# preserved then this behavior can be deactivated using -p
-	option_is_set -p || _sudo chown -R ${_UID}:${_GID} ${tombmount}
+	# usability by single users. If a Tomb is opened read-only or it
+	# is "multiuser" and contains ACL "by convention" using UNIX
+	# ownership that needs to be preserved, then this behavior can be
+	# deactivated using -p
+	local dochown=true
+	option_value_contains -o ro && dochown=false
+	option_is_set -p            && dochown=false
+	$dochown && _sudo chown -R ${_UID}:${_GID} ${tombmount}
 
 	return 0
 }
