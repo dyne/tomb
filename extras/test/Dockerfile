@@ -12,6 +12,7 @@ WORKDIR /Tomb/extras
 RUN ./install_sphinx.sh
 
 COPY extras/test/doas.conf /etc/doas.conf
+RUN chmod 400 /etc/doas.conf
 
 WORKDIR /Tomb
 RUN make --directory=extras/kdf-keys
