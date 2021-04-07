@@ -110,16 +110,20 @@ export TEXTDOMAIN=tomb
 
 # {{{ Safety functions
 
-# Wrap sudo with a more visible message
+# Wrap sudo with a more visible message or apply user-supplied alternative to sudo
 _sudo() {
-	local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
-	command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
-	msg=${(S)msg//::1*::/$USER}
-	sudo -p "
+	if option_is_set --sudo; then
+		$(option_value --sudo) ${@};
+	else
+		local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
+		command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
+		msg=${(S)msg//::1*::/$USER}
+		sudo -p "
 $msg
 
 " ${@}
-}
+	fi
+	}
 
 # Cleanup anything sensitive before exiting.
 _endgame() {
@@ -287,7 +291,7 @@ _is_encrypted_block() {
 	lsblk --help | grep -Fq -- --inverse
 	[[ $? -eq 0 ]] && s="--inverse"
 
-	sudo lsblk $s -o type -n $b 2>/dev/null \
+	_sudo lsblk $s -o type -n $b 2>/dev/null \
 		| egrep -q '^crypt$'
 
 	return $?
@@ -710,6 +714,7 @@ usage() {
 	_print " -g           use a GnuPG key to encrypt a tomb key"
 	_print " -r           provide GnuPG recipients (separated by comma)"
 	_print " -R           provide GnuPG hidden recipients (separated by comma)"
+	_print " --sudo       alternative to sudo such as doas (command or absolute path)"
 
 	[[ $SPHINX == 1 ]] && {
 		_print " --sphx-user  user associated with the key (for use with pitchforkedsphinx)"
@@ -3127,7 +3132,7 @@ main() {
 	# can only use the non-abbreviated long-option version like:
 	# -force and NOT -f
 	#
-	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g)
+	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g -sudo)
 	subcommands_opts[__default]=""
 	# -o in open and mount is used to pass alternate mount options
 	subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: r: R: -sphx-host: -sphx-user: p -preserve-ownership=p"

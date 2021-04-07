@@ -52,5 +52,12 @@ if test_have_prereq SPHINX ORACLE; then
         '
 fi
 
+if test_have_prereq DOAS; then
+    test_export "doas_test" # Using already generated tomb
+    test_expect_success 'Testing open with good password (using doas instead of sudo)' '
+        tt_open --sudo doas --tomb-pwd $DUMMYPASS &&
+        tt_close
+        '
+fi
 
 test_done
