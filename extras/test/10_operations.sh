@@ -56,7 +56,7 @@ if test_have_prereq DOAS; then
     test_export "doas_test" # Using already generated tomb
     test_expect_success 'Testing open with good password (using doas instead of sudo)' '
         tt_open --sudo doas --tomb-pwd $DUMMYPASS &&
-        tt_close
+        tt_close --sudo doas
         '
 fi
 
