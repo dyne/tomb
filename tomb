@@ -3132,7 +3132,7 @@ main() {
 	# can only use the non-abbreviated long-option version like:
 	# -force and NOT -f
 	#
-	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g -sudo)
+	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g -sudo:)
 	subcommands_opts[__default]=""
 	# -o in open and mount is used to pass alternate mount options
 	subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: r: R: -sphx-host: -sphx-user: p -preserve-ownership=p"
