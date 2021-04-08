@@ -113,7 +113,15 @@ export TEXTDOMAIN=tomb
 # Wrap sudo with a more visible message or apply user-supplied alternative to sudo
 _sudo() {
 	if option_is_set --sudo; then
-		$(option_value --sudo) ${@};
+		case `basename $(option_value --sudo)` in
+			"doas")
+				$(option_value --sudo) ${@}
+				;;
+			 *)
+				_failure "Only doas is supported as sudo alternative"
+				;;
+		esac
+		
 	else
 		local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
 		command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
