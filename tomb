@@ -113,9 +113,34 @@ export TEXTDOMAIN=tomb
 
 # Wrap sudo with a more visible message or apply user-supplied alternative to sudo
 _sudo() {
-    _verbose "Enter password for user ::1 user:: to gain superuser privileges" $USER
-    _verbose "Using ::1 exec:: for privilege escalation" $SUDO
-    ${=SUDO} ${@}
+	if option_is_set --sudo; then
+		case `basename $(option_value --sudo)` in
+			"doas")
+				command -v doas >/dev/null || _failure "Doas executable not found in PATH"
+				_verbose "Super user execution using doas"
+				doas ${@}
+				return $?
+				;;
+			"skip"|"none")
+				_verbose "Super user execution skipped (SUID caller)"
+				${@}
+				return $?
+				;;
+			 *)
+				_failure "Super user execution not supported: ::1 sudo::" "`option_value --sudo`"
+				;;
+		esac
+		
+	else
+		local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
+		command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
+		msg=${(S)msg//::1*::/$USER}
+		sudo -p "
+$msg
+
+" ${@}
+		return $?
+	fi
 }
 
 # Cleanup anything sensitive before exiting.
@@ -557,7 +582,7 @@ is_valid_tomb() {
 
 	# Tomb file may be a LUKS FS (or we are creating it)
 	[[ "`file $1`" =~ "luks encrypted file" ]] || {
-		_warning "File is not yet a tomb: ::1 tomb file::" $1 }
+		_message "File is not yet a tomb: ::1 tomb file::" $1 }
 
 	# We set global variables
 	typeset -g TOMBPATH TOMBDIR TOMBFILE TOMBNAME TOMBMAPPER
@@ -581,8 +606,8 @@ is_valid_tomb() {
 
 	# checks if Tomb already mounted (or we cannot alter it)
 	local maphash=`realpath $TOMBPATH | sha256sum -z`
-	local nextloop=`_sudo losetup -f`
-	TOMBMAPPER="tomb.$TOMBNAME.${maphash[(w)1]}.`basename $nextloop`"
+	lo_mount # fills TOMBLOOP with next loop
+	TOMBMAPPER="tomb.$TOMBNAME.${maphash[(w)1]}.`basename $TOMBLOOP`"
 	local mounted_tombs=(`list_tomb_mounts`)
 	local usedmapper
 	for t in ${mounted_tombs}; do
@@ -604,7 +629,7 @@ lo_mount() {
 	tpath="$1"
 
 	# check if we have support for loop mounting
-	TOMBLOOP=`_sudo losetup -f`
+	TOMBLOOP=`losetup -f`
 	[[ $? = 0 ]] || {
 		_warning "Loop mount of volumes is not possible on this machine, this error"
 		_warning "often occurs on VPS and kernels that don't provide the loop module."
@@ -612,9 +637,14 @@ lo_mount() {
 		_failure "Operation aborted."
 	}
 
-	_sudo losetup -f "$tpath" # allocates the next loopback for our file
+	[[ "$tpath" == "" ]] && return 0
+
+
+	# allocates the next loopback for our file
+	_sudo losetup -f "$tpath" || _failure "Loopback mount failed: ::1 path:: on ::2 loop::" "$tpath" $TOMBLOOP
 
 	TOMBLOOPDEVS+=("$TOMBLOOP") # add to array of lodevs used
+
 	return 0
 }
 
@@ -702,7 +732,7 @@ usage() {
 	_print " -g           use a GnuPG key to encrypt a tomb key"
 	_print " -r           provide GnuPG recipients (separated by comma)"
 	_print " -R           provide GnuPG hidden recipients (separated by comma)"
-	_print " --sudo       alternative to sudo such as doas (command or absolute path)"
+	_print " --sudo       super user exec alternative to sudo (doas or none)"
 
 	[[ $SPHINX == 1 ]] && {
 		_print " --sphx-user  user associated with the key (for use with pitchforkedsphinx)"
@@ -2023,11 +2053,10 @@ lock_tomb_with_key() {
 				return 1
 				;;
 		esac
-		# TODO: check validity, only ext3 or 4 or btrfs support
 		_success "Selected filesystem type $filesystem."
 	}
 
-	lo_mount $TOMBPATH
+	lo_mount "$TOMBPATH"
 
 	_verbose "Loop mounted on ::1 mount point::" $TOMBLOOP
 
@@ -2114,7 +2143,7 @@ change_tomb_key() {
 
 	is_valid_tomb $tombpath
 
-	lo_mount $TOMBPATH
+	lo_mount "$TOMBPATH"
 
 	_sudo cryptsetup isLuks ${TOMBLOOP}
 	# is it a LUKS encrypted nest? we check one more time
@@ -2236,7 +2265,7 @@ mount_tomb() {
 			_failure "Mountpoint already in use: ::1 mount point::" "$tombmount"
 	done
 
-	lo_mount $TOMBPATH
+	lo_mount "$TOMBPATH"
 
 	_sudo cryptsetup isLuks ${TOMBLOOP} || {
 		# is it a LUKS encrypted nest? see cryptsetup(1)
