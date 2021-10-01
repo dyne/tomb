@@ -31,11 +31,11 @@ Linux hard disk encryption settings
    and LRW for standardisation. EME along with it's cousin CMC seems to
    provide the best security level, but imposes additional encryption
    steps. Plumb-IV is discussed only for reference, because it has the
-   same performance penalty as CMC, but in constrast suffers from
+   same performance penalty as CMC, but in contrast suffers from
    weaknesses of CBC encryption.
 
    As convention, this document will use the term "blocks", when it
-   referes to a single block of plain or cipher text (usually 16 byte),
+   refers to a single block of plain or cipher text (usually 16 byte),
    and will use the term "sectors", when it refers to a 512-byte wide hard
    disk block.
 
@@ -171,8 +171,8 @@ Content leaks
    cipher blocks. But how does this number grow in n? Obviously
    exponentially. Plotting a few a decimal powers shows that the chance
    for finding at least on identical cipher pair flips to 1 around n =
-   10^20 (n = 10^40 for a 256-bit cipher). This inflexion point is reached
-   for a 146 million TB storage (or a hundered thousand trillion trillions
+   10^20 (n = 10^40 for a 256-bit cipher). This inflection point is reached
+   for a 146 million TB storage (or a hundred thousand trillion trillions
    TB storage for a 256-bit cipher).
 
    ^1The blocks with available preceding cipher blocks is 62/1KB for all

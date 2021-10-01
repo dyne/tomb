@@ -1,12 +1,10 @@
 Overview
 =========
 
-
-What's a key?
-It basicly is a gpg simmetrically encrypted, ascii-armored file.
-It's encryption key is a function (see below, on KDF section) of your tomb
+What is a key?
+It is a gpg symmetrically encrypted, ascii-armored file.
+The encryption key is a function (see below, on KDF section) of your tomb
 passphrase.
-
 
 Layout
 ======
