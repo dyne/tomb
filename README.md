@@ -112,7 +112,7 @@ or if you are in a hurry
 
    -h     print this help
    -v     print version, license and list of available ciphers
-   -q     run quietly without printing informations
+   -q     run quietly without printing information
    -D     print debugging information at runtime
 ```
 
