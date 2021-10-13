@@ -182,11 +182,6 @@ TRAPPIPE() { _endgame PIPE	}
 TRAPTERM() { _endgame TERM	}
 TRAPSTOP() { _endgame STOP	}
 
-_cat() { local -a _arr;
-		 # read file using mapfile, newline fix
-		 _arr=("${(f@)${mapfile[${1}]%$'\n'}}"); print "$_arr"
-	   }
-
 _is_found() {
 	# returns 0 if binary is found in path
 	[[ -z $1 ]] && return 1
@@ -2353,12 +2348,12 @@ mount_tomb() {
 
 	# print out when it was opened the last time, by whom and where
 	[[ -r ${tombmount}/.last ]] && {
-		tombsince=$(_cat ${tombmount}/.last)
+		tombsince=$(cat ${tombmount}/.last)
 		tombsince=$(date --date=@$tombsince +%c)
-		tombtty=$(_cat ${tombmount}/.tty)
-		tombhost=$(_cat ${tombmount}/.host)
-		tomblast=$(_cat ${tombmount}/.last)
-		tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
+		tombtty=$(cat ${tombmount}/.tty)
+		tombhost=$(cat ${tombmount}/.host)
+		tomblast=$(cat ${tombmount}/.last)
+		tombuid=$(cat ${tombmount}/.uid | tr -d ' ')
 
 		tombuser=`_get_username $tombuid`
 
@@ -2533,11 +2528,11 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 
 		# find out who opens it from where
 		[[ -r ${tombmount}/.tty ]] && {
-			tombsince=$(_cat ${tombmount}/.last)
+			tombsince=$(cat ${tombmount}/.last)
 			tombsince=$(date --date=@$tombsince +%c)
-			tombtty=$(_cat ${tombmount}/.tty)
-			tombhost=$(_cat ${tombmount}/.host)
-			tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
+			tombtty=$(cat ${tombmount}/.tty)
+			tombhost=$(cat ${tombmount}/.host)
+			tombuid=$(cat ${tombmount}/.uid | tr -d ' ')
 
 			tombuser=`_get_username $tombuid`
 		}
@@ -3049,8 +3044,8 @@ list_processes() {
 			for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
 				found=$(($found + 1))
 				_verbose "process found: $pnum"
-				puid=$(_cat /proc/${pnum}/loginuid)
-				pcmd=$(_cat /proc/${pnum}/cmdline)
+				puid=$(cat /proc/${pnum}/loginuid)
+				pcmd=$(cat /proc/${pnum}/cmdline)
 				powner=`_get_username $puid`
 				_verbose "process found: $pnum $pcmd ($powner)"
 				_message "::1 tombname:: ::2 cmd:: (::3 owner::)" \
@@ -3091,8 +3086,8 @@ slam_tomb() {
 				 ${tombname} ${tombmount}
 		# iterate through all processes running in mounted tombs
 		for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
-			puid=$(_cat /proc/${pnum}/loginuid)
-			pcmd=$(_cat /proc/${pnum}/cmdline)
+			puid=$(cat /proc/${pnum}/loginuid)
+			pcmd=$(cat /proc/${pnum}/cmdline)
 			powner=`_get_username $puid`
 			_verbose "process found: $pnum $pcmd ($powner)"
 			# iterate through 3 different signals to send, break on success
