@@ -884,9 +884,9 @@ _ensure_dependencies() {
 	path+=(/sbin /usr/sbin) # zsh magic
 
 	# use pkexec in place of sudo if found in path and polkitd is running
-	command -v pkexec 1>/dev/null 2>/dev/null
-	[[ $? == 0 ]] && ps ax | grep '[p]olkitd' 1>/dev/null 2>/dev/null && {
-	    SUDO=(pkexec)	}
+	# command -v pkexec 1>/dev/null 2>/dev/null
+	# [[ $? == 0 ]] && ps ax | grep '[p]olkitd' 1>/dev/null 2>/dev/null && {
+	#     SUDO=(pkexec)	}
 	[[ "$SUDO" == "sudo" ]] && {
 	    command -v sudo 1>/dev/null 2>/dev/null ||
 		_failure "No privilege escalation tool found, not even sudo"

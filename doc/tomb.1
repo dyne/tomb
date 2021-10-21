@@ -279,9 +279,7 @@ modern computers, the value is multiplied by 1 million.
 Select a different tool than sudo for privilege escalation.
 Alternatives supported so far are: pkexec, doas, sup, sud. For any
 alternative to work the executable must be included in the current
-PATH. Automatic selection of pkexec is made even without using this
-flag in case the executable is found and the polkit daemon is
-running. Manual use of this flag overrides any automatic selection.
+PATH.
 .B
 .IP "--sphx-user \fI<username>\fR"
 Activate the SPHINX feature for password-authenticated key agreement.
@@ -377,9 +375,9 @@ command.
 .SH PRIVILEGE ESCALATION
 
 The tomb commandline tool needs to acquire super user rights to
-execute most of its operations: so it uses pkexec(1) or sudo(8), while
-pinentry(1) is adopted to collect passwords from the user. Tomb
-executes as super user only when required.
+execute most of its operations: so it uses sudo(8) or other configured
+tools, while pinentry(1) is adopted to collect passwords from the
+user. Tomb executes as super user only when required.
 
 To be made available on multi user systems, the superuser execution of
 the tomb script can be authorized for users without jeopardizing the
