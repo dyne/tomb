@@ -13,6 +13,8 @@ jobs:
         run: |
           cp -v extras/test/Dockerfile .
           docker build -t dyne/tomb .
+      - name: Disable swap
+        run: sudo swapoff -a
       - name: Run main test suite
         run: docker run -t --privileged dyne/tomb /bin/bash -c "make test"
       - name: Run Tomb-kdb tests
