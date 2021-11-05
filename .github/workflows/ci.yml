@@ -12,7 +12,7 @@ jobs:
       - name: Build the Docker image
         run: |
         cp -v extras/test/Dockerfile .
-        run: docker build -t dyne/tomb .
+        docker build -t dyne/tomb .
       - name: Run main test suite
         run: docker run -it --privileged dyne/tomb /bin/bash -c "oracle & make test"
       - name: Run Tomb-kdb tests
