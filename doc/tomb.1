@@ -260,7 +260,8 @@ the \fIsize\fR of the new file to be created. Units are megabytes (MiB).
 .B
 .IP "-g"
 Tell tomb to use a asymmetric GnuPG key encryption instead of a
-symmetric passphrase to protect a tomb key. This option can be followed by \fI-r\fR when the command needs to specify recipient(s).
+symmetric passphrase to protect a tomb key. This option can be
+followed by \fI-r\fR when the command needs to specify recipient(s).
 .B
 .IP "-r \fI<gpg_id>[,<gpg_id2>]\fR"
 Provide a new set of recipient(s) to encrypt a tomb key. \fIgpg_ids\fR
@@ -273,6 +274,12 @@ key: forces a delay of \fI<itertime>\fR times every time this key is
 used.  The actual time to wait depends on the CPU speed of the
 computer where the key is used.  Using 5 or 10 is a sane amount for
 modern computers, the value is multiplied by 1 million.
+.B
+.IP "--sudo \fI<executable>\fR"
+Select a different tool than sudo for privilege escalation.
+Alternatives supported so far are: pkexec, doas, sup, sud. For any
+alternative to work the executable must be included in the current
+PATH.
 .B
 .IP "--sphx-user \fI<username>\fR"
 Activate the SPHINX feature for password-authenticated key agreement.
@@ -368,9 +375,9 @@ command.
 .SH PRIVILEGE ESCALATION
 
 The tomb commandline tool needs to acquire super user rights to
-execute most of its operations: to do so it uses sudo(8), while
-pinentry(1) is adopted to collect passwords from the user. Tomb
-executes as super user only when required.
+execute most of its operations: so it uses sudo(8) or other configured
+tools, while pinentry(1) is adopted to collect passwords from the
+user. Tomb executes as super user only when required.
 
 To be made available on multi user systems, the superuser execution of
 the tomb script can be authorized for users without jeopardizing the

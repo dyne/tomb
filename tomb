@@ -45,10 +45,11 @@ typeset -a OLDARGS
 for arg in "${(@)argv}"; do OLDARGS+=("$arg"); done
 
 # Special command requirements
-typeset -a DD WIPE PINENTRY
+typeset -a DD WIPE PINENTRY SUDO
 DD=(dd)
 WIPE=(rm -f)
 PINENTRY=(pinentry)
+SUDO=(sudo)
 
 # load zsh regex module
 zmodload zsh/mapfile
@@ -110,15 +111,11 @@ export TEXTDOMAIN=tomb
 
 # {{{ Safety functions
 
-# Wrap sudo with a more visible message
+# Wrap sudo with a more visible message or apply user-supplied alternative to sudo
 _sudo() {
-	local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
-	command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
-	msg=${(S)msg//::1*::/$USER}
-	sudo -p "
-$msg
-
-" ${@}
+    _message "Enter password for user ::1 user:: to gain superuser privileges" $USER
+    _message "Using ::1 exec:: for privilege escalation" $SUDO
+    ${=SUDO} ${@}
 }
 
 # Cleanup anything sensitive before exiting.
@@ -169,11 +166,6 @@ TRAPKILL() { _endgame KILL	}
 TRAPPIPE() { _endgame PIPE	}
 TRAPTERM() { _endgame TERM	}
 TRAPSTOP() { _endgame STOP	}
-
-_cat() { local -a _arr;
-		 # read file using mapfile, newline fix
-		 _arr=("${(f@)${mapfile[${1}]%$'\n'}}"); print "$_arr"
-	   }
 
 _is_found() {
 	# returns 0 if binary is found in path
@@ -287,7 +279,7 @@ _is_encrypted_block() {
 	lsblk --help | grep -Fq -- --inverse
 	[[ $? -eq 0 ]] && s="--inverse"
 
-	sudo lsblk $s -o type -n $b 2>/dev/null \
+	_sudo lsblk $s -o type -n $b 2>/dev/null \
 		| egrep -q '^crypt$'
 
 	return $?
@@ -710,6 +702,7 @@ usage() {
 	_print " -g           use a GnuPG key to encrypt a tomb key"
 	_print " -r           provide GnuPG recipients (separated by comma)"
 	_print " -R           provide GnuPG hidden recipients (separated by comma)"
+	_print " --sudo       alternative to sudo such as doas (command or absolute path)"
 
 	[[ $SPHINX == 1 ]] && {
 		_print " --sphx-user  user associated with the key (for use with pitchforkedsphinx)"
@@ -889,6 +882,15 @@ _ensure_dependencies() {
 
 	# Ensure system binaries are available in the PATH
 	path+=(/sbin /usr/sbin) # zsh magic
+
+	# use pkexec in place of sudo if found in path and polkitd is running
+	# command -v pkexec 1>/dev/null 2>/dev/null
+	# [[ $? == 0 ]] && ps ax | grep '[p]olkitd' 1>/dev/null 2>/dev/null && {
+	#     SUDO=(pkexec)	}
+	[[ "$SUDO" == "sudo" ]] && {
+	    command -v sudo 1>/dev/null 2>/dev/null ||
+		_failure "No privilege escalation tool found, not even sudo"
+	}
 
 	# Which dd command to use
 	command -v dcfldd 1>/dev/null 2>/dev/null && DD=(dcfldd statusinterval=1)
@@ -1274,7 +1276,11 @@ ask_key_password() {
 # call cryptsetup with arguments using the currently known secret
 # echo flags eliminate newline and disable escape (BSD_ECHO)
 _cryptsetup() {
-	print -R -n - "$TOMBSECRET" | _sudo cryptsetup --type luks1 --key-file - ${@}
+	if option_is_set -q; then
+		print -R -n - "$TOMBSECRET" | _sudo cryptsetup --type luks1 --key-file - ${@} 2> /dev/null
+	else
+		print -R -n - "$TOMBSECRET" | _sudo cryptsetup --type luks1 --key-file - ${@}
+	fi
 	return $?
 }
 
@@ -2293,7 +2299,11 @@ mount_tomb() {
 		_message "Checking filesystem via ::1::" $tombstat[3]
 		case $filesystem in
 			ext3|ext4)
-				_sudo fsck -p -C0 /dev/mapper/${TOMBMAPPER}
+				if option_is_set -q; then
+					_sudo fsck -p -C0 /dev/mapper/${TOMBMAPPER} > /dev/null
+				else
+					_sudo fsck -p -C0 /dev/mapper/${TOMBMAPPER}
+				fi
 				# TODO:     btrfs filesystem label [<device>|<mount_point>] [<newlabel>]
 				_sudo tune2fs -L $TOMBNAME /dev/mapper/${TOMBMAPPER} > /dev/null
 				;;
@@ -2332,12 +2342,12 @@ mount_tomb() {
 
 	# print out when it was opened the last time, by whom and where
 	[[ -r ${tombmount}/.last ]] && {
-		tombsince=$(_cat ${tombmount}/.last)
+		tombsince=$(cat ${tombmount}/.last)
 		tombsince=$(date --date=@$tombsince +%c)
-		tombtty=$(_cat ${tombmount}/.tty)
-		tombhost=$(_cat ${tombmount}/.host)
-		tomblast=$(_cat ${tombmount}/.last)
-		tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
+		tombtty=$(cat ${tombmount}/.tty)
+		tombhost=$(cat ${tombmount}/.host)
+		tomblast=$(cat ${tombmount}/.last)
+		tombuid=$(cat ${tombmount}/.uid | tr -d ' ')
 
 		tombuser=`_get_username $tombuid`
 
@@ -2512,11 +2522,11 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 
 		# find out who opens it from where
 		[[ -r ${tombmount}/.tty ]] && {
-			tombsince=$(_cat ${tombmount}/.last)
+			tombsince=$(cat ${tombmount}/.last)
 			tombsince=$(date --date=@$tombsince +%c)
-			tombtty=$(_cat ${tombmount}/.tty)
-			tombhost=$(_cat ${tombmount}/.host)
-			tombuid=$(_cat ${tombmount}/.uid | tr -d ' ')
+			tombtty=$(cat ${tombmount}/.tty)
+			tombhost=$(cat ${tombmount}/.host)
+			tombuid=$(cat ${tombmount}/.uid | tr -d ' ')
 
 			tombuser=`_get_username $tombuid`
 		}
@@ -3028,8 +3038,8 @@ list_processes() {
 			for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
 				found=$(($found + 1))
 				_verbose "process found: $pnum"
-				puid=$(_cat /proc/${pnum}/loginuid)
-				pcmd=$(_cat /proc/${pnum}/cmdline)
+				puid=$(cat /proc/${pnum}/loginuid)
+				pcmd=$(cat /proc/${pnum}/cmdline)
 				powner=`_get_username $puid`
 				_verbose "process found: $pnum $pcmd ($powner)"
 				_message "::1 tombname:: ::2 cmd:: (::3 owner::)" \
@@ -3070,8 +3080,8 @@ slam_tomb() {
 				 ${tombname} ${tombmount}
 		# iterate through all processes running in mounted tombs
 		for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
-			puid=$(_cat /proc/${pnum}/loginuid)
-			pcmd=$(_cat /proc/${pnum}/cmdline)
+			puid=$(cat /proc/${pnum}/loginuid)
+			pcmd=$(cat /proc/${pnum}/cmdline)
 			powner=`_get_username $puid`
 			_verbose "process found: $pnum $pcmd ($powner)"
 			# iterate through 3 different signals to send, break on success
@@ -3127,7 +3137,7 @@ main() {
 	# can only use the non-abbreviated long-option version like:
 	# -force and NOT -f
 	#
-	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g)
+	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g -sudo:)
 	subcommands_opts[__default]=""
 	# -o in open and mount is used to pass alternate mount options
 	subcommands_opts[open]="n -nohook=n k: -kdf: o: -ignore-swap -tomb-pwd: r: R: -sphx-host: -sphx-user: p -preserve-ownership=p"
@@ -3244,6 +3254,29 @@ main() {
 	# read -t or --tmp flags to set a custom temporary directory
 	option_is_set --tmp && TMPDIR=$(option_value --tmp)
 
+	option_is_set --sudo && {
+	    local _opt=`option_value --sudo`
+	    case $_opt in
+		"sudo") # the worst default ever
+		    SUDO=sudo
+		    ;;
+		"doas") # openbsd
+		    SUDO=doas
+		    ;;
+		"pkexec") # policykit
+		    SUDO=pkexec
+		    ;;
+		"sup") # https://sup.dyne.org
+		    SUDO=sup
+		    ;;
+		"sud") # https://sud.dyne.org
+		    SUDO=sud
+		    ;;
+		*)
+		    _failure "Invalid privilege escalation tool: ::1 exec::" $_opt
+		    ;;
+	    esac
+	}
 
 	# When we run as root, we remember the original uid:gid to set
 	# permissions for the calling user and drop privileges

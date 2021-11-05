@@ -112,7 +112,7 @@ or if you are in a hurry
 
    -h     print this help
    -v     print version, license and list of available ciphers
-   -q     run quietly without printing informations
+   -q     run quietly without printing information
    -D     print debugging information at runtime
 ```
 
@@ -160,10 +160,8 @@ following commands as root:
 ```
 lo=$(losetup -f)
 losetup -f secret.tomb
-pass="$(gpg -d secret.key)"
-echo -n -e "$pass" | cryptsetup --key-file - luksOpen $lo secret
+gpg -d secret.key | head -c -1 | cryptsetup --key-file - luksOpen $lo secret
 mount /dev/mapper/secret /mnt
-unset pass
 ```
 One can change the last argument `/mnt` to where the Tomb has to be
 mounted and made accessible. To close the tomb then use:

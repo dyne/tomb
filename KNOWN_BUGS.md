@@ -22,16 +22,16 @@ cryptsetup v2.1 a new default has been introduced (luks2) and the
 Using Tomb version 2.6 (and future releases) the problem opening tombs
 using recent GNU/Linux distributions is fixed.
 
-# Whitespaces in KDF passwords
+# Whitespace in KDF passwords
 ## Issue affecting passwords used with PBKDF2 keys (<2.6)
 
  Up until and including Tomb's version 2.5 the PBKDF2 wrapper for keys
- in Tomb has a bug affecting passwords that contain whitespaces. Since
+ in Tomb has a bug affecting passwords that contain whitespace. Since
  the passwords are trimmed at the first whitespace, this makes them
  weaker, while fortunately the KDF transformation still applies.
 
  This issue is fixed in Tomb version 2.6: all users adopting KDF keys
- that have passwords containing whitespaces should change them,
+ that have passwords containing whitespace should change them,
  knowing that their "old password" is trimmed until the whitespace.
 
  Users adopting GPG keys or plain (without KDF wrapper) can ignore

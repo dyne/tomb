@@ -51,7 +51,7 @@ The key can also be hidden in an image, to be used as key later
     tomb bury -k secrets.tomb.key nosferatu.jpg (hide the key in a jpeg image)
     tomb open -k nosferatu.jpg secrets.tomb (use the jpeg image to open the tomb)
 
-Or backupped to a QRCode that can be printed on paper and hidden in
+Or backed up to a QRCode that can be printed on paper and hidden in
 books. QRCodes can be scanned with any mobile application, resulting
 into a block of text that can be used with `-k` just as a normal key.
 
