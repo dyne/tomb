@@ -2389,7 +2389,13 @@ mount_tomb() {
 		_update_control_file "${tombmount}/.uid" $_UID
 		_update_control_file "${tombmount}/.tty" $_TTY
 		# also the hostname
-		_update_control_file "${tombmount}/.host" `hostname`
+		if command -v hostname >/dev/null; then
+			_update_control_file "${tombmount}/.host" `hostname`
+		elif [[ -r /etc/hostname ]]; then
+			_update_control_file "${tombmount}/.host" $(_cat /etc/hostname)
+		else
+			_update_control_file "${tombmount}/.host" localhost
+		fi
 		# and the "last time opened" information
 		# in minutes since 1970, this is printed at next open
 		_update_control_file "${tombmount}/.last" `date +%s`
