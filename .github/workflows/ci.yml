@@ -1,0 +1,21 @@
+name:
+  Tomb CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the Docker image
+        run: |
+          cp -v extras/test/Dockerfile .
+          docker build -t dyne/tomb .
+      - name: Disable swap
+        run: sudo swapoff -a
+      - name: Run main test suite
+        run: docker run -t --privileged dyne/tomb /bin/bash -c "make test"
+      - name: Run Tomb-kdb tests
+        run: docker run -t --privileged dyne/tomb /bin/bash -c "make -C extras/kdf-keys test"
