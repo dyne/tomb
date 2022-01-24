@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
-"PO-Revision-Date: 2022-01-24 00:11+0000\n"
+"PO-Revision-Date: 2022-01-25 06:52+0000\n"
 "Last-Translator: Maxime Leroy <lisacintosh@gmail.com>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/tomb/tomb/fr/>\n"
 "Language: fr\n"
@@ -399,7 +399,7 @@ msgstr "L'encodage a échoué : ::1 image file:: n'est pas une image JPEG."
 
 #: tomb:Key operations:bury_key:1240
 msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
-msgstr ""
+msgstr "La clé de codage ::1 tomb key:: dans l'image ::2 image file::"
 
 #: tomb:Key operations:bury_key:1241
 msgid "Please confirm the key password for the encoding"
@@ -419,7 +419,7 @@ msgstr "Erreur à l'encodage : steghide rapporte des problèmes."
 
 #: tomb:Key operations:bury_key:1272
 msgid "Tomb key encoded succesfully into image ::1 image file::"
-msgstr ""
+msgstr "La clé Tomb a été encodée dans l'image ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1284
 msgid "Exhume failed, no image specified"
@@ -503,7 +503,7 @@ msgstr "Une tombe existe déjà à cet endroit. Je n'y creuse pas !"
 
 #: tomb:Create:dig_tomb:1420
 msgid "Creating a new tomb in ::1 tomb path::"
-msgstr ""
+msgstr "Crée une nouvelle tomb dans ::1 tomb path::"
 
 #: tomb:Create:dig_tomb:1422
 msgid "Generating ::1 tomb file:: of ::2 size::MiB"
@@ -515,7 +515,7 @@ msgstr "Une erreur s'est produite lors de la création de la tombe à ::1 tomb p
 
 #: tomb:Create:dig_tomb:1442
 msgid "Done digging ::1 tomb name::"
-msgstr ""
+msgstr "Fini d'avoir creusé ::1 tomb name::"
 
 #: tomb:Create:dig_tomb:1443
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
@@ -567,7 +567,7 @@ msgstr "Si vous effectuez l'opération sur un serveur, vous pouvez utiliser un d
 
 #: tomb:Create:forge_key:1518
 msgid "Choose the  password of your key: ::1 tomb key::"
-msgstr ""
+msgstr "Choisir le mot de passe pour votre clé : ::1 tomb key::"
 
 #: tomb:Create:forge_key:1519
 msgid "(You can also change it later using 'tomb passwd'.)"
@@ -627,7 +627,7 @@ msgstr "Vérouillage avec l'algorithme de chiffrement : ::1 cipher::"
 
 #: tomb:Create:lock_tomb_with_key:1613
 msgid "Locking ::1 tomb file:: with ::2 tomb key file::"
-msgstr ""
+msgstr "Verrouillage de ::1 tomb file:: avec ::2 tomb key file::"
 
 #: tomb:Create:lock_tomb_with_key:1615
 msgid "Formatting Luks mapped device."
