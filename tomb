@@ -7,7 +7,7 @@
 
 # {{{ License
 
-# Copyright (C) 2007-2021 Dyne.org Foundation
+# Copyright (C) 2007-2022 Dyne.org Foundation
 #
 # Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
 #
@@ -30,8 +30,8 @@
 
 # {{{ Global variables
 
-typeset VERSION="2.9.0"
-typeset DATE="Jan/2021"
+typeset VERSION="2.10.0"
+typeset DATE="Feb/2022"
 typeset TOMBEXEC=$0
 typeset TMPDIR=${${TMPPREFIX%/*}:-/tmp}
 # TODO: configure which tmp dir to use from a cli flag
@@ -113,8 +113,8 @@ export TEXTDOMAIN=tomb
 
 # Wrap sudo with a more visible message or apply user-supplied alternative to sudo
 _sudo() {
-    _message "Enter password for user ::1 user:: to gain superuser privileges" $USER
-    _message "Using ::1 exec:: for privilege escalation" $SUDO
+    _verbose "Enter password for user ::1 user:: to gain superuser privileges" $USER
+    _verbose "Using ::1 exec:: for privilege escalation" $SUDO
     ${=SUDO} ${@}
 }
 
