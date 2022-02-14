@@ -2218,22 +2218,22 @@ mount_tomb() {
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
 
 	tombmount="$2"
-	[[ -z $tombmount ]] && {
-		tombmount=/media/$TOMBNAME
+	[[ -z "$tombmount" ]] && {
+		tombmount="/media/$TOMBNAME"
 		[[ -d /media ]] || { # no /media found, adopting /run/media/$USER (udisks2 compat)
-			tombmount=/run/media/$_USER/$TOMBNAME
+			tombmount="/run/media/$_USER/$TOMBNAME"
 		}
-		_message "Mountpoint not specified, using default: ::1 mount point::" $tombmount
+		_message "Mountpoint not specified, using default: ::1 mount point::" "$tombmount"
 	}
 
-	_success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBNAME $tombmount
+	_success "Opening ::1 tomb file:: on ::2 mount point::" $TOMBNAME "$tombmount"
 
 	# check if the mountpoint is already used
 	mounted_tombs=(`list_tomb_mounts`)
 	for t in ${mounted_tombs}; do
 		usedmount=${t[(ws:;:)2]}
 		[[ "$usedmount" == "$tombmount" ]] &&
-			_failure "Mountpoint already in use: ::1 mount point::" $tombmount
+			_failure "Mountpoint already in use: ::1 mount point::" "$tombmount"
 	done
 
 	lo_mount $TOMBPATH
@@ -2315,7 +2315,7 @@ mount_tomb() {
 	fi
 
 	# we need root from here on
-	_sudo mkdir -p $tombmount
+	_sudo mkdir -p "$tombmount"
 
 	# Default mount options are overridden with the -o switch
 	{ option_is_set -o } && {
@@ -2323,31 +2323,31 @@ mount_tomb() {
 		MOUNTOPTS="$(option_value -o)" }
 	# TODO: safety check MOUNTOPTS
 	# safe_mount_options &&
-	_sudo mount -o $MOUNTOPTS /dev/mapper/${TOMBMAPPER} ${tombmount}
+	_sudo mount -o $MOUNTOPTS /dev/mapper/${TOMBMAPPER} "${tombmount}"
 	# Clean up if the mount failed
 	[[ $? == 0 ]] || {
-		_warning "Error mounting ::1 mapper:: on ::2 tombmount::" $TOMBMAPPER $tombmount
+		_warning "Error mounting ::1 mapper:: on ::2 tombmount::" $TOMBMAPPER "$tombmount"
 		[[ $oldmountopts != $MOUNTOPTS ]] && \
 			_warning "Are mount options '::1 mount options::' valid?" $MOUNTOPTS
 		# TODO: move cleanup to _endgame()
-		[[ -d $tombmount ]] && _sudo rmdir $tombmount
+		[[ -d "$tombmount" ]] && _sudo rmdir "$tombmount"
 		[[ -e /dev/mapper/$TOMBMAPPER ]] && _sudo cryptsetup luksClose $TOMBMAPPER
 		# The loop is taken care of in _endgame()
 		_failure "Cannot mount ::1 tomb name::" $TOMBNAME
 	}
 
-	_success "Success opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE $tombmount
+	_success "Success opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE "$tombmount"
 
 	local tombtty tombhost tombuid tombuser
 
 	# print out when it was opened the last time, by whom and where
-	[[ -r ${tombmount}/.last ]] && {
-		tombsince=$(cat ${tombmount}/.last)
+	[[ -r "${tombmount}/.last" ]] && {
+		tombsince=$(cat "${tombmount}/.last")
 		tombsince=$(date --date=@$tombsince +%c)
-		tombtty=$(cat ${tombmount}/.tty)
-		tombhost=$(cat ${tombmount}/.host)
-		tomblast=$(cat ${tombmount}/.last)
-		tombuid=$(cat ${tombmount}/.uid | tr -d ' ')
+		tombtty=$(cat "${tombmount}/.tty")
+		tombhost=$(cat "${tombmount}/.host")
+		tomblast=$(cat "${tombmount}/.last")
+		tombuid=$(cat "${tombmount}/.uid" | tr -d ' ')
 
 		tombuser=`_get_username $tombuid`
 
@@ -2357,20 +2357,20 @@ mount_tomb() {
 
 	# write down the UID and TTY that opened the tomb
 	option_value_contains -o ro || {
-		_update_control_file ${tombmount}/.uid $_UID
-		_update_control_file ${tombmount}/.tty $_TTY
+		_update_control_file "${tombmount}/.uid" $_UID
+		_update_control_file "${tombmount}/.tty" $_TTY
 		# also the hostname
-		_update_control_file ${tombmount}/.host `hostname`
+		_update_control_file "${tombmount}/.host" `hostname`
 		# and the "last time opened" information
 		# in minutes since 1970, this is printed at next open
-		_update_control_file ${tombmount}/.last `date +%s`
+		_update_control_file "${tombmount}/.last" `date +%s`
 		# human readable: date --date=@"`cat .last`" +%c
 	}
 	# process bind-hooks (mount -o bind of directories)
 	# and exec-hooks (execute on open)
 	option_is_set -n || {
-		exec_safe_bind_hooks ${tombmount}
-		exec_safe_func_hooks open ${tombmount}
+		exec_safe_bind_hooks "${tombmount}"
+		exec_safe_func_hooks open "${tombmount}"
 	}
 
 	# Changes ownership to current user. This facilitates a lot
@@ -2381,7 +2381,7 @@ mount_tomb() {
 	local dochown=true
 	option_value_contains -o ro && dochown=false
 	option_is_set -p            && dochown=false
-	$dochown && _sudo chown -R ${_UID}:${_GID} ${tombmount}
+	$dochown && _sudo chown -R ${_UID}:${_GID} "${tombmount}"
 
 	return 0
 }
@@ -2502,7 +2502,7 @@ list_tombs() {
 	for t in ${mounted_tombs}; do
 		mapper=`basename ${t[(ws:;:)1]}`
 		tombname=${t[(ws:;:)5]}
-		tombmount=${t[(ws:;:)2]}
+		tombmount="${t[(ws:;:)2]}"
 		tombfs=${t[(ws:;:)3]}
 		tombfsopts=${t[(ws:;:)4]}
 		tombloop=${mapper[(ws:.:)4]}
@@ -2521,20 +2521,20 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 		# tombsince=`date --date=@${mapper[(ws:.:)3]} +%c`
 
 		# find out who opens it from where
-		[[ -r ${tombmount}/.tty ]] && {
-			tombsince=$(cat ${tombmount}/.last)
+		[[ -r "${tombmount}/.tty" ]] && {
+			tombsince=$(cat "${tombmount}/.last")
 			tombsince=$(date --date=@$tombsince +%c)
-			tombtty=$(cat ${tombmount}/.tty)
-			tombhost=$(cat ${tombmount}/.host)
-			tombuid=$(cat ${tombmount}/.uid | tr -d ' ')
+			tombtty=$(cat "${tombmount}/.tty")
+			tombhost=$(cat "${tombmount}/.host")
+			tombuid=$(cat "${tombmount}/.uid" | tr -d ' ')
 
 			tombuser=`_get_username $tombuid`
 		}
 
-		{ option_is_set --get-mountpoint } && { print $tombmount; continue }
+		{ option_is_set --get-mountpoint } && { print "$tombmount"; continue }
 
 		_message "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::" \
-				 $tombname $tombmount $tombfsopts
+				 $tombname "$tombmount" $tombfsopts
 
 		_verbose "::1 tombname:: /dev/::2 tombloop:: device mounted (detach with losetup -d)" $tombname $tombloop
 
@@ -2553,7 +2553,7 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 		}
 
 		# Now check hooks
-		mounted_hooks=(`list_tomb_binds $tombname $tombmount`)
+		mounted_hooks=(`list_tomb_binds $tombname "$tombmount"`)
 		for h in ${mounted_hooks}; do
 			_message "::1 tombname:: hooks ::2 hookdest::" \
 					 $tombname ${h[(ws:;:)2]}
@@ -2674,23 +2674,23 @@ index_tombs() {
 	for t in ${mounted_tombs}; do
 		mapper=`basename ${t[(ws:;:)1]}`
 		tombname=${t[(ws:;:)5]}
-		tombmount=${t[(ws:;:)2]}
-		[[ -r ${tombmount}/.noindex ]] && {
+		tombmount="${t[(ws:;:)2]}"
+		[[ -r "${tombmount}/.noindex" ]] && {
 			_message "Skipping ::1 tomb name:: (.noindex found)." $tombname
 			continue }
 		_message "Indexing ::1 tomb name:: filenames..." $tombname
-		updatedb -l 0 -o ${tombmount}/.updatedb -U ${tombmount}
+		updatedb -l 0 -o "${tombmount}/.updatedb" -U "${tombmount}"
 
 		# here we use swish to index file contents
 		[[ $SWISH == 1 ]] && {
 			_message "Indexing ::1 tomb name:: contents..." $tombname
-			rm -f ${tombmount}/.swishrc
-			_message "Generating a new swish-e configuration file: ::1 swish conf::" ${tombmount}/.swishrc
-			cat <<EOF > ${tombmount}/.swishrc
+			rm -f "${tombmount}/.swishrc"
+			_message "Generating a new swish-e configuration file: ::1 swish conf::" "${tombmount}/.swishrc"
+			cat <<EOF > "${tombmount}/.swishrc"
 # index directives
 DefaultContents TXT*
-IndexDir $tombmount
-IndexFile $tombmount/.swish
+IndexDir "$tombmount"
+IndexFile "$tombmount/.swish"
 # exclude images
 FileRules filename regex /\.jp.?g/i
 FileRules filename regex /\.png/i
@@ -2753,7 +2753,7 @@ IndexContents HTML* .htm .html .shtml
 IndexContents XML* .xml
 EOF
 
-			swish-e -c ${tombmount}/.swishrc -S fs -v3
+			swish-e -c "${tombmount}/.swishrc" -S fs -v3
 		}
 		_message "Search index updated."
 	done
@@ -2782,18 +2782,18 @@ search_tombs() {
 		_verbose "Checking for index: ::1::" ${t}
 		mapper=`basename ${t[(ws:;:)1]}`
 		tombname=${t[(ws:;:)5]}
-		tombmount=${t[(ws:;:)2]}
-		[[ -r ${tombmount}/.updatedb ]] && {
+		tombmount="${t[(ws:;:)2]}"
+		[[ -r "${tombmount}/.updatedb" ]] && {
 			# Use mlocate to search hits on filenames
 			_message "Searching filenames in tomb ::1 tomb name::" $tombname
-			locate -d ${tombmount}/.updatedb -e -i "${(f)@}"
+			locate -d "${tombmount}/.updatedb" -e -i "${(f)@}"
 			_message "Matches found: ::1 matches::" \
-					 $(locate -d ${tombmount}/.updatedb -e -i -c ${(f)@})
+					 $(locate -d "${tombmount}/.updatedb" -e -i -c ${(f)@})
 
 			# Use swish-e to search over contents
-			[[ $SWISH == 1 && -r $tombmount/.swish ]] && {
+			[[ $SWISH == 1 && -r "$tombmount/.swish" ]] && {
 				_message "Searching contents in tomb ::1 tomb name::" $tombname
-				swish-e -w ${@} -f $tombmount/.swish -H0 }
+				swish-e -w ${@} -f "$tombmount/.swish" -H0 }
 		} || {
 			_warning "Skipping tomb ::1 tomb name::: not indexed." $tombname
 			_warning "Run 'tomb index' to create indexes." }
@@ -2936,13 +2936,13 @@ umount_tomb() {
 
 		# strip square parens from tombname
 		tombname=${t[(ws:;:)5]}
-		tombmount=${t[(ws:;:)2]}
+		tombmount="${t[(ws:;:)2]}"
 		tombfs=${t[(ws:;:)3]}
 		tombfsopts=${t[(ws:;:)4]}
 		tombloop=${mapper[(ws:.:)4]}
 
 		_verbose "Name: ::1 tomb name::" $tombname
-		_verbose "Mount: ::1 mount point::" $tombmount
+		_verbose "Mount: ::1 mount point::" "$tombmount"
 		_verbose "Loop: ::1 mount loop::" $tombloop
 		_verbose "Mapper: ::1 mapper::" $mapper
 
@@ -2962,16 +2962,16 @@ umount_tomb() {
 		}
 
 		_message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
-				 $tombname $tombmount
+				 $tombname "$tombmount"
 
 		# check if there are binded dirs and close them
-		bind_tombs=(`list_tomb_binds $tombname $tombmount`)
-		for b in ${(f)"$(list_tomb_binds $tombname $tombmount)"}; do
+		bind_tombs=(`list_tomb_binds $tombname "$tombmount"`)
+		for b in ${(f)"$(list_tomb_binds $tombname "$tombmount")"}; do
 			bind_mapper="${b[(ws:;:)1]}"
 			bind_mount="${b[(ws:;:)2]}"
-			_message "Closing tomb bind hook: ::1 hook::" $bind_mount
-			_sudo umount $bind_mount ||
-				_failure "Tomb bind hook ::1 hook:: is busy, cannot close tomb." $bind_mount
+			_message "Closing tomb bind hook: ::1 hook::" "$bind_mount"
+			_sudo umount "$bind_mount" ||
+				_failure "Tomb bind hook ::1 hook:: is busy, cannot close tomb." "$bind_mount"
 		done
 
 		# check if the tomb is actually still mounted. Background:
@@ -2988,8 +2988,8 @@ umount_tomb() {
 			[[ "$usedmount" == "$tombmount" ]] && {
 				# Tomb was not umounted through the above command
 				# Will do so now
-				_verbose "Performing umount of ::1 mount point::" $tombmount
-				_sudo umount ${tombmount}
+				_verbose "Performing umount of ::1 mount point::" "$tombmount"
+				_sudo umount "${tombmount}"
 				[[ $? = 0 ]] || { _failure "Tomb is busy, cannot umount!" }
 			}
 		done
@@ -2999,7 +2999,7 @@ umount_tomb() {
 		tombname_regex=${tombname_regex//\]/}
 
 		[[ "$tombmount" =~ "(/run)?/media(/$_USER)?/$tombname_regex" ]] && {
-			_sudo rmdir $tombmount }
+			_sudo rmdir "$tombmount" }
 
 		_sudo cryptsetup luksClose $mapper ||
 			_failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper
@@ -3033,9 +3033,9 @@ list_processes() {
 
 		for i in ${mounted_tombs}; do
 			_verbose "scanning tomb: ::1 tombmount::" $i
-			tombmount=${i[(ws:;:)2]}
+			tombmount="${i[(ws:;:)2]}"
 			tombname=${i[(ws:;:)5]}
-			for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
+			for pnum in ${(f)"$(_sudo lsof -t +D "$tombmount")"}; do
 				found=$(($found + 1))
 				_verbose "process found: $pnum"
 				puid=$(cat /proc/${pnum}/loginuid)
@@ -3075,11 +3075,11 @@ slam_tomb() {
 	# iterate through all mounted tomb affected
 	for i in ${mounted_tombs}; do
 		tombname=${i[(ws:;:)5]}
-		tombmount=${i[(ws:;:)2]}
+		tombmount="${i[(ws:;:)2]}"
 		_success "Slamming tomb ::1 tombname:: mounted on ::2 tombmount::" \
-				 ${tombname} ${tombmount}
+				 ${tombname} "${tombmount}"
 		# iterate through all processes running in mounted tombs
-		for pnum in ${(f)"$(_sudo lsof -t +D $tombmount)"}; do
+		for pnum in ${(f)"$(_sudo lsof -t +D "$tombmount")"}; do
 			puid=$(cat /proc/${pnum}/loginuid)
 			pcmd=$(cat /proc/${pnum}/cmdline)
 			powner=`_get_username $puid`
