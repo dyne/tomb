@@ -39,19 +39,17 @@ with random data, decreasing the tomb's security.
 
 .B
 .IP "forge"
-Creates a new \fIkey\fR and prompts the user for a \fIpassword\fR to
-protect its usage using symmetric encryption. This operation uses
-random data from a non-blocking source (/dev/urandom) and it may take
-long only in some cases; to switch using a blocking source the
-\fI--use-random\fR flag can be used. The \fI-g\fR option switches on
-the use of a GPG key instead of a password (asymmetric encryption),
-then the \fI-r\fR option indicates the recipient key; more recipient
-GPG ids can be indicated (comma separated). The default cipher to
-protect the key is AES256, a custom one can be specified using the
-\fI-o\fR option, for a list of supported ciphers use \fI-v\fR. For
-additional protection against dictionary attacks on keys, the
-\fI--kdf\fR option can be used when forging a key, making sure that
-the \fItomb-kdb-pbkdf2\fR binaries in \fIextras/kdf\fR were compiled
+Creates a new \fIkey\fR and prompts the user for a \fIpassword\fR to protect
+its usage using symmetric encryption. This operation uses random data from a
+non-blocking source (/dev/urandom) and it may take long only in some cases; to
+switch using a blocking source the \fI--use-random\fR flag can be used. The
+\fI-g\fR option switches on the use of a GPG key instead of a password
+(asymmetric encryption), then the \fI-r\fR option indicates the recipient key;
+more recipient GPG ids can be indicated (comma separated). The default cipher
+to protect the key is AES256, a custom one can be specified using the \fI-o\fR
+option, for a list of supported ciphers use \fI-v\fR. For additional protection
+against dictionary attacks on keys, the \fI--kdf\fR option can be used when
+forging a key, making sure that the binaries in \fIextras/kdf\fR were compiled
 and installed on the system.
 
 .B
@@ -269,11 +267,22 @@ can be one or more GPG key ID, comma separated. All GPG keys must be
 trusted keys in GPG.
 .B
 .IP "--kdf \fI<itertime>\fR"
-Activate the KDF feature against dictionary attacks when creating a
-key: forces a delay of \fI<itertime>\fR times every time this key is
-used.  The actual time to wait depends on the CPU speed of the
-computer where the key is used.  Using 5 or 10 is a sane amount for
-modern computers, the value is multiplied by 1 million.
+Activate the KDF feature against dictionary attacks when creating a key: forces
+a delay of \fI<itertime>\fR times every time this key is used.  The actual time
+to wait depends on the CPU speed (default) or the RAM size (argon2) of the
+computer where the key is used.  Using 5 or 10 is a sane amount for modern
+computers, the value is multiplied by 1 million.
+.B
+.IP "--kdftype \fIargon2 | pbkdf2\fR"
+Adopt the \fIargon2\fR algorithm for KDF, stressing the RAM capacity rather
+than the CPU speed of the computer decrypting the tomb. Requires the
+\fIargon2\fR binary by P-H-C to be installed, as packaged by most distros.
+Default is \fIpbkdf2\fR.
+.B
+.IP "--kdfmem \fI<memory>\fR"
+In case of \fIargon2\fR KDF algorithm, this value specifies the size of RAM
+used: it consists of a number which is the elevated power of two in bytes.
+Default is 18 which is 262 MiB (2^18 bytes).
 .B
 .IP "--sudo \fI<executable>\fR"
 Select a different tool than sudo for privilege escalation.
