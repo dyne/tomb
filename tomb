@@ -114,11 +114,12 @@ export TEXTDOMAIN=tomb
 # Wrap sudo with a more visible message or apply user-supplied alternative to sudo
 _sudo() {
 	if option_is_set --sudo; then
-		case `basename $(option_value --sudo)` in
-			"doas")
-				command -v doas >/dev/null || _failure "Doas executable not found in PATH"
-				_verbose "Super user execution using doas"
-				doas ${@}
+               pescmd=`option_value --sudo`
+		case `basename $pescmd` in
+			"doas"|"sup"|"sud"|"pkexec")
+				command -v $pescmd > /dev/null || _failure "$pescmd executable not found"
+				_verbose "Super user execution using $pescmd"
+				${pescmd} ${@}
 				return $?
 				;;
 			"skip"|"none")
@@ -3290,27 +3291,8 @@ main() {
 	option_is_set --tmp && TMPDIR=$(option_value --tmp)
 
 	option_is_set --sudo && {
-	    local _opt=`option_value --sudo`
-	    case $_opt in
-		"sudo") # the worst default ever
-		    SUDO=sudo
-		    ;;
-		"doas") # openbsd
-		    SUDO=doas
-		    ;;
-		"pkexec") # policykit
-		    SUDO=pkexec
-		    ;;
-		"sup") # https://sup.dyne.org
-		    SUDO=sup
-		    ;;
-		"sud") # https://sud.dyne.org
-		    SUDO=sud
-		    ;;
-		*)
-		    _failure "Invalid privilege escalation tool: ::1 exec::" $_opt
-		    ;;
-	    esac
+	    local _opt=`basename $(option_value --sudo)`
+            _message "Privilege escalation tool configured: ::1 exec::" $_opt
 	}
 
 	# When we run as root, we remember the original uid:gid to set
