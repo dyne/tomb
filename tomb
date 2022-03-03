@@ -131,7 +131,7 @@ _sudo() {
 				_failure "Super user execution not supported: ::1 sudo::" "`option_value --sudo`"
 				;;
 		esac
-		
+
 	else
 		local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
 		command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
@@ -183,15 +183,15 @@ _endgame() {
 }
 
 # Trap functions for the _endgame event
-TRAPINT()  { _endgame INT	}
-TRAPEXIT() { _endgame EXIT	}
-TRAPHUP()  { _endgame HUP	}
-TRAPQUIT() { _endgame QUIT	}
-TRAPABRT() { _endgame ABORT }
-TRAPKILL() { _endgame KILL	}
-TRAPPIPE() { _endgame PIPE	}
-TRAPTERM() { _endgame TERM	}
-TRAPSTOP() { _endgame STOP	}
+TRAPINT()  { _endgame INT;	}
+TRAPEXIT() { _endgame EXIT;	}
+TRAPHUP()  { _endgame HUP;	}
+TRAPQUIT() { _endgame QUIT;	}
+TRAPABRT() { _endgame ABORT;    }
+TRAPKILL() { _endgame KILL;	}
+TRAPPIPE() { _endgame PIPE;	}
+TRAPTERM() { _endgame TERM;	}
+TRAPSTOP() { _endgame STOP;	}
 
 _is_found() {
 	# returns 0 if binary is found in path
@@ -1445,7 +1445,7 @@ gen_key() {
 		# Set gpg inputs and options
 		gpgpass="$TOMBSECRET"
 		opt=''
-	else 
+	else
 		if [ "$2" = "" ]; then
 			while true; do
 				# 3 tries to write two times a matching password
@@ -2065,7 +2065,7 @@ lock_tomb_with_key() {
 		return 1
 	}
 
-	
+
 	is_valid_tomb $tombpath
 
 	_message "Commanded to lock tomb ::1 tomb file::" $TOMBFILE
