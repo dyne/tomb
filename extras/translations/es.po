@@ -1,11 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
+"PO-Revision-Date: 2022-04-04 10:06+0000\n"
+"Last-Translator: Francisco Serrador <fserrador@gmail.com>\n"
+"Language-Team: Spanish <https://hosted.weblate.org/projects/tomb/tomb/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: POEditor.com\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.12-dev\n"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -13,7 +17,7 @@ msgstr "[sudo] Introduce la contraseña para el usuario ::1 usuario:: para obten
 
 #: tomb:Safety functions:_whoami:200
 msgid "Failing to identify the user who is calling us"
-msgstr "Falló la identificación del usuario que nos llama."
+msgstr "Falló la identificación del usuario que nos llama"
 
 #: tomb:Safety functions:_plot:249
 msgid "Tomb won't work without a TOMBNAME."
@@ -45,7 +49,8 @@ msgstr "Esto genera un riesgo en la seguridad."
 
 #: tomb:Safety functions:_ensure_safe_swap:333
 msgid "You can deactivate all swap partitions using the command:"
-msgstr "Puedes desactivar todas las particiones swap usando el siguiente comando:"
+msgstr ""
+"Puedes desactivar todas las particiones swap usando el siguiente instrucción:"
 
 #: tomb:Safety functions:_ensure_safe_swap:334
 msgid " swapoff -a"
@@ -53,7 +58,7 @@ msgstr " swapoff -a"
 
 #: tomb:Safety functions:_ensure_safe_swap:336
 msgid "But if you want to proceed like this, use the -f (force) flag."
-msgstr "Pero si deseas continuar tal cual, usa el flag -f (force)."
+msgstr "Pero si deseas continuar tal cual, usa el indicador -f (force)."
 
 #: tomb:Safety functions:_check_swap:355
 msgid "Operation aborted."
@@ -77,7 +82,7 @@ msgstr "Error de pinentry: ::1 error::"
 
 #: tomb:Safety functions:ask_password:489
 msgid "Empty password"
-msgstr "Contraseña vacia"
+msgstr "Contraseña vacía"
 
 #: tomb:Safety functions:is_valid_tomb:506
 msgid "Tomb file is missing from arguments."
@@ -101,11 +106,11 @@ msgstr "El fichero tumba pertenece a otro usuario: ::1 usuario::"
 
 #: tomb:Safety functions:is_valid_tomb:537
 msgid "Tomb command failed: ::1 command name::"
-msgstr "El comando de tomb a fallado: ::1 comando::"
+msgstr "La instrucción tomb a fallado: ::1 comando::"
 
 #: tomb:Safety functions:is_valid_tomb:546
 msgid "File is not yet a tomb: ::1 tomb file::"
-msgstr "El fichero no es una tumba todavía: ::1 tumba::"
+msgstr "El archivo aún no es una tumba ::1 tumba::"
 
 #: tomb:Safety functions:is_valid_tomb:554
 msgid "Tomb is currently in use: ::1 tomb name::"
@@ -117,31 +122,32 @@ msgstr "Se ha encontrado una tumba válida en ::1 ruta::"
 
 #: tomb:Safety functions:lo_mount:570
 msgid "Loop mount of volumes is not possible on this machine, this error"
-msgstr "No hay soporte para el montaje en loop de volúmenes en esta máquina, este error"
+msgstr "No es posible montar volúmenes en bucle en esta máquina, este error"
 
 #: tomb:Safety functions:lo_mount:571
 msgid "often occurs on VPS and kernels that don't provide the loop module."
-msgstr "ocurre frecuentemente en VPS y kernels que no proveen el módulo 'loop'."
+msgstr ""
+"ocurre frecuentemente en VPS y núcleos que no proporcionen el módulo 'loop'."
 
 #: tomb:Safety functions:lo_mount:572
 msgid "It is impossible to use Tomb on this machine at this conditions."
-msgstr "Es imposible usar Tomb en esta máquina en estas condiciones."
+msgstr "Es imposible utilizar Tomb en esta máquina en estas condiciones."
 
 #: tomb:Commandline interaction:usage:612
 msgid "Syntax: tomb [options] command [arguments]"
-msgstr "Sintaxis: tomb [opciones] comando [argumentos]"
+msgstr "Sintaxis: tomb [opciones] instrucción [argumentos]"
 
 #: tomb:Commandline interaction:usage:614
 msgid "Commands:"
-msgstr "Comandos:"
+msgstr "Instrucciones:"
 
 #: tomb:Commandline interaction:usage:616
 msgid " // Creation:"
-msgstr "// Creación:"
+msgstr " // Creación:"
 
 #: tomb:Commandline interaction:usage:618
 msgid " forge   create a new KEY file and set its password"
-msgstr " forge   crear una nueva LLAVE y especificar su contraseña"
+msgstr " forge    crear un fichero LLAVE nuevo y fija su contraseña"
 
 #: tomb:Commandline interaction:usage:619
 msgid " lock    installs a lock on a TOMB to use it with KEY"
@@ -149,7 +155,7 @@ msgstr " lock    instala un candado en una TUMBA para usarlo con la LLAVE"
 
 #: tomb:Commandline interaction:usage:621
 msgid " // Operations on tombs:"
-msgstr "// Operaciones en tumbas:"
+msgstr " // Operaciones en tumbas:"
 
 #: tomb:Commandline
 #: interaction:usage:603
@@ -162,11 +168,11 @@ msgstr " index   actualiza los índices de búsqueda de las tumbas"
 
 #: tomb:Commandline interaction:usage:624
 msgid " search  looks for filenames matching text patterns"
-msgstr " search  busca nombres de fichero que coincidan con patrones de texto"
+msgstr " search  busca nombres de archivos que coincidan con patrones de texto"
 
 #: tomb:Commandline interaction:usage:625
 msgid " list    list of open TOMBs and information on them"
-msgstr " list    lista de TUMBAs abiertas e información acerca de ellas"
+msgstr " list    enumera las TUMBAs abiertas y la información acerca de ellas"
 
 #: tomb:Commandline interaction:usage:626
 msgid " close   close a specific TOMB (or 'all')"
@@ -182,7 +188,7 @@ msgstr " resize  cambia el tamaño de una TUMBA al tamaño -s (sólo puede aumen
 
 #: tomb:Commandline interaction:usage:632
 msgid " // Operations on keys:"
-msgstr "// Operaciones en llaves:"
+msgstr " // Operaciones en llaves:"
 
 #: tomb:Commandline interaction:usage:633
 msgid " passwd  change the password of a KEY (needs old pass)"
@@ -198,7 +204,7 @@ msgstr " // Copia de seguridad en papel:"
 
 #: tomb:Commandline interaction:usage:638
 msgid " engrave makes a QR code of a KEY to be saved on paper"
-msgstr " engrave  crea un código QR de una LLAVE para guardarla en papel"
+msgstr " engrave crea un código QR de una LLAVE para guardarla en papel"
 
 #: tomb:Commandline interaction:usage:642
 msgid " // Steganography:"
@@ -231,7 +237,7 @@ msgstr " -n     no procesar los hooks encontrados en la tumba"
 
 #: tomb:Commandline interaction:usage:652
 msgid " -o     options passed to commands: open, lock, forge (see man)"
-msgstr ""
+msgstr " -o    opciones pasadas a instrucciones: abre, bloquea, forja (vea man)"
 
 #: tomb:Commandline interaction:usage:653
 msgid " -f     force operation (i.e. even if swap is active)"
@@ -239,7 +245,7 @@ msgstr " -f     forzar operación (incluso si la memoria de intercambio está ac
 
 #: tomb:Commandline interaction:usage:655
 msgid " --kdf  forge keys armored against dictionary attacks"
-msgstr ""
+msgstr " --kdf  olvida llaves armadas dente a ataques de diccionario"
 
 #: tomb:Commandline interaction:usage:659
 msgid " -h     print this help"
@@ -315,7 +321,7 @@ msgstr "La llave parece inválida, o este formato no es reconocido por esta vers
 
 #: tomb:Key operations:get_lukskey:995
 msgid "No suitable program for KDF ::1 program::."
-msgstr "No hay un programa apropiado para usar KDF: ::1 programa::"
+msgstr "No hay un programa apropiado para usar KDF ::1 programa::."
 
 #: tomb:Key operations:ask_key_password:1021
 msgid "Internal error: ask_key_password() called before _load_key()."
@@ -387,7 +393,7 @@ msgstr "La codificación falló: ::1 fichero:: no es una imagen jpeg."
 
 #: tomb:Key operations:bury_key:1240
 msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
-msgstr "Codificando la llave ::1 llave:: en la imagen ::2 imagen::."
+msgstr "Codificando la llave ::1 llave:: en la imagen ::2 imagen::"
 
 #: tomb:Key operations:bury_key:1241
 msgid "Please confirm the key password for the encoding"
@@ -407,7 +413,7 @@ msgstr "Error en la codficación: steghide reporta problemas."
 
 #: tomb:Key operations:bury_key:1272
 msgid "Tomb key encoded succesfully into image ::1 image file::"
-msgstr "Llave codificada con éxito en la imagen ::1 fichero::."
+msgstr "Llave codificada con éxito en la imagen ::1 fichero::"
 
 #: tomb:Key operations:exhume_key:1284
 msgid "Exhume failed, no image specified"
@@ -459,7 +465,7 @@ msgstr "No se ha encontrado nada en ::1 fichero::"
 
 #: tomb:Key operations:engrave_key:1365
 msgid "Rendering a printable QRCode for key: ::1 tomb key file::"
-msgstr "Creando un código QR imprimible para la llave ::1 fichero::."
+msgstr "Creando un código QR imprimible para la llave ::1 fichero::"
 
 #: tomb:Key operations:engrave_key:1370
 msgid "QREncode reported an error."
@@ -499,7 +505,7 @@ msgstr "Error al crear la tumba ::1 ruta de la tumba::"
 
 #: tomb:Create:dig_tomb:1442
 msgid "Done digging ::1 tomb name::"
-msgstr "Se ha terminado de cavar ::1 tumba::."
+msgstr "Se ha terminado de cavar ::1 tumba::"
 
 #: tomb:Create:dig_tomb:1443
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
@@ -667,7 +673,7 @@ msgstr "No es un volumen LUKS encriptado válido: ::1 volumen::"
 
 #: tomb:Create:change_tomb_key:1675
 msgid "Changing lock on tomb ::1 tomb name::"
-msgstr "Cambiando el candado en la tumba ::1 tumba::."
+msgstr "Cambiando el candado en la tumba ::1 tumba::"
 
 #: tomb:Create:change_tomb_key:1676
 msgid "Old key: ::1 old key::"
@@ -719,7 +725,7 @@ msgstr "Punto de montaje no especificado, utilizando estándar: ::1 punto de mon
 
 #: tomb:Open:mount_tomb:1758
 msgid "Opening ::1 tomb file:: on ::2 mount point::"
-msgstr "Abriendo ::1 tumba:: en ::2 punto de montaje::."
+msgstr "Abriendo ::1 tumba:: en ::2 punto de montaje::"
 
 #: tomb:Open:mount_tomb:1765
 msgid "::1 tomb file:: is not a valid Luks encrypted storage file."
@@ -743,7 +749,7 @@ msgstr "Fallo al montar el fichero encriptado."
 
 #: tomb:Open:mount_tomb:1815
 msgid "Success unlocking tomb ::1 tomb name::"
-msgstr "Se ha abierto el cerrojo de ::1 tumba:: con éxito."
+msgstr "Se ha abierto correctamente el cerrojo de ::1 tumba::"
 
 #: tomb:Open:mount_tomb:1818
 msgid "Checking filesystem via ::1::"
@@ -763,7 +769,7 @@ msgstr "No se puede montar ::1 tumba::"
 
 #: tomb:Open:mount_tomb:1850
 msgid "Success opening ::1 tomb file:: on ::2 mount point::"
-msgstr "Se ha abierto ::1 tumba:: en ::2 punto de montaje:: con éxito."
+msgstr "Se ha abierto correctamente ::1 tumba:: en ::2 punto de montaje::"
 
 #: tomb:Open:mount_tomb:1866
 msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
@@ -783,7 +789,7 @@ msgstr "No se pueden ejecutar los bind-hooks sin una tumba montada."
 
 #: tomb:Open:exec_safe_bind_hooks:1935
 msgid "bind-hooks file is broken"
-msgstr "El fichero de bind-hooks está roto."
+msgstr "El fichero de bind-hooks está roto"
 
 #: tomb:Open:exec_safe_bind_hooks:1953
 msgid "bind-hook target not existent, skipping ::1 home::/::2 subdir::"
@@ -851,7 +857,7 @@ msgstr "No puedo ver ninguna tumba abierta. Que todos descansen en paz."
 
 #: tomb:Index and search:index_tombs:2178
 msgid "Creating and updating search indexes."
-msgstr "Creando y  actualizando índices de búsqueda."
+msgstr "Creando y actualizando índices de búsqueda."
 
 #: tomb:Index and search:index_tombs:2191
 msgid "Skipping ::1 tomb name:: (.noindex found)."
@@ -967,7 +973,9 @@ msgstr "Por favor, especifica una tumba existente."
 
 #: tomb:Close:umount_tomb:2449
 msgid "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::"
-msgstr "Cerrando de un portazo la tumba ::1 nombre:: montada en ::2 punto de montaje::."
+msgstr ""
+"Cerrando de un portazo la tumba ::1 nombre:: montada en ::2 punto de "
+"montaje::"
 
 #: tomb:Close:umount_tomb:2451
 msgid "Kill all processes busy inside the tomb."
@@ -1137,31 +1145,33 @@ msgstr "Dependiendo de la velocidad de las máquinas que vayan a abrir esta tumb
 
 #: tomb:Key operations:gen_key:1174
 msgid "Using KDF, iteration time: ::1 microseconds::"
-msgstr ""
+msgstr "Utilizando KDF, tiempo de iteración: ::1 microsegundos::"
 
 #: tomb:Create:dig_tomb:1409
 msgid "Size must be an integer (mebibytes)"
-msgstr ""
+msgstr "El tamaño debe ser un entero (mebibytes)"
 
 #: tomb:Create:dig_tomb:1410
 msgid "Tombs can't be smaller than 10 mebibytes"
-msgstr ""
+msgstr "Toms no pude ser más pequeño de 10 mebibytes"
 
 #: tomb:Open:exec_safe_bind_hooks:1944
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
-msgstr ""
+msgstr "formato del mapa bind-hooks: local/to/tomb local/to/$HOME"
 
 #: tomb:Open:exec_safe_bind_hooks:1948
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.  Rolling back"
 msgstr ""
+"Formato del mapa bind-hooks: local/para/tomb local/para/$HOME.  Retroceder"
 
 #: tomb:Resize:resize_tomb:2323
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
 msgstr ""
+"Instruido para redimensionar tumba ::1 tumba name:: a ::2 tamaño:: mebibytes."
 
 #: tomb:Resize:resize_tomb:2367
 msgid "Tomb seems resized already, operating filesystem stretch"
-msgstr ""
+msgstr "Tumba parece ya redimensionado, operando reducción del SdF"
 
 #: tomb:Resize:resize_tomb:2387
 msgid "opening tomb"
@@ -1169,5 +1179,4 @@ msgstr "abriendo tumba"
 
 #: tomb:Main routine:main:2806
 msgid " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
-msgstr " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
-
+msgstr " Copyright © 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
