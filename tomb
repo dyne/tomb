@@ -630,7 +630,7 @@ lo_mount() {
 	tpath="$1"
 
 	# check if we have support for loop mounting
-	TOMBLOOP=`losetup -f`
+	TOMBLOOP=`_sudo losetup -f`
 	[[ $? = 0 ]] || {
 		_warning "Loop mount of volumes is not possible on this machine, this error"
 		_warning "often occurs on VPS and kernels that don't provide the loop module."
