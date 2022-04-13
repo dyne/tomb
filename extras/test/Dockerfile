@@ -1,9 +1,8 @@
-FROM dyne/devuan:beowulf
+FROM dyne/devuan:chimaera
 
 RUN echo "deb http://deb.devuan.org/merged chimaera main" >> /etc/apt/sources.list
 RUN apt-get update -y -q --allow-releaseinfo-change
-RUN apt-get install -y -q -t beowulf zsh cryptsetup gawk libgcrypt20-dev steghide qrencode python python2.7 python3-pip python3-dev libssl-dev make gcc g++ sudo gettext file bsdmainutils
-RUN apt-get install -y -q -t chimaera libsodium23 libsodium-dev doas
+RUN apt-get install -y -q zsh cryptsetup gpg gawk libgcrypt20-dev steghide qrencode python python2.7 python3-pip python3-dev libssl-dev make gcc sudo gettext bsdmainutils file pinentry-curses xxd libsodium23 libsodium-dev doas
 RUN pip3 install setuptools wheel
 
 COPY . /Tomb/

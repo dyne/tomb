@@ -11,7 +11,7 @@ test_expect_success 'Testing tomb creation: dig, forge and lock' '
     tt_forge --tomb-pwd $DUMMYPASS &&
     print $DUMMYPASS \
         | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key \
-        | hexdump -C &&
+        | xxd &&
     tt_lock --tomb-pwd $DUMMYPASS
     '
 
@@ -22,7 +22,7 @@ if test_have_prereq SPHINX ORACLE; then
         tt_forge --tomb-pwd $DUMMYPASS --sphx-user $DUMMYUSER --sphx-host $DUMMYHOST &&
         print $(echo $DUMMYPASS | sphinx get $DUMMYUSER $DUMMYHOST) \
             | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key \
-            | hexdump -C &&
+            | xxd &&
         tt_lock --tomb-pwd $DUMMYPASS --sphx-user $DUMMYUSER --sphx-host $DUMMYHOST
         '
 fi
@@ -34,7 +34,7 @@ if test_have_prereq DOAS; then
         tt_forge --sudo doas --tomb-pwd $DUMMYPASS &&
         print $DUMMYPASS \
             | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key \
-            | hexdump -C &&
+            | xxd &&
         tt_lock --sudo doas --tomb-pwd $DUMMYPASS
         '
 fi

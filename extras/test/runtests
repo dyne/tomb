@@ -100,7 +100,7 @@ test-tomb-create() {
         notice "Dump of clear key contents to examine them:"
         print ${dummypass} \
 	        | gpg --batch --passphrase-fd 0 --no-tty --no-options -d /tmp/test.tomb.key \
-	        | hexdump -C
+	        | xxd
         echo --
     }
 
@@ -309,7 +309,7 @@ test-set-key() {
         notice "Dump of clear key contents to examine them:"
         print ${dummypass} \
 	        | gpg --batch --passphrase-fd 0 --no-tty --no-options -d /tmp/test.tomb.new.key \
-	        | hexdump -C
+	        | xxd
         echo --
         mv /tmp/test.tomb.new.key /tmp/test.tomb.key
         tt close test
