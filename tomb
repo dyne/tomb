@@ -980,14 +980,14 @@ is_valid_recipients() {
 	done
 
 	# At least one private key must be present
-	for gpg_id in ${recipients[@]}; do
-		gpg --with-colons --batch --list-secret-keys "$gpg_id" &> /dev/null
-		[[ $? = 0 ]] && {
-			return 0
-		}
-	done
+#	for gpg_id in ${recipients[@]}; do
+#		gpg --with-colons --batch --list-secret-keys "$gpg_id" &> /dev/null
+#		[[ $? = 0 ]] && {
+#			return 0
+#		}
+#	done
 
-	return 1
+	return 0
 }
 
 # $@ is the list of all the recipient used to encrypt a tomb key
