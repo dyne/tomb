@@ -14,7 +14,7 @@ test_expect_success 'Testing set key' '
         --unsafe --tomb-pwd $DUMMYPASS &&
     print $DUMMYPASS \
         | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key_new \
-        | hexdump -C &&
+        | xxd &&
     tt_close
     '
 
@@ -40,7 +40,7 @@ if test_have_prereq SPHINX ORACLE; then
             --sphx-user $DUMMYUSER --sphx-host $DUMMYHOST &&
         print $DUMMYPASS \
             | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key_new \
-            | hexdump -C &&
+            | xxd &&
         tt_close
         '
 fi

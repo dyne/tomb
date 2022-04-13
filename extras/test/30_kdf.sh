@@ -11,7 +11,7 @@ if test_have_prereq KDF; then
         tt_forge --tomb-pwd $DUMMYPASS --kdf 1 &&
         print $DUMMYPASS \
             | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key \
-            | hexdump -C &&
+            | xxd &&
         tt_lock --tomb-pwd $DUMMYPASS --kdf 1
         '
 

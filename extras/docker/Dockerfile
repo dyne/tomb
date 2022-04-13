@@ -4,7 +4,7 @@
 # This creates an Ubuntu derived base image and installs the tomb libarary
 # along with it's dependencies.
 
-FROM dyne/devuan:beowulf
+FROM dyne/devuan:chimaera
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TOMB_VERSION=2.9
@@ -19,7 +19,8 @@ RUN apt-get update -y && \
 	zsh \
 	gnupg \
 	cryptsetup \
-	pinentry-curses \
+	pinentry pinentry-curses \
+	file xxd \
 	steghide \
 	mlocate \
 	swish-e
