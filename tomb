@@ -969,7 +969,7 @@ is_valid_recipients() {
 	for gpg_id in ${recipients[@]}; do
 		trust="$(gpg --with-colons --batch --list-keys "$gpg_id" 2> /dev/null |
 				 	awk 'BEGIN { FS=":" } /^pub/ { print $2; exit}')"
-		[[ $? != 0 ]] && {
+		[[ "${trust}" == "" ]] && {
 			_warning "Not a valid GPG key ID: ::1 gpgid:: " $gpg_id
 			return 1
 		}
