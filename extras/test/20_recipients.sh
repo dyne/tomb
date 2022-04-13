@@ -4,6 +4,8 @@ export test_description="Testing tomb with GnuPG keys"
 
 source ./setup
 
+if test_have_prereq GPGRCPT; then
+
 test_export "recipient"
 test_expect_success 'Testing tomb with GnuPG keys: creation' '
     tt_dig -s 20 &&
@@ -53,5 +55,7 @@ test_expect_success 'Testing tomb creation with untrusted GnuPG keys' '
     tt_dig -s 20 &&
     test_must_fail tt_forge -g -r $KEY_UNTRUSTED
     '
+
+fi
 
 test_done

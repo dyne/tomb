@@ -61,6 +61,8 @@ command -v doas > /dev/null && test_set_prereq DOAS
 
 
 # GnuPG config
+#test_set_prereq GPGRCPT
+if test_have_prereq GPGRCPT; then
 unset GNUPGHOME
 unset GPG_AGENT_INFO
 export GNUPGHOME="$TEST_HOME/gnupg/"
@@ -69,8 +71,8 @@ export KEY2="0B2235E660753AB0475FB3E23DC836481F44B31E"
 export SUBKEY1="D89BE71A935779961C130E50D9D7ACED39D3991C!"
 export SUBKEY2="843077BF7FD4A9C7BBFC3A69F065568B4F7D6CA9!"
 export KEY_UNTRUSTED="E6195F61F5EBA81FE4B1565AAC844B92004240CD"
-
 chmod 700 "$GNUPGHOME"
+fi
 
 
 # Dummy passwords used in the tests suite

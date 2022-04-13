@@ -12,10 +12,14 @@ test_expect_success 'Testing tomb with GnuPG keys: passwd' '
         --tomb-old-pwd $DUMMYPASSNEW --tomb-pwd $DUMMYPASS
     '
 
+if test_have_prereq GPGRCPT; then
+
 test_export "recipient" # Using already generated tomb
 test_expect_success 'Testing tomb with GnuPG keys: passwd' '
     tt passwd -k $tomb_key -g -r $KEY2
     '
+
+fi
 
 if test_have_prereq SPHINX ORACLE; then 
        test_export "sphinx_test" # Using already generated tomb

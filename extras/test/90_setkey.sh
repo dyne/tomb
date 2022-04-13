@@ -18,6 +18,7 @@ test_expect_success 'Testing set key' '
     tt_close
     '
 
+if test_have_prereq GPGRCPT; then
 test_export "recipient" # Using already generated tomb
 test_expect_success 'Testing tomb with GnuPG keys: setkey' '
     tt forge $tomb_key_new -g -r $KEY2 --ignore-swap --unsafe &&
@@ -25,6 +26,7 @@ test_expect_success 'Testing tomb with GnuPG keys: setkey' '
     tt open -k $tomb_key_new $tomb -g &&
     tt_close
     '
+fi
 
 if test_have_prereq SPHINX ORACLE; then 
     test_export "sphinx_test" # Using already generated tomb
