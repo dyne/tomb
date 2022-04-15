@@ -192,6 +192,9 @@ equivalent standards supported by the Linux kernel.
 Tomb can be used in conjunction with some other software applications,
 some are developed by Dyne.org, but some also by third parties.
 
+It works well inside the Windows Subsystem for Linux starting from the
+Windows 11 release since that supports mounting loopback volumes.
+
 ### Included extra applications
 
 These auxiliary applications are found in the extras/ subdirectory of
