@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
-"PO-Revision-Date: 2022-01-30 06:55+0000\n"
+"PO-Revision-Date: 2022-06-26 05:21+0000\n"
 "Last-Translator: Maxime Leroy <lisacintosh@gmail.com>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/tomb/tomb/fr/>\n"
 "Language: fr\n"
@@ -9,7 +9,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.11-dev\n"
+"X-Generator: Weblate 4.13.1-dev\n"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -1141,9 +1141,8 @@ msgid "There's no such command \"::1 subcommand::\"."
 msgstr "La commande \"::1 subcommand::\" n'est pas implémentée."
 
 #: tomb:Main routine:main:2630
-#, fuzzy
 msgid "Please try -h for help."
-msgstr "Essayer -h pour obtenir l'aide."
+msgstr "Veuillez essayez -h pour l'aide."
 
 #: tomb:Main routine:main:2642
 msgid "Some error occurred during option processing."
@@ -1254,7 +1253,7 @@ msgstr ""
 
 #: tomb:Safety functions:_ensure_safe_swap:335
 msgid "[#163] I may not detect plain swaps on an encrypted volume."
-msgstr ""
+msgstr "[#163] Peut ne pas détecter les changements bruts sur un volume crypté."
 
 #: tomb:Commandline interaction:usage:617
 msgid " dig     create a new empty TOMB file of size -s in MiB"
