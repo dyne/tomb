@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
-"PO-Revision-Date: 2022-06-26 05:21+0000\n"
-"Last-Translator: Maxime Leroy <lisacintosh@gmail.com>\n"
+"PO-Revision-Date: 2022-06-27 13:20+0000\n"
+"Last-Translator: Alex <alexandre@pujol.io>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/tomb/tomb/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -81,13 +81,12 @@ msgstr ""
 
 #: tomb:Safety functions:ask_password:459
 msgid "Detected DISPLAY, but only pinentry-curses is found."
-msgstr ""
-"DISPLAY détecté, mais seuls les malédictions de pinentry sont trouvées."
+msgstr "DISPLAY détecté, mais seul 'pinentry-curses' a été trouvé."
 
 #: tomb:Safety functions:ask_password:469
 msgid "Cannot find any pinentry: impossible to ask for password."
 msgstr ""
-"Impossible de trouver pinentry : impossible de demander le mot de passe."
+"Impossible de trouver un 'pinentry' : impossible de demander le mot de passe."
 
 #: tomb:Safety functions:ask_password:479
 msgid "Pinentry error: ::1 error::"
@@ -746,7 +745,7 @@ msgstr "l'exécution a été interrompue."
 
 #: tomb:Create:change_tomb_key:1667
 msgid "Not a valid LUKS encrypted volume: ::1 volume::"
-msgstr "Ce volume n'est pas crypté avec LUKS correctement : ::1 volume::"
+msgstr "Ce n'est pas un volume chiffré LUKS valide : ::1 volume::"
 
 #: tomb:Create:change_tomb_key:1675
 msgid "Changing lock on tomb ::1 tomb name::"
@@ -895,7 +894,7 @@ msgstr ""
 
 #: tomb:Open:exec_safe_post_hooks:1983
 msgid "Post hooks found, executing as user ::1 user name::."
-msgstr ""
+msgstr "Crochets trouvé, exécution en tant qu'utilisateur ::1 user name::."
 
 #: tomb:List:list_tombs:2002
 msgid "I can't see any ::1 status:: tomb, may they all rest in peace."
@@ -985,6 +984,8 @@ msgstr "Index des contenus de ::1 tomb name:: en cours..."
 #: tomb:Index and search:index_tombs:2200
 msgid "Generating a new swish-e configuration file: ::1 swish conf::"
 msgstr ""
+"Génération d'un nouveau fichier de configuration pour 'swish-e' : ::1 swish "
+"conf::"
 
 #: tomb:Index and search:index_tombs:2270
 msgid "Search index updated."
@@ -1085,7 +1086,7 @@ msgstr "Merci d'indiquer une tombe existante."
 
 #: tomb:Close:umount_tomb:2449
 msgid "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::"
-msgstr ""
+msgstr "Claquer la tombe ::1 tomb name:: monté sur ::2 mount point::"
 
 #: tomb:Close:umount_tomb:2451
 msgid "Kill all processes busy inside the tomb."
@@ -1105,12 +1106,11 @@ msgstr "Retrait du point de montage : ::1 hook::"
 
 #: tomb:Close:umount_tomb:2466
 msgid "Slamming tomb: killing all processes using this hook."
-msgstr ""
+msgstr "Claquer une tombe: tuant tous les processus qui utilise ce crochet."
 
 #: tomb:Close:umount_tomb:2467
-#, fuzzy
 msgid "Cannot slam the bind hook ::1 hook::"
-msgstr "Quelque chose coince à ::1 hook::."
+msgstr "Impossible de claquer le crochet ::1 hook::."
 
 #: tomb:Close:umount_tomb:2470
 #, fuzzy
@@ -1248,12 +1248,13 @@ msgstr "Essayer -h pour obtenir l'aide."
 #: tomb:Safety functions:_ensure_safe_swap:330
 msgid "The undertaker found that all swap partitions are encrypted. Good."
 msgstr ""
-"Le croque-mort a découvert que toutes les partitions sont cryptées. Bon "
-"point."
+"Le croque-mort a découvert que toutes les partitions sont chiffrées. Bien."
 
 #: tomb:Safety functions:_ensure_safe_swap:335
 msgid "[#163] I may not detect plain swaps on an encrypted volume."
-msgstr "[#163] Peut ne pas détecter les changements bruts sur un volume crypté."
+msgstr ""
+"[#163] Je ne peut ne pas détecter des partitions swaps en clair sur un "
+"volume chiffré."
 
 #: tomb:Commandline interaction:usage:617
 msgid " dig     create a new empty TOMB file of size -s in MiB"
@@ -1295,11 +1296,12 @@ msgstr "Les tombes ne peuvent faire moins de 10 mebi-octets"
 
 #: tomb:Open:exec_safe_bind_hooks:1944
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
-msgstr ""
+msgstr "cartographie de 'bind-hooks': local/to/tomb local/to/$HOME"
 
 #: tomb:Open:exec_safe_bind_hooks:1948
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.  Rolling back"
 msgstr ""
+"cartographie de 'bind-hooks': local/to/tomb local/to/$HOME. Retour en arrière"
 
 #: tomb:Resize:resize_tomb:2323
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
