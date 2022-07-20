@@ -1,7 +1,7 @@
 ##
 # gregtzar/tomb
 #
-# This creates an Ubuntu derived base image and installs the tomb libarary
+# This creates an Ubuntu derived base image and installs the tomb library
 # along with it's dependencies.
 
 FROM dyne/devuan:chimaera
@@ -19,7 +19,7 @@ RUN apt-get update -y && \
 	zsh \
 	gnupg \
 	cryptsetup \
-	pinentry pinentry-curses \
+	pinentry-curses \
 	file xxd \
 	steghide \
 	mlocate \
