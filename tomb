@@ -2399,7 +2399,6 @@ mount_tomb() {
 	}
 
 	_success "Success opening ::1 tomb file:: on ::2 mount point::" $TOMBFILE "$tombmount"
-
 	local tombtty tombhost tombuid tombuser
 
 	# print out when it was opened the last time, by whom and where
@@ -2415,6 +2414,7 @@ mount_tomb() {
 
 		_message "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::" $tombuser $tombuid $tombtty $tombhost
 		_message "on date ::1 date::" $tombsince
+		[[ -r "${tombmount}"/.cleanexit ]] || _message "the door was slammed or shutdown called before umount."
 	}
 
 	# write down the UID and TTY that opened the tomb
@@ -3054,11 +3054,13 @@ umount_tomb() {
 		for t in ${mounted_tombs}; do
 			usedmount=${t[(ws:;:)2]}
 			[[ "$usedmount" == "$tombmount" ]] && {
-				# Tomb was not umounted through the above command
-				# Will do so now
 				_verbose "Performing umount of ::1 mount point::" "$tombmount"
+				touch "${tombmount}"/.cleanexit
 				_sudo umount "${tombmount}"
-				[[ $? = 0 ]] || { _failure "Tomb is busy, cannot umount!" }
+				[[ $? = 0 ]] || {
+					rm -f "${tombmount}"/.cleanexit
+					_failure "Tomb is busy, cannot umount!"
+				}
 			}
 		done
 
