@@ -727,7 +727,7 @@ msgid "Unexpected error in luksClose."
 msgstr "Unerwarteter Fehler in luksClose."
 
 #: tomb:Create:change_tomb_key:1725
-msgid "Succesfully changed key for tomb: ::1 tomb file::"
+msgid "Successfully changed key for tomb: ::1 tomb file::"
 msgstr "Schlüssel erfolgreich gewechselt für das Grab: ::1 tomb file::"
 
 #: tomb:Create:change_tomb_key:1726

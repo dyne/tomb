@@ -2316,7 +2316,7 @@ change_tomb_key() {
 
 	_sudo cryptsetup luksClose "${TOMBMAPPER}" || _failure "Unexpected error in luksClose."
 
-	_success "Succesfully changed key for tomb: ::1 tomb file::" $TOMBFILE
+	_success "Successfully changed key for tomb: ::1 tomb file::" $TOMBFILE
 	_message "The new key is: ::1 new key::" $TOMBKEYFILE
 
 	return 0
