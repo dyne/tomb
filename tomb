@@ -345,16 +345,6 @@ _is_zramswap() {
 # Synopsis: _zramswap_uses_writeback /path/to/block/device
 # Return 0 if the zram device writes to disk
 # Return 1 if the zram device does not write to disk
-		elif _is_zramswap $s; then
-			if _zramswap_uses_writeback $s; then
-				# We're dealing with unencrypted stuff written to disk.
-				# Maybe it lives on an encrypted filesystem anyway.
-				# @todo verify it's actually written to an encrypted FS
-				# Well, no: bail out.
-				r=1; break;
-			else
-				r=2;
-			fi
 _zramswap_uses_writeback() {
 	local	b=$1 # Path to a block device
 	local	m="" # major device number
