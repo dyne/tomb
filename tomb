@@ -293,6 +293,84 @@ _tmp_create() {
 }
 
 # Check if a *block* device is encrypted
+# Check if a *block* device is a zram device
+# Synopsis: _is_zramswap /path/to/block/device
+# Return 0 if it is a zramswap
+# Return 1 if it is not a zramswap
+_is_zramswap() {
+	local	b=$1 # Path to a block device
+
+	# check if device b is a zram block device
+	zramctl --raw -o NAME | grep "^$b" >/dev/null
+
+	return $?
+}
+
+# Check if a zram device uses the writeback feature that writes data onto a disk
+# Synopsis: _zramswap_uses_writeback /path/to/block/device
+# Return 0 if the zram device writes to disk
+# Return 1 if the zram device does not write to disk
+_zramswap_uses_writeback() {
+	local	b=$1 # Path to a block device
+	local	m="" # major device number
+	local	n="" # minor device number
+
+	read n m < <(stat -c '%T %t' $b) # get major and minor device number in hex
+	printf -v m %d $((16#$m)) # get major device number in decimal
+	printf -v n %d $((16#$n)) # get minor device number in decimal
+
+	if grep '^none$' "/sys/dev/block/$m:$n/backing_dev" > /dev/null; then
+		return 1
+	fi
+
+	return 0
+}
+
+# Check if a *block* device is a zram device
+# Synopsis: _is_zramswap /path/to/block/device
+# Return 0 if it is a zramswap
+# Return 1 if it is not a zramswap
+_is_zramswap() {
+	local	b=$1 # Path to a block device
+
+	zramctl --raw -o NAME | grep "^$b" >/dev/null
+	# @todo How to do this without zramctl?
+	# - device node major is dynamically allocated to zram0
+	# - in /sys/ there seems to be no file identifying a zram device
+
+	return $?
+}
+
+# Check if a zram device uses the writeback feature that writes data onto a disk
+# Synopsis: _zramswap_uses_writeback /path/to/block/device
+# Return 0 if the zram device writes to disk
+# Return 1 if the zram device does not write to disk
+		elif _is_zramswap $s; then
+			if _zramswap_uses_writeback $s; then
+				# We're dealing with unencrypted stuff written to disk.
+				# Maybe it lives on an encrypted filesystem anyway.
+				# @todo verify it's actually written to an encrypted FS
+				# Well, no: bail out.
+				r=1; break;
+			else
+				r=2;
+			fi
+_zramswap_uses_writeback() {
+	local	b=$1 # Path to a block device
+	local	m="" # major device number
+	local	n="" # minor device number
+
+	read n m < <(stat -c '%T %t' $b) # get major and minor device number in hex
+	printf -v m %d $((16#$m)) # get major device number in decimal
+	printf -v n %d $((16#$n)) # get minor device number in decimal
+
+	if grep '^none$' "/sys/dev/block/$m:$n/backing_dev" > /dev/null; then
+		return 1
+	fi
+
+	return 0
+}
+
 # Synopsis: _is_encrypted_block /path/to/block/device
 # Return 0 if it is an encrypted block device
 _is_encrypted_block() {
@@ -314,7 +392,7 @@ _is_encrypted_block() {
 # Check if swap is activated
 # Return 0 if NO swap is used, 1 if swap is used.
 # Return 1 if any of the swaps is not encrypted.
-# Return 2 if swap(s) is(are) used, but ALL encrypted.
+# Return 2 if swap(s) is(are) used, but ALL encrypted or zramswap without writeback to disk.
 # Use _check_swap in functions. It will call this function and
 # exit if unsafe swap is present.
 _ensure_safe_swap() {
@@ -330,8 +408,18 @@ _ensure_safe_swap() {
 	for s in $=swaps; do
 		if _is_encrypted_block $s; then
 			r=2;
+		elif _is_zramswap $s; then
+			if _zramswap_uses_writeback $s; then
+				# We're dealing with unencrypted stuff written to disk.
+				# Maybe it lives on an encrypted filesystem anyway.
+				# @todo verify it's actually written to an encrypted FS
+				# Well, no: bail out.
+				r=1; break;
+			else
+				r=2;
+			fi
 		else
-			# We're dealing with unencrypted stuff.
+			# We're dealing with unencrypted stuff written to disk.
 			# Maybe it lives on an encrypted filesystem anyway.
 			# @todo: verify it's actually on an encrypted FS (see #163 and !189)
 			# Well, no: bail out.
@@ -340,7 +428,8 @@ _ensure_safe_swap() {
 	done
 
 	if [[ $r -eq 2 ]]; then
-		_success "The undertaker found that all swap partitions are encrypted. Good."
+		_success "The undertaker found that all swap partitions are encrypted"
+		_success "or zramswap without writeback to disk. Good."
 	else
 		_warning "This poses a security risk."
 		_warning "You can deactivate all swap partitions using the command:"
