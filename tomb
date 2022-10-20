@@ -404,9 +404,11 @@ _ensure_safe_swap() {
 				# Maybe it lives on an encrypted filesystem anyway.
 				# @todo verify it's actually written to an encrypted FS
 				# Well, no: bail out.
+				_message "Found zramswap with writeback enabled."
 				r=1; break;
 			else
-				r=2;
+				_message "Found zramswap without writeback to disk."
+				r=2
 			fi
 		else
 			# We're dealing with unencrypted stuff written to disk.
@@ -418,8 +420,7 @@ _ensure_safe_swap() {
 	done
 
 	if [[ $r -eq 2 ]]; then
-		_success "The undertaker found that all swap partitions are encrypted"
-		_success "or zramswap without writeback to disk. Good."
+		_success "The undertaker found that all swap partitions are encrypted. Good."
 	else
 		_warning "This poses a security risk."
 		_warning "You can deactivate all swap partitions using the command:"
