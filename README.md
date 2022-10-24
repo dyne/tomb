@@ -27,6 +27,8 @@ For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md)
 
 [![Build Status](https://travis-ci.org/dyne/Tomb.svg?branch=master)](https://travis-ci.org/dyne/Tomb)
 
+Also [watch the Tomb3 repository](/dyne/tomb3) where a complete rewrite for **fully portable Tomb3 volumes** is taking place.
+
 # What is Tomb, the crypto undertaker?
 
 Tomb aims to be a free and open source system for easy encryption and
