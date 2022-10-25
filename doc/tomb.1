@@ -66,10 +66,21 @@ option can be used to specify the cipher specification: default is
 If you are looking for something exotic, also try
 "serpent-xts-plain64". More options may be found in cryptsetup(8) and
 Linux documentation. The \fI--filesystem\fR option can be used to
-specify "btrfs" as an alternative filesystem used to format the tomb,
+specify an alternative filesystem used to format the tomb,
 in place of the default "ext4". This operation requires root
-privileges to loopback mount, format the tomb (using LUKS and Ext4),
-then set the key in its first LUKS slot.
+privileges to loopback mount, format the tomb (using LUKS and mkfs),
+then set the key in its first LUKS slot. 
+
+.RS
+.nf
+Supported filesystems for \fI--filesystem\fR:
+"ext3"	using operating system defaults
+"ext4"	using operating system defaults
+"btrfs"	for tombs >= 47MB using operating system defaults
+"btrfsmixedmode"	for tombs >=18MB btrfs mixed mode (see mkfs.btrfs(8))
+"ext3maxinodes"	ext3 with a maximum of inodes (for many small files)
+"ext4maxinodes"	ext4 with a maximum of inodes (for many small files)
+.RE
 
 .B
 .IP "open"
