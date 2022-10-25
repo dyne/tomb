@@ -2078,9 +2078,22 @@ lock_tomb_with_key() {
 	local filesystem=ext4
     option_is_set --filesystem && {
 		filesystem=`option_value --filesystem`
+		local tombsize=`stat --format '%s' $tombpath`
 		case $filesystem in
 			ext3|ext4) ;;
-			btrfs) ;;
+			ext3maxinodes|ext4maxinodes) ;;
+			btrfs)
+				if [[ $tombsize < 49283072 ]]; then
+					_failure "Filesystem ::1 filesystem:: not supported on tombs smaller than 47MB." \
+						$filesystem
+				fi
+				;;
+			btrfsmixedmode)
+				if [[ $tombsize < 18874368 ]]; then
+					_failure "Filesystem ::1 filesystem:: not supported on tombs smaller than 18MB." \
+						$filesystem
+				fi
+				;;
 			*)
 				_failure "Filesystem not supported: ::1 filesystem::" $filesystem
 				return 1
@@ -2140,8 +2153,16 @@ lock_tomb_with_key() {
 		ext3|ext4)
 			_sudo mkfs.${filesystem} -q -F -j -L $TOMBNAME /dev/mapper/tomb.tmp
 			;;
+		ext3maxinodes|ext4maxinodes) # TODO: cover with test
+			filesystem=${filesystem:0:4}
+			_sudo mkfs.${filesystem} -q -F -j -i 1024 -b 1024 -L $TOMBNAME /dev/mapper/tomb.tmp
+			;;
 		btrfs) # TODO: cover with test
 			_sudo mkfs.${filesystem} -q -L $TOMBNAME /dev/mapper/tomb.tmp
+			;;
+		btrfsmixedmode) # TODO: cover with test
+			filesystem=${filesystem:0:5}
+			_sudo mkfs.${filesystem} -q -M -L $TOMBNAME /dev/mapper/tomb.tmp
 			;;
 	esac
 
