@@ -1,0 +1,402 @@
+#!/bin/sh
+#
+# Tomb v3, the Crypto Undertaker portable version 3
+#
+# A commandline tool to easily operate encryption of secret data
+#
+# {{{ License
+
+# Copyright (C) 2007-2022 Dyne.org Foundation
+#
+# Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
+#
+# Please refer to the AUTHORS file for more information.
+#
+# This source code is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This source code is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	Please refer
+# to the GNU Public License for more details.
+#
+# You should have received a copy of the GNU Public License along with
+# this source code; if not, , see <https://www.gnu.org/licenses/>.
+
+# }}} - License
+
+# {{{ Global variables
+
+VERSION="3.1.0"
+DATE="Nov/2022"
+TOMBEXEC="$0"
+TMPDIR="${TMP:-/tmp}"
+TOMBTMPFILES=""
+PATH="${PATH}:.:/usr/local/bin"
+exitcode=0
+# }}}
+
+# {{{ Logging functions
+
+_success() {
+	echo "[*] " "$1" "$2" "$3" "$4" 1>&2
+}
+_message() {
+	echo " .  " "$1" "$2" "$3" "$4" 1>&2
+}
+_warning() {
+	echo "[W] " "$1" "$2" "$3" "$4" 1>&2
+}
+_verbose() {
+	echo "[D] " "$1" "$2" "$3" "$4" 1>&2
+}
+_error() {
+	echo "[!] " "$1" "$2" "$3" "$4" 1>&2
+	exitcode=1
+}
+_failure() {
+	echo "[!!] " "$1" "$2" "$3" "$4" 1>&2
+	exitcode=1
+	exit 1
+}
+
+# }}}
+
+_success "Starting Tomb v$VERSION"
+
+# {{{ Internal functions
+
+_random_string() {
+	len=${1:-32}
+	[ "$1" != "" ] && {
+		echo "print(O.random($len):base58())" | zenroom 2>/dev/null
+	}
+	return $?
+}
+
+_tmp_create() {
+	[ -d "$TMPDIR" ] || {
+		# we create the tempdir with the sticky bit on
+		mkdir -m 1777 "$TMPDIR"
+		[ $? = 0 ] || {
+			_failure "Fatal error creating the temporary directory: %s" "$TMPDIR"
+		}
+	}
+	tfile="${TMPDIR}/`_random_string 64`"	# Temporary file
+	umask 066
+	[ $? = 0 ] || {
+		_failure "Fatal error setting the permission umask for temporary files"
+	}
+	[ -r "$tfile" ] && {
+		_failure "Someone is messing up with us trying to hijack temporary files."
+	}
+	touch "$tfile"
+	[ $? = 0 ] || {
+		_failure "Fatal error creating a temporary file: %s" "$tfile"
+	}
+	_verbose "Created tempfile: ::1 temp file::" "$tfile"
+	TOMBTMP="$tfile"
+	TOMBTMPFILES="$TOMBTMPFILES:$tfile"
+	return 0
+}
+
+# }}}
+
+# {{{ FreeBSD
+freebsd_mount() {
+	file="$1"
+	mnt="$2"
+	_verbose `veracrypt -l "$file"`
+	loop=`veracrypt -l "$file" | awk '{print $3}'`
+	_verbose "fsck $loop"
+	fsck.ext4 -p -C0 "$loop"
+	lklfuse -o type=ext4 "${loop}" "$mnt"
+	return $?
+}
+
+freebsd_close() {
+	file="$1"
+	md=`veracrypt -l "$file" | awk '{print $3}'`
+	# umount "$mnt"
+	_verbose "md: $md"
+	mnt=`pgrep -lf "lklfuse.*$md" | awk '{print $6}'`
+	_verbose "mnt: $mnt"
+	lkl=`pgrep -f "lklfuse.*$md" | awk '{print $1}'`
+	_verbose "kill $lkl (lklfuse on $md)"
+	# trying to deail with lklfuse bug
+	# https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=239831
+	renice -20 $lkl
+	kill $lkl
+	sync
+	sleep 1
+	kill -9 $lkl
+	# lkl should have really exited now
+	_verbose "veracrypt -d $file"
+	veracrypt  --text --non-interactive -d "$file"
+	return $?
+}
+# }}}
+
+# {{{ Linux
+# usage: _mount /tmp/.veracrypt_ mountpoint
+linux_mount() {
+	file="$1"
+	mnt="$2"
+	veralist=`veracrypt -l "$file" | awk '{print($2,":",$3,":",$4)}'`
+	[ "$veralist" = "" ] && {
+		_error "Cannot mount tomb not yet mapped " "$file"
+		return 1
+	}
+	loop=`echo $veralist | cut -d: -f2 | xargs`
+	[ "`echo $veralist | cut -d: -f3 | xargs`" != "-" ] && {
+		_error "Tomb already mounted " "$file on $loop"
+		return 1
+	}
+	_verbose "fsck $loop"
+	fsck.ext4 -p -C0 "$loop" 1>&2
+	_verbose "linux_mount $mnt"
+	mount "$loop" "$mnt"
+	return $?
+}
+# }}}
+
+# {{{ POSIX portable
+
+# usage: echo PASSWORD | posix_create file size pim
+posix_create() {
+	file="$1" # must not exist
+	size="$2" # veracrypt format (accepts M or G)
+	pim="$3" # any number
+	_verbose "posix_create $file $size $pim"
+	veracrypt --text --non-interactive --stdin \
+		 -m nokernelcrypto \
+		 -c "$file" --volume-type normal \
+		 --hash sha512 --encryption serpent-aes \
+		 --filesystem none --size "$size" --pim "$pim" \
+		 --random-source /dev/urandom -k ''
+	return $?
+}
+
+posix_format() {
+	file="$1"
+	loop=`veracrypt -l "$file" | awk '{print $3}'`
+	_verbose "posix_format: ${loop}"
+	mkfs.ext4 -L "`basename $file`" "$loop" # -E root_owner="${user_uid}:${user_gid}" "$loop"
+	return $?
+}
+
+# usage: echo PASSWORD | posix_map file pim
+posix_map() {
+	file="$1"
+	pim="$2"
+	_verbose "posix_map $file $pim"
+	veracrypt --text --non-interactive --stdin \
+			  --protect-hidden no -m nokernelcrypto \
+			  -k '' --pim "$pim" --filesystem none \
+			  "$file"
+	return $?
+}
+
+posix_close() {
+	file="$1"
+	_verbose "posix_close $file"
+	veracrypt --text --non-interactive -d "$file"
+	return $?
+}
+# }}}
+
+# {{{ Initialization
+
+system="unknown"
+create=""
+format=""
+map=""
+mount=""
+close=""
+
+tomb_init() {
+	system="`uname -s`"
+	case "$system" in
+		FreeBSD)
+cat <<EOF
+create=posix_create
+format=posix_format
+map=posix_map
+mount=freebsd_mount
+close=freebsd_close
+EOF
+			;;
+		Linux)
+cat <<EOF
+create=posix_create
+format=posix_format
+map=posix_map
+mount=linux_mount
+close=posix_close
+EOF
+			;;
+		*)
+			_failure "Unsupported system: %s" "$system"
+	esac
+	echo "system=$system"
+	# _verbose "system detected: %s" $system
+}
+
+# }}}
+
+
+# {{{ Main
+[ "$1" = "source" ] && return 0
+eval "`tomb_init`"
+tombfile=""
+tombsize=""
+PIM=69
+
+cmd="$1"
+shift 1
+
+case "$cmd" in
+	dig)
+		args=2
+		while [ $args -gt 0 ]; do
+			[ "$1" = '-s' ] && { tombsize="$2"; shift 2; }
+			[ "$1" != "" ] && { tombfile="$1"; shift 1; }
+			args=$(( $args - 1 ))
+		done
+
+		[ "$tombfile" = "" ] && _failure "Missing path to tomb"
+		[ "$tombsize" = "" ] && _failure "Size argument missing, use -s"
+		# TODO: check if size is integer
+		# [ "$tombsize" -ge 10 ] || _failure "Tombs can't be smaller than 10 mebibytes"
+		[ -e "$tombfile" ] && {
+			_error "A tomb exists already. I'm not digging here:"
+			ls -l "$tombfile"; exit 1
+		}
+		_message "Commanded to dig tomb " "$tombfile" " sized $tombsize"
+		touch "$tombfile" || _failure "Error creating the tomb " "$tombfile"
+		# dd if=/dev/urandom bs=1048576 count=$tombsize of="$tombfile" || {
+		# 	_failure "Error creating the tomb " "$tombfile"
+		# 	exit 1
+		# }
+		if [ "$system" = "Linux" ]; then
+			fallocate -x -l "$tombsize" "$tombfile" ||
+				_failure "Error creating the tomb " "$tombfile"
+		else
+			bytesize="`tomb-str2size $tombsize`"
+			[ "$bytesize" = "" ] && _failure "Error reading tomb size " "$tombsize"
+			dd if=/dev/zero of="$tombfile" count="$(( bytesize / 1048576))" bs=1048576 ||
+				_failure "Error creating the tomb " "$tombfile of $tombsize"
+		fi
+		;;
+
+	forge)
+		args=1
+	    [ "$1" = "" ] && _failure "Missing argument in command " "forge"
+		while [ $args -gt 0 ]; do
+			case "$1" in
+				'-k') tombkey="$2";  shift 2 ;;
+				*) tombkey="$1"; shift 1 ;;
+			esac
+			args=$(( $args - 1 ))
+		done
+		[ "$tombkey" = "" ] && _failure "Missing path to tomb key"
+		[ -e "$tombkey" ] && {
+			_error "A tomb key exists already. I'm not forging here:"
+			ls -l "$tombkey"; exit 1
+		}
+		_message "Commanded to forge tomb key " "$tombkey"
+		touch "$tombkey" || _failure "Error creating the tomb key " "$tombkey"
+		cat <<EOF | zenroom -z | cut -d\" -f4 > "$tombkey"
+		rule check version 2.0.0
+		Given nothing
+		When I create the random object of '64' bytes
+		Then print the 'random object' as 'hex'
+EOF
+		 ;;
+
+	lock)
+		args=2
+		while [ $args -gt 0 ]; do
+			case "$1" in
+				'-k') tombkey="$2";  shift 2 ;;
+				*) tombfile="$1"; shift 1 ;;
+			esac
+			args=$(( $args - 1 ))
+		done
+		case "$system" in
+			Linux)
+				tombsize=`stat "$tombfile" | awk '/Size:/ {print $2; exit}'`
+				;;
+			*)
+				tombsize=`stat -f '%z' "$tombfile"`
+				;;
+		esac
+		_message "Commanded to lock tomb " "$tombfile of $tombsize with key $tombkey"
+		[ "$tombfile" = "" ] && _failure "Missing path to tomb"
+		[ -r "$tombfile" ] || _failure "Tomb file not readable"
+		[ "$tombkey" = "" ] && _failure "Missing path to key"
+		[ -r "$tombkey" ] || _failure "Key file not readable"
+		"$create" "$tombfile" "$tombsize" "$PIM" < "$tombkey" || {
+			_failure "Error creating the tomb " "$tombfile"
+			exit 1
+		}
+		"$map" "$tombfile" "$PIM" < "$tombkey" ||
+			_failure "Error mapping the tomb " "$tombfile with key $tombkey"
+		"$format" "$tombfile" ||
+			_error "Error formatting tomb " "$tombfile"
+		"$close" "$tombfile"
+		[ $exitcode = 0 ] &&
+			_success "Success locking tomb " "$tombfile with key $tombkey"
+		;;
+
+	open)
+		args=3
+		while [ $args -gt 0 ]; do
+			case "$1" in
+				'-k') tombkey="$2";  shift 2 ;;
+				*) if [ "$tombfile" = "" ]; then
+					   tombfile="$1"
+				   else
+					   tombmount="$1"
+				   fi
+				   shift 1 ;;
+			esac
+			args=$(( $args - 1 ))
+		done
+		_message "Commanded to open tomb " "$tombfile with key $tombkey on $tombmount"
+		[ "$tombfile" = "" ] && _failure "Missing path to tomb"
+		[ -r "$tombfile" ] || _failure "Tomb file not readable"
+		[ "$tombkey" = "" ] && _failure "Missing path to key"
+		[ -r "$tombkey" ] || _failure "Key file not readable"
+		[ "$tombmount" = "" ] && tombmount="`basename $tombfile`"
+		"$map" "$tombfile" "$PIM" < "$tombkey"
+		[ $? != 0 ] &&
+			_failure "Error mapping the tomb " "$tombfile with key $tombkey"
+		"$mount" "$tombfile" "$tombmount" || {
+			"$close" "$tombfile"
+			_failure "Error mounting the tomb " "$tombfile on $tombmount"
+		}
+		;;
+
+	close)
+		# args=1
+		if [ "$1" = "all" ]; then
+			"$close"
+		elif [ -e "$1" ]; then
+			"$close" "`realpath $1`" ||
+				_failure "Error closing " "$1"
+		elif [ "$1" = "" ]; then
+			_failure "Missing argument: tomb file or mountpoint"
+		else
+			_failure "Wrong argument: $1"
+		fi
+		;;
+	list)
+		veracrypt -l
+		;;
+esac
+# }}}
+
+exit 0
