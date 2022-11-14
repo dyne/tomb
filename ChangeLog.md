@@ -5,7 +5,7 @@
 
 This release adds optional support for Argon2 KDF brute-force
 protection and introduces support for doas as an alternative to sudo
-for priviledge escalation. It also improves support for BTRFS
+for privilege escalation. It also improves support for BTRFS
 formatted Tombs, adds zram detection as swap memory, updates
 documentation and translations and cleans up the script code.  There
 are no major changes nor bug fixes compared to the previous Tomb
