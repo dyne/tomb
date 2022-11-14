@@ -25,15 +25,14 @@ For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md)
 
 ![tomb's logo](https://github.com/dyne/Tomb/blob/master/extras/images/monmort.png)
 
-[![Build Status](https://travis-ci.org/dyne/Tomb.svg?branch=master)](https://travis-ci.org/dyne/Tomb)
-
-Also [watch the Tomb3 repository](/dyne/tomb3) where a complete rewrite for **fully portable Tomb3 volumes** is taking place.
+- Linux Tomb [![Build Status](https://github.com/dyne/tomb/actions/workflows/ci.yml/badge.svg)](https://github.com/dyne/Tomb/actions)
+- Portable Tomb [![Build Status](https://github.com/dyne/tomb/actions/workflows/portable.yml/badge.svg)](https://github.com/dyne/Tomb/actions)
 
 # What is Tomb, the crypto undertaker?
 
-Tomb aims to be a free and open source system for easy encryption and
-backup of personal files, written in code that is easy to review and
-links well reliable GNU/Linux components.
+Tomb is a free and open source system for easy encryption and backup
+of personal files, written in code that is easy to review and links
+well reliable GNU/Linux components.
 
 Tomb's ambition is to improve safety by way of:
 
@@ -41,10 +40,13 @@ Tomb's ambition is to improve safety by way of:
 - facilitation of good practices, i.e: key/storage physical separation
 - adoption of a few standard and well tested implementations.
 
-At present, Tomb consists of a simple shell script (Zsh) using
+At present, Linux Tomb consists of a simple shell script (Zsh) using
 standard filesystem tools (GNU) and the cryptographic API of the Linux
-kernel (cryptsetup and LUKS). Tomb can also produce machine parsable
+kernel (cryptsetup and LUKS). It can also produce machine parsable
 output to facilitate its use inside graphical applications.
+
+Starting with the 3.0 release path, also a new [Portable Tomb](portable) script
+is made available (under development) which works on more operating systems beyond Linux based, is written in POSIX shell, has less dependencies and features and is based on [Veracrypt](https://www.veracrypt.fr) instead of LUKS/cryptsetup.
 
 # How does it work?
 
@@ -120,10 +122,10 @@ or if you are in a hurry
 
 # What is this for, exactly?
 
-This tool can be used to dig .tomb files (LUKS volumes), forge keys
-protected by a password (GnuPG encryption) and use the keys to lock
-the tombs. Tombs are like single files whose contents are inaccessible
-in the absence of the key they were locked with and its password.
+This tool can be used to dig .tomb files, forge keys protected by a
+password and use the keys to lock the tombs. Tombs are like single
+files whose contents are inaccessible in the absence of the key they
+were locked with and its password.
 
 Once open, the tombs are just like normal folders and can contain
 different files, plus they offer advanced functionalities like bind
@@ -197,6 +199,8 @@ some are developed by Dyne.org, but some also by third parties.
 It works well inside the Windows Subsystem for Linux starting from the
 Windows 11 release since that supports mounting loopback volumes.
 
+Portable Tomb extends support to Apple/OSX systems and FreeBSD.
+
 ### Included extra applications
 
 These auxiliary applications are found in the extras/ subdirectory of
@@ -215,14 +219,13 @@ distributed Tomb's sourcecode:
 The following applications are not included in Tomb's distributed
 sourcecode, but are known and tested to be compatible with Tomb:
 
+- [pass-tomb](https://github.com/roddhjav/pass-tomb) is a console based wrapper of the excellent password keeping program [pass](https://www.passwordstore.org) that helps to keep the whole tree of password encrypted inside a tomb. It is written in Bash.
+
 - [Secrets](https://secrets.dyne.org) is a software that can be operated on-line and on-site to split a Tomb key in shares to be distributed to peers: some of them have to agree to combine back the shares in order to retrieve the key.
 
 - [zuluCrypt](https://mhogomchungu.github.io/zuluCrypt/) is a graphical application to manage various types of encrypted volumes on GNU/Linux, among them also Tombs, written in C++.
 
 - [Mausoleum](https://github.com/mandeep/Mausoleum) is a graphical interface to facilitate the creation and management of tombs, written in Python.
-
-
-- [pass-tomb](https://github.com/roddhjav/pass-tomb) is a console based wrapper of the excellent password keeping program [pass](https://www.passwordstore.org) that helps to keep the whole tree of password encrypted inside a tomb. It is written in Bash.
 
 If you are writing a project supporting Tomb volumes or wrapping Tomb, let us know!
 
@@ -288,13 +291,10 @@ If you plan to commit code into Tomb, please keep in mind this is a
 minimalist tool and its code should be readable. Guidelines on the
 coding style are illustrated in [doc/HACKING.txt](doc/HACKING.txt).
 
-Tomb's developers can be contacted using the issues on GitHub or over
-IRC on https://irc.dyne.org channel **#dyne** (or direct port 9999 SSL)
-
 # Licensing
 
-Tomb is Copyright (C) 2007-2021 by the Dyne.org Foundation and
-maintained by Denis Roio <J@dyne.org>. More information on all
+Tomb is Copyright (C) 2007-2022 by the Dyne.org Foundation and
+maintained by [Jaromil](/jaromil). More information on all
 the developers involved is found in the [AUTHORS](AUTHORS.md) file.
 
 This source code is free software; you can redistribute it and/or

@@ -1,5 +1,20 @@
 # Tomb ChangeLog
 
+## 3.0
+### Nov 2022
+
+This release adds optional support for Argon2 KDF brute-force
+protection and introduces support for doas as an alternative to sudo
+for priviledge escalation. It also improves support for BTRFS
+formatted Tombs, adds zram detection as swap memory, updates
+documentation and translations and cleans up the script code.  There
+are no major changes nor bug fixes compared to the previous Tomb
+version: the major version increase signals the beginning of a new
+development course that goes beyond Linux Tomb and adds Portable Tomb
+(WIP) as an alternative and more portable POSIX shell script using
+Veracrypt for volume encryption.
+
+
 ## 2.9
 ### Jan 2021
 
