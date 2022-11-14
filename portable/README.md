@@ -1,8 +1,8 @@
-![Tomb's skull icon](docs/monmort.jpg)
 
 # Portable Tomb :: the crypto undertaker runs everywhere
 
- <!-- [![continuous integration tests badge](https://github.com/dyne/tomb3/actions/workflows/ci.yml/badge.svg)](https://github.com/dyne/Tomb3/actions) test coverage status for Ubuntu-20, FreeBSD-13 and Mac/OSX. -->
+ [![continuous integration tests badge](https://github.com/dyne/tomb/actions/workflows/portable.yml/badge.svg)](https://github.com/dyne/Tomb/actions) test coverage status for portability between Ubuntu-20 and FreeBSD-13.
+ 
 ## ⚠️ WORK IN PROGRESS 🛠️
 
 This is the portable version of [Tomb](https://github.com/dyne/tomb) using [Veracrypt](https://www.veracrypt.fr) in place of cryptsetup.
@@ -13,26 +13,26 @@ This is the portable version of [Tomb](https://github.com/dyne/tomb) using [Vera
 
 Portable tomb achieves direct **interoperable access to tomb volumes** between:
 
-- GNU/Linux
+- GNU and Busybox Linux
 - MS/Windows using WSL2
 - Apple/OSX using [MacFUSE](https://osxfuse.github.io/)
 - FreeBSD
 
-as well reduce dependencies and in particular use only the **POSIX sh interpreter**.
+Portable tomb reduces dependencies and in particular uses only the **POSIX sh interpreter**.
 
-## References:
-- [Milestone on v2 repo](https://github.com/dyne/Tomb/milestone/8)
-- [Feature poll](https://github.com/dyne/Tomb/issues/409)
+# Status
+
+Portable tomb development is in progress and tracked via issues and the [portable milestone](https://github.com/dyne/Tomb/milestone/9).
 
 ## Features
 
-The following v2 features will be ported:
+The following features will be implemented where possible:
 
-[ ] mount bind
-[ ] ps / slam
-[ ] resize
-[ ] index & search
-[ ] bury / exhume
+- mount bind (Linux only)
+- ps / slam
+- resize (pending investigation)
+- index & search ([recoll based](https://github.com/dyne/Tomb/issues/211))
+- bury / exhume
 
 ## Dependencies
 
@@ -40,9 +40,11 @@ The following v2 features will be ported:
 - Linux: `fuse3 util-linux`
 - crossplatform [Veracrypt binaries](https://files.dyne.org/tomb3/third-party) console-only
 
-### Note on Veracrypt
+## Note on Veracrypt
 
-The way upstream developers distribute Veracrypt is far from meeting our minimalist needs, but the console-only binary once installed has a few library dependencies and is all what we need. We will likely setup our own build (and eventually need to [fork veracrypt's commandline-client interface](https://github.com/dyne/Tomb3/issues/2)) meanwhile binary builds of Veracrypt v1.25.9 are provided for download on our own file repository for testing purposes: **use at your own risk**.
+The way upstream developers distribute Veracrypt is far from meeting our minimalist needs, but the console-only binary once installed has a few library dependencies and is all what we need.
+
+I setup [my own build](https://github.com/jaromil/veracrypt) and provide binary builds of Veracrypt v1.25.9 for download on Tomb's file repository for testing purposes.
 
 # Disclaimer
 
