@@ -25,8 +25,8 @@ For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md)
 
 ![tomb's logo](https://github.com/dyne/Tomb/blob/master/extras/images/monmort.png)
 
-- Linux Tomb [![Build Status](https://github.com/dyne/tomb/actions/workflows/linux.yml/badge.svg)](https://github.com/dyne/Tomb/actions)
-- Portable Tomb [![Build Status](https://github.com/dyne/tomb/actions/workflows/portable.yml/badge.svg)](https://github.com/dyne/Tomb/actions)
+[![Build Status](https://github.com/dyne/tomb/actions/workflows/linux.yml/badge.svg)](https://github.com/dyne/Tomb/actions)
+[![Build Status](https://github.com/dyne/tomb/actions/workflows/portable.yml/badge.svg)](https://github.com/dyne/Tomb/actions)
 
 # What is Tomb, the crypto undertaker?
 
