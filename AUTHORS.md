@@ -2,11 +2,11 @@ Cryptsetup was originally written in 2004 by Jana Saout
 
 LUKS extensions are written in 2006 by Clemens Fruhwirth
 
-Tomb is written and maintained since 2007 by Denis Roio <J@dyne.org>
+Tomb is written and maintained since 2007 by [Denis "Jaromil" Roio](https://jaromil.dyne.org)
 
 Tomb includes code and advices by Anathema, Boyska, Hellekin O. Wolf,
-Daniel Rodriguez, Parazyd, Alexandre Pujol, AitorATuin, Narrat and
-Artur Malimonov.
+Daniel Rodriguez, Parazyd, Alexandre Pujol, AitorATuin, Narrat, Artur
+Malimonov and Chris Vogel.
 
 The 'gtomb' GUI based on Zenity is written by Parazyd.
 
@@ -38,6 +38,5 @@ Tomb includes an implementation of the "Password-Based Key Derivation
 Function v2" based on GCrypt and written by Anthony Thyssen, with
 fixes contributed by AitorATuin.
 
-Tomb developers can be contacted via GitHub issues on
-https://www.github.com/dyne/Tomb or over IRC https://irc.dyne.org
-channel **#dyne** (or directly over port 9999 with SSL)
+Some of the Tomb developers can be contacted via [GitHub discussions](https://github.com/dyne/Tomb/discussions)
+or over Telegram via the [Dyne.org Chat Channel](https://t.me/dyne_chat).
