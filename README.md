@@ -17,7 +17,7 @@
 
 More information and updates on website: https://www.dyne.org/software/tomb
 
-Get the stable .tar.gz signed release for production use!
+## Get the stable .tar.gz signed release for production use!
 
 Download it from https://files.dyne.org/tomb
 
