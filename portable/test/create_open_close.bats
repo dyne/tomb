@@ -3,7 +3,7 @@ load bats_setup
 @test "Dig tomb" {
 	rm -f "$TOMB"
 	>&3 echo "$TOMB"
-	./tomb dig -s 20MiB "$TOMB"
+	./tomb dig -s 20 "$TOMB"
 }
 
 @test "Forge key" {

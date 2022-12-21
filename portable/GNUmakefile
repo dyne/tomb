@@ -8,8 +8,7 @@ TOMB ?= test.tomb
 #########
 ## BUILD
 #########
-all:
-	${CC} -O2 -Wall -Wextra --std=c99 --pedantic -o tomb-str2size strtosize.c
+test: create-open-close check-random-data
 
 ########
 ## TEST

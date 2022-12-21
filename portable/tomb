@@ -167,14 +167,14 @@ linux_mount() {
 # usage: echo PASSWORD | posix_create file size pim
 posix_create() {
 	file="$1" # must not exist
-	size="$2" # veracrypt format (accepts M or G)
+	size="$2" # size in bytes
 	pim="$3" # any number
 	_verbose "posix_create $file $size $pim"
 	veracrypt --text --non-interactive --stdin \
 		 -m nokernelcrypto \
 		 -c "$file" --volume-type normal \
 		 --hash sha512 --encryption serpent-aes \
-		 --filesystem none --size "$size" --pim "$pim" \
+		 --filesystem none --size "${size}" --pim "$pim" \
 		 --random-source /dev/urandom -k ''
 	return $?
 }
@@ -274,20 +274,21 @@ case "$cmd" in
 			_error "A tomb exists already. I'm not digging here:"
 			ls -l "$tombfile"; exit 1
 		}
-		_message "Commanded to dig tomb " "$tombfile" " sized $tombsize"
+		_message "Commanded to dig tomb " "$tombfile" " sized $tombsize MiB"
 		touch "$tombfile" || _failure "Error creating the tomb " "$tombfile"
 		# dd if=/dev/urandom bs=1048576 count=$tombsize of="$tombfile" || {
 		# 	_failure "Error creating the tomb " "$tombfile"
 		# 	exit 1
 		# }
+		bytesize="$(( $tombsize * 1048576 ))"
+		[ "$bytesize" = "" ] &&
+			_failure "Error reading tomb size " "$tombsize"
 		if [ "$system" = "Linux" ]; then
-			fallocate -x -l "$tombsize" "$tombfile" ||
+			fallocate -x -l "$bytesize" "$tombfile" ||
 				_failure "Error creating the tomb " "$tombfile"
 		else
-			bytesize="`tomb-str2size $tombsize`"
-			[ "$bytesize" = "" ] && _failure "Error reading tomb size " "$tombsize"
-			dd if=/dev/zero of="$tombfile" count="$(( bytesize / 1048576))" bs=1048576 ||
-				_failure "Error creating the tomb " "$tombfile of $tombsize"
+			dd if=/dev/zero of="$tombfile" count="$tombsize" bs=1048576 ||
+				_failure "Error creating the tomb " "$tombfile of $tombsize MiB"
 		fi
 		;;
 
@@ -327,18 +328,18 @@ EOF
 		done
 		case "$system" in
 			Linux)
-				tombsize=`stat "$tombfile" | awk '/Size:/ {print $2; exit}'`
+				bytesize=`stat "$tombfile" | awk '/Size:/ {print $2; exit}'`
 				;;
 			*)
-				tombsize=`stat -f '%z' "$tombfile"`
+				bytesize=`stat -f '%z' "$tombfile"`
 				;;
 		esac
-		_message "Commanded to lock tomb " "$tombfile of $tombsize with key $tombkey"
+		_message "Commanded to lock tomb " "$tombfile with key $tombkey"
 		[ "$tombfile" = "" ] && _failure "Missing path to tomb"
 		[ -r "$tombfile" ] || _failure "Tomb file not readable"
 		[ "$tombkey" = "" ] && _failure "Missing path to key"
 		[ -r "$tombkey" ] || _failure "Key file not readable"
-		"$create" "$tombfile" "$tombsize" "$PIM" < "$tombkey" || {
+		"$create" "$tombfile" "$bytesize" "$PIM" < "$tombkey" || {
 			_failure "Error creating the tomb " "$tombfile"
 			exit 1
 		}
