@@ -18,15 +18,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this source code. If not, see <http://www.gnu.org/licenses/>.
 
-ver="0.8"
-TOMBPATH="/usr/local/bin/tomb" # Set this to your tomb executable's path
-KDFPATH="/usr/local/bin/" # Set this to the path of your KDF binaries (if you're using them)
+# {{{ SETTINGS
+ver="0.9"
+KDFPATH="/usr/libexec/tomb" # Path of your KDF binaries (if you're using them).
+SWAPOFF="false" # Set to "true" to swapoff, or "false" to use -f (force) flag.
 # The ones below should not need changing
+TOMBPATH="$(which tomb)" # Tomb executable's path
 HEXENC="$KDFPATH/tomb-kdb-hexencode"
 GENSALT="$KDFPATH/tomb-kdb-pbkdf2-gensalt"
 GETITER="$KDFPATH/tomb-kdb-pbkdf2-getiter"
 PBKDF="$KDFPATH/tomb-kdb-pbkdf2"
-_DD=/bin/dd
+_DD="$(which dd)"
+# }}}
 
 # {{{ monmort icon
 MONMORT="/tmp/monmort.png"
@@ -39,22 +42,6 @@ SwA8l9OzG5LnAsiiDQGQRRvaEwInK54J390hndAIYIeQ4k6AAjE/h06ab0SjP08MA1xDAAAAJXRF\n
 WHRkYXRlOmNyZWF0ZQAyMDExLTAxLTEyVDA5OjM0OjI0KzAxOjAwo//d7wAAACV0RVh0ZGF0ZTpt\n
 b2RpZnkAMjAxMS0wMS0xMlQwOTozNDoyNCswMTowMNKiZVMAAAAASUVORK5CYII="
 echo -e "$ICONB64" | base64 --decode > $MONMORT
-# }}}
-
-# {{{ sudo functions
-function _sudo {
-    sudoassword=$(ask_password "Insert sudo password for user $USER")
-    echo -e "$sudoassword\n" | sudo -S -v
-    _sudowrong
-}
-
-function _sudowrong {
-    [[ $? = 0 ]] || {
-        sudoassword=$(ask_password "Wrong password. Insert sudo password for user $USER")
-        echo -e "$sudoassword\n" | sudo -S -v
-        _sudowrong
-    }
-}
 # }}}
 
 # {{{ Zenity dialogs
@@ -143,166 +130,6 @@ function _zenentry {
 }
 # }}}
 
-# {{{ Some pinentry code shamelessly stolen from tomb
-# Ask user for a password
-# Wraps around the pinentry command, from the GnuPG project, as it
-# provides better security and conveniently use the right toolkit.
-ask_password() {
-    local description="$1"
-    local title="${2:-Enter tomb password.}"
-    local output
-    local password
-    local gtkrc
-    local theme
-
-    # Distributions have broken wrappers for pinentry: they do
-    # implement fallback, but they disrupt the output somehow.  We are
-    # better off relying on less intermediaries, so we implement our
-    # own fallback mechanisms. Pinentry supported: curses, gtk-2, qt4
-    # and x11.
-
-    # make sure LANG is set, default to C
-    LANG=${LANG:-C}
-
-    _verbose "asking password with tty=$TTY lc-ctype=$LANG"
-
-    if [[ "$DISPLAY" = "" ]]; then
-
-        if _is_found "pinentry-curses"; then
-            _verbose "using pinentry-curses"
-            output=`cat <<EOF | pinentry-curses
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE $title
-SETDESC $description
-SETPROMPT Password:
-GETPIN
-EOF`
-        else
-            _failure "Cannot find pinentry-curses and no DISPLAY detected."
-        fi
-
-    else # a DISPLAY is found to be active
-
-        # customized gtk2 dialog with a skull (if extras are installed)
-        if _is_found "pinentry-gtk-2"; then
-            _verbose "using pinentry-gtk2"
-
-            gtkrc=""
-            theme=/share/themes/tomb/gtk-2.0-key/gtkrc
-            for i in /usr/local /usr; do
-                [[ -r $i/$theme ]] && {
-                    gtkrc="$i/$theme"
-                    break
-                }
-            done
-            [[ "$gtkrc" = "" ]] || {
-                gtkrc_old="$GTK2_RC_FILES"
-                export GTK2_RC_FILES="$gtkrc"
-            }
-            output=`cat <<EOF | pinentry-gtk-2
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE $title
-SETDESC $description
-SETPROMPT Password:
-GETPIN
-EOF`
-            [[ "$gtkrc" = "" ]] || export GTK2_RC_FILES="$gtkrc_old"
-
-            # TODO QT4 customization of dialog
-        elif _is_found "pinentry-qt4"; then
-            _verbose "using pinentry-qt4"
-
-            output=`cat <<EOF | pinentry-qt4
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE $title
-SETDESC $description
-SETPROMPT Password:
-GETPIN
-EOF`
-
-            # TODO X11 customization of dialog
-        elif _is_found "pinentry-x11"; then
-            _verbose "using pinentry-x11"
-
-            output=`cat <<EOF | pinentry-x11
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE $title
-SETDESC $description
-SETPROMPT Password:
-GETPIN
-EOF`
-
-        else
-
-            if _is_found "pinentry-curses"; then
-                _verbose "using pinentry-curses"
-
-                _warning "Detected DISPLAY, but only pinentry-curses is found."
-                output=`cat <<EOF | pinentry-curses
-OPTION ttyname=$TTY
-OPTION lc-ctype=$LANG
-SETTITLE $title
-SETDESC $description
-SETPROMPT Password:
-GETPIN
-EOF`
-            else
-                _failure "Cannot find any pinentry: impossible to ask for password."
-            fi
-
-        fi
-
-    fi # end of DISPLAY block
-
-    # parse the pinentry output
-    for i in ${(f)output}; do
-        [[ "$i" =~ "^ERR.*" ]] && {
-            _warning "Pinentry error: ::1 error::" ${i[(w)3]}
-            print "canceled"
-            return 1 }
-
-        # here the password is found
-        [[ "$i" =~ "^D .*" ]] && password="${i##D }"
-    done
-
-    [[ "$password" = "" ]] && {
-        _warning "Empty password"
-        print "empty"
-        return 1 }
-
-    print "$password"
-    return 0
-}
-
-_is_found() {
-    # returns 0 if binary is found in path
-    [[ "$1" = "" ]] && return 1
-    command -v "$1" 1>/dev/null 2>/dev/null
-    return $?
-}
-
-function _warning  no() {
-    option_is_set -q || _msg warning $@
-    return 1
-}
-
-function _verbose xxx() {
-    option_is_set -D && _msg verbose $@
-    return 0
-}
-
-function _failure die() {
-    typeset -i exitcode=${exitv:-1}
-    option_is_set -q || _msg failure $@
-    # be sure we forget the secrets we were told
-    exit $exitcode
-}
-# }}}
-
 # {{{ _clean - Clean function, removes sensitive stuff from memory
 function _clean {
     unset $?
@@ -315,7 +142,6 @@ function _clean {
     tombname="$rr";     unset tombname
     tombsize="$rr";     unset tombsize
     keyfile="$rr";      unset keyfile
-    sudoassword="$rr";  unset sudoassword
     tombtmp="/tmp/tombtmp"
     if [ -f $tombtmp ]; then
         dd if=/dev/urandom of=$tombtmp bs=800 count=1
@@ -333,8 +159,8 @@ function _main {
     cmnd=`zenity \
         --window-icon="$MONMORT" \
         --title="gtomb" \
-        --width=640 \
-        --height=420 \
+        --width=400 \
+        --height=445 \
         --list \
         --hide-header \
         --text="gtomb v$ver\nThe GUI wrapper for Tomb, the crypto undertaker." \
@@ -356,6 +182,11 @@ function _main {
         "engrave" "Generates a QR code of a key to be saved on paper" \
         "bury" "Hide a key inside a JPEG image" \
         "exhume" "Extract a key from a JPEG image"`
+    if [[ "$?" = 1 && $SWAPOFF = "true" ]]; then
+        SUDOPWD=$(zenity --password --title="sudo swapon -a")
+        echo "$SUDOPWD" | sudo swapon -a
+        unset $SUDOPWD
+    fi
     eval "_$cmnd"
 }
 # }}}
@@ -428,7 +259,7 @@ function _forge {
     kdfiter=""
     if [[ -x $HEXENC ]] && [[ -x $GENSALT ]] && [[ -x $GETITER ]] && [[ -x $PBKDF ]]; then
         _zenques "Do you want to use KDF? (Generates passwords armored against dictionary attacks)"
-        [[ $? == "0" ]] && {
+        if [[ $? == "0" ]]; then
             kdf="--kdf"
             kdfiter=`_zenentry "Iterations" "Enter the delay (itertime) in seconds for each time \n\
 this key is used:" "2"`
@@ -441,14 +272,14 @@ this key is used:" "2"`
                 _info "gtomb" "Canceled"
                 exec _main
             fi
-        }
+        fi
     else
         _zenotif "gtomb" "KDF binaries not found."
     fi
 
 	[[ $? = 0 ]] || exec _main
 
-	"$TOMBPATH" forge "$keyfile" "$kdf" "$kdfiter" | \
+	"$TOMBPATH" forge "$keyfile" "$kdf" "$kdfiter" "$FLAG" | \
 		_zenprog "Forging key" "Please wait while your key is being forged...\n\
 You can move your mouse around and use your computer to speed up the process." &
 
@@ -480,7 +311,6 @@ function _lock {
 	[[ -n $keyfile ]] || { _zenotif "gtomb" "Cancelled" ; exec _main }
 	[[ $? = 0 ]] || exec _main
 
-	_sudo
 	"$TOMBPATH" lock "$tombname" -k "$keyfile" | \
 		_zenprognc "Locking your tomb" "Please wait while your tomb is being locked..."
 	_info "Success" "Your tomb is now locked."
@@ -496,8 +326,7 @@ function _open {
 	keyfile=`_fsel "Choose the key for your tomb"`
 	[[ $? = 0 ]] || exec _main
 
-	_sudo
-	"$TOMBPATH" open "$tombname" -k "$keyfile"
+	"$TOMBPATH" open "$tombname" -k "$keyfile" "$FLAG"
 	_info "Success" "Your tomb is now open."
 	exec _main
 }
@@ -512,11 +341,11 @@ function _list {
         zenity \
             --title="Currently open tombs" \
             --window-icon="$MONMORT" \
-            --width=640 --height=380 --list \
+            --width=400 --height=380 --list \
             --separator=" & " \
             --text="Here are your open tombs" \
-            --column=Tomb \
-            --column=Path `
+            --column="Tomb" \
+            --column="Path" `
 
     tombname=`echo "$tombname" | cut -c1-16`
 
@@ -525,11 +354,11 @@ function _list {
 	listchoice=`zenity \
 		--title="Choose action" \
 		--window-icon="$MONMORT" \
-		--width=640 --height=400 --list \
+		--width=400 --height=380 --list \
 		--separator=" & " \
 		--text="What do you want to do with this tomb?" \
-		--column=Command \
-		--column=Description \
+		--column="Command" \
+		--column="Description" \
 		"disindex" "Disable indexing of this tomb." \
 		"enindex" "Enable indexing of this tomb."   \
 		"close" "Close the selected tomb." \
@@ -541,13 +370,11 @@ function _list {
 
 	case $listchoice in
 		close)
-			_sudo
 			"$TOMBPATH" close "$tombname"
 			_zeninfo "Success" "Tomb closed successfully!"
 			exec _main
 			;;
 		slam)
-			_sudo
 			"$TOMBPATH" slam "$tombname"
 			_info "Success" "$tombname slammed successfully!"
 			exec _main
@@ -610,7 +437,6 @@ function _close {
 
 	[[ $? = 0 ]] || exec _main
 
-	_sudo
 	tombname=`echo "$tombname" | cut -c1-16`
 	"$TOMBPATH" close "$tombname"
 	_info "Success" "Closed successfully!"
@@ -635,7 +461,6 @@ function _slam {
 
 	[[ $? = 0 ]] || exec _main
 
-	_sudo
 	tombname=`echo "$tombname" | cut -c1-16`
 	"$TOMBPATH" slam "$tombname"
 	_info "Success" "Slammed successfully!"
@@ -670,7 +495,6 @@ function _resize {
 	keyfile=`_fsel "Choose according keyfile"`
 	[[ $? = 0 ]] || exec _main
 
-	_sudo
 	"$TOMBPATH" resize "$tombname" -s "$tombsize" -k "$keyfile" | \
 		_zenprognc "Resizing tomb." "Please wait while your tomb is being resized..."
 	_info "Success" "Tomb resized successfully!"
@@ -683,7 +507,7 @@ function _passwd {
     keyfile=`_fsel "Choose a keyfile"`
 	[[ $? = 0 ]] || exec _main
 
-	"$TOMBPATH" passwd -k "$keyfile" | \
+	"$TOMBPATH" passwd -k "$keyfile" "$FLAG" | \
 		_zenprognc "Changing passphrase" "Please wait while your key's passphrase is being changed..."
 
 	_info "Success" "$keyfile passphrase changed successfully!"
@@ -702,8 +526,7 @@ function _setkey {
 	newkey=`_fsel "Choose your tomb's new keyfile"`
 	[[ $? = 0 ]] || exec _main
 
-	_sudo
-    "$TOMBPATH" setkey -k "$newkey" "$keyfile" "$tombname" | \
+	"$TOMBPATH" setkey -k "$newkey" "$keyfile" "$tombname" "$FLAG" | \
 		_zenprognc "Changing key" "Please wait while your tomb's key is being changed..."
 
 	_info "Success" "$tombname keyfile successfully changed! Now using $newkey"
@@ -802,4 +625,14 @@ function _ { _clean } # I like cleaning :)
     _zenwarn "Warning" "Tomb binary is not executable or doesn't exist in the current path. Install it or edit the script to point to the correct path."
 	exit 1 }
 
+if [[ $SWAPOFF = "true" ]]; then
+    FLAG=""
+    SUDOPWD=$(zenity --password --title="sudo swapoff -a")
+    echo "$SUDOPWD" | sudo swapoff -a
+    unset $SUDOPWD
+else
+    FLAG="-f"
+fi
+
 _main
+
