@@ -21,7 +21,7 @@
 # {{{ SETTINGS
 ver="0.9"
 KDFPATH="/usr/libexec/tomb" # Path of your KDF binaries (if you're using them).
-SWAPOFF="false" # Set to "true" to swapoff, or "false" to use -f (force) flag.
+SWAPOFF="true" # Set to "true" to swapoff, or "false" to use -f (force) flag.
 # The ones below should not need changing
 TOMBPATH="$(which tomb)" # Tomb executable's path
 HEXENC="$KDFPATH/tomb-kdb-hexencode"
@@ -183,9 +183,8 @@ function _main {
         "bury" "Hide a key inside a JPEG image" \
         "exhume" "Extract a key from a JPEG image"`
     if [[ "$?" = 1 && $SWAPOFF = "true" ]]; then
-        SUDOPWD=$(zenity --password --title="sudo swapon -a")
-        echo "$SUDOPWD" | sudo swapon -a
-        unset $SUDOPWD
+        zenity --password --title="sudo swapon -a" | sudo swapon -a
+        unset $?
     fi
     eval "_$cmnd"
 }
@@ -627,9 +626,8 @@ function _ { _clean } # I like cleaning :)
 
 if [[ $SWAPOFF = "true" ]]; then
     FLAG=""
-    SUDOPWD=$(zenity --password --title="sudo swapoff -a")
-    echo "$SUDOPWD" | sudo swapoff -a
-    unset $SUDOPWD
+    zenity --password --title="sudo swapoff -a" | sudo swapoff -a
+    unset $?
 else
     FLAG="-f"
 fi
