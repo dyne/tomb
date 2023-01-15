@@ -21,7 +21,7 @@
 # {{{ SETTINGS
 ver="0.9"
 KDFPATH="/usr/libexec/tomb" # Path of your KDF binaries (if you're using them).
-SWAPOFF="true" # Set to "true" to swapoff, or "false" to use -f (force) flag.
+SWAPOFF="false" # Set to "true" to swapoff, or "false" to use -f (force) flag.
 # The ones below should not need changing
 TOMBPATH="$(which tomb)" # Tomb executable's path
 HEXENC="$KDFPATH/tomb-kdb-hexencode"
