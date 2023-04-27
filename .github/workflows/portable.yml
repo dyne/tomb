@@ -55,8 +55,8 @@ jobs:
         brew install fuse-t-sshfs
         brew install veracrypt make bash e2fsprogs wget
         wget https://files.dyne.org/zenroom/nightly/zenroom-osx.command
-        mv zenroom-osx.command /usr/bin/zenroom
-        chmod +x /usr/bin/zenroom
+        mv zenroom-osx.command /usr/local/bin/zenroom
+        chmod +x /usr/local/bin/zenroom
         gmake -C portable
 
     # - name: Test in FreeBSD
