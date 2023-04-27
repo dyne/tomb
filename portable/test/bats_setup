@@ -53,6 +53,15 @@ setup() {
 			user_uid=1000
 			user_gid=1000
 			;;
+		Darwin)
+			f_create=portable_create
+			f_format=freebsd_format
+			f_map=portable_map
+			f_mount=freebsd_mount
+			f_close=freebsd_close
+			user_uid=1001
+			user_gid=1001
+			;;
 		*)
 			>&2 echo "Unsupported system: $system"
 			exit 1
