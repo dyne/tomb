@@ -53,7 +53,7 @@ jobs:
         brew tap macos-fuse-t/homebrew-cask
         brew install fuse-t
         brew install fuse-t-sshfs
-        brew install veracrypt make bash e2fsprogs wget
+        brew install veracrypt make e2fsprogs
         wget https://files.dyne.org/zenroom/nightly/zenroom-osx.command
         mv zenroom-osx.command /usr/local/bin/zenroom
         chmod +x /usr/local/bin/zenroom
