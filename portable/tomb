@@ -108,8 +108,8 @@ _tmp_create() {
 freebsd_mount() {
 	file="$1"
 	mnt="$2"
-	_verbose `veracrypt -l "$file"`
-	loop=`veracrypt -l "$file" | awk '{print $3}'`
+	_verbose `${veracrypt} -l "$file"`
+	loop=`${veracrypt} -l "$file" | awk '{print $3}'`
 	_verbose "fsck $loop"
 	fsck.ext4 -p -C0 "$loop"
 	lklfuse -o type=ext4 "${loop}" "$mnt"
@@ -118,7 +118,7 @@ freebsd_mount() {
 
 freebsd_close() {
 	file="$1"
-	md=`veracrypt -l "$file" | awk '{print $3}'`
+	md=`${veracrypt} -l "$file" | awk '{print $3}'`
 	# umount "$mnt"
 	_verbose "md: $md"
 	mnt=`pgrep -lf "lklfuse.*$md" | awk '{print $6}'`
@@ -133,8 +133,8 @@ freebsd_close() {
 	sleep 1
 	kill -9 $lkl
 	# lkl should have really exited now
-	_verbose "veracrypt -d $file"
-	veracrypt  --text --non-interactive -d "$file"
+	_verbose "${veracrypt} -d $file"
+	${veracrypt}  --text --non-interactive -d "$file"
 	return $?
 }
 # }}}
@@ -144,7 +144,7 @@ freebsd_close() {
 linux_mount() {
 	file="$1"
 	mnt="$2"
-	veralist=`veracrypt -l "$file" | awk '{print($2,":",$3,":",$4)}'`
+	veralist=`${veracrypt} -l "$file" | awk '{print($2,":",$3,":",$4)}'`
 	[ "$veralist" = "" ] && {
 		_error "Cannot mount tomb not yet mapped " "$file"
 		return 1
@@ -170,7 +170,7 @@ posix_create() {
 	size="$2" # size in bytes
 	pim="$3" # any number
 	_verbose "posix_create $file $size $pim"
-	veracrypt --text --non-interactive --stdin \
+	${veracrypt} --text --non-interactive --stdin \
 		 -m nokernelcrypto \
 		 -c "$file" --volume-type normal \
 		 --hash sha512 --encryption serpent-aes \
@@ -181,7 +181,7 @@ posix_create() {
 
 posix_format() {
 	file="$1"
-	loop=`veracrypt -l "$file" | awk '{print $3}'`
+	loop=`${veracrypt} -l "$file" | awk '{print $3}'`
 	_verbose "posix_format: ${loop}"
 	mkfs.ext4 -L "`basename $file`" "$loop" # -E root_owner="${user_uid}:${user_gid}" "$loop"
 	return $?
@@ -192,7 +192,7 @@ posix_map() {
 	file="$1"
 	pim="$2"
 	_verbose "posix_map $file $pim"
-	veracrypt --text --non-interactive --stdin \
+	${veracrypt} --text --non-interactive --stdin \
 			  --protect-hidden no -m nokernelcrypto \
 			  -k '' --pim "$pim" --filesystem none \
 			  "$file"
@@ -202,7 +202,7 @@ posix_map() {
 posix_close() {
 	file="$1"
 	_verbose "posix_close $file"
-	veracrypt --text --non-interactive -d "$file"
+	${veracrypt} --text --non-interactive -d "$file"
 	return $?
 }
 # }}}
@@ -215,6 +215,7 @@ format=""
 map=""
 mount=""
 close=""
+veracrypt="veracrypt"
 
 tomb_init() {
 	system="`uname -s`"
@@ -244,6 +245,7 @@ format=posix_format
 map=posix_map
 mount=freebsd_mount
 close=freebsd_close
+veracrypt=/Applications/Veracrypt.app/Contents/MacOS/Veracrypt
 EOF
 			;;
 		*)
@@ -404,7 +406,7 @@ EOF
 		fi
 		;;
 	list)
-		veracrypt -l
+		${veracrypt} -l
 		;;
 esac
 # }}}
