@@ -237,6 +237,15 @@ mount=linux_mount
 close=posix_close
 EOF
 			;;
+		Darwin)
+cat <<EOF
+create=posix_create
+format=posix_format
+map=posix_map
+mount=freebsd_mount
+close=freebsd_close
+EOF
+			;;
 		*)
 			_failure "Unsupported system: %s" "$system"
 	esac
