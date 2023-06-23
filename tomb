@@ -1014,8 +1014,6 @@ _ensure_dependencies() {
 	command -v lsof 1>/dev/null 2>/dev/null || LSOF=0
 	# Check for steghide
 	command -v steghide 1>/dev/null 2>/dev/null || STEGHIDE=0
-	# Check for python2
-	command -v python2 -V 1>/dev/null 2>/dev/null || PYTHON2=0
 	# Check for cloakify
 	command -v cloakify 1>/dev/null 2>/dev/null || CLOAKIFY=0
 	# Check for decloakify
