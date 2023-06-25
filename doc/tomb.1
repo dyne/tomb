@@ -1,4 +1,4 @@
-.TH tomb 1 "Nov 21, 2022" "tomb"
+.TH tomb 1 "Jun 25, 2023" "tomb"
 
 .SH NAME
 Tomb \- the Crypto Undertaker
@@ -292,8 +292,8 @@ Default is \fIpbkdf2\fR.
 .B
 .IP "--kdfmem \fI<memory>\fR"
 In case of \fIargon2\fR KDF algorithm, this value specifies the size of RAM
-used: it consists of a number which is the elevated power of two in bytes.
-Default is 18 which is 262 MiB (2^18 bytes).
+used: it consists of a number which is the elevated power of two in kilobytes.
+Default is 18 which is 250 MiB (2^18 = 262,144 kilobytes).
 .B
 .IP "--sudo \fI<executable>\fR"
 Select a different tool than sudo for privilege escalation.
