@@ -19,7 +19,7 @@
 # along with this source code. If not, see <http://www.gnu.org/licenses/>.
 
 # {{{ SETTINGS
-ver="0.9"
+ver="0.9.1"
 KDFPATH="/usr/libexec/tomb" # Path of your KDF binaries (if you're using them).
 SWAPOFF="false" # Set to "true" to swapoff, or "false" to use -f (force) flag.
 # The ones below should not need changing
@@ -45,21 +45,22 @@ echo -e "$ICONB64" | base64 --decode > $MONMORT
 # }}}
 
 # {{{ Zenity dialogs
+Icon="--window-icon="$MONMORT""
 function _zenques {
 	zenity \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--question \
 		--text="$1"
 }
 function _fsel {
 	zenity \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--file-selection \
 		--title="$1"
 }
 function _fsave {
 	zenity \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--file-selection \
 		--save \
 		--title="$1" \
@@ -67,10 +68,10 @@ function _fsave {
 }
 function _zenwarn {
 	zenity \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--warning \
-		--title="$1" \
-		--text="$2"
+		--title="Warning" \
+		--text="$1"
 }
 function _info {
 	which notify-send > /dev/null
@@ -82,28 +83,28 @@ function _info {
 }
 function _zenotif {
 	zenity \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--notification \
 		--title="$1" \
 		--text="$2"
 }
 function _zeninfo {
 	zenity \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--info \
 		--title="$1" \
 		--text="$2"
 }
 function _zenerr {
 	zenity \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--error \
 		--title="$1" \
 		--text="$2"
 }
 function _zenprog {
 	zenity \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--progress \
 		--auto-close \
 		--pulsate \
@@ -112,7 +113,7 @@ function _zenprog {
 }
 function _zenprognc {
 	zenity \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--progress \
 		--auto-close \
 		--no-cancel \
@@ -122,7 +123,7 @@ function _zenprognc {
 }
 function _zenentry {
 	zenity \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--entry \
 		--title="$1" \
 		--text="$2" \
@@ -157,7 +158,7 @@ function _clean {
 function _main {
 	_clean
 	cmnd=`zenity \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--title="gtomb" \
 		--width=400 \
 		--height=445 \
@@ -217,7 +218,7 @@ function _dig {
 		exec _main
 	fi
 
-	[[ $res = 0 ]] || { _zenwarn "Warning" "Tomb digging canceled." ; exec _main }
+	[[ $res = 0 ]] || { _zenwarn "Tomb digging cancelled." ; exec _main }
 
 	"$TOMBPATH" dig -s "$tombsize" "$tombname" | \
 		_zenprog "Digging new tomb" "Please wait while your tomb is being dug..." &
@@ -231,10 +232,12 @@ function _dig {
 
 	[[ -n "$PID_DD" && -z "$PID_ZEN" ]] && {
 		kill -9 $PID_DD
-		_zenwarn "Warning" "Tomb digging cancelled."
+		_zenwarn "Tomb digging cancelled."
 		rm -f "$tombname"
 		exec _main
 	}
+	
+	wait
 
 	_info "Success" "Your tomb has been dug in $tombname"
 	exec _main
@@ -250,13 +253,13 @@ function _forge {
 		_zenerr "Error" "This key already exists. I am not overwriting."
 		exec _main
 	elif [[ -z $keyfile ]]; then
-		_info "gtomb" "Canceled"
+		_info "gtomb" "Cancelled"
 		exec _main
 	fi
 
 	kdf=""
 	kdfiter=""
-	if [[ -x $HEXENC ]] && [[ -x $GENSALT ]] && [[ -x $GETITER ]] && [[ -x $PBKDF ]]; then
+	if [[ -x $GENSALT ]] && [[ -x $GETITER ]] && [[ -x $PBKDF ]]; then
 		_zenques "Do you want to use KDF? (Generates passwords armored against dictionary attacks)"
 		if [[ $? == "0" ]]; then
 			kdf="--kdf"
@@ -268,7 +271,7 @@ this key is used:" "2"`
 				_zenerr "Error" "Please choose a valid number."
 				exec _main
 			elif [[ -z $kdfiter ]]; then
-				_info "gtomb" "Canceled"
+				_info "gtomb" "Cancelled"
 				exec _main
 			fi
 		fi
@@ -290,10 +293,12 @@ You can move your mouse around and use your computer to speed up the process." &
 	done
 	[[ -n "$PID_DD"  && -z "$PID_ZEN" ]] && {
 		kill -9 $PID_DD
-		_zenwarn "Warning" "Forging cancelled."
+		_zenwarn "Forging cancelled."
 		rm -f $keyfile
 		exec _main
 	}
+	
+	wait
 
 	_info "Success" "Your key is now forged in $keyfile"
 	exec _main
@@ -312,6 +317,9 @@ function _lock {
 
 	"$TOMBPATH" lock "$tombname" -k "$keyfile" | \
 		_zenprognc "Locking your tomb" "Please wait while your tomb is being locked..."
+	
+	wait
+	
 	_info "Success" "Your tomb is now locked."
 	exec _main
 }
@@ -326,6 +334,9 @@ function _open {
 	[[ $? = 0 ]] || exec _main
 
 	"$TOMBPATH" open "$tombname" -k "$keyfile" "$FLAG"
+	
+	wait
+	
 	_info "Success" "Your tomb is now open."
 	exec _main
 }
@@ -339,7 +350,7 @@ function _list {
 		sed 's/.*\/\([^\/]*\)$/\1\n &/' | \
 		zenity \
 			--title="Currently open tombs" \
-			--window-icon="$MONMORT" \
+			$Icon \
 			--width=400 --height=380 --list \
 			--separator=" & " \
 			--text="Here are your open tombs" \
@@ -352,7 +363,7 @@ function _list {
 
 	listchoice=`zenity \
 		--title="Choose action" \
-		--window-icon="$MONMORT" \
+		$Icon \
 		--width=400 --height=380 --list \
 		--separator=" & " \
 		--text="What do you want to do with this tomb?" \
@@ -428,7 +439,7 @@ function _close {
 		sed 's/.*\/\([^\/]*\)$/\1\n &/' | \
 		zenity \
 			--title="Choose a tomb to close" \
-			--window-icon="$MONMORT" \
+			$Icon \
 			--width=640 --height=380 --list \
 			--separator=" & " \
 			--column=Tomb \
@@ -452,7 +463,7 @@ function _slam {
 		sed 's/.*\/\([^\/]*\)$/\1\n &/' | \
 		zenity \
 			--title="Choose a tomb to slam" \
-			--window-icon="$MONMORT" \
+			$Icon \
 			--width=640 --height=380 --list \
 			--separator=" & " \
 			--column=Tomb \
@@ -473,7 +484,7 @@ function _resize {
 	res=$?
 	_zenques "Is your tomb closed?"
 
-	[[ $? = 0 ]] || { _zenwarn "gtomb" "Please close the tomb before resizing." ; exec _main }
+	[[ $? = 0 ]] || { _zenwarn "Please close the tomb before resizing." ; exec _main }
 
 	[[ $res = 0 ]] || exec _main
 
@@ -535,7 +546,7 @@ function _setkey {
 
 # {{{ engrave - generate QR code of a key
 function _engrave {
-	which qrencode || _zenwarn "Warning" "qrencode is not installed. Install it and try again"
+	which qrencode || _zenwarn "qrencode is not installed. Install it and try again."
 	keyfile=`_fsel "Choose a keyfile to engrave"`
 	[[ $? = 0 ]] || exec _main
 
@@ -552,7 +563,7 @@ function _engrave {
 
 # {{{ bury - hide a keyfile in a JPEG image
 function _bury {
-	which steghide || _zenwarn "Warning" "steghide is not installed. Install it and try again"
+	which steghide || _zenwarn "steghide is not installed. Install it and try again."
 	keyfile=`_fsel "Choose keyfile"`
 	[[ $? = 0 ]] || exec _main
 
@@ -567,7 +578,7 @@ function _bury {
 
 # {{{ exhume - extract keyfile from JPEG
 function _exhume {
-	which steghide || _zenwarn "Warning" "steghide is not installed. Install it and try again"
+	which steghide || _zenwarn "steghide is not installed. Install it and try again."
 	jpegfile=`_fsel "Choose JPEG file"`
 	[[ $? = 0 ]] || exec _main
 
@@ -582,7 +593,7 @@ function _exhume {
 
 # {{{ index - index the contents of open tombs
 function _index {
-	which locate || _zenwarn "Warning" "mlocate is not installed. Install it and try again"
+	which locate || _zenwarn "mlocate is not installed. Install it and try again."
 	"$TOMBPATH" index | _zenprognc "Indexing" "Please wait while the open tombs are being indexed..."
 	_info "Success" "Tombs indexed!"
 	exec _main
@@ -621,7 +632,7 @@ function _searchstring {
 function _ { _clean } # I like cleaning :)
 
 [[ -x $TOMBPATH ]] || {
-	_zenwarn "Warning" "Tomb binary is not executable or doesn't exist in the current path. Install it or edit the script to point to the correct path."
+	_zenwarn "Tomb binary is not executable or doesn't exist in the current path. Install it or edit the script to point to the correct path."
 	exit 1 }
 
 if [[ $SWAPOFF = "true" ]]; then
