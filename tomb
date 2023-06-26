@@ -2813,13 +2813,13 @@ BEGIN { }
 # $1 is optional, to specify a tomb
 index_tombs() {
 	{ command -v updatedb 1>/dev/null 2>/dev/null } || {
-		_failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
+		_failure "Cannot index tombs on this system: updatedb (mlocate/plocate) not installed." }
 
 	updatedbver=`updatedb --version | grep '^updatedb'`
 	[[ "$updatedbver" =~ "GNU findutils" ]] && {
 		_warning "Cannot use GNU findutils for index/search commands." }
-	[[ "$updatedbver" =~ "mlocate" ]] || {
-		_failure "Index command needs 'mlocate' to be installed." }
+	[[ "$updatedbver" =~ "locate" ]] || {
+		_failure "Index command needs 'mlocate/plocate' to be installed." }
 
 	_verbose "$updatedbver"
 
@@ -2930,13 +2930,13 @@ EOF
 
 search_tombs() {
 	{ command -v locate 1>/dev/null 2>/dev/null } || {
-		_failure "Cannot index tombs on this system: updatedb (mlocate) not installed." }
+		_failure "Cannot index tombs on this system: updatedb (mlocate/plocate) not installed." }
 
 	updatedbver=`updatedb --version | grep '^updatedb'`
 	[[ "$updatedbver" =~ "GNU findutils" ]] && {
 		_warning "Cannot use GNU findutils for index/search commands." }
-	[[ "$updatedbver" =~ "mlocate" ]] || {
-		_failure "Index command needs 'mlocate' to be installed." }
+	[[ "$updatedbver" =~ "locate" ]] || {
+		_failure "Index command needs 'mlocate/plocate' to be installed." }
 
 	_verbose "$updatedbver"
 
@@ -2952,7 +2952,7 @@ search_tombs() {
 		tombname=${t[(ws:;:)5]}
 		tombmount="${t[(ws:;:)2]}"
 		[[ -r "${tombmount}/.updatedb" ]] && {
-			# Use mlocate to search hits on filenames
+			# Use mlocate/plocate to search hits on filenames
 			_message "Searching filenames in tomb ::1 tomb name::" $tombname
 			locate -d "${tombmount}/.updatedb" -e -i "${(f)@}"
 			_message "Matches found: ::1 matches::" \
