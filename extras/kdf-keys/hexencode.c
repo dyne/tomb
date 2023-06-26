@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		while( (read_bytes=fread(buf, sizeof(char), 2, stdin)) != 0) {
 			if(read_bytes == 1) buf[1]='\0';
-			sscanf(buf, "%x", &c);
+			sscanf(buf, "%s", &c);
 			printf("%c", c);
 		}
 		return 0;
