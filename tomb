@@ -786,7 +786,7 @@ usage() {
 	echo
 	[[ $QRENCODE == 1 ]] && {
 		_print " // Backup on paper:"
-		_print " engrave makes a QR code of a KEY to be saved on paper"
+		_print " engrave      makes a QR code of a KEY to be saved on paper"
 		echo
 	}
 	[[ $STEGHIDE == 1 || $CLOAKIFY == 1 || $DECLOAKIFY == 1 ]] && {
