@@ -1,15 +1,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
-"PO-Revision-Date: 2022-06-27 13:20+0000\n"
-"Last-Translator: Alex <alexandre@pujol.io>\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2023-06-27 13:11-0300\n"
+"Last-Translator: Daniel Dias Rodrigues <danieldiasr@gmail.com>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/tomb/tomb/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 4.13.1-dev\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -154,15 +155,15 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:612
 msgid "Syntax: tomb [options] command [arguments]"
-msgstr "Syntaxe : tomb [options] commande [arguments]"
+msgstr "Syntaxe: tomb [options] commande [arguments]"
 
 #: tomb:Commandline interaction:usage:614
 msgid "Commands:"
-msgstr "Commandes :"
+msgstr "Commandes:"
 
 #: tomb:Commandline interaction:usage:616
 msgid " // Creation:"
-msgstr " // Création :"
+msgstr " // Création:"
 
 #: tomb:Commandline interaction:usage:618
 msgid " forge   create a new KEY file and set its password"
@@ -176,7 +177,7 @@ msgstr " lock    (vérouiller)    Vérouiller une TOMBE avec une CLÉ"
 
 #: tomb:Commandline interaction:usage:621
 msgid " // Operations on tombs:"
-msgstr " // Opérations sur les tombes :"
+msgstr " // Opérations sur les tombes:"
 
 #: tomb:Commandline interaction:usage:603
 msgid " open    open an existing TOMB"
@@ -207,8 +208,8 @@ msgstr ""
 #: tomb:Commandline interaction:usage:627
 msgid " slam    slam a TOMB killing all programs using it"
 msgstr ""
-" slam           Referme une tombe brutalement, tuant tous les programmes qui "
-"l'utilisent"
+" slam    (claquer)       Referme une tombe brutalement, tuant tous les "
+"programmes qui l'utilisent"
 
 #: tomb:Commandline interaction:usage:629
 msgid " resize  resize a TOMB to a new size -s (can only grow)"
@@ -216,7 +217,7 @@ msgstr " resize  (élargir)       Augmenter la taille d'une TOMBE à -s Mo"
 
 #: tomb:Commandline interaction:usage:632
 msgid " // Operations on keys:"
-msgstr " // Opération sur les clés :"
+msgstr " // Opération sur les clés:"
 
 #: tomb:Commandline interaction:usage:633
 msgid " passwd  change the password of a KEY (needs old pass)"
@@ -231,7 +232,7 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:637
 msgid " // Backup on paper:"
-msgstr " // Sauvegarde sur papier :"
+msgstr " // Sauvegarde sur papier:"
 
 #: tomb:Commandline interaction:usage:638
 msgid " engrave makes a QR code of a KEY to be saved on paper"
@@ -241,19 +242,23 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:642
 msgid " // Steganography:"
-msgstr " // Stéganographie :"
+msgstr " // Stéganographie:"
 
 #: tomb:Commandline interaction:usage:643
 msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
-msgstr " bury    Cache une CLÉ dans une image JPEG (utilisable avec -k)"
+msgstr ""
+" bury    (enterrer)      Cache une CLÉ dans une image JPEG (utilisable avec -"
+"k)"
 
 #: tomb:Commandline interaction:usage:644
 msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
-msgstr " exhume  Extraire une CLÉ d'une image JPEG (affiché sur stdout)"
+msgstr ""
+" exhume  (exhumer)       Extraire une CLÉ d'une image JPEG (affiché sur "
+"stdout)"
 
 #: tomb:Commandline interaction:usage:647
 msgid "Options:"
-msgstr "Options :"
+msgstr "Options:"
 
 #: tomb:Commandline interaction:usage:630
 msgid " -s     size of the tomb file when creating/resizing one (in MB)"
@@ -1170,8 +1175,8 @@ msgstr ""
 msgid ""
 "The create command is deprecated, please use dig, forge and lock instead."
 msgstr ""
-"La commande \"create\" est obsolète : il convient à présent d'utiliser \"dig"
-"\", \"forge\", et \"lock\"."
+"La commande \"create\" est obsolète : il convient à présent d'utiliser "
+"\"dig\", \"forge\", et \"lock\"."
 
 #: tomb:Main routine:main:2706
 msgid "For more informations see Tomb's manual page (man tomb)."

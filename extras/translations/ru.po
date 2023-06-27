@@ -1,16 +1,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
-"PO-Revision-Date: 2022-05-18 19:14+0000\n"
-"Last-Translator: AHOHNMYC <lqwh2h2cwa@protonmail.com>\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2023-06-27 13:00-0300\n"
+"Last-Translator: Daniel Dias Rodrigues <danieldiasr@gmail.com>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/tomb/tomb/ru/>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 4.13-dev\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -156,8 +156,7 @@ msgstr " lock    установить замок на ГРОБНИЦУ, испо
 msgid " // Operations on tombs:"
 msgstr " // Операции над гробницами:"
 
-#: tomb:Commandline
-#: interaction:usage:603
+#: tomb:Commandline interaction:usage:603
 msgid " open    open an existing TOMB"
 msgstr " open    открыть существующую ГРОБНИЦУ "
 
@@ -211,7 +210,7 @@ msgstr " // Стеганография:"
 
 #: tomb:Commandline interaction:usage:643
 msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
-msgstr " bury   спрятать КЛЮЧ внутри изображения JPEG (для использования с -k)"
+msgstr " bury    спрятать КЛЮЧ внутри изображения JPEG (для использования с -k)"
 
 #: tomb:Commandline interaction:usage:644
 msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
@@ -221,8 +220,7 @@ msgstr " exhume  извлечь КЛЮЧ из изображения JPEG (вы�
 msgid "Options:"
 msgstr "Опции:"
 
-#: tomb:Commandline
-#: interaction:usage:630
+#: tomb:Commandline interaction:usage:630
 msgid " -s     size of the tomb file when creating/resizing one (in MB)"
 msgstr " -s     размер файла гробницы при создании/изменении размера (в Мб) "
 
@@ -272,9 +270,7 @@ msgstr "Пожалуйста, сообщайте о найденных ошиб�
 
 #: tomb:Commandline interaction:_ensure_dependencies:800
 msgid "Missing required dependency ::1 command::.  Please install it."
-msgstr ""
-"Отсутствует необходимая зависимость: ::1 command::.  Пожалуйста, установите "
-"ее."
+msgstr "Отсутствует необходимая зависимость: ::1 command::.  Пожалуйста, установите ее."
 
 #: tomb:Key operations:is_valid_key:837
 msgid "cleartext key from stdin selected: this is unsafe."
@@ -371,9 +367,7 @@ msgstr "Вы указали пустой пароль, так нельзя."
 #: tomb:Key operations:gen_key:1167
 #, fuzzy
 msgid "Wrong argument for --kdf: must be an integer number (iteration seconds)."
-msgstr ""
-"Неверный аргумент для --kdf: должно быть указано целое число (секунд "
-"итерации)."
+msgstr "Неверный аргумент для --kdf: должно быть указано целое число (секунд итерации)."
 
 #: tomb:Key operations:gen_key:1175
 msgid "generating salt"
@@ -745,9 +739,7 @@ msgstr "Шифр \"::1 cipher::\", режим \"::2 mode::\", хеш \"::3 hash:
 
 #: tomb:Open:mount_tomb:1781
 msgid "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
-msgstr ""
-"Для этой гробницы разрешено использование нескольких ключей. Будь осторожен: "
-"там может быть задняя дверь."
+msgstr "Для этой гробницы разрешено использование нескольких ключей. Будь осторожен: там может быть задняя дверь."
 
 #: tomb:Open:mount_tomb:1805
 msgid "Failure mounting the encrypted file."
@@ -1046,16 +1038,16 @@ msgid "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::"
 msgstr "Не распознана опция ::1 arg:: для подкоманды ::2 subcommand::"
 
 #: tomb:Main routine:main:2671
-msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\n"
+msgid ""
+"You specified option ::1 option::, which is DANGEROUS and should only be used for testing\n"
 "If you really want so, add --unsafe"
-msgstr "Вы указали опцию ::1 option::, которая ОПАСНА и должна быть использована только для тестирования\n"
+msgstr ""
+"Вы указали опцию ::1 option::, которая ОПАСНА и должна быть использована только для тестирования\n"
 "Если Вы и правда этого хотите, добавьте параметр --unsafe"
 
 #: tomb:Main routine:main:2705
 msgid "The create command is deprecated, please use dig, forge and lock instead."
-msgstr ""
-"Команда create устарела, пожалуйста, используйте dig, forge и lock вместо "
-"неё."
+msgstr "Команда create устарела, пожалуйста, используйте dig, forge и lock вместо неё."
 
 #: tomb:Main routine:main:2706
 msgid "For more informations see Tomb's manual page (man tomb)."
@@ -1135,9 +1127,7 @@ msgstr " dig     создать новый файл ГРОБНИЦЫ разме�
 
 #: tomb:Commandline interaction:usage:622
 msgid " open    open an existing TOMB (-k KEY file or - for stdin)"
-msgstr ""
-" open    открыть ГРОБНИЦУ (-k ФАЙЛ_КЛЮЧА или - для использования "
-"стандартного ввода)"
+msgstr " open    открыть ГРОБНИЦУ (-k ФАЙЛ_КЛЮЧА или - для использования стандартного ввода)"
 
 #: tomb:Commandline interaction:usage:649
 msgid " -s     size of the tomb file when creating/resizing one (in MiB)"
@@ -1149,9 +1139,7 @@ msgstr "Разблокировка защиты ключа KDF (::1 kdf::)"
 
 #: tomb:Key operations:gen_key:1168
 msgid "Depending on the speed of machines using this tomb, use 1 to 10, or more"
-msgstr ""
-"Используйте от 1 до 10 или более, в зависимости от скорости машин, "
-"использующих эту гробницу"
+msgstr "Используйте от 1 до 10 или более, в зависимости от скорости машин, использующих эту гробницу"
 
 #: tomb:Key operations:gen_key:1174
 msgid "Using KDF, iteration time: ::1 microseconds::"
@@ -1176,8 +1164,7 @@ msgstr "Формат привязки bind-hooks: local/to/tomb local/to/$HOME. 
 
 #: tomb:Resize:resize_tomb:2323
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
-msgstr ""
-"Приказано изменить размеры гробницы ::1 tomb name:: на ::2 size:: мебибайт."
+msgstr "Приказано изменить размеры гробницы ::1 tomb name:: на ::2 size:: мебибайт."
 
 #: tomb:Resize:resize_tomb:2367
 msgid "Tomb seems resized already, operating filesystem stretch"
