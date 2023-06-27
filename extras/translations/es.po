@@ -1,15 +1,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
-"PO-Revision-Date: 2022-04-04 10:06+0000\n"
-"Last-Translator: Francisco Serrador <fserrador@gmail.com>\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2023-06-27 13:14-0300\n"
+"Last-Translator: Daniel Dias Rodrigues <danieldiasr@gmail.com>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/tomb/tomb/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.12-dev\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -49,8 +50,7 @@ msgstr "Esto genera un riesgo en la seguridad."
 
 #: tomb:Safety functions:_ensure_safe_swap:333
 msgid "You can deactivate all swap partitions using the command:"
-msgstr ""
-"Puedes desactivar todas las particiones swap usando el siguiente instrucción:"
+msgstr "Puedes desactivar todas las particiones swap usando el siguiente instrucción:"
 
 #: tomb:Safety functions:_ensure_safe_swap:334
 msgid " swapoff -a"
@@ -126,8 +126,7 @@ msgstr "No es posible montar volúmenes en bucle en esta máquina, este error"
 
 #: tomb:Safety functions:lo_mount:571
 msgid "often occurs on VPS and kernels that don't provide the loop module."
-msgstr ""
-"ocurre frecuentemente en VPS y núcleos que no proporcionen el módulo 'loop'."
+msgstr "ocurre frecuentemente en VPS y núcleos que no proporcionen el módulo 'loop'."
 
 #: tomb:Safety functions:lo_mount:572
 msgid "It is impossible to use Tomb on this machine at this conditions."
@@ -147,7 +146,7 @@ msgstr " // Creación:"
 
 #: tomb:Commandline interaction:usage:618
 msgid " forge   create a new KEY file and set its password"
-msgstr " forge    crear un fichero LLAVE nuevo y fija su contraseña"
+msgstr " forge   crear un fichero LLAVE nuevo y fija su contraseña"
 
 #: tomb:Commandline interaction:usage:619
 msgid " lock    installs a lock on a TOMB to use it with KEY"
@@ -157,8 +156,7 @@ msgstr " lock    instala un candado en una TUMBA para usarlo con la LLAVE"
 msgid " // Operations on tombs:"
 msgstr " // Operaciones en tumbas:"
 
-#: tomb:Commandline
-#: interaction:usage:603
+#: tomb:Commandline interaction:usage:603
 msgid " open    open an existing TOMB"
 msgstr " open    abrir una TUMBA existente"
 
@@ -212,18 +210,17 @@ msgstr " // Esteganografía:"
 
 #: tomb:Commandline interaction:usage:643
 msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
-msgstr " bury   esconde la LLAVE dentro de una imagen JPEG (para usarla con -k)"
+msgstr " bury    esconde la LLAVE dentro de una imagen JPEG (para usarla con -k)"
 
 #: tomb:Commandline interaction:usage:644
 msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
-msgstr " exhume extraer una LLAVE de una imagen JPEG (escribe en stdout)"
+msgstr " exhume  extraer una LLAVE de una imagen JPEG (escribe en stdout)"
 
 #: tomb:Commandline interaction:usage:647
 msgid "Options:"
 msgstr "Opciones:"
 
-#: tomb:Commandline
-#: interaction:usage:630
+#: tomb:Commandline interaction:usage:630
 msgid " -s     size of the tomb file when creating/resizing one (in MB)"
 msgstr " -s     tamaño de la tumba al crearla o cambiar su tamaño (en MB)"
 
@@ -237,7 +234,7 @@ msgstr " -n     no procesar los hooks encontrados en la tumba"
 
 #: tomb:Commandline interaction:usage:652
 msgid " -o     options passed to commands: open, lock, forge (see man)"
-msgstr " -o    opciones pasadas a instrucciones: abre, bloquea, forja (vea man)"
+msgstr " -o     opciones pasadas a instrucciones: abre, bloquea, forja (vea man)"
 
 #: tomb:Commandline interaction:usage:653
 msgid " -f     force operation (i.e. even if swap is active)"
@@ -973,9 +970,7 @@ msgstr "Por favor, especifica una tumba existente."
 
 #: tomb:Close:umount_tomb:2449
 msgid "Slamming tomb ::1 tomb name:: mounted on ::2 mount point::"
-msgstr ""
-"Cerrando de un portazo la tumba ::1 nombre:: montada en ::2 punto de "
-"montaje::"
+msgstr "Cerrando de un portazo la tumba ::1 nombre:: montada en ::2 punto de montaje::"
 
 #: tomb:Close:umount_tomb:2451
 msgid "Kill all processes busy inside the tomb."
@@ -1042,9 +1037,11 @@ msgid "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::"
 msgstr "No se reconoce la opción ::1 argumento:: para el subcomando ::2 subcomando::"
 
 #: tomb:Main routine:main:2671
-msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\n"
+msgid ""
+"You specified option ::1 option::, which is DANGEROUS and should only be used for testing\n"
 "If you really want so, add --unsafe"
-msgstr "Has especificado la opción ::1 opción::, que es PELIGROSA y debería usarse sólo en testeo\n"
+msgstr ""
+"Has especificado la opción ::1 opción::, que es PELIGROSA y debería usarse sólo en testeo\n"
 "Si estás seguro, añade --unsafe"
 
 #: tomb:Main routine:main:2705
@@ -1161,13 +1158,11 @@ msgstr "formato del mapa bind-hooks: local/to/tomb local/to/$HOME"
 
 #: tomb:Open:exec_safe_bind_hooks:1948
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.  Rolling back"
-msgstr ""
-"Formato del mapa bind-hooks: local/para/tomb local/para/$HOME.  Retroceder"
+msgstr "Formato del mapa bind-hooks: local/para/tomb local/para/$HOME.  Retroceder"
 
 #: tomb:Resize:resize_tomb:2323
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
-msgstr ""
-"Instruido para redimensionar tumba ::1 tumba name:: a ::2 tamaño:: mebibytes."
+msgstr "Instruido para redimensionar tumba ::1 tumba name:: a ::2 tamaño:: mebibytes."
 
 #: tomb:Resize:resize_tomb:2367
 msgid "Tomb seems resized already, operating filesystem stretch"

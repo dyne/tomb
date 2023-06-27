@@ -1,11 +1,15 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: Tomb\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Daniel Dias Rodrigues <danieldiasr@gmail.com>\n"
+"Language-Team: \n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: POEditor.com\n"
-"Project-Id-Version: Tomb\n"
-"Language: it\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -49,7 +53,7 @@ msgstr "Puoi disattivare tutte le partizioni di swap usando il comando:"
 
 #: tomb:Safety functions:_ensure_safe_swap:334
 msgid " swapoff -a"
-msgstr "␣swapoff -a"
+msgstr " swapoff -a"
 
 #: tomb:Safety functions:_ensure_safe_swap:336
 msgid "But if you want to proceed like this, use the -f (force) flag."
@@ -141,64 +145,63 @@ msgstr " // Creazione:"
 
 #: tomb:Commandline interaction:usage:618
 msgid " forge   create a new KEY file and set its password"
-msgstr "␣forge   crea un nuovo KEY file e imposta la sua password "
+msgstr " forge   crea un nuovo KEY file e imposta la sua password "
 
 #: tomb:Commandline interaction:usage:619
 msgid " lock    installs a lock on a TOMB to use it with KEY"
-msgstr "␣lock    installa un codice di blocco su un file TOMB da usare con la sua KEY "
+msgstr " lock    installa un codice di blocco su un file TOMB da usare con la sua KEY "
 
 #: tomb:Commandline interaction:usage:621
 msgid " // Operations on tombs:"
-msgstr "␣// Operazioni sui file tomb: "
+msgstr " // Operazioni sui file tomb: "
 
-#: tomb:Commandline
-#: interaction:usage:603
+#: tomb:Commandline interaction:usage:603
 msgid " open    open an existing TOMB"
-msgstr "␣open    apri un file esistente TOMB"
+msgstr " open    apri un file esistente TOMB"
 
 #: tomb:Commandline interaction:usage:623
 msgid " index   update the search indexes of tombs"
-msgstr "␣index  aggiorna gli indici di ricerca dei file tomb"
+msgstr " index   aggiorna gli indici di ricerca dei file tomb"
 
 #: tomb:Commandline interaction:usage:624
 msgid " search  looks for filenames matching text patterns"
-msgstr "␣search  cerca i nomi di file che soddisfano i parametri richiesti"
+msgstr " search  cerca i nomi di file che soddisfano i parametri richiesti"
 
 #: tomb:Commandline interaction:usage:625
 msgid " list    list of open TOMBs and information on them"
-msgstr "␣list    lista dei file TOMB aperti e informazioni su di essi"
+msgstr " list    lista dei file TOMB aperti e informazioni su di essi"
 
 #: tomb:Commandline interaction:usage:626
 msgid " close   close a specific TOMB (or 'all')"
-msgstr "␣close   chiude uno specifico file TOMB (oppure 'all' per chiuderli tutti)"
+msgstr " close   chiude uno specifico file TOMB (oppure 'all' per chiuderli tutti)"
 
 #: tomb:Commandline interaction:usage:627
 msgid " slam    slam a TOMB killing all programs using it"
-msgstr "␣slam    per chiudere in fretta un file TOMB uccidendo tutti i programmi che lo utilizzano"
+msgstr " slam    per chiudere in fretta un file TOMB uccidendo tutti i programmi che lo utilizzano"
 
 #: tomb:Commandline interaction:usage:629
 msgid " resize  resize a TOMB to a new size -s (can only grow)"
-msgstr "␣resize  ingrandilre un file TOMB in una nuova grandezza -s (solo espansione)"
+msgstr " resize  ingrandilre un file TOMB in una nuova grandezza -s (solo espansione)"
 
 #: tomb:Commandline interaction:usage:632
 msgid " // Operations on keys:"
-msgstr "␣// Operazioni sulle chiavi:"
+msgstr " // Operazioni sulle chiavi:"
 
 #: tomb:Commandline interaction:usage:633
 msgid " passwd  change the password of a KEY (needs old pass)"
-msgstr "␣passwd  cambiare la password di una KEY (necessaria la vecchia password) "
+msgstr " passwd  cambiare la password di una KEY (necessaria la vecchia password) "
 
 #: tomb:Commandline interaction:usage:634
 msgid " setkey  change the KEY locking a TOMB (needs old key and pass)"
-msgstr "␣setkey  cambia la KEY che blocca un file TOMB (necessaria la vecchia key e password)"
+msgstr " setkey  cambia la KEY che blocca un file TOMB (necessaria la vecchia key e password)"
 
 #: tomb:Commandline interaction:usage:637
 msgid " // Backup on paper:"
-msgstr "␣// Backup 'su carta':"
+msgstr " // Backup 'su carta':"
 
 #: tomb:Commandline interaction:usage:638
 msgid " engrave makes a QR code of a KEY to be saved on paper"
-msgstr "␣engrave crea un QR CODe di una KEY da stampare su carta"
+msgstr " engrave crea un QR CODe di una KEY da stampare su carta"
 
 #: tomb:Commandline interaction:usage:642
 msgid " // Steganography:"
@@ -206,56 +209,55 @@ msgstr " // Steganografia:"
 
 #: tomb:Commandline interaction:usage:643
 msgid " bury    hide a KEY inside a JPEG image (for use with -k)"
-msgstr "␣bury    nasconde una KEY dentro un'immagine JPEG (da usare con switch -k)"
+msgstr " bury    nasconde una KEY dentro un'immagine JPEG (da usare con switch -k)"
 
 #: tomb:Commandline interaction:usage:644
 msgid " exhume  extract a KEY from a JPEG image (prints to stdout)"
-msgstr "␣exhume  estrae una KEY da un'immagine JPEG (viene visualizzata a video) "
+msgstr " exhume  estrae una KEY da un'immagine JPEG (viene visualizzata a video) "
 
 #: tomb:Commandline interaction:usage:647
 msgid "Options:"
 msgstr "Opzioni:"
 
-#: tomb:Commandline
-#: interaction:usage:630
+#: tomb:Commandline interaction:usage:630
 msgid " -s     size of the tomb file when creating/resizing one (in MB)"
-msgstr "␣-s     misura del file tomb in creazione/espansione (in MB)"
+msgstr " -s     misura del file tomb in creazione/espansione (in MB)"
 
 #: tomb:Commandline interaction:usage:650
 msgid " -k     path to the key to be used ('-k -' to read from stdin)"
-msgstr "␣-k     percorso alla key da utilizzare ('-k -' per leggerla dallo standard input)"
+msgstr " -k     percorso alla key da utilizzare ('-k -' per leggerla dallo standard input)"
 
 #: tomb:Commandline interaction:usage:651
 msgid " -n     don't process the hooks found in tomb"
-msgstr "␣-n     non elaborare i collegamenti trovati in tomb"
+msgstr " -n     non elaborare i collegamenti trovati in tomb"
 
 #: tomb:Commandline interaction:usage:652
 msgid " -o     options passed to commands: open, lock, forge (see man)"
-msgstr "␣-o     opzioni passate ai comandi: open, lock, forge (vedi man page)"
+msgstr " -o     opzioni passate ai comandi: open, lock, forge (vedi man page)"
 
 #: tomb:Commandline interaction:usage:653
 msgid " -f     force operation (i.e. even if swap is active)"
-msgstr "␣-f     forza l'operazione (es. anche se lo swap è attivo)"
+msgstr " -f     forza l'operazione (es. anche se lo swap è attivo)"
 
 #: tomb:Commandline interaction:usage:655
 msgid " --kdf  forge keys armored against dictionary attacks"
-msgstr "␣--kdf  forgia chiavi corazzate contro gli attacchi con dizionari"
+msgstr " --kdf  forgia chiavi corazzate contro gli attacchi con dizionari"
 
 #: tomb:Commandline interaction:usage:659
 msgid " -h     print this help"
-msgstr "␣-h     stampa questo file di aiuto"
+msgstr " -h     stampa questo file di aiuto"
 
 #: tomb:Commandline interaction:usage:660
 msgid " -v     print version, license and list of available ciphers"
-msgstr "␣-v     stampa versione, licenza, e lista dei tipi di cifratura disponibili"
+msgstr " -v     stampa versione, licenza, e lista dei tipi di cifratura disponibili"
 
 #: tomb:Commandline interaction:usage:661
 msgid " -q     run quietly without printing informations"
-msgstr "␣-q     esegue le operazioni senza stampare nulla a video"
+msgstr " -q     esegue le operazioni senza stampare nulla a video"
 
 #: tomb:Commandline interaction:usage:662
 msgid " -D     print debugging information at runtime"
-msgstr "␣-D     mostra le informazioni di debug/runtime"
+msgstr " -D     mostra le informazioni di debug/runtime"
 
 #: tomb:Commandline interaction:usage:664
 msgid "For more informations on Tomb read the manual: man tomb"
@@ -303,7 +305,7 @@ msgstr "Questa operazione richiede di specificare un file chiave usando l'opzion
 
 #: tomb:Key operations:_load_key:894
 msgid "Waiting for the key to be piped from stdin... "
-msgstr "Attendo la key dal pipe di stdin....␣"
+msgstr "Attendo la key dal pipe di stdin.... "
 
 #: tomb:Key operations:_load_key:905
 msgid "Key not found, specify one using -k."
@@ -1034,9 +1036,11 @@ msgid "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::"
 msgstr "Opzione sconosciuta ::1 arg:: per il sotto-comando ::2 subcommand::"
 
 #: tomb:Main routine:main:2671
-msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\n"
+msgid ""
+"You specified option ::1 option::, which is DANGEROUS and should only be used for testing\n"
 "If you really want so, add --unsafe"
-msgstr "Hai specificato l'opzione ::1 option::, che è PERICOLOSA e dovrebbe essere usata solo per test.\n"
+msgstr ""
+"Hai specificato l'opzione ::1 option::, che è PERICOLOSA e dovrebbe essere usata solo per test.\n"
 "Se vuoi veramente farlo, aggiungi lo switch --unsafe"
 
 #: tomb:Main routine:main:2705
@@ -1069,11 +1073,11 @@ msgstr "Tomb ::1 version:: - un forte e gentile becchino per i tuoi segreti"
 
 #: tomb:Main routine:main:2807
 msgid " This is free software: you are free to change and redistribute it"
-msgstr "␣Questo è free software: sei libero di modificarlo e ridistribuirlo"
+msgstr " Questo è free software: sei libero di modificarlo e ridistribuirlo"
 
 #: tomb:Main routine:main:2808
 msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
-msgstr "␣Per i sorgenti aggiornati vai al sito <http://dyne.org/software/tomb>"
+msgstr " Per i sorgenti aggiornati vai al sito <http://dyne.org/software/tomb>"
 
 #: tomb:Main routine:main:2813
 msgid " This source code is distributed in the hope that it will be useful,"
@@ -1125,7 +1129,7 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:649
 msgid " -s     size of the tomb file when creating/resizing one (in MiB)"
-msgstr "␣-s     misura del file tomb in creazione/espansione (in MiB)"
+msgstr " -s     misura del file tomb in creazione/espansione (in MiB)"
 
 #: tomb:Key operations:get_lukskey:988
 msgid "Unlocking KDF key protection (::1 kdf::)"
@@ -1170,4 +1174,3 @@ msgstr ""
 #: tomb:Main routine:main:2806
 msgid " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
 msgstr " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
-
