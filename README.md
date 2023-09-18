@@ -26,7 +26,7 @@ For the instructions on how to get started using Tomb, see [INSTALL](INSTALL.md)
 ![tomb's logo](https://github.com/dyne/Tomb/blob/master/extras/images/monmort.png)
 
 [![Build Status](https://github.com/dyne/tomb/actions/workflows/linux.yml/badge.svg)](https://github.com/dyne/Tomb/actions)
-[![Build Status](https://github.com/dyne/tomb/actions/workflows/portable.yml/badge.svg)](https://github.com/dyne/Tomb/actions)
+<!-- [![Build Status](https://github.com/dyne/tomb/actions/workflows/portable.yml/badge.svg)](https://github.com/dyne/Tomb/actions) -->
 
 # What is Tomb, the crypto undertaker?
 
@@ -44,9 +44,6 @@ At present, Linux Tomb consists of a simple shell script (Zsh) using
 standard filesystem tools (GNU) and the cryptographic API of the Linux
 kernel (cryptsetup and LUKS). It can also produce machine parsable
 output to facilitate its use inside graphical applications.
-
-Starting with the 3.0 release path, also a new [Portable Tomb](portable) script
-is made available (under development) which works on more operating systems beyond Linux based, is written in POSIX shell, has less dependencies and features and is based on [Veracrypt](https://www.veracrypt.fr) instead of LUKS/cryptsetup.
 
 # How does it work?
 
@@ -196,10 +193,9 @@ equivalent standards supported by the Linux kernel.
 Tomb can be used in conjunction with some other software applications,
 some are developed by Dyne.org, but some also by third parties.
 
-It works well inside the Windows Subsystem for Linux starting from the
-Windows 11 release since that supports mounting loopback volumes.
-
-Portable Tomb extends support to Apple/OSX systems and FreeBSD.
+It works well inside the Windows Subsystem for Linux (WSL2) starting
+from the Windows 11 release since that supports mounting loopback
+volumes.
 
 ### Included extra applications
 
@@ -293,8 +289,8 @@ coding style are illustrated in [doc/HACKING.txt](doc/HACKING.txt).
 
 # Licensing
 
-Tomb is Copyright (C) 2007-2022 by the Dyne.org Foundation and
-maintained by [Jaromil](/jaromil). More information on all
+Tomb is Copyright (C) 2007-2023 by the Dyne.org Foundation and
+maintained by [Jaromil](https://github.com/jaromil). More information on all
 the developers involved is found in the [AUTHORS](AUTHORS.md) file.
 
 This source code is free software; you can redistribute it and/or

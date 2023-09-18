@@ -1,11 +1,11 @@
 
 # Portable Tomb :: the crypto undertaker runs everywhere
 
- [![continuous integration tests badge](https://github.com/dyne/tomb/actions/workflows/portable.yml/badge.svg)](https://github.com/dyne/Tomb/actions) test coverage status for portability between Ubuntu-20 and FreeBSD-13.
+ [![continuous integration tests badge](https://github.com/dyne/tomb/actions/workflows/portable.yml/badge.svg)](https://github.com/dyne/Tomb/actions) test coverage status for portability
  
 ## ⚠️ WORK IN PROGRESS 🛠️
 
-This is the portable version of [Tomb](https://github.com/dyne/tomb) using [Veracrypt](https://www.veracrypt.fr) in place of cryptsetup.
+This is the portable version of [Tomb](https://github.com/dyne/tomb)
 
 [![software by Dyne.org](https://files.dyne.org/software_by_dyne.png)](http://www.dyne.org)
 
@@ -13,12 +13,15 @@ This is the portable version of [Tomb](https://github.com/dyne/tomb) using [Vera
 
 Portable tomb achieves direct **interoperable access to tomb volumes** between:
 
-- GNU and Busybox Linux
-- MS/Windows using WSL2
-- Apple/OSX using [MacFUSE](https://osxfuse.github.io/)
-- FreeBSD
+- GNU base Linux (Ubuntu)
+- Busybox based Linux (Alpine)
+- MS/Windows using WSL2 (Ubuntu)
+- FreeBSD (WIP using libluksde)
+- ~~Apple/OSX using [MacFUSE](https://osxfuse.github.io/)~~
 
-Portable tomb reduces dependencies and in particular uses only the **POSIX sh interpreter**.
+After some extensive testing during 2022, __adoption of Veracrypt in portable Tomb has been dropped__ because of unreliability and bad performance.
+
+Portable tomb stays as an experimental branch that aims to reduce dependencies and in particular uses only the **POSIX sh interpreter**.
 
 # Status
 
@@ -36,7 +39,7 @@ The following features will be implemented where possible:
 
 ## Dependencies
 
-- FreeBSD: `fusefs-libs3 fusefs-lkl e2fsprogs util-linux`
+- FreeBSD: `fusefs-libs3 fusefs-lkl e2fsprogs util-linux libluksde`
 - Linux: `fuse3 util-linux`
 - crossplatform [Veracrypt binaries](https://files.dyne.org/tomb3/third-party) console-only
 
@@ -48,7 +51,7 @@ I setup [my own build](https://github.com/jaromil/veracrypt) and provide binary 
 
 # Disclaimer
 
-Tomb is Copyright (C) 2007-2022 by the Dyne.org Foundation and
+Tomb is Copyright (C) 2007-2023 by the Dyne.org Foundation and
 developed by [Jaromil](https://github.com/jaromil).
 
 This source code is free software; you can redistribute it and/or
