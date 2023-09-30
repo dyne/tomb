@@ -72,14 +72,21 @@ privileges to loopback mount, format the tomb (using LUKS and mkfs),
 then set the key in its first LUKS slot. 
 
 .RS
-.nf
 Supported filesystems for \fI--filesystem\fR:
-"ext3"	using operating system defaults
-"ext4"	using operating system defaults
-"btrfs"	for tombs >= 47MB using operating system defaults
-"btrfsmixedmode"	for tombs >=18MB btrfs mixed mode (see mkfs.btrfs(8))
-"ext3maxinodes"	ext3 with a maximum of inodes (for many small files)
-"ext4maxinodes"	ext4 with a maximum of inodes (for many small files)
+.PD 0
+.IP "ext3" 15
+using operating system defaults
+.IP "ext4"
+using operating system defaults
+.IP "btrfs"
+for tombs >= 47MB using operating system defaults
+.IP "btrfsmixedmode"
+for tombs >=18MB btrfs mixed mode (see mkfs.btrfs(8))
+.IP "ext3maxinodes"
+ext3 with a maximum of inodes (for many small files)
+.IP "ext4maxinodes"
+ext4 with a maximum of inodes (for many small files)
+.PD
 .RE
 
 .B
