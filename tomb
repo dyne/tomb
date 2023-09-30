@@ -2162,13 +2162,13 @@ lock_tomb_with_key() {
 			ext3|ext4) ;;
 			ext3maxinodes|ext4maxinodes) ;;
 			btrfs)
-				if [[ $tombsize < 49283072 ]]; then
+				if [[ $tombsize -lt 49283072 ]]; then
 					_failure "Filesystem ::1 filesystem:: not supported on tombs smaller than 47MB." \
 						$filesystem
 				fi
 				;;
 			btrfsmixedmode)
-				if [[ $tombsize < 18874368 ]]; then
+				if [[ $tombsize -lt 18874368 ]]; then
 					_failure "Filesystem ::1 filesystem:: not supported on tombs smaller than 18MB." \
 						$filesystem
 				fi
