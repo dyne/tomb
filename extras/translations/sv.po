@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb\n"
-"PO-Revision-Date: 2019-10-18 12:53+0000\n"
-"Last-Translator: Mattias Münster <mattiasmun@gmail.com>\n"
+"PO-Revision-Date: 2023-12-05 09:05+0000\n"
+"Last-Translator: bittin1ddc447d824349b2 <bittin@reimu.nl>\n"
 "Language-Team: Swedish <https://hosted.weblate.org/projects/tomb/tomb/sv/>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.9.1-dev\n"
+"X-Generator: Weblate 5.3-dev\n"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -1044,6 +1044,9 @@ msgstr "::1 arg:: är ett okänt alternativ för kommando ::2 subcommand::"
 msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\n"
 "If you really want so, add --unsafe"
 msgstr ""
+"Du angav alternativ ::1 alternativ::, vilket är FARLIGT och bör endast "
+"användas för testning\n"
+"Om du verkligen vill det, lägg till --unsafe"
 
 #: tomb:Main routine:main:2705
 msgid "The create command is deprecated, please use dig, forge and lock instead."
@@ -1115,19 +1118,19 @@ msgstr "Försök med -h för hjälp."
 
 #: tomb:Safety functions:_ensure_safe_swap:330
 msgid "The undertaker found that all swap partitions are encrypted. Good."
-msgstr ""
+msgstr "The undertaker upptäckte att alla swap-partitioner är krypterade. Bra."
 
 #: tomb:Safety functions:_ensure_safe_swap:335
 msgid "[#163] I may not detect plain swaps on an encrypted volume."
-msgstr ""
+msgstr "[#163] Jag kanske inte upptäcker vanliga byten på en krypterad volym."
 
 #: tomb:Commandline interaction:usage:617
 msgid " dig     create a new empty TOMB file of size -s in MiB"
-msgstr " dig:     skapa en ny tom GRAV-fil med en storlek av -s i MiB"
+msgstr " dig:     skapa en ny tom TOMB-fil med en storlek av -s i MiB"
 
 #: tomb:Commandline interaction:usage:622
 msgid " open    open an existing TOMB (-k KEY file or - for stdin)"
-msgstr ""
+msgstr " open    öppna en befintlig TOMB (-k NYCKEL-fil eller - för stdin)"
 
 #: tomb:Commandline interaction:usage:649
 msgid " -s     size of the tomb file when creating/resizing one (in MiB)"
@@ -1135,43 +1138,49 @@ msgstr " -s     tomb-filens storlek, vid skapande eller ändring av storlek (i M
 
 #: tomb:Key operations:get_lukskey:988
 msgid "Unlocking KDF key protection (::1 kdf::)"
-msgstr ""
+msgstr "Låser upp KDF-nyckelskydd (::1 kdf::)"
 
 #: tomb:Key operations:gen_key:1168
 msgid "Depending on the speed of machines using this tomb, use 1 to 10, or more"
 msgstr ""
+"Beroende på hastigheten på maskinerna som använder denna tomb, använd 1 till "
+"10 eller mer"
 
 #: tomb:Key operations:gen_key:1174
 msgid "Using KDF, iteration time: ::1 microseconds::"
-msgstr ""
+msgstr "Med KDF, iterationstid: ::1 mikrosekunder::"
 
 #: tomb:Create:dig_tomb:1409
 msgid "Size must be an integer (mebibytes)"
-msgstr ""
+msgstr "Storleken måste vara ett heltal (mebibyte)"
 
 #: tomb:Create:dig_tomb:1410
 msgid "Tombs can't be smaller than 10 mebibytes"
-msgstr ""
+msgstr "Tombs får inte vara mindre än 10 mebibyte"
 
 #: tomb:Open:exec_safe_bind_hooks:1944
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
-msgstr ""
+msgstr "bind-hooks kartformat: lokal/till/tomb lokal/till/$HOME"
 
 #: tomb:Open:exec_safe_bind_hooks:1948
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.  Rolling back"
 msgstr ""
+"bind-hooks kartformat: lokal/till/tomb lokal/till/$HOME. Rullar tillbaka"
 
 #: tomb:Resize:resize_tomb:2323
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
 msgstr ""
+"Beordrad att ändra storlek på tomb ::1 tombnamn:: till ::2 storlek:: "
+"mebibyte."
 
 #: tomb:Resize:resize_tomb:2367
 msgid "Tomb seems resized already, operating filesystem stretch"
 msgstr ""
+"Tomb verkar redan ändrad storlek, operativsystemets filsystem sträcker sig"
 
 #: tomb:Resize:resize_tomb:2387
 msgid "opening tomb"
-msgstr ""
+msgstr "öppnar tomb"
 
 #: tomb:Main routine:main:2806
 msgid " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
