@@ -2594,8 +2594,11 @@ exec_safe_bind_hooks() {
 	# each line, using zsh word separator array subscript
 	_bindhooks="${mapfile[${mnt}/bind-hooks]}"
 	for h in ${(f)_bindhooks}; do
+		h=${h//\\ /__ESC_SPACE__}
 		s="${h[(w)1]}"
 		d="${h[(w)2]}"
+		s=${s//__ESC_SPACE__/ }
+		d=${d//__ESC_SPACE__/ }
 		[[ -z $s ]] && { _warning "bind-hooks file is broken"; return 1 }
 		[[ -z $d ]] && { _warning "bind-hooks file is broken"; return 1 }
 		maps+=($s $d)
