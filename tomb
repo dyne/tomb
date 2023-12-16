@@ -2525,7 +2525,7 @@ mount_tomb() {
 		if command -v hostname >/dev/null; then
 			_update_control_file "${tombmount}/.host" `hostname`
 		elif [[ -r /etc/hostname ]]; then
-			_update_control_file "${tombmount}/.host" $(_cat /etc/hostname)
+			_update_control_file "${tombmount}/.host" $(cat /etc/hostname)
 		else
 			_update_control_file "${tombmount}/.host" localhost
 		fi
