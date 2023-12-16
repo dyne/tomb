@@ -3141,7 +3141,7 @@ umount_tomb() {
 			bind_mapper="${b[(ws:;:)1]}"
 			bind_mount="${b[(ws:;:)2]}"
 			_message "Closing tomb bind hook: ::1 hook::" "$bind_mount"
-			_sudo umount "$bind_mount" ||
+			_sudo umount "$(echo "$bind_mount")" ||
 				_failure "Tomb bind hook ::1 hook:: is busy, cannot close tomb." "$bind_mount"
 		done
 
