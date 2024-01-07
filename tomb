@@ -3189,10 +3189,8 @@ umount_tomb() {
 
 list_processes() {
 	# $1 = (optional) name of tomb
-	# returns a list of process UIDs, one per line
+	# runs lsof on the mounted_tombs
 	local mounted_tombs i
-	local pnum puid pcmd powner found
-	found=0
 	mounted_tombs=(`list_tomb_mounts $1`)
 	if [[ "${#mounted_tombs}" -gt 0 ]]; then
 		if [[ -z $1 ]]; then
@@ -3204,21 +3202,9 @@ list_processes() {
 		for i in ${mounted_tombs}; do
 			_verbose "scanning tomb: ::1 tombmount::" $i
 			tombmount="${i[(ws:;:)2]}"
-			tombname=${i[(ws:;:)5]}
-			for pnum in ${(f)"$(_sudo lsof -t +D "$tombmount")"}; do
-				found=$(($found + 1))
-				_verbose "process found: $pnum"
-				puid=$(cat /proc/${pnum}/loginuid)
-				pcmd=$(cat /proc/${pnum}/cmdline)
-				powner=`_get_username $puid`
-				_verbose "process found: $pnum $pcmd ($powner)"
-				_message "::1 tombname:: ::2 cmd:: (::3 owner::)" \
-						 $tombname $pcmd $powner
-			done
+			_sudo lsof +D "${i[(ws:;:)2]}"
 		done
 	fi
-	_message "::1 foundproc:: running processes found inside ::2 numtombs:: open tombs" \
-			 $found ${#mounted_tombs}
 	return 0
 }
 
