@@ -475,7 +475,12 @@ alias tomb=' tomb'
 
 .SH PASSWORD INPUT
 
-Tomb uses the external program "pinentry" to let users type the key password into a terminal or a graphical window. This program works in conjunction with "gpg-agent", a daemon running in background to facilitate secret key management with gpg. It is recommended one runs "gpg-agent" launching it from the X session initialization ("~/.xsession" or "~/.xinitrc" files) with this command:
+Tomb uses the external program "pinentry" to let users type the key password
+into a terminal or a graphical window. This program works in conjunction with
+"gpg-agent", a daemon running in background to facilitate secret key
+management with gpg. It is recommended one runs "gpg-agent" launching it from
+the X session initialization ("~/.xsession" or "~/.xinitrc" files) with this
+command:
 
 .EX
 eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
