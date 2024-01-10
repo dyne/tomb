@@ -383,10 +383,10 @@ first column are indicated paths relative to the tomb and in the
 second column are indicated paths relative to $HOME contents, for
 example:
 .EX
-  mail          mail
-  .gnupg        .gnupg
-  .fmrc         .fetchmailrc
-  .mozilla      .mozilla
+	mail          mail
+	.gnupg        .gnupg
+	.fmrc         .fetchmailrc
+	.mozilla      .mozilla
 .EE
 
 .B
@@ -417,8 +417,8 @@ whole system's security: just add such a line to \fI/etc/sudoers\fR:
 To avoid that tomb execution is logged by \fIsyslog\fR also add:
 
 .EX
-Cmnd_Alias TOMB = /usr/local/bin/tomb
-Defaults!TOMB !syslog
+	Cmnd_Alias TOMB = /usr/local/bin/tomb
+	Defaults!TOMB !syslog
 .EE
 
 .SH PASSWORD INPUT
@@ -469,8 +469,8 @@ prefix all invocations of tomb with a blank space, including two lines
 in ".zshrc":
 
 .EX
-export HISTIGNORESPACE=1
-alias tomb=' tomb'
+	export HISTIGNORESPACE=1
+	alias tomb=' tomb'
 .EE
 
 .SH PASSWORD INPUT
@@ -483,7 +483,7 @@ the X session initialization ("~/.xsession" or "~/.xinitrc" files) with this
 command:
 
 .EX
-eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
+	eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
 .EE
 
 In the future it may become mandatory to run gpg-agent when using tomb.
@@ -570,11 +570,11 @@ keeping all its profile data inside it:
 	cat <<EOF > /media/FOX.tomb/exec-hooks
 #!/bin/sh
 if [ "$1" = "open" ]; then
-  firefox -no-remote -profile "$2"/firefox-pro &
+	firefox -no-remote -profile "$2"/firefox-pro &
 fi
 EOF
-	chmod +x     /media/FOX.tomb/exec-hooks
-        mkdir /media/FOX.tomb/firefox-pro
+	chmod +x /media/FOX.tomb/exec-hooks
+	mkdir /media/FOX.tomb/firefox-pro
 .EE
 
 .IP \(bu
@@ -585,13 +585,13 @@ Script a tomb to archive Pictures using Shotwell, launching it on open:
 	cat <<EOF > /media/Pictures.tomb/bind-hooks
 Pictures Pictures
 EOF
-        cat <<EOF > /media/Pictures.tomb/exec-hooks
+	cat <<EOF > /media/Pictures.tomb/exec-hooks
 #!/bin/sh
 if [ "$1" = "open" ]; then
-  which shotwell > /dev/null
-  if [ "$?" = "0" ]; then
-    shotwell -d "$2"/Pictures/.shotwell &
-  fi
+	which shotwell > /dev/null
+	if [ "$?" = "0" ]; then
+		shotwell -d "$2"/Pictures/.shotwell &
+	fi
 fi
 EOF
 	chmod +x /media/Pictures.tomb/exec-hooks
