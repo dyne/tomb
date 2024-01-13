@@ -69,7 +69,7 @@ Linux documentation. The \fI--filesystem\fR option can be used to
 specify an alternative filesystem used to format the tomb,
 in place of the default "ext4". This operation requires root
 privileges to loopback mount, format the tomb (using LUKS and mkfs),
-then set the key in its first LUKS slot. 
+then set the key in its first LUKS slot.
 
 .RS
 Supported filesystems for \fI--filesystem\fR:
@@ -122,7 +122,7 @@ internally to enumerate processes running in one or all tombs.
 .IP "index"
 Creates or updates the search indexes of all tombs currently open:
 enables use of the \fIsearch\fR command using simple word patterns on
-file names. Indexes are created using mlocate's updatedb(8) and
+file names. Indexes are created using mlocate/plocate's updatedb(8) and
 swish-e(1) if they are found on the system. Indexes allow one to search
 very fast for filenames and contents inside a tomb, they are stored
 inside it and are not accessible if the Tomb is closed. To avoid
@@ -132,7 +132,7 @@ indexing a specific tomb simply touch a \fI.noindex\fR file in it.
 .IP "search"
 Takes any string as argument and searches for them through all tombs
 currently open and previously indexed using the \fIindex\fR command.
-The search matches filenames if mlocate is installed and then also
+The search matches filenames if mlocate/plocate is installed and then also
 file contents if swish++ is present on the system, results are listed
 on the console.
 
@@ -505,7 +505,7 @@ commands: \fIopen\fR, \fIforge\fR \fIsetkey\fR, \fIpasswd\fR,
 Using the package libsphinx
 .UR https://github.com/stef/libsphinx
 .UE
-and its python client/daemon implementation pwdsphinx 
+and its python client/daemon implementation pwdsphinx
 .UR https://github.com/stef/pwdsphinx
 .UE
 is possible to store and retrieve safely the password that locks the
