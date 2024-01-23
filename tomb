@@ -7,7 +7,7 @@
 
 # {{{ License
 
-# Copyright (C) 2007-2023 Dyne.org Foundation
+# Copyright (C) 2007-2024 Dyne.org Foundation
 #
 # Tomb is designed, written and maintained by Denis Roio <jaromil@dyne.org>
 #
@@ -3590,7 +3590,7 @@ main() {
 		__default)
 			_print "Tomb ::1 version:: - a strong and gentle undertaker for your secrets" $VERSION
 			echo
-			_print " Copyright (C) 2007-2021 Dyne.org Foundation, License GNU GPL v3+"
+			_print " Copyright (C) 2007-2024 Dyne.org Foundation, License GNU GPL v3+"
 			_print " This is free software: you are free to change and redistribute it"
 			_print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
 			echo
