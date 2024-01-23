@@ -34,7 +34,7 @@ All information is found on our website.
 
 Use only stable and signed releases in production!
 
-### 💾 [Download from files.dyne.org/tomb](https://dyne.org/tomb)
+### 💾 [Download from files.dyne.org/tomb](https://files.dyne.org/tomb/)
 
 Tomb's development is community-based!
 
