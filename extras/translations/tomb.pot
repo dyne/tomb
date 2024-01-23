@@ -1,6 +1,6 @@
 
 # Tomb - The Crypto Undertaker.
-# Copyright (C) 2007-2014 Dyne.org Foundation
+# Copyright (C) 2007-2024 Dyne.org Foundation
 # Denis Roio <jaromil@dyne.org>, 2013.
 #
 #, fuzzy
@@ -1123,7 +1123,7 @@ msgid "Tomb ::1 version:: - a strong and gentle undertaker for your secrets"
 msgstr ""
 
 #: tomb:Main routine:main:2806
-msgid " Copyright (C) 2007-2017 Dyne.org Foundation, License GNU GPL v3+"
+msgid " Copyright (C) 2007-2024 Dyne.org Foundation, License GNU GPL v3+"
 msgstr ""
 
 #: tomb:Main routine:main:2807
