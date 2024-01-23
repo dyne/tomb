@@ -52,7 +52,7 @@ There is also a [space for discussion](https://github.com/dyne/Tomb/discussions)
 
 # Licensing
 
-Tomb is Copyright (C) 2007-2023 by the Dyne.org Foundation and maintained by [Jaromil](https://github.com/jaromil). The [AUTHORS](AUTHORS.md) file contains more information on all the developers involved. The license is GNU Public License v3.
+Tomb is Copyright (C) 2007-2024 by the Dyne.org Foundation and maintained by [Jaromil](https://github.com/jaromil). The [AUTHORS](AUTHORS.md) file contains more information on all the developers involved. The license is GNU Public License v3.
 
 ## [More info on dyne.org/software/tomb](https://dyne.org/software/tomb)
 
