@@ -3335,7 +3335,6 @@ main() {
 	subcommands_opts[index]=""
 	subcommands_opts[search]=""
 
-	subcommands_opts[help]=""
 	subcommands_opts[bury]="k: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
 	subcommands_opts[exhume]="k: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
 	subcommands_opts[cloak]="k: "
