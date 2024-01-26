@@ -17,32 +17,11 @@ $ perl generate_translatable_strings.pl > tomb.pot
 
 After that, just open the `tomb.pot` file in the [poedit](https://poedit.net/) program, and click on "Start new translation" (bottom left button), select your language, save and start translating.
 
-## 3. Notes on versioning
-
-**As of June 27, 2023**, the current `tomb.pot` template was created on January 2, 2017 for `Tomb version 2.3`, which was released on the same date, as can be seen in [tag v2.3](https://github.com/dyne/Tomb/releases/tag/v2.3).
-
-```sh
-$ sed -n '9p' tomb.pot
-"PO-Revision-Date: Mon Jan  2 22:40:32 2017\n"
-```
-
-***Thus, all files in this folder, as of June 27, 2023, are valid for tomb version 2.3 `only`.***
-
-Old translations may work with recent versions of Tomb, but will be incomplete and wrong at many points.
-
-### 3.1 Exception
-Translation files for Brazilian Portuguese (pt_BR) was created in June 27, 2023. Precisely when it was noticed that the translations were out of date.
-
-So the translator created two versions: one for Tomb 2.3 (`pt_BR.pot` based upon `tomb.pot`) and another for Tomb 2.10 (`pt_BR-2.10.pot` based upon `tomb-2.10.pot`).
-
-For now it is the only updated translation for the current version of Tomb.
-
-## 4. Updating translation
+## 3. Updating translation
 In your favorite shell, make a backup of old file adding it's version, then update with `msgmerge`:
 
 ```sh
-$ cp lang.po lang-2.3.pot
-$ msgmerge --update lang.po tomb-2.10.pot
+$ msgmerge --update <language>.po tomb.pot
 ```
 
-Open the new updated PO translation file and start reviewing the translation.
+Open the new updated PO translation file and start reviewing the translation. Poedit will highlight what has changed and what needs revision.
