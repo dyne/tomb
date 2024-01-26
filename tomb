@@ -2668,7 +2668,7 @@ list_tombs() {
 	# list all open tombs
 	mounted_tombs=(`list_tomb_mounts $1`)
 	[[ ${#mounted_tombs} == 0 ]] && {
-		_failure "I can't see any ::1 status:: tomb, may they all rest in peace." ${1:-open} }
+		_failure "I can't see any open tomb, may they all rest in peace." }
 
 	for t in ${mounted_tombs}; do
 		mapper=`basename ${t[(ws:;:)1]}`
