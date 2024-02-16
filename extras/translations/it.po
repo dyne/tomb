@@ -449,7 +449,7 @@ msgstr "Key valida."
 
 #: tomb:Key operations:recover_key:1144 operations:recover_key:866
 msgid "Attempting key recovery."
-msgstr "Tentando recupero chiave"
+msgstr "Tentando recupero chiave."
 
 #: tomb:Key operations:_load_key:1168 operations:_load_key:890
 msgid "This operation requires a key file to be specified using the -k option."
@@ -571,10 +571,12 @@ msgstr ""
 "Argomento errato per --kdf: deve essere un numero intero (iterazioni in "
 "secondi)."
 
-#: tomb:Key operations:gen_key:1578 operations:gen_key:1168
+#: tomb:Key operations:gen_key:1168
 msgid ""
 "Depending on the speed of machines using this tomb, use 1 to 10, or more"
 msgstr ""
+"A seconda della velocità della macchine che usano questo tomb, usa valori da "
+"1 a 10, o maggiori"
 
 #: tomb:Key operations:gen_key:1589 operations:gen_key:1174
 msgid "Using KDF, iteration time: ::1 microseconds::"
@@ -644,7 +646,7 @@ msgstr "Tomb key codificata con successo nell'immagine ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1752 operations:exhume_key:1284
 msgid "Exhume failed, no image specified"
-msgstr "Exhume fallito, immagine non specificata."
+msgstr "Exhume fallito, immagine non specificata"
 
 #: tomb:Key operations:exhume_key:1765 operations:exhume_key:1294
 msgid "Exhume failed, image file not found: ::1 image file::"
@@ -656,7 +658,7 @@ msgstr "Exhume fallito: ::1 image file:: non è un'immagine jpeg."
 
 #: tomb:Key operations:exhume_key:1774 operations:exhume_key:1303
 msgid "Wrong password or no steganographic key found"
-msgstr "Password sbagliata o key steganografica non trovata."
+msgstr "Password sbagliata o key steganografica non trovata"
 
 #: tomb:Key operations:exhume_key:1785 operations:exhume_key:1314
 msgid "printing exhumed key on stdout"
@@ -684,7 +686,7 @@ msgstr "Provo l'exhume della key dall'immagine ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1819 operations:exhume_key:1348
 msgid "Key succesfully exhumed to ::1 key::."
-msgstr "Key exhume riuscito su ::1 key::"
+msgstr "Key exhume riuscito su ::1 key::."
 
 #: tomb:Key operations:exhume_key:1821 operations:exhume_key:1350
 msgid "Nothing found in ::1 image file::"
@@ -774,9 +776,9 @@ msgstr "Path al file tomb mancante"
 msgid "Size argument missing, use -s"
 msgstr "Manca la dimensione, usare lo switch -s"
 
-#: tomb:Create:dig_tomb:1987 tomb:Create:dig_tomb:1409
+#: tomb:Create:dig_tomb:1409
 msgid "Size must be an integer (mebibytes)"
-msgstr ""
+msgstr "La dimensione deve essere un intero (mebibytes)"
 
 #: tomb:Create:dig_tomb:1988 tomb:Create:dig_tomb:1410
 msgid "Tombs can't be smaller than 10 mebibytes"
