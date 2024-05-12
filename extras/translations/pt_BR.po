@@ -91,9 +91,9 @@ msgid "Operation aborted."
 msgstr "Operação abortada."
 
 #: tomb:Safety functions:ask_password:536
-msgid "Cannot find any pinentry-curses and no DISPLAY detected."
+msgid "Cannot find any pinentry and no DISPLAY detected."
 msgstr ""
-"Não foi possível encontrar qualquer pinentry-curses e nenhum DISPLAY foi "
+"Não foi possível encontrar qualquer pinentry e nenhum DISPLAY foi "
 "detectado."
 
 #: tomb:Safety functions:ask_password:550

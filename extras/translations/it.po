@@ -89,8 +89,8 @@ msgstr "Operazione annullata."
 
 #: tomb:Safety functions:ask_password:536
 #, fuzzy
-msgid "Cannot find any pinentry-curses and no DISPLAY detected."
-msgstr "Impossibile trovare pinentry-curses e nessun DISPLAY rilevato."
+msgid "Cannot find any pinentry and no DISPLAY detected."
+msgstr "Impossibile trovare pinentry e nessun DISPLAY rilevato."
 
 #: tomb:Safety functions:ask_password:550
 msgid "Pinentry error: ::1 error::"
