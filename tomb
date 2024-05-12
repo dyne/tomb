@@ -694,7 +694,7 @@ is_valid_tomb() {
 		_failure "Tomb won't work without a TOMBNAME."
 
 	# checks if Tomb already mounted (or we cannot alter it)
-	local maphash=`realpath $TOMBPATH | sha256sum -z`
+	local maphash=`realpath $TOMBPATH | sha256sum`
 	lo_mount # fills TOMBLOOP with next loop
 	TOMBMAPPER="tomb.$TOMBNAME.${maphash[(w)1]}.`basename $TOMBLOOP`"
 	local mounted_tombs=(`list_tomb_mounts`)
