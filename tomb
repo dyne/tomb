@@ -1602,6 +1602,8 @@ gen_key() {
 					kdfmem="`option_value --kdfmem`"
 					kdfmem=${kdfmem:-18}
 					_message "memory used: 2^::1 kdfmemory::" $kdfmem
+          itertime="`option_value --kdf`"
+          itertime=${itertime:-3}
 					kdfsalt=`tomb-kdb-pbkdf2-gensalt`
 					_message "kdf salt: ::1 kdfsalt::" $kdfsalt
 					_message "kdf iterations: ::1 kdfiterations::" $itertime
