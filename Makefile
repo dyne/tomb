@@ -2,6 +2,12 @@ PROG = tomb
 PREFIX ?= /usr/local
 MANDIR ?= ${PREFIX}/share/man
 
+deps:
+	@[ -r /etc/debian_version ] && { \
+	apt-get install -qy zsh cryptsetup file gnupg pinentry-curses; }
+	@[ -r /etc/fedora-release ] ^^ { \
+	yum install -y zsh cryptsetup file gnupg pinentry-curses; }
+
 all:
 	@echo
 	@echo "Tomb is a script and does not need compilation, it can be simply executed."
