@@ -72,8 +72,8 @@ executable | function
   steghide | bury and exhume keys inside images
   resizefs | extend the size of existing tomb volumes
   qrencode | engrave keys into printable qrcode sheets
-  mlocate  | fast search of file names inside tombs
-  swish++  | fast search of file contents inside tombs
+  plocate  | fast search of file names inside tombs
+  recoll   | fast search of file contents inside tombs
   unoconv  | fast search of contents in PDF and DOC files
   lesspipe | fast search of contents in compressed archives
   haveged  | fast entropy generation for key forging

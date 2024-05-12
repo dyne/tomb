@@ -122,19 +122,21 @@ internally to enumerate processes running in one or all tombs.
 .IP "index"
 Creates or updates the search indexes of all tombs currently open:
 enables use of the \fIsearch\fR command using simple word patterns on
-file names. Indexes are created using mlocate/plocate's updatedb(8) and
-swish-e(1) if they are found on the system. Indexes allow one to search
+file names. Indexes are created using plocate's updatedb(8) and
+recoll(1) if they are found on the system. Indexes allow one to search
 very fast for filenames and contents inside a tomb, they are stored
 inside it and are not accessible if the Tomb is closed. To avoid
 indexing a specific tomb simply touch a \fI.noindex\fR file in it.
+Useful tools to have: poppler-utils, aspell, xdg-utils, plocate.
 
 .B
 .IP "search"
 Takes any string as argument and searches for them through all tombs
 currently open and previously indexed using the \fIindex\fR command.
-The search matches filenames if mlocate/plocate is installed and then also
-file contents if swish++ is present on the system, results are listed
-on the console.
+The search matches filenames if plocate is installed and then also
+file contents if recoll is installed, all results are listed on the
+console.
+One can also run recoll's GUI using \fIrecoll -c /media/tomb\fR
 
 .B
 .IP "close"

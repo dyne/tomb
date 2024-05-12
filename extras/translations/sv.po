@@ -1231,8 +1231,8 @@ msgid "Indexing ::1 tomb name:: contents..."
 msgstr "Indexerar ::1 tomb name:: innehåll..."
 
 #: tomb:Index and search:index_tombs:2859
-msgid "Generating a new swish-e configuration file: ::1 swish conf::"
-msgstr "Genererar en ny swish-e konfigutŕationsfil: ::1 swish conf::"
+msgid "Generating a new search index configuration file: ::1 swish conf::"
+msgstr "Genererar en ny search index konfigutŕationsfil: ::1 swish conf::"
 
 #: tomb:Index and search:index_tombs:2929
 msgid "Search index updated."
