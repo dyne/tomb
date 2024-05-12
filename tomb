@@ -48,8 +48,6 @@ for arg in "${(@)argv}"; do OLDARGS+=("$arg"); done
 typeset -a DD WIPE PINENTRY SUDO
 DD=(dd)
 WIPE=(rm -f)
-PINENTRY=(pinentry)
-SUDO=(sudo)
 
 # load zsh regex module
 zmodload zsh/mapfile
@@ -133,15 +131,29 @@ _sudo() {
 		esac
 
 	else
-		local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
-		command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
-		msg=${(S)msg//::1*::/$USER}
-		[[ -n "$SUDO_ASKPASS" ]] && local sudo_askpass="--askpass"
-		sudo $sudo_askpass -p "
+    if [[ "`id -u`" = "0" ]]; then
+			_verbose "Super user execution skipped (SUID caller)"
+			${@}
+			return $?
+    elif command -v sudo 1>/dev/null 2>/dev/null; then
+		  local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
+		  command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
+		  msg=${(S)msg//::1*::/$USER}
+		  [[ -n "$SUDO_ASKPASS" ]] && local sudo_askpass="--askpass"
+		  sudo $sudo_askpass -p "
 $msg
 
 " ${@}
-		return $?
+		  return $?
+    elif command -v doas 1>/dev/null 2>/dev/null; then
+		  local msg="Enter password for user ::1 user:: to gain superuser privileges"
+		  command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
+		  msg=${(S)msg//::1*::/$USER}
+      doas ${@}
+      return $?
+    else
+      _failure "No way found to escalate privileges to super user."
+    fi
 	fi
 }
 
@@ -994,7 +1006,7 @@ _list_optional_tools() {
 _ensure_dependencies() {
 
 	# Check for required programs
-	for req in cryptsetup sudo gpg mkfs.ext4 e2fsck; do
+	for req in cryptsetup gpg mkfs.ext4 e2fsck; do
 		command -v $req 1>/dev/null 2>/dev/null || {
 			_failure "Missing required dependency ::1 command::.  Please install it." $req; }
 	done
@@ -1011,10 +1023,10 @@ _ensure_dependencies() {
 	# command -v pkexec 1>/dev/null 2>/dev/null
 	# [[ $? == 0 ]] && ps ax | grep '[p]olkitd' 1>/dev/null 2>/dev/null && {
 	#     SUDO=(pkexec)	}
-	[[ "$SUDO" == "sudo" ]] && {
-	    command -v sudo 1>/dev/null 2>/dev/null ||
-		_failure "No privilege escalation tool found, not even sudo"
-	}
+	# [[ "$SUDO" == "sudo" ]] && {
+	#     command -v sudo 1>/dev/null 2>/dev/null ||
+	# 	_failure "No privilege escalation tool found, not even sudo"
+	# }
 
 	# Which dd command to use
 	command -v dcfldd 1>/dev/null 2>/dev/null && DD=(dcfldd statusinterval=1)
