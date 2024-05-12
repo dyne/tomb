@@ -22,8 +22,8 @@ RUN apt-get update -y && \
 	pinentry-curses \
 	file xxd \
 	steghide \
-	mlocate \
-	swish-e
+	plocate \
+	recoll
 
 # Build and install Tomb from remote repo
 RUN curl https://files.dyne.org/tomb/releases/Tomb-$TOMB_VERSION.tar.gz -o /tmp/Tomb-$TOMB_VERSION.tar.gz && \

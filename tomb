@@ -65,7 +65,7 @@ typeset -i CLOAKIFY=1
 typeset -i DECLOAKIFY=1
 typeset -i SPHINX=1
 typeset -i RESIZER=1
-typeset -i SWISH=1
+typeset -i RECOLL=1
 typeset -i QRENCODE=1
 
 # Default mount options
@@ -970,7 +970,7 @@ function _print() {
 _list_optional_tools() {
 	typeset -a _deps
 	_deps=(gettext dcfldd shred steghide)
-	_deps+=(resize2fs tomb-kdb-pbkdf2 argon2 qrencode swish-e unoconv lsof)
+	_deps+=(resize2fs tomb-kdb-pbkdf2 argon2 qrencode recoll unoconv lsof)
 	for d in $_deps; do
 		_print "`which $d`"
 	done
@@ -1026,8 +1026,8 @@ _ensure_dependencies() {
 	command -v tomb-kdb-pbkdf2 1>/dev/null 2>/dev/null || KDF=0
 	# Check for ARGON2 KDF auxiliary tools
 	command -v argon2 1>/dev/null 2>/dev/null || ARGON2=0
-	# Check for Swish-E file content indexer
-	command -v swish-e 1>/dev/null 2>/dev/null || SWISH=0
+	# Check for Recoll file content indexer
+	command -v recoll 1>/dev/null 2>/dev/null || RECOLL=0
 	# Check for QREncode for paper backups of keys
 	command -v qrencode 1>/dev/null 2>/dev/null || QRENCODE=0
 }
@@ -2815,17 +2815,6 @@ BEGIN { }
 # index files in all tombs for search
 # $1 is optional, to specify a tomb
 index_tombs() {
-	{ command -v updatedb 1>/dev/null 2>/dev/null } || {
-		_failure "Cannot index tombs on this system: updatedb (mlocate/plocate) not installed." }
-
-	updatedbver=`updatedb --version | grep '^updatedb'`
-	[[ "$updatedbver" =~ "GNU findutils" ]] && {
-		_warning "Cannot use GNU findutils for index/search commands." }
-	[[ "$updatedbver" =~ "locate" ]] || {
-		_failure "Index command needs 'mlocate/plocate' to be installed." }
-
-	_verbose "$updatedbver"
-
 	mounted_tombs=(`list_tomb_mounts $1`)
 	[[ ${#mounted_tombs} == 0 ]] && {
 		# Considering one tomb
@@ -2836,11 +2825,11 @@ index_tombs() {
 
 	_success "Creating and updating search indexes."
 
-	# start the LibreOffice document converter if installed
-	{ command -v unoconv 1>/dev/null 2>/dev/null } && {
-		unoconv -l 2>/dev/null &
-		_verbose "unoconv listener launched."
-		sleep 1 }
+	# # start the LibreOffice document converter if installed
+	# { command -v unoconv 1>/dev/null 2>/dev/null } && {
+	# 	unoconv -l 2>/dev/null &
+	# 	_verbose "unoconv listener launched."
+	# 	sleep 1 }
 
 	for t in ${mounted_tombs}; do
 		mapper=`basename ${t[(ws:;:)1]}`
@@ -2849,82 +2838,31 @@ index_tombs() {
 		[[ -r "${tombmount}/.noindex" ]] && {
 			_message "Skipping ::1 tomb name:: (.noindex found)." $tombname
 			continue }
-		_message "Indexing ::1 tomb name:: filenames..." $tombname
-		updatedb -l 0 -o "${tombmount}/.updatedb" -U "${tombmount}"
 
-		# here we use swish to index file contents
-		[[ $SWISH == 1 ]] && {
+	  { command -v updatedb 1>/dev/null 2>/dev/null } && {
+	    updatedbver=`updatedb --version | grep '^updatedb'`
+	    if [[ "$updatedbver" =~ "GNU findutils" ]]; then
+		    _warning "Cannot use GNU findutils for index/search commands."
+      # elif [[ "$updatedbver" =~ "locate" ]]; then
+		  #   _warning "Index command needs 'mlocate/plocate' to be installed."
+      else
+		    _message "Indexing ::1 tomb name:: filenames..." $tombname
+	      _verbose "$updatedbver"
+		    updatedb -l 0 -o "${tombmount}/.updatedb" -U "${tombmount}"
+      fi
+    }
+
+		# here we use recoll to index file contents
+		[[ $RECOLL == 1 ]] && {
 			_message "Indexing ::1 tomb name:: contents..." $tombname
-			rm -f "${tombmount}/.swishrc"
-			_message "Generating a new swish-e configuration file: ::1 swish conf::" "${tombmount}/.swishrc"
-			cat <<EOF > "${tombmount}/.swishrc"
-# index directives
-DefaultContents TXT*
-IndexDir "$tombmount"
-IndexFile "$tombmount/.swish"
-# exclude images
-FileRules filename regex /\.jp.?g/i
-FileRules filename regex /\.png/i
-FileRules filename regex /\.gif/i
-FileRules filename regex /\.tiff/i
-FileRules filename regex /\.svg/i
-FileRules filename regex /\.xcf/i
-FileRules filename regex /\.eps/i
-FileRules filename regex /\.ttf/i
-# exclude audio
-FileRules filename regex /\.mp3/i
-FileRules filename regex /\.ogg/i
-FileRules filename regex /\.wav/i
-FileRules filename regex /\.mod/i
-FileRules filename regex /\.xm/i
-# exclude video
-FileRules filename regex /\.mp4/i
-FileRules filename regex /\.avi/i
-FileRules filename regex /\.ogv/i
-FileRules filename regex /\.ogm/i
-FileRules filename regex /\.mkv/i
-FileRules filename regex /\.mov/i
-FileRules filename regex /\.flv/i
-FileRules filename regex /\.webm/i
-# exclude system
-FileRules filename is ok
-FileRules filename is lock
-FileRules filename is control
-FileRules filename is status
-FileRules filename is proc
-FileRules filename is sys
-FileRules filename is supervise
-FileRules filename regex /\.asc$/i
-FileRules filename regex /\.gpg$/i
-# pdf and postscript
-FileFilter .pdf pdftotext "'%p' -"
-FileFilter .ps	ps2txt "'%p' -"
-# compressed files
-FileFilterMatch lesspipe "%p" /\.tgz$/i
-FileFilterMatch lesspipe "%p" /\.zip$/i
-FileFilterMatch lesspipe "%p" /\.gz$/i
-FileFilterMatch lesspipe "%p" /\.bz2$/i
-FileFilterMatch lesspipe "%p" /\.Z$/
-# spreadsheets
-FileFilterMatch unoconv "-d spreadsheet -f csv --stdout %P" /\.xls.*/i
-FileFilterMatch unoconv "-d spreadsheet -f csv --stdout %P" /\.xlt.*/i
-FileFilter .ods unoconv "-d spreadsheet -f csv --stdout %P"
-FileFilter .ots unoconv "-d spreadsheet -f csv --stdout %P"
-FileFilter .dbf unoconv "-d spreadsheet -f csv --stdout %P"
-FileFilter .dif unoconv "-d spreadsheet -f csv --stdout %P"
-FileFilter .uos unoconv "-d spreadsheet -f csv --stdout %P"
-FileFilter .sxc unoconv "-d spreadsheet -f csv --stdout %P"
-# word documents
-FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.doc.*/i
-FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.odt.*/i
-FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.rtf.*/i
-FileFilterMatch unoconv "-d document -f txt --stdout %P" /\.tex$/i
-# native html support
-IndexContents HTML* .htm .html .shtml
-IndexContents XML* .xml
+			rm -f "${tombmount}/recoll.conf"
+			_message "Generating a new search index configuration: ::1 recoll conf::" "${tombmount}/recoll.conf"
+      mkdir -p "${tombmount}/.recoll"
+			cat <<EOF > "${tombmount}/recoll.conf"
+topdirs = ${tombmount}
+cachedir = ${tombmount}/.recoll
 EOF
-
-			swish-e -c "${tombmount}/.swishrc" -S fs -v3
+			recollindex -c "${tombmount}"
 		}
 		_message "Search index updated."
 	done
@@ -2961,10 +2899,10 @@ search_tombs() {
 			_message "Matches found: ::1 matches::" \
 					 $(locate -d "${tombmount}/.updatedb" -e -i -c ${(f)@})
 
-			# Use swish-e to search over contents
-			[[ $SWISH == 1 && -r "$tombmount/.swish" ]] && {
+			# Use recoll to search over contents
+			[[ $RECOLL == 1 && -r "$tombmount/recoll.conf" ]] && {
 				_message "Searching contents in tomb ::1 tomb name::" $tombname
-				swish-e -w ${@} -f "$tombmount/.swish" -H0 }
+				recollq -c "${tombmount}" ${@} }
 		} || {
 			_warning "Skipping tomb ::1 tomb name::: not indexed." $tombname
 			_warning "Run 'tomb index' to create indexes." }
