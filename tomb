@@ -1837,10 +1837,11 @@ exhume_key() {
 cloakify_key() {
 
 	_load_key	 # Try loading key from option -k and set TOMBKEY
-
 	local cipher="$1"    # The cipher to use
 	local destfile="$2"  # (Optional) the output file where to save the
 	# result (none for stdout)
+  [[ -r "${cipher}" ]] ||
+    _failure "Cloak cipher file not found, see tomb/extras/cloak/ciphers"
 
 	_success "Encoding key ::1 tomb key:: using cipher ::2 cipher file::" $TOMBKEYFILE $cipher
 
@@ -1861,7 +1862,7 @@ cloakify_key() {
 	}
 
 	# Cipher the key
-	cloakify $TOMBKEYFILE $cipher >$destfile
+	cloakify -i $TOMBKEYFILE -c $cipher >$destfile
 	if [ $? != 0 ]; then
 		_warning "Encoding error: cloakify reports problems."
 		res=1
@@ -1901,7 +1902,7 @@ decloakify_key() {
 	# Ensure we have a valid destination for the key
 	[[ -z $destkey ]] && { option_is_set -k } && destkey=$(option_value -k)
 	[[ -z $destkey ]] && {
-		destkey="/dev/stdout" # No key was specified: fallback to stdout
+		# No key was specified: fallback to stdout
 		_message "printing uncloaked key on stdout" }
 
 	# Bail out if destination exists, unless -f (force) was passed
@@ -1916,11 +1917,15 @@ decloakify_key() {
 	}
 
 	# Extract the key from the text file
-	decloakify $textfile $cipher >$destkey
+  if [[ -z "$destkey" ]]; then
+	  decloakify -i "${textfile}" -c "${cipher}"
+  else
+	  decloakify -i "${textfile}" -c "${cipher}" -o "${destkey}"
+  fi
 	r=$?
 
 	# Report to the user
-	[[ "$destkey" = "/dev/stdout" ]] && destkey="stdout"
+	[[ -z "$destkey" ]] && destkey="stdout"
 	[[ $r == 0 ]] && {
 		_success "Key succesfully uncloaked to ::1 key::." $destkey
 	} || {
