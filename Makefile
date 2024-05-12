@@ -3,10 +3,12 @@ PREFIX ?= /usr/local
 MANDIR ?= ${PREFIX}/share/man
 
 deps:
-	@[ -r /etc/debian_version ] && { \
-	apt-get install -qy zsh cryptsetup file gnupg pinentry-curses; }
-	@[ -r /etc/fedora-release ] ^^ { \
-	yum install -y zsh cryptsetup file gnupg pinentry-curses; }
+	@if [ -r /etc/debian_version ]; then \
+	apt-get install -qy zsh cryptsetup file gnupg pinentry-curses; fi
+	@if [ -r /etc/fedora-release ]; then \
+	yum install -y zsh cryptsetup file gnupg pinentry-curses; fi
+	@if [ -r /etc/alpine-release ]; then \
+	apk add zsh cryptsetup file gpg pinentry-tty e2fsprogs findmnt; fi
 
 all:
 	@echo
