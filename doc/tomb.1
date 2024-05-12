@@ -219,22 +219,19 @@ key is buried in any image or not.
 
 .B
 .IP "cloak"
-Hides a tomb key (\fI-k\fR) inside a \fIlong plain-text file\fR (first
-argument) using \fIsteganography\fR: the text will change in a way
-that can hardly be noticed by human eye and hardly detected by data
-analysis. This option is useful to backup tomb keys in unsuspected
-places; it depends from the availability of \fIcloakify\fR and
-consequently \fIpython2\fR. This function does not support asymmetric
-encryption using the \fI-g\fR flag.
+Cloaks a tomb key (\fI-k\fR) disguising it as a text file using a
+cipher from \fIextras/cloak/ciphers\fR (second argument) using
+\fIcloakify\fR. This option is useful to backup tomb keys in
+unsuspected places; it needs \fIextras/cloak\fR installed and
+\fIpython3\fR.
 
 .B
 .IP "uncloak"
-This command recovers from long plain-text files the keys that were
-previously hidden into them using \fIcloak\fR.  Cloak requires a key
-filename (\fI-k\fR) and a \fIplain-text\fR file (first argument) known
-to be containing a key. If the right key password is given, the key
-will be exhumed. If the password is not known, it is quite hard to
-verify if a key is buried in a text or not.
+Recovers a tomb key from a cloaked text file. Uncloak requires a text
+file (first argument), a cipher file (second argument) and optionally
+an output file (third argument). If the first two parameters are
+correct then the output will be a valid tomb key file restored from
+cloak.
 
 .SH OPTIONS
 .B
