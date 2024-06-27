@@ -1,0 +1,50 @@
+
+{{ define "header" }}
+<header class="hero" id="top">
+  <div class="imagecontainer" style="background-image: url({{ .Params.image | relURL }});opacity:0.3;">
+  </div>
+  <div class="content-wrapper">
+    <a href="#start" class="svg">
+      {{ partial "svg/software-logotype.svg" . }}
+    </a>
+    <a href="#start" style="text-align:center;margin-top:160px;">{{ partial "svg/arrow.svg" . }}</a>
+  </div>
+</header>
+{{ end }}
+
+{{ define "main" }}
+<section id="start">
+  <div class="content-wrapper">
+    <div class="content">
+      <h1>{{ .Site.Params.description }}</h1>
+      <p><a href="{{ .Site.Params.download }}" class="button">Download</a> <a href="{{ .Site.Params.documentation}}" class="button">Documentation</a></p>
+      {{ .Content | markdownify }}
+    </div>
+  </div>
+</section>
+{{ range .Params.sections }}
+{{ $baseurl := .Site.BaseURL }}
+<article class="narative">
+  <div class="content-wrapper">
+
+    <div class="text-content">
+      <h2>{{ .title }}</h2>
+      <p>{{ .description_markdown | markdownify }}</p>
+      <p><a href="{{ .button.URL | relURL }}" class="button">{{ .button.label }}</a></p>
+    </div>
+    <div class="cartouche">
+      <figure>
+        <img src="{{ .image | relURL }}" />
+      </figure>
+    </div>
+  </div>
+</article>
+{{ end }}
+
+{{ end }}
+
+{{ define "footer"}}
+
+{{ partial "body/footer.html" . }}
+
+{{ end }}

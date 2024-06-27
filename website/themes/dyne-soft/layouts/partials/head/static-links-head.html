@@ -1,0 +1,13 @@
+<link rel="stylesheet" href='{{ "assets/css/all.min.css" | relURL}}' />
+{{ $options := (dict "outputStyle" "compressed" "enableSourceMap" true) }}
+{{ $colors := resources.Get "assets/sass/colors.scss" | resources.ExecuteAsTemplate "sass/colors.scss" . | toCSS $options | fingerprint }}
+<link rel="stylesheet" href="{{ $colors.RelPermalink }}">
+{{ $main := resources.Get "assets/sass/main.scss" | toCSS $options | fingerprint }}
+<link rel="stylesheet" href="{{ $main.RelPermalink }}">
+{{ $noscripts := resources.Get "assets/sass/noscripts.scss" | toCSS $options | fingerprint }}
+<noscript><link rel="stylesheet" href="{{ $noscripts.RelPermalink }}"></noscript>
+<link rel="apple-touch-icon" href='{{ "apple-touch-icon.png" | absURL }}'>
+<link rel="icon" type="image/png" href='{{ "touch-icon.png" | absURL }}' sizes="192x192">
+<link rel="shortcut icon" href='{{ "siteicon.png" | absURL }}' type="image/png" />
+{{ $jep := resources.Get "assets/js/jep.js" | resources.Minify | fingerprint }}
+<script src="{{ $jep.RelPermalink }}"></script>

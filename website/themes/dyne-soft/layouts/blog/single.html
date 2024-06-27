@@ -1,0 +1,120 @@
+{{ define "header" }}
+<header class="hero-single" id="top">
+  <div class="imagecontainer" style="background-image: url({{ .Params.image | relURL }}); background-size:cover; background-position:center center;">
+  </div>
+  <div class="content-wrapper">
+    <a href="/" alt="back to home">{{ partial "svg/software-icon.svg" . }}</a>
+    <div>
+      <h1>{{ .Title }}</h1>
+      <p>{{ .Params.description_markdown | markdownify }}</p>
+   </div>
+   <a class="arrow" href="#start" style="text-align:center;">{{ partial "svg/arrow.svg" . }}</a>
+  </div>
+</header>
+{{ end }}
+{{ define "main" }}
+{{ $headless := .Site.GetPage "/team_members" }}
+{{ $reusablePages := $headless.Resources.ByType "page" }}
+<section id="start" class="blog-post">
+  <div class="content-wrapper">
+    <div class="content blog">
+      <div class="date">Published {{ .Date.Format "2006-01-02" }}
+        {{ range where $reusablePages "Section" "=" "team_members" }}
+      {{ if eq .File.Path $.Params.author }}
+        by <a href="#author">{{ .Params.name }}</a>
+      {{ end }}{{ end }}
+      </div>
+      {{ .Content }}
+      {{ if .Params.link.URL }}
+      <p class="center">
+        <a href="{{ .Params.link.URL }}" target="_bank" rel="noopener" class="button">{{ if .Params.link.label }}{{ .Params.link.label }}{{ else }}check it out{{ end }}</a>
+      </p>
+      {{ end }}
+      <div>
+      {{ $taxonomy := "tags" }}
+
+          {{ with .Param $taxonomy }}
+          <ul class="taglist">
+            {{ range $index, $tag := . }}
+            {{ with $.Site.GetPage (printf "/%s/%s" $taxonomy $tag) -}}
+            <li>
+              <a href="{{ .Permalink | relURL }}" class="tag">#{{ $tag | urlize }}</a>
+            </li>
+            {{- end -}}
+            {{- end -}}
+          </ul>
+        {{ end }}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Author -->
+<section class="author" id="author">
+  <div class="content-wrapper">
+    <div class="content">
+
+
+
+
+      {{ range where $reusablePages "Section" "=" "team_members" }}
+      {{ if eq .File.Path $.Params.author }}
+      <div class="team">
+        <div class="mate">
+          <figure>
+            <img src="{{ .Params.image }}" alt="{{ .Params.name }}" />
+          </figure>
+          <h3>{{ .Params.name }}</h3>
+          <p><strong>{{ .Params.work_title }}</strong></p>
+          <p>{{ .Params.bio }}</p>
+        </div>
+      </div>
+      {{ end }}
+      {{ end }}
+
+
+    </div>
+  </div>
+</section>
+
+
+<!-- post Naviation -->
+
+
+
+{{ $pages := where site.RegularPages "Section" .Section }}
+<section class="post-navigation">
+
+  <div class="container">
+    {{ with $pages.ByWeight.Prev . }}
+  <div class="post-nav">
+
+    <h4><a href="{{ .Permalink | relURL }}" alt="Read {{.Title }}" title="Read {{ .Title }}"><span
+      class="fas fa-arrow-left" style="font-size:3em;text-decoration: none;"></span></a></h4>
+    <h3>{{ .Title }}</h3>
+    <p>{{ .Params.description_markdown | markdownify }}</p>
+
+  </div>
+  {{ end }}
+  {{ with $pages.ByWeight.Next . }}
+  <div class="post-nav-next">
+
+    <h4><a href="{{ .Permalink | relURL }}" alt="Read {{ .Title }}" title="Read {{ .Title }}"><span
+      class="fas fa-arrow-right" style="font-size:3em;"></span></a></h4>
+    <h3>{{ .Title }}</h3>
+    <p>{{ .Params.description_markdown | markdownify }}</p>
+
+  </div>
+  {{ end }}
+  </div>
+
+</section>
+
+
+{{ end }}
+
+{{ define "footer"}}
+
+{{ partial "body/footer.html" . }}
+
+{{ end }}

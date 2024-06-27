@@ -1,0 +1,59 @@
+baseURL = "https://dyne.org/tomb"
+languageCode = "en-us"
+title = "Tomb"
+# enableGitInfo = "true"
+theme = "dyne-soft"
+disableKinds = ["taxonomy, term"]
+enableRobotsTXT = "false"
+
+[taxonomies]
+  tag = "tags"
+
+[params]
+  description = "Tomb is a minimalistic command line tool based on Linux dm-crypt and LUKS, trusted by hackers since 2007."
+  moto = 'Tomb: The Linux Crypto Undertaker'
+  publisher = "Dyne.org"
+  google_analytics_id = ""
+  logo = "assets/img/logo.svg"
+  icon = "assets/img/dyne-icon.svg"
+  footerIcon = "assets/img/dyne-icon.svg"
+  email = "info+tomb@dyne.org"
+  sourcecode = "https://github.com/dyne/tomb"
+  download = "https://github.com/dyne/tomb"
+  documentation = "https://dyne.org/docs/tomb"
+
+  [params.geo]
+    timezone = "Europe/Netherlands"
+    lat = "52.39679"
+    long = "4.87996"
+    region = "NL"
+    street = "Haparandadam 7"
+    locality = "Amsterdam"
+    country = "Netherlands"
+    postalcode = "1013AK "
+    org_nr = "34237525 at KvK.NL"
+
+
+  [params.homepage_meta_tags]
+    meta_og_type = "website"
+    meta_og_image = "images/dowse.png"
+    meta_twitter_site = "@dyneorg"
+    meta_twitter_creator = "@dyneorg"
+
+[permalinks]
+  posts = "/blog/:year-:month-:day-:slug/"
+  pages = "/:filename/"
+
+[frontmatter]
+  date = ["date", "publishDate"]
+  expiryDate = ["expiryDate"]
+  lastmod = [":fileModTime"]
+  publishDate = ["publishDate", "date"]
+
+[params._editor]
+  default_path = "/"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true

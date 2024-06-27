@@ -1,0 +1,39 @@
+// NAvigation
+
+.logo, #sticky {
+  filter: blur(0px);
+  opacity: 1;
+  background-color: var(--bg);
+ }
+
+.blurredout {
+  filter: blur(0px);
+  opacity: 1;
+  background-color: var(--bg);
+  -webkit-transition: all var(--anim-speed) ease-in;
+  -moz-transition: all var(--anim-speed) ease-in;
+  -ms-transition: all var(--anim-speed) ease-in;
+  transition: all var(--anim-speed) ease-in;
+ }
+
+.hero {
+  padding-top: 120px;
+}
+
+// Player link
+.player-wrap {
+  display: none;
+}
+.noJSalbum {
+  display: unset;
+  flex: 0 1 400px;
+  border-radius: var(--border-radius);
+  width: 100%;
+}
+#fixed-player {
+  display: unset;
+  height: unset;
+}
+.hideWhenNoJS {
+  display: none;
+}

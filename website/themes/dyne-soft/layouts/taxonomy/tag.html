@@ -1,0 +1,69 @@
+{{ define "header" }}
+<header class="hero-single" id="top">
+  <div class="imagecontainer">
+  </div>
+  <div class="content-wrapper">
+    <a href="/" alt="back to home">{{ partial "svg/software-icon.svg" . }}</a>
+    <div>
+      <h1>{{ .Title }}</h1>
+      <p>Posts filed with the <span class="tag">#{{ .Title | urlize }}</span> tag</p>
+   </div>
+   <a class="arrow" href="#start" style="text-align:center;">{{ partial "svg/arrow.svg" . }}</a>
+  </div>
+</header>
+
+{{ end }}
+
+{{ define "main" }}
+
+<section id="start">
+  <div class="content-wrapper">
+    <div class="content">
+      {{ .Content }}
+    </div>
+  </div>
+</section>
+
+<section class="blog-list">
+  <div class="content-wrapper">
+    <div class="content">
+      {{ range .Paginator.Pages }}
+
+        <article>
+          <figure>
+            <img src="{{ .Params.image }}" alt="{{ .Title }}" />
+          </figure>
+          <h3>{{ .Title }}</h3>
+
+          <p>{{ .Params.description_markdown | markdownify }}</p>
+          <p class="date">Published {{ .Date.Format "2" }}{{ if in (slice 1 21 31) .Date.Day}}st{{ else if in (slice 2 22) .Date.Day}}nd{{ else if in (slice 3 23) .Date.Day}}rd{{ else }}th{{ end }} of {{ .Date.Format "January 2006" }}</p>
+          <p><a href="{{ .Permalink | relURL }}" class="button">Read More</a></p>
+          {{ $taxonomy := "tags" }}
+
+          {{ with .Param $taxonomy }}
+          <ul class="taglist">
+            {{ range $index, $tag := . }}
+            {{ with $.Site.GetPage (printf "/%s/%s" $taxonomy $tag) -}}
+            <li>
+              <a href="{{ .Permalink | relURL }}" class="tag">#{{ $tag | urlize }}</a>
+            </li>
+            {{- end -}}
+            {{- end -}}
+          </ul>
+          {{ end }}
+        </article>
+
+      {{ end }}
+    </div>
+  </div>
+
+</section>
+
+
+{{ end }}
+
+{{ define "footer"}}
+
+{{ partial "body/footer.html" . }}
+
+{{ end }}

@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<!--
+  Publikatorized Hugolainen by Sakrecoer
+  Free for personal and commercial use under the Creative commons licens CC-BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/
+-->
+<html lang="{{ .Site.LanguageCode }}">
+<head>
+
+{{ partial "head/meta.html" . }}
+{{ partial "head/static-links-head.html" . }}
+{{ partial "head/seo.html" . }}
+
+</head>
+
+<body>
+<!-- Wrapper -->
+{{ partial "body/navigation.html" . }}
+<main id="main-wrapper">
+
+    {{ block "header" . }}{{ end }}
+
+    {{ block "main" . }}{{ end }}
+
+
+
+</main>
+<!-- END Wrapper -->
+{{ block "footer" . }}{{ end }}
+
+
+
+{{ partial "footer/static-links-foot.html" . }}
+<!--
+{{ partial "body/cookie-consent.html" . }}
+
+{{ partial "scripts/cookie-script.html" . }}
+-->
+</body>
+</html>
+

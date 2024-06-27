@@ -1,0 +1,74 @@
+{{ define "header" }}
+<header class="hero-single" id="top">
+  <div class="imagecontainer">
+  </div>
+  <div class="content-wrapper">
+    <a href="/" alt="back to home">{{ partial "svg/software-icon.svg" . }}</a>
+    <div>
+      <h1>About {{ .Site.Title }}</h1>
+      <p>{{ .Params.description_markdown | markdownify }}</p>
+   </div>
+   <a class="arrow" href="#start" style="text-align:center;">{{ partial "svg/arrow.svg" . }}</a>
+  </div>
+</header>
+{{ end }}
+
+
+{{ define "main" }}
+<section id="start" class="about">
+  <div class="content-wrapper">
+    <div>
+
+      <p>{{ .Content }}</p>
+    </div>
+  </div>
+</section>
+<section class="about">
+  {{ range .Page.Params.sections }}
+  <div class="content-wrapper">
+    <div class="text-content">
+      <h2>{{ .title }}</h2>
+      <p>{{ .content_markdown | markdownify }}</p>
+      <p><a href="{{ .button.URL | relURL }}" class="button">{{ .button.label }}</a></p>
+    </div>
+    <div class="cartouche">
+      <figure>
+        <img src="{{ .image | relURL }}" alt="{{ .name }}" />
+      </figure>
+    </div>
+  </div>
+  {{ end }}
+</section>
+<!-- disable team for now
+<section id="team" class="about">
+  <div class="content-wrapper">
+    <div>
+      <h2>Team</h2>
+      <p>{{ .Params.team_section | markdownify }}</p>
+    </div>
+  </div>
+</section>
+<section class="about" id="team">
+  <div class="content-wrapper">
+    <div class="team">
+      {{ $headless := .Site.GetPage "/team_members" }}
+      {{ $reusablePages := $headless.Resources.ByType "page" }}
+      {{ range where $reusablePages ".Params.guest" false }}
+      <div class="mate">
+        <figure>
+          <img src="{{ .Params.image }}" alt="{{ .Params.name }}" />
+        </figure>
+        <h4><a href="{{ .Params.link }}">{{ .Params.name }}</a></h3>
+        <p>{{ .Params.work_title }}</p>
+        <p>{{ .Params.bio }}</p>
+      </div>
+      {{ end }}
+    </div>
+  </div>
+</section>
+-->
+{{ end }}
+{{ define "footer"}}
+
+{{ partial "body/footer.html" . }}
+{{ end }}

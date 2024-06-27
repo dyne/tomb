@@ -1,0 +1,55 @@
+
+<!-- Footer -->
+<footer>
+  <div class="footframe">
+    <div >
+      <h3>{{ .Site.Title }}</h3>
+      <p>{{ .Site.Params.description }}</p>
+      <p><strong>Software made and maintained by <a href="https://dyne.org">Dyne.org</a></strong><br />
+      <strong>{{ .Site.Params.geo.street }}<br />
+        {{ .Site.Params.geo.region }} - {{ .Site.Params.geo.locality }} {{ .Site.Params.geo.postalcode }}<br />
+        {{ .Site.Params.geo.country }}
+      </strong></p>
+      <p>Not for profit org. est. 2005 with reg.num.:<br />
+      {{ .Site.Params.geo.org_nr }}</p>
+
+
+
+
+    </div>
+    <div>
+      <ul>
+        {{ if not .IsHome }}
+        <li><a href="/">Home</a></li>
+        {{ end }}
+        {{ range .Site.Data.navigation }}
+        {{ if ne .name "Contact"}}
+        <li><a href="{{ .URL | relURL }}" {{ if eq .external true }} target="_blank" rel="noopener"
+            {{ end }}>{{ .icon }} {{ .name }}</a></li>
+        {{ end }}
+        {{ end }}
+      </ul>
+
+    </div>
+
+    <div class="footer-logo"><a href="#top">
+      {{ partial "svg/dyne-icon.svg" . }}
+    </a></div>
+
+    <small>
+      <div style="text-align: center;">
+        {{ range .Site.Data.social }}
+        <a target="_blank" alt="{{ .Site.Title }} on {{ .name }}" title="{{ .Site.Title }} on {{ .name }}" rel="noopener"
+          href="{{ .URL }}" class="icon small fab {{ .icon }}"><span class="label">{{ .name }}</span></a>
+        {{ end }}
+        <a target="_blank" alt="email" title="email" href="mailto:{{ .Site.Params.email }}" class="icon small fas fa-envelope-open-text" rel="me"><span
+          class="label">Email</span></a>
+      </div>
+      <p>&copy;{{ now.Format "2006" }} {{ .Site.Title }}
+        <!-- | <a href="/webcreds/">Credits</a>  -->
+        | <a href="{{ "cookies" | relURL }}">Privacy Policy</a>
+        | <a href="{{ "credits" | relURL }}">Credits</a></p>
+
+    </small>
+  </div>
+</footer>

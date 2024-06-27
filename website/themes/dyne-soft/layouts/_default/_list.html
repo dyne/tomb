@@ -1,0 +1,32 @@
+{{ define "header" }}
+{{ partial "body/header.html" . }}
+{{ end }}
+
+{{ define "main" }}
+{{ range .Paginator.Pages }}
+<section id="start" class="front-section">
+
+  <div style="background-image:url({{ .Params.Image | relURL }})">
+  </div>
+
+  <div class="description">
+    <div class="container">
+
+      <h2>{{ .Title }}</h2>
+
+      <p><strong>Posted on <time datetime="{{ .Date }}">{{ .Date.Format "2" }}{{ if in (slice 1 21 31) .Date.Day}}st{{ else if in (slice 2 22) .Date.Day}}nd{{ else if in (slice 3 23) .Date.Day}}rd{{ else }}th{{ end }} of {{ .Date.Format "January 2006" }}</time></strong></p>
+      <p>{{ .Content }}</p>
+      <p><a href="{{ .Permalink | relURL }}" class="button">Read More</a></p>
+
+    </div>
+  </div>
+
+</section>
+{{ end }}
+{{ end }}
+
+{{ define "footer"}}
+
+{{ partial "body/footer.html" . }}
+
+{{ end }}

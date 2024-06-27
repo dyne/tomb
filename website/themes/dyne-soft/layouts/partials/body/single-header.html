@@ -1,0 +1,12 @@
+<header class="hero-single" id="top">
+  <div class="imagecontainer">
+  </div>
+  <div class="content-wrapper">
+    <a href="/" alt="back to home">{{ partial "svg/software-icon.svg" . }}</a>
+    <div>
+      <h1>{{ .Title }}</h1>
+      <p>{{ .Params.description_markdown | markdownify }}</p>
+   </div>
+   <a class="arrow" href="#start" style="text-align:center;">{{ partial "svg/arrow.svg" . }}</a>
+  </div>
+</header>

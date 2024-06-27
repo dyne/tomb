@@ -1,0 +1,57 @@
+{{ define "header" }}
+{{ partial "body/single-header.html" . }}
+{{ end }}
+
+
+
+{{ define "main" }}
+
+<section id="start" style="margin-bottom: 80px">
+  <div class="content-wrapper">
+    <div class="content">
+      <p>{{ .Content | markdownify }}</p>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="service-selection">
+  <div class="content-wrapper">
+    <div class="content">
+      {{ range .Params.services }}
+      <div class="selector">
+        <h2>{{ .title }}</h2>
+        <p>{{ .short_markdown }}</p>
+        <p><a href="#{{ replace .title " " ""}}" class="button">Read More</a></p>
+      </div>
+      {{ end }}
+    </div>
+  </div>
+</section>
+
+{{ range .Params.services }}
+<article id="{{ replace .title " " ""}}" class="narative">
+  <div class="content-wrapper" style="margin-top: 160px;">
+
+    <div class="text-content">
+      <h2>{{ .title }}</h2>
+      <p>{{ .content_markdown | markdownify }}</p>
+      <p><a href="{{ .button.URL }}" class="button">{{ .button.label }}</a></p>
+    </div>
+    <div class="cartouche">
+      <figure>
+        <img src="{{ .image }}" />
+      </figure>
+    </div>
+  </div>
+</article>
+{{ end }}
+
+{{ end }}
+
+{{ define "footer"}}
+
+{{ partial "body/footer.html" . }}
+
+{{ end }}
