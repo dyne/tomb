@@ -1,0 +1,27 @@
+{{ define "header" }}
+{{ partial "body/single-header.html" . }}
+{{ end }}
+
+
+{{ define "main" }}
+
+<section id="start">
+  <div class="content-wrapper">
+    <div class="content">
+      {{ .Content | markdownify }}
+      {{ if .Params.link.URL }}
+      <p class="center">
+        <a href="{{ .Params.link.URL }}" target="_bank" rel="noopener" class="button">{{ if .Params.link.label }}{{ .Params.link.label }}{{ else }}check it out{{ end }}</a>
+      </p>
+      {{ end }}
+    </div>
+  </div>
+</section>
+
+{{ end }}
+
+{{ define "footer"}}
+
+{{ partial "body/footer.html" . }}
+
+{{ end }}

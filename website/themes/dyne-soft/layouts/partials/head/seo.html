@@ -1,0 +1,88 @@
+<!-- BEGIN seo.html -->
+{{ $title := printf "%s | %s" .Site.Title .Site.Params.Moto }}
+{{ if not .IsHome }}
+  {{ $title = printf "%s | %s" .Title site.Title }}
+{{ end }}
+
+
+{{ $description := .Site.Params.Description }}
+{{ if not .IsHome }}
+  {{ $description = $.Page.Params.description_markdown }}
+{{ end }}
+
+<title>{{ $title }}</title>
+<meta name="title" content="{{ $title }}" />
+<meta name="description" content="{{ $description }}" />
+<meta name="dc.date.modified" scheme="ISO8601" content="{{ .Lastmod }}" />
+<meta name="robots" content="index" />
+<link rel="canonical" href="{{ .Permalink }}" />
+<link rel="alternate" hreflang="x-default" href="{{ .Permalink }}" />
+<meta name="geo.region" content="{{ .Site.Params.geo.region }}" />
+<meta name="geo.placename" content="{{ .Site.Params.geo.locality }}" />
+<meta name="geo.position" content="{{ .Site.Params.geo.lat }};{{ .Site.Params.geo.long }}" />
+<meta name="ICBM" content="{{ .Site.Params.geo.lat }}, {{ .Site.Params.geo.long }}" />
+<meta name="author" content="{{ .Site.Title }}" />
+<meta name="generator" content="Hugo" />
+
+<!-- Dublin Core basic info -->
+
+<meta name="dcterms.Identifier" content="{{ .Permalink }}" />
+<meta name="dcterms.Format" content="text/html" />
+<meta name="dcterms.Relation" content="{{ .Site.Title }}" />
+<meta name="dcterms.Publisher" content="{{ .Site.Params.publisher }}" />
+<meta name="dcterms.Type" content="text/html" />
+<meta name="dcterms.Coverage" content="{{ .Permalink }}" />
+<meta name="dcterms.Rights" content="Copyright &copy;{{ .PublishDate }} {{ .Site.Title }}." />
+<meta name="dcterms.Subject" content="{{ $description }}" />
+<meta name="dcterms.Title" content="{{ .Title }}" />
+<meta name="dcterms.Contributor" content="{{ .Site.Title }}" />
+<meta name="dcterms.Date" content="{{ $.Page.Params.LastMod.Format "2006-01-02" }}" />
+<meta name="dcterms.Description" content="{{ $description }}" />
+
+<!-- Facebook -->
+
+<meta property="og:title" content="{{ $title }}" />
+<meta property="og:locale" content="{{ .Site.LanguageCode }}" />
+<meta property="og:description" content="{{ $description }}" />
+<meta property="og:url" content="{{ .Permalink }}" />
+<meta property="og:site_name" content="{{ .Site.Title }}" />
+<meta property="og:type" content="webpage" />
+<meta property="article:published_time" content="{{ .Lastmod }}" />
+<meta property="og:image" content="{{ .Site.Params.homepage_meta_tags.meta_og_image | absURL }}" />
+
+<!-- Twitter Card -->
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $title }}" />
+<meta name="twitter:description" content="{{ $description }}" />
+<meta name="twitter:image" content="{{ .Site.Params.homepage_meta_tags.meta_og_image | absURL }}" />
+
+<!-- Linked Data JSON -->
+
+
+<script type='application/ld+json'>
+  {
+    "@context": "https://www.schema.org",
+    "@type": "Organization",
+    "name": "{{ .Site.Title }}",
+    "url": "{{ .Site.BaseURL }}",
+    "sameAs": [
+    {{ range $index, $e := .Site.Data.social }}{{ if $index }}, {{ end }}{{ .URL }}{{ end }}
+    ],
+    "logo": "{{ .Site.BaseURL }}siteicon.png",
+    "image": "{{ .Site.BaseURL }}{{ .Site.Params.homepage_meta_tags.meta_og_image }}",
+    "description": "{{ .Site.Params.description }}",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{ .Site.Params.geo.street }}",
+      "addressLocality": "{{ .Site.Params.geo.locality }}",
+      "addressRegion": "{{ .Site.Params.geo.region }}",
+      "postalCode": "{{ .Site.Params.geo.postalcode }}",
+      "addressCountry": "{{ .Site.Params.geo.country }}"
+    }
+  }
+</script>
+
+
+<link rel="alternate" type="application/rss+xml" href="{{ .Site.BaseURL }}feed.xml" title="{{ .Site.Title }}" />
+   <!-- END seo.html -->

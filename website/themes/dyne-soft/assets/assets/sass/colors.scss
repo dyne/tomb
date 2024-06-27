@@ -1,0 +1,18 @@
+:root {
+--bg: {{ $.Site.Data.colors.bg_rgba }};
+--bg-alt: {{ $.Site.Data.colors.bg_alt_rgba }};
+--bg-shadow: {{ $.Site.Data.colors.bg_shadow_rgba }};
+--bg-highlight: {{ $.Site.Data.colors.bg_highlight_rgba }};
+--fg: {{ $.Site.Data.colors.fg_rgba }};
+--fg-alt: {{ $.Site.Data.colors.fg_alt_rgba }};
+--border: {{ $.Site.Data.colors.border_rgba }};
+--border-alt: {{ $.Site.Data.colors.border_alt_rgba }};
+--accent1: {{ $.Site.Data.colors.accent1_rgba }};
+--accent1-alt: {{ $.Site.Data.colors.accent1_alt_rgba }};
+--accent2: {{ $.Site.Data.colors.accent2_rgba }};
+--accent2-alt: {{ $.Site.Data.colors.accent2_alt_rgba }};
+--cta: {{ $.Site.Data.colors.cta_rgba }};
+--cta-alt: {{ $.Site.Data.colors.cta_alt_rgba }};
+--cta2: {{ $.Site.Data.colors.cta2_rgba }};
+--cta2-alt: {{ $.Site.Data.colors.cta2_alt_rgba }};
+}

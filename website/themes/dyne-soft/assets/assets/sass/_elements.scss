@@ -1,0 +1,181 @@
+
+// Basic Elements
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+}
+body {
+  height: 100vh;
+  width: 100vw;
+  font-size: 16px;
+  font-family: _font(family);
+  font-weight: 300;
+  color: var(--fg);
+  letter-spacing: _font(kerning);
+  overflow-x: hidden;
+}
+p {
+  font-size: 1.2em; /* 16px is the default em size */
+  line-height: 1.9555em; /* = 22px/14px */
+  margin-bottom: 1.5em;
+}
+em {
+  font-style: italic;
+}
+code {
+  font-family: _font(family-fixed);
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: _font(family);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 1.5em;
+}
+h1 {
+  font-size: 2.9em;
+  line-height: 1.1em;
+}
+h2 {
+  font-size: 2em;
+  line-height: 2em;
+}
+h3 {
+  font-size: 1.5em;
+  line-height: 1,83333333333em;
+  font-family: _font(family);
+
+}
+ul, ol {
+  font-size: 1.2em;
+}
+strong {
+  font-weight: 500;
+  font-style: normal;
+}
+a {
+  text-decoration-style: wavy;
+  text-decoration-color: transparent;
+  color: var(--accent1);
+  -moz-transition: all var(--anim-speed) ease-in-out, color var(--anim-speed) ease-in-out;
+  -webkit-transition: all var(--anim-speed) ease-in-out, color var(--anim-speed) ease-in-out;
+  -ms-transition: all var(--anim-speed) ease-in-out, color var(--anim-speed) ease-in-out;
+  transition: all var(--anim-speed) ease-in-out, color var(--anim-speed) ease-in-out;
+}
+a:hover {
+  color: var(--accent2);
+  text-decoration-style: wavy;
+  text-decoration-color: unset;
+}
+.center {
+  text-align: center;
+}
+
+// Buttons
+
+.button {
+  background-color: var(--accent1);
+  padding: 1em 2.3em;
+  margin-bottom: 22px;
+  display: inline-block;
+  border-radius: var(--border-radius);
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-family: _font(title);
+  text-transform: lowercase;
+  color: var(--bg);
+  box-shadow: 0px 0px 2px 0px var(--bg-shadow),0px 1px 0px 0px var(--bg-highlight) inset,0px -1px 0px 0px var(--bg-shadow) inset;
+  -webkit-transition: all var(--anim-speed) ease-in-out;
+  -moz-transition: all var(--anim-speed) ease-in-out;
+  -ms-transition: all var(--anim-speed) ease-in-out;
+  transition: all var(--anim-speed) ease-in-out;
+
+
+
+}
+.button:hover {
+  background-color: var(--accent2);
+  color: var(--bg);
+  box-shadow: 0px 0px 2px 0px var(--bg-shadow),0px 1px 0px 0px var(--bg-highlight) inset,0px -1px 0px 0px var(--bg-shadow) inset;
+  -webkit-transition: all var(--anim-speed) ease-in-out;
+  -moz-transition: all var(--anim-speed) ease-in-out;
+  -ms-transition: all var(--anim-speed) ease-in-out;
+  transition: all var(--anim-speed) ease-in-out;
+}
+.button:active {
+  -webkit-box-shadow: 0px 0px 0px 0px var(--border-alt);
+  -moz-box-shadow: 0px 0px 0px 0px var(--border-alt);
+  box-shadow: 0px 0px 0px 0px var(--border-alt);
+}
+@media only screen and (max-width: 480px) {
+  .button {
+    font-size: 0.75em;
+    padding: 0.75em;
+  }
+}
+
+
+// icon
+
+.label {
+  display: none;
+}
+.icon {
+  flex: 0 0 45px;
+  margin:20px;
+  font-size: 45px;
+  border-radius: 100px;
+  width: 100px;
+  height: 100px;
+  line-height: 100px;
+  border: 1px solid var(--accent1);
+  color: var(--accent1);
+  text-align: center;
+  text-decoration: none;
+  -moz-transition: border var(--anim-speed) ease-in-out, color var(--anim-speed) ease-in-out;
+  -webkit-transition: border var(--anim-speed) ease-in-out, color var(--anim-speed) ease-in-out;
+  -ms-transition: border var(--anim-speed) ease-in-out, color var(--anim-speed) ease-in-out;
+  transition: border var(--anim-speed) ease-in-out, color var(--anim-speed) ease-in-out;
+
+}
+.icon:hover {
+  border: 1px solid var(--accent2);
+  color: var(--accent2);
+
+}
+.small {
+  border-radius: 80px;
+  width: 70px;
+  height: 70px;
+  line-height: 70px;
+  font-size: 45px;
+
+}
+.smaller {
+  border-radius: 30px;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 18px;
+  margin: 10px 10px 10px 0;
+}
+
+
+.svg-container {
+  -moz-transition: all 3s ease-in-out;
+  -webkit-transition: all 3s ease-in-out;
+  -ms-transition: all 3s ease-in-out;
+  transition: all 3s ease-in-out;
+}
+.svg-container:hover {
+  fill: var(--accent1);
+  -moz-transition: all 3s ease-in-out;
+  -webkit-transition: all 3s ease-in-out;
+  -ms-transition: all 3s ease-in-out;
+  transition: all 3s ease-in-out;
+
+
+}

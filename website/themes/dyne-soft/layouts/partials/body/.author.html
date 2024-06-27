@@ -1,0 +1,34 @@
+{% assign author_id = page.author | prepend: "/authors/" | append: "/" %}
+{% assign author = site.authors | where: "url", author_id | first %}
+<div id="author">
+  <div class="bio">
+
+    {% if page.collection == 'posts' %}
+    <div class="author-image" alt="Picture of {{ author.name }}" style="background-image:url({{ author.image }});">
+    </div>
+    <br />
+    <p><a href="mailto:{{ author.email }}" rel="me"><strong>{{ author.name }}</strong></a></p>
+    <p>{{ author.position }}{% if author.gpg != nil %} | <a target="_blank" rel="noopener"
+        href="{{ author.gpg }}" rel="pgpkey authn">GPG</a>{% endif %}</p>
+    <p class="date">
+      Published the
+      <time datetime="{{ page.date }}">{% include dates.html %}</time>
+    </p>
+
+    {% endif %}
+    <h6>
+
+      Share this page:
+    </h6>
+    <ul>
+      <a target="_blank" rel="nofollow noopener" title="Share to facebook" alt="Share to facebook" href="https://touch.facebook.com/sharer.php?u={{ site.url }}{{ page.url | xml_escape }}&quest;pk_campaign=homeshare&amp;quote={{ page.description | xml_escape }}%20By%20{{ site.title | xml_escape }}%20via%20{{ site.url }}" class="icon smaller fab fa-facebook-f"><span class="label">Facebook</span></a>
+      <a target="_blank" rel="nofollow noopener" title="Share to twitter" alt="Share to twitter" href="https://twitter.com/share?url={{ site.url }}{{ page.url | xml_escape }}&quest;pk_campaign=homeshare&amp;text={{ page.description | xml_escape }}%20via%20&#64;{{ site.social.usernames.twitter }}%20&amp;hashtags=#{{ site.social.hashtag }}" class="icon smaller fab fa-twitter"><span class="label">Twitter</span></a>
+      <a target="_blank" rel="nofollow noopener" title="Share to telegram" alt="Share to telgram" href="https://telegram.me/share/url?url={{ site.url }}{{ page.url }}&quest;pk_campaign=homeshare&amp;text={{ page.description | xml_escape }}%20via%20&#64;{{ site.social.usernames.telegram }}" class="icon smaller fab fa-telegram"><span class="label ">Telegram</span></a>
+      <a target="_blank" rel="nofollow noopener" title="Share to reddit" alt="Share to reddit" href="https://reddit.com/submit/?url={{ site.url }}{{ page.url }}&quest;pk_campaign=homeshare&amp;title={{ page.description | xml_escape }}%20By%20{{ site.title | xml_escape }}" class="icon smaller fab fa-reddit"><span class="label">Reddit</span></a>
+    </ul>
+    <br />
+    {% unless page.url == '/radio/' %}
+    <h2><a href="#support" class="button">🙏 Support</a></h2>
+    {% endunless %}
+  </div>
+</div>

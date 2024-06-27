@@ -1,0 +1,52 @@
+
+{{ define "header" }}
+<header class="hero-single" id="top" style="min-height: 50vh">
+  <div class="imagecontainer">
+  </div>
+  <div class="content-wrapper">
+    <a href="/" alt="back to home">{{ partial "svg/software-icon.svg" . }}</a>
+    <div>
+      <h1>Download {{ .Site.Title }}</h1>
+      <p>{{ .Params.description_markdown | markdownify  }}<p>
+      <p>{{ range .Params.buttons }}<a href="{{ .URL }}" class="button" style="margin-right:10px;">{{ .label }}</a>{{ end }}</p>
+   </div>
+
+  </div>
+</header>
+{{ end }}
+
+{{ define "main" }}
+<section id="start">
+  <div class="content-wrapper">
+    <div class="content">
+      <h1>{{ .Params.description }}</h1>
+      {{ .Content | markdownify }}
+
+    </div>
+  </div>
+</section>
+{{ range .Params.sections }}
+<article class="narative">
+  <div class="content-wrapper">
+
+    <div class="text-content">
+      <h2>{{ .title }}</h2>
+      <p>{{ .description_markdown | markdownify }}</p>
+      <p><a href="{{ .button.URL }}" class="button">{{ .button.label }}</a></p>
+    </div>
+    <div class="cartouche">
+      <figure>
+        <img src="{{ .image }}" />
+      </figure>
+    </div>
+  </div>
+</article>
+{{ end }}
+
+{{ end }}
+
+{{ define "footer"}}
+
+{{ partial "body/footer.html" . }}
+
+{{ end }}

@@ -1,0 +1,48 @@
+.staff {
+  max-width: var(--max-width);
+	padding: 0;
+	margin: auto;
+	list-style: none;
+
+  display: flex;
+  flex-wrap: wrap;
+	li {
+    flex: 1 1 300px;
+    display: flex;
+    flex-direction: column;
+		padding: 30px 20px;
+		box-sizing: border-box;
+    width: 100%;
+    text-align: center;
+
+    .square-image {
+      background-size: cover;
+      background-position: center;
+      width: 100px;
+      height: 100px;
+      border-radius: 200px;
+      margin: 0 auto;
+
+    }
+	}
+
+	.name {
+    margin-top: 20px;
+    font-weight: 700;
+	}
+
+	.position {
+		color: var(--fg);
+		font-size: 1em;
+  }
+  @media only screen and (max-width: 769px) {
+    li {
+      .square-image {
+        width: 70px;
+        height: 70px;
+
+
+      }
+    }
+  }
+}

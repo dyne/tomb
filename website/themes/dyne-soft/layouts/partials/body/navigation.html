@@ -1,0 +1,34 @@
+
+<!-- Navigation -->
+<div id="navigation">
+<div class="content-wrapper">
+<div id="navbar" class="modalDialog">
+  <a href="#close" onclick="removeBlur()" alt="Close Menu" title="Close Menu">
+    <div class="closearea"> </div>
+  </a>
+  <nav>
+    <a href="#close" title="Close" onclick="removeBlur()" class="close-button">X</a>
+    <ul>
+
+      <li><a href="{{ "" | relURL }}" onclick="removeBlur()"  class="{{ if .IsHome }}current {{ end }}button">Home</a></li>
+
+{{ range .Site.Data.navigation }}
+
+    {{ if eq .external false }}
+      <li><a href="{{ .URL | relURL }}" onclick="removeBlur()" class="{{ if eq ( .URL | relURL) $.Page.RelPermalink }}current{{ end }} button">{{ .icon }} {{ .name }}</a></li>
+    {{ else }}
+      <li><a href="{{ .URL }}" target="_blank" rel="noopener" onclick="removeBlur()" class="button">{{ .icon }} {{ .name }}</a></li>
+    {{ end }}
+
+{{ end }}
+    </ul>
+  </nav>
+</div>
+<div id="sticky" class="logo">
+  <a href="{{ if .IsHome }}#top{{ else }}{{ "" | relURL }}{{ end }}" id="logo" class="folded"><img height="40px" src="{{ .Site.Params.logo | absURL }}" alt="{{ .Site.Title }} Logo" /></a>
+  <a href="#navbar" onclick="blurBody()" alt="Navigation Menu" title="Navigation Menu"><span class="fas fa-bars navmenu" style="position: relative;top: 9px;"></span></a>
+</div>
+</div>
+</div>
+
+  <!-- End Navigation -->

@@ -1,0 +1,43 @@
+{{ define "header" }}
+{{ partial "body/single-header.html" . }}
+{{ end }}
+
+
+
+{{ define "main" }}
+
+<section class="info" id="start">
+  <div class="info-pages">
+    <div class="container">
+      {{ .Page.Content | markdownify }}
+    </div>
+  </div>
+</section>
+
+
+{{ range .Paginator.Pages }}
+<section class="front-section">
+
+  <div style="background-image:url({{ .Params.Image | relURL }});filter: sepia() hue-rotate(120deg)">
+  </div>
+
+  <div class="content-wrapper">
+    <div class="container">
+
+      <h2>{{ .Title }}</h2>
+      <p>{{ .Params.description_markdown }}</p>
+      <p><a href="{{ .Permalink | relURL }}" class="button">Read More</a></p>
+
+    </div>
+  </div>
+
+</section>
+{{ end }}
+
+{{ end }}
+
+{{ define "footer"}}
+
+{{ partial "body/footer.html" . }}
+
+{{ end }}

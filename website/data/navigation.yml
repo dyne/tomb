@@ -1,0 +1,14 @@
+---
+- name: "About"
+  URL: "about/"
+  icon: ''
+  external: false
+- name: "Docs"
+  URL: "https://dyne.org/docs/tomb"
+  icon: ''
+  external: true
+- name: "Community"
+  URL: "community/"
+  icon: ''
+  external: false
+---

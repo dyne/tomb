@@ -1,0 +1,51 @@
+{{ define "header" }}
+<header class="hero-single" id="top">
+  <div class="imagecontainer">
+  </div>
+  <div class="content-wrapper">
+    <a href="/" alt="back to home">{{ partial "svg/software-icon.svg" . }}</a>
+    <div>
+      <h1>{{ .Title }}</h1>
+      <p>List of all the tags that can be found in this website's blog</p>
+   </div>
+   <a class="arrow" href="#start" style="text-align:center;">{{ partial "svg/arrow.svg" . }}</a>
+  </div>
+</header>
+
+{{ end }}
+
+{{ define "main" }}
+
+<section id="start">
+  <div class="content-wrapper">
+    <div class="content">
+      {{ .Content }}
+    </div>
+  </div>
+</section>
+
+<section class="blog-list">
+  <div class="content-wrapper">
+    <div class="content">
+      {{ range .Paginator.Pages }}
+
+
+
+
+          <p><a href="{{ .Permalink | relURL }}" class="tag">#{{ .Title }}</a></p>
+
+
+      {{ end }}
+    </div>
+  </div>
+
+</section>
+
+
+{{ end }}
+
+{{ define "footer"}}
+
+{{ partial "body/footer.html" . }}
+
+{{ end }}

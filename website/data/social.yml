@@ -1,0 +1,11 @@
+---
+- name: GitHub
+  URL: https://github.com/dyne/tomb
+  icon: fa-github
+- name: Mastofon
+  URL: https://toot.community/@dyne
+  icon: fa-mastodon
+- name: Twitter
+  URL: https://twitter.com/dyneorg
+  icon: fa-twitter
+---

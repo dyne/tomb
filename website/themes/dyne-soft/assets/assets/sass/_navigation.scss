@@ -1,0 +1,236 @@
+
+#navigation {
+  a, a:hover {
+    text-decoration: none;
+  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  width: 100vw;
+  z-index: 100;
+  -webkit-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+  -moz-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+  -ms-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+  transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+  .content-wrapper {
+    padding: 20px 40px;
+  }
+  #sticky {
+    flex: 1 1 auto;
+    max-width: var(--max-width);
+    height: 40px;
+    margin: auto;
+    padding: 20px 0;
+    display: flex;
+    flex-wrap:unset;
+    justify-content: flex-end;
+    .navmenu {
+      font-size: 2.3em;
+      margin-left: 40px;
+      display: none;
+      color: var(--accent1);
+    }
+    .folded {
+      width: 0px;
+      opacity: 0;
+      overflow: hidden;
+      -webkit-transition: all var(--anim-speed) ease-in;
+      -moz-transition: all var(--anim-speed) ease-in;
+      -ms-transition: all var(--anim-speed) ease-in;
+      transition: all var(--anim-speed) ease-in;
+    }
+    .slider {
+      width: 77px;
+      opacity: 1;
+      -webkit-transition: all var(--anim-speed) ease-in;
+      -moz-transition: all var(--anim-speed) ease-in;
+      -ms-transition: all var(--anim-speed) ease-in;
+      transition: all var(--anim-speed) ease-in;
+    }
+  }
+  #navbar {
+
+    flex: 1 1 auto;
+    max-width: var(--max-width);
+    height: 40px;
+    margin: auto;
+    padding: 20px 0;
+    #closearea {
+      display: none;
+    }
+    .close-button {
+      display: none;
+      z-index: 100000;
+    }
+    nav{
+      margin:auto;
+    }
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+
+      .button {
+        display: block;
+        background-color: transparent;
+        margin: 0 20px 0 0;
+        padding: 10px 30px;
+        color: var(--fg);
+        -webkit-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+        -moz-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+        -ms-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+        transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+        box-shadow: none;
+      }
+      .button:hover {
+        background-color: transparent;
+        color: var(--fg);
+        box-shadow: 0px 0px 2px 0px var(--bg-shadow),0px 1px 0px 0px var(--bg-highlight) inset,0px -1px 0px 0px var(--bg-shadow) inset;
+        -webkit-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+        -moz-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+        -ms-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+        transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+      }
+      .current {
+        box-shadow: 0px 0px 2px 0px var(--bg-shadow),0px 1px 0px 0px var(--bg-highlight) inset,0px -1px 0px 0px var(--bg-shadow) inset;
+      }
+    }
+  }
+
+}
+#navigation.enabled {
+  background-color: var(--bg);
+  -webkit-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+  -moz-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+  -ms-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+  transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+  -webkit-box-shadow: 0px 10px 30px 3px var(--bg-shadow);
+  -moz-box-shadow: 0px 10px 30px 3px var(--bg-shadow);
+  box-shadow: 0px 10px 30px 3px var(--bg-shadow);
+}
+
+
+///// MOBILE
+
+@media only screen and (max-width: 999px) {
+
+  #navigation {
+
+    #sticky {
+      justify-content: center;
+      .navmenu {
+        font-size: 2.3em;
+        margin-left: 0;
+        display: unset;
+
+      }
+      .folded {
+        margin-right: 0px;
+      }
+      .slider {
+        margin-right: 10px;
+      }
+    }
+    #navbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      nav {
+        position: absolute;
+        width: 300px;
+        height: 460px;
+        max-height: 90vh;
+        max-width: 90vw;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: var(--bg);
+
+        display: flex;
+        flex-wrap: wrap;
+        box-shadow: none;
+        align-content: center;
+        ul {
+          padding: 20px;
+          width: 100%;
+          display: block;
+        }
+        li {
+          list-style-type: none;
+          margin: 20px;
+          padding: 0;
+          box-shadow: 0px 0px 2px 0px var(--bg-shadow),0px 1px 0px 0px var(--bg-highlight) inset,0px -1px 0px 0px var(--bg-shadow) inset;
+          border-radius: var(--border-radius);
+        }
+        .button {
+          padding: 10px 0;
+          margin: 0;
+        }
+      }
+
+      .close-button {
+        display: unset;
+        background-color: var(--accent1);
+        color: var(--bg);
+        margin: 0 auto;
+        line-height: 48px;
+        position: absolute;
+        right: -12px;
+        text-align: center;
+        top: -10px;
+        width: 48px;
+        height: 48px;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: var(--border-radius);
+        box-shadow: 0px 0px 2px 0px var(--bg-shadow),0px 1px 0px 0px var(--bg-highlight) inset,0px -1px 0px 0px var(--bg-shadow) inset;
+
+        -webkit-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+        -moz-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+        -ms-transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+        transition: background-color var(--anim-speed) ease-in, box-shadow var(--anim-speed) ease-in;
+      }
+      .close-button:hover {
+        background-color: var(--accent2);
+        color: var(--bg);
+      }
+      .closearea {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        display: unset;
+      }
+    }
+  }
+  .modalDialog {
+
+    background: var(--bg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center left;
+    z-index: 10000;
+    opacity:0;
+    -webkit-transition: opacity var(--anim-speed) ease-in;
+    -moz-transition: opacity var(--anim-speed) ease-in;
+    -ms-transition: opacity var(--anim-speed) ease-in;
+    transition: opacity var(--anim-speed) ease-in;
+    pointer-events: none;
+  }
+  .modalDialog:target {
+    opacity:1;
+    pointer-events: auto;
+  }
+  .modalDialog > div {
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin: 100px auto;
+    padding: 20px;
+    border-radius: var(--border-radius);
+  }
+}
