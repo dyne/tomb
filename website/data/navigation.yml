@@ -1,6 +1,6 @@
 ---
-- name: "About"
-  URL: "about/"
+- name: "FAQ"
+  URL: "faq/"
   icon: ''
   external: false
 - name: "Docs"
