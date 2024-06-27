@@ -278,7 +278,7 @@ article:first-of-type {
         border-radius: calc(40vw + 400px );
         object-fit: cover;
         opacity: 1;
-        filter: sepia() hue-rotate(343deg);
+        filter: sepia() hue-rotate(120deg);
       }
     }
   }
@@ -323,7 +323,7 @@ article:first-of-type {
           border-radius: calc(100vw - 120px);
           object-fit: cover;
           opacity: 1;
-          filter: sepia() hue-rotate(343deg);
+          filter: sepia() hue-rotate(120deg);
         }
       }
     }
@@ -605,7 +605,7 @@ footer {
         border-radius: calc(40vw + 400px );
         object-fit: cover;
         opacity: 1;
-        filter: sepia() hue-rotate(343deg);
+        filter: sepia() hue-rotate(120deg);
       }
     }
   }
@@ -633,7 +633,7 @@ footer {
         img {
 
           opacity: 1;
-          filter: sepia() hue-rotate(343deg);
+          filter: sepia() hue-rotate(120deg);
           border-radius: 100vw;
           width: calc(100% - 40px);
           position: relative;
@@ -693,7 +693,7 @@ footer {
           border-radius: calc(100vw - 120px);
           object-fit: cover;
           opacity: 1;
-          filter: sepia() hue-rotate(343deg);
+          filter: sepia() hue-rotate(120deg);
         }
       }
     }
@@ -842,7 +842,7 @@ footer {
         img {
           margin: 0;
           opacity: 1;
-          filter: sepia() hue-rotate(343deg);
+          filter: sepia() hue-rotate(120deg);
           border-radius: 100vw;
           width: calc(100% - 40px);
           position: relative;
