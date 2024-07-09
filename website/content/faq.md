@@ -1,71 +1,98 @@
 ---
 title: Frequently Asked Questions
-description_markdown: "Dowse processes all DNS network connections on its network and makes them visible in real-time, showing when we connect to **.com**, **.org** or **.net** domains, or to the corporate cloud of social networks. This way we can immediately see how many connections are opened by our personal devices, without us even knowing, every time we connect to a network."
+description_markdown: "Everything you need to know about Tomb but where too affraid to ask"
 image: 'images/dowse-dataprevention-campaign-1024x576.jpg'
 sections:
-- title: "Experiment along"
-  content_markdown: "Dowse talks back to your devices. It uses open standards: MQTT,
-    Websockets, Open Sound Control. So many types of devices can treasure the messages
-    that Dowse publishes to turn them to action. It is a good starting point for artists,
-    hobbyists and makers to create amazing network-aware effects and interfaces. \n\n**We try
-    to help a community of dowsers to explore this possibility.**"
-  image: "images/dowsing_on_map.png"
+- title: "Development?"
+  content_markdown: "Tomb is on GitHub, where most of the community activity goes.\n\n
+
+Developers can interact with us via a discussion area, issues, or pull requests. The README is also a brief introduction for developers willing to engage.\n\n
+
+The [short tomb tester howto](https://github.com/dyne/Tomb/wiki/TesterHowTo) provides a guide to troubleshooting problems. Anyone planning to write code in Tomb should first look at the [short tomb developer howto](https://github.com/dyne/Tomb/wiki/DeveloperHowto). \n\n
+
+To get in touch with us in person please plan to participate in one of the yearly [italian hackmeeting](http://hackmeeting.org), usually held during summer on the peninsula."
+  image: "images/tomb_crew_hkm11.webp"
   button:
-    URL: "community"
-    label: Become a dowser
-- title: Peaceful Zone
-  content_markdown: "Your local area network should be a safe-sapce. A zone of peace of mind.
-  Knowing what happens in the digital realm can seem like worrysome sorcery or black-magic.\n\n
-  **Dowse is meant to help you preserve the peace of mind by creating awareness and
-  demystifying the communication taking place between your devices.**"
-  image: "images/dowse-dataprevention-campaign-thumb.jpg"
-  button:
-    URL: "download"
-    label: This is the Way
+    URL: "https://github.com/dyne/Tomb/discussions"
+    label: Get in touch
 layout: about
 ---
 
-## What is Dowse?
+## How secure is Tomb?
 
-<iframe width="100%" height="460" src="https://www.youtube-nocookie.com/embed/wDLyYk_TQtI?si=E9j_UJs_SwmCN6gc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+**Death is the only sure thing in life**. That said, Tomb is a pretty secure tool mainly because it is kept minimal, its source is always open to review (even when installed), and its code is easy to read with some shell script knowledge. Plus, **no cloud or network connection is needed: Tomb works offline**.
 
-### Synopsis
-We believe that complex and hidden network connections make people unaware of how their privacy is violated and how their data is communicated to third parties. We see Dowse primarily as an educational tool to share an insight into what is going on in a private network. We call this local area network (LAN) awareness: who is talking to whom or what, where and when? Any audience witnessing an operating Dowse installation is hit by a “wow!” effect and this awe serves to raise their awareness about the privacy implications of joining a network with a private device.
+GNU/Linux distributions include all encryption tools we use in Tomb and therefore, they are regularly peer-reviewed: we don't add anything else to them, just a layer of usability.
 
-Dowse is an application to filter all DNS queries in a Local Area Network (LAN) and make them visible in a beautiful looking live data visualization. It groups queries to show when we connect to .com or any other top-level domain (TLD) and is capable of distinguishing global cloud servers among them. Dowse can help analyze the traffic of any device connected to its LAN: mobile phones, laptops and “Internet of Things” (IoT) objects, without requiring technical knowledge of protocols: it is useful to demonstrate how many connections are opened on our behalf, without us even knowing, every time we connect to a network.
+If needed, **it is always possible to access the contents of a tomb without the tomb script**, only using a few commands typed into any shell interpreter:
 
-In short, it is a device that is designed to do a few things very well:
+```
+lo=$(losetup -f)
+losetup -f secret.tomb
+gpg -d secret.key | head -c -1 | cryptsetup --key-file - luksOpen $lo secret
+mount /dev/mapper/secret /mnt
+```
 
-- Opacize your network; External services will *not be able to capture your metadata and/or your data* through Domain Name System Translation.
-- Makes you aware of your traffic and all activities of your users without spying on them. It is a bit like sharing the same room.
-- Allows you to *swich off devices' and machines' network connection* in case they wish to "call home" because they have been infected by malware, or they have been ill conceived to serve commercial spyware purpose.
+One can change the last argument `/mnt` to where the Tomb has to be mounted and made accessible. To close the tomb, use:
 
-And we added to the mix:
-- Open Sound Control
-- MQTT
-- NETDATA
-- Websockets and all the good stuff to play with it.
-- Hardware Hacking with ESP8266 and Arduino
-- Programmable with NODERED
+```
+umount /mnt
+cryptsetup luksClose /dev/mapper/secret
+```
 
 
-## Idea: Responsible Networking
+## Who needs Tomb?
 
-Running a network in the age of the Internet of Things means hosting the connectivity of multiple devices owned by a diversity of subjects. Often such devices have full access to private, common and public information about humans operating them. Furthermore, devices can talk to each other without humans even asking and such interactions
-are not even manifest. This situation raises issues that are not just technical, but socio-political, about the way connections happen without human consent, within local networks and towards the outside, to and from the Internet.
+> Democracy requires privacy as much as Freedom of Expression. — Anonymous
 
-In such a scenario it becomes of crucial importance for home users and professionals to have a clear overview of what goes in and out of the network they are running: be it the LAN space they are offering to guests at home or the office network they are sharing with co-workers.
+The world is full of prevarication and political imprisonments, war rages in several places, and media is mainly used for propaganda by the powers in charge. Some of us face the dangers of being tracked by oppressors opposing our self-definition, independent thinking and resistance to homologation.
 
-## Concept
-Dowse is not only a functional tool, but a symbolic operation proposing a different linguistic approach to networking. In conceptualizing and documenting Dowse all references to military traits are removed: there is no use of “defense”, “shield”, “guardian” or “firewall” words.
+Our target community are GNU/Linux users with no time to click around, sometimes using old or borrowed computers, operating in places endangered by conflict where **a leak of personal data can be a threat**.
 
-The way privacy awareness (rather than protection) is presented to its users is not envisioned as a violent process, but as a responsible, natural act in search of harmony among the things connecting the inside with the outside of one’s private, common and public aspects of life.
+Even if one can't own a laptop, Tomb makes it possible to go around with a USB stick and borrow computers, leaving no trace and keeping data safe during transport.
 
-<iframe width="100%" height="460" src="https://www.youtube-nocookie.com/embed/9p5LozWuENE?si=xAQ9AF-V_3RXOQ0W" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-## Credits
-The Dowse network visualization shown in the exibition is designed and developed by **Denis "Jaromil" Roio**, who published it along with the Dowse Whitepaper in 2013. Soon Jaromil was joined by **Rob van Kranenburg** who has woven the Dowse narrative to a wider perspective on the Internet of Things, and by **Federico Bonelli** who ran workshops in various schools using Dowse.
+> The distinction between public and private is becoming increasingly blurred with the increasing intrusiveness of the media and advances in electronic technology. While this distinction is always the outcome of continuous cultural negotiation, it continues to be critical, for where nothing is private, democracy becomes impossible.
 
-The project has been funded by **SIDN Fonds** and received the ISOC NL Prize 2016.
+The Internet offers plenty of free services; in most cases, **corporate or state monopolies host all private information**. Server-hosted services and web-integrated technologies gather all data into huge information pools made available to established economic and cultural regimes.
 
-The Dowse software includes code contributions by **Luca Greco, Ivan Jelinčić, Andrea Scarpino, Nicola Rossi and Danilo Spinella**, and is based on the **DNSCrypt Proxy v2** framework by **Frank Denis**. **Jaromil** is still the current maintainer and accepts contributions via Dyne.org.
+**Tomb is ethical software that empowers everyone to protect their privacy**.
+
+## Aren't there enough encryption tools?
+
+The current situation in personal desktop encryption is far from optimal.
+
+The encrypted home mechanism of most operating systems doesn’t make it easy to transport around, and they do not separate the keys from the storage: only the password is needed to open them, which is prone to brute-forcing attacks.
+
+[TrueCrypt](http://en.wikipedia.org/wiki/TrueCrypt) makes use of statically linked libraries with code is hard to audit. Furthermore, it is [not considered free](http://lists.freedesktop.org/archives/distributions/2008-October/000276.html) by operating system distributors because of its liability reasons. (see [Debian](http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=364034), [Ubuntu](https://bugs.edge.launchpad.net/ubuntu/+bug/109701), [Suse](http://lists.opensuse.org/opensuse-buildservice/2008-10/msg00055.html), [Gentoo](http://bugs.gentoo.org/show_bug.cgi?id=241650) and [Fedora](https://fedoraproject.org/wiki/ForbiddenItems#TrueCrypt)).
+
+[Veracrypt](https://veracrypt.org) is a very portable rewrite of TrueCrypt (works also on Mac OSX) but it is very slow and has some interaction patterns that are not secure. Its way of encrypting is comparable to Tomb.
+
+[EncFS](http://www.arg0.net/encfs) doesn’t need root access. But it has drawbacks: it implements weaker encryption, doesn't promote the separated storage of keys and exposes the size of each single file rather than hiding the structure of a folder.
+
+
+Watch Tomb's development history in this infographic based on git commits.
+<iframe title="dyne/Tomb - Gource visualisation" width="100%" height="315" src="https://tv.dyne.org/videos/embed/54255dae-4bc5-4538-9c61-c5d2d69779da" frameborder="0" allowfullscreen="" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+
+## Compliancy
+
+Tomb qualifies as sound for use with information rated as "top secret" when used on an underlying stack of carefully reviewed hardware (random number generator and other components) and software (Linux kernel build, crypto modules, device manager, compiler used to built, shell interpreter and packaged dependencies).
+
+Tomb volumes are fully compliant with the FIPS 197 advanced encryption standard published by NIST and with the following industry standards:
+
+- Information technology -- Security techniques -- Encryption algorithms
+	- [ISO/IEC 18033-1:2015](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=54530)  -- Part 1: General
+	- [ISO/IEC 18033-3:2010](http://www.iso.org/iso/home/store/catalogue_ics/catalogue_detail_ics.htm?csnumber=54531) -- Part 3: Block ciphers
+
+Tomb implementation is known to at least partially address issues raised in:
+
+- Information technology -- Security techniques -- Key management
+	- [ISO/IEC 11770-1:2010](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=53456)  -- Part 1: Framework
+	- [ISO/IEC 11770-2:2008](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=46370)  -- Part 2: Mechanisms using symmetric techniques
+- [ISO/IEC 27005:2011](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=56742) Information technology -- Security techniques -- Information security risk management
+- [ISO/IEC 24759:2014](http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=59142) Information technology -- Security techniques -- Test requirements for cryptographic modules
+
+Any help on further verification of compliance is very welcome, as our access to ISO/IEC documents is limited.
+
+
+> All I know is what the words know, and dead things, and that makes a handsome little sum, with a beginning and a middle and an end, as in the well-built phrase and the long sonata of the dead. — Samuel Beckett
