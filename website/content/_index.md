@@ -8,19 +8,19 @@ sections:
   image: "images/tombanim.webp"
   button:
     label: "Entomb your secrets"
-    URL: "https://dyne.org/docs/tomb/get-started"
+    URL: "https://dyne.org/docs/tomb/#get-started"
 - title: "Advanced usage"
   description_markdown: "The tomb script takes care of several details to improve a user’s behaviour and the security of tombs in everyday usage"
   image: "images/tomb_songs.webp"
   button:
     label: "protect your data"
-    URL: "https://dyne.org/docs/tomb/advanced"
+    URL: "https://dyne.org/docs/tomb/#advanced-usage"
 - title: "External applications"
   description_markdown: "pass-tomb, Secrets, Mausoleum, zuluCrypt... Tomb has an ecosystem of third party apps ready to help you secure your digital life"
   image: "images/foster_privacy.webp"
   button:
     label: Enhance your privacy
-    URL: "https://dyne.org/docs/tomb/3rd-party-apps"
+    URL: "https://dyne.org/docs/tomb/#external-applications"
 ---
 
 Tomb is a 100% free and open source tool that facilitates managing secret files in volumes protected by strong encryption.
