@@ -8,7 +8,7 @@
   icon: ''
   external: true
 - name: "Community"
-  URL: "community/"
+  URL: "https://github.com/dyne/Tomb/discussions"
   icon: ''
   external: false
 ---
