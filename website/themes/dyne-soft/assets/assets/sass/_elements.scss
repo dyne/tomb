@@ -24,8 +24,23 @@ p {
 em {
   font-style: italic;
 }
-code {
+
+pre {
+  padding: 20px;
+  width: calc(100vw - 120px);
+  max-width: var(--max-width);
+  box-shadow: 3px 3px 6px 0px var(--bg-shadow) inset,-3px -3px 6px 1px var(--bg-highlight) inset;
+  border-radius: 7px;
+}
+pre > code {
   font-family: _font(family-fixed);
+  display: block;
+  background: none;
+  white-space: pre;
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 100px;
 }
 h1, h2, h3, h4, h5, h6 {
   font-family: _font(family);
@@ -178,4 +193,7 @@ a:hover {
   transition: all 3s ease-in-out;
 
 
+}
+hr {
+  width: 100%;
 }
