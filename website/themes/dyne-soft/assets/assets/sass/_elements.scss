@@ -197,3 +197,12 @@ a:hover {
 hr {
   width: 100%;
 }
+
+blockquote {
+  padding-left: 20px;
+  width: calc(100vw - 120px);
+  max-width: var(--max-width);
+  border-left: 3px solid var(--fg);
+  font-size: 1.2em;
+  letter-spacing: 0.05em;
+}
