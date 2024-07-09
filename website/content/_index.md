@@ -1,7 +1,7 @@
 ---
 title: Dowse
 description: 'Tomb is a system to make strong encryption easy for everyday use. A tomb is like a locked folder that can be safely transported and hidden in a filesystem.'
-image: "images/tombanim.webp"
+image: "images/tomb-horizontal.webp"
 sections:
 - title: "Get Started"
   description_markdown: "Tombs are operated from a terminal command line and require root access to the machine (or just sudo access to the script)."
