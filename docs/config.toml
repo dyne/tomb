@@ -36,7 +36,7 @@ enableRobotsTXT = "false"
 
   [params.homepage_meta_tags]
     meta_og_type = "website"
-    meta_og_image = "images/dowse.png"
+    meta_og_image = "images/tomb.jpeg"
     meta_twitter_site = "@dyneorg"
     meta_twitter_creator = "@dyneorg"
 
