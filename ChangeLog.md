@@ -1,5 +1,19 @@
 # Tomb ChangeLog
 
+## 2.11
+### July 2024
+
+Search engine is upgraded to use recoll, based on xapian backend:
+offers a GUI and is more up to date, replaces swish-e. Various fixes
+include a better default of 3 rounds for Argon2 KDF, improved support
+for cloakify which is now shipped in tomb/extras, new support for
+pinentry-tty useful for some headless systems and terminals over
+serial port, improved usage on machines without sudo and support
+bind-hooks on folders containing spaces in their names. Also the
+translations to some other languages were improved.  All documentation
+was revisited and reorganized, manpage corrected in some parts and a
+new homepage is up at https://dyne.org/tomb
+
 ## 2.10
 ### Sep 2023
 

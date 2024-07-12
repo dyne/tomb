@@ -26,9 +26,9 @@ Or, if you are in a hurry, kill all processes with open files inside your tomb a
 ```
  $ tomb slam
 ```
-## [Get started on dyne.org/software/tomb](https://dyne.org/software/tomb)
+## [Get started on dyne.org/tomb](https://dyne.org/tomb)
 
-<a href="https://dyne.org/software/tomb"><img src="https://files.dyne.org/software_by_dyne.png" width="30%"></a>
+<a href="https://dyne.org/tomb"><img src="https://files.dyne.org/software_by_dyne.png" width="30%"></a>
 
 All information is found on our website.
 
@@ -54,5 +54,5 @@ There is also a [space for discussion](https://github.com/dyne/Tomb/discussions)
 
 Tomb is Copyright (C) 2007-2024 by the Dyne.org Foundation and maintained by [Jaromil](https://github.com/jaromil). The [AUTHORS](AUTHORS.md) file contains more information on all the developers involved. The license is GNU Public License v3.
 
-## [More info on dyne.org/software/tomb](https://dyne.org/software/tomb)
+## [More info on dyne.org/tomb](https://dyne.org/tomb)
 
