@@ -112,7 +112,7 @@ export TEXTDOMAIN=tomb
 # Wrap sudo with a more visible message or apply user-supplied alternative to sudo
 _sudo() {
 	if option_is_set --sudo; then
-	       pescmd=`option_value --sudo`
+		pescmd=`option_value --sudo`
 		case `basename $pescmd` in
 			"doas"|"sup"|"sud"|"pkexec")
 				command -v $pescmd > /dev/null || _failure "$pescmd executable not found"
@@ -125,35 +125,35 @@ _sudo() {
 				${@}
 				return $?
 				;;
-			 *)
+			*)
 				_failure "Super user execution not supported: ::1 sudo::" "`option_value --sudo`"
 				;;
 		esac
 
 	else
-    if [[ "`id -u`" = "0" ]]; then
+		if [[ "`id -u`" = "0" ]]; then
 			_verbose "Super user execution skipped (SUID caller)"
 			${@}
 			return $?
-    elif command -v sudo 1>/dev/null 2>/dev/null; then
-		  local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
-		  command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
-		  msg=${(S)msg//::1*::/$USER}
-		  [[ -n "$SUDO_ASKPASS" ]] && local sudo_askpass="--askpass"
-		  sudo $sudo_askpass -p "
+		elif command -v sudo 1>/dev/null 2>/dev/null; then
+			local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
+			command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
+			msg=${(S)msg//::1*::/$USER}
+			[[ -n "$SUDO_ASKPASS" ]] && local sudo_askpass="--askpass"
+			sudo $sudo_askpass -p "
 $msg
 
 " ${@}
-		  return $?
-    elif command -v doas 1>/dev/null 2>/dev/null; then
-		  local msg="Enter password for user ::1 user:: to gain superuser privileges"
-		  command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
-		  msg=${(S)msg//::1*::/$USER}
-      doas ${@}
-      return $?
-    else
-      _failure "No way found to escalate privileges to super user."
-    fi
+			return $?
+		elif command -v doas 1>/dev/null 2>/dev/null; then
+			local msg="Enter password for user ::1 user:: to gain superuser privileges"
+			command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
+			msg=${(S)msg//::1*::/$USER}
+			doas ${@}
+			return $?
+		else
+			_failure "No way found to escalate privileges to super user."
+		fi
 	fi
 }
 
@@ -218,20 +218,20 @@ _is_found() {
 # date format: seconds since Epoch
 # stat format: <last access>:<last modified>
 _track_stat() {
-    local file="$1"
-    local stat=$(stat --format="%X:%Y" "$file")
-    TOMBFILESSTAT+=("$file" "$stat")
+	local file="$1"
+	local stat=$(stat --format="%X:%Y" "$file")
+	TOMBFILESSTAT+=("$file" "$stat")
 }
 
 # Restore files stats
 _restore_stat() {
-    local file stat
-    for file stat in "${(@kv)TOMBFILESSTAT}"; do
-	stats=("${(@s.:.)stat}")
-	_verbose "Restoring access and modification time for ::1 file::" $file
-	[[ -z "${stats[1]}" ]] || touch -a --date="@${stats[1]}" "$file"
-	[[ -z "${stats[2]}" ]] || touch -m --date="@${stats[2]}" "$file"
-    done
+	local file stat
+	for file stat in "${(@kv)TOMBFILESSTAT}"; do
+		stats=("${(@s.:.)stat}")
+		_verbose "Restoring access and modification time for ::1 file::" $file
+		[[ -z "${stats[1]}" ]] || touch -a --date="@${stats[1]}" "$file"
+		[[ -z "${stats[2]}" ]] || touch -m --date="@${stats[2]}" "$file"
+	done
 }
 
 # Identify the running user
@@ -267,7 +267,7 @@ _whoami() {
 	local home=`_get_home $_USER`
 	[[ $home == $HOME ]] || {
 		_verbose "Updating HOME to match user's: ::1 home:: (was ::2 HOME::)" \
-				 $home $HOME
+		$home $HOME
 		HOME=$home }
 
 	# Get connecting TTY from option -T or the environment
@@ -545,10 +545,10 @@ ask_password() {
 			_verbose "using pinentry-tty with no display"
 			output=$(pinentry_assuan_getpass | pinentry-tty)
 			pass_asked=1
-    else
-      # TODO: fallback to asking password using read
-		  _failure "Cannot find any pinentry and no DISPLAY detected."
-    fi
+		else
+			# TODO: fallback to asking password using read
+			_failure "Cannot find any pinentry and no DISPLAY detected."
+		fi
 	fi
 
 	[[ $pass_asked == 0 ]] &&
@@ -943,9 +943,9 @@ function _msg() {
 	[[ -n $_MSG_FD_OVERRIDE ]] && fd=$_MSG_FD_OVERRIDE
 
 	if [[ -t $fd ]]; then
-	       [[ -n "$progname" ]] && progname="$fg[magenta]$progname$reset_color"
-	       [[ -n "$pchars" ]] && pchars="$fg_bold[$pcolor]$pchars$reset_color"
-	       msg="$fg[$pcolor]$msg$reset_color"
+		[[ -n "$progname" ]] && progname="$fg[magenta]$progname$reset_color"
+		[[ -n "$pchars" ]] && pchars="$fg_bold[$pcolor]$pchars$reset_color"
+		msg="$fg[$pcolor]$msg$reset_color"
 	fi
 
 	${=command} "${progname}" "${pchars}" "${msg}" >&$fd
@@ -1010,12 +1010,12 @@ _ensure_dependencies() {
 		command -v $req 1>/dev/null 2>/dev/null || {
 			_failure "Missing required dependency ::1 command::.  Please install it." $req; }
 	done
-  # Check for pinentry or at least pinentry-tty (which has no alias)
-  if ! command -v pinentry 1>/dev/null 2>/dev/null; then
-    if ! command -v pinentry-tty 1>/dev/null 2>/dev/null; then
+	# Check for pinentry or at least pinentry-tty (which has no alias)
+	if ! command -v pinentry 1>/dev/null 2>/dev/null; then
+		if ! command -v pinentry-tty 1>/dev/null 2>/dev/null; then
 			_failure "Missing required dependency ::1 command::.  Please install it." pinentry
-    fi
-  fi
+		fi
+	fi
 	# Ensure system binaries are available in the PATH
 	path+=(/sbin /usr/sbin) # zsh magic
 
@@ -1071,7 +1071,7 @@ is_valid_recipients() {
 	# All the keys ID must be valid (the public keys must be present in the database)
 	for gpg_id in ${recipients[@]}; do
 		trust="$(gpg --with-colons --batch --list-keys "$gpg_id" 2> /dev/null |
-				 	awk 'BEGIN { FS=":" } /^pub/ { print $2; exit}')"
+			awk 'BEGIN { FS=":" } /^pub/ { print $2; exit}')"
 		[[ "${trust}" == "" ]] && {
 			_warning "Not a valid GPG key ID: ::1 gpgid:: " $gpg_id
 			return 1
@@ -1528,7 +1528,7 @@ gen_key() {
 				recipients_opt="--hidden-recipient"
 			fi
 
-		    is_valid_recipients $recipients || {
+			is_valid_recipients $recipients || {
 				_failure "You set an invalid GPG ID."
 			}
 
@@ -1607,33 +1607,33 @@ gen_key() {
 				kdftype="`option_value --kdftype`"
 				kdftype=${kdftype:-pbkdf2}
 				case ${kdftype} in
-				    pbkdf2)
-					local -i microseconds
-					microseconds=$(( itertime * 1000000 ))
-					_success "Using KDF, iteration time: ::1 microseconds::" $microseconds
-					_message "generating salt"
-					pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
-					_message "calculating iterations"
-					pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
-					_message "encoding the password"
-					# We use a length of 64bytes = 512bits (more than needed!?)
-					tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
+					pbkdf2)
+						local -i microseconds
+						microseconds=$(( itertime * 1000000 ))
+						_success "Using KDF, iteration time: ::1 microseconds::" $microseconds
+						_message "generating salt"
+						pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
+						_message "calculating iterations"
+						pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
+						_message "encoding the password"
+						# We use a length of 64bytes = 512bits (more than needed!?)
+						tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
 
-					header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
-					;;
-				    argon2)
-					_success "Using KDF Argon2"
-					kdfmem="`option_value --kdfmem`"
-					kdfmem=${kdfmem:-18}
-					_message "memory used: 2^::1 kdfmemory::" $kdfmem
-	  itertime="`option_value --kdf`"
-	  itertime=${itertime:-3}
-					kdfsalt=`tomb-kdb-pbkdf2-gensalt`
-					_message "kdf salt: ::1 kdfsalt::" $kdfsalt
-					_message "kdf iterations: ::1 kdfiterations::" $itertime
-					tombpass=`argon2 $kdfsalt -m $kdfmem -t $itertime -l 64 -r <<<"${tombpass}"`
-					header="_KDF_argon2_${kdfsalt}_${itertime}_${kdfmem}_64\n"
-					;;
+						header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+						;;
+					argon2)
+						_success "Using KDF Argon2"
+						kdfmem="`option_value --kdfmem`"
+						kdfmem=${kdfmem:-18}
+						_message "memory used: 2^::1 kdfmemory::" $kdfmem
+						itertime="`option_value --kdf`"
+						itertime=${itertime:-3}
+						kdfsalt=`tomb-kdb-pbkdf2-gensalt`
+						_message "kdf salt: ::1 kdfsalt::" $kdfsalt
+						_message "kdf iterations: ::1 kdfiterations::" $itertime
+						tombpass=`argon2 $kdfsalt -m $kdfmem -t $itertime -l 64 -r <<<"${tombpass}"`
+						header="_KDF_argon2_${kdfsalt}_${itertime}_${kdfmem}_64\n"
+						;;
 				esac
 			}
 		}
@@ -1649,8 +1649,8 @@ gen_key() {
 	local tmpres=$TOMBTMP
 	print $opt - "$gpgpass" \
 		| gpg --openpgp --force-mdc --cipher-algo ${algo} \
-			  --batch --no-tty ${gpgopt} \
-			  --status-fd 2 -o - --armor 2> $tmpres >> "$1"
+			--batch --no-tty ${gpgopt} \
+			--status-fd 2 -o - --armor 2> $tmpres >> "$1"
 	unset gpgpass
 	# check result of gpg operation
 	for i in ${(f)"$(cat $tmpres)"}; do
@@ -1758,7 +1758,7 @@ bury_key() {
 /^Version/ {next}
 {print $0}' \
 		| steghide embed --embedfile - --coverfile ${imagefile} \
-				   -p $TOMBPASSWORD -z 9 -e serpent cbc
+			-p $TOMBPASSWORD -z 9 -e serpent cbc
 	if [ $? != 0 ]; then
 		_warning "Encoding error: steghide reports problems."
 		res=1
@@ -1864,25 +1864,26 @@ cloakify_key() {
 	local cipher="$1"    # The cipher to use
 	local destfile="$2"  # (Optional) the output file where to save the
 	# result (none for stdout)
-  [[ -r "${cipher}" ]] ||
-    _failure "Cloak cipher file not found, see tomb/extras/cloak/ciphers"
+	[[ -r "${cipher}" ]] ||
+		_failure "Cloak cipher file not found, see tomb/extras/cloak/ciphers"
 
 	_success "Encoding key ::1 tomb key:: using cipher ::2 cipher file::" $TOMBKEYFILE $cipher
 
 	# Ensure we have a valid destination for the cloaked key
 	[[ -z $destfile ]] && {
-		  destfile="/dev/stdout" # No file was specified: fallback to stdout
-		  _message "printing cloaked key on stdout" }
+		destfile="/dev/stdout" # No file was specified: fallback to stdout
+		_message "printing cloaked key on stdout" }
 
 	# Bail out if destination exists, unless -f (force) was passed
 	[[ $destfile != "/dev/stdout" && -s $destfile ]] && {
-		  _warning "File exists: ::1 output file::" $destfile
-		  { option_is_set -f } && {
-			    _warning "Use of --force selected: overwriting."
-			    rm -f $destfile
-		  } || {
-			    _warning "Make explicit use of --force to overwrite."
-			    _failure "Refusing to overwrite file. Operation aborted." }
+		_warning "File exists: ::1 output file::" $destfile
+		{ option_is_set -f } && {
+			_warning "Use of --force selected: overwriting."
+			rm -f $destfile
+		} || {
+			_warning "Make explicit use of --force to overwrite."
+			_failure "Refusing to overwrite file. Operation aborted."
+		}
 	}
 
 	# Cipher the key
@@ -1903,9 +1904,9 @@ cloakify_key() {
 # optional 3rd arg: the key where to save the result (none for stdout)
 decloakify_key() {
 	[[ -z $1 ]] && {
-		  _failure "Uncloak failed, no text file specified" }
+		_failure "Uncloak failed, no text file specified" }
 	[[ -z $2 ]] && {
-		  _failure "Uncloak failed, no cipher file specified" }
+		_failure "Uncloak failed, no cipher file specified" }
 
 	local textfile="$1"   # The text file where to look for the key
 	local cipher="$2"     # The cipher to use
@@ -1941,11 +1942,11 @@ decloakify_key() {
 	}
 
 	# Extract the key from the text file
-  if [[ -z "$destkey" ]]; then
-	  decloakify -i "${textfile}" -c "${cipher}"
-  else
-	  decloakify -i "${textfile}" -c "${cipher}" -o "${destkey}"
-  fi
+	if [[ -z "$destkey" ]]; then
+		decloakify -i "${textfile}" -c "${cipher}"
+	else
+		decloakify -i "${textfile}" -c "${cipher}" -o "${destkey}"
+	fi
 	r=$?
 
 	# Report to the user
@@ -2092,7 +2093,7 @@ forge_key() {
 	[[ -n "$algopt" ]] && algo=$algopt
 
 	_message "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::" \
-			 $destkey $algo
+		$destkey $algo
 
 	[[ $KDF == 1 ]] && { ! option_is_set -g } && {
 		_message "Using KDF to protect the key password (`option_value --kdf` rounds)"
@@ -2186,7 +2187,7 @@ lock_tomb_with_key() {
 	_verbose "Tomb found: ::1 tomb path::" $TOMBPATH
 
 	local filesystem=ext4
-    option_is_set --filesystem && {
+	option_is_set --filesystem && {
 		filesystem=`option_value --filesystem`
 		local tombsize=`stat --format '%s' $tombpath`
 		case $filesystem in
@@ -2286,7 +2287,7 @@ lock_tomb_with_key() {
 
 	_message "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::" $TOMBNAME $cipher
 	_success "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::" \
-			 $TOMBPATH $TOMBKEYFILE
+		$TOMBPATH $TOMBKEYFILE
 	return 0
 }
 
@@ -2674,7 +2675,7 @@ exec_safe_func_hooks() {
 	# Only run if post-hooks has the executable bit set
 	[[ -x $mnt/exec-hooks ]] && {
 		_success "Exec hook: ::1 exec hook:: ::2 action::" \
-				 "${mnt}/exec-hooks" "$1"
+			"${mnt}/exec-hooks" "$1"
 		# here call two actions: open or close. Synopsis:
 		# $1	 $2			  $3		  $4		  $5
 		# open	"$tombmount"
@@ -2736,7 +2737,7 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 		{ option_is_set --get-mountpoint } && { print "$tombmount"; continue }
 
 		_message "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::" \
-				 $tombname "$tombmount" $tombfsopts
+			$tombname "$tombmount" $tombfsopts
 
 		_verbose "::1 tombname:: /dev/::2 tombloop:: device mounted (detach with losetup -d)" $tombname $tombloop
 
@@ -2744,11 +2745,11 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 
 		[[ -z "$tombtty" ]] || {
 			_message "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::" \
-					 $tombname $tombuser $tombtty $tombhost
+				$tombname $tombuser $tombtty $tombhost
 		}
 
 		_message "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::%) is used: ::4 tombavail:: free " \
-				 $tombname $tombtot $tombused $tombavail $tombpercent
+			$tombname $tombtot $tombused $tombavail $tombpercent
 
 		[[ ${tombp} -ge 90 ]] && {
 			_warning "::1 tombname:: warning: your tomb is almost full!" $tombname
@@ -2758,7 +2759,7 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 		mounted_hooks=(`list_tomb_binds $tombname "$tombmount"`)
 		for h in ${mounted_hooks}; do
 			_message "::1 tombname:: hooks ::2 hookdest::" \
-					 $tombname ${h[(ws:;:)2]}
+				$tombname ${h[(ws:;:)2]}
 		done
 	done
 	return 0
@@ -2787,9 +2788,9 @@ list_tomb_mounts() {
 			| awk '
 BEGIN { main="" }
 /^\/dev\/mapper\/tomb/ {
-  if(main==$1) next;
-  print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
-  main=$1
+	if(main==$1) next;
+	print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
+	main=$1
 }
 '
 	} || {
@@ -2802,10 +2803,10 @@ BEGIN { main="" }
 			| awk -vtomb="$tname" '
 BEGIN { main="" }
 /^\/dev\/mapper\/tomb/ {
-  if("["$5"]"!=tomb) next;
-  if(main==$1) next;
-  print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
-  main=$1
+	if("["$5"]"!=tomb) next;
+	if(main==$1) next;
+	print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
+	main=$1
 }
 '
 	}
@@ -2831,10 +2832,10 @@ list_tomb_binds() {
 		| awk -vpattern="$1" '
 BEGIN { }
 {
-  if("["$5"]"!=pattern) next;
-  if(index($1,"[")==0) next;
-  gsub("[[][^]]*[]]","",$1);
-  print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
+	if("["$5"]"!=pattern) next;
+	if(index($1,"[")==0) next;
+	gsub("[[][^]]*[]]","",$1);
+	print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
 }
 '
 }
@@ -2870,25 +2871,25 @@ index_tombs() {
 			_message "Skipping ::1 tomb name:: (.noindex found)." $tombname
 			continue }
 
-	  { command -v updatedb 1>/dev/null 2>/dev/null } && {
-	    updatedbver=`updatedb --version | grep '^updatedb'`
-	    if [[ "$updatedbver" =~ "GNU findutils" ]]; then
-		    _warning "Cannot use GNU findutils for index/search commands."
-      # elif [[ "$updatedbver" =~ "locate" ]]; then
-		  #   _warning "Index command needs 'mlocate/plocate' to be installed."
-      else
-		    _message "Indexing ::1 tomb name:: filenames..." $tombname
-	      _verbose "$updatedbver"
-		    updatedb -l 0 -o "${tombmount}/.updatedb" -U "${tombmount}"
-      fi
-    }
+		{ command -v updatedb 1>/dev/null 2>/dev/null } && {
+			updatedbver=`updatedb --version | grep '^updatedb'`
+			if [[ "$updatedbver" =~ "GNU findutils" ]]; then
+				_warning "Cannot use GNU findutils for index/search commands."
+			# elif [[ "$updatedbver" =~ "locate" ]]; then
+			#   _warning "Index command needs 'mlocate/plocate' to be installed."
+			else
+				_message "Indexing ::1 tomb name:: filenames..." $tombname
+				_verbose "$updatedbver"
+				updatedb -l 0 -o "${tombmount}/.updatedb" -U "${tombmount}"
+			fi
+		}
 
 		# here we use recoll to index file contents
 		[[ $RECOLL == 1 ]] && {
 			_message "Indexing ::1 tomb name:: contents..." $tombname
 			rm -f "${tombmount}/recoll.conf"
 			_message "Generating a new search index configuration: ::1 recoll conf::" "${tombmount}/recoll.conf"
-      mkdir -p "${tombmount}/.recoll"
+			mkdir -p "${tombmount}/.recoll"
 			cat <<EOF > "${tombmount}/recoll.conf"
 topdirs = ${tombmount}
 cachedir = ${tombmount}/.recoll
@@ -2928,7 +2929,7 @@ search_tombs() {
 			_message "Searching filenames in tomb ::1 tomb name::" $tombname
 			locate -d "${tombmount}/.updatedb" -e -i "${(f)@}"
 			_message "Matches found: ::1 matches::" \
-					 $(locate -d "${tombmount}/.updatedb" -e -i -c ${(f)@})
+				$(locate -d "${tombmount}/.updatedb" -e -i -c ${(f)@})
 
 			# Use recoll to search over contents
 			[[ $RECOLL == 1 && -r "$tombmount/recoll.conf" ]] && {
@@ -2991,7 +2992,7 @@ resize_tomb() {
 		${=DD} if=/dev/urandom bs=1048576 count=${delta} >> $TOMBPATH
 		[[ $? == 0 ]] || {
 			_failure "Error creating the extra resize ::1 size::, operation aborted." \
-					 $tmp_resize }
+				$tmp_resize }
 
 		# If same size this allows to re-launch resize if pinentry expires
 		# so that it will continue resizing without appending more space.
@@ -3102,7 +3103,7 @@ umount_tomb() {
 		}
 
 		_message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
-				 $tombname "$tombmount"
+			$tombname "$tombmount"
 
 		# check if there are binded dirs and close them
 		bind_tombs=(`list_tomb_binds $tombname "$tombmount"`)
@@ -3205,7 +3206,7 @@ slam_tomb() {
 		tombname=${i[(ws:;:)5]}
 		tombmount="${i[(ws:;:)2]}"
 		_success "Slamming tomb ::1 tombname:: mounted on ::2 tombmount::" \
-				 ${tombname} "${tombmount}"
+			${tombname} "${tombmount}"
 		# iterate through all processes running in mounted tombs
 		for pnum in ${(f)"$(_sudo lsof -t +D "$tombmount")"}; do
 			puid=$(cat /proc/${pnum}/loginuid)
@@ -3215,7 +3216,7 @@ slam_tomb() {
 			# iterate through 3 different signals to send, break on success
 			for s in TERM HUP KILL; do
 				_message "::1 tombname:: sending ::2 sig:: to ::3 cmd:: (::4 uid::)" \
-						 ${tombname} ${s} ${pcmd} ${powner}
+					${tombname} ${s} ${pcmd} ${powner}
 				_sudo kill -$s $pnum
 				# give some time to the process for a clean quit
 				sleep .5
@@ -3225,7 +3226,7 @@ slam_tomb() {
 			# if process still running then signal failure
 			[[ -r /proc/$pnum ]] && {
 				_warning "Can't kill ::1 process:: ::2 pcmd:: (::3 powner::)" \
-						 $pnum $pcmd $powner
+					$pnum $pcmd $powner
 				result=1 }
 		done
 		# if it failed killing a process, report it
@@ -3382,8 +3383,8 @@ main() {
 	option_is_set --tmp && TMPDIR=$(option_value --tmp)
 
 	option_is_set --sudo && {
-	    local _opt=`basename $(option_value --sudo)`
-	    _message "Privilege escalation tool configured: ::1 exec::" $_opt
+		local _opt=`basename $(option_value --sudo)`
+		_message "Privilege escalation tool configured: ::1 exec::" $_opt
 	}
 
 	# When we run as root, we remember the original uid:gid to set
@@ -3398,7 +3399,7 @@ main() {
 
 	[[ -z $_UID ]] || {
 		_verbose "Caller: uid[::1 uid::], gid[::2 gid::], tty[::3 tty::]." \
-				 $_UID $_GID $_TTY
+			$_UID $_GID $_TTY
 	}
 
 	_verbose "Temporary directory: $TMPDIR"
@@ -3560,13 +3561,13 @@ main() {
 				_print "System utils:"
 				echo
 				cat <<EOF
-  `zsh --version`
-  `sudo -V | head -n1`
-  `cryptsetup --version`
-  `pinentry --version | head -n1`
-  `findmnt -V`
-  `gpg --version | head -n1` - key forging algorithms (GnuPG symmetric ciphers):
-  `list_gnupg_ciphers`
+	`zsh --version`
+	`sudo -V | head -n1`
+	`cryptsetup --version`
+	`pinentry --version | head -n1`
+	`findmnt -V`
+	`gpg --version | head -n1` - key forging algorithms (GnuPG symmetric ciphers):
+	`list_gnupg_ciphers`
 EOF
 				echo
 				_print "Optional utils:"
