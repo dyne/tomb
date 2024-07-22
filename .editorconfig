@@ -1,0 +1,15 @@
+# Copyright 2023 Dyne.org foundation
+# SPDX-FileCopyrightText: 2023 Dyne.org foundation
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# stop search for .editorconfig in parent directories
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+indent_style = tab
+indent_size = 8
+

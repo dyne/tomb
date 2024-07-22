@@ -112,7 +112,7 @@ export TEXTDOMAIN=tomb
 # Wrap sudo with a more visible message or apply user-supplied alternative to sudo
 _sudo() {
 	if option_is_set --sudo; then
-               pescmd=`option_value --sudo`
+	       pescmd=`option_value --sudo`
 		case `basename $pescmd` in
 			"doas"|"sup"|"sud"|"pkexec")
 				command -v $pescmd > /dev/null || _failure "$pescmd executable not found"
@@ -227,10 +227,10 @@ _track_stat() {
 _restore_stat() {
     local file stat
     for file stat in "${(@kv)TOMBFILESSTAT}"; do
-        stats=("${(@s.:.)stat}")
-        _verbose "Restoring access and modification time for ::1 file::" $file
-        [[ -z "${stats[1]}" ]] || touch -a --date="@${stats[1]}" "$file"
-        [[ -z "${stats[2]}" ]] || touch -m --date="@${stats[2]}" "$file"
+	stats=("${(@s.:.)stat}")
+	_verbose "Restoring access and modification time for ::1 file::" $file
+	[[ -z "${stats[1]}" ]] || touch -a --date="@${stats[1]}" "$file"
+	[[ -z "${stats[2]}" ]] || touch -m --date="@${stats[2]}" "$file"
     done
 }
 
@@ -1626,8 +1626,8 @@ gen_key() {
 					kdfmem="`option_value --kdfmem`"
 					kdfmem=${kdfmem:-18}
 					_message "memory used: 2^::1 kdfmemory::" $kdfmem
-          itertime="`option_value --kdf`"
-          itertime=${itertime:-3}
+	  itertime="`option_value --kdf`"
+	  itertime=${itertime:-3}
 					kdfsalt=`tomb-kdb-pbkdf2-gensalt`
 					_message "kdf salt: ::1 kdfsalt::" $kdfsalt
 					_message "kdf iterations: ::1 kdfiterations::" $itertime
@@ -2073,8 +2073,8 @@ forge_key() {
 	# Ensure GnuPG won't exit with an error before first run
 	local gpghome=${GNUPGHOME:-$HOME/.gnupg}
 	[[ -r $gpghome/pubring.gpg ]] || {
-        mkdir -p -m 0700 $gpghome
-        touch $gpghome/pubring.gpg }
+	mkdir -p -m 0700 $gpghome
+	touch $gpghome/pubring.gpg }
 
 	# Do not overwrite any files accidentally
 	[[ -r "$destkey" ]] && {
@@ -3383,7 +3383,7 @@ main() {
 
 	option_is_set --sudo && {
 	    local _opt=`basename $(option_value --sudo)`
-            _message "Privilege escalation tool configured: ::1 exec::" $_opt
+	    _message "Privilege escalation tool configured: ::1 exec::" $_opt
 	}
 
 	# When we run as root, we remember the original uid:gid to set
