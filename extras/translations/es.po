@@ -2,19 +2,19 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2023-06-27 13:14-0300\n"
-"Last-Translator: Daniel Dias Rodrigues <danieldiasr@gmail.com>\n"
+"PO-Revision-Date: 2024-07-25 16:09+0000\n"
+"Last-Translator: gallegonovato <fran-carro@hotmail.es>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/tomb/tomb/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Weblate 5.7-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
-msgstr ""
+msgstr "No se encontró el ejecutable $pescmd"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -24,7 +24,7 @@ msgstr ""
 
 #: tomb:Safety functions:_sudo:131
 msgid "Super user execution not supported: ::1 sudo::"
-msgstr ""
+msgstr "No se admite la ejecución de superusuario: ::1 sudo::"
 
 #: tomb:Safety functions:_whoami:236
 msgid "Failing to identify the user who is calling us"
@@ -53,11 +53,11 @@ msgstr "Se ha encontrado una partición de intercambio activa..."
 
 #: tomb:Safety functions:_ensure_safe_swap:408
 msgid "Found zramswap with writeback enabled."
-msgstr ""
+msgstr "Se encontró zramswap con reescritura habilitada."
 
 #: tomb:Safety functions:_ensure_safe_swap:411
 msgid "Found zramswap without writeback to disk."
-msgstr ""
+msgstr "Se encontró zramswap sin escritura en el disco."
 
 #: tomb:Safety functions:_ensure_safe_swap:424
 msgid "The undertaker found that all swap partitions are encrypted. Good."
@@ -93,9 +93,8 @@ msgid "Operation aborted."
 msgstr "Operación abortada."
 
 #: tomb:Safety functions:ask_password:536
-#, fuzzy
 msgid "Cannot find any pinentry and no DISPLAY detected."
-msgstr "No se puede encontrar pinentry, y no se ha detectado DISPLAY."
+msgstr "No se pudo encontrar ningún pinentry y no se detectó ninguna PANTALLA."
 
 #: tomb:Safety functions:ask_password:550
 msgid "Pinentry error: ::1 error::"
@@ -106,21 +105,20 @@ msgid "Empty password"
 msgstr "Contraseña vacía"
 
 #: tomb:Safety functions:sphinx_get_password:587
-#, fuzzy
 msgid "sphinx returns error: ::1 error::"
-msgstr "Error de pinentry: ::1 error::"
+msgstr "El pinentry devuelve el error: ::1 error::"
 
 #: tomb:Safety functions:sphinx_get_password:589
 msgid "Failed to retrieve actual password with sphinx."
-msgstr ""
+msgstr "No se pudo recuperar la contraseña real con sphinx."
 
 #: tomb:Safety functions:sphinx_get_password:592
 msgid "Both host and user have to be set to use sphinx"
-msgstr ""
+msgstr "Tanto el host como el usuario deben estar configurados para usar sphinx"
 
 #: tomb:Safety functions:sphinx_set_password:623
 msgid "Failed to create password with sphinx"
-msgstr ""
+msgstr "Error al crear contraseña con sphinx"
 
 #: tomb:Safety functions:is_valid_tomb:636
 msgid "Tomb file is missing from arguments."
@@ -151,9 +149,8 @@ msgid "Tomb won't work without a TOMBNAME."
 msgstr "Tomb no funcionará sin un TOMBNAME (nombre de la tumba)."
 
 #: tomb:Safety functions:is_valid_tomb:698
-#, fuzzy
 msgid "Tomb file already in use: ::1 tombname::"
-msgstr "La tumba ya está en uso: ::1 tumba::"
+msgstr "Tomb está actualmente en uso: ::1 tombname::"
 
 #: tomb:Safety functions:is_valid_tomb:704
 msgid "Valid tomb file found: ::1 tomb path::"
@@ -169,14 +166,12 @@ msgstr ""
 "ocurre frecuentemente en VPS y núcleos que no proporcionen el módulo 'loop'."
 
 #: tomb:Safety functions:lo_mount:718
-#, fuzzy
 msgid "It is impossible to use Tomb on this machine under these conditions."
 msgstr "Es imposible utilizar Tomb en esta máquina en estas condiciones."
 
 #: tomb:Safety functions:lo_mount:726
-#, fuzzy
 msgid "Loopback mount failed: ::1 path:: on ::2 loop::"
-msgstr "Error al montar ::1 mapper:: en ::2 punto de montaje::"
+msgstr "Error en el ensamblaje de Loopback: ::1 path:: en ::2 loop::"
 
 #: tomb:Commandline interaction:usage:762
 msgid "Syntax: tomb [options] command [arguments]"
@@ -191,9 +186,8 @@ msgid " // Creation:"
 msgstr " // Creación:"
 
 #: tomb:Commandline interaction:usage:767
-#, fuzzy
 msgid " dig          create a new empty TOMB file of size -s in MiB"
-msgstr " dig     crear una nueva TUMBA vacía de tamaño -s en MiB"
+msgstr " dig     crear un nuevo TOMB vacío de tamaño -s en MiB"
 
 #: tomb:Commandline interaction:usage:768
 #, fuzzy
