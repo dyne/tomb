@@ -66,6 +66,7 @@ typeset -i RECOLL=1
 typeset -i QRENCODE=1
 typeset -i LSOF=1
 typeset -i ACL=1
+typeset -i ARGON2=1
 
 # Default mount options
 typeset		 MOUNTOPTS="rw,noatime,nodev"
@@ -749,8 +750,13 @@ usage() {
 	_print " -R           provide GnuPG hidden recipients (separated by comma)"
 	_print " --sudo       super user exec alternative to sudo (doas or none)"
 
-	[[ $KDF == 1 ]] && {
-		_print " --kdf        forge keys armored against dictionary attacks"
+	[[ $KDF == 1 ]] || [[ $ARGON2 == 1 ]] && {
+		_print " --kdf        forge keys armored against dictionary attacks (pbkdf2 (default), argon2)"
+		_print " --kdfiter    Number of iterations (meaning depending on KDF algorithm) (pbkdf2, argon2)"
+	}
+	[[ $ARGON2 == 1 ]] && {
+		_print " --kdfmem     memory to be used (argon2)"
+		_print " --kdfpar     number of threads (argon2)"
 	}
 
 	echo
@@ -1225,11 +1231,14 @@ get_lukskey() {
 				kdf_salt="${firstline[(ws:_:)3]}"
 				kdf_ic="${firstline[(ws:_:)4]}"
 				kdf_mem="${firstline[(ws:_:)5]}"
+				kdf_par="${firstline[(ws:_:)6]}"
+				# ToDo also parse kdf_len?
 				_message "Unlocking KDF key protection (::1 kdf::)" $kdf_hash
 				_verbose "KDF salt: $kdf_salt"
 				_verbose "KDF ic: $kdf_ic"
 				_verbose "KDF mem: $kdf_mem"
-				_password=$(argon2 $kdf_salt -m $kdf_mem -t $kdf_ic -l 64 -r 2>/dev/null <<<$_password)
+				_verbose "KDF # threads: $kdf_par"
+				_password=$(argon2 $kdf_salt -m $kdf_mem -t $kdf_ic -p $kdf_par -l 64 -r 2>/dev/null <<<$_password)
 				;;
 
 			*)
@@ -1472,50 +1481,68 @@ gen_key() {
 		fi
 
 		header=""
-		[[ $KDF == 1 ]] && {
+		[[ $KDF == 1 ]] || [[ $ARGON2 == 1 ]] && {
 			{ option_is_set --kdf } && {
-				# KDF is a new key strenghtening technique against brute forcing
+				# KDF is a key strengthening technique against brute forcing
 				# see: https://github.com/dyne/Tomb/issues/82
-				itertime="`option_value --kdf`"
+				# Two KDF are currently supported:
+				# * pbkdf2 (time restrictive)
+				# * argon2 (memory, parallelismn restrictive and through those time)
+
+				# --kdfiter takes one integer value as parameter
+				# argon2: # of iterations (default of 3);
+				# pbkdf2: calculates # of iterations to reach this as time cost in seconds
+				itertime="`option_value --kdfiter`"
+				itertime=${itertime:-3}
+
 				# removing support of floating points because they can't be type checked well
 				# if [[ "$itertime" != <-> ]]; then
 				# 	unset tombpass
 				# 	unset tombpasstmp
-				# 	_warning "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+				# 	_warning "Wrong argument for --kdfiter: must be an integer number (iteration seconds)."
 				# 	_failure "Depending on the speed of machines using this tomb, use 1 to 10, or more"
 				# 	return 1
 				# fi
-				# # --kdf takes one parameter: iter time (on present machine) in seconds
 
-				kdftype="`option_value --kdftype`"
+				# Generating salt (either via tomb-kdb-pbkdf2 or a shell fallback)
+				if $(command -v tomb-kdb-pbkdf2-gensalt 1>/dev/null 2>/dev/null); then
+					kdfsalt=`tomb-kdb-pbkdf2-gensalt`
+				else
+					kdfsalt=$(LC_CTYPE=C tr -cd 'a-f0-9' < /dev/random | head -c 64)
+				fi
+				_message "kdf salt: ::1 kdfsalt::" $kdfsalt
+
+				# --kdf takes one optional parameter: what KDF
+				# (pbkdf2 being the default)
+				kdftype="`option_value --kdf`"
 				kdftype=${kdftype:-pbkdf2}
 				case ${kdftype} in
-				    pbkdf2)
+				pbkdf2)
 					local -i microseconds
 					microseconds=$(( itertime * 1000000 ))
-					_success "Using KDF, iteration time: ::1 microseconds::" $microseconds
-					_message "generating salt"
-					pbkdf2_salt=`tomb-kdb-pbkdf2-gensalt`
-					_message "calculating iterations"
+					_success "Using pbkdf2 as KDF"
+					_message "iteration time: ::1 microseconds::" $microseconds
 					pbkdf2_iter=`tomb-kdb-pbkdf2-getiter $microseconds`
-					_message "encoding the password"
+					_message "iterations: ::1 pbkdf2_iter::" $pbkdf2_iter
 					# We use a length of 64bytes = 512bits (more than needed!?)
-					tombpass=`tomb-kdb-pbkdf2 $pbkdf2_salt $pbkdf2_iter 64 <<<"${tombpass}"`
-
-					header="_KDF_pbkdf2sha1_${pbkdf2_salt}_${pbkdf2_iter}_64\n"
+					tombpass=`tomb-kdb-pbkdf2 $kdfsalt $pbkdf2_iter 64 <<<"${tombpass}"`
+					header="_KDF_pbkdf2sha1_${kdfsalt}_${pbkdf2_iter}_64\n"
 					;;
-				    argon2)
-					_success "Using KDF Argon2"
+				argon2)
+					_success "Using Argon2 as KDF"
+					_message "iterations: ::1 kdfiterations::" $itertime
 					kdfmem="`option_value --kdfmem`"
 					kdfmem=${kdfmem:-18}
 					_message "memory used: 2^::1 kdfmemory::" $kdfmem
-          itertime="`option_value --kdf`"
-          itertime=${itertime:-3}
-					kdfsalt=`tomb-kdb-pbkdf2-gensalt`
-					_message "kdf salt: ::1 kdfsalt::" $kdfsalt
-					_message "kdf iterations: ::1 kdfiterations::" $itertime
-					tombpass=`argon2 $kdfsalt -m $kdfmem -t $itertime -l 64 -r <<<"${tombpass}"`
-					header="_KDF_argon2_${kdfsalt}_${itertime}_${kdfmem}_64\n"
+					kdfpar="`option_value --kdfpar`"
+					kdfpar=${kdfpar:-1}
+					_message "parallelismn: ::1 kdfparallel::" $kdfpar
+					tombpass=`argon2 $kdfsalt -m $kdfmem -t $itertime -p $kdfpar -l 64 -r <<<"${tombpass}"`
+					header="_KDF_argon2_${kdfsalt}_${itertime}_${kdfmem}_${kdfpar}_64\n"
+					;;
+				*)
+					_warning "unrecognized KDF ::1::" $kdftype
+					_warning "key won\'t be protected via a KDF implementation"
 					;;
 				esac
 			}
@@ -1978,7 +2005,7 @@ forge_key() {
 			 $destkey $algo
 
 	[[ $KDF == 1 ]] && { ! option_is_set -g } && {
-		_message "Using KDF to protect the key password (`option_value --kdf` rounds)"
+		_message "Using KDF to protect the key password"
 	}
 
 	TOMBKEYFILE="$destkey"	  # Set global variable
@@ -3131,19 +3158,19 @@ main() {
 	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g -sudo:)
 	subcommands_opts[__default]=""
 	# -o in open and mount is used to pass alternate mount options
-	subcommands_opts[open]="n -nohook=n k: -kdf: -kdftype: -kdfmem: o: -ignore-swap -tomb-pwd: r: R: -sphx-host: -sphx-user: p -preserve-ownership=p"
+	subcommands_opts[open]="n -nohook=n k: o: -ignore-swap -tomb-pwd: r: R: -sphx-host: -sphx-user: p -preserve-ownership=p"
 	subcommands_opts[mount]=${subcommands_opts[open]}
 
 	subcommands_opts[create]="" # deprecated, will issue warning
 
 	# -o in forge and lock is used to pass an alternate cipher.
-	subcommands_opts[forge]="-ignore-swap k: -kdf: -kdftype: -kdfmem: o: -tomb-pwd: -use-random r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[forge]="-ignore-swap k: -kdf:: -kdfiter: -kdfmem: -kdfpar: o: -tomb-pwd: -use-random r: R: -sphx-host: -sphx-user: "
 	subcommands_opts[dig]="-ignore-swap s: -size=s "
-	subcommands_opts[lock]="-ignore-swap k: -kdf: -kdftype: -kdfmem: o: -tomb-pwd: r: R: -sphx-host: -sphx-user: -filesystem: "
-	subcommands_opts[setkey]="k: -ignore-swap -kdf: -kdftype: -kdfmem: -tomb-old-pwd: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[lock]="-ignore-swap k: o: -tomb-pwd: r: R: -sphx-host: -sphx-user: -filesystem: "
+	subcommands_opts[setkey]="k: -ignore-swap -tomb-old-pwd: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
 	subcommands_opts[engrave]="k: "
 
-	subcommands_opts[passwd]="k: -ignore-swap -kdf: -kdftype: -kdfmem: -tomb-old-pwd: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[passwd]="k: -ignore-swap -kdf:: -kdfiter: -kdfmem: -kdfpar: -tomb-old-pwd: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
 	subcommands_opts[close]=""
 	subcommands_opts[help]=""
 	subcommands_opts[slam]=""
