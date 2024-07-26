@@ -1495,15 +1495,6 @@ gen_key() {
 				itertime="`option_value --kdfiter`"
 				itertime=${itertime:-3}
 
-				# removing support of floating points because they can't be type checked well
-				# if [[ "$itertime" != <-> ]]; then
-				# 	unset tombpass
-				# 	unset tombpasstmp
-				# 	_warning "Wrong argument for --kdfiter: must be an integer number (iteration seconds)."
-				# 	_failure "Depending on the speed of machines using this tomb, use 1 to 10, or more"
-				# 	return 1
-				# fi
-
 				# Generating salt (either via tomb-kdb-pbkdf2 or a shell fallback)
 				if $(command -v tomb-kdb-pbkdf2-gensalt 1>/dev/null 2>/dev/null); then
 					kdfsalt=`tomb-kdb-pbkdf2-gensalt`
