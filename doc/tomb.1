@@ -49,8 +49,10 @@ more recipient GPG ids can be indicated (comma separated). The default cipher
 to protect the key is AES256, a custom one can be specified using the \fI-o\fR
 option, for a list of supported ciphers use \fI-v\fR. For additional protection
 against dictionary attacks on keys, the \fI--kdf\fR option can be used when
-forging a key, making sure that the binaries in \fIextras/kdf\fR were compiled
-and installed on the system.
+forging a key. Two KDF are currently supported: \fIargon2\fR and \fIpbkdf2\fR.
+\fIpbkdf2\fR is available from \fIextras/kdf\fR and needs to be compiled and
+installed on the system. \fIargon2\fR is generally available from distribution
+repositories.
 
 .B
 .IP "lock"
@@ -283,23 +285,43 @@ Provide a new set of recipient(s) to encrypt a tomb key. \fIgpg_ids\fR
 can be one or more GPG key ID, comma separated. All GPG keys must be
 trusted keys in GPG.
 .B
-.IP "--kdf \fI<itertime>\fR"
-Activate the KDF feature against dictionary attacks when creating a key: forces
-a delay of \fI<itertime>\fR times every time this key is used.  The actual time
-to wait depends on the CPU speed (default) or the RAM size (argon2) of the
-computer where the key is used.  Using 5 or 10 is a sane amount for modern
-computers, the value is multiplied by 1 million.
-.B
-.IP "--kdftype \fIargon2 | pbkdf2\fR"
-Adopt the \fIargon2\fR algorithm for KDF, stressing the RAM capacity rather
-than the CPU speed of the computer decrypting the tomb. Requires the
-\fIargon2\fR binary by P-H-C to be installed, as packaged by most distros.
+.IP "--kdf \fI[argon2 | pbkdf2]\fR"
+Enable the KDF feature against dictionary attacks when creating a key.
+An optional argument allows to choose between \fIargon2\fR or \fIpbkdf2\fR.
+\fIargon2\fR is using a mix of RAM capacity, number of threads and
+iterations to achieve a time cost.
+\fIpbkdf2\fR is only about calculation speed to achieve a time cost.
+Due to a low memory footprint and no restrictions regarding threads, this
+time cost can be somewhat negated due to parallelization. Especially on
+GPUs with their high number of cores.
+\fIargon2\fR requires the respective binary by P-H-C to be installed, as
+packaged by most distros. \fIpbkdf2\fR is available from the \fItomb\fR
+sources and is a custom implementation of the algorithm.
 Default is \fIpbkdf2\fR.
+.B
+.IP "--kdfiter \fI<itertime>\fR"
+Available for \fIargon2\fR and \fIpbkdf2\fR. In general this controls how
+often the algorithm will be run. In case of \fIpbkdf2\fR the argument will
+be interpret as an interval in seconds. The actual number of iterations to
+achieve this delay will be calculated with \fItomb-kdb-pbkdf2-getiter\fR,
+which needs to available (normally installed alongside tomb's pbkdf2 tools).
+Reason being that the actual time to wait depends on the CPU speed.
+OWASP recommendations from 2023 suggest a minimal iteration count of 600000
+for \fIpbkdf2\fR, which should be achieved with the current default value.
+Default is 3 (based on the \fIargon2\fR default).
 .B
 .IP "--kdfmem \fI<memory>\fR"
 In case of \fIargon2\fR KDF algorithm, this value specifies the size of RAM
 used: it consists of a number which is the elevated power of two in kilobytes.
 Default is 18 which is 250 MiB (2^18 = 262,144 kilobytes).
+.B
+.IP "--kdfpar \fI<# of threads>\fR"
+In case of \fIargon2\fR KDF algorithm, this value specifies the number of
+threads that should be used. This helps to remedy the effects of an increased
+time cost for your system whereas setups of ASICs or GPUs don't profit. Only
+increase if memory or iteration got increased that much, that key decryption
+takes massively longer on regular systems.
+Default is 1 thread (based on the \fIargon2\fR default).
 .B
 .IP "--sudo \fI<executable>\fR"
 Select a different tool than sudo for privilege escalation.
