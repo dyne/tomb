@@ -4,341 +4,364 @@
 #
 msgid ""
 msgstr ""
-"PO-Revision-Date: Thu Jan 25 22:28:26 2024\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2024-07-28 11:09+0000\n"
+"Last-Translator: Ricky Tigg <ricky.tigg@gmail.com>\n"
+"Language-Team: Finnish <https://hosted.weblate.org/projects/tomb/tomb/fi/>\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.7-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
-msgstr ""
+msgstr "$pescmd suoritettavaa ei löydy"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
 msgstr ""
+"[sudo] Syötä salasana käyttäjälle ::1 user:: saadaksesi pääkäyttäjän oikeudet"
 
 #: tomb:Safety functions:_sudo:131
 msgid "Super user execution not supported: ::1 sudo::"
-msgstr ""
+msgstr "Ylikäyttäjän suoritusta ei tueta: ::1 sudo::"
 
 #: tomb:Safety functions:_whoami:236
 msgid "Failing to identify the user who is calling us"
-msgstr ""
+msgstr "Meille soittavan käyttäjän tunnistaminen epäonnistui"
 
 #: tomb:Safety functions:_tmp_create:272
 msgid "Fatal error creating the temporary directory: ::1 temp dir::"
-msgstr ""
+msgstr "Vakava virhe väliaikaisen hakemiston luomisessa: ::1 temp dir::"
 
 #: tomb:Safety functions:_tmp_create:280
 msgid "Fatal error setting the permission umask for temporary files"
 msgstr ""
+"Vakava virhe asetettaessa umask-käyttöoikeutta väliaikaisille tiedostoille"
 
 #: tomb:Safety functions:_tmp_create:283
 msgid "Someone is messing up with us trying to hijack temporary files."
-msgstr ""
+msgstr "Joku sotkee kanssamme ja yrittää kaapata väliaikaisia tiedostoja."
 
 #: tomb:Safety functions:_tmp_create:287
 msgid "Fatal error creating a temporary file: ::1 temp file::"
-msgstr ""
+msgstr "Vakava virhe väliaikaisen tiedoston luomisessa: ::1 temp file::"
 
 #: tomb:Safety functions:_ensure_safe_swap:398
 msgid "An active swap partition is detected..."
-msgstr ""
+msgstr "Aktiivinen sivutusosio havaitaan..."
 
 #: tomb:Safety functions:_ensure_safe_swap:408
 msgid "Found zramswap with writeback enabled."
-msgstr ""
+msgstr "Löytyi zram-sivutus, jossa takaisinkirjoitus on käytössä."
 
 #: tomb:Safety functions:_ensure_safe_swap:411
 msgid "Found zramswap without writeback to disk."
-msgstr ""
+msgstr "Löytyi zram-sivutus ilman takaisinkirjoitusta levylle."
 
 #: tomb:Safety functions:_ensure_safe_swap:424
 msgid "The undertaker found that all swap partitions are encrypted. Good."
-msgstr ""
+msgstr "Hautausohjelma havaitsi, että kaikki sivutusosiot ovat salattuja. Hyvä."
 
 #: tomb:Safety functions:_ensure_safe_swap:426
 msgid "This poses a security risk."
-msgstr ""
+msgstr "Tämä aiheuttaa turvallisuusriskin."
 
 #: tomb:Safety functions:_ensure_safe_swap:427
 msgid "You can deactivate all swap partitions using the command:"
-msgstr ""
+msgstr "Voit poistaa kaikki sivutusosiot käytöstä komennolla:"
 
 #: tomb:Safety functions:_ensure_safe_swap:428
 msgid " swapoff -a"
-msgstr ""
+msgstr " swapoff -a"
 
 #: tomb:Safety functions:_ensure_safe_swap:429
 msgid "[#163] I may not detect plain swaps on an encrypted volume."
-msgstr ""
+msgstr "[#163] En ehkä havaitse pelkkää sivutuksia salatulla taltiolla."
 
 #: tomb:Safety functions:_ensure_safe_swap:430
 msgid "But if you want to proceed like this, use the -f (force) flag."
-msgstr ""
+msgstr "Mutta jos haluat jatkaa näin, käytä '-f' (pakota) -lippua."
 
 #: tomb:Safety functions:_check_swap:449
 msgid "Operation aborted."
-msgstr ""
+msgstr "Toiminta peruttu."
 
 #: tomb:Safety functions:ask_password:536
 msgid "Cannot find any pinentry and no DISPLAY detected."
-msgstr ""
+msgstr "Pinentryä ei löydy eikä 'DISPLAY' havaittu."
 
 #: tomb:Safety functions:ask_password:550
 msgid "Pinentry error: ::1 error::"
-msgstr ""
+msgstr "Pinentry-virhe: ::1 error::"
 
 #: tomb:Safety functions:ask_password:562
 msgid "Empty password"
-msgstr ""
+msgstr "Tyhjä salasana"
 
 #: tomb:Safety functions:sphinx_get_password:587
 msgid "sphinx returns error: ::1 error::"
-msgstr ""
+msgstr "sphinx palauttaa virheen: ::1 error::"
 
 #: tomb:Safety functions:sphinx_get_password:589
 msgid "Failed to retrieve actual password with sphinx."
-msgstr ""
+msgstr "Salasanan hakeminen sphinxillä epäonnistui."
 
 #: tomb:Safety functions:sphinx_get_password:592
 msgid "Both host and user have to be set to use sphinx"
-msgstr ""
+msgstr "Sekä isäntä että käyttäjä on asetettava käyttämään sphinxiä"
 
 #: tomb:Safety functions:sphinx_set_password:623
 msgid "Failed to create password with sphinx"
-msgstr ""
+msgstr "Salasanan luominen sphinxillä epäonnistui"
 
 #: tomb:Safety functions:is_valid_tomb:636
 msgid "Tomb file is missing from arguments."
-msgstr ""
+msgstr "Tomb-tiedosto puuttuu argumenteista."
 
 #: tomb:Safety functions:is_valid_tomb:643
 msgid "Tomb file is not writable: ::1 tomb file::"
-msgstr ""
+msgstr "Tomb-tiedosto ei ole kirjoituskelpoinen: ::1 tomb file::"
 
 #: tomb:Safety functions:is_valid_tomb:650
 msgid "Tomb file is not a regular file: ::1 tomb file::"
-msgstr ""
+msgstr "Tomb-tiedosto ei ole tavallinen tiedosto: ::1 tomb file::"
 
 #: tomb:Safety functions:is_valid_tomb:656
 msgid "Tomb file is empty (zero length): ::1 tomb file::"
-msgstr ""
+msgstr "Tomb-tiedosto on tyhjä (pituus nolla): ::1 tomb file::"
 
 #: tomb:Safety functions:is_valid_tomb:662
 msgid "Tomb command failed: ::1 command name::"
-msgstr ""
+msgstr "Tomb-komento epäonnistui: ::1 command name::"
 
 #: tomb:Safety functions:is_valid_tomb:667
 msgid "File is not yet a tomb: ::1 tomb file::"
-msgstr ""
+msgstr "Tiedosto ei ole vielä hauta: ::1 tomb file::"
 
 #: tomb:Safety functions:is_valid_tomb:687
 msgid "Tomb won't work without a TOMBNAME."
-msgstr ""
+msgstr "Tomb ei toimi ilman TOMBin NIMEÄ."
 
 #: tomb:Safety functions:is_valid_tomb:698
 msgid "Tomb file already in use: ::1 tombname::"
-msgstr ""
+msgstr "Tomb-tiedosto on jo käytössä: ::1 tombname::"
 
 #: tomb:Safety functions:is_valid_tomb:704
 msgid "Valid tomb file found: ::1 tomb path::"
-msgstr ""
+msgstr "Kelvollinen tomb-tiedosto löytyi: ::1 tomb path::"
 
 #: tomb:Safety functions:lo_mount:716
 msgid "Loop mount of volumes is not possible on this machine, this error"
-msgstr ""
+msgstr "Taltioiden silmukkaliito ei ole mahdollista tässä koneessa, tämä virhe"
 
 #: tomb:Safety functions:lo_mount:717
 msgid "often occurs on VPS and kernels that don't provide the loop module."
-msgstr ""
+msgstr "ilmenee usein VPS:ssä ja ytimissä, jotka eivät tarjoa silmukkamoduulia."
 
 #: tomb:Safety functions:lo_mount:718
 msgid "It is impossible to use Tomb on this machine under these conditions."
-msgstr ""
+msgstr "Tombia ei ole mahdollista käyttää tässä koneessa näissä olosuhteissa."
 
 #: tomb:Safety functions:lo_mount:726
 msgid "Loopback mount failed: ::1 path:: on ::2 loop::"
-msgstr ""
+msgstr "Takasilmukkaliito epäonnistui: ::1 path:: ::2 loop:: :lla"
 
 #: tomb:Commandline interaction:usage:762
 msgid "Syntax: tomb [options] command [arguments]"
-msgstr ""
+msgstr "Syntaksi: tomb [vaihtoehdot] komento [argumentit]"
 
 #: tomb:Commandline interaction:usage:764
 msgid "Commands:"
-msgstr ""
+msgstr "Komennot:"
 
 #: tomb:Commandline interaction:usage:766
 msgid " // Creation:"
-msgstr ""
+msgstr " // Luonti:"
 
 #: tomb:Commandline interaction:usage:767
 msgid " dig          create a new empty TOMB file of size -s in MiB"
-msgstr ""
+msgstr " dig          Luo uusi tyhjä TOMB-tiedosto koossa '-s' Mit:ssa"
 
 #: tomb:Commandline interaction:usage:768
 msgid " forge        create a new KEY file and set its password"
-msgstr ""
+msgstr " forge        luo uusi KEY-tiedosto ja aseta sen salasana"
 
 #: tomb:Commandline interaction:usage:769
 msgid " lock         installs a lock on a TOMB to use it with KEY"
-msgstr ""
+msgstr " lock         asentaa TOMB:iin lukon käyttääkseen sitä KEY:n kanssa"
 
 #: tomb:Commandline interaction:usage:771
 msgid " // Operations on tombs:"
-msgstr ""
+msgstr " // Toiminnot haudoille:"
 
 #: tomb:Commandline interaction:usage:772
 msgid " open         open an existing TOMB (-k KEY file or - for stdin)"
-msgstr ""
+msgstr " avaa olemassa oleva TOMB ('-k KEY-tiedosto' tai '-for stdin')"
 
 #: tomb:Commandline interaction:usage:773
 msgid " index        update the search indexes of tombs"
-msgstr ""
+msgstr " index        päivittää hautojen hakuhakemistot"
 
 #: tomb:Commandline interaction:usage:774
 msgid " search       looks for filenames matching text patterns"
-msgstr ""
+msgstr " search       etsii tiedostonimiä, jotka vastaavat tekstimalleja"
 
 #: tomb:Commandline interaction:usage:775
 msgid " list         list of open TOMBs and information on them"
-msgstr ""
+msgstr " list         luettelo avoimista TOMB:ista ja tiedot niistä"
 
 #: tomb:Commandline interaction:usage:776
 msgid " ps           list of running processes inside open TOMBs"
 msgstr ""
+" ps           luettelo käynnissä olevista prosesseista avoimissa TOMB:eissa"
 
 #: tomb:Commandline interaction:usage:777
 msgid " close        close a specific TOMB (or 'all')"
-msgstr ""
+msgstr " close        sulje tietty TOMB (tai kaikki 'all')"
 
 #: tomb:Commandline interaction:usage:778
 msgid " slam         slam a TOMB killing all programs using it"
-msgstr ""
+msgstr " slam         iske TOMBin tappaen kaikki sitä käyttävät ohjelmat"
 
 #: tomb:Commandline interaction:usage:780
 msgid " resize       resize a TOMB to a new size -s (can only grow)"
-msgstr ""
+msgstr " resize       muuttaa TOMBin kokoa uuteen kokoon '-s' (voi vain kasvaa)"
 
 #: tomb:Commandline interaction:usage:783
 msgid " // Operations on keys:"
-msgstr ""
+msgstr " // Toiminnot avaimilla:"
 
 #: tomb:Commandline interaction:usage:784
 msgid " passwd       change the password of a KEY (needs old pass)"
-msgstr ""
+msgstr " passwd       vaihtaa KEY:n salasana (vaatii vanhan salasanan)"
 
 #: tomb:Commandline interaction:usage:785
 msgid " setkey       change the KEY locking a TOMB (needs old key and pass)"
 msgstr ""
+" setkey       vaihda TOMBin lukitsevaa KEY:tä (vaatii vanhan avaimen ja "
+"salasanan)"
 
 #: tomb:Commandline interaction:usage:788
 msgid " // Backup on paper:"
-msgstr ""
+msgstr " // Varmuuskopio paperille:"
 
 #: tomb:Commandline interaction:usage:789
 msgid " engrave      makes a QR code of a KEY to be saved on paper"
-msgstr ""
+msgstr " engrave      tekee KEY:stä QR-koodin, joka tallennetaan paperille"
 
 #: tomb:Commandline interaction:usage:793
 msgid " // Steganography:"
-msgstr ""
+msgstr " // Steganografia:"
 
 #: tomb:Commandline interaction:usage:795
 msgid " bury         hide a KEY inside a JPEG image (for use with -k)"
 msgstr ""
+" bury         piilota KEY JPEG-kuvan sisään (käytettäväksi '-k':n kanssa)"
 
 #: tomb:Commandline interaction:usage:796
 msgid " exhume       extract a KEY from a JPEG image (prints to stdout)"
-msgstr ""
+msgstr " exhume       poimi KEY JPEG-kuvasta (tulostaa stdout:een)"
 
 #: tomb:Commandline interaction:usage:799
 msgid " cloak        transform a KEY into TEXT using CIPHER (for use with -k)"
 msgstr ""
+" cloak        muuntaa KEY TEXT:ksi käyttämällä CIPHERiä (käytettäväksi '-k':"
+"n kanssa)"
 
 #: tomb:Commandline interaction:usage:802
 msgid " uncloak      extract a KEY from a TEXT using CIPHER (prints to stdout)"
-msgstr ""
+msgstr " uncloak      poimi KEY TEXT:stä CIPHER:in avulla (tulostaa stdout:een)"
 
 #: tomb:Commandline interaction:usage:806
 msgid "Options:"
-msgstr ""
+msgstr "Vaihtoehdot:"
 
 #: tomb:Commandline interaction:usage:808
 msgid " -s           size of the tomb file when creating/resizing one (in MiB)"
 msgstr ""
+" -s          tomb-tiedoston koko luotaessa tai muutettaessa sitä (Mitissa)"
 
 #: tomb:Commandline interaction:usage:809
 msgid " -k           path to the key to be used ('-k -' to read from stdin)"
-msgstr ""
+msgstr " -k           polku käytettävään avaimeen ('-k -' lukeakseen stdinistä)"
 
 #: tomb:Commandline interaction:usage:810
 msgid " -n           don't launch the execution hooks found in tomb"
-msgstr ""
+msgstr " -n           älä käynnistä haudassa olevia teloituskoukkuja"
 
 #: tomb:Commandline interaction:usage:811
 msgid " -p           preserve the ownership of all files in tomb"
 msgstr ""
+" -p           säilyttää kaikkien haudassa olevien tiedostojen omistusoikeus"
 
 #: tomb:Commandline interaction:usage:812
 msgid " -o           options passed to commands: open, lock, forge (see man)"
 msgstr ""
+" -o           komentoihin välitetyt vaihtoehdot: open, lock, forge (katso "
+"man)"
 
 #: tomb:Commandline interaction:usage:813
 msgid " -f           force operation (i.e. even if swap is active)"
-msgstr ""
+msgstr " -f           pakota toiminto (eli vaikka sivutus olisi aktiivinen)"
 
 #: tomb:Commandline interaction:usage:814
 msgid " -g           use a GnuPG key to encrypt a tomb key"
-msgstr ""
+msgstr " -g           käytä GnuPG-avainta tomb-avaimen salaamiseen"
 
 #: tomb:Commandline interaction:usage:815
 msgid " -r           provide GnuPG recipients (separated by comma)"
-msgstr ""
+msgstr " -r           anna GnuPG-vastaanottajat (pilkulla erotettuna)"
 
 #: tomb:Commandline interaction:usage:816
 msgid " -R           provide GnuPG hidden recipients (separated by comma)"
 msgstr ""
+" -R           anna GnuPG:n piilotetut vastaanottajat (pilkulla erotettuna)"
 
 #: tomb:Commandline interaction:usage:817
 msgid " --sudo       super user exec alternative to sudo (doas or none)"
 msgstr ""
+" --sudo       ylikäyttäjän suoritusvaihtoehto sudolle (tee käyttäjänä tai ei "
+"mitään)"
 
 #: tomb:Commandline interaction:usage:820
 msgid " --sphx-user  user associated with the key (for use with pitchforkedsphinx)"
 msgstr ""
+" --sphx-user  avaimeen liittyvä käyttäjä (käytettäväksi "
+"'pitchforkedsphinx':in) kanssa"
 
 #: tomb:Commandline interaction:usage:821
 msgid " --sphx-host  host associated with the key (for use with pitchforkedsphinx)"
 msgstr ""
+" --sphx-host  avaimeen liittyvä isäntä (käytettäväksi 'pitchforkedsphinx':in "
+"kanssa)"
 
 #: tomb:Commandline interaction:usage:825
 msgid " --kdf        forge keys armored against dictionary attacks"
-msgstr ""
+msgstr " --kdf        takoa avaimia panssaroituna sanakirjahyökkäyksiä vastaan"
 
 #: tomb:Commandline interaction:usage:829
 msgid " -h           print this help"
-msgstr ""
+msgstr " -h           tulosta tämä ohje"
 
 #: tomb:Commandline interaction:usage:830
 msgid " -v           print version, license and list of available ciphers"
 msgstr ""
+" -v           tulostaa version, lisenssin ja luettelon saatavilla olevista "
+"salauksista"
 
 #: tomb:Commandline interaction:usage:831
 msgid " -q           run quietly without printing informations"
-msgstr ""
+msgstr " -q           toimii hiljaa tulostamatta tietoja"
 
 #: tomb:Commandline interaction:usage:832
 msgid " -D           print debugging information at runtime"
-msgstr ""
+msgstr " -D           tulostaa vianmääritystiedot ajon aikana"
 
 #: tomb:Commandline interaction:usage:834
 msgid "For more information on Tomb read the manual: man tomb"
-msgstr ""
+msgstr "Jos haluat lisätietoja Tombista, lue käsikirja: man tomb"
 
 #: tomb:Commandline interaction:usage:835
 msgid "Please report bugs on <http://github.com/dyne/tomb/issues>."
@@ -346,379 +369,387 @@ msgstr ""
 
 #: tomb:Commandline interaction:_ensure_dependencies:992
 msgid "Missing required dependency ::1 command::.  Please install it."
-msgstr ""
+msgstr "Vaadittava riippuvuus puuttuu ::1 comand::. Asenna se."
 
 #: tomb:Commandline interaction:_ensure_dependencies:1004
 msgid "No privilege escalation tool found, not even sudo"
-msgstr ""
+msgstr "Etuoikeuksien eskalointityökalua ei löytynyt, ei edes sudoa"
 
 #: tomb:Key operations:is_valid_recipients:1052
 msgid "Not a valid GPG key ID: ::1 gpgid:: "
-msgstr ""
+msgstr "Ei kelvollinen GPG-avaimen tunnus: ::1 gpgid:: "
 
 #: tomb:Key operations:is_valid_recipients:1056
 msgid "The key ::1 gpgid:: is not trusted enough"
-msgstr ""
+msgstr "Avain ::1 gpgid:: ei ole tarpeeksi luotettava"
 
 #: tomb:Key operations:is_valid_key:1107
 msgid "cleartext key from stdin selected: this is unsafe."
-msgstr ""
+msgstr "selkeä tekstiavain valittuna stdin:stä: tämä ei ole turvallinen."
 
 #: tomb:Key operations:is_valid_key:1108
 msgid "please use --unsafe if you really want to do this."
-msgstr ""
+msgstr "käytä '--unsafe', jos todella haluat tehdä tämän."
 
 #: tomb:Key operations:is_valid_key:1110
 msgid "received key in cleartext from stdin (unsafe mode)"
-msgstr ""
+msgstr "vastaanotettu avain selkeänä tekstinä stdinistä (vaarallinen tila)"
 
 #: tomb:Key operations:is_valid_key:1114
 msgid "is_valid_key() called without an argument."
-msgstr ""
+msgstr "is_valid_key() kutsuttu ilman argumenttia."
 
 #: tomb:Key operations:is_valid_key:1122
 msgid "Key is an image, it might be valid."
-msgstr ""
+msgstr "Avain on kuva, se saattaa olla kelvollinen."
 
 #: tomb:Key operations:is_valid_key:1128
 msgid "Key is missing KDF header."
-msgstr ""
+msgstr "Avaimesta puuttuu KDF-otsikko."
 
 #: tomb:Key operations:is_valid_key:1134
 msgid "Key is valid."
-msgstr ""
+msgstr "Avain on kelvollinen."
 
 #: tomb:Key operations:recover_key:1144
 msgid "Attempting key recovery."
-msgstr ""
+msgstr "Yritetään avaimen palautusta."
 
 #: tomb:Key operations:_load_key:1168
 msgid "This operation requires a key file to be specified using the -k option."
 msgstr ""
+"Tämä toiminto vaatii avaintiedoston määrittämisen käyttämällä vaihtoehtoa "
+"'-k'."
 
 #: tomb:Key operations:_load_key:1172
 msgid "Waiting for the key to be piped from stdin... "
-msgstr ""
+msgstr "Odotetaan avaimen ohjautumista putkeen stdinista... "
 
 #: tomb:Key operations:_load_key:1183
 msgid "Key not found, specify one using -k."
-msgstr ""
+msgstr "Avainta ei löydy, määritä yksi käyttäen '-k'."
 
 #: tomb:Key operations:_load_key:1198
 msgid "The key seems invalid or its format is not known by this version of Tomb."
 msgstr ""
+"Avain näyttää olevan virheellinen tai tämä Tomb-versio ei tunne sen muotoa."
 
 #: tomb:Key operations:gpg_decrypt:1229
 msgid "You set an invalid GPG ID."
-msgstr ""
+msgstr "Olet määrittänyt virheellisen GPG-tunnuksen."
 
 #: tomb:Key operations:get_lukskey:1281
 msgid "Unlocking KDF key protection (::1 kdf::)"
-msgstr ""
+msgstr "KDF-avainsuojan avaaminen (::1 kdf::)"
 
 #: tomb:Key operations:get_lukskey:1300
 msgid "No suitable program for KDF ::1 program::."
-msgstr ""
+msgstr "Ei sopivaa ohjelmaa KDF:lle ::1 program::."
 
 #: tomb:Key operations:get_lukskey:1316
 msgid "User aborted password dialog."
-msgstr ""
+msgstr "Käyttäjän keskeytetty salasana -valintaikkuna."
 
 #: tomb:Key operations:ask_key_password:1340
 msgid "Internal error: ask_key_password() called before _load_key()."
-msgstr ""
+msgstr "Sisäinen virhe: ask_key_password() kutsuttu ennen _load_key()."
 
 #: tomb:Key operations:ask_key_password:1352
 msgid "A password is required to use key ::1 key::"
-msgstr ""
+msgstr "Avaimen ::1 key::käyttämiseen tarvitaan salasana"
 
 #: tomb:Key operations:ask_key_password:1371
 msgid "Password OK."
-msgstr ""
+msgstr "Salasana kunnossa."
 
 #: tomb:Key operations:change_passwd:1419
 msgid "Commanded to change GnuPG key for tomb key ::1 key::"
-msgstr ""
+msgstr "Käsketty vaihtamaan GnuPG-avain Tomb-avaimelle ::1 key::"
 
 #: tomb:Key operations:change_passwd:1421
 msgid "Commanded to change password for tomb key ::1 key::"
-msgstr ""
+msgstr "Käsketty vaihtamaan salasana Tomb-avaimelle ::1 key::"
 
 #: tomb:Key operations:change_passwd:1434
 msgid "No valid password supplied."
-msgstr ""
+msgstr "Kelvollista salasanaa ei toimitettu."
 
 #: tomb:Key operations:change_passwd:1437
 msgid "Changing GnuPG key for ::1 key file::"
-msgstr ""
+msgstr "GnuPG-avaimen vaihtaminen ::1 key file:: :een"
 
 #: tomb:Key operations:change_passwd:1439
 msgid "Changing password for ::1 key file::"
-msgstr ""
+msgstr "Salasanan vaihtaminen ::1 key file:: :een"
 
 #: tomb:Key operations:change_passwd:1453
 msgid "Error: the newly generated keyfile does not seem valid."
-msgstr ""
+msgstr "Virhe: juuri luotu avaintiedosto ei vaikuta kelvolliselta."
 
 #: tomb:Key operations:change_passwd:1458
 msgid "Your GnuPG key was successfully changed"
-msgstr ""
+msgstr "GnuPG-avaimesi on vaihdettu onnistuneesti"
 
 #: tomb:Key operations:change_passwd:1460
 msgid "Your passphrase was successfully updated."
-msgstr ""
+msgstr "Tunnuslauseesi on päivitetty onnistuneesti."
 
 #: tomb:Key operations:gen_key:1511
 msgid "You are going to encrypt a tomb key with ::1 nrecipients:: recipient(s)."
-msgstr ""
+msgstr "Aiot salata Tomb-avaimen ::1 nrecipients:: vastaanottajien kanssa."
 
 #: tomb:Key operations:gen_key:1512
 msgid "It is your responsibility to check these fingerprints."
-msgstr ""
+msgstr "Sinun vastuullasi on tarkistaa nämä sormenjäljet."
 
 #: tomb:Key operations:gen_key:1513
 msgid "The fingerprints are:"
-msgstr ""
+msgstr "Sormenjäljet ovat:"
 
 #: tomb:Key operations:gen_key:1515
 msgid "	  `_gpg_fingerprint "
-msgstr ""
+msgstr "\t  `_gpg_-sormenjälki "
 
 #: tomb:Key operations:gen_key:1520
 msgid "No recipient specified, using default GPG key."
-msgstr ""
+msgstr "Vastaanottajaa ei ole määritetty; käytetään oletusarvoista GPG-avainta."
 
 #: tomb:Key operations:gen_key:1533
 msgid "User aborted."
-msgstr ""
+msgstr "Käyttäjän keskeyttämä."
 
 #: tomb:Key operations:gen_key:1536
 msgid "You set empty password, which is not possible."
-msgstr ""
+msgstr "Olet asettanut tyhjän salasanan, mikä ei ole mahdollista."
 
 #: tomb:Key operations:gen_key:1577
 msgid "Wrong argument for --kdf: must be an integer number (iteration seconds)."
 msgstr ""
+"Väärä argumentti '--kdf':lle: on oltava kokonaisluku (iteraatiosekuntia)."
 
 #: tomb:Key operations:gen_key:1578
 msgid "Depending on the speed of machines using this tomb, use 1 to 10, or more"
 msgstr ""
+"Riippuen tätä hautaa käyttävien koneiden nopeudesta, käytä 1–10 tai enemmän"
 
 #: tomb:Key operations:gen_key:1589
 msgid "Using KDF, iteration time: ::1 microseconds::"
-msgstr ""
+msgstr "KDF:n käyttö, iterointiaika: ::1 microseconds::"
 
 #: tomb:Key operations:gen_key:1590
 msgid "generating salt"
-msgstr ""
+msgstr "tuottamassa suolaa"
 
 #: tomb:Key operations:gen_key:1592
 msgid "calculating iterations"
-msgstr ""
+msgstr "laskemassa iteraatiot"
 
 #: tomb:Key operations:gen_key:1594
 msgid "encoding the password"
-msgstr ""
+msgstr "koodaamassa salasanaa"
 
 #: tomb:Key operations:gen_key:1601
 msgid "Using KDF Argon2"
-msgstr ""
+msgstr "Käyttämässä KDF Argon2"
 
 #: tomb:Key operations:gen_key:1604
 msgid "memory used: 2^::1 kdfmemory::"
-msgstr ""
+msgstr "käytetty muisti: 2^::1 kdfmemory::"
 
 #: tomb:Key operations:gen_key:1606
 msgid "kdf salt: ::1 kdfsalt::"
-msgstr ""
+msgstr "kdf:n suola: ::1 kdfsalt::"
 
 #: tomb:Key operations:gen_key:1607
 msgid "kdf iterations: ::1 kdfiterations::"
-msgstr ""
+msgstr "kdf:n iteraatiot: ::1 kdfiterations::"
 
 #: tomb:Key operations:bury_key:1667
 msgid "Encode failed: ::1 image file:: is not a jpeg image."
-msgstr ""
+msgstr "Koodaus epäonnistui: ::1 image file:: ei ole jpeg-kuva."
 
 #: tomb:Key operations:bury_key:1671
 msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
-msgstr ""
+msgstr "Koodausavain ::1 tomb key:: kuvan ::2 image file:: sisällä"
 
 #: tomb:Key operations:bury_key:1673
 msgid "Using GnuPG Key ID"
-msgstr ""
+msgstr "GnuPG-avaintunnuksen käyttäminen"
 
 #: tomb:Key operations:bury_key:1675
 msgid "Please confirm the key password for the encoding"
-msgstr ""
+msgstr "Vahvista avaimen salasana koodausta varten"
 
 #: tomb:Key operations:bury_key:1696
 msgid "Wrong password/GnuPG ID supplied."
-msgstr ""
+msgstr "Väärä salasana/GnuPG-tunnus annettu."
 
 #: tomb:Key operations:bury_key:1697
 msgid "You shall not bury a key whose password is unknown to you."
-msgstr ""
+msgstr "Et saa haudata avainta, jonka salasana on sinulle tuntematon."
 
 #: tomb:Key operations:bury_key:1737
 msgid "Encoding error: steghide reports problems."
-msgstr ""
+msgstr "Koodausvirhe: steghide ilmoittaa ongelmista."
 
 #: tomb:Key operations:bury_key:1740
 msgid "Tomb key encoded succesfully into image ::1 image file::"
-msgstr ""
+msgstr "Tomb-avain koodattu onnistuneesti kuvaksi ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1752
 msgid "Exhume failed, no image specified"
-msgstr ""
+msgstr "Kaivaminen epäonnistui, kuvaa ei määritetty"
 
 #: tomb:Key operations:exhume_key:1765
 msgid "Exhume failed, image file not found: ::1 image file::"
-msgstr ""
+msgstr "Exhume epäonnistui, kuvatiedostoa ei löytynyt: ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1767
 msgid "Exhume failed: ::1 image file:: is not a jpeg image."
-msgstr ""
+msgstr "Kaivaus epäonnistui: ::1 image file:: ei ole jpeg-kuva."
 
 #: tomb:Key operations:exhume_key:1774
 msgid "Wrong password or no steganographic key found"
-msgstr ""
+msgstr "Väärä salasana tai steganografista avainta ei löytynyt"
 
 #: tomb:Key operations:exhume_key:1785
 msgid "printing exhumed key on stdout"
-msgstr ""
+msgstr "kaivetun avaimen tulostaminen stdoutiin"
 
 #: tomb:Key operations:exhume_key:1789
 msgid "File exists: ::1 tomb key::"
-msgstr ""
+msgstr "Tiedosto on olemassa: ::1 tomb key::"
 
 #: tomb:Key operations:exhume_key:1791
 msgid "Use of --force selected: overwriting."
-msgstr ""
+msgstr "'--force':n käyttö valittu; päällekirjoitus."
 
 #: tomb:Key operations:exhume_key:1794
 msgid "Make explicit use of --force to overwrite."
-msgstr ""
+msgstr "Käytä nimenomaisesti '--force':ta päällekirjoittamiseen."
 
 #: tomb:Key operations:exhume_key:1795
 msgid "Refusing to overwrite file. Operation aborted."
-msgstr ""
+msgstr "Kieltäydytään tiedoston päällekirjoittamisesta. Toiminta peruttu."
 
 #: tomb:Key operations:exhume_key:1798
 msgid "Trying to exhume a key out of image ::1 image file::"
-msgstr ""
+msgstr "Yritetään kaivaa avainta pois kuvasta ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1819
 msgid "Key succesfully exhumed to ::1 key::."
-msgstr ""
+msgstr "Avain kaivettiin onnistuneesti ::1 key:: :lle."
 
 #: tomb:Key operations:exhume_key:1821
 msgid "Nothing found in ::1 image file::"
-msgstr ""
+msgstr "Mitään ei löytynyt ::1 image file:: :ssa"
 
 #: tomb:Key operations:cloakify_key:1843
 msgid "Encoding key ::1 tomb key:: using cipher ::2 cipher file::"
-msgstr ""
+msgstr "Koodaamassa avainta ::1 tomb key:: salausta ::2 cipher file:: käyttäen"
 
 #: tomb:Key operations:cloakify_key:1848
 msgid "printing cloaked key on stdout"
-msgstr ""
+msgstr "peitetyn avaimen tulostaminen stdoutiin"
 
 #: tomb:Key operations:cloakify_key:1852
 msgid "File exists: ::1 output file::"
-msgstr ""
+msgstr "Tiedosto on olemassa: ::1 output file::"
 
 #: tomb:Key operations:cloakify_key:1864
 msgid "Encoding error: cloakify reports problems."
-msgstr ""
+msgstr "Koodausvirhe: cloakify raportoi ongelmista."
 
 #: tomb:Key operations:cloakify_key:1867
 msgid "Tomb key encoded succesfully"
-msgstr ""
+msgstr "Tomb-avain koodattu onnistuneesti"
 
 #: tomb:Key operations:decloakify_key:1879
 msgid "Uncloak failed, no text file specified"
-msgstr ""
+msgstr "Peitteen poistaminen epäonnistui, tekstitiedostoa ei ole määritetty"
 
 #: tomb:Key operations:decloakify_key:1881
 msgid "Uncloak failed, no cipher file specified"
-msgstr ""
+msgstr "Peitteen poistaminen epäonnistui, salaustiedostoa ei määritetty"
 
 #: tomb:Key operations:decloakify_key:1894
 msgid "Uncloak failed, text file not found: ::1 text file::"
 msgstr ""
+"Peitteen poistaminen epäonnistui, tekstitiedostoa ei löydy: ::1 text file::"
 
 #: tomb:Key operations:decloakify_key:1897
 msgid "Uncloak failed, cipher file not found: ::1 cipher file::"
 msgstr ""
+"Peitteen poistaminen epäonnistui, salaustiedostoa ei löydy:: ::1 cipher "
+"file::"
 
 #: tomb:Key operations:decloakify_key:1903
 msgid "printing uncloaked key on stdout"
-msgstr ""
+msgstr "peittämättömän avaimen tulostaminen stdoutiin"
 
 #: tomb:Key operations:decloakify_key:1923
 msgid "Key succesfully uncloaked to ::1 key::."
-msgstr ""
+msgstr "Onnistuneen avaimen peitteen poisto ::1 key:: :lle."
 
 #: tomb:Key operations:decloakify_key:1925
 msgid "Nothing found in ::1 text file::"
-msgstr ""
+msgstr "Mitään ei löytynyt ::1 text file:: :ssa"
 
 #: tomb:Key operations:engrave_key:1942
 msgid "Rendering a printable QRCode for key: ::1 tomb key file::"
-msgstr ""
+msgstr "Tulostettavan QR-koodin hahmottaminen avaimelle: ::1 tomb key file::"
 
 #: tomb:Key operations:engrave_key:1947
 msgid "QREncode reported an error."
-msgstr ""
+msgstr "QREncode ilmoitti virheestä."
 
 #: tomb:Key operations:engrave_key:1949
 msgid "Operation successful:"
-msgstr ""
+msgstr "Toiminta onnistui:"
 
 #: tomb:Create:dig_tomb:1983
 msgid "Commanded to dig tomb ::1 tomb path::"
-msgstr ""
+msgstr "Käsketty kaivaa hauta ::1 tomb path::"
 
 #: tomb:Create:dig_tomb:1985
 msgid "Missing path to tomb"
-msgstr ""
+msgstr "Puuttuva polku haudalle"
 
 #: tomb:Create:dig_tomb:1986
 msgid "Size argument missing, use -s"
-msgstr ""
+msgstr "Koko-argumentti puuttuu, käytä '-s'"
 
 #: tomb:Create:dig_tomb:1987
 msgid "Size must be an integer (mebibytes)"
-msgstr ""
+msgstr "Koon on oltava kokonaisluku (mebitavuja)"
 
 #: tomb:Create:dig_tomb:1988
 msgid "Tombs can't be smaller than 10 mebibytes"
-msgstr ""
+msgstr "Haudat eivät voi olla pienempiä kuin kymmenen mebitavua"
 
 #: tomb:Create:dig_tomb:1991
 msgid "A tomb exists already. I'm not digging here:"
-msgstr ""
+msgstr "Hauta on jo olemassa. En kaivaa täällä:"
 
 #: tomb:Create:dig_tomb:1996
 msgid "Creating a new tomb in ::1 tomb path::"
-msgstr ""
+msgstr "Uuden haudan luominen ::1 tomb path:: :ssa"
 
 #: tomb:Create:dig_tomb:1997
 msgid "Generating ::1 tomb file:: of ::2 size::MiB"
-msgstr ""
+msgstr "Luodaan ::2 size:: Mit:n tiedostoa ::1 tomb file:: :lle"
 
 #: tomb:Create:dig_tomb:2001
 msgid "Error creating the tomb ::1 tomb path::"
-msgstr ""
+msgstr "Virhe haudan luomisessa ::1 tomb path::"
 
 #: tomb:Create:dig_tomb:2011
 msgid "Done digging ::1 tomb name::"
-msgstr ""
+msgstr "Kaivaminen tehty ::1 tomb name::"
 
 #: tomb:Create:dig_tomb:2012
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
-msgstr ""
+msgstr "Hautasi ei ole vielä valmis, sinun täytyy takoa avain ja lukita se:"
 
 #: tomb:Create:dig_tomb:2013
 msgid "tomb forge ::1 tomb path::.key"
@@ -730,71 +761,74 @@ msgstr ""
 
 #: tomb:Create:forge_key:2036
 msgid "A filename needs to be specified using -k to forge a new key."
-msgstr ""
+msgstr "Tiedostonimi on määritettävä '-k':lla uuden avaimen takomiseksi."
 
 #: tomb:Create:forge_key:2038
 msgid "Commanded to forge key ::1 key::"
-msgstr ""
+msgstr "Käsketty takoa avaimen ::1 key::"
 
 #: tomb:Create:forge_key:2051
 msgid "Forging this key would overwrite an existing file. Operation aborted."
 msgstr ""
+"Tämän avaimen takominen kirjoittaisi päällekkäin olemassa olevan tiedoston. "
+"Toiminta peruttu."
 
 #: tomb:Create:forge_key:2055
 msgid "Cannot generate encryption key."
-msgstr ""
+msgstr "Salausavainta ei voi luoda."
 
 #: tomb:Create:forge_key:2063
 msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
-msgstr ""
+msgstr "Käsketty takomaan avain ::1 key:: salausalgoritmilla ::2 algorithm::"
 
 #: tomb:Create:forge_key:2072
 msgid "This operation takes time. Keep using this computer on other tasks."
 msgstr ""
+"Tämä toimenpide vie aikaa. Jatka tämän tietokoneen käyttöä muihin tehtäviin."
 
 #: tomb:Create:forge_key:2073
 msgid "Once done you will be asked to choose a password for your tomb."
-msgstr ""
+msgstr "Kun olet valmis, sinua pyydetään valitsemaan salasana haudallesi."
 
 #: tomb:Create:forge_key:2074
 msgid "To make it faster you can move the mouse around."
-msgstr ""
+msgstr "Voit nopeuttaa sitä liikuttamalla hiirtä."
 
 #: tomb:Create:forge_key:2075
 msgid "If you are on a server, you can use an Entropy Generation Daemon."
-msgstr ""
+msgstr "Jos olet palvelimella, voit käyttää Entropy Generation Daemonia."
 
 #: tomb:Create:forge_key:2090
 msgid "Using GnuPG key(s) to encrypt your key: ::1 tomb key::"
-msgstr ""
+msgstr "GnuPG-avainten käyttäminen avaimesi salaamiseen: ::1 tomb key::"
 
 #: tomb:Create:forge_key:2092
 msgid "Choose the password of your key: ::1 tomb key::"
-msgstr ""
+msgstr "Valitse avaimesi salasana: ::1 tomb key::"
 
 #: tomb:Create:forge_key:2094
 msgid "(You can also change it later using 'tomb passwd'.)"
-msgstr ""
+msgstr "(Voit myös vaihtaa sen myöhemmin käyttämällä 'tomb passwd'.)"
 
 #: tomb:Create:forge_key:2112
 msgid "The key does not seem to be valid."
-msgstr ""
+msgstr "Avain ei näytä kelpaavan."
 
 #: tomb:Create:forge_key:2113
 msgid "Dumping contents to screen:"
-msgstr ""
+msgstr "Sisällön tyhjennys näytölle:"
 
 #: tomb:Create:forge_key:2121
 msgid "Done forging ::1 key file::"
-msgstr ""
+msgstr "Takominen tehty ::1 key file::"
 
 #: tomb:Create:forge_key:2122
 msgid "Your key is ready:"
-msgstr ""
+msgstr "Avaimesi on valmis:"
 
 #: tomb:Create:lock_tomb_with_key:2142
 msgid "No tomb specified for locking."
-msgstr ""
+msgstr "Ei hautaa määritetty lukittavaksi."
 
 #: tomb:Create:lock_tomb_with_key:2143
 msgid "Usage: tomb lock file.tomb -k file.tomb.key"
@@ -802,11 +836,11 @@ msgstr ""
 
 #: tomb:Create:lock_tomb_with_key:2150
 msgid "Commanded to lock tomb ::1 tomb file::"
-msgstr ""
+msgstr "Käsketty lukitsemaan hauta ::1 tomb file::"
 
 #: tomb:Create:lock_tomb_with_key:2153
 msgid "There is no tomb here. You have to dig it first."
-msgstr ""
+msgstr "Täällä ei ole hautaa. Sinun täytyy kaivaa se ensin."
 
 #: tomb:Create:lock_tomb_with_key:2166
 msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 47MB."
@@ -818,75 +852,81 @@ msgstr ""
 
 #: tomb:Create:lock_tomb_with_key:2177
 msgid "Filesystem not supported: ::1 filesystem::"
-msgstr ""
+msgstr "Tiedostojärjestelmää ei tueta: ::1 filesystem::"
 
 #: tomb:Create:lock_tomb_with_key:2181
 msgid "Selected filesystem type $filesystem."
-msgstr ""
+msgstr "Valittu tiedostojärjestelmätyyppi $filesystem."
 
 #: tomb:Create:lock_tomb_with_key:2188
 msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
 msgstr ""
+"Tarkistetaan, onko hauta tyhjä (emme koskaan astu kenenkään muun luiden "
+"päälle)."
 
 #: tomb:Create:lock_tomb_with_key:2192
 msgid "The tomb was already locked with another key."
-msgstr ""
+msgstr "Hauta oli jo lukittu toisella avaimella."
 
 #: tomb:Create:lock_tomb_with_key:2193
 msgid "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
 msgstr ""
+"Toiminta peruttu. En voi lukita jo lukittua hautaa. Mene kaivamaan uusi."
 
 #: tomb:Create:lock_tomb_with_key:2195
 msgid "Fine, this tomb seems empty."
-msgstr ""
+msgstr "Hyvä, tämä hauta näyttää tyhjältä."
 
 #: tomb:Create:lock_tomb_with_key:2203
 msgid "Locking using cipher: ::1 cipher::"
-msgstr ""
+msgstr "Lukitaan salauksella: ::1 cipher::"
 
 #: tomb:Create:lock_tomb_with_key:2215
 msgid "Locking ::1 tomb file:: with ::2 tomb key file::"
-msgstr ""
+msgstr "Lukitaan ::1 tomb file:: ::2 tomb key file:: :n kanssa"
 
 #: tomb:Create:lock_tomb_with_key:2217
 msgid "Formatting Luks mapped device."
-msgstr ""
+msgstr "LUKS-kartoitettua laitetta alustetaan."
 
 #: tomb:Create:lock_tomb_with_key:2222
 msgid "cryptsetup luksFormat returned an error."
-msgstr ""
+msgstr "cryptsetup luksFormat palautti virheen."
 
 #: tomb:Create:lock_tomb_with_key:2227
 msgid "cryptsetup luksOpen returned an error."
-msgstr ""
+msgstr "cryptsetup luksOpen palautti virheen."
 
 #: tomb:Create:lock_tomb_with_key:2230
 msgid "Formatting your Tomb with $filesystem filesystem."
-msgstr ""
+msgstr "Tombin alustaminen $filesystem-tiedostojärjestelmällä."
 
 #: tomb:Create:lock_tomb_with_key:2249
 msgid "Tomb format returned an error."
-msgstr ""
+msgstr "Tomb-muoto palautti virheen."
 
 #: tomb:Create:lock_tomb_with_key:2251
 msgid "Your tomb ::1 tomb file:: may be corrupted."
-msgstr ""
+msgstr "Hautasi ::1 tomb file:: saattaa olla vioittunut."
 
 #: tomb:Create:lock_tomb_with_key:2256
 msgid "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::"
-msgstr ""
+msgstr "::1 tomb name:: :n lukitus tehty käyttäen Luks dm-crypt ::2 cipher::"
 
 #: tomb:Create:lock_tomb_with_key:2257
 msgid "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::"
 msgstr ""
+"Hautasi on valmis ::1 tomb path:: :ssa ja suojattu avaimella ::2 tomb key::"
 
 #: tomb:Create:change_tomb_key:2267
 msgid "Commanded to reset key for tomb ::1 tomb path::"
-msgstr ""
+msgstr "Käsketty nollaamaan avaimen haudalle ::1 tomb path::"
 
 #: tomb:Create:change_tomb_key:2270
 msgid "Command 'setkey' needs two arguments: the old key file and the tomb."
 msgstr ""
+"Komento 'setkey' tarvitsee kaksi argumenttia: vanhan avaintiedoston ja "
+"haudan."
 
 #: tomb:Create:change_tomb_key:2271
 msgid "I.e:	tomb -k new.tomb.key old.tomb.key secret.tomb"
