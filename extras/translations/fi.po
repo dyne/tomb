@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2024-07-28 11:09+0000\n"
+"PO-Revision-Date: 2024-07-29 18:09+0000\n"
 "Last-Translator: Ricky Tigg <ricky.tigg@gmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tomb/tomb/fi/>\n"
 "Language: fi\n"
@@ -832,7 +832,7 @@ msgstr "Ei hautaa määritetty lukittavaksi."
 
 #: tomb:Create:lock_tomb_with_key:2143
 msgid "Usage: tomb lock file.tomb -k file.tomb.key"
-msgstr ""
+msgstr "Käyttö: tomb lock file.tomb -k file.tomb.key"
 
 #: tomb:Create:lock_tomb_with_key:2150
 msgid "Commanded to lock tomb ::1 tomb file::"
@@ -934,251 +934,267 @@ msgstr ""
 
 #: tomb:Create:change_tomb_key:2272
 msgid "Execution aborted."
-msgstr ""
+msgstr "Toteutus keskeytetty."
 
 #: tomb:Create:change_tomb_key:2284
 msgid "Not a valid LUKS encrypted volume: ::1 volume::"
-msgstr ""
+msgstr "Ei kelvollinen LUKS-salattu taltio: ::1 volume::"
 
 #: tomb:Create:change_tomb_key:2294
 msgid "Changing lock on tomb ::1 tomb name::"
-msgstr ""
+msgstr "Haudan lukon vaihto ::1 tomb name::"
 
 #: tomb:Create:change_tomb_key:2295
 msgid "Old key: ::1 old key::"
-msgstr ""
+msgstr "Vanha avain: ::1 old key::"
 
 #: tomb:Create:change_tomb_key:2306
 msgid "No valid password supplied for the old key."
-msgstr ""
+msgstr "Vanhalle avaimelle ei toimitettu kelvollista salasanaa."
 
 #: tomb:Create:change_tomb_key:2312
 msgid "Unexpected error in luksOpen."
-msgstr ""
+msgstr "Odottamaton virhe luksOpenissa."
 
 #: tomb:Create:change_tomb_key:2316
 msgid "New key: ::1 key file::"
-msgstr ""
+msgstr "Uusi avain: ::1 key file::"
 
 #: tomb:Create:change_tomb_key:2326
 msgid "No valid password supplied for the new key."
-msgstr ""
+msgstr "Uudelle avaimelle ei toimitettu kelvollista salasanaa."
 
 #: tomb:Create:change_tomb_key:2335
 msgid "Unexpected error in luksChangeKey."
-msgstr ""
+msgstr "Odottamaton virhe luksChangeKeyssä."
 
 #: tomb:Create:change_tomb_key:2337
 msgid "Unexpected error in luksClose."
-msgstr ""
+msgstr "Odottamaton virhe luksClose:ssa."
 
 #: tomb:Create:change_tomb_key:2339
 msgid "Successfully changed key for tomb: ::1 tomb file::"
-msgstr ""
+msgstr "Avaimen vaihto onnistui haudalle: ::1 tomb file::"
 
 #: tomb:Create:change_tomb_key:2340
 msgid "The new key is: ::1 new key::"
-msgstr ""
+msgstr "Uusi avain on: ::1 new key::"
 
 #: tomb:Open:mount_tomb:2370
 msgid "No tomb name specified for opening."
-msgstr ""
+msgstr "Avaamista varten ei ole määritetty haudan nimeä."
 
 #: tomb:Open:mount_tomb:2372
 msgid "Commanded to open tomb ::1 tomb name::"
-msgstr ""
+msgstr "Käsketty avata hauta ::1 tomb name::"
 
 #: tomb:Open:mount_tomb:2388
 msgid "Mountpoint not specified, using default: ::1 mount point::"
 msgstr ""
+"Liitoskohtaa ei ole määritetty; käytetään oletusarvoa: ::1 mount point::"
 
 #: tomb:Open:mount_tomb:2391
 msgid "Opening ::1 tomb file:: on ::2 mount point::"
-msgstr ""
+msgstr "Avataan ::1 tomb file:: ::2 mount point:: : lla"
 
 #: tomb:Open:mount_tomb:2398
 msgid "Mountpoint already in use: ::1 mount point::"
-msgstr ""
+msgstr "Liitoskohta jo käytössä: ::1 mount point::"
 
 #: tomb:Open:mount_tomb:2405
 msgid "::1 tomb file:: is not a valid Luks encrypted storage file."
-msgstr ""
+msgstr "::1 tomb file:: ei ole kelvollinen LUKS-salattu tallennustiedosto."
 
 #: tomb:Open:mount_tomb:2407
 msgid "This tomb is a valid LUKS encrypted device."
-msgstr ""
+msgstr "Tämä hauta on kelvollinen LUKS-salattu laite."
 
 #: tomb:Open:mount_tomb:2414
 msgid "Cipher is \"::1 cipher::\" mode \"::2 mode::\" hash \"::3 hash::\""
-msgstr ""
+msgstr "Salaus on \"::1 cipher::\" tila \"::2 mode::\" hajautus \"::3 hash::\""
 
 #: tomb:Open:mount_tomb:2421
 msgid "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
 msgstr ""
+"Tässä haudassa on käytössä useita avainpaikkoja. Varo: voi olla takaovi."
 
 #: tomb:Open:mount_tomb:2439
 msgid "Failure mounting the encrypted file."
-msgstr ""
+msgstr "Salatun tiedoston liitäminen epäonnistui."
 
 #: tomb:Open:mount_tomb:2449
 msgid "Success unlocking tomb ::1 tomb name::"
-msgstr ""
+msgstr "Haudan ::1 tomb name:: lukituksen avaaminen onnistui"
 
 #: tomb:Open:mount_tomb:2453
 msgid "Filesystem detected: ::1 filesystem::"
-msgstr ""
+msgstr "Havaittu tiedostojärjestelmä: ::1 filesystem::"
 
 #: tomb:Open:mount_tomb:2459
 msgid "Skipping filesystem checks in read-only"
-msgstr ""
+msgstr "Ohitetaan tiedostojärjestelmän tarkistukset vain luku -tilassa"
 
 #: tomb:Open:mount_tomb:2461
 msgid "Checking filesystem via ::1::"
-msgstr ""
+msgstr "Tarkistetaan tiedostojärjestelmää ::1:: :n kautta"
 
 #: tomb:Open:mount_tomb:2491
 msgid "Error mounting ::1 mapper:: on ::2 tombmount::"
-msgstr ""
+msgstr "Virhe liitettäessä ::1 mapper:: ::2 tombmount:: :een"
 
 #: tomb:Open:mount_tomb:2493
 msgid "Are mount options '::1 mount options::' valid?"
-msgstr ""
+msgstr "Ovatko liitosvalinnat '::1 mount options::' kelvollisia?"
 
 #: tomb:Open:mount_tomb:2498
 msgid "Cannot mount ::1 tomb name::"
-msgstr ""
+msgstr "Ei voi liittää ::1 tomb name::"
 
 #: tomb:Open:mount_tomb:2501
 msgid "Success opening ::1 tomb file:: on ::2 mount point::"
-msgstr ""
+msgstr "::1 tomb file:: :n avaaminen ::2 mount point:: :lla onnistui"
 
 #: tomb:Open:mount_tomb:2515
 msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
 msgstr ""
+"Viimeksi vieraili: ::1 user::(::2 tomb build::) ::3 tty:: :sta ::4 host:: "
+":lla"
 
 #: tomb:Open:mount_tomb:2516
 msgid "on date ::1 date::"
-msgstr ""
+msgstr "päivämääränä ::1 date::"
 
 #: tomb:Open:mount_tomb:2517
 msgid "the door was slammed or shutdown called before umount."
 msgstr ""
+"ovi pamautettiin kiinni tai sammutus kutsuttiin ennen liitoksen irrottamista."
 
 #: tomb:Open:exec_safe_bind_hooks:2579
 msgid "How pitiful!	A tomb, and no HOME."
-msgstr ""
+msgstr "Kuinka säälittävää! Hauta, eikä KOTIA."
 
 #: tomb:Open:exec_safe_bind_hooks:2583
 msgid "Cannot exec bind hooks without a mounted tomb."
-msgstr ""
+msgstr "Ei voi sitoa koukkuja ilman liitettyä hautaa."
 
 #: tomb:Open:exec_safe_bind_hooks:2602
 msgid "bind-hooks file is broken"
-msgstr ""
+msgstr "bind-hooks-tiedosto on rikki"
 
 #: tomb:Open:exec_safe_bind_hooks:2611
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
-msgstr ""
+msgstr "bind-hooks-sidontakoukkujen karttamuoto: local/to/tomb local/to/$HOME"
 
 #: tomb:Open:exec_safe_bind_hooks:2615
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.	 Rolling back"
 msgstr ""
+"bind-hooks-sidontakoukkujen karttamuoto: local/to/tomb local/to/$HOME.\t "
+"Pyöriminen takaisin"
 
 #: tomb:Open:exec_safe_bind_hooks:2620
 msgid "bind-hook target not existent, skipping ::1 home::/::2 subdir::"
 msgstr ""
+"bind-hook-sidoskoukun kohdetta ei ole; ohitetaan ::1 home::/::2 subdir::"
 
 #: tomb:Open:exec_safe_bind_hooks:2622
 msgid "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
 msgstr ""
+"bind-hook-sidoskoukun lähdettä ei löydy haudasta; ohitetaan ::1 mount "
+"point::/::2 subdir::"
 
 #: tomb:Open:exec_safe_func_hooks:2645
 msgid "Exec hook: ::1 exec hook:: ::2 action::"
-msgstr ""
+msgstr "Suorituskoukku: ::1 exec hook:: ::2 action::"
 
 #: tomb:List:list_tombs:2671
 msgid "I can't see any open tomb, may they all rest in peace."
-msgstr ""
+msgstr "En näe yhtään avointa hautaa, levätkööt he kaikki rauhassa."
 
 #: tomb:List:list_tombs:2707
 msgid "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::"
-msgstr ""
+msgstr "::1 tombname:: auki ::2 tombmount:: :lla käyttäen ::3 tombfsopts::"
 
 #: tomb:List:list_tombs:2712
 msgid "::1 tombname:: open since ::2 tombsince::"
-msgstr ""
+msgstr "::1 tombname:: auki ::2 tombsince:: :sta lähtien"
 
 #: tomb:List:list_tombs:2715
 msgid "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::"
 msgstr ""
+"Haudan ::1 tombname:: avasi ::2 tombuser:: ::3 tombtty:: :sta ::4 tombhost:: "
+":lla"
 
 #: tomb:List:list_tombs:2719
 msgid "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::%) is used: ::4 tombavail:: free "
 msgstr ""
+"::1 tombname:: koko ::2 tombtot::, josta ::3 tombused:: (::5 tombpercent:: %)"
+" on käytössä: ::4 tombavail:: vapaa "
 
 #: tomb:List:list_tombs:2723
 msgid "::1 tombname:: warning: your tomb is almost full!"
-msgstr ""
+msgstr "::1 tombname:: varoitus, hautasi on melkein täynnä!"
 
 #: tomb:List:list_tombs:2729
 msgid "::1 tombname:: hooks ::2 hookdest::"
-msgstr ""
+msgstr "::1 tombname:: koukut ::2 hookdest::"
 
 #: tomb:List:list_tomb_binds:2790
 msgid "Internal error: list_tomb_binds called without argument."
-msgstr ""
+msgstr "Sisäinen virhe: list_tomb_binds kutsuttu ilman argumenttia."
 
 #: tomb:Index and search:index_tombs:2819
 msgid "Cannot index tombs on this system: updatedb (mlocate/plocate) not installed."
 msgstr ""
+"Hautoja ei voi indeksoida tässä järjestelmässä: updatedb (mlocate/plocate) "
+"ei asennettu."
 
 #: tomb:Index and search:index_tombs:2823
 msgid "Cannot use GNU findutils for index/search commands."
-msgstr ""
+msgstr "GNU findutils:ta ei voi käyttää komentoihin index/search."
 
 #: tomb:Index and search:index_tombs:2825
 msgid "Index command needs 'mlocate/plocate' to be installed."
-msgstr ""
+msgstr "index-komento vaatii 'mlocate/plocate' asennettavan."
 
 #: tomb:Index and search:index_tombs:2833
 msgid "There seems to be no open tomb engraved as [::1::]"
-msgstr ""
+msgstr "Ei näytä olevan avointa hautaa, johon on kaiverrettu [::1::]"
 
 #: tomb:Index and search:index_tombs:2837
 msgid "Creating and updating search indexes."
-msgstr ""
+msgstr "Hakuindeksien luominen ja päivittäminen."
 
 #: tomb:Index and search:index_tombs:2850
 msgid "Skipping ::1 tomb name:: (.noindex found)."
-msgstr ""
+msgstr "Ohitetaan ::1 tomb name:: (.noindex löydetty)."
 
 #: tomb:Index and search:index_tombs:2852
 msgid "Indexing ::1 tomb name:: filenames..."
-msgstr ""
+msgstr "Indeksoidaan ::1 tomb name:: tiedostojen nimet..."
 
 #: tomb:Index and search:index_tombs:2857
 msgid "Indexing ::1 tomb name:: contents..."
-msgstr ""
+msgstr "Indeksoidaan ::1 tomb name:: sisällöt..."
 
 #: tomb:Index and search:index_tombs:2859
 msgid "Generating a new search index configuration file: ::1 swish conf::"
-msgstr ""
+msgstr "Luodaan uutta hakuindeksin asetustiedostoa: ::1 swish conf::"
 
 #: tomb:Index and search:index_tombs:2929
 msgid "Search index updated."
-msgstr ""
+msgstr "Hakuindeksi päivitetty."
 
 #: tomb:Index and search:search_tombs:2951
 msgid "Searching for: ::1::"
-msgstr ""
+msgstr "Etsitään: ::1::"
 
 #: tomb:Index and search:search_tombs:2959
 msgid "Searching filenames in tomb ::1 tomb name::"
-msgstr ""
+msgstr "Etsitään tiedostonimiä haudasta ::1 tomb name::"
 
 #: tomb:Index and search:search_tombs:2961
 msgid "Matches found: ::1 matches::"
-msgstr ""
+msgstr "Osumia löytyi: ::1 matches::"
 
 #: tomb:Index and search:search_tombs:2966
 msgid "Searching contents in tomb ::1 tomb name::"
