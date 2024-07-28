@@ -8,7 +8,7 @@ if test_have_prereq KDF; then
     test_export "kdf"
     test_expect_success 'Testing KDF: tomb creation' '
         tt_dig -s 20 &&
-        tt_forge --tomb-pwd $DUMMYPASS --kdf 1 &&
+        tt_forge --tomb-pwd $DUMMYPASS --kdf &&
         print $DUMMYPASS \
             | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key \
             | xxd &&
