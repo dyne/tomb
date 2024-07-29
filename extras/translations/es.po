@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2024-07-25 16:09+0000\n"
+"PO-Revision-Date: 2024-07-29 18:09+0000\n"
 "Last-Translator: gallegonovato <fran-carro@hotmail.es>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/tomb/tomb/es/>\n"
 "Language: es\n"
@@ -190,14 +190,12 @@ msgid " dig          create a new empty TOMB file of size -s in MiB"
 msgstr " dig     crear un nuevo TOMB vacío de tamaño -s en MiB"
 
 #: tomb:Commandline interaction:usage:768
-#, fuzzy
 msgid " forge        create a new KEY file and set its password"
-msgstr " forge   crear un fichero LLAVE nuevo y fija su contraseña"
+msgstr " forge        crea un nuevo archivo KEY y establece su contraseña"
 
 #: tomb:Commandline interaction:usage:769
-#, fuzzy
 msgid " lock         installs a lock on a TOMB to use it with KEY"
-msgstr " lock    instala un candado en una TUMBA para usarlo con la LLAVE"
+msgstr " lock    instala un candado en una TOMB para usarlo con la LLAVE"
 
 #: tomb:Commandline interaction:usage:771
 msgid " // Operations on tombs:"
