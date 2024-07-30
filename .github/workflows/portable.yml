@@ -2,13 +2,13 @@ name: ☠️ Portable tomb
 on:
   push:
     paths:
-      - 'portable/**'
+      - 'extras/portable/**'
       - '.github/workflows/portable.yml'
     branches:
     - master
   pull_request:
     paths:
-      - 'portable/**'
+      - 'extras/portable/**'
       - '.github/workflows/portable.yml'
     branches:
     - master
@@ -30,11 +30,11 @@ jobs:
           sudo apt-get install -q -y make openssl wget fuse3 util-linux
           sudo make -C portable download-deps-ubuntu20
       - name: Run portable tomb test
-        run: sudo make -C portable create-open-close
+        run: sudo make -C extras/portable create-open-close
       - uses: actions/upload-artifact@v3
         with:
           name: ubuntu-test.tomb
-          path: portable/test.tomb*
+          path: extras/portable/test.tomb*
           retention-days: 1
 
   freebsd:
@@ -47,7 +47,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: ubuntu-test.tomb
-        path: portable
+        path: extras/portable
     - name: Test in FreeBSD
       id: test
       uses: vmactions/freebsd-vm@v0
@@ -62,12 +62,12 @@ jobs:
           chmod a+x /usr/bin/veracrypt /usr/bin/zenroom
           kldload fusefs
         run: |
-          sudo gmake -C portable
+          sudo gmake -C extras/portable
           sudo gmake -C portable check-random-data
     - uses: actions/upload-artifact@v3
       with:
         name: freebsd-test.tomb
-        path: portable/test.tomb*
+        path: extras/portable/test.tomb*
         retention-days: 1
 
   ubuntu-last-cleanup:
@@ -79,14 +79,14 @@ jobs:
       - name: Install compiler and dependencies
         run: |
           sudo apt-get install -q -y make openssl wget fuse3 util-linux
-          sudo make -C portable download-deps-ubuntu20
+          sudo make -C extras/portable download-deps-ubuntu20
       - name: Download tomb built on FreeBSD
         uses: actions/download-artifact@v3
         with:
           name: freebsd-test.tomb
-          path: portable
+          path: extras/portable
       - name: Check integrity FreeBSD->Ubuntu
-        run: sudo make -C portable check-random-data
+        run: sudo make -C extras/portable check-random-data
       - name: delete FreeBSD tomb artifacts
         uses: geekyeggo/delete-artifact@v2
         with:

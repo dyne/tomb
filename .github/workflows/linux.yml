@@ -5,14 +5,14 @@ on:
   push:
     paths-ignore:
       - 'doc/**'
-      - 'portable/**'
+      - 'extras/portable/**'
       - '*.md'
     branches:
     - master
   pull_request:
     paths-ignore:
       - 'doc/**'
-      - 'portable/**'
+      - 'extras/portable/**'
       - '*.md'
     branches:
     - master
