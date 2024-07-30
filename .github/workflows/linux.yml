@@ -33,13 +33,13 @@ jobs:
           sudo apt-get update -y -q
           sudo apt-get install -y -q zsh cryptsetup gpg gawk libgcrypt20-dev steghide qrencode python2 python3-pip python3-dev libssl-dev make gcc sudo gettext bsdmainutils file pinentry-curses xxd libsodium23 libsodium-dev
       - uses: actions/checkout@v3
-      - name: Build the KDF extras
+      - name: Build the pbkdf2 extras
         run: |
           make --directory=extras/kdf-keys
           sudo make --directory=extras/kdf-keys install
+      - name: Run pbkdf2 tests
+        run: sudo make -C extras/kdf-keys test
       - name: Disable swap
         run: sudo swapoff -a
       - name: Run main tests
         run: sudo make test
-      - name: Run KDF tests
-        run: sudo make -C extras/kdf-keys test
