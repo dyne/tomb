@@ -62,7 +62,8 @@ msgstr "Löytyi zram-sivutus ilman takaisinkirjoitusta levylle."
 
 #: tomb:Safety functions:_ensure_safe_swap:424
 msgid "The undertaker found that all swap partitions are encrypted. Good."
-msgstr "Hautausohjelma havaitsi, että kaikki sivutusosiot ovat salattuja. Hyvä."
+msgstr ""
+"Hautausohjelma havaitsi, että kaikki sivutusosiot ovat salattuja. Hyvä."
 
 #: tomb:Safety functions:_ensure_safe_swap:426
 msgid "This poses a security risk."
@@ -158,7 +159,8 @@ msgstr "Taltioiden silmukkaliito ei ole mahdollista tässä koneessa, tämä vir
 
 #: tomb:Safety functions:lo_mount:717
 msgid "often occurs on VPS and kernels that don't provide the loop module."
-msgstr "ilmenee usein VPS:ssä ja ytimissä, jotka eivät tarjoa silmukkamoduulia."
+msgstr ""
+"ilmenee usein VPS:ssä ja ytimissä, jotka eivät tarjoa silmukkamoduulia."
 
 #: tomb:Safety functions:lo_mount:718
 msgid "It is impossible to use Tomb on this machine under these conditions."
@@ -227,7 +229,8 @@ msgstr " slam         iske TOMBin tappaen kaikki sitä käyttävät ohjelmat"
 
 #: tomb:Commandline interaction:usage:780
 msgid " resize       resize a TOMB to a new size -s (can only grow)"
-msgstr " resize       muuttaa TOMBin kokoa uuteen kokoon '-s' (voi vain kasvaa)"
+msgstr ""
+" resize       muuttaa TOMBin kokoa uuteen kokoon '-s' (voi vain kasvaa)"
 
 #: tomb:Commandline interaction:usage:783
 msgid " // Operations on keys:"
@@ -272,7 +275,8 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:802
 msgid " uncloak      extract a KEY from a TEXT using CIPHER (prints to stdout)"
-msgstr " uncloak      poimi KEY TEXT:stä CIPHER:in avulla (tulostaa stdout:een)"
+msgstr ""
+" uncloak      poimi KEY TEXT:stä CIPHER:in avulla (tulostaa stdout:een)"
 
 #: tomb:Commandline interaction:usage:806
 msgid "Options:"
@@ -285,7 +289,8 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:809
 msgid " -k           path to the key to be used ('-k -' to read from stdin)"
-msgstr " -k           polku käytettävään avaimeen ('-k -' lukeakseen stdinistä)"
+msgstr ""
+" -k           polku käytettävään avaimeen ('-k -' lukeakseen stdinistä)"
 
 #: tomb:Commandline interaction:usage:810
 msgid " -n           don't launch the execution hooks found in tomb"
@@ -326,13 +331,15 @@ msgstr ""
 "mitään)"
 
 #: tomb:Commandline interaction:usage:820
-msgid " --sphx-user  user associated with the key (for use with pitchforkedsphinx)"
+msgid ""
+" --sphx-user  user associated with the key (for use with pitchforkedsphinx)"
 msgstr ""
-" --sphx-user  avaimeen liittyvä käyttäjä (käytettäväksi "
-"'pitchforkedsphinx':in) kanssa"
+" --sphx-user  avaimeen liittyvä käyttäjä (käytettäväksi 'pitchforkedsphinx':"
+"in) kanssa"
 
 #: tomb:Commandline interaction:usage:821
-msgid " --sphx-host  host associated with the key (for use with pitchforkedsphinx)"
+msgid ""
+" --sphx-host  host associated with the key (for use with pitchforkedsphinx)"
 msgstr ""
 " --sphx-host  avaimeen liittyvä isäntä (käytettäväksi 'pitchforkedsphinx':in "
 "kanssa)"
@@ -418,8 +425,8 @@ msgstr "Yritetään avaimen palautusta."
 #: tomb:Key operations:_load_key:1168
 msgid "This operation requires a key file to be specified using the -k option."
 msgstr ""
-"Tämä toiminto vaatii avaintiedoston määrittämisen käyttämällä vaihtoehtoa "
-"'-k'."
+"Tämä toiminto vaatii avaintiedoston määrittämisen käyttämällä vaihtoehtoa '-"
+"k'."
 
 #: tomb:Key operations:_load_key:1172
 msgid "Waiting for the key to be piped from stdin... "
@@ -430,7 +437,8 @@ msgid "Key not found, specify one using -k."
 msgstr "Avainta ei löydy, määritä yksi käyttäen '-k'."
 
 #: tomb:Key operations:_load_key:1198
-msgid "The key seems invalid or its format is not known by this version of Tomb."
+msgid ""
+"The key seems invalid or its format is not known by this version of Tomb."
 msgstr ""
 "Avain näyttää olevan virheellinen tai tämä Tomb-versio ei tunne sen muotoa."
 
@@ -495,7 +503,8 @@ msgid "Your passphrase was successfully updated."
 msgstr "Tunnuslauseesi on päivitetty onnistuneesti."
 
 #: tomb:Key operations:gen_key:1511
-msgid "You are going to encrypt a tomb key with ::1 nrecipients:: recipient(s)."
+msgid ""
+"You are going to encrypt a tomb key with ::1 nrecipients:: recipient(s)."
 msgstr "Aiot salata Tomb-avaimen ::1 nrecipients:: vastaanottajien kanssa."
 
 #: tomb:Key operations:gen_key:1512
@@ -507,12 +516,13 @@ msgid "The fingerprints are:"
 msgstr "Sormenjäljet ovat:"
 
 #: tomb:Key operations:gen_key:1515
-msgid "	  `_gpg_fingerprint "
+msgid "\t  `_gpg_fingerprint "
 msgstr "\t  `_gpg_-sormenjälki "
 
 #: tomb:Key operations:gen_key:1520
 msgid "No recipient specified, using default GPG key."
-msgstr "Vastaanottajaa ei ole määritetty; käytetään oletusarvoista GPG-avainta."
+msgstr ""
+"Vastaanottajaa ei ole määritetty; käytetään oletusarvoista GPG-avainta."
 
 #: tomb:Key operations:gen_key:1533
 msgid "User aborted."
@@ -523,12 +533,14 @@ msgid "You set empty password, which is not possible."
 msgstr "Olet asettanut tyhjän salasanan, mikä ei ole mahdollista."
 
 #: tomb:Key operations:gen_key:1577
-msgid "Wrong argument for --kdf: must be an integer number (iteration seconds)."
+msgid ""
+"Wrong argument for --kdf: must be an integer number (iteration seconds)."
 msgstr ""
 "Väärä argumentti '--kdf':lle: on oltava kokonaisluku (iteraatiosekuntia)."
 
 #: tomb:Key operations:gen_key:1578
-msgid "Depending on the speed of machines using this tomb, use 1 to 10, or more"
+msgid ""
+"Depending on the speed of machines using this tomb, use 1 to 10, or more"
 msgstr ""
 "Riippuen tätä hautaa käyttävien koneiden nopeudesta, käytä 1–10 tai enemmän"
 
@@ -869,7 +881,8 @@ msgid "The tomb was already locked with another key."
 msgstr "Hauta oli jo lukittu toisella avaimella."
 
 #: tomb:Create:lock_tomb_with_key:2193
-msgid "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
+msgid ""
+"Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
 msgstr ""
 "Toiminta peruttu. En voi lukita jo lukittua hautaa. Mene kaivamaan uusi."
 
@@ -914,7 +927,8 @@ msgid "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::"
 msgstr "::1 tomb name:: :n lukitus tehty käyttäen Luks dm-crypt ::2 cipher::"
 
 #: tomb:Create:lock_tomb_with_key:2257
-msgid "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::"
+msgid ""
+"Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::"
 msgstr ""
 "Hautasi on valmis ::1 tomb path:: :ssa ja suojattu avaimella ::2 tomb key::"
 
@@ -929,8 +943,8 @@ msgstr ""
 "haudan."
 
 #: tomb:Create:change_tomb_key:2271
-msgid "I.e:	tomb -k new.tomb.key old.tomb.key secret.tomb"
-msgstr ""
+msgid "I.e:\ttomb -k new.tomb.key old.tomb.key secret.tomb"
+msgstr "eli: tomb -k uusi.hauta-avain vanha.hauta-avain salainen.hauta"
 
 #: tomb:Create:change_tomb_key:2272
 msgid "Execution aborted."
@@ -1014,7 +1028,8 @@ msgid "Cipher is \"::1 cipher::\" mode \"::2 mode::\" hash \"::3 hash::\""
 msgstr "Salaus on \"::1 cipher::\" tila \"::2 mode::\" hajautus \"::3 hash::\""
 
 #: tomb:Open:mount_tomb:2421
-msgid "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
+msgid ""
+"Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
 msgstr ""
 "Tässä haudassa on käytössä useita avainpaikkoja. Varo: voi olla takaovi."
 
@@ -1057,8 +1072,8 @@ msgstr "::1 tomb file:: :n avaaminen ::2 mount point:: :lla onnistui"
 #: tomb:Open:mount_tomb:2515
 msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
 msgstr ""
-"Viimeksi vieraili: ::1 user::(::2 tomb build::) ::3 tty:: :sta ::4 host:: "
-":lla"
+"Viimeksi vieraili: ::1 user::(::2 tomb build::) ::3 tty:: :sta ::4 host:: :"
+"lla"
 
 #: tomb:Open:mount_tomb:2516
 msgid "on date ::1 date::"
@@ -1070,7 +1085,7 @@ msgstr ""
 "ovi pamautettiin kiinni tai sammutus kutsuttiin ennen liitoksen irrottamista."
 
 #: tomb:Open:exec_safe_bind_hooks:2579
-msgid "How pitiful!	A tomb, and no HOME."
+msgid "How pitiful!\tA tomb, and no HOME."
 msgstr "Kuinka säälittävää! Hauta, eikä KOTIA."
 
 #: tomb:Open:exec_safe_bind_hooks:2583
@@ -1086,7 +1101,7 @@ msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
 msgstr "bind-hooks-sidontakoukkujen karttamuoto: local/to/tomb local/to/$HOME"
 
 #: tomb:Open:exec_safe_bind_hooks:2615
-msgid "bind-hooks map format: local/to/tomb local/to/$HOME.	 Rolling back"
+msgid "bind-hooks map format: local/to/tomb local/to/$HOME.\t Rolling back"
 msgstr ""
 "bind-hooks-sidontakoukkujen karttamuoto: local/to/tomb local/to/$HOME.\t "
 "Pyöriminen takaisin"
@@ -1097,7 +1112,8 @@ msgstr ""
 "bind-hook-sidoskoukun kohdetta ei ole; ohitetaan ::1 home::/::2 subdir::"
 
 #: tomb:Open:exec_safe_bind_hooks:2622
-msgid "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
+msgid ""
+"bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
 msgstr ""
 "bind-hook-sidoskoukun lähdettä ei löydy haudasta; ohitetaan ::1 mount "
 "point::/::2 subdir::"
@@ -1119,16 +1135,19 @@ msgid "::1 tombname:: open since ::2 tombsince::"
 msgstr "::1 tombname:: auki ::2 tombsince:: :sta lähtien"
 
 #: tomb:List:list_tombs:2715
-msgid "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::"
+msgid ""
+"::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::"
 msgstr ""
-"Haudan ::1 tombname:: avasi ::2 tombuser:: ::3 tombtty:: :sta ::4 tombhost:: "
-":lla"
+"Haudan ::1 tombname:: avasi ::2 tombuser:: ::3 tombtty:: :sta ::4 "
+"tombhost:: :lla"
 
 #: tomb:List:list_tombs:2719
-msgid "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::%) is used: ::4 tombavail:: free "
+msgid ""
+"::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::"
+"%) is used: ::4 tombavail:: free "
 msgstr ""
-"::1 tombname:: koko ::2 tombtot::, josta ::3 tombused:: (::5 tombpercent:: %)"
-" on käytössä: ::4 tombavail:: vapaa "
+"::1 tombname:: koko ::2 tombtot::, josta ::3 tombused:: (::5 tombpercent:: "
+"%) on käytössä: ::4 tombavail:: vapaa "
 
 #: tomb:List:list_tombs:2723
 msgid "::1 tombname:: warning: your tomb is almost full!"
@@ -1143,7 +1162,8 @@ msgid "Internal error: list_tomb_binds called without argument."
 msgstr "Sisäinen virhe: list_tomb_binds kutsuttu ilman argumenttia."
 
 #: tomb:Index and search:index_tombs:2819
-msgid "Cannot index tombs on this system: updatedb (mlocate/plocate) not installed."
+msgid ""
+"Cannot index tombs on this system: updatedb (mlocate/plocate) not installed."
 msgstr ""
 "Hautoja ei voi indeksoida tässä järjestelmässä: updatedb (mlocate/plocate) "
 "ei asennettu."
@@ -1198,51 +1218,51 @@ msgstr "Osumia löytyi: ::1 matches::"
 
 #: tomb:Index and search:search_tombs:2966
 msgid "Searching contents in tomb ::1 tomb name::"
-msgstr ""
+msgstr "Etsitään sisältöä haudasta ::1 tomb name::"
 
 #: tomb:Index and search:search_tombs:2969
 msgid "Skipping tomb ::1 tomb name::: not indexed."
-msgstr ""
+msgstr "Ohitetaan hauta ::1 tomb name::: ei indeksoitu."
 
 #: tomb:Index and search:search_tombs:2970
 msgid "Run 'tomb index' to create indexes."
-msgstr ""
+msgstr "Suorita 'tomb index' luodakseen indeksejä."
 
 #: tomb:Index and search:search_tombs:2972
 msgid "Search completed."
-msgstr ""
+msgstr "Haku suoritettu."
 
 #: tomb:Resize:resize_tomb:2984
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
-msgstr ""
+msgstr "Käsketty muuttamaan haudan kokoa ::1 tomb name:: ::2 size:: mebitavua."
 
 #: tomb:Resize:resize_tomb:2986
 msgid "No tomb name specified for resizing."
-msgstr ""
+msgstr "Haudan nimeä ei ole määritetty koon muuttamista varten."
 
 #: tomb:Resize:resize_tomb:2987
 msgid "Cannot find ::1::"
-msgstr ""
+msgstr "::1:: :ta ei löydy"
 
 #: tomb:Resize:resize_tomb:2991
 msgid "Aborting operations: new size was not specified, use -s"
-msgstr ""
+msgstr "Toimintojen keskeytetään: uutta kokoa ei ollut määritetty, käytä '-s'"
 
 #: tomb:Resize:resize_tomb:3010
 msgid "You must specify the new size of ::1 tomb name::"
-msgstr ""
+msgstr "Sinun on määritettävä uusi koko ::1 tomb name:: :lle"
 
 #: tomb:Resize:resize_tomb:3012
 msgid "Size is not an integer."
-msgstr ""
+msgstr "Koko ei ole kokonaisluku."
 
 #: tomb:Resize:resize_tomb:3024
 msgid "Error creating the extra resize ::1 size::, operation aborted."
-msgstr ""
+msgstr "Virhe luotaessa ylimääräistä kokoa ::1 size::; toiminta peruttu."
 
 #: tomb:Resize:resize_tomb:3031
 msgid "Tomb seems resized already, operating filesystem stretch"
-msgstr ""
+msgstr "Haudan koko näyttää jo muuttuneen, käyttötiedostojärjestelmä venyy"
 
 #: tomb:Resize:resize_tomb:3033
 msgid "The new size must be greater than old tomb size."
@@ -1250,183 +1270,194 @@ msgstr ""
 
 #: tomb:Resize:resize_tomb:3038
 msgid "opening tomb"
-msgstr ""
+msgstr "avaamassa hautaa"
 
 #: tomb:Resize:resize_tomb:3043
 msgid "cryptsetup failed to resize ::1 mapper::"
-msgstr ""
+msgstr "cryptsetup ei voinut muuttaa ::1 mapper:: :n kokoa"
 
 #: tomb:Resize:resize_tomb:3052
 msgid "e2fsck failed to check ::1 mapper::"
-msgstr ""
+msgstr "e2fsck ei voinut tarkistaa ::1 mapper:: :ta"
 
 #: tomb:Resize:resize_tomb:3055
 msgid "resize2fs failed to resize ::1 mapper::"
-msgstr ""
+msgstr "resize2fs epäonnistui ::1 mapper:::n koon muuttamisessa"
 
 #: tomb:Resize:resize_tomb:3060
 msgid "filesystem check failed on ::1 mapper::"
-msgstr ""
+msgstr "tiedostojärjestelmän tarkistus epäonnistui ::1 mapper:: :lla"
 
 #: tomb:Resize:resize_tomb:3069
 msgid "filesystem resize failed on ::1 mapper::"
-msgstr ""
+msgstr "tiedostojärjestelmän koon muuttaminen epäonnistui ::1 mapper:: :lla"
 
 #: tomb:Close:umount_tomb:3098
 msgid "There is no open tomb to be closed."
-msgstr ""
+msgstr "Suljettavaa avointa hautaa ei ole."
 
 #: tomb:Close:umount_tomb:3101
 msgid "Too many tombs mounted, please specify one (see tomb list)"
-msgstr ""
+msgstr "Liian monta hautaa liitettyinä, määritä yksi (katso 'tomb list')"
 
 #: tomb:Close:umount_tomb:3102
 msgid "or issue the command 'tomb close all' to close them all."
-msgstr ""
+msgstr "tai suorita komento 'tomb close all' sulkeaksesi ne kaikki."
 
 #: tomb:Close:umount_tomb:3121
 msgid "Tomb not found: ::1 tomb file::"
-msgstr ""
+msgstr "Hautaa ei löytynyt: ::1 tomb file::"
 
 #: tomb:Close:umount_tomb:3122
 msgid "Please specify an existing tomb."
-msgstr ""
+msgstr "Määritä olemassa oleva hauta."
 
 #: tomb:Close:umount_tomb:3130
 msgid "close exec-hook returns a non-zero error code: ::1 error::"
-msgstr ""
+msgstr "sulje exec-hook palauttaa nollasta poikkeavan virhekoodin: ::1 error::"
 
 #: tomb:Close:umount_tomb:3131
 msgid "Operation aborted"
-msgstr ""
+msgstr "Toiminta peruttu"
 
 #: tomb:Close:umount_tomb:3135
 msgid "Closing tomb ::1 tomb name:: mounted on ::2 mount point::"
-msgstr ""
+msgstr "Sulkemassa ::2 mount point:: :hen liitetty hautaa ::1 tomb name::"
 
 #: tomb:Close:umount_tomb:3143
 msgid "Closing tomb bind hook: ::1 hook::"
-msgstr ""
+msgstr "Sulkemassa haudansidontakoukkua: ::1 hook::"
 
 #: tomb:Close:umount_tomb:3145
 msgid "Tomb bind hook ::1 hook:: is busy, cannot close tomb."
-msgstr ""
+msgstr "Haudansidontakoukku ::1 hook:: on varattu, ei voi sulkea hautaa."
 
 #: tomb:Close:umount_tomb:3165
 msgid "Tomb is busy, cannot umount!"
-msgstr ""
+msgstr "Hauta on varattu; ei voi irrottaa!"
 
 #: tomb:Close:umount_tomb:3178
 msgid "Error occurred in cryptsetup luksClose ::1 mapper::"
-msgstr ""
+msgstr "Tapahtui virhe cryptsetup luksClose:ssa ::1 mapper::"
 
 #: tomb:Close:umount_tomb:3186
 msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
-msgstr ""
+msgstr "Hauta ::1 tomb name:: suljettu; luusi lepäävät rauhassa."
 
 #: tomb:Close:list_processes:3200
 msgid "Listing processes running inside all open tombs..."
 msgstr ""
+"Luettelemassa kaikissa avoimissa haudoissa käynnissä olevat prosessit..."
 
 #: tomb:Close:list_processes:3202
 msgid "Listing processes running inside tomb '::1 tombname::'..."
 msgstr ""
+"Luettelemassa haudan '::1 tombname::' sisällä käynnissä olevat prosessit..."
 
 #: tomb:Close:slam_tomb:3238
 msgid "Slamming tomb ::1 tombname:: mounted on ::2 tombmount::"
-msgstr ""
+msgstr "Iskemässä ::2 tombmount:: :hen liitettyä ::1 tombname:: :ta"
 
 #: tomb:Close:slam_tomb:3248
 msgid "::1 tombname:: sending ::2 sig:: to ::3 cmd:: (::4 uid::)"
-msgstr ""
+msgstr "::1 tombname:: lähettämässä ::2 sig:: :ta ::3 cmd:: :lle (::4 uid::)"
 
 #: tomb:Close:slam_tomb:3258
 msgid "Can't kill ::1 process:: ::2 pcmd:: (::3 powner::)"
-msgstr ""
+msgstr "::1 process:: :ta ::2 pcmd:: (::3 powner::) ei voi tappaa"
 
 #: tomb:Main routine:main:3357
 msgid "Error parsing."
-msgstr ""
+msgstr "Virhe jäsentämisessä."
 
 #: tomb:Main routine:main:3367
 msgid "There's no such command \"::1 subcommand::\"."
-msgstr ""
+msgstr "Sellaista '::1 subcommand::'-komentoa ei ole."
 
 #: tomb:Main routine:main:3368
 msgid "Please try -h for help."
-msgstr ""
+msgstr "Kokeile '-h' saadaksesi apua."
 
 #: tomb:Main routine:main:3380
 msgid "Some error occurred during option processing."
-msgstr ""
+msgstr "Valinnan käsittelyn aikana tapahtui virhe."
 
 #: tomb:Main routine:main:3381
 msgid "See \"tomb help\" for more info."
-msgstr ""
+msgstr "Katso 'bomb help' saadaksesi lisätietoja."
 
 #: tomb:Main routine:main:3393
 msgid "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::"
-msgstr ""
+msgstr "Tuntematon vaihtoehto ::1 arg::alikomennolle ::2 subcommand::"
 
 #: tomb:Main routine:main:3409
-msgid "You specified option ::1 option::, which is DANGEROUS and should only be used for testing\nIf you really want so, add --unsafe"
+msgid ""
+"You specified option ::1 option::, which is DANGEROUS and should only be "
+"used for testing\n"
+"If you really want so, add --unsafe"
 msgstr ""
+"Määritit vaihtoehdon ::1 option::, joka on vaarallinen ja sitä tulisi "
+"käyttää vain testaukseen\n"
+"Jos todella haluat niin, lisää '-- unsafe'"
 
 #: tomb:Main routine:main:3417
 msgid "Privilege escalation tool configured: ::1 exec::"
-msgstr ""
+msgstr "Etuoikeuksien eskalointityökalu määritetty: ::1 exec::"
 
 #: tomb:Main routine:main:3447
-msgid "The create command is deprecated, please use dig, forge and lock instead."
+msgid ""
+"The create command is deprecated, please use dig, forge and lock instead."
 msgstr ""
+"Komento 'create' on vanhentunut; käytä sen sijaan dig-, forge- ja lock-"
+"komentoa."
 
 #: tomb:Main routine:main:3448
 msgid "For more informations see Tomb's manual page (man tomb)."
-msgstr ""
+msgstr "Katso lisätietoja Tombin käsikirjan sivulta ('man tomb')."
 
 #: tomb:Main routine:main:3489
 msgid "lsof not installed: cannot slam tombs."
-msgstr ""
+msgstr "lsof ei asennettu: ei voi iskeä hautoja."
 
 #: tomb:Main routine:main:3490
 msgid "Trying a regular close."
-msgstr ""
+msgstr "Yrittämässä säännöllistä sulkemista."
 
 #: tomb:Main routine:main:3497
 msgid "Resize2fs not installed: cannot resize tombs."
-msgstr ""
+msgstr "Resize2fs ei asennettu: hautojen kokoa ei voi muuttaa."
 
 #: tomb:Main routine:main:3523
 msgid "QREncode not installed: cannot engrave keys on paper."
-msgstr ""
+msgstr "QREncodea ei ole asennettu; avaimia ei voi kaivertaa paperille."
 
 #: tomb:Main routine:main:3540
 msgid "Steghide not installed: cannot bury keys into images."
-msgstr ""
+msgstr "Steghide ei asennettu: avaimia ei voi haudata kuviin."
 
 #: tomb:Main routine:main:3547
 msgid "Steghide not installed: cannot exhume keys from images."
-msgstr ""
+msgstr "Steghide ei asennettu: avaimia ei voi kaivaa esiin kuvista."
 
 #: tomb:Main routine:main:3554
 msgid "Cloakify not installed: cannot cipher keys into texts"
-msgstr ""
+msgstr "Cloakify ei asennettu: avaimia ei voi salata teksteiksi"
 
 #: tomb:Main routine:main:3561
 msgid "Decloakify not installed: cannot decipher keys from texts"
-msgstr ""
+msgstr "Decloakify ei asennettu: ei voi purkaa avaimia teksteistä"
 
 #: tomb:Main routine:main:3576
 msgid "Tomb ::1 version:: - a strong and gentle undertaker for your secrets"
-msgstr ""
+msgstr "Tomb ::1 version:: - vahva ja lempeä hautausmies salaisuuksillesi"
 
 #: tomb:Main routine:main:3578
 msgid " Copyright (C) 2007-2024 Dyne.org Foundation, License GNU GPL v3+"
-msgstr ""
+msgstr " Tekijänoikeus (C) 2007–2024 Dyne.org Foundation, License GNU GPL v3+"
 
 #: tomb:Main routine:main:3579
 msgid " This is free software: you are free to change and redistribute it"
-msgstr ""
+msgstr " Tämä on ilmainen ohjelmisto: voit vapaasti muuttaa ja jakaa sitä"
 
 #: tomb:Main routine:main:3580
 msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
@@ -1434,15 +1465,15 @@ msgstr ""
 
 #: tomb:Main routine:main:3585
 msgid " This source code is distributed in the hope that it will be useful,"
-msgstr ""
+msgstr " Tätä lähdekoodia jaetaan siinä toivossa, että siitä on hyötyä,"
 
 #: tomb:Main routine:main:3586
 msgid " but WITHOUT ANY WARRANTY; without even the implied warranty of"
-msgstr ""
+msgstr " mutta ILMAN MITÄÄN TAKUUTA; ilman edes oletettua takuuta"
 
 #: tomb:Main routine:main:3587
 msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
-msgstr ""
+msgstr " myyntikelpoisuutta tai sopivuutta tiettyyn tarkoitukseen."
 
 #: tomb:Main routine:main:3589
 msgid " When in need please refer to <http://dyne.org/support>."
@@ -1450,16 +1481,20 @@ msgstr ""
 
 #: tomb:Main routine:main:3591
 msgid "System utils:"
-msgstr ""
+msgstr "Järjestelmän käyttötarkoitukset:"
 
 #: tomb:Main routine:main:3603
 msgid "Optional utils:"
-msgstr ""
+msgstr "Valinnaiset käyttötarkoitukset:"
 
 #: tomb:Main routine:main:3613
 msgid "Command \"::1 subcommand::\" not recognized."
-msgstr ""
+msgstr "Komentoa '::1 subcommand::' ei tunnisteta."
 
 #: tomb:Main routine:main:3614
 msgid "Try -h for help."
-msgstr ""
+msgstr "Kokeile '-h' saadaksesi apua."
+
+#: tomb:Resize:resize_tomb:3033
+msgid "The new size must be greater then old tomb size."
+msgstr "Uuden koon on oltava suurempi kuin vanhan haudan koko."
