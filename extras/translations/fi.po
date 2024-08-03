@@ -75,7 +75,7 @@ msgstr "Voit poistaa kaikki sivutusosiot käytöstä komennolla:"
 
 #: tomb:Safety functions:_ensure_safe_swap:428
 msgid " swapoff -a"
-msgstr " swapoff -a"
+msgstr " 'swapoff -a'"
 
 #: tomb:Safety functions:_ensure_safe_swap:429
 msgid "[#163] I may not detect plain swaps on an encrypted volume."
@@ -857,10 +857,12 @@ msgstr "Täällä ei ole hautaa. Sinun täytyy kaivaa se ensin."
 #: tomb:Create:lock_tomb_with_key:2166
 msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 47MB."
 msgstr ""
+"Tiedostojärjestelmä ::1 filesystem:: :ta ei tueta alle 47 Mt:n haudoissa."
 
 #: tomb:Create:lock_tomb_with_key:2172
 msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 18MB."
 msgstr ""
+"Tiedostojärjestelmä ::1 filesystem:: :ta ei tueta alle 18 Mt:n haudoissa."
 
 #: tomb:Create:lock_tomb_with_key:2177
 msgid "Filesystem not supported: ::1 filesystem::"
