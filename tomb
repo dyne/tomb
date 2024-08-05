@@ -187,12 +187,10 @@ _endgame() {
 	done
 	unset TOMBTMPFILES
 
-	# Detach loop devices
-	for l in $TOMBLOOPDEVS; do
-		_sudo losetup -d "$l"
-	done
+	# Clear information regarding loop devices
+	# No need for an explicit detach as cryptsetup
+	# sets the AUTOCLEAR flag
 	unset TOMBLOOPDEVS
-
 }
 
 # Trap functions for the _endgame event
@@ -707,7 +705,7 @@ is_valid_tomb() {
 
 	# checks if Tomb already mounted (or we cannot alter it)
 	local maphash=`realpath $TOMBPATH | sha256sum`
-	lo_mount # fills TOMBLOOP with next loop
+	lo_check # fills TOMBLOOP with next loop if available
 	TOMBMAPPER="tomb.$TOMBNAME.${maphash[(w)1]}.`basename $TOMBLOOP`"
 	local mounted_tombs=(`list_tomb_mounts`)
 	local usedmapper
@@ -724,9 +722,8 @@ is_valid_tomb() {
 	return 0
 }
 
-
-# $1 is the tomb file to be lomounted
-lo_mount() {
+# $1 is the tomb file which needs a loop device
+lo_check() {
 	tpath="$1"
 
 	# check if we have support for loop mounting
@@ -740,23 +737,9 @@ lo_mount() {
 
 	[[ "$tpath" == "" ]] && return 0
 
-
-	# allocates the next loopback for our file
-	_sudo losetup -f "$tpath" || _failure "Loopback mount failed: ::1 path:: on ::2 loop::" "$tpath" $TOMBLOOP
-
 	TOMBLOOPDEVS+=("$TOMBLOOP") # add to array of lodevs used
 
 	return 0
-}
-
-# print out latest loopback mounted
-lo_new() { print - "${TOMBLOOPDEVS[${#TOMBLOOPDEVS}]}" }
-
-# $1 is the path to the lodev to be preserved after quit
-lo_preserve() {
-	_verbose "lo_preserve on ::1 path::" $1
-	# remove the lodev from the tomb_lodevs array
-	TOMBLOOPDEVS=("${(@)TOMBLOOPDEVS:#$1}")
 }
 
 # eventually used for debugging
@@ -2212,12 +2195,10 @@ lock_tomb_with_key() {
 		_success "Selected filesystem type $filesystem."
 	}
 
-	lo_mount "$TOMBPATH"
-
-	_verbose "Loop mounted on ::1 mount point::" $TOMBLOOP
+	lo_check "$TOMBPATH"
 
 	_message "Checking if the tomb is empty (we never step on somebody else's bones)."
-	_sudo cryptsetup isLuks ${TOMBLOOP}
+	_sudo cryptsetup isLuks ${TOMBPATH}
 	if [ $? = 0 ]; then
 		# is it a LUKS encrypted nest? then bail out and avoid reformatting it
 		_warning "The tomb was already locked with another key."
@@ -2248,12 +2229,12 @@ lock_tomb_with_key() {
 	_message "Formatting Luks mapped device."
 	_cryptsetup --batch-mode \
 				--cipher ${cipher} --hash sha512 --key-size 512 --key-slot 0 \
-				luksFormat ${TOMBLOOP}
+				luksFormat ${TOMBPATH}
 	[[ $? == 0 ]] || {
 		_warning "cryptsetup luksFormat returned an error."
 		_failure "Operation aborted." }
 
-	_cryptsetup --cipher ${cipher} --hash sha512 luksOpen ${TOMBLOOP} tomb.tmp
+	_cryptsetup --cipher ${cipher} --hash sha512 luksOpen ${TOMBPATH} tomb.tmp
 	[[ $? == 0 ]] || {
 		_warning "cryptsetup luksOpen returned an error."
 		_failure "Operation aborted." }
@@ -2306,10 +2287,8 @@ change_tomb_key() {
 	_check_swap
 
 	is_valid_tomb $tombpath
-
-	lo_mount "$TOMBPATH"
-
-	_sudo cryptsetup isLuks ${TOMBLOOP}
+	lo_check "$TOMBPATH"
+	_sudo cryptsetup isLuks ${TOMBPATH}
 	# is it a LUKS encrypted nest? we check one more time
 	[[ $? == 0 ]] || {
 		_failure "Not a valid LUKS encrypted volume: ::1 volume::" $TOMBPATH }
@@ -2339,7 +2318,7 @@ change_tomb_key() {
 
 	# luksOpen the tomb (not really mounting, just on the loopback)
 	print -R -n - "$old_secret" | _sudo cryptsetup --key-file - \
-										luksOpen ${TOMBLOOP} ${TOMBMAPPER}
+										luksOpen ${TOMBPATH} ${TOMBMAPPER}
 	[[ $? == 0 ]] || _failure "Unexpected error in luksOpen."
 
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
@@ -2361,7 +2340,7 @@ change_tomb_key() {
 	print -R -n - "$TOMBSECRET" >> $tmpnewkey
 
 	print -R -n - "$old_secret" | _sudo cryptsetup --key-file - \
-										luksChangeKey "$TOMBLOOP" "$tmpnewkey"
+										luksChangeKey "$TOMBPATH" "$tmpnewkey"
 
 	[[ $? == 0 ]] || _failure "Unexpected error in luksChangeKey."
 
@@ -2429,15 +2408,15 @@ mount_tomb() {
 			_failure "Mountpoint already in use: ::1 mount point::" "$tombmount"
 	done
 
-	lo_mount "$TOMBPATH"
 
-	_sudo cryptsetup isLuks ${TOMBLOOP} || {
+	lo_check "$TOMBPATH"
+	_sudo cryptsetup isLuks ${TOMBPATH} || {
 		# is it a LUKS encrypted nest? see cryptsetup(1)
 		_failure "::1 tomb file:: is not a valid Luks encrypted storage file." $TOMBFILE }
 
 	_message "This tomb is a valid LUKS encrypted device."
 
-	luksdump="`_sudo cryptsetup luksDump ${TOMBLOOP}`"
+	luksdump="`_sudo cryptsetup luksDump ${TOMBPATH}`"
 	tombdump=(`print $luksdump | awk '
 		/^Cipher name/ {print $3}
 		/^Cipher mode/ {print $3}
@@ -2465,12 +2444,9 @@ mount_tomb() {
 	}
 	[[ $? == 0 ]] || _failure "No valid password supplied."
 
-	_cryptsetup luksOpen ${TOMBLOOP} ${TOMBMAPPER}
+	_cryptsetup luksOpen ${TOMBPATH} ${TOMBMAPPER}
 	[[ $? = 0 ]] || {
 		_failure "Failure mounting the encrypted file." }
-
-	# preserve the loopdev after exit
-	lo_preserve "$TOMBLOOP"
 
 	# array: [ cipher, keysize, loopdevice ]
 	tombstat=(`_sudo cryptsetup status ${TOMBMAPPER} | awk '
@@ -2482,7 +2458,7 @@ mount_tomb() {
 
 	filesystem=`_detect_filesystem /dev/mapper/${TOMBMAPPER}`
 	_message "Filesystem detected: ::1 filesystem::" $filesystem
-	# TODO: check if FS is supported, else close luks and loop
+	# TODO: check if FS is supported, else close luks
 
 	_verbose "Tomb engraved as ::1 tomb name::" $TOMBNAME
 
@@ -2525,7 +2501,6 @@ mount_tomb() {
 		# TODO: move cleanup to _endgame()
 		[[ -d "$tombmount" ]] && _sudo rmdir "$tombmount"
 		[[ -e /dev/mapper/$TOMBMAPPER ]] && _sudo cryptsetup luksClose $TOMBMAPPER
-		# The loop is taken care of in _endgame()
 		_failure "Cannot mount ::1 tomb name::" $TOMBNAME
 	}
 
@@ -2738,7 +2713,7 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 		_message "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::" \
 				 $tombname "$tombmount" $tombfsopts
 
-		_verbose "::1 tombname:: /dev/::2 tombloop:: device mounted (detach with losetup -d)" $tombname $tombloop
+		_verbose "::1 tombname:: attached to /dev/::2 tombloop:: device" $tombname $tombloop
 
 		_message "::1 tombname:: open since ::2 tombsince::" $tombname $tombsince
 
@@ -3002,10 +2977,10 @@ resize_tomb() {
 		_failure "The new size must be greater then old tomb size."
 	fi
 
-	lo_mount "$TOMBPATH"
+	lo_check "$TOMBPATH"
 
 	_message "opening tomb"
-	_cryptsetup luksOpen ${TOMBLOOP} ${TOMBMAPPER} || {
+	_cryptsetup luksOpen ${TOMBPATH} ${TOMBMAPPER} || {
 		_failure "Failure mounting the encrypted file." }
 
 	_sudo cryptsetup resize "${TOMBMAPPER}" || {
@@ -3145,12 +3120,6 @@ umount_tomb() {
 
 		_sudo cryptsetup luksClose $mapper ||
 			_failure "Error occurred in cryptsetup luksClose ::1 mapper::" $mapper
-
-		# Normally the loopback device is detached when unused
-		[[ -e "/dev/$tombloop" ]] && {
-			_sudo losetup -d "/dev/$tombloop" ||
-				_verbose "/dev/$tombloop was already closed."
-		}
 
 		_success "Tomb ::1 tomb name:: closed: your bones will rest in peace." $tombname
 
