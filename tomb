@@ -2779,13 +2779,12 @@ list_tomb_binds() {
 	[[ -z "$1" ]] && {
 		_failure "Internal error: list_tomb_binds called without argument." }
 
-	# much simpler than the crazy from before
-	# in fact, the second parameter is now redundant
-	# as we only need the tomb mapper name
+	# ignore the first line of the result for the respective source (mapper),
+	# as this will be the canonical first mount (aka main mount)
 	findmnt --source=/dev/mapper/"$1" -rno SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
 		| awk '
+FNR==1 {next}
 {
-  if(index($1,"[")==0) next;
   print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
 }
 '
@@ -3056,7 +3055,8 @@ umount_tomb() {
 		_message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
 				 $tombname "$tombmount"
 
-		# check if there are bind mounted dirs and close them
+		# check if there are bind mounted dirs and close them first
+		# Can be due to bind-hooks or outside --bind mounts
 		bind_tombs=(`list_tomb_binds "$mapper"`)
 		for b in ${bind_tombs}; do
 			bind_mapper="${b[(ws:;:)1]}"
@@ -3066,27 +3066,14 @@ umount_tomb() {
 				_failure "Tomb bind hook ::1 hook:: is busy, cannot close tomb." "$bind_mount"
 		done
 
-		# check if the tomb is actually still mounted. Background:
-		# When mounted on a binded directory in appears twice in 'list_tomb_binds'
-		# and will get umounted automatically through the above function
-		# causing an error and a remaining (decrypted!) loop device
-		# posing a security risk.
-		# See https://github.com/dyne/Tomb/issues/273
-
-		# checking for tombs still mounted
-		mounted_tombs=(`list_tomb_mounts`)
-		for t in ${mounted_tombs}; do
-			usedmount=${t[(ws:;:)2]}
-			[[ "$usedmount" == "$tombmount" ]] && {
-				_verbose "Performing umount of ::1 mount point::" "$tombmount"
-				touch "${tombmount}"/.cleanexit
-				_sudo umount "${tombmount}"
-				[[ $? = 0 ]] || {
-					rm -f "${tombmount}"/.cleanexit
-					_failure "Tomb is busy, cannot umount!"
-				}
-			}
-		done
+		# umount the main mount
+		_verbose "Performing umount of ::1 mount point::" "$tombmount"
+		touch "${tombmount}"/.cleanexit
+		_sudo umount "${tombmount}"
+		[[ $? = 0 ]] || {
+			rm -f "${tombmount}"/.cleanexit
+			_failure "Tomb is busy, cannot umount!"
+		}
 
 		# If we used a default mountpoint and is now empty, delete it
 		tombname_regex=${tombname//\[/}
