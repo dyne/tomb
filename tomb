@@ -2756,34 +2756,18 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 #
 # 5. tomb name
 list_tomb_mounts() {
-	[[ -z "$1" ]] && {
-		# list all open tombs
-		_sudo findmnt -rvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
+	# execute in subshell to avoid ZSH non-POSIX behaviour if globbing doesn't match something
+	( for dev in /dev/mapper/tomb*$1.*; do
+		findmnt --source ${dev} -rnvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
 			| awk '
 BEGIN { main="" }
-/^\/dev\/mapper\/tomb/ {
+{
   if(main==$1) next;
   print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
   main=$1
 }
 '
-	} || {
-		# list a specific tomb
-		# add square parens if not present (detection)
-		local tname
-		if [[ "${1[1]}" = "[" ]]; then tname="$1"
-		else tname="[$1]"; fi
-		_sudo findmnt -rvo SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
-			| awk -vtomb="$tname" '
-BEGIN { main="" }
-/^\/dev\/mapper\/tomb/ {
-  if("["$5"]"!=tomb) next;
-  if(main==$1) next;
-  print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
-  main=$1
-}
-'
-	}
+	done ) 2>/dev/null
 }
 
 # list_tomb_binds
