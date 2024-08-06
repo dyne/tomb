@@ -3079,9 +3079,9 @@ umount_tomb() {
 		_message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
 				 $tombname "$tombmount"
 
-		# check if there are binded dirs and close them
+		# check if there are bind mounted dirs and close them
 		bind_tombs=(`list_tomb_binds $tombname "$tombmount"`)
-		for b in ${(f)"$(list_tomb_binds $tombname "$tombmount")"}; do
+		for b in ${bind_tombs}; do
 			bind_mapper="${b[(ws:;:)1]}"
 			bind_mount="${b[(ws:;:)2]}"
 			_message "Closing tomb bind hook: ::1 hook::" "$bind_mount"
