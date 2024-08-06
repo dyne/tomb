@@ -3162,7 +3162,7 @@ slam_tomb() {
 				result=1 }
 		done
 		# if it failed killing a process, report it
-		[[ $result = 0 ]] && umount_tomb $tombname
+		[[ $result = 0 ]] && umount_tomb "${tombname:1:-1}"
 	done
 	return $result
 }
@@ -3378,7 +3378,7 @@ main() {
 
 		# Slam a tomb killing all processes running inside
 		slam)
-			slam_tomb $PARAM
+			slam_tomb $PARAM[1]
 			;;
 
 		# Close the tomb
