@@ -424,12 +424,23 @@ To avoid that tomb execution is logged by \fIsyslog\fR also add:
 
 Password input is handled by the pinentry program: it can be text
 based or graphical and is usually configured with a symlink. When
-using Tomb in X11 it is better to use a graphical pinentry-gtk2 or
-pinentry-qt because it helps preventing keylogging by other X
-clients. When using it from a remote ssh connection it might be
-necessary to force use of pinentry-curses for instance by unsetting
-the DISPLAY environment var.
+using Tomb in a graphical environment (X11 or Wayland) it is better
+to use either pinentry-gtk2 (deprecated), pinentry-gnome or
+pinentry-qt because it helps preventing keylogging by other clients.
+When using it from a remote ssh connection it might be necessary to
+force use of pinentry-tty for instance by unsetting the DISPLAY (X11)
+or WAYLAND_DISPLAY (Wayland) environment var.
+This program pinentry works in conjunction with
+"gpg-agent", a daemon running in background to facilitate secret key
+management with gpg. It is recommended one runs "gpg-agent" launching
+it via the respective session initialization (in X "~/.xsession" or
+"~/.xinitrc" files) with this command:
 
+.EX
+	eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
+.EE
+
+In the future it may become mandatory to run gpg-agent when using tomb.
 
 .SH SWAP
 
@@ -471,21 +482,6 @@ in ".zshrc":
 	export HISTIGNORESPACE=1
 	alias tomb=' tomb'
 .EE
-
-.SH PASSWORD INPUT
-
-Tomb uses the external program "pinentry" to let users type the key password
-into a terminal or a graphical window. This program works in conjunction with
-"gpg-agent", a daemon running in background to facilitate secret key
-management with gpg. It is recommended one runs "gpg-agent" launching it from
-the X session initialization ("~/.xsession" or "~/.xinitrc" files) with this
-command:
-
-.EX
-	eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
-.EE
-
-In the future it may become mandatory to run gpg-agent when using tomb.
 
 .SH SHARE A TOMB
 A tomb key can be encrypted with more than one recipient. Therefore, a
