@@ -2730,7 +2730,7 @@ awk "/mapper/"' { print $2 ";" $3 ";" $4 ";" $5 }'`
 		}
 
 		# Now check hooks
-		mounted_hooks=(`list_tomb_binds $tombname "$tombmount"`)
+		mounted_hooks=(`list_tomb_binds "$mapper"`)
 		for h in ${mounted_hooks}; do
 			_message "::1 tombname:: hooks ::2 hookdest::" \
 					 $tombname ${h[(ws:;:)2]}
@@ -2776,23 +2776,16 @@ BEGIN { main="" }
 # needs two arguments: name of tomb whose hooks belong
 #					   mount tomb
 list_tomb_binds() {
-	[[ -z "$2" ]] && {
+	[[ -z "$1" ]] && {
 		_failure "Internal error: list_tomb_binds called without argument." }
 
 	# much simpler than the crazy from before
 	# in fact, the second parameter is now redundant
-	# as we only need the tomb name
-
-	# note that this code assumes that the tomb name is provided in square brackets
-
-	_sudo findmnt -ro SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
-		| grep -F "/dev/mapper/tomb" \
-		| awk -vpattern="$1" '
-BEGIN { }
+	# as we only need the tomb mapper name
+	findmnt --source=/dev/mapper/"$1" -rno SOURCE,TARGET,FSTYPE,OPTIONS,LABEL \
+		| awk '
 {
-  if("["$5"]"!=pattern) next;
   if(index($1,"[")==0) next;
-  gsub("[[][^]]*[]]","",$1);
   print $1 ";" $2 ";" $3 ";(" $4 ");[" $5 "]"
 }
 '
@@ -3064,7 +3057,7 @@ umount_tomb() {
 				 $tombname "$tombmount"
 
 		# check if there are bind mounted dirs and close them
-		bind_tombs=(`list_tomb_binds $tombname "$tombmount"`)
+		bind_tombs=(`list_tomb_binds "$mapper"`)
 		for b in ${bind_tombs}; do
 			bind_mapper="${b[(ws:;:)1]}"
 			bind_mount="${b[(ws:;:)2]}"
