@@ -430,17 +430,6 @@ pinentry-qt because it helps preventing keylogging by other clients.
 When using it from a remote ssh connection it might be necessary to
 force use of pinentry-tty for instance by unsetting the DISPLAY (X11)
 or WAYLAND_DISPLAY (Wayland) environment var.
-This program pinentry works in conjunction with
-"gpg-agent", a daemon running in background to facilitate secret key
-management with gpg. It is recommended one runs "gpg-agent" launching
-it via the respective session initialization (in X "~/.xsession" or
-"~/.xinitrc" files) with this command:
-
-.EX
-	eval $(gpg-agent --daemon --write-env-file "${HOME}/.gpg-agent-info")
-.EE
-
-In the future it may become mandatory to run gpg-agent when using tomb.
 
 .SH SWAP
 
