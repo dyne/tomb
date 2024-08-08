@@ -372,7 +372,7 @@ msgstr "Jos haluat lisätietoja Tombista, lue käsikirja: man tomb"
 
 #: tomb:Commandline interaction:usage:835
 msgid "Please report bugs on <http://github.com/dyne/tomb/issues>."
-msgstr ""
+msgstr "Ilmoita vioista <https://github.com/dyne/tomb/issues>:een."
 
 #: tomb:Commandline interaction:_ensure_dependencies:992
 msgid "Missing required dependency ::1 command::.  Please install it."
@@ -1463,7 +1463,7 @@ msgstr " Tämä on ilmainen ohjelmisto: voit vapaasti muuttaa ja jakaa sitä"
 
 #: tomb:Main routine:main:3580
 msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
-msgstr ""
+msgstr " Uusimman lähdekoodin saa <https://dyne.org/software/tomb>:sta"
 
 #: tomb:Main routine:main:3585
 msgid " This source code is distributed in the hope that it will be useful,"
@@ -1479,7 +1479,7 @@ msgstr " myyntikelpoisuutta tai sopivuutta tiettyyn tarkoitukseen."
 
 #: tomb:Main routine:main:3589
 msgid " When in need please refer to <http://dyne.org/support>."
-msgstr ""
+msgstr " Kun on tarvetta, katso <https://dyne.org/support>:sta."
 
 #: tomb:Main routine:main:3591
 msgid "System utils:"
