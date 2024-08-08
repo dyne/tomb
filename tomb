@@ -64,6 +64,7 @@ typeset -i DECLOAKIFY=1
 typeset -i RESIZER=1
 typeset -i RECOLL=1
 typeset -i QRENCODE=1
+typeset -i LSOF=1
 
 # Default mount options
 typeset		 MOUNTOPTS="rw,noatime,nodev"
@@ -2961,8 +2962,18 @@ umount_tomb() {
 			}
 		}
 
-		_message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
+		# if SLAM is set kill possible processes
+		[[ -v SLAM ]] && {
+			_message "Slamming tomb ::1 tombname:: mounted on ::2 tombmount::" \
+				 ${tombname} "${tombmount}"
+			_kill_processes "$tombname" "$tombmount"
+			[[ $? -ne 0 ]] && {
+				_failure "Still active processes for ::1 tombname ::, cannot close tomb." "$tombname"
+			}
+		} || {
+			_message "Closing tomb ::1 tomb name:: mounted on ::2 mount point::" \
 				 $tombname "$tombmount"
+		}
 
 		# check if there are bind mounted dirs and close them first
 		# Can be due to bind-hooks or outside --bind mounts
@@ -3009,9 +3020,9 @@ list_processes() {
 	mounted_tombs=(`list_tomb_mounts $1`)
 	if [[ "${#mounted_tombs}" -gt 0 ]]; then
 		if [[ -z $1 ]]; then
-			_success "Looking for processes running inside all open tombs..."
+			_message "Looking for processes running inside all open tombs..."
 		else
-			_success "Looking for processes running inside tomb '::1 tombname::'..." "$1"
+			_message "Looking for processes running inside tomb '::1 tombname::'..." "$1"
 		fi
 
 		for i in ${mounted_tombs}; do
@@ -3024,61 +3035,41 @@ list_processes() {
 	return $indicator
 }
 
-# Kill all processes using the tomb
-slam_tomb() {
-	# $1 = (optional) name of tomb to slam, or "all" if more mounted
-
-	if [ "$1" = "all" ]; then
-		mounted_tombs=(`list_tomb_mounts`)
-	else
-		mounted_tombs=(`list_tomb_mounts $1`)
-	fi
-
-	[[ ${#mounted_tombs} == 0 ]] && {
-		_failure "There is no open tomb to be closed." }
-
-	[[ ${#mounted_tombs} -gt 1 && -z "$1" ]] && {
-		_warning "Too many tombs mounted, please specify one (see tomb list)"
-		_warning "or issue the command 'tomb close all' to close them all."
-		_failure "Operation aborted." }
+# Kill all processes using the specified tomb
+_kill_processes() {
+	# $1 = name of tomb to slam
+	# $2 = mount location of tomb
+	[[ -z "$2" ]] && _failure "Missing arguments for slamming."
 
 	local pnum result lsofres
 	result=0
-	# iterate through all mounted tomb affected
-	for i in ${mounted_tombs}; do
-		tombname=${i[(ws:;:)5]}
-		tombmount="${i[(ws:;:)2]}"
-		_success "Slamming tomb ::1 tombname:: mounted on ::2 tombmount::" \
-				 ${tombname} "${tombmount}"
-		list_processes "${tombname:1:-1}"
-		[[ $? -eq 0 ]] && {
-			# iterate through 3 different signals, break on success
-			for s in TERM HUP KILL; do
-				lsofres=(`_sudo lsof -t +D "$tombmount"`)
-				[[ -n $lsofres ]] && {
-					# iterate through all processes before switching signals
-					for pnum in $lsofres; do
-						_message "::1 tombname:: sending ::2 sig:: to open process ::3 pnum::" \
-								 ${tombname} ${s} ${pnum}
-						_sudo kill -$s $pnum
-					done
-				} || { break }
-				# give some time to the process for a clean quit
-				sleep .5
-			done
-		}
 
-		# if there are still processes then signal failure
-		lsofres=(`_sudo lsof -t +D "$tombmount"`)
-		[[ -n $lsofres ]] && {
-			for pnum in $lsofres; do
-				_warning "Couldn't kill ::1 pnum::" $pnum
-			done
-			result=1
-		}
-		# if it failed killing a process, report it
-		[[ $result = 0 ]] && umount_tomb "${tombname:1:-1}"
-	done
+	list_processes "$1"
+	[[ $? -eq 0 ]] && {
+		# iterate through 3 different signals, break on success
+		for s in TERM HUP KILL; do
+			lsofres=(`_sudo lsof -t +D "$2"`)
+			[[ -n $lsofres ]] && {
+				# iterate through all processes before switching signals
+				for pnum in $lsofres; do
+					_message "::1 tombname:: sending ::2 sig:: to open process ::3 pnum::" \
+							 ${1} ${s} ${pnum}
+					_sudo kill -$s $pnum
+				done
+				} || { break }
+			# give some time to the process for a clean quit
+			sleep .5
+		done
+	}
+
+	# if there are still processes then signal failure
+	lsofres=(`_sudo lsof -t +D "$tombmount"`)
+	[[ -n $lsofres ]] && {
+		for pnum in $lsofres; do
+			_warning "Couldn't kill ::1 pnum::" $pnum
+		done
+		result=1
+	}
 	return $result
 }
 
@@ -3293,18 +3284,15 @@ main() {
 
 		# Slam a tomb killing all processes running inside
 		slam)
-			slam_tomb $PARAM[1]
-			;;
+			[[ $LSOF -eq 1 ]] && {
+				SLAM=1
+			} || {
+				_warning "lsof not installed: cannot slam tombs."
+				_warning "Trying a regular close."}
+			;&
 
 		# Close the tomb
-		# `slam` is used to force closing.
 		umount|close)
-			[[ "$subcommand" == "slam" ]] && {
-				SLAM=1
-				[[ $LSOF == 0 ]] && {
-					unset SLAM
-					_warning "lsof not installed: cannot slam tombs."
-					_warning "Trying a regular close." }}
 			umount_tomb $PARAM[1]
 			;;
 
