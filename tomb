@@ -3004,22 +3004,24 @@ umount_tomb() {
 list_processes() {
 	# $1 = (optional) name of tomb
 	# runs lsof on the mounted_tombs
-	local mounted_tombs i
+	local mounted_tombs i indicator lsofres
+	indicator=1 # != 0 means there were processes
 	mounted_tombs=(`list_tomb_mounts $1`)
 	if [[ "${#mounted_tombs}" -gt 0 ]]; then
 		if [[ -z $1 ]]; then
-			_success "Listing processes running inside all open tombs..."
+			_success "Looking for processes running inside all open tombs..."
 		else
-			_success "Listing processes running inside tomb '::1 tombname::'..." "$1"
+			_success "Looking for processes running inside tomb '::1 tombname::'..." "$1"
 		fi
 
 		for i in ${mounted_tombs}; do
 			_verbose "scanning tomb: ::1 tombmount::" $i
-			tombmount="${i[(ws:;:)2]}"
-			_sudo lsof +D "${i[(ws:;:)2]}"
+			lsofres=$(_sudo lsof +D "${i[(ws:;:)2]}")
+			# Check on output, as $? will always return 1 for whatever reasons
+			[[ -n $lsofres ]] && { indicator=0; echo $lsofres } || { _success "None found" }
 		done
 	fi
-	return 0
+	return $indicator
 }
 
 # Kill all processes using the tomb
@@ -3040,7 +3042,7 @@ slam_tomb() {
 		_warning "or issue the command 'tomb close all' to close them all."
 		_failure "Operation aborted." }
 
-	local pnum puid pcmd powner result
+	local pnum result lsofres
 	result=0
 	# iterate through all mounted tomb affected
 	for i in ${mounted_tombs}; do
@@ -3048,28 +3050,32 @@ slam_tomb() {
 		tombmount="${i[(ws:;:)2]}"
 		_success "Slamming tomb ::1 tombname:: mounted on ::2 tombmount::" \
 				 ${tombname} "${tombmount}"
-		# iterate through all processes running in mounted tombs
-		for pnum in ${(f)"$(_sudo lsof -t +D "$tombmount")"}; do
-			puid=$(cat /proc/${pnum}/loginuid)
-			pcmd=$(cat /proc/${pnum}/cmdline)
-			powner=`_get_username $puid`
-			_verbose "process found: $pnum $pcmd ($powner)"
-			# iterate through 3 different signals to send, break on success
+		list_processes "${tombname:1:-1}"
+		[[ $? -eq 0 ]] && {
+			# iterate through 3 different signals, break on success
 			for s in TERM HUP KILL; do
-				_message "::1 tombname:: sending ::2 sig:: to ::3 cmd:: (::4 uid::)" \
-						 ${tombname} ${s} ${pcmd} ${powner}
-				_sudo kill -$s $pnum
+				lsofres=(`_sudo lsof -t +D "$tombmount"`)
+				[[ -n $lsofres ]] && {
+					# iterate through all processes before switching signals
+					for pnum in $lsofres; do
+						_message "::1 tombname:: sending ::2 sig:: to open process ::3 pnum::" \
+								 ${tombname} ${s} ${pnum}
+						_sudo kill -$s $pnum
+					done
+				} || { break }
 				# give some time to the process for a clean quit
 				sleep .5
-				# stop sending other signals if kill was succesfull
-				[[ -r /proc/$pnum ]] || break
 			done
-			# if process still running then signal failure
-			[[ -r /proc/$pnum ]] && {
-				_warning "Can't kill ::1 process:: ::2 pcmd:: (::3 powner::)" \
-						 $pnum $pcmd $powner
-				result=1 }
-		done
+		}
+
+		# if there are still processes then signal failure
+		lsofres=(`_sudo lsof -t +D "$tombmount"`)
+		[[ -n $lsofres ]] && {
+			for pnum in $lsofres; do
+				_warning "Couldn't kill ::1 pnum::" $pnum
+			done
+			result=1
+		}
 		# if it failed killing a process, report it
 		[[ $result = 0 ]] && umount_tomb "${tombname:1:-1}"
 	done
