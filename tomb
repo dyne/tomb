@@ -2850,7 +2850,7 @@ resize_tomb() {
 	elif [[ "$newtombsize" = "$oldtombsize" ]]; then
 		_message "Tomb seems resized already, operating filesystem stretch"
 	else
-		_failure "The new size must be greater then old tomb size."
+		_failure "The new size must be greater than old tomb size."
 	fi
 
 	lo_check "$TOMBPATH"

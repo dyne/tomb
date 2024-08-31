@@ -1199,7 +1199,7 @@ msgid "Tomb seems resized already, operating filesystem stretch"
 msgstr ""
 
 #: tomb:Resize:resize_tomb:3033
-msgid "The new size must be greater then old tomb size."
+msgid "The new size must be greater than old tomb size."
 msgstr ""
 
 #: tomb:Resize:resize_tomb:3038

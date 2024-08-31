@@ -1321,7 +1321,7 @@ msgid "Tomb seems resized already, operating filesystem stretch"
 msgstr "Tumba parece ya redimensionado, operando reducción del SdF"
 
 #: tomb:Resize:resize_tomb:3033
-msgid "The new size must be greater then old tomb size."
+msgid "The new size must be greater than old tomb size."
 msgstr "El nuevo tamaño debe ser mayor que el viejo tamaño de la tumba."
 
 #: tomb:Resize:resize_tomb:3038
