@@ -57,6 +57,7 @@ command -v cloakify > /dev/null && test_set_prereq CLOAKIFY
 command -v decloakify > /dev/null && test_set_prereq DECLOAKIFY
 command -v doas > /dev/null && test_set_prereq DOAS
 command -v argon2 > /dev/null && test_set_prereq ARGON2
+command -v mkfs.btrfs > /dev/null && test_set_prereq BTRFS
 
 
 # GnuPG config
