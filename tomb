@@ -61,7 +61,6 @@ typeset -i KDF=1
 typeset -i STEGHIDE=1
 typeset -i CLOAKIFY=1
 typeset -i DECLOAKIFY=1
-typeset -i SPHINX=1
 typeset -i RESIZER=1
 typeset -i RECOLL=1
 typeset -i QRENCODE=1
@@ -569,12 +568,6 @@ ask_password() {
 		return 1
 	}
 
-	# if sphinx mode is chosen, use the provided input
-	# as master password to retrieve the actual password
-	if option_is_set --sphx-user || option_is_set --sphx-host; then
-		password=$(sphinx_get_password "$password")
-	fi
-
 	[[ -z $password ]] && {
 		_warning "Empty password"
 		print "empty"
@@ -583,65 +576,6 @@ ask_password() {
 
 	print "$password"
 	return 0
-}
-
-# Retrieve PASSWORD from sphinx
-# $1 MASTER password for the password store
-# requires --sphx-host and --sphx-user flags to be set
-sphinx_get_password() {
-	local errorfile
-	local password
-	if option_is_set --sphx-user && option_is_set --sphx-host; then
-		# value error in sphinx doesn't set exit code
-		# using tempfile as a workaround to notice the error
-		errorfile=$(mktemp /tmp/tomb_error.XXXXXXXXX)
-		password=$(echo "$1" | sphinx get $(option_value --sphx-user) $(option_value --sphx-host) 2>$errorfile)
-		if  ! grep -q "ValueError: fail" $errorfile ; then
-			echo "$password"
-			rm $errorfile
-			return 0
-		else
-			_warning "sphinx returns error: ::1 error::" $(cat $errorfile)
-			rm $errorfile
-			_failure "Failed to retrieve actual password with sphinx."
-		fi
-	else
-		_failure "Both host and user have to be set to use sphinx"
-	fi
-}
-
-# Create PASSWORD in sphinx
-# $1 MASTER password for the password store
-# requires --sphx-host and --sphx-user flags to be set
-sphinx_set_password() {
-	local errorfile
-	local password
-	if option_is_set --sphx-user && option_is_set --sphx-host; then
-		# value error in sphinx doesn't set exit code
-		# using tempfile as a workaround to notice the error
-		errorfile=$(mktemp /tmp/tomb_error.XXXXXXXXX)
-		# check first if this host/user combination exists in store
-		# if yes, there is no need to make a call to create
-		password=$(echo "$1" | sphinx get $(option_value --sphx-user) $(option_value --sphx-host) 2>$errorfile)
-		if  ! grep -q "error: sphinx protocol failure" $errorfile ; then
-			echo "$password"
-			rm $errorfile
-			return 0
-		fi
-		# no such host/user combination in store, create one
-		password=$(echo "$1" | sphinx create $(option_value --sphx-user) $(option_value --sphx-host) ulsd 0 2>$errorfile)
-		if  ! grep -q "error: sphinx protocol failure" $errorfile ; then
-			echo "$password"
-			rm $errorfile
-			return 0
-		else
-			_warning "sphinx returns error: ::1 error::" $(cat $errorfile)
-			rm $errorfile
-			_failure "Failed to create password with sphinx"
-		fi
-	else
-		_failure "Both host and user have to be set to use sphinx"
-	fi
 }
 
 # Check if a filename is a valid tomb
@@ -817,11 +751,6 @@ usage() {
 	_print " -r           provide GnuPG recipients (separated by comma)"
 	_print " -R           provide GnuPG hidden recipients (separated by comma)"
 	_print " --sudo       super user exec alternative to sudo (doas or none)"
-
-	[[ $SPHINX == 1 ]] && {
-		_print " --sphx-user  user associated with the key (for use with pitchforkedsphinx)"
-		_print " --sphx-host  host associated with the key (for use with pitchforkedsphinx)"
-	}
 
 	[[ $KDF == 1 ]] && {
 		_print " --kdf        forge keys armored against dictionary attacks"
@@ -1025,8 +954,6 @@ _ensure_dependencies() {
 	command -v cloakify 1>/dev/null 2>/dev/null || CLOAKIFY=0
 	# Check for decloakify
 	command -v decloakify 1>/dev/null 2>/dev/null || DECLOAKIFY=0
-	# Check for pitchforkedsphinx client
-	command -v sphinx 1>/dev/null 2>/dev/null || SPHINX=0
 	# Check for resize
 	command -v resize2fs 1>/dev/null 2>/dev/null || RESIZER=0
 	# Check for KDF auxiliary tools
@@ -1385,12 +1312,6 @@ ask_key_password() {
 		tombpass="$1"
 		_verbose "ask_key_password with tombpass: ::1 tomb pass::" $tombpass
 
-		# if sphinx mode is chosen, use the provided input
-		# as master password to retrieve the actual password
-		if option_is_set --sphx-user || option_is_set --sphx-host; then
-			tombpass=$(sphinx_get_password "$tombpass")
-		fi
-
 		get_lukskey "$tombpass"
 
 		[[ $? = 0 ]] && {
@@ -1488,16 +1409,6 @@ gen_key() {
 	tombpass=""
 	tombpasstmp=""
 
-	# remove sphinx opts not to mess with initial password prompt
-	option_is_set --sphx-user && {
-		sphx_user_tmp="$(option_value --sphx-user)"
-		unset "OPTS[--sphx-user]"
-	}
-	option_is_set --sphx-host && {
-		sphx_host_tmp="$(option_value --sphx-host)"
-		unset "OPTS[--sphx-host]"
-	}
-
 	if option_is_set -g; then
 		gpgopt=(--encrypt)
 
@@ -1556,19 +1467,6 @@ gen_key() {
 		else
 			tombpass="$2"
 			_verbose "gen_key takes tombpass from CLI argument: ::1 tomb pass::" $tombpass
-		fi
-
-		# if sphinx mode is chosen, use the provided input
-		# as master password to generate the actual password
-		if [[ ! -z $sphx_host_tmp ]] || [[ ! -z $sphx_user_tmp ]]; then
-			OPTS[--sphx-user]=$sphx_user_tmp
-			OPTS[--sphx-host]=$sphx_host_tmp
-			unset sphx_user_tmp
-			unset sphx_host_tmp
-			tombpass=$(sphinx_set_password "$tombpass")
-			if [[ $? != 0 ]]; then
-				_failure "User aborted."
-			fi
 		fi
 
 		header=""
