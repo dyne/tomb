@@ -58,6 +58,7 @@ command -v decloakify > /dev/null && test_set_prereq DECLOAKIFY
 command -v sphinx > /dev/null && test_set_prereq SPHINX
 command -v oracle > /dev/null && test_set_prereq ORACLE
 command -v doas > /dev/null && test_set_prereq DOAS
+command -v argon2 > /dev/null && test_set_prereq ARGON2
 
 
 # GnuPG config
