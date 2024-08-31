@@ -27,4 +27,26 @@ if test_have_prereq DOAS; then
         '
 fi
 
+if test_have_prereq BTRFS; then
+    test_export "create_btrfs"
+    test_expect_success 'Testing tomb creation using BTRFS filesystem' '
+    tt_dig -s 50 &&
+    tt_forge --tomb-pwd $DUMMYPASS &&
+    print $DUMMYPASS \
+        | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key \
+        | xxd &&
+    tt_lock --tomb-pwd $DUMMYPASS --filesystem btrfs
+    '
+
+    test_export "create_btrfsmixed"
+    test_expect_success 'Testing tomb creation using BTRFS mixedmode filesystem' '
+    tt_dig -s 20 &&
+    tt_forge --tomb-pwd $DUMMYPASS &&
+    print $DUMMYPASS \
+        | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key \
+        | xxd &&
+    tt_lock --tomb-pwd $DUMMYPASS --filesystem btrfsmixedmode
+    '
+fi
+
 test_done

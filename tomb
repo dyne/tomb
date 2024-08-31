@@ -2065,7 +2065,7 @@ lock_tomb_with_key() {
 	_verbose "Tomb found: ::1 tomb path::" $TOMBPATH
 
 	local filesystem=ext4
-    option_is_set --filesystem && {
+	option_is_set --filesystem && {
 		filesystem=`option_value --filesystem`
 		local tombsize=`stat --format '%s' $tombpath`
 		case $filesystem in
@@ -2074,13 +2074,13 @@ lock_tomb_with_key() {
 			btrfs)
 				if [[ $tombsize -lt 49283072 ]]; then
 					_failure "Filesystem ::1 filesystem:: not supported on tombs smaller than 47MB." \
-						$filesystem
+						 $filesystem
 				fi
 				;;
 			btrfsmixedmode)
 				if [[ $tombsize -lt 18874368 ]]; then
 					_failure "Filesystem ::1 filesystem:: not supported on tombs smaller than 18MB." \
-						$filesystem
+						 $filesystem
 				fi
 				;;
 			*)
