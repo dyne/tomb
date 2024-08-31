@@ -18,4 +18,16 @@ if test_have_prereq RESIZER; then
 
 fi # RESIZER
 
+if test_have_prereq BTRFS; then
+    test_export "btrfs"
+    test_expect_success 'Testing resize using BTRFS filesystem' '
+        tt resize -s 150 $tomb -k $tomb_key --unsafe --tomb-pwd $DUMMYPASS
+        '
+
+    test_export "btrfsmixed"
+    test_expect_success 'Testing resize using BTRFS filesystem' '
+        tt resize -s 30 $tomb -k $tomb_key --unsafe --tomb-pwd $DUMMYPASS
+        '
+fi
+
 test_done
