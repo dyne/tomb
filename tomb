@@ -500,56 +500,54 @@ ask_password() {
 
 	pass_asked=0
 
-	if [[ ! -z $WAYLAND_DISPLAY ]]; then
-		_verbose "wayland display detected"
-		_is_found "pinentry-gnome3" && {
-			_verbose "using pinentry-gnome3 on wayland"
-			output=$(pinentry_assuan_getpass | pinentry-gnome3)
-			pass_asked=1
+	while true; do
+		[[ ! -z $WAYLAND_DISPLAY ]] && {
+			_verbose "wayland display detected"
+			_is_found "pinentry-gnome3" && {
+				_verbose "using pinentry-gnome3 on wayland"
+				output=$(pinentry_assuan_getpass | pinentry-gnome3)
+				break; }
+			# TODO: pinentry on KDE running in wayland?
 		}
-	fi
-	if [[ ! -z $DISPLAY ]] && [[ $pass_asked == 0 ]]; then
-		_verbose "X11 display detected"
-		if _is_found "pinentry-gtk-2"; then
-			_verbose "using pinentry-gtk2"
-			output=$(pinentry_assuan_getpass | pinentry-gtk-2)
-			pass_asked=1
-		elif _is_found "pinentry-x11"; then
-			_verbose "using pinentry-x11"
-			output=$(pinentry_assuan_getpass | pinentry-x11)
-			pass_asked=1
-		elif _is_found "pinentry-gnome3"; then
-			_verbose "using pinentry-gnome3 on X11"
-			output=$(pinentry_assuan_getpass | pinentry-gnome3)
-			pass_asked=1
-		elif _is_found "pinentry-qt5"; then
-			_verbose "using pinentry-qt5"
-			output=$(pinentry_assuan_getpass | pinentry-qt5)
-			pass_asked=1
-		elif _is_found "pinentry-qt4"; then
-			_verbose "using pinentry-qt4"
-			output=$(pinentry_assuan_getpass | pinentry-qt4)
-			pass_asked=1
-		fi
-	fi
-	if [[ $pass_asked == 0 ]]; then
+		[[ ! -z $DISPLAY ]] && [[ $pass_asked == 0 ]] && {
+			_verbose "X11 display detected"
+			_is_found "pinentry-gtk-2" && {
+				_verbose "using pinentry-gtk2"
+				output=$(pinentry_assuan_getpass | pinentry-gtk-2)
+				break; }
+			_is_found "pinentry-x11" && {
+				_verbose "using pinentry-x11"
+				output=$(pinentry_assuan_getpass | pinentry-x11)
+				break; }
+			_is_found "pinentry-gnome3" && {
+				_verbose "using pinentry-gnome3 on X11"
+				output=$(pinentry_assuan_getpass | pinentry-gnome3)
+				break; }
+			_is_found "pinentry-qt5" && {
+				_verbose "using pinentry-qt5"
+				output=$(pinentry_assuan_getpass | pinentry-qt5)
+				break; }
+			_is_found "pinentry-qt4" && {
+				_verbose "using pinentry-qt4"
+				output=$(pinentry_assuan_getpass | pinentry-qt4)
+				break; }
+		}
 		_verbose "no display detected"
-		if _is_found "pinentry-curses"; then
+		_is_found "pinentry-curses" && {
 			_verbose "using pinentry-curses with no display"
 			output=$(pinentry_assuan_getpass | pinentry-curses)
-			pass_asked=1
-		elif _is_found "pinentry-tty"; then
+			break; }
+		_is_found "pinentry-tty" && {
 			_verbose "using pinentry-tty with no display"
 			output=$(pinentry_assuan_getpass | pinentry-tty)
-			pass_asked=1
-    else
-      # TODO: fallback to asking password using read
-		  _failure "Cannot find any pinentry and no DISPLAY detected."
-    fi
-	fi
-
-	[[ $pass_asked == 0 ]] &&
+			break; }
+		# TODO: fallback using read -s - and beware
+		# using read with or without -r may break
+		# passwords, so this must be covered by a test
+		# for compatibility
 		_failure "Cannot find any pinentry and no DISPLAY detected."
+		exit 1
+	done
 
 	# parse the pinentry output
 	local pinentry_error
@@ -589,26 +587,23 @@ is_valid_tomb() {
 	local _fail=0
 	# Tomb file must be a readable, writable, non-empty regular file.
 	# If passed the "ro" mount option, the writable check is skipped.
-	option_value_contains -o ro || {
-		[[ ! -w "$1" ]] && {
-			_warning "Tomb file is not writable: ::1 tomb file::" $1
-			_fail=1
+	while true; do
+		option_value_contains -o ro || {
+			[[ ! -w "$1" ]] && {
+				_warning "Tomb file is not writable: ::1 tomb file::" $1
+				_fail=1; break; }
 		}
-	}
-	_verbose "tomb file is readable"
-
-	[[ ! -f "$1" ]] && {
-		_warning "Tomb file is not a regular file: ::1 tomb file::" $1
-		_fail=1
-	}
-	_verbose "tomb file is a regular file"
-
-	[[ ! -s "$1" ]] && {
-		_warning "Tomb file is empty (zero length): ::1 tomb file::" $1
-		_fail=1
-	}
-	_verbose "tomb file is not empty"
-
+		_verbose "tomb file is readable"
+		[[ ! -f "$1" ]] && {
+			_warning "Tomb file is not a regular file: ::1 tomb file::" $1
+			_fail=1; break; }
+		_verbose "tomb file is a regular file"
+		[[ ! -s "$1" ]] && {
+			_warning "Tomb file is empty (zero length): ::1 tomb file::" $1
+			_fail=1; break; }
+		_verbose "tomb file is not empty"
+		break;
+	done
 	[[ $_fail == 1 ]] && {
 		_failure "Tomb command failed: ::1 command name::" $subcommand
 	}
@@ -922,12 +917,12 @@ _ensure_dependencies() {
 		command -v $req 1>/dev/null 2>/dev/null || {
 			_failure "Missing required dependency ::1 command::.  Please install it." $req; }
 	done
-  # Check for pinentry or at least pinentry-tty (which has no alias)
-  if ! command -v pinentry 1>/dev/null 2>/dev/null; then
-    if ! command -v pinentry-tty 1>/dev/null 2>/dev/null; then
+	# Check for pinentry or at least pinentry-tty (which has no alias)
+	if ! command -v pinentry 1>/dev/null 2>/dev/null; then
+		if ! command -v pinentry-tty 1>/dev/null 2>/dev/null; then
 			_failure "Missing required dependency ::1 command::.  Please install it." pinentry
-    fi
-  fi
+		fi
+	fi
 	# Ensure system binaries are available in the PATH
 	path+=(/sbin /usr/sbin) # zsh magic
 
@@ -1101,24 +1096,27 @@ _load_key() {
 	[[ -z $keyfile ]] && {
 		_failure "This operation requires a key file to be specified using the -k option." }
 
-	if [[ $keyfile == "-" ]]; then
-		_verbose "load_key reading from stdin."
-		_message "Waiting for the key to be piped from stdin... "
-		TOMBKEYFILE=stdin
-		TOMBKEY=$(cat)
-	elif [[ $keyfile == "cleartext" ]]; then
-		_verbose "load_key reading SECRET from stdin"
-		_message "Waiting for the key to be piped from stdin... "
-		TOMBKEYFILE=cleartext
-		TOMBKEY=cleartext
-		TOMBSECRET=$(cat)
-	else
+	while true; do
+		[[ $keyfile == "-" ]] && {
+			_verbose "load_key reading from stdin."
+			_message "Waiting for the key to be piped from stdin... "
+			TOMBKEYFILE=stdin
+			TOMBKEY=$(cat)
+			break; }
+		[[ $keyfile == "cleartext" ]] && {
+			_verbose "load_key reading SECRET from stdin"
+			_message "Waiting for the key to be piped from stdin... "
+			TOMBKEYFILE=cleartext
+			TOMBKEY=cleartext
+			TOMBSECRET=$(cat)
+			break; }
 		_verbose "load_key argument: ::1 key file::" $keyfile
 		[[ -r $keyfile ]] || _failure "Key not found, specify one using -k."
 		_track_stat "$keyfile"
 		TOMBKEYFILE=$keyfile
 		TOMBKEY="${mapfile[$TOMBKEYFILE]}"
-	fi
+		break
+	done
 
 	_verbose "load_key: ::1 key::" $TOMBKEYFILE
 
@@ -2520,14 +2518,18 @@ exec_safe_bind_hooks() {
 			for dir in ${mounted}; do _sudo umount $dir; done
 			return 0 }
 
-		if [[ ! -r "$HOME/${maps[$dir]}" ]]; then
-			_warning "bind-hook target not existent, skipping ::1 home::/::2 subdir::" $HOME ${maps[$dir]}
-		elif [[ ! -r "$mnt/$dir" ]]; then
-			_warning "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::" $mnt $dir
-		else
-			_sudo mount -o bind,$MOUNTOPTS $mnt/$dir $HOME/${maps[$dir]} \
+		while true; do
+			[[ ! -r "$mnt/$dir" ]] && {
+				_warning "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::" $mnt $dir
+				break; }
+			[[ ! -r "$HOME/${maps[$dir]}" ]] && {
+				_warning "bind-hook target not existent, skipping ::1 home::/::2 subdir::" $HOME ${maps[$dir]}
+				break; }
+			_sudo mount -o bind,$MOUNTOPTS \
+			      $mnt/$dir $HOME/${maps[$dir]} \
 				&& mounted+=("$HOME/${maps[$dir]}")
-		fi
+			break
+		done
 	done
 }
 
