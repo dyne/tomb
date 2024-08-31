@@ -12,18 +12,18 @@ if test_have_prereq KDF; then
         print $DUMMYPASS \
             | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key \
             | xxd &&
-        tt_lock --tomb-pwd $DUMMYPASS --kdf 1
+        tt_lock --tomb-pwd $DUMMYPASS
         '
 
     test_expect_success 'Testing KDF: tomb passwd' '
-        tt passwd -k $tomb_key --kdf 1 \
+        tt passwd -k $tomb_key \
             --unsafe --tomb-old-pwd $DUMMYPASS --tomb-pwd $DUMMYPASSNEW &&
-        tt passwd -k $tomb_key --kdf 1 \
+        tt passwd -k $tomb_key \
             --unsafe --tomb-old-pwd $DUMMYPASSNEW --tomb-pwd $DUMMYPASS
         '
 
     test_expect_success 'Testing KDF: tomb open & close' '
-        tt_open --tomb-pwd $DUMMYPASS --kdf 1 &&
+        tt_open --tomb-pwd $DUMMYPASS &&
         tt_close
         '
 fi
@@ -39,18 +39,18 @@ if test_have_prereq ARGON2; then
         print $DUMMYPASS \
             | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key \
             | xxd &&
-        tt_lock --tomb-pwd $DUMMYPASS --kdf 1
+        tt_lock --tomb-pwd $DUMMYPASS
         '
 
     test_expect_success 'Testing KDF ARGON2: tomb passwd' '
-        tt passwd -k $tomb_key --kdf 1 \
+        tt passwd -k $tomb_key \
             --unsafe --tomb-old-pwd $DUMMYPASS --tomb-pwd $DUMMYPASSNEW &&
-        tt passwd -k $tomb_key --kdf 1 \
+        tt passwd -k $tomb_key \
             --unsafe --tomb-old-pwd $DUMMYPASSNEW --tomb-pwd $DUMMYPASS
         '
 
     test_expect_success 'Testing KDF ARGON2: tomb open & close' '
-        tt_open --tomb-pwd $DUMMYPASS --kdf 1 &&
+        tt_open --tomb-pwd $DUMMYPASS &&
         tt_close
         '
 fi
