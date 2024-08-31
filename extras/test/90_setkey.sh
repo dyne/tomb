@@ -28,23 +28,4 @@ test_expect_success 'Testing tomb with GnuPG keys: setkey' '
     '
 fi
 
-if test_have_prereq SPHINX ORACLE; then 
-    test_export "sphinx_test" # Using already generated tomb
-    test_expect_success 'Testing set key (sphinx)' '
-        tt forge -f -k $tomb_key_new --tomb-pwd $DUMMYPASS \
-            --ignore-swap --unsafe --force \
-            --sphx-user $DUMMYUSER --sphx-host $DUMMYHOST &&
-        tt setkey -f -k $tomb_key_new $tomb_key $tomb \
-            --unsafe --tomb-pwd $DUMMYPASS --tomb-old-pwd $DUMMYPASS \
-            --sphx-user $DUMMYUSER --sphx-host $DUMMYHOST &&
-        tt open -f -k $tomb_key_new $tomb \
-            --unsafe --tomb-pwd $DUMMYPASS \
-            --sphx-user $DUMMYUSER --sphx-host $DUMMYHOST &&
-        print $DUMMYPASS \
-            | gpg --batch --passphrase-fd 0 --no-tty --no-options -d $tomb_key_new \
-            | xxd &&
-        tt_close
-        '
-fi
-
 test_done

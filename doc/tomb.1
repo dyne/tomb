@@ -306,17 +306,6 @@ Select a different tool than sudo for privilege escalation.
 Alternatives supported so far are: pkexec, doas, sup, sud. For any
 alternative to work the executable must be included in the current
 PATH.
-.B
-.IP "--sphx-user \fI<username>\fR"
-Activate the SPHINX feature for password-authenticated key agreement.
-This option indicates the \fI<username>\fR used to retrieve the
-password from a sphinx oracle key reachable via TCP/IP.
-.B
-.IP "--sphx-host \fI<domain>\fR"
-Activate the SPHINX feature for password-authenticated key agreement.
-This option indicates the \fI<domain>\fR used to retrieve the password
-from a sphinx oracle daemon reachable via TCP/IP. This is not the
-network address of the daemon, which is configured in /etc/sphinx
 
 .B
 .IP "-h"
@@ -483,24 +472,6 @@ will be always possible to use it to access the tomb key unless all
 its copies are destroyed. The \fI-r\fR option can be used in the tomb
 commands: \fIopen\fR, \fIforge\fR \fIsetkey\fR, \fIpasswd\fR,
 \fIbury\fR, \fIexhume\fR and \fIresize\fR.
-
-.SH SPHINX (PAKE)
-
-Using the package libsphinx
-.UR https://github.com/stef/libsphinx
-.UE
-and its python client/daemon implementation pwdsphinx
-.UR https://github.com/stef/pwdsphinx
-.UE
-is possible to store and retrieve safely the password that locks the
-tomb. Using this feature will make it impossible to retrieve the
-password without the oracle sphinx server running and reachable. Each
-key entry needs a username and a domain specified on creation and
-a password that locks it.
-
-SPHINX makes it impossible to maliciously retrieve the password
-locking the tomb key without an attacker accessing both the
-server, the sphinx password and the tomb key file.
 
 .SH EXAMPLES
 
