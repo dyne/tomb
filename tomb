@@ -2806,7 +2806,7 @@ resize_tomb() {
 	[[ -z "$1" ]] && _failure "No tomb name specified for resizing."
 	[[ ! -r "$1" ]] && _failure "Cannot find ::1::" $1
 
-	newtombsize="`option_value -s`"
+	local newtombsize="`option_value -s`"
 	[[ -z "$newtombsize" ]] && {
 		_failure "Aborting operations: new size was not specified, use -s" }
 
@@ -2815,8 +2815,8 @@ resize_tomb() {
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
 
 	if option_is_set --tomb-pwd; then
-		tomb_pwd="`option_value --tomb-pwd`"
-		_verbose "tomb-pwd = ::1 tomb pass::" $tomb_pwd
+		local tomb_pwd="`option_value --tomb-pwd`"
+		# _verbose "tomb-pwd = ::1 tomb pass::" $tomb_pwd
 		ask_key_password "$tomb_pwd"
 	else
 		ask_key_password
@@ -2824,7 +2824,7 @@ resize_tomb() {
 	[[ $? == 0 ]] || _failure "No valid password supplied."
 
 	local oldtombsize=$(( `stat -c %s "$TOMBPATH" 2>/dev/null` / 1048576 ))
-
+	local delta=""
 	# New tomb size must be specified
 	[[ -n "$newtombsize" ]] || {
 		_failure "You must specify the new size of ::1 tomb name::" $TOMBNAME }
@@ -2835,6 +2835,9 @@ resize_tomb() {
 	if [[ "$newtombsize" -gt "$oldtombsize" ]]; then
 
 		delta="$(( $newtombsize - $oldtombsize ))"
+		_verbose "delta growth: +${delta}M"
+		[[ "$delta" -gt "150" ]] ||
+			_failure "The growth in size must be greater than 150MiB"
 
 		_message "Generating ::1 tomb file:: of ::2 size::MiB" $TOMBFILE $newtombsize
 
@@ -2879,16 +2882,22 @@ resize_tomb() {
 				_sudo cryptsetup luksClose "${TOMBMAPPER}"
 				_failure "filesystem check failed on ::1 mapper::" $TOMBMAPPER }
 			# btrfs requires mounting before resize
-			local mp=${TOMBNAME}.tomb.resize
-			mkdir -p /tmp/${mp}
-			_sudo mount /dev/mapper/${TOMBMAPPER} /tmp/${mp}
-			_sudo btrfs filesystem resize max /tmp/${mp} || {
-				_sudo umount /tmp/${mp}
+			local mp=$HOME/${TOMBNAME}.tomb.resize
+			mkdir -p ${mp}
+			_sudo mount /dev/mapper/${TOMBMAPPER} ${mp}
+			sudo btrfs filesystem show /dev/mapper/${TOMBMAPPER} |
+				awk '/devid/{print $2}' | read -r devid
+			_verbose "BTRFS devid detected: $devid"
+			_verbose "btrfs filesystem resize ${devid}:max ${mp}"
+			_sudo btrfs filesystem resize ${devid}:max ${mp} || {
+				_sudo umount ${mp}
 				_sudo cryptsetup luksClose "${TOMBMAPPER}"
-				rmdir /tmp/${mp}
-				_failure "filesystem resize failed on ::1 mapper::" $TOMBMAPPER }
-			_sudo umount /tmp/${mp}
-			rmdir /tmp/${mp}
+				rmdir ${mp}
+				_failure "filesystem resize failed on ::1 mapper::" $TOMBMAPPER
+			}
+			_sudo umount ${mp}
+			_sudo cryptsetup luksClose "${TOMBMAPPER}"
+			rmdir ${mp}
 			;;
 		# TODO: report error on unrecognized filesystem
 	esac
