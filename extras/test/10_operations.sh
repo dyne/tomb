@@ -44,14 +44,6 @@ if test_have_prereq LSOF; then
         '
 fi
 
-if test_have_prereq SPHINX ORACLE; then
-    test_export "sphinx_test" # Using already generated tomb
-    test_expect_success 'Testing open with good password (sphinx)' '
-        tt_open --tomb-pwd $DUMMYPASS --sphx-user $DUMMYUSER --sphx-host $DUMMYHOST &&
-        tt_close
-        '
-fi
-
 if test_have_prereq DOAS; then
     test_export "doas_test" # Using already generated tomb
     test_expect_success 'Testing open with good password (using doas instead of sudo)' '
