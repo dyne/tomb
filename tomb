@@ -2383,10 +2383,18 @@ mount_tomb() {
 	_sudo mkdir -p "$tombmount"
 
 	# Default mount options are overridden with the -o switch
+	local oldmountopts
 	{ option_is_set -o } && {
-		local oldmountopts=$MOUNTOPTS
+		oldmountopts=$MOUNTOPTS
+		# TODO: safety check MOUNTOPTS coming from user
 		MOUNTOPTS="$(option_value -o)" }
-	# TODO: safety check MOUNTOPTS
+
+	# default btrfs compression zstd:1 (oportunistic according to pre-compression heuristics)
+	# see: https://btrfs.readthedocs.io/en/latest/Compression.html#pre-compression-heuristics
+	[[ "$filesystem" = "btrfs" ]] && {
+		MOUNTOPTS="$MOUNTOPTS,compress=zstd:1"
+	}
+
 	# safe_mount_options &&
 	_sudo mount -o $MOUNTOPTS /dev/mapper/${TOMBMAPPER} "${tombmount}"
 	# Clean up if the mount failed
