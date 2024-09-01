@@ -50,6 +50,7 @@ MEDIA="/media"
 command -v steghide > /dev/null && test_set_prereq STEGHIDE
 command -v e2fsck resize2fs > /dev/null && test_set_prereq RESIZER
 command -v tomb-kdb-pbkdf2 > /dev/null && test_set_prereq KDF
+command -v argon2 > /dev/null && test_set_prereq ARGON
 command -v qrencode > /dev/null && test_set_prereq QRENCODE
 command -v lsof > /dev/null && test_set_prereq LSOF
 command -v python3 > /dev/null && test_set_prereq PYTHON3
