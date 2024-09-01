@@ -64,6 +64,7 @@ typeset -i DECLOAKIFY=1
 typeset -i RESIZER=1
 typeset -i RECOLL=1
 typeset -i QRENCODE=1
+typeset -i ACL=1
 
 # Default mount options
 typeset		 MOUNTOPTS="rw,noatime,nodev"
@@ -896,7 +897,7 @@ function _print() {
 _list_optional_tools() {
 	typeset -a _deps
 	_deps=(gettext dcfldd shred steghide)
-	_deps+=(resize2fs tomb-kdb-pbkdf2 argon2 qrencode recoll unoconv lsof)
+	_deps+=(resize2fs tomb-kdb-pbkdf2 argon2 qrencode recoll unoconv lsof setfacl)
 	for d in $_deps; do
 		_print "`which $d`"
 	done
@@ -959,6 +960,8 @@ _ensure_dependencies() {
 	command -v recoll 1>/dev/null 2>/dev/null || RECOLL=0
 	# Check for QREncode for paper backups of keys
 	command -v qrencode 1>/dev/null 2>/dev/null || QRENCODE=0
+	# Check for acl/setfacl for setting ACL at the mount location
+	command -v setfacl 1>/dev/null 2>/dev/null || ACL=0
 }
 
 # }}} - Commandline interaction
@@ -2288,8 +2291,11 @@ mount_tomb() {
 	tombmount="$2"
 	[[ -z "$tombmount" ]] && {
 		tombmount="/media/$TOMBNAME"
-		[[ -d /media ]] || { # no /media found, adopting /run/media/$USER (udisks2 compat)
-			tombmount="/run/media/$_USER/$TOMBNAME"
+		[[ -d /media ]] || {
+			# no /media found, adopting /run/media/$USER to match behaviour
+			# of tools following the notion to mount in that location (like udisks2)
+			local runmedia="/run/media/$_USER"
+			tombmount="$runmedia/$TOMBNAME"
 		}
 		_message "Mountpoint not specified, using default: ::1 mount point::" "$tombmount"
 	}
@@ -2381,6 +2387,12 @@ mount_tomb() {
 
 	# we need root from here on
 	_sudo mkdir -p "$tombmount"
+
+	# set ACL on /run/media/$_USER/ to match behaviour (see #461)
+	# tmpfs -> it doesn't know acl/noacl mount options -> no check
+	[[ $ACL == 1 ]] && [[ -s $runmedia ]] && {
+		_sudo setfacl -m u:"$_USER":r-x "$runmedia"
+	}
 
 	# Default mount options are overridden with the -o switch
 	{ option_is_set -o } && {
