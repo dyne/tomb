@@ -2285,7 +2285,7 @@ mount_tomb() {
 
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
 
-	tombmount="$2"
+	local tombmount="$2"
 	[[ -z "$tombmount" ]] && {
 		tombmount="/media/$TOMBNAME"
 		[[ -d /media ]] || { # no /media found, adopting /run/media/$USER (udisks2 compat)
@@ -2312,14 +2312,14 @@ mount_tomb() {
 
 	_message "This tomb is a valid LUKS encrypted device."
 
-	luksdump="`_sudo cryptsetup luksDump ${TOMBPATH}`"
-	tombdump=(`print $luksdump | awk '
+	local luksdump="`_sudo cryptsetup luksDump ${TOMBPATH}`"
+	local tombdump=(`print $luksdump | awk '
 		/^Cipher name/ {print $3}
 		/^Cipher mode/ {print $3}
 		/^Hash spec/   {print $3}'`)
 	_message "Cipher is \"::1 cipher::\" mode \"::2 mode::\" hash \"::3 hash::\"" $tombdump[1] $tombdump[2] $tombdump[3]
 
-	slotwarn=`print $luksdump | awk '
+	local slotwarn=`print $luksdump | awk '
 		BEGIN { zero=0 }
 		/^Key slot 0/ { zero=1 }
 		/^Key slot.*ENABLED/ { if(zero==1) print "WARN" }'`
@@ -2345,14 +2345,14 @@ mount_tomb() {
 		_failure "Failure mounting the encrypted file." }
 
 	# array: [ cipher, keysize, loopdevice ]
-	tombstat=(`_sudo cryptsetup status ${TOMBMAPPER} | awk '
+	local tombstat=(`_sudo cryptsetup status ${TOMBMAPPER} | awk '
 	/cipher:/  {print $2}
 	/keysize:/ {print $2}
 	/device:/  {print $2}'`)
 	_success "Success unlocking tomb ::1 tomb name::" $TOMBNAME
 	_verbose "Key size is ::1 size:: for cipher ::2 cipher::" $tombstat[2] $tombstat[1]
 
-	filesystem=`_detect_filesystem /dev/mapper/${TOMBMAPPER}`
+	local filesystem=`_detect_filesystem /dev/mapper/${TOMBMAPPER}`
 	_message "Filesystem detected: ::1 filesystem::" $filesystem
 	# TODO: check if FS is supported, else close luks
 
