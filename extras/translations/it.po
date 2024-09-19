@@ -2,18 +2,19 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tomb\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: Daniel Dias Rodrigues <danieldiasr@gmail.com>\n"
-"Language-Team: \n"
+"PO-Revision-Date: 2024-09-20 10:40+0000\n"
+"Last-Translator: Gianluca Montecchi <mgian@pm.me>\n"
+"Language-Team: Italian <https://hosted.weblate.org/projects/tomb/tomb/it/>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.0.1\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.8-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
-msgstr ""
+msgstr "$pescmd eseguibile non trovato"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -23,7 +24,7 @@ msgstr ""
 
 #: tomb:Safety functions:_sudo:131
 msgid "Super user execution not supported: ::1 sudo::"
-msgstr ""
+msgstr "Esecuzione come super user non supportata: ::1 sudo::"
 
 #: tomb:Safety functions:_whoami:236 functions:_whoami:200
 msgid "Failing to identify the user who is calling us"
@@ -53,11 +54,11 @@ msgstr "Rilevata partizione di swap attiva..."
 
 #: tomb:Safety functions:_ensure_safe_swap:408
 msgid "Found zramswap with writeback enabled."
-msgstr ""
+msgstr "Trovata zramswap con writeback abilitata."
 
 #: tomb:Safety functions:_ensure_safe_swap:411
 msgid "Found zramswap without writeback to disk."
-msgstr ""
+msgstr "Trovata zramswap senza writeback su disco."
 
 #: tomb:Safety functions:_ensure_safe_swap:330
 msgid "The undertaker found that all swap partitions are encrypted. Good."
@@ -78,7 +79,7 @@ msgstr " swapoff -a"
 
 #: tomb:Safety functions:_ensure_safe_swap:429 functions:_ensure_safe_swap:335
 msgid "[#163] I may not detect plain swaps on an encrypted volume."
-msgstr ""
+msgstr "[#163] Posso non rilevare swaps normali su un volume crittografato."
 
 #: tomb:Safety functions:_ensure_safe_swap:430 functions:_ensure_safe_swap:336
 msgid "But if you want to proceed like this, use the -f (force) flag."
@@ -108,7 +109,7 @@ msgstr "Errore di pinentry: ::1 error::"
 
 #: tomb:Safety functions:sphinx_get_password:589
 msgid "Failed to retrieve actual password with sphinx."
-msgstr ""
+msgstr "Recupero della password attuale con sphinx non riuscito."
 
 #: tomb:Safety functions:sphinx_get_password:592
 msgid "Both host and user have to be set to use sphinx"
