@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: 2024-09-23 18:38+0000\n"
-"Last-Translator: gallegonovato <fran-carro@hotmail.es>\n"
+"Last-Translator: Francisco Serrador <fserrador@gmail.com>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/tomb/tomb/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -1151,7 +1151,7 @@ msgstr "el ::1 fecha::"
 
 #: tomb:Open:mount_tomb:2517
 msgid "the door was slammed or shutdown called before umount."
-msgstr ""
+msgstr "la puerta fue golpeada o apagada invocado antes de desmontaje."
 
 #: tomb:Open:exec_safe_bind_hooks:2579
 #, fuzzy
@@ -1191,7 +1191,7 @@ msgstr ""
 
 #: tomb:Open:exec_safe_func_hooks:2645
 msgid "Exec hook: ::1 exec hook:: ::2 action::"
-msgstr ""
+msgstr "Ejecuta gancho: ::1 ejecuta gancho:: ::2 acción::"
 
 #: tomb:List:list_tombs:2671
 msgid "I can't see any open tomb, may they all rest in peace."
@@ -1392,6 +1392,8 @@ msgstr "Por favor, especifica una tumba existente."
 #: tomb:Close:umount_tomb:3130
 msgid "close exec-hook returns a non-zero error code: ::1 error::"
 msgstr ""
+"cierra gancho-ejecutado devuelve un código de error distinto de cero: ::1 "
+"error::"
 
 #: tomb:Close:umount_tomb:3131
 #, fuzzy
@@ -1446,7 +1448,7 @@ msgstr "::1 nombre:: abierto por ::2 usuario:: desde ::3 tty:: en ::4 host::"
 
 #: tomb:Close:slam_tomb:3258
 msgid "Can't kill ::1 process:: ::2 pcmd:: (::3 powner::)"
-msgstr ""
+msgstr "No puede matar ::1 proceso:: pcmd:: (::3 poderoso::)"
 
 #: tomb:Main routine:main:3357
 msgid "Error parsing."
@@ -1485,7 +1487,7 @@ msgstr ""
 
 #: tomb:Main routine:main:3417
 msgid "Privilege escalation tool configured: ::1 exec::"
-msgstr ""
+msgstr "Herramienta de escalada de privilegio configurada: ::1 ejecuta::"
 
 #: tomb:Main routine:main:3447
 msgid ""
@@ -1506,7 +1508,7 @@ msgstr ""
 
 #: tomb:Main routine:main:3490
 msgid "Trying a regular close."
-msgstr ""
+msgstr "Intentando un cierre usual."
 
 #: tomb:Main routine:main:3497
 msgid "Resize2fs not installed: cannot resize tombs."
