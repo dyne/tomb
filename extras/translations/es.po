@@ -2,15 +2,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2024-07-29 18:09+0000\n"
-"Last-Translator: gallegonovato <fran-carro@hotmail.es>\n"
+"PO-Revision-Date: 2024-09-23 18:31+0000\n"
+"Last-Translator: Francisco Serrador <fserrador@gmail.com>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/tomb/tomb/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.7-dev\n"
+"X-Generator: Weblate 5.8-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
@@ -224,6 +224,7 @@ msgstr " list    enumera las TUMBAs abiertas y la información acerca de ellas"
 #: tomb:Commandline interaction:usage:776
 msgid " ps           list of running processes inside open TOMBs"
 msgstr ""
+" ps           enumera procesos ejecutándose dentro de las tumbas abiertas"
 
 #: tomb:Commandline interaction:usage:777
 #, fuzzy
@@ -287,6 +288,8 @@ msgstr " exhume  extraer una LLAVE de una imagen JPEG (escribe en stdout)"
 #: tomb:Commandline interaction:usage:799
 msgid " cloak        transform a KEY into TEXT using CIPHER (for use with -k)"
 msgstr ""
+" cloak        transforma una LLAVE dentro del TEXTO utilizando CIFRADO (para "
+"utilizar con -k)"
 
 #: tomb:Commandline interaction:usage:802
 #, fuzzy
@@ -315,6 +318,7 @@ msgstr " -n     no procesar los hooks encontrados en la tumba"
 #: tomb:Commandline interaction:usage:811
 msgid " -p           preserve the ownership of all files in tomb"
 msgstr ""
+" -p           preserva la propiedad de todos los archivos dentro de la tumba"
 
 #: tomb:Commandline interaction:usage:812
 #, fuzzy
@@ -330,29 +334,36 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:814
 msgid " -g           use a GnuPG key to encrypt a tomb key"
-msgstr ""
+msgstr " -g           utiliza una llave GnuPG para cifrar una llave de tumba"
 
 #: tomb:Commandline interaction:usage:815
 msgid " -r           provide GnuPG recipients (separated by comma)"
-msgstr ""
+msgstr " -r           proporciona recipientes GnuPG (separados por comas)"
 
 #: tomb:Commandline interaction:usage:816
 msgid " -R           provide GnuPG hidden recipients (separated by comma)"
 msgstr ""
+" -R           proporciona recipientes ocultos de GnuPG (separados por coma)"
 
 #: tomb:Commandline interaction:usage:817
+#, fuzzy
 msgid " --sudo       super user exec alternative to sudo (doas or none)"
-msgstr ""
+msgstr " --sudo       super usuario ejecuta alterativa de sudo (una o ninguna)"
 
 #: tomb:Commandline interaction:usage:820
+#, fuzzy
 msgid ""
 " --sphx-user  user associated with the key (for use with pitchforkedsphinx)"
 msgstr ""
+" --sphx-user  usuario asociado con la llave (para utilizar con "
+"pitchforkedsphinx)"
 
 #: tomb:Commandline interaction:usage:821
 msgid ""
 " --sphx-host  host associated with the key (for use with pitchforkedsphinx)"
 msgstr ""
+" --sphx-host  hospedaje asociado con la llave (para utilizar con "
+"pitchforkedsphinx)"
 
 #: tomb:Commandline interaction:usage:825
 #, fuzzy
@@ -393,16 +404,18 @@ msgid "Missing required dependency ::1 command::.  Please install it."
 msgstr "Falta la dependencia ::1 comando::. Por favor, instálala."
 
 #: tomb:Commandline interaction:_ensure_dependencies:1004
+#, fuzzy
 msgid "No privilege escalation tool found, not even sudo"
-msgstr ""
+msgstr "No se ha encontrado ningún privilegio de escalada, ni incluso sudo"
 
 #: tomb:Key operations:is_valid_recipients:1052
+#, fuzzy
 msgid "Not a valid GPG key ID: ::1 gpgid:: "
-msgstr ""
+msgstr "ID de llave GPG no es válido: ::1 gpgid:: "
 
 #: tomb:Key operations:is_valid_recipients:1056
 msgid "The key ::1 gpgid:: is not trusted enough"
-msgstr ""
+msgstr "La llave ::1 gpgid:: no es suficientemente configada"
 
 #: tomb:Key operations:is_valid_key:1107
 msgid "cleartext key from stdin selected: this is unsafe."
@@ -430,7 +443,7 @@ msgstr "La llave es una imagen, puede que sea válida."
 
 #: tomb:Key operations:is_valid_key:1128
 msgid "Key is missing KDF header."
-msgstr ""
+msgstr "La llave falta en la cabecera KDF."
 
 #: tomb:Key operations:is_valid_key:1134
 msgid "Key is valid."
@@ -461,7 +474,7 @@ msgstr ""
 
 #: tomb:Key operations:gpg_decrypt:1229
 msgid "You set an invalid GPG ID."
-msgstr ""
+msgstr "Fije un ID GPG no válido."
 
 #: tomb:Key operations:get_lukskey:1281
 msgid "Unlocking KDF key protection (::1 kdf::)"
@@ -527,18 +540,21 @@ msgstr "Tu contraseña ha sido actualizada con éxito."
 msgid ""
 "You are going to encrypt a tomb key with ::1 nrecipients:: recipient(s)."
 msgstr ""
+"Está intentando cifrar una clave de tumba con ::1 nrecipients:: "
+"recipiente(s)."
 
 #: tomb:Key operations:gen_key:1512
 msgid "It is your responsibility to check these fingerprints."
-msgstr ""
+msgstr "Es su responsabilidad comprobar estas huellas."
 
 #: tomb:Key operations:gen_key:1513
 msgid "The fingerprints are:"
-msgstr ""
+msgstr "Las huellas son:"
 
 #: tomb:Key operations:gen_key:1515
+#, fuzzy
 msgid "\t  `_gpg_fingerprint "
-msgstr ""
+msgstr "\t  `_gpg_fingerprint "
 
 #: tomb:Key operations:gen_key:1520
 #, fuzzy
@@ -586,11 +602,11 @@ msgstr "codificando la contraseña"
 
 #: tomb:Key operations:gen_key:1601
 msgid "Using KDF Argon2"
-msgstr ""
+msgstr "Utilizr KDF Argon2"
 
 #: tomb:Key operations:gen_key:1604
 msgid "memory used: 2^::1 kdfmemory::"
-msgstr ""
+msgstr "memoria utilizada: 2^::1 kdfmemory::"
 
 #: tomb:Key operations:gen_key:1606
 #, fuzzy
@@ -599,7 +615,7 @@ msgstr "el ::1 fecha::"
 
 #: tomb:Key operations:gen_key:1607
 msgid "kdf iterations: ::1 kdfiterations::"
-msgstr ""
+msgstr "iteraciones kdf: ::1 kdfiterations::"
 
 #: tomb:Key operations:bury_key:1667
 msgid "Encode failed: ::1 image file:: is not a jpeg image."
@@ -611,7 +627,7 @@ msgstr "Codificando la llave ::1 llave:: en la imagen ::2 imagen::"
 
 #: tomb:Key operations:bury_key:1673
 msgid "Using GnuPG Key ID"
-msgstr ""
+msgstr "Utilizando ID de clave GnuPG"
 
 #: tomb:Key operations:bury_key:1675
 msgid "Please confirm the key password for the encoding"
