@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: 2024-09-23 18:35+0000\n"
-"Last-Translator: gallegonovato <fran-carro@hotmail.es>\n"
+"Last-Translator: Francisco Serrador <fserrador@gmail.com>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/tomb/tomb/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -918,18 +918,22 @@ msgstr "No hay una tumba aquí. Tienes que cavarla primero."
 #: tomb:Create:lock_tomb_with_key:2166
 msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 47MB."
 msgstr ""
+"Sistema de ficheros ::1 filesystem:: no mantenido en tumbas más pequeñas que "
+"47MB."
 
 #: tomb:Create:lock_tomb_with_key:2172
 msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 18MB."
 msgstr ""
+"Sistema de ficheros ::1 filesystem:: no admitido en tumbas más pequeñas de "
+"18MB."
 
 #: tomb:Create:lock_tomb_with_key:2177
 msgid "Filesystem not supported: ::1 filesystem::"
-msgstr ""
+msgstr "Sistema de ficheros no mantenido: ::1 filesystem::"
 
 #: tomb:Create:lock_tomb_with_key:2181
 msgid "Selected filesystem type $filesystem."
-msgstr ""
+msgstr "Seleccionó el tipo de sistema de ficheros $filesystem."
 
 #: tomb:Create:lock_tomb_with_key:2188
 msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
@@ -1110,11 +1114,11 @@ msgstr "Se ha abierto correctamente el cerrojo de ::1 tumba::"
 
 #: tomb:Open:mount_tomb:2453
 msgid "Filesystem detected: ::1 filesystem::"
-msgstr ""
+msgstr "Sistema de ficheros detectado: ::1 filesystem::"
 
 #: tomb:Open:mount_tomb:2459
 msgid "Skipping filesystem checks in read-only"
-msgstr ""
+msgstr "Se omite comprobantes del sistema de ficheros en solo lectura"
 
 #: tomb:Open:mount_tomb:2461
 msgid "Checking filesystem via ::1::"
