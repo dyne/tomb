@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2024-09-24 19:15+0000\n"
+"PO-Revision-Date: 2024-10-03 08:15+0000\n"
 "Last-Translator: gallegonovato <fran-carro@hotmail.es>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/tomb/tomb/es/>\n"
 "Language: es\n"
@@ -202,24 +202,20 @@ msgid " // Operations on tombs:"
 msgstr " // Operaciones en tumbas:"
 
 #: tomb:Commandline interaction:usage:772
-#, fuzzy
 msgid " open         open an existing TOMB (-k KEY file or - for stdin)"
-msgstr " open    abrir una TUMBA existente (-k FICHERO_CLAVE o - para stdin)"
+msgstr " open abrir un TOMB existente (-k KEY file o - para stdin)"
 
 #: tomb:Commandline interaction:usage:773
-#, fuzzy
 msgid " index        update the search indexes of tombs"
-msgstr " index   actualiza los índices de búsqueda de las tumbas"
+msgstr " index actualizar los índices de búsqueda de Tomb"
 
 #: tomb:Commandline interaction:usage:774
-#, fuzzy
 msgid " search       looks for filenames matching text patterns"
-msgstr " search  busca nombres de archivos que coincidan con patrones de texto"
+msgstr " search buscar nombres de archivo que coincidan con patrones de texto"
 
 #: tomb:Commandline interaction:usage:775
-#, fuzzy
 msgid " list         list of open TOMBs and information on them"
-msgstr " list    enumera las TUMBAs abiertas y la información acerca de ellas"
+msgstr " list         enumera de Tomb abiertas e información sobre ellas"
 
 #: tomb:Commandline interaction:usage:776
 msgid " ps           list of running processes inside open TOMBs"
@@ -227,63 +223,54 @@ msgstr ""
 " ps           enumera procesos ejecutándose dentro de las tumbas abiertas"
 
 #: tomb:Commandline interaction:usage:777
-#, fuzzy
 msgid " close        close a specific TOMB (or 'all')"
-msgstr " close   cerrar una TUMBA específica o todas ('all')"
+msgstr " close        cerrar un Tomb específico (o \"todas\")"
 
 #: tomb:Commandline interaction:usage:778
-#, fuzzy
 msgid " slam         slam a TOMB killing all programs using it"
-msgstr ""
-" slam    cerrar una TUMBA de un portazo, matando todos los programas que la "
-"usan"
+msgstr " slam         Cerrar Tomb matando a todos los programas que lo utilizan"
 
 #: tomb:Commandline interaction:usage:780
-#, fuzzy
 msgid " resize       resize a TOMB to a new size -s (can only grow)"
 msgstr ""
-" resize  cambia el tamaño de una TUMBA al tamaño -s (sólo puede aumentar)"
+" resize       redimensionar Tomb a un nuevo tamaño -s (solo puede aumentar)"
 
 #: tomb:Commandline interaction:usage:783
 msgid " // Operations on keys:"
 msgstr " // Operaciones en llaves:"
 
 #: tomb:Commandline interaction:usage:784
-#, fuzzy
 msgid " passwd       change the password of a KEY (needs old pass)"
 msgstr ""
-" passwd  cambia la contraseña de la LLAVE (necesita la contraseña vieja)"
+" passwd       cambiar la contraseña de una CLAVE (necesita la contraseña "
+"antigua)"
 
 #: tomb:Commandline interaction:usage:785
-#, fuzzy
 msgid " setkey       change the KEY locking a TOMB (needs old key and pass)"
 msgstr ""
-" setkey  cambia la LLAVE que cierra la TUMBA (necesita la contraseña y llave "
-"viejas)"
+" setkey       cambiar la CLAVE que bloquea Tomb (necesita la clave antigua y "
+"la contraseña)"
 
 #: tomb:Commandline interaction:usage:788
 msgid " // Backup on paper:"
 msgstr " // Copia de seguridad en papel:"
 
 #: tomb:Commandline interaction:usage:789
-#, fuzzy
 msgid " engrave      makes a QR code of a KEY to be saved on paper"
-msgstr " engrave crea un código QR de una LLAVE para guardarla en papel"
+msgstr " engrave      crea un código QR de una CLAVE para guardarla en papel"
 
 #: tomb:Commandline interaction:usage:793
 msgid " // Steganography:"
 msgstr " // Esteganografía:"
 
 #: tomb:Commandline interaction:usage:795
-#, fuzzy
 msgid " bury         hide a KEY inside a JPEG image (for use with -k)"
 msgstr ""
-" bury    esconde la LLAVE dentro de una imagen JPEG (para usarla con -k)"
+" bury         ocultar una CLAVE dentro de una imagen JPEG (para usar con -k)"
 
 #: tomb:Commandline interaction:usage:796
-#, fuzzy
 msgid " exhume       extract a KEY from a JPEG image (prints to stdout)"
-msgstr " exhume  extraer una LLAVE de una imagen JPEG (escribe en stdout)"
+msgstr " exhume       extraer una CLAVE de una imagen JPEG (imprime en stdout)"
 
 #: tomb:Commandline interaction:usage:799
 msgid " cloak        transform a KEY into TEXT using CIPHER (for use with -k)"
@@ -292,23 +279,24 @@ msgstr ""
 "utilizar con -k)"
 
 #: tomb:Commandline interaction:usage:802
-#, fuzzy
 msgid " uncloak      extract a KEY from a TEXT using CIPHER (prints to stdout)"
-msgstr " exhume  extraer una LLAVE de una imagen JPEG (escribe en stdout)"
+msgstr ""
+" uncloak      extraer una CLAVE de un TEXTO utilizando CIPHER (imprime en "
+"stdout)"
 
 #: tomb:Commandline interaction:usage:806
 msgid "Options:"
 msgstr "Opciones:"
 
 #: tomb:Commandline interaction:usage:808
-#, fuzzy
 msgid " -s           size of the tomb file when creating/resizing one (in MiB)"
-msgstr " -s     tamaño de la tumba al crearla o cambiar su tamaño (en MiB)"
+msgstr ""
+" -s           tamaño del archivo Tomb al crear/redimensionar uno (en MiB)"
 
 #: tomb:Commandline interaction:usage:809
-#, fuzzy
 msgid " -k           path to the key to be used ('-k -' to read from stdin)"
-msgstr " -k     ruta a la llave a utilizar ('-k -' para leerla de stdin)"
+msgstr ""
+" -k           ruta a la clave que se va a utilizar ('-k -' para leer stdin)"
 
 #: tomb:Commandline interaction:usage:810
 #, fuzzy
@@ -327,10 +315,10 @@ msgstr ""
 " -o     opciones pasadas a instrucciones: abre, bloquea, forja (vea man)"
 
 #: tomb:Commandline interaction:usage:813
-#, fuzzy
 msgid " -f           force operation (i.e. even if swap is active)"
 msgstr ""
-" -f     forzar operación (incluso si la memoria de intercambio está activa)"
+" -f           Operación forzada (es decir, incluso si el intercambio está "
+"activo)"
 
 #: tomb:Commandline interaction:usage:814
 msgid " -g           use a GnuPG key to encrypt a tomb key"
@@ -346,17 +334,14 @@ msgstr ""
 " -R           proporciona recipientes ocultos de GnuPG (separados por coma)"
 
 #: tomb:Commandline interaction:usage:817
-#, fuzzy
 msgid " --sudo       super user exec alternative to sudo (doas or none)"
-msgstr " --sudo       super usuario ejecuta alterativa de sudo (una o ninguna)"
+msgstr " --sudo       Alternativa de superusuario exec a sudo (doas o none)"
 
 #: tomb:Commandline interaction:usage:820
-#, fuzzy
 msgid ""
 " --sphx-user  user associated with the key (for use with pitchforkedsphinx)"
 msgstr ""
-" --sphx-user  usuario asociado con la llave (para utilizar con "
-"pitchforkedsphinx)"
+" --sphx-user  usuario asociado con la clave (para usar con pitchforkedsphinx)"
 
 #: tomb:Commandline interaction:usage:821
 msgid ""
@@ -371,29 +356,24 @@ msgid " --kdf        forge keys armored against dictionary attacks"
 msgstr " --kdf  olvida llaves armadas dente a ataques de diccionario"
 
 #: tomb:Commandline interaction:usage:829
-#, fuzzy
 msgid " -h           print this help"
-msgstr " -h     imprimir este mensaje de ayuda"
+msgstr " -h           imprimir esta ayuda"
 
 #: tomb:Commandline interaction:usage:830
-#, fuzzy
 msgid " -v           print version, license and list of available ciphers"
-msgstr " -v     imprimir versión, licencia y lista de cifrados disponibles"
+msgstr " -v           Versión impresa, licencia y lista de cifrados disponibles"
 
 #: tomb:Commandline interaction:usage:831
-#, fuzzy
 msgid " -q           run quietly without printing informations"
-msgstr " -q     correr silenciosamente sin imprimir información"
+msgstr " -q           ejecutar silenciosamente sin imprimir información"
 
 #: tomb:Commandline interaction:usage:832
-#, fuzzy
 msgid " -D           print debugging information at runtime"
-msgstr " -D     imprimir información de debugging al correr"
+msgstr " -D           Imprimir información de depuración durante la ejecución"
 
 #: tomb:Commandline interaction:usage:834
-#, fuzzy
 msgid "For more information on Tomb read the manual: man tomb"
-msgstr "Para más información acerca de Tomb lee el manual: man tomb"
+msgstr "Para obtener más información sobre Tomb, lea el manual: Man Tomb"
 
 #: tomb:Commandline interaction:usage:835
 msgid "Please report bugs on <http://github.com/dyne/tomb/issues>."
@@ -404,14 +384,14 @@ msgid "Missing required dependency ::1 command::.  Please install it."
 msgstr "Falta la dependencia ::1 comando::. Por favor, instálala."
 
 #: tomb:Commandline interaction:_ensure_dependencies:1004
-#, fuzzy
 msgid "No privilege escalation tool found, not even sudo"
-msgstr "No se ha encontrado ningún privilegio de escalada, ni incluso sudo"
+msgstr ""
+"No se encontró ninguna herramienta de escalada de privilegios, ni siquiera "
+"sudo"
 
 #: tomb:Key operations:is_valid_recipients:1052
-#, fuzzy
 msgid "Not a valid GPG key ID: ::1 gpgid:: "
-msgstr "ID de llave GPG no es válido: ::1 gpgid:: "
+msgstr "ID de clave GPG no válida: ::1 gpgid:: "
 
 #: tomb:Key operations:is_valid_recipients:1056
 msgid "The key ::1 gpgid:: is not trusted enough"
@@ -502,9 +482,8 @@ msgid "Password OK."
 msgstr "Contraseña OK."
 
 #: tomb:Key operations:change_passwd:1419
-#, fuzzy
 msgid "Commanded to change GnuPG key for tomb key ::1 key::"
-msgstr "Se ha ordenado cambiar la contraseña de la llave ::1 llave::"
+msgstr "Se ordenó cambiar la clave GnuPG de la clave Tomb ::1 key::"
 
 #: tomb:Key operations:change_passwd:1421
 msgid "Commanded to change password for tomb key ::1 key::"
