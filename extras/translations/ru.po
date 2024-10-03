@@ -2,20 +2,20 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2023-06-27 13:00-0300\n"
-"Last-Translator: Daniel Dias Rodrigues <danieldiasr@gmail.com>\n"
+"PO-Revision-Date: 2024-09-15 23:09+0000\n"
+"Last-Translator: BombFoolGranny <bombfoolgranny@gmail.com>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/tomb/tomb/ru/>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Poedit 3.0.1\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Weblate 5.8-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
-msgstr ""
+msgstr "$pescmd исполняемый файл не найден"
 
 #: tomb:Safety functions:_sudo:124
 msgid "[sudo] Enter password for user ::1 user:: to gain superuser privileges"
@@ -25,7 +25,7 @@ msgstr ""
 
 #: tomb:Safety functions:_sudo:131
 msgid "Super user execution not supported: ::1 sudo::"
-msgstr ""
+msgstr "Исполнение от имени суперпользователя не поддерживается: ::1 sudo::"
 
 #: tomb:Safety functions:_whoami:236
 msgid "Failing to identify the user who is calling us"
@@ -102,21 +102,22 @@ msgid "Empty password"
 msgstr "Пустой пароль"
 
 #: tomb:Safety functions:sphinx_get_password:587
-#, fuzzy
 msgid "sphinx returns error: ::1 error::"
-msgstr "Ошибка pinentry: ::1 error::"
+msgstr "sphinx вернул ошибку: ::1 error::"
 
 #: tomb:Safety functions:sphinx_get_password:589
+#, fuzzy
 msgid "Failed to retrieve actual password with sphinx."
-msgstr ""
+msgstr "Не удалось получить актуальный пароль с sphinx."
 
 #: tomb:Safety functions:sphinx_get_password:592
+#, fuzzy
 msgid "Both host and user have to be set to use sphinx"
-msgstr ""
+msgstr "Хост и пользователь должны использовать sphinx"
 
 #: tomb:Safety functions:sphinx_set_password:623
 msgid "Failed to create password with sphinx"
-msgstr ""
+msgstr "Не удалось создать пароль с sphinx"
 
 #: tomb:Safety functions:is_valid_tomb:636
 msgid "Tomb file is missing from arguments."
@@ -315,8 +316,9 @@ msgid " -n           don't launch the execution hooks found in tomb"
 msgstr " -n     не обрабатывать привязки, найденные в гробнице"
 
 #: tomb:Commandline interaction:usage:811
+#, fuzzy
 msgid " -p           preserve the ownership of all files in tomb"
-msgstr ""
+msgstr " -p           сохранить владельца всех файлов в гробнице"
 
 #: tomb:Commandline interaction:usage:812
 #, fuzzy
@@ -329,8 +331,9 @@ msgid " -f           force operation (i.e. even if swap is active)"
 msgstr " -f     форсировать операцию (например, даже при активном swap)"
 
 #: tomb:Commandline interaction:usage:814
+#, fuzzy
 msgid " -g           use a GnuPG key to encrypt a tomb key"
-msgstr ""
+msgstr " -g           использовать GnuPG ключ чтобы зашифровать ключ гробницы"
 
 #: tomb:Commandline interaction:usage:815
 msgid " -r           provide GnuPG recipients (separated by comma)"
@@ -397,8 +400,9 @@ msgstr ""
 "ее."
 
 #: tomb:Commandline interaction:_ensure_dependencies:1004
+#, fuzzy
 msgid "No privilege escalation tool found, not even sudo"
-msgstr ""
+msgstr "Не обнаружено инструментов для повышения привилегий, даже sudo"
 
 #: tomb:Key operations:is_valid_recipients:1052
 msgid "Not a valid GPG key ID: ::1 gpgid:: "
@@ -430,7 +434,7 @@ msgstr "Ключ - это изображение, может подойти."
 
 #: tomb:Key operations:is_valid_key:1128
 msgid "Key is missing KDF header."
-msgstr ""
+msgstr "В ключе отсутствует KDF заголовок."
 
 #: tomb:Key operations:is_valid_key:1134
 msgid "Key is valid."
@@ -459,7 +463,7 @@ msgstr "Похоже, ключ неверен, либо его формат не
 
 #: tomb:Key operations:gpg_decrypt:1229
 msgid "You set an invalid GPG ID."
-msgstr ""
+msgstr "Вы задали некорректный GPG ID."
 
 #: tomb:Key operations:get_lukskey:1281
 msgid "Unlocking KDF key protection (::1 kdf::)"
@@ -526,23 +530,23 @@ msgid ""
 msgstr ""
 
 #: tomb:Key operations:gen_key:1512
+#, fuzzy
 msgid "It is your responsibility to check these fingerprints."
-msgstr ""
+msgstr "Это ваша обязанность сверить эти цифровые отпечатки."
 
 #: tomb:Key operations:gen_key:1513
+#, fuzzy
 msgid "The fingerprints are:"
-msgstr ""
+msgstr "Цифровые отпечатки:"
 
 #: tomb:Key operations:gen_key:1515
 msgid "\t  `_gpg_fingerprint "
-msgstr ""
+msgstr "\t  `_gpg_fingerprint "
 
 #: tomb:Key operations:gen_key:1520
 #, fuzzy
 msgid "No recipient specified, using default GPG key."
-msgstr ""
-"Не указана точка монтирования, использую точку по умолчанию: ::1 mount "
-"point::"
+msgstr "Не указан получатель, использую GPG ключ по умолчанию."
 
 #: tomb:Key operations:gen_key:1533
 msgid "User aborted."
@@ -584,12 +588,13 @@ msgid "encoding the password"
 msgstr "кодирую пароль"
 
 #: tomb:Key operations:gen_key:1601
+#, fuzzy
 msgid "Using KDF Argon2"
-msgstr ""
+msgstr "Используется KDF Argon2"
 
 #: tomb:Key operations:gen_key:1604
 msgid "memory used: 2^::1 kdfmemory::"
-msgstr ""
+msgstr "использовано памяти: 2^::1 kdfmemory::"
 
 #: tomb:Key operations:gen_key:1606
 #, fuzzy
@@ -609,8 +614,9 @@ msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
 msgstr "Кодирую ключ ::1 tomb key:: в изображение ::2 image file::"
 
 #: tomb:Key operations:bury_key:1673
+#, fuzzy
 msgid "Using GnuPG Key ID"
-msgstr ""
+msgstr "Используется GnuPG Key ID"
 
 #: tomb:Key operations:bury_key:1675
 msgid "Please confirm the key password for the encoding"
@@ -704,7 +710,7 @@ msgstr "Ошибка шифрования: steghide сообщает о проб
 #: tomb:Key operations:cloakify_key:1867
 #, fuzzy
 msgid "Tomb key encoded succesfully"
-msgstr "Ключ от гробницы успешно закодирован в изображение ::1 image file::"
+msgstr "Ключ от гробницы успешно закодирован"
 
 #: tomb:Key operations:decloakify_key:1879
 #, fuzzy
@@ -737,9 +743,8 @@ msgid "Key succesfully uncloaked to ::1 key::."
 msgstr "Ключ успешно эксгумирован в ::1 key::."
 
 #: tomb:Key operations:decloakify_key:1925
-#, fuzzy
 msgid "Nothing found in ::1 text file::"
-msgstr "В ::1 image file:: ничего не найдено"
+msgstr "Ничего не найдено в ::1 text file::"
 
 #: tomb:Key operations:engrave_key:1942
 msgid "Rendering a printable QRCode for key: ::1 tomb key file::"
@@ -830,7 +835,9 @@ msgstr ""
 #: tomb:Create:forge_key:2072
 #, fuzzy
 msgid "This operation takes time. Keep using this computer on other tasks."
-msgstr "Эта операция займет некоторое время, выполняйте пока другие задачи,"
+msgstr ""
+"Эта операция займет некоторое время. Пользуйтесь компьютером в других "
+"задачах."
 
 #: tomb:Create:forge_key:2073
 #, fuzzy
@@ -895,18 +902,21 @@ msgstr "Здесь нет гробницы. Сначала выкопайте е
 #: tomb:Create:lock_tomb_with_key:2166
 msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 47MB."
 msgstr ""
+"Файловая система ::1 filesystem:: не поддерживается в гробницах меньше 47MB."
 
 #: tomb:Create:lock_tomb_with_key:2172
 msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 18MB."
 msgstr ""
+"Файловая система ::1 filesystem:: не поддерживается в гробницах меньше 18MB."
 
 #: tomb:Create:lock_tomb_with_key:2177
 msgid "Filesystem not supported: ::1 filesystem::"
-msgstr ""
+msgstr "Файловая система не поддерживается: ::1 filesystem::"
 
 #: tomb:Create:lock_tomb_with_key:2181
+#, fuzzy
 msgid "Selected filesystem type $filesystem."
-msgstr ""
+msgstr "Выбрана файловая система типа $filesystem."
 
 #: tomb:Create:lock_tomb_with_key:2188
 msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
@@ -978,9 +988,8 @@ msgid "Command 'setkey' needs two arguments: the old key file and the tomb."
 msgstr "Команда 'setkey' требует два аргумента: старый файл ключа и гробницу."
 
 #: tomb:Create:change_tomb_key:2271
-#, fuzzy
 msgid "I.e:\ttomb -k new.tomb.key old.tomb.key secret.tomb"
-msgstr "Например:  tomb -k new.tomb.key old.tomb.key secret.tomb"
+msgstr "Например:\ttomb -k new.tomb.key old.tomb.key secret.tomb"
 
 #: tomb:Create:change_tomb_key:2272
 msgid "Execution aborted."
@@ -1024,7 +1033,7 @@ msgstr "Неожиданная ошибка в luksClose."
 
 #: tomb:Create:change_tomb_key:2339
 msgid "Successfully changed key for tomb: ::1 tomb file::"
-msgstr "Ключ для гробницы ::1 tomb file:: успешно изменен"
+msgstr "Успешно изменен ключ для гробницы: ::1 tomb file::"
 
 #: tomb:Create:change_tomb_key:2340
 msgid "The new key is: ::1 new key::"
@@ -1083,12 +1092,14 @@ msgid "Success unlocking tomb ::1 tomb name::"
 msgstr "Успешно отпер гробницу ::1 tomb name::"
 
 #: tomb:Open:mount_tomb:2453
+#, fuzzy
 msgid "Filesystem detected: ::1 filesystem::"
-msgstr ""
+msgstr "Обнаруженная файловая система: ::1 filesystem::"
 
 #: tomb:Open:mount_tomb:2459
+#, fuzzy
 msgid "Skipping filesystem checks in read-only"
-msgstr ""
+msgstr "Пропускаю проверки файловой системы в режиме \"только для чтения\""
 
 #: tomb:Open:mount_tomb:2461
 msgid "Checking filesystem via ::1::"
@@ -1120,8 +1131,9 @@ msgid "on date ::1 date::"
 msgstr "дата: ::1 date::"
 
 #: tomb:Open:mount_tomb:2517
+#, fuzzy
 msgid "the door was slammed or shutdown called before umount."
-msgstr ""
+msgstr "дверь была захлопнута или прописан shutdown перед размонтированием."
 
 #: tomb:Open:exec_safe_bind_hooks:2579
 #, fuzzy
@@ -1141,9 +1153,8 @@ msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
 msgstr "Формат привязки bind-hooks: local/to/tomb local/to/$HOME"
 
 #: tomb:Open:exec_safe_bind_hooks:2615
-#, fuzzy
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.\t Rolling back"
-msgstr "Формат привязки bind-hooks: local/to/tomb local/to/$HOME.  Откат"
+msgstr "Формат привязки bind-hooks: local/to/tomb local/to/$HOME.\t Откат"
 
 #: tomb:Open:exec_safe_bind_hooks:2620
 msgid "bind-hook target not existent, skipping ::1 home::/::2 subdir::"
@@ -1363,9 +1374,8 @@ msgid "close exec-hook returns a non-zero error code: ::1 error::"
 msgstr ""
 
 #: tomb:Close:umount_tomb:3131
-#, fuzzy
 msgid "Operation aborted"
-msgstr "Операция отменена."
+msgstr "Операция отменена"
 
 #: tomb:Close:umount_tomb:3135
 msgid "Closing tomb ::1 tomb name:: mounted on ::2 mount point::"
@@ -1398,9 +1408,8 @@ msgid "Listing processes running inside all open tombs..."
 msgstr "Убиваю все процессы, занятые в гробнице."
 
 #: tomb:Close:list_processes:3202
-#, fuzzy
 msgid "Listing processes running inside tomb '::1 tombname::'..."
-msgstr "Успешно отпер гробницу ::1 tomb name::"
+msgstr "Перечисляю процессы запущенные внутри гробницы '::1 tomb name::'..."
 
 #: tomb:Close:slam_tomb:3238
 #, fuzzy
@@ -1415,8 +1424,9 @@ msgstr ""
 "::1 tombname:: открыл ::2 tombuser:: из ::3 tombtty:: на ::4 tombhost::"
 
 #: tomb:Close:slam_tomb:3258
+#, fuzzy
 msgid "Can't kill ::1 process:: ::2 pcmd:: (::3 powner::)"
-msgstr ""
+msgstr "Не могу завершить ::1 process:: ::2 pcmd:: (::3 powner::)"
 
 #: tomb:Main routine:main:3357
 msgid "Error parsing."
@@ -1428,7 +1438,7 @@ msgstr "Нет такой команды \"::1 subcommand::\"."
 
 #: tomb:Main routine:main:3368
 msgid "Please try -h for help."
-msgstr "Используйте -h для вызова справки."
+msgstr "Пожалуйста используйте -h для вызова справки."
 
 #: tomb:Main routine:main:3380
 msgid "Some error occurred during option processing."
@@ -1453,8 +1463,9 @@ msgstr ""
 "Если Вы и правда этого хотите, добавьте параметр --unsafe"
 
 #: tomb:Main routine:main:3417
+#, fuzzy
 msgid "Privilege escalation tool configured: ::1 exec::"
-msgstr ""
+msgstr "Утилита для повышения привилегий сконфигурирована: ::1 exec::"
 
 #: tomb:Main routine:main:3447
 msgid ""
@@ -1473,8 +1484,9 @@ msgid "lsof not installed: cannot slam tombs."
 msgstr "Resize2fs не установлен: не могу менять размер гробниц."
 
 #: tomb:Main routine:main:3490
+#, fuzzy
 msgid "Trying a regular close."
-msgstr ""
+msgstr "Пробую обычное закрытие."
 
 #: tomb:Main routine:main:3497
 msgid "Resize2fs not installed: cannot resize tombs."
