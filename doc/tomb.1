@@ -287,7 +287,8 @@ trusted keys in GPG.
 .B
 .IP "--kdf \fI[argon2 | pbkdf2]\fR"
 Enable the KDF feature against dictionary attacks when creating a key.
-An optional argument allows to choose between \fIargon2\fR or \fIpbkdf2\fR.
+The required argument currently allows to choose between \fIargon2\fR
+or \fIpbkdf2\fR.
 \fIargon2\fR is using a mix of RAM capacity, number of threads and
 iterations to achieve a time cost.
 \fIpbkdf2\fR is only about calculation speed to achieve a time cost.
