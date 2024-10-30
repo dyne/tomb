@@ -3317,12 +3317,6 @@ main() {
 
 		# Close the tomb
 		umount|close)
-			[[ "$subcommand" == "slam" ]] && {
-				SLAM=1
-				[[ $LSOF == 0 ]] && {
-					unset SLAM
-					_warning "lsof not installed: cannot slam tombs."
-					_warning "Trying a regular close." }}
 			umount_tomb $PARAM[1]
 			;;
 
