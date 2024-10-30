@@ -114,7 +114,7 @@ _sudo() {
 	if option_is_set --sudo; then
                pescmd=`option_value --sudo`
 		case `basename $pescmd` in
-			"doas"|"sup"|"sud"|"pkexec")
+			"doas"|"sup"|"sud"|"pkexec"|"run0")
 				command -v $pescmd > /dev/null || _failure "$pescmd executable not found"
 				_verbose "Super user execution using $pescmd"
 				${pescmd} ${@}
