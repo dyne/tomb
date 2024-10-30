@@ -1405,8 +1405,6 @@ gen_key() {
 	local gpgpass opt
 	local recipients_opt
 	typeset -a gpgopt
-	local sphx_host_tmp
-	local sphx_user_tmp
 	# here user is prompted for key password
 	tombpass=""
 	tombpasstmp=""
@@ -3131,19 +3129,19 @@ main() {
 	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g -sudo:)
 	subcommands_opts[__default]=""
 	# -o in open and mount is used to pass alternate mount options
-	subcommands_opts[open]="n -nohook=n k: -kdf: -kdftype: -kdfmem: o: -ignore-swap -tomb-pwd: r: R: -sphx-host: -sphx-user: p -preserve-ownership=p"
+	subcommands_opts[open]="n -nohook=n k: -kdf: -kdftype: -kdfmem: o: -ignore-swap -tomb-pwd: r: R: p -preserve-ownership=p"
 	subcommands_opts[mount]=${subcommands_opts[open]}
 
 	subcommands_opts[create]="" # deprecated, will issue warning
 
 	# -o in forge and lock is used to pass an alternate cipher.
-	subcommands_opts[forge]="-ignore-swap k: -kdf: -kdftype: -kdfmem: o: -tomb-pwd: -use-random r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[forge]="-ignore-swap k: -kdf: -kdftype: -kdfmem: o: -tomb-pwd: -use-random r: R: "
 	subcommands_opts[dig]="-ignore-swap s: -size=s "
-	subcommands_opts[lock]="-ignore-swap k: -kdf: -kdftype: -kdfmem: o: -tomb-pwd: r: R: -sphx-host: -sphx-user: -filesystem: "
-	subcommands_opts[setkey]="k: -ignore-swap -kdf: -kdftype: -kdfmem: -tomb-old-pwd: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[lock]="-ignore-swap k: -kdf: -kdftype: -kdfmem: o: -tomb-pwd: r: R: -filesystem: "
+	subcommands_opts[setkey]="k: -ignore-swap -kdf: -kdftype: -kdfmem: -tomb-old-pwd: -tomb-pwd: r: R: "
 	subcommands_opts[engrave]="k: "
 
-	subcommands_opts[passwd]="k: -ignore-swap -kdf: -kdftype: -kdfmem: -tomb-old-pwd: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[passwd]="k: -ignore-swap -kdf: -kdftype: -kdfmem: -tomb-old-pwd: -tomb-pwd: r: R: "
 	subcommands_opts[close]=""
 	subcommands_opts[help]=""
 	subcommands_opts[slam]=""
@@ -3153,8 +3151,8 @@ main() {
 	subcommands_opts[index]=""
 	subcommands_opts[search]=""
 
-	subcommands_opts[bury]="k: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
-	subcommands_opts[exhume]="k: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[bury]="k: -tomb-pwd: r: R: "
+	subcommands_opts[exhume]="k: -tomb-pwd: r: R: "
 	subcommands_opts[cloak]="k: "
 	subcommands_opts[uncloak]="k: "
 	# subcommands_opts[decompose]=""
@@ -3162,7 +3160,7 @@ main() {
 	# subcommands_opts[install]=""
 	subcommands_opts[askpass]=""
 	subcommands_opts[source]=""
-	subcommands_opts[resize]="-ignore-swap s: -size=s k: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[resize]="-ignore-swap s: -size=s k: -tomb-pwd: r: R: "
 	subcommands_opts[check]="-ignore-swap "
 	#	 subcommands_opts[translate]=""
 
