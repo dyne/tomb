@@ -1,3 +1,0 @@
-pixmap_path "%prefix%/pixmaps"
-style "normal" { stock["gtk-dialog-authentication"] = {{"monmort.xpm"}} }
-widget "*" style "normal"

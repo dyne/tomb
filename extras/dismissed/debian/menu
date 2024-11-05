@@ -1,3 +1,0 @@
-?package(tomb):command="tomb-open" icon="/usr/share/pixmaps/monmort.xpm" needs="text" \
-	section="Applications/System/Security" title="Tomb" hints="Crypto" \
-	hotkey="Tomb"

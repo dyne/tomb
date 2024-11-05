@@ -1,4 +1,0 @@
-?package(tomb):command="tomb" icon="/usr/share/pixmaps/monmort.xpm" needs="text" \
-	section="Applications/Accessories" title="Tomb" hints="Crypto" \
-	hotkey="Tomb"
-

@@ -1,9 +1,0 @@
-Some conventions:
-.ui files are designers files
-Sometimes it's necessary to create custom widget to extend the functionality
-given by designer in a clean way. These files should be called ui_whatever.py
-
-.ui files must be "compiled" using pyuic4. This should be done with make, but
-won't be right now. So, for the moment, I'll keep compiled files directly in
-the sources, for easiness.
-
