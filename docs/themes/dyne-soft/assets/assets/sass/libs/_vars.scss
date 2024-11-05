@@ -112,10 +112,64 @@
 
 }
 
+@font-face {
+  font-family: 'jakarta';
+  src: url('/tomb/assets/fonts/jakarta/webfonts/PlusJakartaSans-Regular.woff2'),
+       url('/tomb/assets/fonts/jakarta/ttf/PlusJakartaSans-Regular.ttf') format('ttf');
+  font-weight: normal;
+  font-style: normal;
+
+}
+
+@font-face {
+  font-family: 'jakarta';
+  src: url('/tomb/assets/fonts/jakarta/webfonts/PlusJakartaSans-Italic.woff2'),
+       url('/tomb/assets/fonts/jakarta/ttf/PlusJakartaSans-Italic.ttf') format('ttf');
+  font-weight: normal;
+  font-style: italic;
+
+}
+
+@font-face {
+  font-family: 'jakarta';
+  src: url('/tomb/assets/fonts/jakarta/webfonts/PlusJakartaSans-Medium.woff2'),
+       url('/tomb/assets/fonts/jakarta/ttf/PlusJakartaSans-Medium.ttf') format('ttf');
+  font-weight: 300;
+  font-style: normal;
+
+}
+
+@font-face {
+  font-family: 'jakarta';
+  src: url('/tomb/assets/fonts/jakarta/webfonts/PlusJakartaSans-MediumItalic.woff2'),
+       url('/tomb/assets/fonts/jakarta/ttf/PlusJakartaSans-MediumItalic.ttf') format('ttf');
+  font-weight: 300;
+  font-style: italic;
+
+}
+
+
+@font-face {
+  font-family: 'jakarta';
+  src: url('/tomb/assets/fonts/jakarta/webfonts/PlusJakartaSans-Bold.woff2'),
+       url('/tomb/assets/fonts/jakarta/ttf/PlusJakartaSans-Bold.ttf') format('ttf');
+  font-weight: 500;
+  font-style: normal;
+}
+
+  @font-face {
+    font-family: 'jakarta';
+    src: url('/tomb/assets/fonts/jakarta/webfonts/PlusJakartaSans-BoldItalic.woff2'),
+         url('/tomb/assets/fonts/jakarta/ttf/PlusJakartaSans-BoldItalic.ttf') format('ttf');
+    font-weight: 500;
+    font-style: italic;
+  }
+  
+
 
 $font: (
   title:         ('syne', 'Arial', 'Helvetica', sans-serif),
-  family:        ('syne', 'Arial', 'Helvetica', sans-serif),
+  family:        ('jakarta', 'Arial', 'Helvetica', sans-serif),
   family-fixed:  ('syne-mono', 'dejavu_sans_monobook', 'Lucida Console', Monaco, monospace),
   weight:       200,
   weight-bold:  700,
