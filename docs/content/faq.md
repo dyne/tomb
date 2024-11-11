@@ -1,6 +1,6 @@
 ---
 title: Frequently Asked Questions
-description_markdown: "Everything you need to know about Tomb but were too affraid to ask"
+description_markdown: "Everything you need to know about Tomb, but were too afraid to ask"
 image: 'images/dowse-dataprevention-campaign-1024x576.jpg'
 sections:
 - title: "Development?"
