@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tomb\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2024-09-20 10:40+0000\n"
+"PO-Revision-Date: 2024-11-13 12:00+0000\n"
 "Last-Translator: Gianluca Montecchi <mgian@pm.me>\n"
 "Language-Team: Italian <https://hosted.weblate.org/projects/tomb/tomb/it/>\n"
 "Language: it\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.8-dev\n"
+"X-Generator: Weblate 5.9-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
@@ -114,10 +114,11 @@ msgstr "Recupero della password attuale con sphinx non riuscito."
 #: tomb:Safety functions:sphinx_get_password:592
 msgid "Both host and user have to be set to use sphinx"
 msgstr ""
+"Sia il server che l'utilizzatore devono essere impostati per usare sphinx"
 
 #: tomb:Safety functions:sphinx_set_password:623
 msgid "Failed to create password with sphinx"
-msgstr ""
+msgstr "Creazione password con sphinx fallita"
 
 #: tomb:Safety functions:is_valid_tomb:636 functions:is_valid_tomb:506
 msgid "Tomb file is missing from arguments."
@@ -230,7 +231,7 @@ msgstr " list    lista dei file TOMB aperti e informazioni su di essi"
 
 #: tomb:Commandline interaction:usage:776
 msgid " ps           list of running processes inside open TOMBs"
-msgstr ""
+msgstr " .ps                     elenca i processi attivi all'interno di TOMBs"
 
 #: tomb:Commandline interaction:usage:777
 #, fuzzy
@@ -295,7 +296,7 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:799
 msgid " cloak        transform a KEY into TEXT using CIPHER (for use with -k)"
-msgstr ""
+msgstr " cloak         trasforma la KEY in TEXT usando CIPHER (per uso con -k)"
 
 #: tomb:Commandline interaction:usage:802
 #, fuzzy
@@ -326,7 +327,7 @@ msgstr " -n     non elaborare i collegamenti trovati in tomb"
 
 #: tomb:Commandline interaction:usage:811
 msgid " -p           preserve the ownership of all files in tomb"
-msgstr ""
+msgstr " -p            mantiene il proprietario di tutti i file nel tomb"
 
 #: tomb:Commandline interaction:usage:812
 #, fuzzy
