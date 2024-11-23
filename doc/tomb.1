@@ -160,7 +160,7 @@ situations. It requires \fIlsof\fR else it falls back to \fIclose\fR.
 Changes the password protecting a key file specified using
 \fI-k\fR. With keys encrypted for GPG recipients use \fI-g\fR followed
 by \fI-r\fR to indicate the new recipient key, or a comma separated
-list.. The user will need to know the key's current password, or
+list. The user will need to know the key's current password, or
 possess at least one of the current recipients GPG secret keys,
 because the key contents will be decoded and reencoded using the new
 passwords or keys. If the key file is broken (missing headers) this
@@ -467,7 +467,7 @@ tomb can be shared between different users. The recipients are given
 using the \fI-r\fR (or/and \fI-R\fR) option and if multiple each GPG
 key ID must be separated by a comma (\fI,\fR). Sharing a tomb is a
 very sensitive action and the user needs to trust that all the GPG
-public keys used are kept safe. If one of them its stolen or lost, it
+public keys used are kept safe. If one of them is stolen or lost, it
 will be always possible to use it to access the tomb key unless all
 its copies are destroyed. The \fI-r\fR option can be used in the tomb
 commands: \fIopen\fR, \fIforge\fR \fIsetkey\fR, \fIpasswd\fR,
