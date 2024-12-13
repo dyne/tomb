@@ -246,7 +246,7 @@ msgstr " engrave      生成key文件的二维码，用于书面保存"
 
 #: tomb:Commandline interaction:usage:793
 msgid " // Steganography:"
-msgstr " // 信息隐藏："
+msgstr " // 信息隐写："
 
 #: tomb:Commandline interaction:usage:795
 msgid " bury         hide a KEY inside a JPEG image (for use with -k)"
@@ -258,11 +258,11 @@ msgstr " exhume         从JPEG图像中提取key（打印到stdout）"
 
 #: tomb:Commandline interaction:usage:799
 msgid " cloak        transform a KEY into TEXT using CIPHER (for use with -k)"
-msgstr " cloak        使用cipher将key文件转换为文本（与-k一起使用）"
+msgstr " cloak        使用加密文件将key文件转换为文本（与-k一起使用）"
 
 #: tomb:Commandline interaction:usage:802
 msgid " uncloak      extract a KEY from a TEXT using CIPHER (prints to stdout)"
-msgstr " uncloak      使用cipher从文本中提取key文件（打印到stdout）"
+msgstr " uncloak      使用加密文件从文本中提取key文件（打印到stdout）"
 
 #: tomb:Commandline interaction:usage:806
 msgid "Options:"
@@ -286,7 +286,7 @@ msgstr " -p           保留tomb中所有文件的所有权"
 
 #: tomb:Commandline interaction:usage:812
 msgid " -o           options passed to commands: open, lock, forge (see man)"
-msgstr " -o           传递给命令的选项：打开、锁定、伪造（请参阅man）"
+msgstr " -o           传递给命令的选项：open、lock、forge（请参阅man）"
 
 #: tomb:Commandline interaction:usage:813
 msgid " -f           force operation (i.e. even if swap is active)"
@@ -320,7 +320,7 @@ msgstr " --sphx-host  与key文件关联的主机与（与pitchforkedsphinx一�
 
 #: tomb:Commandline interaction:usage:825
 msgid " --kdf        forge keys armored against dictionary attacks"
-msgstr " --kdf        伪造key文件防止字典攻击"
+msgstr " --kdf        创建防止字典攻击的key文件"
 
 #: tomb:Commandline interaction:usage:829
 msgid " -h           print this help"
@@ -548,27 +548,27 @@ msgstr "编码失败：::1 image file::不是jpeg图像。"
 
 #: tomb:Key operations:bury_key:1671
 msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
-msgstr ""
+msgstr "正在将key文件::1 tomb key::编码到图像::2 image file::中"
 
 #: tomb:Key operations:bury_key:1673
 msgid "Using GnuPG Key ID"
-msgstr ""
+msgstr "正在使用GnuPG密钥ID"
 
 #: tomb:Key operations:bury_key:1675
 msgid "Please confirm the key password for the encoding"
-msgstr ""
+msgstr "请确认编码的密钥密码"
 
 #: tomb:Key operations:bury_key:1696
 msgid "Wrong password/GnuPG ID supplied."
-msgstr ""
+msgstr "密码/GnuPG ID错误。"
 
 #: tomb:Key operations:bury_key:1697
 msgid "You shall not bury a key whose password is unknown to you."
-msgstr ""
+msgstr "不得bury密码未知的key文件。"
 
 #: tomb:Key operations:bury_key:1737
 msgid "Encoding error: steghide reports problems."
-msgstr ""
+msgstr "编码错误：steghide报告问题。"
 
 #: tomb:Key operations:bury_key:1740
 msgid "Tomb key encoded successfully into image ::1 image file::"
@@ -576,43 +576,43 @@ msgstr ""
 
 #: tomb:Key operations:exhume_key:1752
 msgid "Exhume failed, no image specified"
-msgstr ""
+msgstr "exhume失败，未指定图像"
 
 #: tomb:Key operations:exhume_key:1765
 msgid "Exhume failed, image file not found: ::1 image file::"
-msgstr ""
+msgstr "exhume失败，未找到图像：::1 image file::"
 
 #: tomb:Key operations:exhume_key:1767
 msgid "Exhume failed: ::1 image file:: is not a jpeg image."
-msgstr ""
+msgstr "exhume失败：::1 image file::不是jpeg图像。"
 
 #: tomb:Key operations:exhume_key:1774
 msgid "Wrong password or no steganographic key found"
-msgstr ""
+msgstr "密码错误或未找到隐写密钥"
 
 #: tomb:Key operations:exhume_key:1785
 msgid "printing exhumed key on stdout"
-msgstr ""
+msgstr "正在stdout中打印exhume后的密钥"
 
 #: tomb:Key operations:exhume_key:1789
 msgid "File exists: ::1 tomb key::"
-msgstr ""
+msgstr "文件存在：::1 tomb key::"
 
 #: tomb:Key operations:exhume_key:1791
 msgid "Use of --force selected: overwriting."
-msgstr ""
+msgstr "使用--force选择：覆盖。"
 
 #: tomb:Key operations:exhume_key:1794
 msgid "Make explicit use of --force to overwrite."
-msgstr ""
+msgstr "明确使用--force进行覆盖。"
 
 #: tomb:Key operations:exhume_key:1795
 msgid "Refusing to overwrite file. Operation aborted."
-msgstr ""
+msgstr "拒绝覆盖文件。操作已中止。"
 
 #: tomb:Key operations:exhume_key:1798
 msgid "Trying to exhume a key out of image ::1 image file::"
-msgstr ""
+msgstr "正在尝试从图片::1 image file::里exhume出密钥"
 
 #: tomb:Key operations:exhume_key:1819
 msgid "Key successfully exhumed to ::1 key::."
@@ -620,23 +620,23 @@ msgstr ""
 
 #: tomb:Key operations:exhume_key:1821
 msgid "Nothing found in ::1 image file::"
-msgstr ""
+msgstr "在::1 image file::中找不到任何内容"
 
 #: tomb:Key operations:cloakify_key:1843
 msgid "Encoding key ::1 tomb key:: using cipher ::2 cipher file::"
-msgstr ""
+msgstr "正在使用加密文件::2 cipher file::编码密钥文件::1 tomb key::"
 
 #: tomb:Key operations:cloakify_key:1848
 msgid "printing cloaked key on stdout"
-msgstr ""
+msgstr "正在stdout中打印cloak后的密钥"
 
 #: tomb:Key operations:cloakify_key:1852
 msgid "File exists: ::1 output file::"
-msgstr ""
+msgstr "文件存在：::1 output file::"
 
 #: tomb:Key operations:cloakify_key:1864
 msgid "Encoding error: cloakify reports problems."
-msgstr ""
+msgstr "编码错误：cloakify报告问题。"
 
 #: tomb:Key operations:cloakify_key:1867
 msgid "Tomb key encoded successfully"
@@ -644,23 +644,23 @@ msgstr ""
 
 #: tomb:Key operations:decloakify_key:1879
 msgid "Uncloak failed, no text file specified"
-msgstr ""
+msgstr "uncloak失败，未指定文本文件"
 
 #: tomb:Key operations:decloakify_key:1881
 msgid "Uncloak failed, no cipher file specified"
-msgstr ""
+msgstr "uncloak失败，未指定加密文件"
 
 #: tomb:Key operations:decloakify_key:1894
 msgid "Uncloak failed, text file not found: ::1 text file::"
-msgstr ""
+msgstr "uncloak失败，未找到文本文件：::1 text file::"
 
 #: tomb:Key operations:decloakify_key:1897
 msgid "Uncloak failed, cipher file not found: ::1 cipher file::"
-msgstr ""
+msgstr "uncloak失败，未找到加密文件：::1 cipher file::"
 
 #: tomb:Key operations:decloakify_key:1903
 msgid "printing uncloaked key on stdout"
-msgstr ""
+msgstr "正在stdout中打印uncloak后的密钥"
 
 #: tomb:Key operations:decloakify_key:1923
 msgid "Key successfully uncloaked to ::1 key::."
@@ -668,79 +668,79 @@ msgstr ""
 
 #: tomb:Key operations:decloakify_key:1925
 msgid "Nothing found in ::1 text file::"
-msgstr ""
+msgstr "在::1 text file::中找不到任何内容"
 
 #: tomb:Key operations:engrave_key:1942
 msgid "Rendering a printable QRCode for key: ::1 tomb key file::"
-msgstr ""
+msgstr "正在为密钥文件渲染可打印的二维码：::1 tomb key file::"
 
 #: tomb:Key operations:engrave_key:1947
 msgid "QREncode reported an error."
-msgstr ""
+msgstr "QREncode报告了一个错误。"
 
 #: tomb:Key operations:engrave_key:1949
 msgid "Operation successful:"
-msgstr ""
+msgstr "操作成功："
 
 #: tomb:Create:dig_tomb:1983
 msgid "Commanded to dig tomb ::1 tomb path::"
-msgstr ""
+msgstr "命令dig tomb文件：::1 tomb path::"
 
 #: tomb:Create:dig_tomb:1985
 msgid "Missing path to tomb"
-msgstr ""
+msgstr "缺少tomb文件的路径"
 
 #: tomb:Create:dig_tomb:1986
 msgid "Size argument missing, use -s"
-msgstr ""
+msgstr "缺少大小参数，请使用-s"
 
 #: tomb:Create:dig_tomb:1987
 msgid "Size must be an integer (mebibytes)"
-msgstr ""
+msgstr "大小必须为整数（单位为MiB）"
 
 #: tomb:Create:dig_tomb:1988
 msgid "Tombs can't be smaller than 10 mebibytes"
-msgstr ""
+msgstr "tomb文件不能小于10MiB"
 
 #: tomb:Create:dig_tomb:1991
 msgid "A tomb exists already. I'm not digging here:"
-msgstr ""
+msgstr "已存在tomb文件。不会在此dig："
 
 #: tomb:Create:dig_tomb:1996
 msgid "Creating a new tomb in ::1 tomb path::"
-msgstr ""
+msgstr "正在::1 tomb path::新建一个tomb文件"
 
 #: tomb:Create:dig_tomb:1997
 msgid "Generating ::1 tomb file:: of ::2 size::MiB"
-msgstr ""
+msgstr "正在生成::1 tomb file::，大小为::2 size::MiB"
 
 #: tomb:Create:dig_tomb:2001
 msgid "Error creating the tomb ::1 tomb path::"
-msgstr ""
+msgstr "创建tomb文件::1 tomb path::错误"
 
 #: tomb:Create:dig_tomb:2011
 msgid "Done digging ::1 tomb name::"
-msgstr ""
+msgstr "dig ::1 tomb name::完成"
 
 #: tomb:Create:dig_tomb:2012
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
-msgstr ""
+msgstr "您的tomb文件还没有完成，您需要创建一个密钥并上锁："
 
 #: tomb:Create:dig_tomb:2013
 msgid "tomb forge ::1 tomb path::.key"
-msgstr ""
+msgstr "tomb forge ::1 tomb path::.key"
 
 #: tomb:Create:dig_tomb:2014
 msgid "tomb lock ::1 tomb path:: -k ::1 tomb path::.key"
-msgstr ""
+msgstr "tomb lock ::1 tomb path:: -k ::1 tomb path::.key"
 
 #: tomb:Create:forge_key:2036
 msgid "A filename needs to be specified using -k to forge a new key."
-msgstr ""
+msgstr "需要用-k指定文件名以新建密钥。"
 
 #: tomb:Create:forge_key:2038
 msgid "Commanded to forge key ::1 key::"
-msgstr ""
+msgstr "命令新建密钥::1 key::"
 
 #: tomb:Create:forge_key:2051
 msgid "Forging this key would overwrite an existing file. Operation aborted."
@@ -748,350 +748,354 @@ msgstr ""
 
 #: tomb:Create:forge_key:2055
 msgid "Cannot generate encryption key."
-msgstr ""
+msgstr "无法生成加密密钥。"
 
 #: tomb:Create:forge_key:2063
 msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
-msgstr ""
+msgstr "命令使用密码算法::2 algorithm::新建密钥::1 key::"
 
 #: tomb:Create:forge_key:2072
 msgid "This operation takes time. Keep using this computer on other tasks."
-msgstr ""
+msgstr "此操作需要时间。请继续用这此计算机进行其他任务。"
 
 #: tomb:Create:forge_key:2073
 msgid "Once done you will be asked to choose a password for your tomb."
-msgstr ""
+msgstr "完成后，您将需要为您的tomb文件选择密码。"
 
 #: tomb:Create:forge_key:2074
 msgid "To make it faster you can move the mouse around."
-msgstr ""
+msgstr "你可以四处移动鼠标进行加速。"
 
 #: tomb:Create:forge_key:2075
 msgid "If you are on a server, you can use an Entropy Generation Daemon."
-msgstr ""
+msgstr "如果您在服务器上，您可以使用熵生成守护进程。"
 
 #: tomb:Create:forge_key:2090
 msgid "Using GnuPG key(s) to encrypt your key: ::1 tomb key::"
-msgstr ""
+msgstr "正在使用GnuPG密钥加密您的密钥：::1 tomb key::"
 
 #: tomb:Create:forge_key:2092
 msgid "Choose the password of your key: ::1 tomb key::"
-msgstr ""
+msgstr "选择您的密钥密码：::1 tomb key::"
 
 #: tomb:Create:forge_key:2094
 msgid "(You can also change it later using 'tomb passwd'.)"
-msgstr ""
+msgstr "（您也可以稍后使用“tomb passwd”进行更改。）"
 
 #: tomb:Create:forge_key:2112
 msgid "The key does not seem to be valid."
-msgstr ""
+msgstr "密钥似乎无效。"
 
 #: tomb:Create:forge_key:2113
 msgid "Dumping contents to screen:"
-msgstr ""
+msgstr "将内容转储到屏幕："
 
 #: tomb:Create:forge_key:2121
 msgid "Done forging ::1 key file::"
-msgstr ""
+msgstr "完成创建::1 key file::"
 
 #: tomb:Create:forge_key:2122
 msgid "Your key is ready:"
-msgstr ""
+msgstr "您的密钥已就绪："
 
 #: tomb:Create:lock_tomb_with_key:2142
 msgid "No tomb specified for locking."
-msgstr ""
+msgstr "未指定要上锁的tomb文件。"
 
 #: tomb:Create:lock_tomb_with_key:2143
 msgid "Usage: tomb lock file.tomb -k file.tomb.key"
-msgstr ""
+msgstr "用法：tomb lock file.tomb -k file.tomb.key"
 
 #: tomb:Create:lock_tomb_with_key:2150
 msgid "Commanded to lock tomb ::1 tomb file::"
-msgstr ""
+msgstr "命令上锁tomb文件::1 tomb file::"
 
 #: tomb:Create:lock_tomb_with_key:2153
 msgid "There is no tomb here. You have to dig it first."
-msgstr ""
+msgstr "这里没有tomb文件，您必须先进行dig。"
 
 #: tomb:Create:lock_tomb_with_key:2166
 msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 47MB."
-msgstr ""
+msgstr "文件系统::1 filesystem::不支持小于47MB的tomb文件。"
 
 #: tomb:Create:lock_tomb_with_key:2172
 msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 18MB."
-msgstr ""
+msgstr "文件系统::1 filesystem::不支持小于18MB的tomb文件。"
 
 #: tomb:Create:lock_tomb_with_key:2177
 msgid "Filesystem not supported: ::1 filesystem::"
-msgstr ""
+msgstr "文件系统不支持：::1 filesystem::"
 
 #: tomb:Create:lock_tomb_with_key:2181
 msgid "Selected filesystem type $filesystem."
-msgstr ""
+msgstr "所选文件系统类型$filesystem。"
 
 #: tomb:Create:lock_tomb_with_key:2188
 msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
-msgstr ""
+msgstr "正在检查tomb文件是否为空（我们从不碰别人的东西）。"
 
 #: tomb:Create:lock_tomb_with_key:2192
 msgid "The tomb was already locked with another key."
-msgstr ""
+msgstr "tomb文件已经被另一个密钥锁上了。"
 
 #: tomb:Create:lock_tomb_with_key:2193
 msgid ""
 "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
-msgstr ""
+msgstr "操作已中止。我无法上锁已经锁好的tomb文件。请dig一个新的。"
 
 #: tomb:Create:lock_tomb_with_key:2195
 msgid "Fine, this tomb seems empty."
-msgstr ""
+msgstr "好吧，这个tomb文件似乎是空的。"
 
 #: tomb:Create:lock_tomb_with_key:2203
 msgid "Locking using cipher: ::1 cipher::"
-msgstr ""
+msgstr "正在使用加密文件上锁：::1 cipher::"
 
 #: tomb:Create:lock_tomb_with_key:2215
 msgid "Locking ::1 tomb file:: with ::2 tomb key file::"
-msgstr ""
+msgstr "正在使用::2 tomb key file::上锁::1 tomb file::"
 
 #: tomb:Create:lock_tomb_with_key:2217
 msgid "Formatting Luks mapped device."
-msgstr ""
+msgstr "正在格式化Luks映射设备。"
 
 #: tomb:Create:lock_tomb_with_key:2222
 msgid "cryptsetup luksFormat returned an error."
-msgstr ""
+msgstr "cryptsetup luksFormat返回一个错误。"
 
 #: tomb:Create:lock_tomb_with_key:2227
 msgid "cryptsetup luksOpen returned an error."
-msgstr ""
+msgstr "cryptsetup luksOpen返回一个错误。"
 
 #: tomb:Create:lock_tomb_with_key:2230
 msgid "Formatting your Tomb with $filesystem filesystem."
-msgstr ""
+msgstr "使用$filesystem文件系统格式化您的Tomb。"
 
 #: tomb:Create:lock_tomb_with_key:2249
 msgid "Tomb format returned an error."
-msgstr ""
+msgstr "Tomb格式化返回一个错误。"
 
 #: tomb:Create:lock_tomb_with_key:2251
 msgid "Your tomb ::1 tomb file:: may be corrupted."
-msgstr ""
+msgstr "您的tomb文件::1 tomb file::可能已损坏。"
 
 #: tomb:Create:lock_tomb_with_key:2256
 msgid "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::"
-msgstr ""
+msgstr "已成功使用Luks dm-crypt::2 cipher::成功上锁::1 tomb name::"
 
 #: tomb:Create:lock_tomb_with_key:2257
 msgid ""
 "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::"
 msgstr ""
+"你的tomb文件已经在::1 tomb path::准备好了，并用密钥::2 tomb key::保护好了"
 
 #: tomb:Create:change_tomb_key:2267
 msgid "Commanded to reset key for tomb ::1 tomb path::"
-msgstr ""
+msgstr "命令重置tomb密钥::1 tomb path::"
 
 #: tomb:Create:change_tomb_key:2270
 msgid "Command 'setkey' needs two arguments: the old key file and the tomb."
-msgstr ""
+msgstr "“setkey”命令需要两个参数：旧密钥文件和tomb文件。"
 
 #: tomb:Create:change_tomb_key:2271
 msgid "I.e:\ttomb -k new.tomb.key old.tomb.key secret.tomb"
-msgstr ""
+msgstr "即：\ttomb -k new.tomb.key old.tomb.key secret.tomb"
 
 #: tomb:Create:change_tomb_key:2272
 msgid "Execution aborted."
-msgstr ""
+msgstr "执行已中止。"
 
 #: tomb:Create:change_tomb_key:2284
 msgid "Not a valid LUKS encrypted volume: ::1 volume::"
-msgstr ""
+msgstr "不是有效的LUKS加密卷：::1 volume::"
 
 #: tomb:Create:change_tomb_key:2294
 msgid "Changing lock on tomb ::1 tomb name::"
-msgstr ""
+msgstr "正在修改tomb文件::1 tomb name::的锁"
 
 #: tomb:Create:change_tomb_key:2295
 msgid "Old key: ::1 old key::"
-msgstr ""
+msgstr "旧密钥：::1 old key::"
 
 #: tomb:Create:change_tomb_key:2306
 msgid "No valid password supplied for the old key."
-msgstr ""
+msgstr "没有为旧密钥提供有效密码。"
 
 #: tomb:Create:change_tomb_key:2312
 msgid "Unexpected error in luksOpen."
-msgstr ""
+msgstr "luksOpen出现意外错误。"
 
 #: tomb:Create:change_tomb_key:2316
 msgid "New key: ::1 key file::"
-msgstr ""
+msgstr "新密钥：::1 key file::"
 
 #: tomb:Create:change_tomb_key:2326
 msgid "No valid password supplied for the new key."
-msgstr ""
+msgstr "没有为新密钥提供有效密码。"
 
 #: tomb:Create:change_tomb_key:2335
 msgid "Unexpected error in luksChangeKey."
-msgstr ""
+msgstr "luksChangeKey出现意外错误。"
 
 #: tomb:Create:change_tomb_key:2337
 msgid "Unexpected error in luksClose."
-msgstr ""
+msgstr "luksClose出现意外错误。"
 
 #: tomb:Create:change_tomb_key:2339
 msgid "Successfully changed key for tomb: ::1 tomb file::"
-msgstr ""
+msgstr "已成功修改tomb文件的密钥：::1 tomb file::"
 
 #: tomb:Create:change_tomb_key:2340
 msgid "The new key is: ::1 new key::"
-msgstr ""
+msgstr "新密钥为：::1 new key::"
 
 #: tomb:Open:mount_tomb:2370
 msgid "No tomb name specified for opening."
-msgstr ""
+msgstr "没有指定要打开的tomb文件名称。"
 
 #: tomb:Open:mount_tomb:2372
 msgid "Commanded to open tomb ::1 tomb name::"
-msgstr ""
+msgstr "命令打开tomb文件::1 tomb name::"
 
 #: tomb:Open:mount_tomb:2388
 msgid "Mountpoint not specified, using default: ::1 mount point::"
-msgstr ""
+msgstr "未指定装载点，使用默认值：::1 mount point::"
 
 #: tomb:Open:mount_tomb:2391
 msgid "Opening ::1 tomb file:: on ::2 mount point::"
-msgstr ""
+msgstr "正在::2 mount point::上打开::1 tomb file::"
 
 #: tomb:Open:mount_tomb:2398
 msgid "Mountpoint already in use: ::1 mount point::"
-msgstr ""
+msgstr "挂载点已在使用中：::1 mount point::"
 
 #: tomb:Open:mount_tomb:2405
 msgid "::1 tomb file:: is not a valid Luks encrypted storage file."
-msgstr ""
+msgstr "::1 tomb file::不是有效的Luks加密存储文件。"
 
 #: tomb:Open:mount_tomb:2407
 msgid "This tomb is a valid LUKS encrypted device."
-msgstr ""
+msgstr "这个tomb文件是有效的LUKS加密设备。"
 
 #: tomb:Open:mount_tomb:2414
 msgid "Cipher is \"::1 cipher::\" mode \"::2 mode::\" hash \"::3 hash::\""
-msgstr ""
+msgstr "加密文件为“::1 cipher::”，模式为“::2 mode::”，哈希值为“::3 hash::”"
 
 #: tomb:Open:mount_tomb:2421
 msgid ""
 "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
-msgstr ""
+msgstr "此tomb文件启用了多个密钥接口。注意：可能有后门。"
 
 #: tomb:Open:mount_tomb:2439
 msgid "Failure mounting the encrypted file."
-msgstr ""
+msgstr "挂载加密文件失败。"
 
 #: tomb:Open:mount_tomb:2449
 msgid "Success unlocking tomb ::1 tomb name::"
-msgstr ""
+msgstr "成功解锁tomb文件::1 tomb name::"
 
 #: tomb:Open:mount_tomb:2453
 msgid "Filesystem detected: ::1 filesystem::"
-msgstr ""
+msgstr "检测到文件系统：::1 filesystem::"
 
 #: tomb:Open:mount_tomb:2459
 msgid "Skipping filesystem checks in read-only"
-msgstr ""
+msgstr "在只读模式下跳过文件系统检查"
 
 #: tomb:Open:mount_tomb:2461
 msgid "Checking filesystem via ::1::"
-msgstr ""
+msgstr "正在通过::1::检查文件系统"
 
 #: tomb:Open:mount_tomb:2491
 msgid "Error mounting ::1 mapper:: on ::2 tombmount::"
-msgstr ""
+msgstr "将::1 mapper::挂载到::2 tombmount::时出错"
 
 #: tomb:Open:mount_tomb:2493
 msgid "Are mount options '::1 mount options::' valid?"
-msgstr ""
+msgstr "挂载选项‘::1 mount options::’是否有效？"
 
 #: tomb:Open:mount_tomb:2498
 msgid "Cannot mount ::1 tomb name::"
-msgstr ""
+msgstr "无法挂载::1 tomb name::"
 
 #: tomb:Open:mount_tomb:2501
 msgid "Success opening ::1 tomb file:: on ::2 mount point::"
-msgstr ""
+msgstr "成功在::2 mount point::上打开::1 tomb file::"
 
 #: tomb:Open:mount_tomb:2515
 msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
-msgstr ""
+msgstr "::1 user::（::2 tomb build::）最后一次访问是通过::3 tty::在host4上"
 
 #: tomb:Open:mount_tomb:2516
 msgid "on date ::1 date::"
-msgstr ""
+msgstr "日期::1 date::"
 
 #: tomb:Open:mount_tomb:2517
 msgid "the door was slammed or shutdown called before umount."
-msgstr ""
+msgstr "门被slam，或者在调用umount之前已关闭。"
 
 #: tomb:Open:exec_safe_bind_hooks:2579
+#, fuzzy
 msgid "How pitiful!\tA tomb, and no HOME."
-msgstr ""
+msgstr "真可怜！\t一个tomb文件，没有家。"
 
 #: tomb:Open:exec_safe_bind_hooks:2583
 msgid "Cannot exec bind hooks without a mounted tomb."
-msgstr ""
+msgstr "没有挂载的坟墓，无法执行绑定钩子。"
 
 #: tomb:Open:exec_safe_bind_hooks:2602
 msgid "bind-hooks file is broken"
-msgstr ""
+msgstr "捆绑钩子文件已损坏"
 
 #: tomb:Open:exec_safe_bind_hooks:2611
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
-msgstr ""
+msgstr "捆绑钩子映射格式：local/to/tomb local/to/$HOME"
 
 #: tomb:Open:exec_safe_bind_hooks:2615
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.\t Rolling back"
-msgstr ""
+msgstr "捆绑钩子映射格式：local/to/tomb local/to/$HOME.\t 回滚"
 
 #: tomb:Open:exec_safe_bind_hooks:2620
 msgid "bind-hook target not existent, skipping ::1 home::/::2 subdir::"
-msgstr ""
+msgstr "捆绑钩子目标不存在，正在跳过::1 home::/::2 subdir::"
 
 #: tomb:Open:exec_safe_bind_hooks:2622
 msgid ""
 "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
-msgstr ""
+msgstr "tomb文件中未发现捆绑钩子源，正在跳过::1 mount point::/::2 subdir::"
 
 #: tomb:Open:exec_safe_func_hooks:2645
 msgid "Exec hook: ::1 exec hook:: ::2 action::"
-msgstr ""
+msgstr "执行钩子：::1 exec hook:: ::2 action::"
 
 #: tomb:List:list_tombs:2671
 msgid "I can't see any open tomb, may they all rest in peace."
-msgstr ""
+msgstr "我看不到打开的tomb文件，愿他们安息。"
 
 #: tomb:List:list_tombs:2707
 msgid "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::"
-msgstr ""
+msgstr "使用::3 tombfsopts::在::2 tombmount::上打开::1 tombname::"
 
 #: tomb:List:list_tombs:2712
 msgid "::1 tombname:: open since ::2 tombsince::"
-msgstr ""
+msgstr "::1 tombname::自::2 tombsince::一直开启"
 
 #: tomb:List:list_tombs:2715
 msgid ""
 "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::"
-msgstr ""
+msgstr "::2 tombuser::在::4 tombhost::上通过::3 tombtty::打开::1 tombname::"
 
 #: tomb:List:list_tombs:2719
 msgid ""
 "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::"
 "%) is used: ::4 tombavail:: free "
 msgstr ""
+"::1 tombname::大小为::2 tombtot::，已用::3 tombused::（::5 tombpercent::%）："
+"空余::4 tombavail:: "
 
 #: tomb:List:list_tombs:2723
 msgid "::1 tombname:: warning: your tomb is almost full!"
-msgstr ""
+msgstr "::1 tombname::警告：您的tomb文件快满了！"
 
 #: tomb:List:list_tombs:2729
 msgid "::1 tombname:: hooks ::2 hookdest::"
@@ -1424,4 +1428,24 @@ msgstr ""
 
 #: tomb:Main routine:main:3614
 msgid "Try -h for help."
+msgstr ""
+
+#: tomb:Key operations:bury_key:1740
+msgid "Tomb key encoded succesfully into image ::1 image file::"
+msgstr "tomb密钥已成功编码到图像::1 image file::"
+
+#: tomb:Key operations:exhume_key:1819
+msgid "Key succesfully exhumed to ::1 key::."
+msgstr "成功exhume出密钥::1 key::。"
+
+#: tomb:Key operations:cloakify_key:1867
+msgid "Tomb key encoded succesfully"
+msgstr "tomb密钥编码成功"
+
+#: tomb:Key operations:decloakify_key:1923
+msgid "Key succesfully uncloaked to ::1 key::."
+msgstr "成功uncloak出密钥::1 key::。"
+
+#: tomb:Main routine:main:3448
+msgid "For more informations see Tomb's manual page (man tomb)."
 msgstr ""
