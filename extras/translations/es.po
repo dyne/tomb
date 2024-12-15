@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2024-10-03 08:15+0000\n"
+"PO-Revision-Date: 2024-11-11 20:04+0000\n"
 "Last-Translator: gallegonovato <fran-carro@hotmail.es>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/tomb/tomb/es/>\n"
 "Language: es\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.8-dev\n"
+"X-Generator: Weblate 5.8.2\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
@@ -309,10 +309,10 @@ msgstr ""
 " -p           preserva la propiedad de todos los archivos dentro de la tumba"
 
 #: tomb:Commandline interaction:usage:812
-#, fuzzy
 msgid " -o           options passed to commands: open, lock, forge (see man)"
 msgstr ""
-" -o     opciones pasadas a instrucciones: abre, bloquea, forja (vea man)"
+" -o           Opciones pasadas a los comandos: abrir, bloquear, forjar (ver "
+"man)"
 
 #: tomb:Commandline interaction:usage:813
 msgid " -f           force operation (i.e. even if swap is active)"
