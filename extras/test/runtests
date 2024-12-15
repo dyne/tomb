@@ -304,7 +304,7 @@ test-set-key() {
     tt open -k /tmp/test.tomb.new.key --unsafe --tomb-pwd ${dummypass} /tmp/test.tomb
 
     [[ $? = 0 ]] && {
-        notice "Setkey succesfully swapped tomb key"
+        notice "Setkey successfully swapped tomb key"
         results+=(setkey SUCCESS)
         notice "Dump of clear key contents to examine them:"
         print ${dummypass} \

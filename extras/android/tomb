@@ -591,7 +591,7 @@ usage() {
     _print " -q     run quietly without printing informations"
     _print " -D     print debugging information at runtime"
     _print "\000"
-    _print "For more informations on Tomb read the manual: man tomb"
+    _print "For more information on Tomb read the manual: man tomb"
     _print "Please report bugs on <http://github.com/dyne/tomb/issues>."
 }
 
@@ -1087,7 +1087,7 @@ gen_key() {
     header=""
     [[ $KDF == 1 ]] && {
         { option_is_set --kdf } && {
-            # KDF is a new key strenghtening technique against brute forcing
+            # KDF is a new key strengthening technique against brute forcing
             # see: https://github.com/dyne/Tomb/issues/82
             itertime="`option_value --kdf`"
             # removing support of floating points because they can't be type checked well
@@ -1194,7 +1194,7 @@ bury_key() {
         _warning "Encoding error: steghide reports problems."
         res=1
     else
-        _success "Tomb key encoded succesfully into image ::1 image file::" $imagefile
+        _success "Tomb key encoded successfully into image ::1 image file::" $imagefile
         res=0
     fi
 
@@ -1270,7 +1270,7 @@ exhume_key() {
     # Report to the user
     [[ "$destkey" = "-" ]] && destkey="stdout"
     [[ $r == 0 ]] && {
-        _success "Key succesfully exhumed to ::1 key::." $destkey
+        _success "Key successfully exhumed to ::1 key::." $destkey
     } || {
         _warning "Nothing found in ::1 image file::" $imagefile
     }
@@ -2607,7 +2607,7 @@ main() {
         # DEPRECATION notice (leave here as 'create' is still present in old docs)
         create)
             _warning "The create command is deprecated, please use dig, forge and lock instead."
-            _warning "For more informations see Tomb's manual page (man tomb)."
+            _warning "For more information see Tomb's manual page (man tomb)."
             _failure "Operation aborted."
             ;;
 

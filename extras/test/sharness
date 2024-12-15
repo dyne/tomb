@@ -25,7 +25,7 @@ export SHARNESS_VERSION
 : ${SHARNESS_TEST_EXTENSION:=t}
 export SHARNESS_TEST_EXTENSION
 
-#  Reset TERM to original terminal if found, otherwise save orignal TERM
+#  Reset TERM to original terminal if found, otherwise save original TERM
 [ "x" = "x$SHARNESS_ORIG_TERM" ] &&
 		SHARNESS_ORIG_TERM="$TERM" ||
 		TERM="$SHARNESS_ORIG_TERM"
@@ -177,7 +177,7 @@ trap 'die' EXIT
 # implicitly by specifying the prerequisite name in calls to test_expect_success
 # or test_expect_failure.
 #
-# $1 - Name of prerequiste (a simple word, in all capital letters by convention)
+# $1 - Name of prerequisite (a simple word, in all capital letters by convention)
 #
 # Examples
 #
@@ -570,7 +570,7 @@ test_expect_code() {
 
 # Public: Compare two files to see if expected output matches actual output.
 #
-# The TEST_CMP variable defines the command used for the comparision; it
+# The TEST_CMP variable defines the command used for the comparison; it
 # defaults to "diff -u". Only when the test script was started with --verbose,
 # will the command's output, the diff, be printed to the standard output.
 #

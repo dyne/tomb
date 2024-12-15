@@ -52,7 +52,7 @@ Once you understand the concept of docker bind mounts you will be able to run to
 
 First launch an interactive bash prompt in a temporary instance of the container, and bind-mount a working directory from the host machine where we can output the new tomb volume.
 
-This will mount the `/tmp/tomb-gen` directy on the host to the location of `/tomb-gen` inside the docker container instance. **Note**: The `/tmp/tomb-gen` directory must already exist on the host.
+This will mount the `/tmp/tomb-gen` directory on the host to the location of `/tomb-gen` inside the docker container instance. **Note**: The `/tmp/tomb-gen` directory must already exist on the host.
 
 ```bash
 docker run -it --rm --privileged \
@@ -60,7 +60,7 @@ docker run -it --rm --privileged \
 	tomb /bin/bash
 ```
 
-Now from the interative prompt inside the docker continer instance creating a new tomb volume is textbook. **Note**: If you get an error about swap partitions during the `forge` command, this is a host issue and not a container issue. You need to disable swapping on the host if you want to fix it, or use `-f` to forge ahead anyways.
+Now from the interactive prompt inside the docker container instance creating a new tomb volume is textbook. **Note**: If you get an error about swap partitions during the `forge` command, this is a host issue and not a container issue. You need to disable swapping on the host if you want to fix it, or use `-f` to forge ahead anyways.
 
 ```bash
 cd /tomb-gen
@@ -84,7 +84,7 @@ docker run -it --rm --privileged \
 	tomb /bin/bash
 ```
 
-Now from the interative prompt inside the docker continer instance we can open the tomb volume as usual, referencing the tomb volume, key, and mount destinations bind-mounted to the host:
+Now from the interactive prompt inside the docker container instance we can open the tomb volume as usual, referencing the tomb volume, key, and mount destinations bind-mounted to the host:
 
 ```bash
 tomb open /tomb-gen/secret.tomb /tomb-mount -k /tomb-gen/secret.tomb.key
@@ -98,9 +98,9 @@ tomb close
 
 ### Unpack and Repack a Tomb Volume
 
-This workflow was created as a workaround for the MacOS lack of support for bind propagation which prevents us from directly mounting a tomb volume back to the host OS. The workaround is to use an additional bash script layer to copy and synchronize the tomb volume contents between a bind mounted host directory and the mounted tomb volume accesible only from inside the docker container.
+This workflow was created as a workaround for the MacOS lack of support for bind propagation which prevents us from directly mounting a tomb volume back to the host OS. The workaround is to use an additional bash script layer to copy and synchronize the tomb volume contents between a bind mounted host directory and the mounted tomb volume accessible only from inside the docker container.
 
-The `tomb.sh` script is desinged to run from the host and requires the following ENV VARS to be available to it:
+The `tomb.sh` script is designed to run from the host and requires the following ENV VARS to be available to it:
 
 * `TOMB_DOCKER_IMAGE`: The name of the docker image on the host. In the examples we named it `tomb`.
 * `TOMB_VOLUME`: The full path of the tomb volume file on the host. In the example it is `/tmp/tomb-gen/secret.tomb`.

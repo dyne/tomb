@@ -605,7 +605,7 @@ msgid "Encoding error: steghide reports problems."
 msgstr "Koodausvirhe: steghide ilmoittaa ongelmista."
 
 #: tomb:Key operations:bury_key:1740
-msgid "Tomb key encoded succesfully into image ::1 image file::"
+msgid "Tomb key encoded successfully into image ::1 image file::"
 msgstr "Tomb-avain koodattu onnistuneesti kuvaksi ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1752
@@ -649,7 +649,7 @@ msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr "Yritetään kaivaa avainta pois kuvasta ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1819
-msgid "Key succesfully exhumed to ::1 key::."
+msgid "Key successfully exhumed to ::1 key::."
 msgstr "Avain kaivettiin onnistuneesti ::1 key:: :lle."
 
 #: tomb:Key operations:exhume_key:1821
@@ -673,7 +673,7 @@ msgid "Encoding error: cloakify reports problems."
 msgstr "Koodausvirhe: cloakify raportoi ongelmista."
 
 #: tomb:Key operations:cloakify_key:1867
-msgid "Tomb key encoded succesfully"
+msgid "Tomb key encoded successfully"
 msgstr "Tomb-avain koodattu onnistuneesti"
 
 #: tomb:Key operations:decloakify_key:1879
@@ -700,7 +700,7 @@ msgid "printing uncloaked key on stdout"
 msgstr "peittämättömän avaimen tulostaminen stdoutiin"
 
 #: tomb:Key operations:decloakify_key:1923
-msgid "Key succesfully uncloaked to ::1 key::."
+msgid "Key successfully uncloaked to ::1 key::."
 msgstr "Onnistuneen avaimen peitteen poisto ::1 key:: :lle."
 
 #: tomb:Key operations:decloakify_key:1925
@@ -1414,7 +1414,7 @@ msgstr ""
 "komentoa."
 
 #: tomb:Main routine:main:3448
-msgid "For more informations see Tomb's manual page (man tomb)."
+msgid "For more information see Tomb's manual page (man tomb)."
 msgstr "Katso lisätietoja Tombin käsikirjan sivulta ('man tomb')."
 
 #: tomb:Main routine:main:3489

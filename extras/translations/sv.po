@@ -626,7 +626,7 @@ msgid "Encoding error: steghide reports problems."
 msgstr "Kodningsfel: steghide raporterar problem."
 
 #: tomb:Key operations:bury_key:1740
-msgid "Tomb key encoded succesfully into image ::1 image file::"
+msgid "Tomb key encoded successfully into image ::1 image file::"
 msgstr "Tomb-nyckel skapad i bild ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1752
@@ -670,7 +670,7 @@ msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr "Försöker extrahera nyckel ur bild ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1819
-msgid "Key succesfully exhumed to ::1 key::."
+msgid "Key successfully exhumed to ::1 key::."
 msgstr "Nyckel extraherad till ::1 key::."
 
 #: tomb:Key operations:exhume_key:1821
@@ -699,7 +699,7 @@ msgstr "Kodningsfel: steghide raporterar problem."
 
 #: tomb:Key operations:cloakify_key:1867
 #, fuzzy
-msgid "Tomb key encoded succesfully"
+msgid "Tomb key encoded successfully"
 msgstr "Tomb-nyckel skapad i bild ::1 image file::"
 
 #: tomb:Key operations:decloakify_key:1879
@@ -729,7 +729,7 @@ msgstr "skriver extraherad nyckel till stdout"
 
 #: tomb:Key operations:decloakify_key:1923
 #, fuzzy
-msgid "Key succesfully uncloaked to ::1 key::."
+msgid "Key successfully uncloaked to ::1 key::."
 msgstr "Nyckel extraherad till ::1 key::."
 
 #: tomb:Key operations:decloakify_key:1925
@@ -1454,7 +1454,7 @@ msgid ""
 msgstr "Skapa kommandot är föråldrat, använd gräv, smedja och lås istället."
 
 #: tomb:Main routine:main:3448
-msgid "For more informations see Tomb's manual page (man tomb)."
+msgid "For more information see Tomb's manual page (man tomb)."
 msgstr "För mer information se Tombs manualsidor (man tomb)."
 
 #: tomb:Main routine:main:3489

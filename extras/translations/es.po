@@ -626,7 +626,7 @@ msgid "Encoding error: steghide reports problems."
 msgstr "Error en la codficación: steghide reporta problemas."
 
 #: tomb:Key operations:bury_key:1740
-msgid "Tomb key encoded succesfully into image ::1 image file::"
+msgid "Tomb key encoded successfully into image ::1 image file::"
 msgstr "Llave codificada con éxito en la imagen ::1 fichero::"
 
 #: tomb:Key operations:exhume_key:1752
@@ -671,7 +671,7 @@ msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr "Intentando exhumar una llave de la imagen ::1 fichero::"
 
 #: tomb:Key operations:exhume_key:1819
-msgid "Key succesfully exhumed to ::1 key::."
+msgid "Key successfully exhumed to ::1 key::."
 msgstr "Llave exhumada con éxito en ::1 llave::."
 
 #: tomb:Key operations:exhume_key:1821
@@ -700,7 +700,7 @@ msgstr "Error en la codficación: steghide reporta problemas."
 
 #: tomb:Key operations:cloakify_key:1867
 #, fuzzy
-msgid "Tomb key encoded succesfully"
+msgid "Tomb key encoded successfully"
 msgstr "Llave codificada con éxito en la imagen ::1 fichero::"
 
 #: tomb:Key operations:decloakify_key:1879
@@ -730,7 +730,7 @@ msgstr "mostrando llave exhumada en stdout"
 
 #: tomb:Key operations:decloakify_key:1923
 #, fuzzy
-msgid "Key succesfully uncloaked to ::1 key::."
+msgid "Key successfully uncloaked to ::1 key::."
 msgstr "Llave exhumada con éxito en ::1 llave::."
 
 #: tomb:Key operations:decloakify_key:1925
@@ -1476,7 +1476,7 @@ msgstr ""
 "lugar."
 
 #: tomb:Main routine:main:3448
-msgid "For more informations see Tomb's manual page (man tomb)."
+msgid "For more information see Tomb's manual page (man tomb)."
 msgstr "Para más información mira el manual de Tomb (man tomb)."
 
 #: tomb:Main routine:main:3489

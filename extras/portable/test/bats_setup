@@ -153,7 +153,7 @@ freebsd_close() {
 	>&2 echo "mnt: $mnt"
 	lkl=`pgrep -f "lklfuse.*$md" | awk '{print $1}'`
 	>&3 echo "kill $lkl (lklfuse on $md)"
-	# trying to deail with lklfuse bug
+	# trying to deal with lklfuse bug
 	# https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=239831
 	renice -20 $lkl
 	kill $lkl

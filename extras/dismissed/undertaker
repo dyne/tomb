@@ -76,7 +76,7 @@ function undertaker_scheme() {
 	    obexftp -b $obexdev -g $obexpath 
 	    if [[ $? != 0 ]]; then
 		rmdir ${keytmp}
-		die "a problem occurred retreiving the key via bluetooth."
+		die "a problem occurred retrieving the key via bluetooth."
 	    fi
 	# print out the key on stdout
 	    if option_is_set --path; then

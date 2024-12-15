@@ -212,7 +212,7 @@ _is_found() {
 	return $?
 }
 
-# Track acces and modification time of tomb files.
+# Track access and modification time of tomb files.
 # $1: file to track
 # date format: seconds since Epoch
 # stat format: <last access>:<last modified>
@@ -756,7 +756,7 @@ usage() {
 	echo
 	_print " -h           print this help"
 	_print " -v           print version, license and list of available ciphers"
-	_print " -q           run quietly without printing informations"
+	_print " -q           run quietly without printing information"
 	_print " -D           print debugging information at runtime"
 	echo
 	_print "For more information on Tomb read the manual: man tomb"
@@ -1474,7 +1474,7 @@ gen_key() {
 		header=""
 		[[ $KDF == 1 ]] && {
 			{ option_is_set --kdf } && {
-				# KDF is a new key strenghtening technique against brute forcing
+				# KDF is a new key strengthening technique against brute forcing
 				# see: https://github.com/dyne/Tomb/issues/82
 				itertime="`option_value --kdf`"
 				# removing support of floating points because they can't be type checked well
@@ -1646,7 +1646,7 @@ bury_key() {
 		_warning "Encoding error: steghide reports problems."
 		res=1
 	else
-		_success "Tomb key encoded succesfully into image ::1 image file::" $imagefile
+		_success "Tomb key encoded successfully into image ::1 image file::" $imagefile
 		res=0
 	fi
 
@@ -1725,7 +1725,7 @@ exhume_key() {
 	# Report to the user
 	[[ "$destkey" = "-" ]] && destkey="stdout"
 	[[ $r == 0 ]] && {
-		_success "Key succesfully exhumed to ::1 key::." $destkey
+		_success "Key successfully exhumed to ::1 key::." $destkey
 	} || {
 		_warning "Nothing found in ::1 image file::" $imagefile
 	}
@@ -1774,7 +1774,7 @@ cloakify_key() {
 		_warning "Encoding error: cloakify reports problems."
 		res=1
 	else
-		_success "Tomb key encoded succesfully"
+		_success "Tomb key encoded successfully"
 		res=0
 	fi
 
@@ -1834,7 +1834,7 @@ decloakify_key() {
 	# Report to the user
 	[[ -z "$destkey" ]] && destkey="stdout"
 	[[ $r == 0 ]] && {
-		_success "Key succesfully uncloaked to ::1 key::." $destkey
+		_success "Key successfully uncloaked to ::1 key::." $destkey
 	} || {
 		_warning "Nothing found in ::1 text file::" $textfile
 	}
@@ -3277,7 +3277,7 @@ main() {
 		# DEPRECATION notice (leave here as 'create' is still present in old docs)
 		create)
 			_warning "The create command is deprecated, please use dig, forge and lock instead."
-			_warning "For more informations see Tomb's manual page (man tomb)."
+			_warning "For more information see Tomb's manual page (man tomb)."
 			_failure "Operation aborted."
 			;;
 

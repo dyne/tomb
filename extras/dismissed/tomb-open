@@ -211,7 +211,7 @@ if [ $1 ]; then # is it a file?
             unset  usbkey_mount
         fi
 
-        if [ $success = 0 ]; then	# mount was succesfull (with password and all)
+        if [ $success = 0 ]; then	# mount was successful (with password and all)
             launch_status ${tombname}
             exit 0
         else
@@ -266,7 +266,7 @@ cat <<EOF
   it makes use  of strong encryption and helps you keep  the keys on a
   separate USB storage for safer transports.
 
-  Inside a Tomb  you can store private informations  without fear that
+  Inside a Tomb  you can store private information without fear that
   other people  possessing it will discover your  secrets, unless they
   have your USB key and your password.
 
@@ -351,7 +351,7 @@ if [ $? = 0 ]; then
 	sudo cp -v ${tombfile}.key ${usbkey_mount}/.tomb/
 	sudo chmod -R go-rwx ${usbkey_mount}/.tomb
 
-	yes "${tombname}.key succesfully saved on your USB"
+	yes "${tombname}.key successfully saved on your USB"
 	act "now we'll proceed opening your brand new tomb"
 
 	"${TOMBEXEC}" open -k ${tombfile}.key ${tombfile}
