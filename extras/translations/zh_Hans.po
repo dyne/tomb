@@ -84,9 +84,8 @@ msgid "Operation aborted."
 msgstr "操作已中止。"
 
 #: tomb:Safety functions:ask_password:536
-#, fuzzy
 msgid "Cannot find any pinentry and no DISPLAY detected."
-msgstr "找不到pinentry，也没有检测到显示。"
+msgstr "找不到pinentry，也未检测到DISPLAY变量。"
 
 #: tomb:Safety functions:ask_password:550
 msgid "Pinentry error: ::1 error::"
@@ -182,11 +181,11 @@ msgstr " dig          新建一个空tomb文件，大小为-s（单位为MiB）"
 
 #: tomb:Commandline interaction:usage:768
 msgid " forge        create a new KEY file and set its password"
-msgstr " forge        新建一个key文件并设置密码"
+msgstr " forge        新建一个密钥文件并设置密码"
 
 #: tomb:Commandline interaction:usage:769
 msgid " lock         installs a lock on a TOMB to use it with KEY"
-msgstr " lock         在tomb文件上安装锁，以便与key一起使用"
+msgstr " lock         在tomb文件上安装锁，以便与密钥一起使用"
 
 #: tomb:Commandline interaction:usage:771
 msgid " // Operations on tombs:"
@@ -194,7 +193,8 @@ msgstr " // 对tomb文件的操作："
 
 #: tomb:Commandline interaction:usage:772
 msgid " open         open an existing TOMB (-k KEY file or - for stdin)"
-msgstr " open         打开一个现有的tomb文件（-k表示key文件，或-接标准输入）"
+msgstr ""
+" open         打开一个现有的tomb文件（“-k 密钥文件”，或用“-”从标准输入）"
 
 #: tomb:Commandline interaction:usage:773
 msgid " index        update the search indexes of tombs"
@@ -226,15 +226,15 @@ msgstr " resize       将tomb文件调整为新大小-s（只能增大）"
 
 #: tomb:Commandline interaction:usage:783
 msgid " // Operations on keys:"
-msgstr " // 对key文件的操作："
+msgstr " // 对密钥的操作："
 
 #: tomb:Commandline interaction:usage:784
 msgid " passwd       change the password of a KEY (needs old pass)"
-msgstr " passwd       修改key文件的密码（需要旧密码）"
+msgstr " passwd       修改密钥的密码（需要旧密码）"
 
 #: tomb:Commandline interaction:usage:785
 msgid " setkey       change the KEY locking a TOMB (needs old key and pass)"
-msgstr " setkey       更改tomb文件的key文件（需要旧key文件和密码）"
+msgstr " setkey       更改tomb文件的密钥（需要旧密钥和密码）"
 
 #: tomb:Commandline interaction:usage:788
 msgid " // Backup on paper:"
@@ -242,7 +242,7 @@ msgstr " // 书面备份："
 
 #: tomb:Commandline interaction:usage:789
 msgid " engrave      makes a QR code of a KEY to be saved on paper"
-msgstr " engrave      生成key文件的二维码，用于书面保存"
+msgstr " engrave      生成密钥的二维码，用于书面保存"
 
 #: tomb:Commandline interaction:usage:793
 msgid " // Steganography:"
@@ -250,19 +250,19 @@ msgstr " // 信息隐写："
 
 #: tomb:Commandline interaction:usage:795
 msgid " bury         hide a KEY inside a JPEG image (for use with -k)"
-msgstr " bury         在JPEG图像中隐藏key文件（与-k一起使用）"
+msgstr " bury         在JPEG图像中隐藏密钥（与-k一起使用）"
 
 #: tomb:Commandline interaction:usage:796
 msgid " exhume       extract a KEY from a JPEG image (prints to stdout)"
-msgstr " exhume         从JPEG图像中提取key（打印到stdout）"
+msgstr " exhume         从JPEG图像中提取密钥（打印到标准输出）"
 
 #: tomb:Commandline interaction:usage:799
 msgid " cloak        transform a KEY into TEXT using CIPHER (for use with -k)"
-msgstr " cloak        使用加密算法将key文件转换为文本（与-k一起使用）"
+msgstr " cloak        使用加密算法将密钥转换为文本（与-k一起使用）"
 
 #: tomb:Commandline interaction:usage:802
 msgid " uncloak      extract a KEY from a TEXT using CIPHER (prints to stdout)"
-msgstr " uncloak      使用加密算法从文本中提取key文件（打印到stdout）"
+msgstr " uncloak      使用加密算法从文本中提取密钥（打印到标准输出）"
 
 #: tomb:Commandline interaction:usage:806
 msgid "Options:"
@@ -274,7 +274,7 @@ msgstr " -s           创建/调整tomb文件时的大小（单位为MiB）"
 
 #: tomb:Commandline interaction:usage:809
 msgid " -k           path to the key to be used ('-k -' to read from stdin)"
-msgstr " -k           要使用的key文件路径（“-k -”从stdin读取）"
+msgstr " -k           要使用的密钥路径（“-k -”从标准输入读取）"
 
 #: tomb:Commandline interaction:usage:810
 msgid " -n           don't launch the execution hooks found in tomb"
@@ -311,16 +311,16 @@ msgstr " --sudo       替代sudo的超级用户exec（doas或none）"
 #: tomb:Commandline interaction:usage:820
 msgid ""
 " --sphx-user  user associated with the key (for use with pitchforkedsphinx)"
-msgstr " --sphx-user  与key文件关联的用户（与pitchforkedsphinx一起使用）"
+msgstr " --sphx-user  与密钥关联的用户（与pitchforkedsphinx一起使用）"
 
 #: tomb:Commandline interaction:usage:821
 msgid ""
 " --sphx-host  host associated with the key (for use with pitchforkedsphinx)"
-msgstr " --sphx-host  与key文件关联的主机与（与pitchforkedsphinx一起使用）"
+msgstr " --sphx-host  与密钥关联的主机（与pitchforkedsphinx一起使用）"
 
 #: tomb:Commandline interaction:usage:825
 msgid " --kdf        forge keys armored against dictionary attacks"
-msgstr " --kdf        创建防止字典攻击的key文件"
+msgstr " --kdf        创建防止字典攻击的密钥"
 
 #: tomb:Commandline interaction:usage:829
 msgid " -h           print this help"
@@ -364,7 +364,7 @@ msgstr "密钥::1 gpgid::信任度不够"
 
 #: tomb:Key operations:is_valid_key:1107
 msgid "cleartext key from stdin selected: this is unsafe."
-msgstr "已选择stdin中的明文密钥：这是很不安全的。"
+msgstr "已选择标准输入中的明文密钥：这是很不安全的。"
 
 #: tomb:Key operations:is_valid_key:1108
 msgid "please use --unsafe if you really want to do this."
@@ -372,7 +372,7 @@ msgstr "如果您真想这样做，请使用--unsafe。"
 
 #: tomb:Key operations:is_valid_key:1110
 msgid "received key in cleartext from stdin (unsafe mode)"
-msgstr "从stdin接收明文密钥（不安全模式）"
+msgstr "从标准输入接收明文密钥（不安全模式）"
 
 #: tomb:Key operations:is_valid_key:1114
 msgid "is_valid_key() called without an argument."
@@ -396,11 +396,11 @@ msgstr "正在尝试恢复密钥。"
 
 #: tomb:Key operations:_load_key:1168
 msgid "This operation requires a key file to be specified using the -k option."
-msgstr "此操作需要用-k选项指定key文件。"
+msgstr "此操作需要用-k选项指定密钥文件。"
 
 #: tomb:Key operations:_load_key:1172
 msgid "Waiting for the key to be piped from stdin... "
-msgstr "正在等待从stdin输入密钥… "
+msgstr "正在等待从标准输入输入密钥… "
 
 #: tomb:Key operations:_load_key:1183
 msgid "Key not found, specify one using -k."
@@ -433,7 +433,7 @@ msgstr "内部错误：ask_key_password()在_load_key()之前调用。"
 
 #: tomb:Key operations:ask_key_password:1352
 msgid "A password is required to use key ::1 key::"
-msgstr "使用key文件::1 key::需要密码"
+msgstr "使用密钥::1 key::需要密码"
 
 #: tomb:Key operations:ask_key_password:1371
 msgid "Password OK."
@@ -461,7 +461,7 @@ msgstr "更改::1 key file::密码"
 
 #: tomb:Key operations:change_passwd:1453
 msgid "Error: the newly generated keyfile does not seem valid."
-msgstr "错误：新生成的key文件似乎无效。"
+msgstr "错误：新生成的密钥文件似乎无效。"
 
 #: tomb:Key operations:change_passwd:1458
 msgid "Your GnuPG key was successfully changed"
@@ -548,7 +548,7 @@ msgstr "编码失败：::1 image file::不是jpeg图像。"
 
 #: tomb:Key operations:bury_key:1671
 msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
-msgstr "正在将key文件::1 tomb key::编码到图像::2 image file::中"
+msgstr "正在将密钥::1 tomb key::编码到图像::2 image file::中"
 
 #: tomb:Key operations:bury_key:1673
 msgid "Using GnuPG Key ID"
@@ -564,7 +564,7 @@ msgstr "密码/GnuPG ID错误。"
 
 #: tomb:Key operations:bury_key:1697
 msgid "You shall not bury a key whose password is unknown to you."
-msgstr "不得bury密码未知的key文件。"
+msgstr "不得将密码未知的密钥隐藏于图像中。"
 
 #: tomb:Key operations:bury_key:1737
 msgid "Encoding error: steghide reports problems."
@@ -576,15 +576,15 @@ msgstr ""
 
 #: tomb:Key operations:exhume_key:1752
 msgid "Exhume failed, no image specified"
-msgstr "exhume失败，未指定图像"
+msgstr "提取失败，未指定图像"
 
 #: tomb:Key operations:exhume_key:1765
 msgid "Exhume failed, image file not found: ::1 image file::"
-msgstr "exhume失败，未找到图像：::1 image file::"
+msgstr "提取失败，未找到图像：::1 image file::"
 
 #: tomb:Key operations:exhume_key:1767
 msgid "Exhume failed: ::1 image file:: is not a jpeg image."
-msgstr "exhume失败：::1 image file::不是jpeg图像。"
+msgstr "提取失败：::1 image file::不是jpeg图像。"
 
 #: tomb:Key operations:exhume_key:1774
 msgid "Wrong password or no steganographic key found"
@@ -592,7 +592,7 @@ msgstr "密码错误或未找到隐写密钥"
 
 #: tomb:Key operations:exhume_key:1785
 msgid "printing exhumed key on stdout"
-msgstr "正在stdout中打印exhume后的密钥"
+msgstr "正在标准输出中打印提取后的密钥"
 
 #: tomb:Key operations:exhume_key:1789
 msgid "File exists: ::1 tomb key::"
@@ -612,7 +612,7 @@ msgstr "拒绝覆盖文件。操作已中止。"
 
 #: tomb:Key operations:exhume_key:1798
 msgid "Trying to exhume a key out of image ::1 image file::"
-msgstr "正在尝试从图像::1 image file::中exhume出密钥"
+msgstr "正在尝试从图像::1 image file::中提取密钥"
 
 #: tomb:Key operations:exhume_key:1819
 msgid "Key successfully exhumed to ::1 key::."
@@ -628,7 +628,7 @@ msgstr "正在使用加密算法文件::2 cipher file::编码密钥文件::1 tom
 
 #: tomb:Key operations:cloakify_key:1848
 msgid "printing cloaked key on stdout"
-msgstr "正在stdout中打印cloak后的密钥"
+msgstr "正在标准输出中打印转换后的密钥"
 
 #: tomb:Key operations:cloakify_key:1852
 msgid "File exists: ::1 output file::"
@@ -644,23 +644,23 @@ msgstr ""
 
 #: tomb:Key operations:decloakify_key:1879
 msgid "Uncloak failed, no text file specified"
-msgstr "uncloak失败，未指定文本文件"
+msgstr "提取失败，未指定文本文件"
 
 #: tomb:Key operations:decloakify_key:1881
 msgid "Uncloak failed, no cipher file specified"
-msgstr "uncloak失败，未指定加密算法文件"
+msgstr "提取失败，未指定加密算法文件"
 
 #: tomb:Key operations:decloakify_key:1894
 msgid "Uncloak failed, text file not found: ::1 text file::"
-msgstr "uncloak失败，未找到文本文件：::1 text file::"
+msgstr "提取失败，未找到文本文件：::1 text file::"
 
 #: tomb:Key operations:decloakify_key:1897
 msgid "Uncloak failed, cipher file not found: ::1 cipher file::"
-msgstr "uncloak失败，未找到加密算法文件：::1 cipher file::"
+msgstr "提取失败，未找到加密算法文件：::1 cipher file::"
 
 #: tomb:Key operations:decloakify_key:1903
 msgid "printing uncloaked key on stdout"
-msgstr "正在stdout中打印uncloak后的密钥"
+msgstr "正在标准输出中打印提取后的密钥"
 
 #: tomb:Key operations:decloakify_key:1923
 msgid "Key successfully uncloaked to ::1 key::."
@@ -684,7 +684,7 @@ msgstr "操作成功："
 
 #: tomb:Create:dig_tomb:1983
 msgid "Commanded to dig tomb ::1 tomb path::"
-msgstr "命令dig tomb文件::1 tomb path::"
+msgstr "命令创建tomb文件::1 tomb path::"
 
 #: tomb:Create:dig_tomb:1985
 msgid "Missing path to tomb"
@@ -704,7 +704,7 @@ msgstr "tomb文件不能小于10MiB"
 
 #: tomb:Create:dig_tomb:1991
 msgid "A tomb exists already. I'm not digging here:"
-msgstr "已存在tomb文件。不会在此dig："
+msgstr "已存在tomb文件。不会在此创建："
 
 #: tomb:Create:dig_tomb:1996
 msgid "Creating a new tomb in ::1 tomb path::"
@@ -720,7 +720,7 @@ msgstr "创建tomb文件::1 tomb path::错误"
 
 #: tomb:Create:dig_tomb:2011
 msgid "Done digging ::1 tomb name::"
-msgstr "dig ::1 tomb name::完成"
+msgstr "::1 tomb name::创建完成"
 
 #: tomb:Create:dig_tomb:2012
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
@@ -812,7 +812,7 @@ msgstr "命令上锁tomb文件::1 tomb file::"
 
 #: tomb:Create:lock_tomb_with_key:2153
 msgid "There is no tomb here. You have to dig it first."
-msgstr "这里没有tomb文件，您必须先进行dig。"
+msgstr "这里没有tomb文件，您必须先创建。"
 
 #: tomb:Create:lock_tomb_with_key:2166
 msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 47MB."
@@ -841,7 +841,7 @@ msgstr "tomb文件已经被另一个密钥锁上了。"
 #: tomb:Create:lock_tomb_with_key:2193
 msgid ""
 "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
-msgstr "操作已中止。我无法上锁已经锁好的tomb文件。请dig一个新的。"
+msgstr "操作已中止。我无法上锁已经锁好的tomb文件。请创建一个新的。"
 
 #: tomb:Create:lock_tomb_with_key:2195
 msgid "Fine, this tomb seems empty."
@@ -881,7 +881,7 @@ msgstr "您的tomb文件::1 tomb file::可能已损坏。"
 
 #: tomb:Create:lock_tomb_with_key:2256
 msgid "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::"
-msgstr "已成功使用Luks dm-crypt::2 cipher::成功上锁::1 tomb name::"
+msgstr "已成功使用Luks dm-crypt ::2 cipher::成功上锁::1 tomb name::"
 
 #: tomb:Create:lock_tomb_with_key:2257
 msgid ""
@@ -891,7 +891,7 @@ msgstr ""
 
 #: tomb:Create:change_tomb_key:2267
 msgid "Commanded to reset key for tomb ::1 tomb path::"
-msgstr "命令重置tomb密钥::1 tomb path::"
+msgstr "命令重置tomb文件::1 tomb path::的密钥"
 
 #: tomb:Create:change_tomb_key:2270
 msgid "Command 'setkey' needs two arguments: the old key file and the tomb."
@@ -1024,7 +1024,8 @@ msgstr "成功在::2 mount point::上打开::1 tomb file::"
 
 #: tomb:Open:mount_tomb:2515
 msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
-msgstr "::1 user::（::2 tomb build::）最后一次访问是通过::3 tty::在host4上"
+msgstr ""
+"::1 user::（::2 tomb build::）最后一次访问是通过::3 tty::在::4 host::上"
 
 #: tomb:Open:mount_tomb:2516
 msgid "on date ::1 date::"
@@ -1035,9 +1036,8 @@ msgid "the door was slammed or shutdown called before umount."
 msgstr "门被强制关闭，或者在umount之前已调用shutdown。"
 
 #: tomb:Open:exec_safe_bind_hooks:2579
-#, fuzzy
 msgid "How pitiful!\tA tomb, and no HOME."
-msgstr "真可怜！\t一个tomb文件，没有家。"
+msgstr "好可怜！\t一个没有HOME的tomb文件。"
 
 #: tomb:Open:exec_safe_bind_hooks:2583
 msgid "Cannot exec bind hooks without a mounted tomb."
@@ -1120,7 +1120,7 @@ msgstr "索引命令需要安装“mlocate/pplocate”。"
 
 #: tomb:Index and search:index_tombs:2833
 msgid "There seems to be no open tomb engraved as [::1::]"
-msgstr "似乎没有打开的tomb文件engrave为[::1::]"
+msgstr "似乎没有打开的tomb文件可与[::1::]对应"
 
 #: tomb:Index and search:index_tombs:2837
 msgid "Creating and updating search indexes."
@@ -1188,7 +1188,7 @@ msgstr "未找到::1::"
 
 #: tomb:Resize:resize_tomb:2991
 msgid "Aborting operations: new size was not specified, use -s"
-msgstr "中止操作：未指定新大小，请使用-s"
+msgstr "正在中止操作：未指定新大小，请使用-s"
 
 #: tomb:Resize:resize_tomb:3010
 msgid "You must specify the new size of ::1 tomb name::"
@@ -1280,7 +1280,7 @@ msgstr "tomb文件正忙，无法umount！"
 
 #: tomb:Close:umount_tomb:3178
 msgid "Error occurred in cryptsetup luksClose ::1 mapper::"
-msgstr "cryptsetup luksClose ::1 mapper::中发生错误"
+msgstr "cryptsetup luksClose ::1 mapper::发生错误"
 
 #: tomb:Close:umount_tomb:3186
 msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
@@ -1304,7 +1304,7 @@ msgstr "::1 tombname::正在向::3 cmd::发送::2 sig::（::4 uid::）"
 
 #: tomb:Close:slam_tomb:3258
 msgid "Can't kill ::1 process:: ::2 pcmd:: (::3 powner::)"
-msgstr "无法杀死::1 process:: ::2 pcmd::（::3 powner::）"
+msgstr "无法停止::1 process:: ::2 pcmd::（::3 powner::）"
 
 #: tomb:Main routine:main:3357
 msgid "Error parsing."
@@ -1366,15 +1366,15 @@ msgstr "未安装resize2fs：无法调整tomb文件的大小。"
 
 #: tomb:Main routine:main:3523
 msgid "QREncode not installed: cannot engrave keys on paper."
-msgstr "未安装QREncode：无法engrave密钥。"
+msgstr "未安装QREncode：无法将密钥转化为二维码。"
 
 #: tomb:Main routine:main:3540
 msgid "Steghide not installed: cannot bury keys into images."
-msgstr "未安装steghide：无法将密钥bury到图片中。"
+msgstr "未安装steghide：无法将密钥隐藏于图像中。"
 
 #: tomb:Main routine:main:3547
 msgid "Steghide not installed: cannot exhume keys from images."
-msgstr "未安装steghide：无法将密钥从图像中exhume出来。"
+msgstr "未安装steghide：无法从图像中提取密钥。"
 
 #: tomb:Main routine:main:3554
 msgid "Cloakify not installed: cannot cipher keys into texts"
@@ -1438,7 +1438,7 @@ msgstr "tomb密钥已成功编码到图像::1 image file::"
 
 #: tomb:Key operations:exhume_key:1819
 msgid "Key succesfully exhumed to ::1 key::."
-msgstr "成功exhume出密钥::1 key::。"
+msgstr "成功提取密钥::1 key::。"
 
 #: tomb:Key operations:cloakify_key:1867
 msgid "Tomb key encoded succesfully"
@@ -1446,7 +1446,7 @@ msgstr "tomb密钥编码成功"
 
 #: tomb:Key operations:decloakify_key:1923
 msgid "Key succesfully uncloaked to ::1 key::."
-msgstr "成功uncloak出密钥::1 key::。"
+msgstr "成功提取密钥::1 key::。"
 
 #: tomb:Main routine:main:3448
 msgid "For more informations see Tomb's manual page (man tomb)."
