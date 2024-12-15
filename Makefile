@@ -24,7 +24,7 @@ install:
 	install -Dm755 ${PROG} ${DESTDIR}${PREFIX}/bin/${PROG}
 	install -Dm644 doc/${PROG}.1 ${DESTDIR}${MANDIR}/man1/${PROG}.1
 	@echo
-	@echo "Tomb is installed succesfully. To install language translations, make sure"
+	@echo "Tomb is installed successfully. To install language translations, make sure"
 	@echo "gettext is also installed, then 'cd extras/translations' and 'make install' there."
 	@echo
 	@echo "Look around the extras/ directory, it contains other interesting modules."

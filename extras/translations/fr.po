@@ -676,7 +676,7 @@ msgid "Encoding error: steghide reports problems."
 msgstr "Erreur à l'encodage : steghide rapporte des problèmes."
 
 #: tomb:Key operations:bury_key:1740
-msgid "Tomb key encoded succesfully into image ::1 image file::"
+msgid "Tomb key encoded successfully into image ::1 image file::"
 msgstr "La clé Tomb a été encodée dans l'image ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1752
@@ -720,7 +720,7 @@ msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr "Tentative d'exhumer une clé de l'image ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1819
-msgid "Key succesfully exhumed to ::1 key::."
+msgid "Key successfully exhumed to ::1 key::."
 msgstr "La clé a été correctement exhumé vers ::1 key::."
 
 #: tomb:Key operations:exhume_key:1821
@@ -749,7 +749,7 @@ msgstr "Erreur à l'encodage : steghide rapporte des problèmes."
 
 #: tomb:Key operations:cloakify_key:1867
 #, fuzzy
-msgid "Tomb key encoded succesfully"
+msgid "Tomb key encoded successfully"
 msgstr "La clé Tomb a été encodée dans l'image ::1 image file::"
 
 #: tomb:Key operations:decloakify_key:1879
@@ -779,7 +779,7 @@ msgstr "Impression de la clé exhumée sur la sortie standard"
 
 #: tomb:Key operations:decloakify_key:1923
 #, fuzzy
-msgid "Key succesfully uncloaked to ::1 key::."
+msgid "Key successfully uncloaked to ::1 key::."
 msgstr "La clé a été correctement exhumé vers ::1 key::."
 
 #: tomb:Key operations:decloakify_key:1925
@@ -1547,7 +1547,7 @@ msgstr ""
 "\"dig\", \"forge\", et \"lock\"."
 
 #: tomb:Main routine:main:3448
-msgid "For more informations see Tomb's manual page (man tomb)."
+msgid "For more information see Tomb's manual page (man tomb)."
 msgstr ""
 "Pour de plus amples informations, se référer au manuel de Tomb (man tomb)."
 
