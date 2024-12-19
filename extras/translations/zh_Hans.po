@@ -25,7 +25,7 @@ msgstr "不支持超级用户执行：::1 sudo::"
 
 #: tomb:Safety functions:_whoami:236
 msgid "Failing to identify the user who is calling us"
-msgstr "无法识别正在呼叫我们的用户"
+msgstr "无法识别正在呼叫的用户"
 
 #: tomb:Safety functions:_tmp_create:272
 msgid "Fatal error creating the temporary directory: ::1 temp dir::"
@@ -73,11 +73,11 @@ msgstr " swapoff -a"
 
 #: tomb:Safety functions:_ensure_safe_swap:429
 msgid "[#163] I may not detect plain swaps on an encrypted volume."
-msgstr "[#163] 我可能无法检测加密卷中的普通交换分区。"
+msgstr "[#163] 可能无法检测加密卷中的普通交换分区。"
 
 #: tomb:Safety functions:_ensure_safe_swap:430
 msgid "But if you want to proceed like this, use the -f (force) flag."
-msgstr "但如果您想如此继续，请使用-f标志。"
+msgstr "但如果您想继续，请使用-f标志。"
 
 #: tomb:Safety functions:_check_swap:449
 msgid "Operation aborted."
@@ -133,7 +133,7 @@ msgstr "tomb命令失败：::1 command name::"
 
 #: tomb:Safety functions:is_valid_tomb:667
 msgid "File is not yet a tomb: ::1 tomb file::"
-msgstr "文件还不是tomb：::1 tomb file::"
+msgstr "文件还不是tomb文件：::1 tomb file::"
 
 #: tomb:Safety functions:is_valid_tomb:687
 msgid "Tomb won't work without a TOMBNAME."
@@ -149,7 +149,7 @@ msgstr "找到有效的tomb文件：::1 tomb path::"
 
 #: tomb:Safety functions:lo_mount:716
 msgid "Loop mount of volumes is not possible on this machine, this error"
-msgstr "此计算机无法回环挂载卷，此错误"
+msgstr "此计算机无法回环挂载卷，此类错误"
 
 #: tomb:Safety functions:lo_mount:717
 msgid "often occurs on VPS and kernels that don't provide the loop module."
@@ -157,7 +157,7 @@ msgstr "经常发生在VPS和未提供回环模块的内核上。"
 
 #: tomb:Safety functions:lo_mount:718
 msgid "It is impossible to use Tomb on this machine under these conditions."
-msgstr "在这些情况下，这台设备无法使用Tomb。"
+msgstr "在这些情况下，设备会无法使用Tomb。"
 
 #: tomb:Safety functions:lo_mount:726
 msgid "Loopback mount failed: ::1 path:: on ::2 loop::"
@@ -194,7 +194,7 @@ msgstr " // 对tomb文件的操作："
 #: tomb:Commandline interaction:usage:772
 msgid " open         open an existing TOMB (-k KEY file or - for stdin)"
 msgstr ""
-" open         打开一个现有的tomb文件（“-k 密钥文件”，或用“-”从标准输入）"
+" open         打开一个现有的tomb文件（“-k 密钥文件”，或用“-”从标准输入读取）"
 
 #: tomb:Commandline interaction:usage:773
 msgid " index        update the search indexes of tombs"
@@ -206,11 +206,11 @@ msgstr " search       查找与文本模式匹配的文件名"
 
 #: tomb:Commandline interaction:usage:775
 msgid " list         list of open TOMBs and information on them"
-msgstr " list         开放的tomb文件列表及其相关信息"
+msgstr " list         打开的tomb文件列表及其相关信息"
 
 #: tomb:Commandline interaction:usage:776
 msgid " ps           list of running processes inside open TOMBs"
-msgstr " ps           开放的tomb文件中正在运行的进程列表"
+msgstr " ps           打开的tomb文件中正在运行的进程列表"
 
 #: tomb:Commandline interaction:usage:777
 msgid " close        close a specific TOMB (or 'all')"
@@ -282,7 +282,7 @@ msgstr " -n           不启动在tomb中发现的执行钩子"
 
 #: tomb:Commandline interaction:usage:811
 msgid " -p           preserve the ownership of all files in tomb"
-msgstr " -p           保留tomb中所有文件的所有权"
+msgstr " -p           保留tomb文件中所有文件的所有权"
 
 #: tomb:Commandline interaction:usage:812
 msgid " -o           options passed to commands: open, lock, forge (see man)"
@@ -290,7 +290,7 @@ msgstr " -o           传递给命令的选项：open、lock、forge（请参阅
 
 #: tomb:Commandline interaction:usage:813
 msgid " -f           force operation (i.e. even if swap is active)"
-msgstr " -f           强制操作（即使swap处于活动状态）"
+msgstr " -f           强制操作（即使交换分区处于活动状态）"
 
 #: tomb:Commandline interaction:usage:814
 msgid " -g           use a GnuPG key to encrypt a tomb key"
@@ -302,11 +302,11 @@ msgstr " -r           提供GnuPG接收者（用逗号分隔）"
 
 #: tomb:Commandline interaction:usage:816
 msgid " -R           provide GnuPG hidden recipients (separated by comma)"
-msgstr " 提供GnuPG隐藏接收者（用逗号分隔）"
+msgstr " -R           提供GnuPG隐藏接收者（用逗号分隔）"
 
 #: tomb:Commandline interaction:usage:817
 msgid " --sudo       super user exec alternative to sudo (doas or none)"
-msgstr " --sudo       替代sudo的超级用户exec（doas或none）"
+msgstr " --sudo       替代sudo（doas或none）的超级用户执行"
 
 #: tomb:Commandline interaction:usage:820
 msgid ""
@@ -328,7 +328,7 @@ msgstr " -h           打印此帮助"
 
 #: tomb:Commandline interaction:usage:830
 msgid " -v           print version, license and list of available ciphers"
-msgstr " -v           打印版本、许可证和可用加密算法列表"
+msgstr " -v           打印版本、许可证、可用加密算法列表"
 
 #: tomb:Commandline interaction:usage:831
 msgid " -q           run quietly without printing informations"
@@ -352,7 +352,7 @@ msgstr "缺少必需的依赖::1 command::。  请安装。"
 
 #: tomb:Commandline interaction:_ensure_dependencies:1004
 msgid "No privilege escalation tool found, not even sudo"
-msgstr "未找到权限提升工具，甚至连sudo都没有"
+msgstr "未找到权限提升工具，甚至没有找到sudo"
 
 #: tomb:Key operations:is_valid_recipients:1052
 msgid "Not a valid GPG key ID: ::1 gpgid:: "
@@ -364,7 +364,7 @@ msgstr "密钥::1 gpgid::信任度不够"
 
 #: tomb:Key operations:is_valid_key:1107
 msgid "cleartext key from stdin selected: this is unsafe."
-msgstr "已选择标准输入中的明文密钥：这是很不安全的。"
+msgstr "已选择标准输入中的明文密钥：这很不安全。"
 
 #: tomb:Key operations:is_valid_key:1108
 msgid "please use --unsafe if you really want to do this."
@@ -503,12 +503,12 @@ msgstr "您设置了空密码，这是不允许的。"
 #: tomb:Key operations:gen_key:1577
 msgid ""
 "Wrong argument for --kdf: must be an integer number (iteration seconds)."
-msgstr "错误的--kdf参数：必须为整数（迭代秒数）。"
+msgstr "--kdf参数错误：必须为整数（迭代秒数）。"
 
 #: tomb:Key operations:gen_key:1578
 msgid ""
 "Depending on the speed of machines using this tomb, use 1 to 10, or more"
-msgstr "取决于使用此tomb文件的设备速度，选择1到10或更多"
+msgstr "取决于使用此tomb文件的设备速度，选择1~10或更多"
 
 #: tomb:Key operations:gen_key:1589
 msgid "Using KDF, iteration time: ::1 microseconds::"
@@ -600,7 +600,7 @@ msgstr "文件存在：::1 tomb key::"
 
 #: tomb:Key operations:exhume_key:1791
 msgid "Use of --force selected: overwriting."
-msgstr "使用--force选择：覆盖。"
+msgstr "选择--force的效果：覆盖。"
 
 #: tomb:Key operations:exhume_key:1794
 msgid "Make explicit use of --force to overwrite."
@@ -756,7 +756,7 @@ msgstr "命令使用加密算法::2 algorithm::新建密钥::1 key::"
 
 #: tomb:Create:forge_key:2072
 msgid "This operation takes time. Keep using this computer on other tasks."
-msgstr "此操作需要时间。请继续用这此计算机进行其他任务。"
+msgstr "此操作较慢，请继续用这此计算机进行其他任务。"
 
 #: tomb:Create:forge_key:2073
 msgid "Once done you will be asked to choose a password for your tomb."
@@ -764,11 +764,11 @@ msgstr "完成后，您将需要为您的tomb文件选择密码。"
 
 #: tomb:Create:forge_key:2074
 msgid "To make it faster you can move the mouse around."
-msgstr "您可以四处移动鼠标进行加速。"
+msgstr "您可以四处移动鼠标实现加速。"
 
 #: tomb:Create:forge_key:2075
 msgid "If you are on a server, you can use an Entropy Generation Daemon."
-msgstr "如果您在服务器上，您可以使用熵生成守护进程。"
+msgstr "如果您在服务器上，可以使用熵生成守护进程。"
 
 #: tomb:Create:forge_key:2090
 msgid "Using GnuPG key(s) to encrypt your key: ::1 tomb key::"
@@ -812,7 +812,7 @@ msgstr "命令上锁tomb文件::1 tomb file::"
 
 #: tomb:Create:lock_tomb_with_key:2153
 msgid "There is no tomb here. You have to dig it first."
-msgstr "这里没有tomb文件，您必须先创建。"
+msgstr "这里没有tomb文件，您必须先新建。"
 
 #: tomb:Create:lock_tomb_with_key:2166
 msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 47MB."
@@ -841,7 +841,7 @@ msgstr "tomb文件已经被另一个密钥锁上了。"
 #: tomb:Create:lock_tomb_with_key:2193
 msgid ""
 "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
-msgstr "操作已中止。我无法上锁已经锁好的tomb文件。请创建一个新的。"
+msgstr "操作已中止。无法上锁已经锁好的tomb文件，请创建一个新的。"
 
 #: tomb:Create:lock_tomb_with_key:2195
 msgid "Fine, this tomb seems empty."
@@ -869,7 +869,7 @@ msgstr "cryptsetup luksOpen返回一个错误。"
 
 #: tomb:Create:lock_tomb_with_key:2230
 msgid "Formatting your Tomb with $filesystem filesystem."
-msgstr "使用$filesystem文件系统格式化您的Tomb。"
+msgstr "正在使用$filesystem文件系统格式化您的Tomb。"
 
 #: tomb:Create:lock_tomb_with_key:2249
 msgid "Tomb format returned an error."
@@ -881,7 +881,7 @@ msgstr "您的tomb文件::1 tomb file::可能已损坏。"
 
 #: tomb:Create:lock_tomb_with_key:2256
 msgid "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::"
-msgstr "已成功使用Luks dm-crypt ::2 cipher::成功上锁::1 tomb name::"
+msgstr "已成功使用Luks dm-crypt ::2 cipher::上锁::1 tomb name::"
 
 #: tomb:Create:lock_tomb_with_key:2257
 msgid ""
@@ -903,7 +903,7 @@ msgstr "即：\ttomb -k new.tomb.key old.tomb.key secret.tomb"
 
 #: tomb:Create:change_tomb_key:2272
 msgid "Execution aborted."
-msgstr "执行已中止。"
+msgstr "已中止执行。"
 
 #: tomb:Create:change_tomb_key:2284
 msgid "Not a valid LUKS encrypted volume: ::1 volume::"
@@ -1041,7 +1041,7 @@ msgstr "好可怜！\t一个没有HOME的tomb文件。"
 
 #: tomb:Open:exec_safe_bind_hooks:2583
 msgid "Cannot exec bind hooks without a mounted tomb."
-msgstr "没有挂载的坟墓，无法执行绑定钩子。"
+msgstr "没有挂载的tomb文件，无法执行捆绑钩子。"
 
 #: tomb:Open:exec_safe_bind_hooks:2602
 msgid "bind-hooks file is broken"
@@ -1070,7 +1070,7 @@ msgstr "执行钩子：::1 exec hook:: ::2 action::"
 
 #: tomb:List:list_tombs:2671
 msgid "I can't see any open tomb, may they all rest in peace."
-msgstr "我看不到打开的tomb文件，愿他们安息。"
+msgstr "未找到打开的tomb文件，愿他们安息。"
 
 #: tomb:List:list_tombs:2707
 msgid "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::"
@@ -1176,7 +1176,7 @@ msgstr "搜索完成。"
 
 #: tomb:Resize:resize_tomb:2984
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
-msgstr "命令调整tomb文件::1 tomb name::为::2 size::MiB。"
+msgstr "命令调整tomb文件::1 tomb name::至::2 size::MiB。"
 
 #: tomb:Resize:resize_tomb:2986
 msgid "No tomb name specified for resizing."
@@ -1200,7 +1200,7 @@ msgstr "大小不是整数。"
 
 #: tomb:Resize:resize_tomb:3024
 msgid "Error creating the extra resize ::1 size::, operation aborted."
-msgstr "创建额外调整大小::1 size::时出错，操作中止。"
+msgstr "创建额外调整大小::1 size::时出错，操作已中止。"
 
 #: tomb:Resize:resize_tomb:3031
 msgid "Tomb seems resized already, operating filesystem stretch"
@@ -1276,7 +1276,7 @@ msgstr "tomb文件捆绑钩子::1 hook::正忙，无法关闭tomb文件。"
 
 #: tomb:Close:umount_tomb:3165
 msgid "Tomb is busy, cannot umount!"
-msgstr "tomb文件正忙，无法umount！"
+msgstr "tomb文件正忙，无法解挂！"
 
 #: tomb:Close:umount_tomb:3178
 msgid "Error occurred in cryptsetup luksClose ::1 mapper::"
@@ -1336,7 +1336,7 @@ msgid ""
 "used for testing\n"
 "If you really want so, add --unsafe"
 msgstr ""
-"您指定了选项::1 option::，这是很危险，只应当用于测试\n"
+"您指定了选项::1 option::，这很危险，应当只用于测试\n"
 "如果您真想这样，请添加--unsafe"
 
 #: tomb:Main routine:main:3417
@@ -1406,7 +1406,7 @@ msgstr " 发布此源代码是希望它能派上用场，"
 
 #: tomb:Main routine:main:3586
 msgid " but WITHOUT ANY WARRANTY; without even the implied warranty of"
-msgstr " 但不提供任何保证；甚至没有"
+msgstr " 但不提供任何保证；甚至不包含"
 
 #: tomb:Main routine:main:3587
 msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
