@@ -386,7 +386,7 @@ _is_encrypted_block() {
 	[[ $? -eq 0 ]] && s="--inverse"
 
 	_sudo lsblk $s -o type -n $b 2>/dev/null \
-		| egrep -q '^crypt$'
+		| grep -Eq '^crypt$'
 
 	return $?
 }
