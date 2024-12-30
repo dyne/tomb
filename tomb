@@ -489,12 +489,17 @@ ask_password() {
 	local gtkrc
 	local theme
 	local pass_asked
+	local backends
 
 	# Distributions have broken wrappers for pinentry: they do
 	# implement fallback, but they disrupt the output somehow.	We are
-	# better off relying on less intermediaries, so we implement our
-	# own fallback mechanisms. Pinentry supported: curses, gtk-2, qt4, qt5
-	# and x11.
+	# better off relying on less intermediaries, so we copy in the
+	# fallback logic directly here.
+	# Pinentry supported: curses, tty, qt{,4,5}, gtk{,-2}, gnome3, and x11.
+
+	# TODO: Implement a user option to specify a pinentry program and
+	# wrap pinentry with a `_pinentry()` function that implements the
+	# search logic if the user option is not specified: Issue #542
 
 	# make sure LANG is set, default to C
 	LANG=${LANG:-C}
@@ -503,54 +508,38 @@ ask_password() {
 
 	pass_asked=0
 
-	while true; do
-		[[ ! -z $WAYLAND_DISPLAY ]] && {
-			_verbose "wayland display detected"
-			_is_found "pinentry-gnome3" && {
-				_verbose "using pinentry-gnome3 on wayland"
-				output=$(pinentry_assuan_getpass | pinentry-gnome3)
-				break; }
-			# TODO: pinentry on KDE running in wayland?
-		}
-		[[ ! -z $DISPLAY ]] && [[ $pass_asked == 0 ]] && {
-			_verbose "X11 display detected"
-			_is_found "pinentry-gtk-2" && {
-				_verbose "using pinentry-gtk2"
-				output=$(pinentry_assuan_getpass | pinentry-gtk-2)
-				break; }
-			_is_found "pinentry-x11" && {
-				_verbose "using pinentry-x11"
-				output=$(pinentry_assuan_getpass | pinentry-x11)
-				break; }
-			_is_found "pinentry-gnome3" && {
-				_verbose "using pinentry-gnome3 on X11"
-				output=$(pinentry_assuan_getpass | pinentry-gnome3)
-				break; }
-			_is_found "pinentry-qt5" && {
-				_verbose "using pinentry-qt5"
-				output=$(pinentry_assuan_getpass | pinentry-qt5)
-				break; }
-			_is_found "pinentry-qt4" && {
-				_verbose "using pinentry-qt4"
-				output=$(pinentry_assuan_getpass | pinentry-qt4)
-				break; }
-		}
-		_verbose "no display detected"
-		_is_found "pinentry-curses" && {
-			_verbose "using pinentry-curses with no display"
-			output=$(pinentry_assuan_getpass | pinentry-curses)
-			break; }
-		_is_found "pinentry-tty" && {
-			_verbose "using pinentry-tty with no display"
-			output=$(pinentry_assuan_getpass | pinentry-tty)
-			break; }
-		# TODO: fallback using read -s - and beware
-		# using read with or without -r may break
-		# passwords, so this must be covered by a test
-		# for compatibility
-		_failure "Cannot find any pinentry and no DISPLAY detected."
-		exit 1
+	# Guess preferred backend based on environment.
+	backends=(curses tty)
+	if [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]]; then
+		_verbose "Graphical display system detected"
+		case "$XDG_CURRENT_DESKTOP" in
+			KDE|LXQT|LXQt)
+				backends=(qt5 qt qt4 gnome3 gtk gtk-2 curses tty)
+				;;
+			*)
+				backends=(gtk gtk-2 x11 gnome3 qt5 qt qt4 curses tty)
+				;;
+		esac
+	fi
+	_verbose "Checking backends '${backends[@]}'"
+
+	for backend in "${backends[@]}"; do
+		local pinentry
+		local lddout
+		pinentry="$(which pinentry-$backend)"
+		lddout=$(ldd "$pinentry" 2>/dev/null) || continue
+		[[ "$lddout" == *'not found'* ]] && continue
+		_verbose "using $pinentry"
+		output=$(pinentry_assuan_getpass | $pinentry)
+		pass_asked=1
+		break
 	done
+
+	# TODO: fallback using read -s - and beware using read with or
+	# without -r may break passwords, so this must be covered by a test
+	# for compatibility
+	[[ $pass_asked == 0 ]] &&
+		_failure "Cannot find any viable pinentry."
 
 	# parse the pinentry output
 	local pinentry_error
