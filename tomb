@@ -213,7 +213,7 @@ _is_found() {
 	return $?
 }
 
-# Track acces and modification time of tomb files.
+# Track access and modification time of tomb files.
 # $1: file to track
 # date format: seconds since Epoch
 # stat format: <last access>:<last modified>
@@ -387,7 +387,7 @@ _is_encrypted_block() {
 	[[ $? -eq 0 ]] && s="--inverse"
 
 	_sudo lsblk $s -o type -n $b 2>/dev/null \
-		| egrep -q '^crypt$'
+		| grep -Eq '^crypt$'
 
 	return $?
 }
@@ -762,7 +762,7 @@ usage() {
 	echo
 	_print " -h           print this help"
 	_print " -v           print version, license and list of available ciphers"
-	_print " -q           run quietly without printing informations"
+	_print " -q           run quietly without printing information"
 	_print " -D           print debugging information at runtime"
 	echo
 	_print "For more information on Tomb read the manual: man tomb"
@@ -1414,8 +1414,6 @@ gen_key() {
 	local gpgpass opt
 	local recipients_opt
 	typeset -a gpgopt
-	local sphx_host_tmp
-	local sphx_user_tmp
 	# here user is prompted for key password
 	tombpass=""
 	tombpasstmp=""
@@ -1663,7 +1661,7 @@ bury_key() {
 		_warning "Encoding error: steghide reports problems."
 		res=1
 	else
-		_success "Tomb key encoded succesfully into image ::1 image file::" $imagefile
+		_success "Tomb key encoded successfully into image ::1 image file::" $imagefile
 		res=0
 	fi
 
@@ -1742,7 +1740,7 @@ exhume_key() {
 	# Report to the user
 	[[ "$destkey" = "-" ]] && destkey="stdout"
 	[[ $r == 0 ]] && {
-		_success "Key succesfully exhumed to ::1 key::." $destkey
+		_success "Key successfully exhumed to ::1 key::." $destkey
 	} || {
 		_warning "Nothing found in ::1 image file::" $imagefile
 	}
@@ -1791,7 +1789,7 @@ cloakify_key() {
 		_warning "Encoding error: cloakify reports problems."
 		res=1
 	else
-		_success "Tomb key encoded succesfully"
+		_success "Tomb key encoded successfully"
 		res=0
 	fi
 
@@ -1851,7 +1849,7 @@ decloakify_key() {
 	# Report to the user
 	[[ -z "$destkey" ]] && destkey="stdout"
 	[[ $r == 0 ]] && {
-		_success "Key succesfully uncloaked to ::1 key::." $destkey
+		_success "Key successfully uncloaked to ::1 key::." $destkey
 	} || {
 		_warning "Nothing found in ::1 text file::" $textfile
 	}
@@ -3148,19 +3146,19 @@ main() {
 	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g -sudo:)
 	subcommands_opts[__default]=""
 	# -o in open and mount is used to pass alternate mount options
-	subcommands_opts[open]="n -nohook=n k: o: -ignore-swap -tomb-pwd: r: R: -sphx-host: -sphx-user: p -preserve-ownership=p"
+	subcommands_opts[open]="n -nohook=n k: o: -ignore-swap -tomb-pwd: r: R: p -preserve-ownership=p"
 	subcommands_opts[mount]=${subcommands_opts[open]}
 
 	subcommands_opts[create]="" # deprecated, will issue warning
 
 	# -o in forge and lock is used to pass an alternate cipher.
-	subcommands_opts[forge]="-ignore-swap k: -kdf: -kdfiter: -kdfmem: -kdfpar: o: -tomb-pwd: -use-random r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[forge]="-ignore-swap k: -kdf: -kdfiter: -kdfmem: -kdfpar: o: -tomb-pwd: -use-random r: R: "
 	subcommands_opts[dig]="-ignore-swap s: -size=s "
-	subcommands_opts[lock]="-ignore-swap k: o: -tomb-pwd: r: R: -sphx-host: -sphx-user: -filesystem: "
-	subcommands_opts[setkey]="k: -ignore-swap -tomb-old-pwd: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[lock]="-ignore-swap k: o: -tomb-pwd: r: R: -filesystem: "
+	subcommands_opts[setkey]="k: -ignore-swap -tomb-old-pwd: -tomb-pwd: r: R: "
 	subcommands_opts[engrave]="k: "
 
-	subcommands_opts[passwd]="k: -ignore-swap -kdf: -kdfiter: -kdfmem: -kdfpar: -tomb-old-pwd: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[passwd]="k: -ignore-swap -kdf: -kdfiter: -kdfmem: -kdfpar: -tomb-old-pwd: -tomb-pwd: r: R: "
 	subcommands_opts[close]=""
 	subcommands_opts[help]=""
 	subcommands_opts[slam]=""
@@ -3170,8 +3168,8 @@ main() {
 	subcommands_opts[index]=""
 	subcommands_opts[search]=""
 
-	subcommands_opts[bury]="k: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
-	subcommands_opts[exhume]="k: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[bury]="k: -tomb-pwd: r: R: "
+	subcommands_opts[exhume]="k: -tomb-pwd: r: R: "
 	subcommands_opts[cloak]="k: "
 	subcommands_opts[uncloak]="k: "
 	# subcommands_opts[decompose]=""
@@ -3179,7 +3177,7 @@ main() {
 	# subcommands_opts[install]=""
 	subcommands_opts[askpass]=""
 	subcommands_opts[source]=""
-	subcommands_opts[resize]="-ignore-swap s: -size=s k: -tomb-pwd: r: R: -sphx-host: -sphx-user: "
+	subcommands_opts[resize]="-ignore-swap s: -size=s k: -tomb-pwd: r: R: "
 	subcommands_opts[check]="-ignore-swap "
 	#	 subcommands_opts[translate]=""
 
@@ -3294,7 +3292,7 @@ main() {
 		# DEPRECATION notice (leave here as 'create' is still present in old docs)
 		create)
 			_warning "The create command is deprecated, please use dig, forge and lock instead."
-			_warning "For more informations see Tomb's manual page (man tomb)."
+			_warning "For more information see Tomb's manual page (man tomb)."
 			_failure "Operation aborted."
 			;;
 
@@ -3334,12 +3332,6 @@ main() {
 
 		# Close the tomb
 		umount|close)
-			[[ "$subcommand" == "slam" ]] && {
-				SLAM=1
-				[[ $LSOF == 0 ]] && {
-					unset SLAM
-					_warning "lsof not installed: cannot slam tombs."
-					_warning "Trying a regular close." }}
 			umount_tomb $PARAM[1]
 			;;
 

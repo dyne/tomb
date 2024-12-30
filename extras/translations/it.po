@@ -642,7 +642,7 @@ msgid "Encoding error: steghide reports problems."
 msgstr "Errore codifica: steghide riporta problemi."
 
 #: tomb:Key operations:bury_key:1740 operations:bury_key:1272
-msgid "Tomb key encoded succesfully into image ::1 image file::"
+msgid "Tomb key encoded successfully into image ::1 image file::"
 msgstr "Tomb key codificata con successo nell'immagine ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1752 operations:exhume_key:1284
@@ -686,7 +686,7 @@ msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr "Provo l'exhume della key dall'immagine ::1 image file::"
 
 #: tomb:Key operations:exhume_key:1819 operations:exhume_key:1348
-msgid "Key succesfully exhumed to ::1 key::."
+msgid "Key successfully exhumed to ::1 key::."
 msgstr "Key exhume riuscito su ::1 key::."
 
 #: tomb:Key operations:exhume_key:1821 operations:exhume_key:1350
@@ -715,7 +715,7 @@ msgstr "Errore codifica: steghide riporta problemi."
 
 #: tomb:Key operations:cloakify_key:1867
 #, fuzzy
-msgid "Tomb key encoded succesfully"
+msgid "Tomb key encoded successfully"
 msgstr "Tomb key codificata con successo nell'immagine ::1 image file::"
 
 #: tomb:Key operations:decloakify_key:1879
@@ -745,7 +745,7 @@ msgstr "stampo l'exhumed key a video"
 
 #: tomb:Key operations:decloakify_key:1923
 #, fuzzy
-msgid "Key succesfully uncloaked to ::1 key::."
+msgid "Key successfully uncloaked to ::1 key::."
 msgstr "Key exhume riuscito su ::1 key::"
 
 #: tomb:Key operations:decloakify_key:1925
@@ -1489,7 +1489,7 @@ msgstr ""
 "Il comando create è obsoleto, per favore usa i comandi dig, forge e lock."
 
 #: tomb:Main routine:main:3448 routine:main:2706
-msgid "For more informations see Tomb's manual page (man tomb)."
+msgid "For more information see Tomb's manual page (man tomb)."
 msgstr "Per maggiori informazioni consulta i manuali di Tomb (man tomb)."
 
 #: tomb:Main routine:main:3489
@@ -1713,7 +1713,7 @@ msgid " -D     print debugging information at runtime"
 msgstr " -D     mostra le informazioni di debug/runtime"
 
 #: tomb:Commandline interaction:usage:664
-msgid "For more informations on Tomb read the manual: man tomb"
+msgid "For more information on Tomb read the manual: man tomb"
 msgstr "Per maggiori informazioni su Tomb leggi il manuale: man tomb"
 
 #: tomb:Key operations:list_gnupg_ciphers:1215

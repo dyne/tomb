@@ -530,7 +530,7 @@ function _setkey {
 	tombname=`_fsel "Choose a tomb to change its keyfile"`
 	[[ $? = 0 ]] || exec _main
 
-	keyfile=`_fsel "Chosse your tomb's old keyfile"`
+	keyfile=`_fsel "Choose your tomb's old keyfile"`
 	 [[ $? = 0 ]] || exec _main
 
 	newkey=`_fsel "Choose your tomb's new keyfile"`
