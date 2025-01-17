@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2024-09-19 09:40+0000\n"
+"PO-Revision-Date: 2025-01-18 12:00+0000\n"
 "Last-Translator: Ricky Tigg <ricky.tigg@gmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tomb/tomb/fi/>\n"
 "Language: fi\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.8-dev\n"
+"X-Generator: Weblate 5.10-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
@@ -168,7 +168,7 @@ msgstr "Tombia ei ole mahdollista käyttää tässä koneessa näissä olosuhtei
 
 #: tomb:Safety functions:lo_mount:726
 msgid "Loopback mount failed: ::1 path:: on ::2 loop::"
-msgstr "Takasilmukkaliito epäonnistui: ::1 path:: ::2 loop:: :lla"
+msgstr "Takasilmukkaliito epäonnistui: ::1 path:: ::2 loop:::lla"
 
 #: tomb:Commandline interaction:usage:762
 msgid "Syntax: tomb [options] command [arguments]"
@@ -464,7 +464,7 @@ msgstr "Sisäinen virhe: ask_key_password() kutsuttu ennen _load_key()."
 
 #: tomb:Key operations:ask_key_password:1352
 msgid "A password is required to use key ::1 key::"
-msgstr "Avaimen ::1 key::käyttämiseen tarvitaan salasana"
+msgstr "Avaimen ::1 key:: käyttämiseen tarvitaan salasana"
 
 #: tomb:Key operations:ask_key_password:1371
 msgid "Password OK."
