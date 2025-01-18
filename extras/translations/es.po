@@ -2,15 +2,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2024-11-11 20:04+0000\n"
-"Last-Translator: gallegonovato <fran-carro@hotmail.es>\n"
+"PO-Revision-Date: 2025-01-19 15:00+0000\n"
+"Last-Translator: Francisco Serrador <fserrador@gmail.com>\n"
 "Language-Team: Spanish <https://hosted.weblate.org/projects/tomb/tomb/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.8.2\n"
+"X-Generator: Weblate 5.10-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
@@ -45,11 +45,11 @@ msgstr "Alguien está intentando secuestrar nuestros ficheros temporales."
 
 #: tomb:Safety functions:_tmp_create:287
 msgid "Fatal error creating a temporary file: ::1 temp file::"
-msgstr "Error fatal al crear el fichero temporal ::1 fichero::"
+msgstr "Error fatal al crear el fichero temporal: ::1 fichero temporal::"
 
 #: tomb:Safety functions:_ensure_safe_swap:398
 msgid "An active swap partition is detected..."
-msgstr "Se ha encontrado una partición de intercambio activa..."
+msgstr "Se ha detectado una partición de intercambio activa…"
 
 #: tomb:Safety functions:_ensure_safe_swap:408
 msgid "Found zramswap with writeback enabled."
@@ -57,7 +57,7 @@ msgstr "Se encontró zramswap con reescritura habilitada."
 
 #: tomb:Safety functions:_ensure_safe_swap:411
 msgid "Found zramswap without writeback to disk."
-msgstr "Se encontró zramswap sin re-escritura en el disco."
+msgstr "Se encontró zramswap sin re-escritura al disco."
 
 #: tomb:Safety functions:_ensure_safe_swap:424
 msgid "The undertaker found that all swap partitions are encrypted. Good."
@@ -72,7 +72,8 @@ msgstr "Esto genera un riesgo en la seguridad."
 #: tomb:Safety functions:_ensure_safe_swap:427
 msgid "You can deactivate all swap partitions using the command:"
 msgstr ""
-"Puedes desactivar todas las particiones swap usando el siguiente instrucción:"
+"Puede desactivar todas las particiones de intercambio utilizando la "
+"instrucción:"
 
 #: tomb:Safety functions:_ensure_safe_swap:428
 msgid " swapoff -a"
@@ -86,7 +87,7 @@ msgstr ""
 
 #: tomb:Safety functions:_ensure_safe_swap:430
 msgid "But if you want to proceed like this, use the -f (force) flag."
-msgstr "Pero si deseas continuar tal cual, usa el indicador -f (force)."
+msgstr "Pero si deseas continuar tal cual, utilice el indicador -f (forzar)."
 
 #: tomb:Safety functions:_check_swap:449
 msgid "Operation aborted."
@@ -117,7 +118,7 @@ msgstr "No se pudo recuperar la contraseña real con sphinx."
 #: tomb:Safety functions:sphinx_get_password:592
 msgid "Both host and user have to be set to use sphinx"
 msgstr ""
-"Tanto el anfitrión como el usuario deben estar configurados para usar sphinx"
+"Tanto el anfitrión como el usuario deben estar establecidos para usar sphinx"
 
 #: tomb:Safety functions:sphinx_set_password:623
 msgid "Failed to create password with sphinx"
@@ -265,7 +266,7 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:788
 msgid " // Backup on paper:"
-msgstr " // Copia de seguridad en papel:"
+msgstr " // Respaldar en papel:"
 
 #: tomb:Commandline interaction:usage:789
 msgid " engrave      makes a QR code of a KEY to be saved on paper"
@@ -318,7 +319,7 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:810
 msgid " -n           don't launch the execution hooks found in tomb"
-msgstr " -n     no procesar los enganches encontrados en la tumba"
+msgstr " -n           no procesar los enganches encontrados en la tumba"
 
 #: tomb:Commandline interaction:usage:811
 msgid " -p           preserve the ownership of all files in tomb"
@@ -375,7 +376,7 @@ msgstr " --kdf  fragua llaves armadas frente a ataques de diccionario"
 
 #: tomb:Commandline interaction:usage:829
 msgid " -h           print this help"
-msgstr " -h           escribe esta ayuda"
+msgstr " -h           declara esta ayuda"
 
 #: tomb:Commandline interaction:usage:830
 msgid " -v           print version, license and list of available ciphers"
@@ -442,7 +443,7 @@ msgstr "La llave es una imagen, quizá sea válida."
 
 #: tomb:Key operations:is_valid_key:1128
 msgid "Key is missing KDF header."
-msgstr "Falta la llave el encabezado de KDF."
+msgstr "Falta a la llave el encabezado de KDF."
 
 #: tomb:Key operations:is_valid_key:1134
 msgid "Key is valid."
@@ -516,7 +517,7 @@ msgstr "Contraseña incorrecta."
 
 #: tomb:Key operations:change_passwd:1437
 msgid "Changing GnuPG key for ::1 key file::"
-msgstr "Cambiando la llave GnuPG para llave ::1 archivo file::"
+msgstr "Cambiando la contraseña para ::1 llave fichero::"
 
 #: tomb:Key operations:change_passwd:1439
 msgid "Changing password for ::1 key file::"
@@ -528,7 +529,7 @@ msgstr "Error: la llave recién generada no parece válida."
 
 #: tomb:Key operations:change_passwd:1458
 msgid "Your GnuPG key was successfully changed"
-msgstr "Su llave GnuGP ha sido modificada correctamente"
+msgstr "Su llave GnuPG ha sido modificada correctamente"
 
 #: tomb:Key operations:change_passwd:1460
 msgid "Your passphrase was successfully updated."
@@ -645,7 +646,7 @@ msgstr "Error en la codificación: steghide informa problemas."
 
 #: tomb:Key operations:bury_key:1740
 msgid "Tomb key encoded successfully into image ::1 image file::"
-msgstr "Llave codificada con éxito en la imagen ::1 fichero::"
+msgstr "Llave codificada correctamente en la imagen ::1 fichero::"
 
 #: tomb:Key operations:exhume_key:1752
 msgid "Exhume failed, no image specified"
@@ -691,7 +692,7 @@ msgstr "Intentando exhumar una llave externa de la imagen ::1 fichero file::"
 
 #: tomb:Key operations:exhume_key:1819
 msgid "Key successfully exhumed to ::1 key::."
-msgstr "Llave exhumada con éxito en ::1 llave::."
+msgstr "Llave exhumada correctamente en ::1 llave::."
 
 #: tomb:Key operations:exhume_key:1821
 msgid "Nothing found in ::1 image file::"
@@ -716,9 +717,8 @@ msgid "Encoding error: cloakify reports problems."
 msgstr "Error en la codificación: cloakify informa problemas."
 
 #: tomb:Key operations:cloakify_key:1867
-#, fuzzy
 msgid "Tomb key encoded successfully"
-msgstr "Llave codificada con éxito en la imagen ::1 fichero::"
+msgstr "Llave de Tomb codificada correctamente"
 
 #: tomb:Key operations:decloakify_key:1879
 msgid "Uncloak failed, no text file specified"
@@ -745,9 +745,8 @@ msgid "printing uncloaked key on stdout"
 msgstr "declara llave descubierta por salida estándar"
 
 #: tomb:Key operations:decloakify_key:1923
-#, fuzzy
 msgid "Key successfully uncloaked to ::1 key::."
-msgstr "Llave exhumada con éxito en ::1 llave::."
+msgstr "Llave exhumada correctamente a ::1 llave::."
 
 #: tomb:Key operations:decloakify_key:1925
 msgid "Nothing found in ::1 text file::"
@@ -808,8 +807,7 @@ msgstr "Se ha terminado de cavar ::1 nombre de tumba name::"
 
 #: tomb:Create:dig_tomb:2012
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
-msgstr ""
-"Su tumba no está lista todavía, tiene que forjar una llave y bloquearla:"
+msgstr "Su tumba aún no está reparada, necesita forjar una llave y bloquearla:"
 
 #: tomb:Create:dig_tomb:2013
 msgid "tomb forge ::1 tomb path::.key"
@@ -871,7 +869,7 @@ msgstr "Utilice la/las llave(s) GnuPG para cifrar su llave: ::1 llave::"
 
 #: tomb:Create:forge_key:2092
 msgid "Choose the password of your key: ::1 tomb key::"
-msgstr "Elija la contraseña para tu llave: ::1 llave::"
+msgstr "Elija la contraseña para tu llave: ::1 llave de tumba::"
 
 #: tomb:Create:forge_key:2094
 msgid "(You can also change it later using 'tomb passwd'.)"
@@ -1005,7 +1003,7 @@ msgstr ""
 
 #: tomb:Create:change_tomb_key:2271
 msgid "I.e:\ttomb -k new.tomb.key old.tomb.key secret.tomb"
-msgstr "P.ej:\\t tomb -k nueva.tomb.key antigua.tomb.key secreto.tomb"
+msgstr "P.ej:\t tomb -k nueva.tomb.key antigua.tomb.key secreto.tomb"
 
 #: tomb:Create:change_tomb_key:2272
 msgid "Execution aborted."
