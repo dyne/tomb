@@ -523,7 +523,7 @@ msgid "unrecognized KDF ::1::"
 msgstr ""
 
 #: tomb:Key operations:gen_key:1532
-msgid "key won\'t be protected via a KDF implementation"
+msgid "key won't be protected via a KDF implementation"
 msgstr ""
 
 #: tomb:Key operations:gen_key:1533
