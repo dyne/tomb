@@ -1529,7 +1529,7 @@ gen_key() {
 					;;
 				*)
 					_warning "unrecognized KDF ::1::" $kdftype
-					_warning "key won\'t be protected via a KDF implementation"
+					_warning "key won't be protected via a KDF implementation"
 					_warning "only pbkdf2 and argon2 are valid arguments"
 					;;
 				esac
