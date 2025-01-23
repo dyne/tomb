@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tomb the Crypto Undertaker\n"
-"PO-Revision-Date: 2020-11-14 10:28+0000\n"
+"PO-Revision-Date: 2025-01-23 19:31+0100\n"
 "Last-Translator: mv87 <mv87@dismail.de>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/tomb/tomb/de/>\n"
 "Language: de\n"
@@ -9,7 +9,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.4-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
@@ -25,1201 +24,1130 @@ msgstr ""
 msgid "Super user execution not supported: ::1 sudo::"
 msgstr ""
 
-#: tomb:Safety functions:_whoami:236
+#: tomb:Safety functions:_sudo:157
+msgid "No way found to escalate privileges to super user."
+msgstr ""
+
+#: tomb:Safety functions:_whoami:248
 msgid "Failing to identify the user who is calling us"
 msgstr "Fehler beim Identifizieren des uns rufenden Anwenders"
 
-#: tomb:Safety functions:_tmp_create:272
+#: tomb:Safety functions:_tmp_create:284
 msgid "Fatal error creating the temporary directory: ::1 temp dir::"
 msgstr "Fataler Fehler beim Erstellen des temporären Ordners: ::1 temp dir::"
 
-#: tomb:Safety functions:_tmp_create:280
+#: tomb:Safety functions:_tmp_create:292
 msgid "Fatal error setting the permission umask for temporary files"
 msgstr ""
 "Fataler Fehler beim Setzen der Berechtigungsmaske für die temporären Dateien"
 
-#: tomb:Safety functions:_tmp_create:283
+#: tomb:Safety functions:_tmp_create:295
 msgid "Someone is messing up with us trying to hijack temporary files."
 msgstr ""
 "Jemand versucht uns durcheinander zu bringen und unsere temporären Dateien "
 "zu kapern."
 
-#: tomb:Safety functions:_tmp_create:287
+#: tomb:Safety functions:_tmp_create:299
 msgid "Fatal error creating a temporary file: ::1 temp file::"
 msgstr "Fataler Fehler beim Erstellen einer temporären Datei: ::1 temp file::"
 
-#: tomb:Safety functions:_ensure_safe_swap:398
+#: tomb:Safety functions:_ensure_safe_swap:410
 msgid "An active swap partition is detected..."
 msgstr "Eine aktive Swap-Partition wurde gefunden..."
 
-#: tomb:Safety functions:_ensure_safe_swap:408
+#: tomb:Safety functions:_ensure_safe_swap:420
 msgid "Found zramswap with writeback enabled."
 msgstr ""
 
-#: tomb:Safety functions:_ensure_safe_swap:411
+#: tomb:Safety functions:_ensure_safe_swap:423
 msgid "Found zramswap without writeback to disk."
 msgstr ""
 
-#: tomb:Safety functions:_ensure_safe_swap:424
+#: tomb:Safety functions:_ensure_safe_swap:436
 msgid "The undertaker found that all swap partitions are encrypted. Good."
 msgstr ""
 "Der Totengräber hat festgestellt, dass alle Swap-Partitionen verschlüsselt "
 "sind. Super."
 
-#: tomb:Safety functions:_ensure_safe_swap:426
+#: tomb:Safety functions:_ensure_safe_swap:438
 msgid "This poses a security risk."
 msgstr "Dies ist ein Sicherheitsrisiko."
 
-#: tomb:Safety functions:_ensure_safe_swap:427
+#: tomb:Safety functions:_ensure_safe_swap:439
 msgid "You can deactivate all swap partitions using the command:"
 msgstr "Sie können alle Swap-Partitionen deaktivieren mit dem Befehl:"
 
-#: tomb:Safety functions:_ensure_safe_swap:428
+#: tomb:Safety functions:_ensure_safe_swap:440
 msgid " swapoff -a"
 msgstr " swapoff -a"
 
-#: tomb:Safety functions:_ensure_safe_swap:429
+#: tomb:Safety functions:_ensure_safe_swap:441
 msgid "[#163] I may not detect plain swaps on an encrypted volume."
 msgstr ""
 "[#163] Möglicherweise kann ich unverschlüsselte Swap-Container auf "
 "verschlüsselten Volumes nicht erkennen."
 
-#: tomb:Safety functions:_ensure_safe_swap:430
+#: tomb:Safety functions:_ensure_safe_swap:442
 msgid "But if you want to proceed like this, use the -f (force) flag."
 msgstr ""
 "Falls Sie ohne dies zu tun fortfahren wollen, benutzen sie die -f "
 "(erzwingen) Option."
 
-#: tomb:Safety functions:_check_swap:449
+#: tomb:Safety functions:_check_swap:461
 msgid "Operation aborted."
 msgstr "Vorgang abgebrochen."
 
-#: tomb:Safety functions:ask_password:536
-#, fuzzy
+#: tomb:Safety functions:ask_password:551
 msgid "Cannot find any pinentry and no DISPLAY detected."
-msgstr "Kann 'pinentry' nicht finden und es kein DISPLAY gefunden."
+msgstr "Kein 'pinentry' Programm gefunden und DISPLAY fehlt."
 
-#: tomb:Safety functions:ask_password:550
+#: tomb:Safety functions:ask_password:567
 msgid "Pinentry error: ::1 error::"
 msgstr "Pinentry-Fehler: ::1 error::"
 
-#: tomb:Safety functions:ask_password:562
+#: tomb:Safety functions:ask_password:573
 msgid "Empty password"
 msgstr "Leeres Passwort"
 
-#: tomb:Safety functions:sphinx_get_password:587
-#, fuzzy
-msgid "sphinx returns error: ::1 error::"
-msgstr "Pinentry-Fehler: ::1 error::"
-
-#: tomb:Safety functions:sphinx_get_password:589
-msgid "Failed to retrieve actual password with sphinx."
-msgstr ""
-
-#: tomb:Safety functions:sphinx_get_password:592
-msgid "Both host and user have to be set to use sphinx"
-msgstr ""
-
-#: tomb:Safety functions:sphinx_set_password:623
-msgid "Failed to create password with sphinx"
-msgstr ""
-
-#: tomb:Safety functions:is_valid_tomb:636
+#: tomb:Safety functions:is_valid_tomb:588
 msgid "Tomb file is missing from arguments."
 msgstr "Grab-Datei fehlt bei den Argumenten."
 
-#: tomb:Safety functions:is_valid_tomb:643
+#: tomb:Safety functions:is_valid_tomb:596
 msgid "Tomb file is not writable: ::1 tomb file::"
 msgstr "Keine Schreibrechte auf Grab-Datei: ::1 tomb file::"
 
-#: tomb:Safety functions:is_valid_tomb:650
+#: tomb:Safety functions:is_valid_tomb:601
 msgid "Tomb file is not a regular file: ::1 tomb file::"
 msgstr "Grab-Datei ist keine gewöhnliche Datei: ::1 tomb file::"
 
-#: tomb:Safety functions:is_valid_tomb:656
+#: tomb:Safety functions:is_valid_tomb:605
 msgid "Tomb file is empty (zero length): ::1 tomb file::"
 msgstr "Grab-Datei ist leer (Länge: 0): ::1 tomb file::"
 
-#: tomb:Safety functions:is_valid_tomb:662
+#: tomb:Safety functions:is_valid_tomb:611
 msgid "Tomb command failed: ::1 command name::"
 msgstr "Grab-Befehl fehlgeschlagen: ::1 command name::"
 
-#: tomb:Safety functions:is_valid_tomb:667
+#: tomb:Safety functions:is_valid_tomb:616
 msgid "File is not yet a tomb: ::1 tomb file::"
 msgstr "Datei ist noch kein Grab: ::1 tomb file::"
 
-#: tomb:Safety functions:is_valid_tomb:687
+#: tomb:Safety functions:is_valid_tomb:636
 msgid "Tomb won't work without a TOMBNAME."
 msgstr "Ohne GRABNAME kann Tomb nicht funktionieren."
 
-#: tomb:Safety functions:is_valid_tomb:698
-#, fuzzy
+#: tomb:Safety functions:is_valid_tomb:647
 msgid "Tomb file already in use: ::1 tombname::"
 msgstr "Grab wird schon benutzt ::1 tomb name::"
 
-#: tomb:Safety functions:is_valid_tomb:704
+#: tomb:Safety functions:is_valid_tomb:653
 msgid "Valid tomb file found: ::1 tomb path::"
 msgstr "Gültige Grab-Datei gefunden: ::1 tomb path::"
 
-#: tomb:Safety functions:lo_mount:716
+#: tomb:Safety functions:lo_check:664
 msgid "Loop mount of volumes is not possible on this machine, this error"
 msgstr "Loop-Mount von Laufwerken nicht unterstützt. Dieser Fehler"
 
-#: tomb:Safety functions:lo_mount:717
+#: tomb:Safety functions:lo_check:665
 msgid "often occurs on VPS and kernels that don't provide the loop module."
 msgstr ""
 "tritt oft in virtuellen Maschinen auf oder mit Kerneln ohne Loop-Modul."
 
-#: tomb:Safety functions:lo_mount:718
-#, fuzzy
+#: tomb:Safety functions:lo_check:666
 msgid "It is impossible to use Tomb on this machine under these conditions."
 msgstr ""
 "Tomb kann unter diesen Umständen auf dieser Maschine nicht benutzt werden."
 
-#: tomb:Safety functions:lo_mount:726
-#, fuzzy
-msgid "Loopback mount failed: ::1 path:: on ::2 loop::"
-msgstr "Fehler beim Einhängen von ::1 mapper:: an ::2 tombmount::"
-
-#: tomb:Commandline interaction:usage:762
+#: tomb:Commandline interaction:usage:696
 msgid "Syntax: tomb [options] command [arguments]"
 msgstr "Syntax: tomb [Optionen] Befehl [Argumente]"
 
-#: tomb:Commandline interaction:usage:764
+#: tomb:Commandline interaction:usage:698
 msgid "Commands:"
 msgstr "Befehle:"
 
-#: tomb:Commandline interaction:usage:766
+#: tomb:Commandline interaction:usage:700
 msgid " // Creation:"
 msgstr " // Erstellen:"
 
-#: tomb:Commandline interaction:usage:767
-#, fuzzy
+#: tomb:Commandline interaction:usage:701
 msgid " dig          create a new empty TOMB file of size -s in MiB"
 msgstr " dig     Neues GRAB erstellen mit der Größe -s in MiB"
 
-#: tomb:Commandline interaction:usage:768
-#, fuzzy
+#: tomb:Commandline interaction:usage:702
 msgid " forge        create a new KEY file and set its password"
 msgstr " forge   Neuen SCHLÜSSEL erstellen und Passwort zuweisen"
 
-#: tomb:Commandline interaction:usage:769
-#, fuzzy
+#: tomb:Commandline interaction:usage:703
 msgid " lock         installs a lock on a TOMB to use it with KEY"
 msgstr " lock    GRAB mit einem SCHLÜSSEL zusperren"
 
-#: tomb:Commandline interaction:usage:771
+#: tomb:Commandline interaction:usage:705
 msgid " // Operations on tombs:"
 msgstr " // Gräber bearbeiten:"
 
-#: tomb:Commandline interaction:usage:772
-#, fuzzy
+#: tomb:Commandline interaction:usage:706
 msgid " open         open an existing TOMB (-k KEY file or - for stdin)"
 msgstr ""
 " open    öffne ein bestehendes GRAB (-k SCHLÜSSEL-Datei oder - für "
 "Standardeingabe)"
 
-#: tomb:Commandline interaction:usage:773
-#, fuzzy
+#: tomb:Commandline interaction:usage:707
 msgid " index        update the search indexes of tombs"
 msgstr " index   die Suchindizes der Gräber aktualisieren"
 
-#: tomb:Commandline interaction:usage:774
-#, fuzzy
+#: tomb:Commandline interaction:usage:708
 msgid " search       looks for filenames matching text patterns"
 msgstr " search  sucht nach Dateinamen, welche Textmustern entsprechen"
 
-#: tomb:Commandline interaction:usage:775
-#, fuzzy
+#: tomb:Commandline interaction:usage:709
 msgid " list         list of open TOMBs and information on them"
 msgstr " list    Liste geöffneter GRÄBER und Informationen über diese"
 
-#: tomb:Commandline interaction:usage:776
+#: tomb:Commandline interaction:usage:710
 msgid " ps           list of running processes inside open TOMBs"
 msgstr ""
 
-#: tomb:Commandline interaction:usage:777
-#, fuzzy
+#: tomb:Commandline interaction:usage:711
 msgid " close        close a specific TOMB (or 'all')"
 msgstr " close   schließt das angegebene GRAB (oder 'all' / alle)"
 
-#: tomb:Commandline interaction:usage:778
-#, fuzzy
+#: tomb:Commandline interaction:usage:712
 msgid " slam         slam a TOMB killing all programs using it"
 msgstr ""
 " slam    knallt ein GRAB zu und bricht alle darauf zugreifenden Programme ab"
 
-#: tomb:Commandline interaction:usage:780
-#, fuzzy
+#: tomb:Commandline interaction:usage:714
 msgid " resize       resize a TOMB to a new size -s (can only grow)"
 msgstr " resize  ändert die Größe eines GRABes zu -s (nur Vergrößern möglich)"
 
-#: tomb:Commandline interaction:usage:783
+#: tomb:Commandline interaction:usage:717
 msgid " // Operations on keys:"
 msgstr " // Schlüssel bearbeiten:"
 
-#: tomb:Commandline interaction:usage:784
-#, fuzzy
+#: tomb:Commandline interaction:usage:718
 msgid " passwd       change the password of a KEY (needs old pass)"
 msgstr ""
 " passwd  ändert des Passwort für einen SCHLÜSSEL (benötigt altes Passwort)"
 
-#: tomb:Commandline interaction:usage:785
-#, fuzzy
+#: tomb:Commandline interaction:usage:719
 msgid " setkey       change the KEY locking a TOMB (needs old key and pass)"
 msgstr ""
 " setkey  ändert den SCHLÜSSEL eines GRABes (benötigt alten Schlüssel und "
 "Passwort)"
 
-#: tomb:Commandline interaction:usage:788
+#: tomb:Commandline interaction:usage:722
 msgid " // Backup on paper:"
 msgstr " // Backup auf Papier:"
 
-#: tomb:Commandline interaction:usage:789
-#, fuzzy
+#: tomb:Commandline interaction:usage:723
 msgid " engrave      makes a QR code of a KEY to be saved on paper"
 msgstr " engrave erstellt einen QR-Code eines SCHLÜSSELS zum Ausdrucken"
 
-#: tomb:Commandline interaction:usage:793
+#: tomb:Commandline interaction:usage:727
 msgid " // Steganography:"
 msgstr " // Steganographie:"
 
-#: tomb:Commandline interaction:usage:795
-#, fuzzy
+#: tomb:Commandline interaction:usage:729
 msgid " bury         hide a KEY inside a JPEG image (for use with -k)"
 msgstr ""
 " bury    versteckt einen SCHLÜSSEL in einem JPEG-Bild (zur Nutzung mit -k)"
 
-#: tomb:Commandline interaction:usage:796
-#, fuzzy
+#: tomb:Commandline interaction:usage:730
 msgid " exhume       extract a KEY from a JPEG image (prints to stdout)"
 msgstr ""
 " exhume  extrahiert einen SCHLÜSSEL aus einer JPEG-Datei (gibt an die "
 "Standardausgabe aus)"
 
-#: tomb:Commandline interaction:usage:799
+#: tomb:Commandline interaction:usage:733
 msgid " cloak        transform a KEY into TEXT using CIPHER (for use with -k)"
 msgstr ""
 
-#: tomb:Commandline interaction:usage:802
-#, fuzzy
+#: tomb:Commandline interaction:usage:736
 msgid " uncloak      extract a KEY from a TEXT using CIPHER (prints to stdout)"
 msgstr ""
-" exhume  extrahiert einen SCHLÜSSEL aus einer JPEG-Datei (gibt an die "
-"Standardausgabe aus)"
 
-#: tomb:Commandline interaction:usage:806
+#: tomb:Commandline interaction:usage:740
 msgid "Options:"
 msgstr "Optionen:"
 
-#: tomb:Commandline interaction:usage:808
-#, fuzzy
+#: tomb:Commandline interaction:usage:742
 msgid " -s           size of the tomb file when creating/resizing one (in MiB)"
 msgstr ""
 " -s     Größe eines Grabes (beim Erstellen/neue Größe zuweisen) (in MiB)"
 
-#: tomb:Commandline interaction:usage:809
-#, fuzzy
+#: tomb:Commandline interaction:usage:743
 msgid " -k           path to the key to be used ('-k -' to read from stdin)"
 msgstr ""
 " -k     Dateipfad zum Schlüssel ('-k -' um ihn aus der Standardeingabe "
 "einzulesen)"
 
-#: tomb:Commandline interaction:usage:810
-#, fuzzy
+#: tomb:Commandline interaction:usage:744
 msgid " -n           don't launch the execution hooks found in tomb"
 msgstr " -n     im Grab gefundene 'Hooks' nicht benutzen"
 
-#: tomb:Commandline interaction:usage:811
+#: tomb:Commandline interaction:usage:745
 msgid " -p           preserve the ownership of all files in tomb"
 msgstr ""
 
-#: tomb:Commandline interaction:usage:812
-#, fuzzy
+#: tomb:Commandline interaction:usage:746
 msgid " -o           options passed to commands: open, lock, forge (see man)"
 msgstr " -o     Optionen für Befehle: open, lock, forge (siehe Handbuchseite)"
 
-#: tomb:Commandline interaction:usage:813
-#, fuzzy
+#: tomb:Commandline interaction:usage:747
 msgid " -f           force operation (i.e. even if swap is active)"
 msgstr " -f     Vorgang erzwingen (z.B. falls Swap-Datei aktiv)"
 
-#: tomb:Commandline interaction:usage:814
+#: tomb:Commandline interaction:usage:748
 msgid " -g           use a GnuPG key to encrypt a tomb key"
 msgstr ""
 
-#: tomb:Commandline interaction:usage:815
+#: tomb:Commandline interaction:usage:749
 msgid " -r           provide GnuPG recipients (separated by comma)"
 msgstr ""
 
-#: tomb:Commandline interaction:usage:816
+#: tomb:Commandline interaction:usage:750
 msgid " -R           provide GnuPG hidden recipients (separated by comma)"
 msgstr ""
 
-#: tomb:Commandline interaction:usage:817
+#: tomb:Commandline interaction:usage:751
 msgid " --sudo       super user exec alternative to sudo (doas or none)"
 msgstr ""
 
-#: tomb:Commandline interaction:usage:820
+#: tomb:Commandline interaction:usage:754
 msgid ""
-" --sphx-user  user associated with the key (for use with pitchforkedsphinx)"
-msgstr ""
-
-#: tomb:Commandline interaction:usage:821
-msgid ""
-" --sphx-host  host associated with the key (for use with pitchforkedsphinx)"
-msgstr ""
-
-#: tomb:Commandline interaction:usage:825
-#, fuzzy
-msgid " --kdf        forge keys armored against dictionary attacks"
+" --kdf        forge keys armored against dictionary attacks (pbkdf2, argon2)"
 msgstr ""
 " --kdf  Schlüssel erstellen, die gegen Wörterbuchangriffe abgehärtet sind"
 
-#: tomb:Commandline interaction:usage:829
-#, fuzzy
+#: tomb:Commandline interaction:usage:755
+msgid ""
+" --kdfiter    Number of iterations (meaning depending on KDF algorithm) "
+"(pbkdf2, argon2)"
+msgstr ""
+
+#: tomb:Commandline interaction:usage:758
+msgid " --kdfmem     memory to be used (argon2)"
+msgstr ""
+
+#: tomb:Commandline interaction:usage:759
+msgid " --kdfpar     number of threads (argon2)"
+msgstr ""
+
+#: tomb:Commandline interaction:usage:763
 msgid " -h           print this help"
 msgstr " -h     anzeigen dieser Hilfe"
 
-#: tomb:Commandline interaction:usage:830
-#, fuzzy
+#: tomb:Commandline interaction:usage:764
 msgid " -v           print version, license and list of available ciphers"
 msgstr ""
 " -v     anzeigen der Version, Lizenz und vorhandener Verschlüsslungsmethoden"
 
-#: tomb:Commandline interaction:usage:831
-#, fuzzy
-msgid " -q           run quietly without printing informations"
+#: tomb:Commandline interaction:usage:765
+msgid " -q           run quietly without printing information"
 msgstr " -q     still ausführen, ohne Infos anzuzeigen"
 
-#: tomb:Commandline interaction:usage:832
-#, fuzzy
+#: tomb:Commandline interaction:usage:766
 msgid " -D           print debugging information at runtime"
 msgstr " -D     Debug-Infos beim Ablauf anzeigen"
 
-#: tomb:Commandline interaction:usage:834
-#, fuzzy
+#: tomb:Commandline interaction:usage:768
 msgid "For more information on Tomb read the manual: man tomb"
 msgstr "Für weitere Informationen siehe Benutzerhandbuch: man tomb"
 
-#: tomb:Commandline interaction:usage:835
+#: tomb:Commandline interaction:usage:769
 msgid "Please report bugs on <http://github.com/dyne/tomb/issues>."
 msgstr "Fehlerberichte bitte an <https://github.com/dyne/tomb/issues>."
 
-#: tomb:Commandline interaction:_ensure_dependencies:992
+#: tomb:Commandline interaction:_ensure_dependencies:926
 msgid "Missing required dependency ::1 command::.  Please install it."
 msgstr "Fehlende Abhängigkeit ::1 command::. Bitte installieren Sie diese."
 
-#: tomb:Commandline interaction:_ensure_dependencies:1004
+#: tomb:Commandline interaction:_ensure_dependencies:943
 msgid "No privilege escalation tool found, not even sudo"
 msgstr ""
 
-#: tomb:Key operations:is_valid_recipients:1052
+#: tomb:Key operations:is_valid_recipients:991
 msgid "Not a valid GPG key ID: ::1 gpgid:: "
 msgstr ""
 
-#: tomb:Key operations:is_valid_recipients:1056
+#: tomb:Key operations:is_valid_recipients:995
 msgid "The key ::1 gpgid:: is not trusted enough"
 msgstr ""
 
-#: tomb:Key operations:is_valid_key:1107
+#: tomb:Key operations:is_valid_key:1046
 msgid "cleartext key from stdin selected: this is unsafe."
 msgstr ""
 "Klartext-Schlüssel von der Standardeingabe ausgewählt: Dies ist nicht sicher."
 
-#: tomb:Key operations:is_valid_key:1108
+#: tomb:Key operations:is_valid_key:1047
 msgid "please use --unsafe if you really want to do this."
 msgstr "Bitte benutzen Sie --unsafe, wenn Sie dies wirklich tun wollen."
 
-#: tomb:Key operations:is_valid_key:1110
+#: tomb:Key operations:is_valid_key:1049
 msgid "received key in cleartext from stdin (unsafe mode)"
 msgstr ""
-"Schlüssel in Klartext von der Standardeingabe empfangen (Nicht sicherer "
-"Modus)"
+"Schlüssel in Klartext von der Standardeingabe empfangen (unsicherer Modus)"
 
-#: tomb:Key operations:is_valid_key:1114
+#: tomb:Key operations:is_valid_key:1053
 msgid "is_valid_key() called without an argument."
 msgstr "is_valid_key() ausgeführt ohne Argument."
 
-#: tomb:Key operations:is_valid_key:1122
+#: tomb:Key operations:is_valid_key:1061
 msgid "Key is an image, it might be valid."
 msgstr "Schlüssel ist ein Bild. Er könnte gültig sein."
 
-#: tomb:Key operations:is_valid_key:1128
+#: tomb:Key operations:is_valid_key:1067
 msgid "Key is missing KDF header."
 msgstr ""
 
-#: tomb:Key operations:is_valid_key:1134
+#: tomb:Key operations:is_valid_key:1073
 msgid "Key is valid."
 msgstr "Schlüssel ist gültig."
 
-#: tomb:Key operations:recover_key:1144
+#: tomb:Key operations:recover_key:1083
 msgid "Attempting key recovery."
 msgstr "Versuche Schlüssel wiederherzustellen."
 
-#: tomb:Key operations:_load_key:1168
+#: tomb:Key operations:_load_key:1107
 msgid "This operation requires a key file to be specified using the -k option."
 msgstr ""
 "Diese Operation benötigt die Angabe eines Schlüssels durch die Option -k."
 
-#: tomb:Key operations:_load_key:1172
+#: tomb:Key operations:_load_key:1112
 msgid "Waiting for the key to be piped from stdin... "
 msgstr "Warten auf den Schlüssel durch die Standardeingabe... "
 
-#: tomb:Key operations:_load_key:1183
+#: tomb:Key operations:_load_key:1124
 msgid "Key not found, specify one using -k."
 msgstr "Schlüssel nicht gefunden. Bitte einen solchen mit -k angeben."
 
-#: tomb:Key operations:_load_key:1198
+#: tomb:Key operations:_load_key:1140
 msgid ""
 "The key seems invalid or its format is not known by this version of Tomb."
 msgstr ""
 "Der Schlüssel scheint ungültig zu sein oder sein Format ist dieser Version "
 "von Tomb unbekannt."
 
-#: tomb:Key operations:gpg_decrypt:1229
+#: tomb:Key operations:gpg_decrypt:1171
 msgid "You set an invalid GPG ID."
 msgstr ""
 
-#: tomb:Key operations:get_lukskey:1281
+#: tomb:Key operations:get_lukskey:1223
 msgid "Unlocking KDF key protection (::1 kdf::)"
 msgstr "Entsperre KDF-Schlüsselschutz (::1 kdf::)"
 
-#: tomb:Key operations:get_lukskey:1300
+#: tomb:Key operations:get_lukskey:1245
 msgid "No suitable program for KDF ::1 program::."
 msgstr "Kein geeignetes Programm für KDF ::1 program::."
 
-#: tomb:Key operations:get_lukskey:1316
+#: tomb:Key operations:get_lukskey:1261
 msgid "User aborted password dialog."
 msgstr "Benutzer hat die Passworteingabe abgebrochen."
 
-#: tomb:Key operations:ask_key_password:1340
+#: tomb:Key operations:ask_key_password:1285
 msgid "Internal error: ask_key_password() called before _load_key()."
 msgstr "Interner Fehler: ask_key_password() vor _load_key() ausgeführt."
 
-#: tomb:Key operations:ask_key_password:1352
+#: tomb:Key operations:ask_key_password:1297
 msgid "A password is required to use key ::1 key::"
 msgstr "Ein Passwort ist zur Benutzung des Schlüssels ::1 key:: erforderlich"
 
-#: tomb:Key operations:ask_key_password:1371
+#: tomb:Key operations:ask_key_password:1316
 msgid "Password OK."
 msgstr "Passwort OK."
 
-#: tomb:Key operations:change_passwd:1419
-#, fuzzy
+#: tomb:Key operations:change_passwd:1358
 msgid "Commanded to change GnuPG key for tomb key ::1 key::"
-msgstr "Angewiesen das Passwort des Schlüssels ::1 key:: zu ändern"
+msgstr ""
 
-#: tomb:Key operations:change_passwd:1421
+#: tomb:Key operations:change_passwd:1360
 msgid "Commanded to change password for tomb key ::1 key::"
 msgstr "Angewiesen das Passwort des Schlüssels ::1 key:: zu ändern"
 
-#: tomb:Key operations:change_passwd:1434
+#: tomb:Key operations:change_passwd:1373
 msgid "No valid password supplied."
 msgstr "Kein gültiges Passwort angegeben."
 
-#: tomb:Key operations:change_passwd:1437
-#, fuzzy
+#: tomb:Key operations:change_passwd:1376
 msgid "Changing GnuPG key for ::1 key file::"
-msgstr "Ändere Passwort für ::1 key file::"
+msgstr ""
 
-#: tomb:Key operations:change_passwd:1439
+#: tomb:Key operations:change_passwd:1378
 msgid "Changing password for ::1 key file::"
 msgstr "Ändere Passwort für ::1 key file::"
 
-#: tomb:Key operations:change_passwd:1453
+#: tomb:Key operations:change_passwd:1392
 msgid "Error: the newly generated keyfile does not seem valid."
 msgstr "Fehler: Der neu erstellte Schlüssel scheint nicht gültig zu sein."
 
-#: tomb:Key operations:change_passwd:1458
-#, fuzzy
+#: tomb:Key operations:change_passwd:1397
 msgid "Your GnuPG key was successfully changed"
-msgstr "Ihr Passwort wurde erfolgreich auf den neuesten Stand gebracht."
+msgstr ""
 
-#: tomb:Key operations:change_passwd:1460
+#: tomb:Key operations:change_passwd:1399
 msgid "Your passphrase was successfully updated."
 msgstr "Ihr Passwort wurde erfolgreich auf den neuesten Stand gebracht."
 
-#: tomb:Key operations:gen_key:1511
+#: tomb:Key operations:gen_key:1438
 msgid ""
 "You are going to encrypt a tomb key with ::1 nrecipients:: recipient(s)."
 msgstr ""
 
-#: tomb:Key operations:gen_key:1512
+#: tomb:Key operations:gen_key:1439
 msgid "It is your responsibility to check these fingerprints."
 msgstr ""
 
-#: tomb:Key operations:gen_key:1513
+#: tomb:Key operations:gen_key:1440
 msgid "The fingerprints are:"
 msgstr ""
 
-#: tomb:Key operations:gen_key:1515
+#: tomb:Key operations:gen_key:1442
 msgid "\t  `_gpg_fingerprint "
 msgstr ""
 
-#: tomb:Key operations:gen_key:1520
-#, fuzzy
+#: tomb:Key operations:gen_key:1447
 msgid "No recipient specified, using default GPG key."
 msgstr ""
-"Einhängeort nicht angegeben: der Standard ::1 mount point:: wird gewählt"
 
-#: tomb:Key operations:gen_key:1533
+#: tomb:Key operations:gen_key:1460
 msgid "User aborted."
 msgstr "Vom Benutzer abgebrochen."
 
-#: tomb:Key operations:gen_key:1536
+#: tomb:Key operations:gen_key:1463
 msgid "You set empty password, which is not possible."
 msgstr "Ein leeres Passwort ist nicht möglich."
 
-#: tomb:Key operations:gen_key:1577
-msgid ""
-"Wrong argument for --kdf: must be an integer number (iteration seconds)."
-msgstr "Ungültiges Argument für --kdf: muss eine Ganzzahl sein."
-
-#: tomb:Key operations:gen_key:1578
-msgid ""
-"Depending on the speed of machines using this tomb, use 1 to 10, or more"
-msgstr ""
-"Je nach Geschwindigkeit des Rechners, der dieses Grab nutzt, wähle 1 bis 10 "
-"oder mehr"
-
-#: tomb:Key operations:gen_key:1589
-msgid "Using KDF, iteration time: ::1 microseconds::"
-msgstr "Nutze KDF, Iterationszeit ::1 microseconds::"
-
-#: tomb:Key operations:gen_key:1590
-msgid "generating salt"
-msgstr "generiere Salt"
-
-#: tomb:Key operations:gen_key:1592
-msgid "calculating iterations"
-msgstr "berechne Iterationen"
-
-#: tomb:Key operations:gen_key:1594
-msgid "encoding the password"
-msgstr "verschlüssle das Passwort"
-
-#: tomb:Key operations:gen_key:1601
-msgid "Using KDF Argon2"
+#: tomb:Key operations:gen_key:1502
+msgid "kdf salt: ::1 kdfsalt::"
 msgstr ""
 
-#: tomb:Key operations:gen_key:1604
+#: tomb:Key operations:gen_key:1510
+msgid "Using pbkdf2 as KDF"
+msgstr ""
+
+#: tomb:Key operations:gen_key:1511
+msgid "iteration time: ::1 microseconds::"
+msgstr "Iterationszeit ::1 microseconds::"
+
+#: tomb:Key operations:gen_key:1513
+msgid "iterations: ::1 pbkdf2_iter::"
+msgstr ""
+
+#: tomb:Key operations:gen_key:1519
+msgid "Using Argon2 as KDF"
+msgstr ""
+
+#: tomb:Key operations:gen_key:1520
+msgid "iterations: ::1 kdfiterations::"
+msgstr ""
+
+#: tomb:Key operations:gen_key:1523
 msgid "memory used: 2^::1 kdfmemory::"
 msgstr ""
 
-#: tomb:Key operations:gen_key:1606
-#, fuzzy
-msgid "kdf salt: ::1 kdfsalt::"
-msgstr "am ::1 date::"
-
-#: tomb:Key operations:gen_key:1607
-msgid "kdf iterations: ::1 kdfiterations::"
+#: tomb:Key operations:gen_key:1526
+msgid "parallelismn: ::1 kdfparallel::"
 msgstr ""
 
-#: tomb:Key operations:bury_key:1667
+#: tomb:Key operations:gen_key:1531
+msgid "unrecognized KDF ::1::"
+msgstr ""
+
+#: tomb:Key operations:gen_key:1532
+msgid "key won't be protected via a KDF implementation"
+msgstr ""
+
+#: tomb:Key operations:gen_key:1533
+msgid "only pbkdf2 and argon2 are valid arguments"
+msgstr ""
+
+#: tomb:Key operations:bury_key:1591
 msgid "Encode failed: ::1 image file:: is not a jpeg image."
 msgstr "Verschlüsselung fehlgeschlagen: ::1 image file:: ist kein JPEG-Bild."
 
-#: tomb:Key operations:bury_key:1671
+#: tomb:Key operations:bury_key:1595
 msgid "Encoding key ::1 tomb key:: inside image ::2 image file::"
 msgstr "Enkodiere Schlüssel ::1 tomb key:: im Bild ::2 image file::"
 
-#: tomb:Key operations:bury_key:1673
+#: tomb:Key operations:bury_key:1597
 msgid "Using GnuPG Key ID"
 msgstr ""
 
-#: tomb:Key operations:bury_key:1675
+#: tomb:Key operations:bury_key:1599
 msgid "Please confirm the key password for the encoding"
 msgstr "Bitte bestätigen Sie das Passwort zur Verschlüsselung"
 
-#: tomb:Key operations:bury_key:1696
-#, fuzzy
+#: tomb:Key operations:bury_key:1620
 msgid "Wrong password/GnuPG ID supplied."
 msgstr "Das eingegebene Passwort ist falsch."
 
-#: tomb:Key operations:bury_key:1697
+#: tomb:Key operations:bury_key:1621
 msgid "You shall not bury a key whose password is unknown to you."
 msgstr ""
 "Sie dürfen keinen Schlüssel vergraben, von dem Sie das Passwort nicht kennen."
 
-#: tomb:Key operations:bury_key:1737
+#: tomb:Key operations:bury_key:1661
 msgid "Encoding error: steghide reports problems."
 msgstr "Fehler beim Verschlüsseln: steghide meldet Fehler."
 
-#: tomb:Key operations:bury_key:1740
+#: tomb:Key operations:bury_key:1664
 msgid "Tomb key encoded successfully into image ::1 image file::"
 msgstr "Grabschlüssel erfolgreich im Bild ::1 image file:: enkodiert"
 
-#: tomb:Key operations:exhume_key:1752
+#: tomb:Key operations:exhume_key:1676
 msgid "Exhume failed, no image specified"
 msgstr "Extrahieren fehlgeschlagen. Keine Bilddatei angegeben"
 
-#: tomb:Key operations:exhume_key:1765
+#: tomb:Key operations:exhume_key:1689
 msgid "Exhume failed, image file not found: ::1 image file::"
 msgstr "Exhumieren fehlgeschlagen. Bilddatei nicht gefunden: ::1 image file::"
 
-#: tomb:Key operations:exhume_key:1767
+#: tomb:Key operations:exhume_key:1691
 msgid "Exhume failed: ::1 image file:: is not a jpeg image."
 msgstr "Exhumieren fehlgeschlagen: ::1 image file:: ist kein JPEG-Bild."
 
-#: tomb:Key operations:exhume_key:1774
+#: tomb:Key operations:exhume_key:1698
 msgid "Wrong password or no steganographic key found"
 msgstr "Falsches Passwort oder kein steganographischer Schlüssel gefunden"
 
-#: tomb:Key operations:exhume_key:1785
+#: tomb:Key operations:exhume_key:1709
 msgid "printing exhumed key on stdout"
 msgstr "gebe exhumierten Schlüssel auf der Standardausgabe aus"
 
-#: tomb:Key operations:exhume_key:1789
+#: tomb:Key operations:exhume_key:1713
 msgid "File exists: ::1 tomb key::"
 msgstr "Datei existiert: ::1 tomb key::"
 
-#: tomb:Key operations:exhume_key:1791
+#: tomb:Key operations:exhume_key:1715
 msgid "Use of --force selected: overwriting."
 msgstr "--force wurde gewählt: überschreibe."
 
-#: tomb:Key operations:exhume_key:1794
+#: tomb:Key operations:exhume_key:1718
 msgid "Make explicit use of --force to overwrite."
 msgstr "Benutzen Sie --force, um ein Überschreiben zu erzwingen."
 
-#: tomb:Key operations:exhume_key:1795
+#: tomb:Key operations:exhume_key:1719
 msgid "Refusing to overwrite file. Operation aborted."
 msgstr "Überschreiben verweigert. Operation abgebrochen."
 
-#: tomb:Key operations:exhume_key:1798
+#: tomb:Key operations:exhume_key:1722
 msgid "Trying to exhume a key out of image ::1 image file::"
 msgstr "Versuche Schlüssel aus Bild ::1 image file:: zu exhumieren"
 
-#: tomb:Key operations:exhume_key:1819
+#: tomb:Key operations:exhume_key:1743
 msgid "Key successfully exhumed to ::1 key::."
 msgstr "Schlüssel erfolgreich exhumiert in ::1 key::."
 
-#: tomb:Key operations:exhume_key:1821
+#: tomb:Key operations:exhume_key:1745
 msgid "Nothing found in ::1 image file::"
 msgstr "Nichts gefunden in ::1 image file::"
 
-#: tomb:Key operations:cloakify_key:1843
-#, fuzzy
+#: tomb:Key operations:cloakify_key:1766
+msgid "Cloak cipher file not found, see tomb/extras/cloak/ciphers"
+msgstr ""
+
+#: tomb:Key operations:cloakify_key:1768
 msgid "Encoding key ::1 tomb key:: using cipher ::2 cipher file::"
 msgstr "Enkodiere Schlüssel ::1 tomb key:: im Bild ::2 image file::"
 
-#: tomb:Key operations:cloakify_key:1848
-#, fuzzy
+#: tomb:Key operations:cloakify_key:1773
 msgid "printing cloaked key on stdout"
 msgstr "gebe exhumierten Schlüssel auf der Standardausgabe aus"
 
-#: tomb:Key operations:cloakify_key:1852
-#, fuzzy
+#: tomb:Key operations:cloakify_key:1777
 msgid "File exists: ::1 output file::"
 msgstr "Datei existiert: ::1 tomb key::"
 
-#: tomb:Key operations:cloakify_key:1864
-#, fuzzy
+#: tomb:Key operations:cloakify_key:1789
 msgid "Encoding error: cloakify reports problems."
-msgstr "Fehler beim Verschlüsseln: steghide meldet Fehler."
+msgstr "Fehler beim Verschlüsseln: cloakify meldet Fehler."
 
-#: tomb:Key operations:cloakify_key:1867
-#, fuzzy
+#: tomb:Key operations:cloakify_key:1792
 msgid "Tomb key encoded successfully"
 msgstr "Grabschlüssel erfolgreich im Bild ::1 image file:: enkodiert"
 
-#: tomb:Key operations:decloakify_key:1879
-#, fuzzy
+#: tomb:Key operations:decloakify_key:1804
 msgid "Uncloak failed, no text file specified"
 msgstr "Extrahieren fehlgeschlagen. Keine Bilddatei angegeben"
 
-#: tomb:Key operations:decloakify_key:1881
-#, fuzzy
+#: tomb:Key operations:decloakify_key:1806
 msgid "Uncloak failed, no cipher file specified"
 msgstr "Extrahieren fehlgeschlagen. Keine Bilddatei angegeben"
 
-#: tomb:Key operations:decloakify_key:1894
-#, fuzzy
+#: tomb:Key operations:decloakify_key:1819
 msgid "Uncloak failed, text file not found: ::1 text file::"
 msgstr "Exhumieren fehlgeschlagen. Bilddatei nicht gefunden: ::1 image file::"
 
-#: tomb:Key operations:decloakify_key:1897
-#, fuzzy
+#: tomb:Key operations:decloakify_key:1822
 msgid "Uncloak failed, cipher file not found: ::1 cipher file::"
 msgstr "Exhumieren fehlgeschlagen. Bilddatei nicht gefunden: ::1 image file::"
 
-#: tomb:Key operations:decloakify_key:1903
-#, fuzzy
+#: tomb:Key operations:decloakify_key:1828
 msgid "printing uncloaked key on stdout"
 msgstr "gebe exhumierten Schlüssel auf der Standardausgabe aus"
 
-#: tomb:Key operations:decloakify_key:1923
-#, fuzzy
+#: tomb:Key operations:decloakify_key:1852
 msgid "Key successfully uncloaked to ::1 key::."
 msgstr "Schlüssel erfolgreich exhumiert in ::1 key::."
 
-#: tomb:Key operations:decloakify_key:1925
-#, fuzzy
+#: tomb:Key operations:decloakify_key:1854
 msgid "Nothing found in ::1 text file::"
 msgstr "Nichts gefunden in ::1 image file::"
 
-#: tomb:Key operations:engrave_key:1942
+#: tomb:Key operations:engrave_key:1871
 msgid "Rendering a printable QRCode for key: ::1 tomb key file::"
 msgstr ""
 "Zeichnet eines ausdruckbaren QR-Codes des Schlüssels: ::1 tomb key file::"
 
-#: tomb:Key operations:engrave_key:1947
+#: tomb:Key operations:engrave_key:1876
 msgid "QREncode reported an error."
 msgstr "QREncode meldet einen Fehler."
 
-#: tomb:Key operations:engrave_key:1949
+#: tomb:Key operations:engrave_key:1878
 msgid "Operation successful:"
 msgstr "Operation erfolgreich:"
 
-#: tomb:Create:dig_tomb:1983
+#: tomb:Create:dig_tomb:1912
 msgid "Commanded to dig tomb ::1 tomb path::"
 msgstr "Befehl erhalten zum Ausheben des Grabes ::1 tomb path::"
 
-#: tomb:Create:dig_tomb:1985
+#: tomb:Create:dig_tomb:1914
 msgid "Missing path to tomb"
 msgstr "Dateipfad zum Grab fehlt"
 
-#: tomb:Create:dig_tomb:1986
+#: tomb:Create:dig_tomb:1915
 msgid "Size argument missing, use -s"
 msgstr "Größenangabe fehlt. Benutzen Sie -s"
 
-#: tomb:Create:dig_tomb:1987
+#: tomb:Create:dig_tomb:1916
 msgid "Size must be an integer (mebibytes)"
 msgstr "Größe muss als Ganzzahl angegeben werden (Mebibytes)"
 
-#: tomb:Create:dig_tomb:1988
+#: tomb:Create:dig_tomb:1917
 msgid "Tombs can't be smaller than 10 mebibytes"
 msgstr "Gräber können nicht kleiner als 10 Mebibytes sein"
 
-#: tomb:Create:dig_tomb:1991
+#: tomb:Create:dig_tomb:1920
 msgid "A tomb exists already. I'm not digging here:"
 msgstr "Es existiert bereits ein Grab. Hier grabe ich nicht:"
 
-#: tomb:Create:dig_tomb:1996
+#: tomb:Create:dig_tomb:1925
 msgid "Creating a new tomb in ::1 tomb path::"
 msgstr "Erstelle ein neues Grab in ::1 tomb path::"
 
-#: tomb:Create:dig_tomb:1997
+#: tomb:Create:dig_tomb:1926
 msgid "Generating ::1 tomb file:: of ::2 size::MiB"
 msgstr "Grab ::1 tomb file:: wird erstellt, in der Größe ::2 size::MB"
 
-#: tomb:Create:dig_tomb:2001
+#: tomb:Create:dig_tomb:1930
 msgid "Error creating the tomb ::1 tomb path::"
 msgstr "Fehler beim Erzeugen des Grabes ::1 tomb path::"
 
-#: tomb:Create:dig_tomb:2011
+#: tomb:Create:dig_tomb:1940
 msgid "Done digging ::1 tomb name::"
 msgstr "Fertig mit Ausheben von ::1 tomb name::"
 
-#: tomb:Create:dig_tomb:2012
+#: tomb:Create:dig_tomb:1941
 msgid "Your tomb is not yet ready, you need to forge a key and lock it:"
 msgstr ""
 "Ihr Grab ist noch nicht bereit. Erst müssen Sie einen Schlüssel generieren "
 "und es verschließen:"
 
-#: tomb:Create:dig_tomb:2013
+#: tomb:Create:dig_tomb:1942
 msgid "tomb forge ::1 tomb path::.key"
 msgstr "tomb forge ::1 tomb path::.key "
 
-#: tomb:Create:dig_tomb:2014
+#: tomb:Create:dig_tomb:1943
 msgid "tomb lock ::1 tomb path:: -k ::1 tomb path::.key"
 msgstr "tomb lock ::1 tomb path:: -k ::1 tomb path::.key"
 
-#: tomb:Create:forge_key:2036
+#: tomb:Create:forge_key:1965
 msgid "A filename needs to be specified using -k to forge a new key."
 msgstr ""
 "Mit -k muss ein Dateiname angegeben werden, um einen neuen Schlüssel zu "
 "generieren."
 
-#: tomb:Create:forge_key:2038
+#: tomb:Create:forge_key:1967
 msgid "Commanded to forge key ::1 key::"
 msgstr "Angewiesen den Schlüssel ::1 key:: zu generieren"
 
-#: tomb:Create:forge_key:2051
+#: tomb:Create:forge_key:1980
 msgid "Forging this key would overwrite an existing file. Operation aborted."
 msgstr ""
 "Diesen Schlüssel zu generieren würde eine existierende Datei überschreiben. "
 "Aktion abgebrochen."
 
-#: tomb:Create:forge_key:2055
+#: tomb:Create:forge_key:1984
 msgid "Cannot generate encryption key."
 msgstr "Verschlüsselungsschlüssel konnte nicht erstellt werden."
 
-#: tomb:Create:forge_key:2063
+#: tomb:Create:forge_key:1992
 msgid "Commanded to forge key ::1 key:: with cipher algorithm ::2 algorithm::"
 msgstr ""
 "Der Schlüssel ::1 key:: wird mit dem Verschlüsselungsalgorithmus ::2 "
-"algorithm:: gefälscht"
+"algorithm:: erstellt"
 
-#: tomb:Create:forge_key:2072
-#, fuzzy
+#: tomb:Create:forge_key:1996
+msgid "Using KDF to protect the key password"
+msgstr ""
+
+#: tomb:Create:forge_key:2001
 msgid "This operation takes time. Keep using this computer on other tasks."
 msgstr ""
 "Dieser Vorgang braucht Zeit. Benutzen Sie den Computer für andere Aufgaben."
 
-#: tomb:Create:forge_key:2073
-#, fuzzy
+#: tomb:Create:forge_key:2002
 msgid "Once done you will be asked to choose a password for your tomb."
 msgstr ""
 "Wenn der Vorgang abgeschlossen ist, werden Sie aufgefordert ein Passwort für "
 "ihr Grab anzugeben."
 
-#: tomb:Create:forge_key:2074
+#: tomb:Create:forge_key:2003
 msgid "To make it faster you can move the mouse around."
 msgstr "Um den Vorgang zu beschleunigen, bewegen Sie die Maus hin und her."
 
-#: tomb:Create:forge_key:2075
+#: tomb:Create:forge_key:2004
 msgid "If you are on a server, you can use an Entropy Generation Daemon."
 msgstr ""
 "Falls Sie auf einem Server sind, können Sie einen Entropie erzeugenden "
 "Daemon benutzen."
 
-#: tomb:Create:forge_key:2090
-#, fuzzy
+#: tomb:Create:forge_key:2019
 msgid "Using GnuPG key(s) to encrypt your key: ::1 tomb key::"
-msgstr "Wählen Sie das Passwort ihres Schlüssels: ::1 tomb key::"
+msgstr ""
 
-#: tomb:Create:forge_key:2092
-#, fuzzy
+#: tomb:Create:forge_key:2021
 msgid "Choose the password of your key: ::1 tomb key::"
 msgstr "Wählen Sie das Passwort ihres Schlüssels: ::1 tomb key::"
 
-#: tomb:Create:forge_key:2094
+#: tomb:Create:forge_key:2023
 msgid "(You can also change it later using 'tomb passwd'.)"
 msgstr "(Sie können ihn auch später mit 'tomb passwd' wechseln.)"
 
-#: tomb:Create:forge_key:2112
+#: tomb:Create:forge_key:2041
 msgid "The key does not seem to be valid."
 msgstr "Der Schlüssel scheint ungültig zu sein."
 
-#: tomb:Create:forge_key:2113
+#: tomb:Create:forge_key:2042
 msgid "Dumping contents to screen:"
 msgstr "Inhalte werden am Bildschirm angezeigt:"
 
-#: tomb:Create:forge_key:2121
+#: tomb:Create:forge_key:2050
 msgid "Done forging ::1 key file::"
 msgstr "Fertig mit der Generierung von ::1 key file::"
 
-#: tomb:Create:forge_key:2122
+#: tomb:Create:forge_key:2051
 msgid "Your key is ready:"
 msgstr "Ihr Schlüssel ist bereit:"
 
-#: tomb:Create:lock_tomb_with_key:2142
+#: tomb:Create:lock_tomb_with_key:2071
 msgid "No tomb specified for locking."
 msgstr "Kein Grab zum Verschließen angegeben."
 
-#: tomb:Create:lock_tomb_with_key:2143
-#, fuzzy
+#: tomb:Create:lock_tomb_with_key:2072
 msgid "Usage: tomb lock file.tomb -k file.tomb.key"
-msgstr "Nutzung: tomb lock file.tomb file.tomb.key"
+msgstr "Nutzung: tomb lock file.tomb -k file.tomb.key"
 
-#: tomb:Create:lock_tomb_with_key:2150
+#: tomb:Create:lock_tomb_with_key:2079
 msgid "Commanded to lock tomb ::1 tomb file::"
 msgstr "Grab ::1 tomb file:: wird verschlossen"
 
-#: tomb:Create:lock_tomb_with_key:2153
+#: tomb:Create:lock_tomb_with_key:2082
 msgid "There is no tomb here. You have to dig it first."
 msgstr "An diesem Ort befindet sich kein Grab. Sie müssen erst eines ausheben."
 
-#: tomb:Create:lock_tomb_with_key:2166
-msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 47MB."
+#: tomb:Create:lock_tomb_with_key:2095
+msgid ""
+"Filesystem ::1 filesystem:: not supported on tombs smaller than ::2 size::"
 msgstr ""
 
-#: tomb:Create:lock_tomb_with_key:2172
-msgid "Filesystem ::1 filesystem:: not supported on tombs smaller than 18MB."
-msgstr ""
-
-#: tomb:Create:lock_tomb_with_key:2177
+#: tomb:Create:lock_tomb_with_key:2106
 msgid "Filesystem not supported: ::1 filesystem::"
 msgstr ""
 
-#: tomb:Create:lock_tomb_with_key:2181
+#: tomb:Create:lock_tomb_with_key:2110
 msgid "Selected filesystem type $filesystem."
 msgstr ""
 
-#: tomb:Create:lock_tomb_with_key:2188
+#: tomb:Create:lock_tomb_with_key:2115
 msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
 msgstr "Prüfe, ob das Grab leer ist (wir würden nie fremde Knochen stören)."
 
-#: tomb:Create:lock_tomb_with_key:2192
+#: tomb:Create:lock_tomb_with_key:2119
 msgid "The tomb was already locked with another key."
 msgstr "Grab ist schon mit einem anderem Schlüssel verschlossen."
 
-#: tomb:Create:lock_tomb_with_key:2193
+#: tomb:Create:lock_tomb_with_key:2120
 msgid ""
 "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
 msgstr ""
 "Vorgang abgebrochen. Ich kann kein bereits abgeschlossenes Grab nochmal "
 "abschließen. Heben Sie ein neues aus."
 
-#: tomb:Create:lock_tomb_with_key:2195
+#: tomb:Create:lock_tomb_with_key:2122
 msgid "Fine, this tomb seems empty."
 msgstr "Gut, dieses Grab scheint leer zu sein."
 
-#: tomb:Create:lock_tomb_with_key:2203
+#: tomb:Create:lock_tomb_with_key:2130
 msgid "Locking using cipher: ::1 cipher::"
 msgstr "Abschließen mit Chiffre: ::1 cipher::"
 
-#: tomb:Create:lock_tomb_with_key:2215
+#: tomb:Create:lock_tomb_with_key:2142
 msgid "Locking ::1 tomb file:: with ::2 tomb key file::"
 msgstr "Verschließe ::1 tomb file:: mit ::2 tomb key file::"
 
-#: tomb:Create:lock_tomb_with_key:2217
+#: tomb:Create:lock_tomb_with_key:2144
 msgid "Formatting Luks mapped device."
 msgstr "Formatieren des LUKS-Gerätes."
 
-#: tomb:Create:lock_tomb_with_key:2222
+#: tomb:Create:lock_tomb_with_key:2149
 msgid "cryptsetup luksFormat returned an error."
 msgstr "'cryptsetup luksFormat' hat einen Fehler ausgegeben."
 
-#: tomb:Create:lock_tomb_with_key:2227
+#: tomb:Create:lock_tomb_with_key:2154
 msgid "cryptsetup luksOpen returned an error."
 msgstr "'cryptsetup luksOpen' hat einen Fehler ausgegeben."
 
-#: tomb:Create:lock_tomb_with_key:2230
-#, fuzzy
+#: tomb:Create:lock_tomb_with_key:2157
 msgid "Formatting your Tomb with $filesystem filesystem."
-msgstr "Ihr Grab wird mit ext3/ext4 formatiert."
+msgstr "Ihr Grab wird mit $filesystem formatiert."
 
-#: tomb:Create:lock_tomb_with_key:2249
+#: tomb:Create:lock_tomb_with_key:2176
 msgid "Tomb format returned an error."
 msgstr "Beim Formatieren ist ein Fehler aufgetreten."
 
-#: tomb:Create:lock_tomb_with_key:2251
+#: tomb:Create:lock_tomb_with_key:2178
 msgid "Your tomb ::1 tomb file:: may be corrupted."
 msgstr "Ihr Grab ::1 tomb file:: könnte beschädigt sein."
 
-#: tomb:Create:lock_tomb_with_key:2256
+#: tomb:Create:lock_tomb_with_key:2183
 msgid "Done locking ::1 tomb name:: using Luks dm-crypt ::2 cipher::"
 msgstr ""
 "Grab ::1 tomb name:: wurde erfolgreich abgeschlossen (mit LUKS dm-crypt ::2 "
 "cipher::)"
 
-#: tomb:Create:lock_tomb_with_key:2257
+#: tomb:Create:lock_tomb_with_key:2184
 msgid ""
 "Your tomb is ready in ::1 tomb path:: and secured with key ::2 tomb key::"
 msgstr ""
 "Ihr Grab ist bereit in ::1 tomb path:: und gesichert mit dem Schlüssel ::2 "
 "tomb key::"
 
-#: tomb:Create:change_tomb_key:2267
+#: tomb:Create:change_tomb_key:2194
 msgid "Commanded to reset key for tomb ::1 tomb path::"
 msgstr ""
 "Befehl erhalten zum Zurücksetzen des Schlüssels für das Grab ::1 tomb path::"
 
-#: tomb:Create:change_tomb_key:2270
+#: tomb:Create:change_tomb_key:2197
 msgid "Command 'setkey' needs two arguments: the old key file and the tomb."
 msgstr ""
 "Der Befehl 'setkey' benötigt zwei Argumente: Die alte Schlüsseldatei und das "
 "Grab."
 
-#: tomb:Create:change_tomb_key:2271
-#, fuzzy
+#: tomb:Create:change_tomb_key:2198
 msgid "I.e:\ttomb -k new.tomb.key old.tomb.key secret.tomb"
 msgstr "z.B.: tomb -k new.tomb.key old.tomb.key secret.tomb"
 
-#: tomb:Create:change_tomb_key:2272
+#: tomb:Create:change_tomb_key:2199
 msgid "Execution aborted."
 msgstr "Vorgang abgebrochen."
 
-#: tomb:Create:change_tomb_key:2284
+#: tomb:Create:change_tomb_key:2209
 msgid "Not a valid LUKS encrypted volume: ::1 volume::"
 msgstr "Dieses Grab ist kein gültiges LUKS-verschlüsseltes Gerät: ::1 volume::"
 
-#: tomb:Create:change_tomb_key:2294
+#: tomb:Create:change_tomb_key:2219
 msgid "Changing lock on tomb ::1 tomb name::"
 msgstr "Wechsle Schloss am Grab ::1 tomb name::"
 
-#: tomb:Create:change_tomb_key:2295
+#: tomb:Create:change_tomb_key:2220
 msgid "Old key: ::1 old key::"
 msgstr "Alter Schlüssel: ::1 old key::"
 
-#: tomb:Create:change_tomb_key:2306
+#: tomb:Create:change_tomb_key:2231
 msgid "No valid password supplied for the old key."
 msgstr "Kein gültiges Passwort für den alten Schlüssel angegeben."
 
-#: tomb:Create:change_tomb_key:2312
+#: tomb:Create:change_tomb_key:2237
 msgid "Unexpected error in luksOpen."
 msgstr "Unerwarteter Fehler in luksOpen."
 
-#: tomb:Create:change_tomb_key:2316
+#: tomb:Create:change_tomb_key:2241
 msgid "New key: ::1 key file::"
 msgstr "Neuer Schlüssel: ::1 key file::"
 
-#: tomb:Create:change_tomb_key:2326
+#: tomb:Create:change_tomb_key:2251
 msgid "No valid password supplied for the new key."
 msgstr "Kein gültiges Passwort für den neuen Schlüssel angegeben."
 
-#: tomb:Create:change_tomb_key:2335
+#: tomb:Create:change_tomb_key:2260
 msgid "Unexpected error in luksChangeKey."
 msgstr "Unerwarteter Fehler in luksChangeKey."
 
-#: tomb:Create:change_tomb_key:2337
+#: tomb:Create:change_tomb_key:2262
 msgid "Unexpected error in luksClose."
 msgstr "Unerwarteter Fehler in luksClose."
 
-#: tomb:Create:change_tomb_key:2339
+#: tomb:Create:change_tomb_key:2264
 msgid "Successfully changed key for tomb: ::1 tomb file::"
 msgstr "Schlüssel erfolgreich gewechselt für das Grab: ::1 tomb file::"
 
-#: tomb:Create:change_tomb_key:2340
+#: tomb:Create:change_tomb_key:2265
 msgid "The new key is: ::1 new key::"
 msgstr "Der neue Schlüssel ist: ::1 new key::"
 
-#: tomb:Open:mount_tomb:2370
+#: tomb:Open:mount_tomb:2295
 msgid "No tomb name specified for opening."
 msgstr "Bitte geben Sie den Namen des zu öffnenden Grabes an."
 
-#: tomb:Open:mount_tomb:2372
+#: tomb:Open:mount_tomb:2297
 msgid "Commanded to open tomb ::1 tomb name::"
 msgstr "Grab ::1 tomb name:: wird geöffnet"
 
-#: tomb:Open:mount_tomb:2388
+#: tomb:Open:mount_tomb:2316
 msgid "Mountpoint not specified, using default: ::1 mount point::"
 msgstr ""
 "Einhängeort nicht angegeben: der Standard ::1 mount point:: wird gewählt"
 
-#: tomb:Open:mount_tomb:2391
+#: tomb:Open:mount_tomb:2319
 msgid "Opening ::1 tomb file:: on ::2 mount point::"
 msgstr "Öffne ::1 tomb file:: an ::2 mount point::"
 
-#: tomb:Open:mount_tomb:2398
-#, fuzzy
+#: tomb:Open:mount_tomb:2326
 msgid "Mountpoint already in use: ::1 mount point::"
 msgstr ""
 "Einhängeort nicht angegeben: der Standard ::1 mount point:: wird gewählt"
 
-#: tomb:Open:mount_tomb:2405
+#: tomb:Open:mount_tomb:2333
 msgid "::1 tomb file:: is not a valid Luks encrypted storage file."
 msgstr "::1 tomb file:: ist keine gültige LUKS-verschlüsselte Containerdatei."
 
-#: tomb:Open:mount_tomb:2407
+#: tomb:Open:mount_tomb:2335
 msgid "This tomb is a valid LUKS encrypted device."
 msgstr "Dieses Grab ist ein gültiges LUKS-verschlüsseltes Gerät."
 
-#: tomb:Open:mount_tomb:2414
+#: tomb:Open:mount_tomb:2342
 msgid "Cipher is \"::1 cipher::\" mode \"::2 mode::\" hash \"::3 hash::\""
 msgstr ""
 "Verschlüsselung \"::1 cipher::\" im Modus \"::2 mode::\" und der "
 "Hashfunktion \"::3 hash::\""
 
-#: tomb:Open:mount_tomb:2421
+#: tomb:Open:mount_tomb:2349
 msgid ""
 "Multiple key slots are enabled on this tomb. Beware: there can be a backdoor."
 msgstr ""
 "Mehrere Schlüssellöcher sind an diesem Grab angebracht. Achtung: es könnten "
 "Hintertüren sein."
 
-#: tomb:Open:mount_tomb:2439
+#: tomb:Open:mount_tomb:2367
 msgid "Failure mounting the encrypted file."
 msgstr "Fehler beim Einhängen der verschlüsselten Datei."
 
-#: tomb:Open:mount_tomb:2449
+#: tomb:Open:mount_tomb:2374
 msgid "Success unlocking tomb ::1 tomb name::"
 msgstr "Entsperren erfolgreich von ::1 tomb name::"
 
-#: tomb:Open:mount_tomb:2453
+#: tomb:Open:mount_tomb:2378
 msgid "Filesystem detected: ::1 filesystem::"
 msgstr ""
 
-#: tomb:Open:mount_tomb:2459
+#: tomb:Open:mount_tomb:2384
 msgid "Skipping filesystem checks in read-only"
 msgstr ""
 
-#: tomb:Open:mount_tomb:2461
+#: tomb:Open:mount_tomb:2386
 msgid "Checking filesystem via ::1::"
 msgstr "Dateisystem überprüfen mit ::1::"
 
-#: tomb:Open:mount_tomb:2491
+#: tomb:Open:mount_tomb:2430
 msgid "Error mounting ::1 mapper:: on ::2 tombmount::"
 msgstr "Fehler beim Einhängen von ::1 mapper:: an ::2 tombmount::"
 
-#: tomb:Open:mount_tomb:2493
+#: tomb:Open:mount_tomb:2432
 msgid "Are mount options '::1 mount options::' valid?"
 msgstr "Sind die mount-Optionen '::1 mount options::' richtig?"
 
-#: tomb:Open:mount_tomb:2498
+#: tomb:Open:mount_tomb:2436
 msgid "Cannot mount ::1 tomb name::"
 msgstr "Kann ::1 tomb name:: nicht einhängen"
 
-#: tomb:Open:mount_tomb:2501
+#: tomb:Open:mount_tomb:2439
 msgid "Success opening ::1 tomb file:: on ::2 mount point::"
 msgstr "Erfolgreiches Öffnen von ::1 tomb file:: auf ::2 mount point::"
 
-#: tomb:Open:mount_tomb:2515
+#: tomb:Open:mount_tomb:2453
 msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
 msgstr ""
 "Letzer Besuch von ::1 user::(::2 tomb build::) von ::3 tty:: auf ::4 host::"
 
-#: tomb:Open:mount_tomb:2516
+#: tomb:Open:mount_tomb:2454
 msgid "on date ::1 date::"
 msgstr "am ::1 date::"
 
-#: tomb:Open:mount_tomb:2517
+#: tomb:Open:mount_tomb:2455
 msgid "the door was slammed or shutdown called before umount."
 msgstr ""
 
-#: tomb:Open:exec_safe_bind_hooks:2579
-#, fuzzy
+#: tomb:Open:exec_safe_bind_hooks:2517
 msgid "How pitiful!\tA tomb, and no HOME."
 msgstr "Wie bedauernswert! Ein Grab, aber kein HOME."
 
-#: tomb:Open:exec_safe_bind_hooks:2583
+#: tomb:Open:exec_safe_bind_hooks:2521
 msgid "Cannot exec bind hooks without a mounted tomb."
 msgstr "'Bind hooks' kann ohne eingehängtes Grab nicht benutzt werden ."
 
-#: tomb:Open:exec_safe_bind_hooks:2602
+#: tomb:Open:exec_safe_bind_hooks:2540
 msgid "bind-hooks file is broken"
 msgstr "Datei mit den Bind-Hooks ist korrumpiert"
 
-#: tomb:Open:exec_safe_bind_hooks:2611
+#: tomb:Open:exec_safe_bind_hooks:2549
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
 msgstr ""
 "'bind-hooks'-Zuweisungsformat: lokaler/Pfad/zum/Grab lokaler/Pfad/zu/$HOME"
 
-#: tomb:Open:exec_safe_bind_hooks:2615
-#, fuzzy
+#: tomb:Open:exec_safe_bind_hooks:2553
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.\t Rolling back"
 msgstr ""
 "'bind-hooks'-Zuweisungsformat: lokaler/Pfad/zum/Grab lokaler/Pfad/zu/$HOME.  "
 "Mache rückgängig"
 
-#: tomb:Open:exec_safe_bind_hooks:2620
-msgid "bind-hook target not existent, skipping ::1 home::/::2 subdir::"
-msgstr ""
-"'bind-hooks'-Ziel existiert nicht, ::1 home::/::2 subdir:: wird ignoriert"
-
-#: tomb:Open:exec_safe_bind_hooks:2622
+#: tomb:Open:exec_safe_bind_hooks:2559
 msgid ""
 "bind-hook source not found in tomb, skipping ::1 mount point::/::2 subdir::"
 msgstr ""
-"'bind-hooks'-Quelle nicht in Grab gefunden. ::1 mount point::/::2 subdir:: "
-"wird ignoriert"
+"'bind-hooks'-Quelle nicht in Grab gefunden. Übergehe ::1 mount point::/::2 subdir::"
 
-#: tomb:Open:exec_safe_func_hooks:2645
+#: tomb:Open:exec_safe_bind_hooks:2562
+msgid "bind-hook target not existent, skipping ::1 home::/::2 subdir::"
+msgstr ""
+"'bind-hooks'-Ziel existiert nicht, übergehe ::1 home::/::2 subdir::"
+
+#: tomb:Open:exec_safe_func_hooks:2587
 msgid "Exec hook: ::1 exec hook:: ::2 action::"
 msgstr ""
 
-#: tomb:List:list_tombs:2671
+#: tomb:List:list_tombs:2613
 msgid "I can't see any open tomb, may they all rest in peace."
 msgstr "Ich sehe kein geöffnetes Grab. Mögen Sie alle in Frieden ruhen."
 
-#: tomb:List:list_tombs:2707
+#: tomb:List:list_tombs:2649
 msgid "::1 tombname:: open on ::2 tombmount:: using ::3 tombfsopts::"
 msgstr "::1 tombname:: geöffnet in ::2 tombmount:: mit ::3 tombfsopts::"
 
-#: tomb:List:list_tombs:2712
+#: tomb:List:list_tombs:2654
 msgid "::1 tombname:: open since ::2 tombsince::"
 msgstr "::1 tombname:: geöffnet seit ::2 tombsince::"
 
-#: tomb:List:list_tombs:2715
+#: tomb:List:list_tombs:2657
 msgid ""
 "::1 tombname:: open by ::2 tombuser:: from ::3 tombtty:: on ::4 tombhost::"
 msgstr ""
 "::1 tombname:: geöffnet von ::2 tombuser:: von ::3 tombtty:: auf ::4 "
 "tombhost::"
 
-#: tomb:List:list_tombs:2719
+#: tomb:List:list_tombs:2661
 msgid ""
 "::1 tombname:: size ::2 tombtot:: of which ::3 tombused:: (::5 tombpercent::"
 "%) is used: ::4 tombavail:: free "
@@ -1227,271 +1155,270 @@ msgstr ""
 "::1 tombname:: Grösse ::2 tombtot:: davon ::3 tombused:: (::5 tombpercent::"
 "%) benutzt: ::4 tombavail:: frei "
 
-#: tomb:List:list_tombs:2723
+#: tomb:List:list_tombs:2665
 msgid "::1 tombname:: warning: your tomb is almost full!"
 msgstr "::1 tombname:: Warnung: Ihr Grab ist fast voll!"
 
-#: tomb:List:list_tombs:2729
-#, fuzzy
+#: tomb:List:list_tombs:2671
 msgid "::1 tombname:: hooks ::2 hookdest::"
-msgstr "::1 tombname:: bindet ::2 hookname:: ein auf ::3 hookdest::"
+msgstr ""
 
-#: tomb:List:list_tomb_binds:2790
+#: tomb:List:list_tomb_binds:2716
 msgid "Internal error: list_tomb_binds called without argument."
 msgstr "Interner Fehler: list_tomb_binds wurde ohne Argumente aufgerufen."
 
-#: tomb:Index and search:index_tombs:2819
-#, fuzzy
-msgid ""
-"Cannot index tombs on this system: updatedb (mlocate/plocate) not installed."
-msgstr ""
-"Kann Gräber auf diesem System nicht indexieren: updatedb (mlocate) ist nicht "
-"installiert."
-
-#: tomb:Index and search:index_tombs:2823
-msgid "Cannot use GNU findutils for index/search commands."
-msgstr "Kann GNU findutils nicht für Indexierung/Suchbefehle benutzen."
-
-#: tomb:Index and search:index_tombs:2825
-#, fuzzy
-msgid "Index command needs 'mlocate/plocate' to be installed."
-msgstr "Index-Befehl benötigt installiertes 'mlocate'."
-
-#: tomb:Index and search:index_tombs:2833
+#: tomb:Index and search:index_tombs:2740
 msgid "There seems to be no open tomb engraved as [::1::]"
 msgstr "Es scheint kein als [::1::] benanntes Grab offen zu sein"
 
-#: tomb:Index and search:index_tombs:2837
+#: tomb:Index and search:index_tombs:2744
 msgid "Creating and updating search indexes."
 msgstr "Erstellen und aktualisieren der Suchindizes."
 
-#: tomb:Index and search:index_tombs:2850
+#: tomb:Index and search:index_tombs:2757
 msgid "Skipping ::1 tomb name:: (.noindex found)."
 msgstr "Überspringe ::1 tomb name:: (.noindex gefunden)."
 
-#: tomb:Index and search:index_tombs:2852
+#: tomb:Index and search:index_tombs:2763
+msgid "Cannot use GNU findutils for index/search commands."
+msgstr "Kann GNU findutils nicht für Indexierung/Suchbefehle benutzen."
+
+#: tomb:Index and search:index_tombs:2765
+msgid "Index command needs 'mlocate/plocate' to be installed."
+msgstr ""
+
+#: tomb:Index and search:index_tombs:2767
 msgid "Indexing ::1 tomb name:: filenames..."
 msgstr "Indexieren der Dateinamen von ::1 tomb name:: läuft..."
 
-#: tomb:Index and search:index_tombs:2857
+#: tomb:Index and search:index_tombs:2775
 msgid "Indexing ::1 tomb name:: contents..."
 msgstr "Indexieren der Inhalte von ::1 tomb name:: läuft..."
 
-#: tomb:Index and search:index_tombs:2859
-msgid "Generating a new search index configuration file: ::1 swish conf::"
+#: tomb:Index and search:index_tombs:2777
+msgid "Generating a new search index configuration: ::1 recoll conf::"
 msgstr "Kreiere eine neue 'search index'-Konfigurationsdatei: ::1 swish conf::"
 
-#: tomb:Index and search:index_tombs:2929
+#: tomb:Index and search:index_tombs:2785
 msgid "Search index updated."
 msgstr "Suchindex aktualisiert."
 
-#: tomb:Index and search:search_tombs:2951
+#: tomb:Index and search:search_tombs:2792
+msgid "Cannot index tombs on this system: updatedb (mlocate/plocate) not installed."
+msgstr ""
+
+#: tomb:Index and search:search_tombs:2807
 msgid "Searching for: ::1::"
 msgstr "Suche nach: ::1::"
 
-#: tomb:Index and search:search_tombs:2959
+#: tomb:Index and search:search_tombs:2815
 msgid "Searching filenames in tomb ::1 tomb name::"
 msgstr "Suche Dateinamen im Grab ::1 tomb name::"
 
-#: tomb:Index and search:search_tombs:2961
+#: tomb:Index and search:search_tombs:2817
 msgid "Matches found: ::1 matches::"
 msgstr "Ergebnisse: ::1 matches::"
 
-#: tomb:Index and search:search_tombs:2966
+#: tomb:Index and search:search_tombs:2822
 msgid "Searching contents in tomb ::1 tomb name::"
 msgstr "Suche in den Inhalten von ::1 tomb name::"
 
-#: tomb:Index and search:search_tombs:2969
+#: tomb:Index and search:search_tombs:2825
 msgid "Skipping tomb ::1 tomb name::: not indexed."
 msgstr "Das Grab ::1 tomb name:: ist nicht indexiert und wird ignoriert."
 
-#: tomb:Index and search:search_tombs:2970
+#: tomb:Index and search:search_tombs:2826
 msgid "Run 'tomb index' to create indexes."
 msgstr "Führen Sie 'tomb index' aus, um Suchindizes zu erstellen."
 
-#: tomb:Index and search:search_tombs:2972
+#: tomb:Index and search:search_tombs:2828
 msgid "Search completed."
 msgstr "Suche abgeschlossen."
 
-#: tomb:Resize:resize_tomb:2984
+#: tomb:Resize:resize_tomb:2840
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
 msgstr ""
 "Die Größe des Grabs ::1 tombname:: soll auf ::2 size:: Mebibytes geändert "
 "werden."
 
-#: tomb:Resize:resize_tomb:2986
+#: tomb:Resize:resize_tomb:2842
 msgid "No tomb name specified for resizing."
 msgstr "Kein Name für das zu vergrößernde Grab angegeben."
 
-#: tomb:Resize:resize_tomb:2987
+#: tomb:Resize:resize_tomb:2843
 msgid "Cannot find ::1::"
 msgstr "::1:: nicht gefunden"
 
-#: tomb:Resize:resize_tomb:2991
+#: tomb:Resize:resize_tomb:2847
 msgid "Aborting operations: new size was not specified, use -s"
 msgstr "Operationen werden abgebrochen: Neue Größe nicht mit -s angegeben"
 
-#: tomb:Resize:resize_tomb:3010
+#: tomb:Resize:resize_tomb:2866
 msgid "You must specify the new size of ::1 tomb name::"
 msgstr "Sie müssen die neue Größe von ::1 tomb name:: angeben"
 
-#: tomb:Resize:resize_tomb:3012
+#: tomb:Resize:resize_tomb:2868
 msgid "Size is not an integer."
 msgstr "Die Größe ist keine Ganzzahl."
 
-#: tomb:Resize:resize_tomb:3024
+#: tomb:Resize:resize_tomb:2876
+msgid "The growth in size must be greater than 150MiB"
+msgstr ""
+
+#: tomb:Resize:resize_tomb:2883
 msgid "Error creating the extra resize ::1 size::, operation aborted."
 msgstr ""
 "Fehler beim Erstellen der Extra-Vergrößerung ::1 size::, Operation "
 "abgebrochen."
 
-#: tomb:Resize:resize_tomb:3031
+#: tomb:Resize:resize_tomb:2890
 msgid "Tomb seems resized already, operating filesystem stretch"
 msgstr ""
-"Die Größe des Grabs wurde offensichtlich schon geändert, über eine "
-"Stretchfunktion des Dateisystems"
 
-#: tomb:Resize:resize_tomb:3033
+#: tomb:Resize:resize_tomb:2892
 msgid "The new size must be greater than old tomb size."
 msgstr "Die neue Größe muss größer sein als die alte."
 
-#: tomb:Resize:resize_tomb:3038
+#: tomb:Resize:resize_tomb:2897
 msgid "opening tomb"
 msgstr "öffne Grab"
 
-#: tomb:Resize:resize_tomb:3043
+#: tomb:Resize:resize_tomb:2902
 msgid "cryptsetup failed to resize ::1 mapper::"
 msgstr "cryptsetup konnte ::1 mapper:: nicht vergrößern"
 
-#: tomb:Resize:resize_tomb:3052
+#: tomb:Resize:resize_tomb:2911
 msgid "e2fsck failed to check ::1 mapper::"
 msgstr "e2fsck konnte ::1 mapper:: nicht überprüfen"
 
-#: tomb:Resize:resize_tomb:3055
+#: tomb:Resize:resize_tomb:2914
 msgid "resize2fs failed to resize ::1 mapper::"
 msgstr "resize2fs konnte ::1 mapper:: nicht vergrößern"
 
-#: tomb:Resize:resize_tomb:3060
-#, fuzzy
+#: tomb:Resize:resize_tomb:2919
 msgid "filesystem check failed on ::1 mapper::"
-msgstr "e2fsck konnte ::1 mapper:: nicht überprüfen"
+msgstr ""
 
-#: tomb:Resize:resize_tomb:3069
-#, fuzzy
+#: tomb:Resize:resize_tomb:2932
 msgid "filesystem resize failed on ::1 mapper::"
 msgstr "resize2fs konnte ::1 mapper:: nicht vergrößern"
 
-#: tomb:Close:umount_tomb:3098
+#: tomb:Close:umount_tomb:2963
 msgid "There is no open tomb to be closed."
 msgstr "Es gibt kein zu schließendes Grab."
 
-#: tomb:Close:umount_tomb:3101
+#: tomb:Close:umount_tomb:2966
 msgid "Too many tombs mounted, please specify one (see tomb list)"
 msgstr ""
 "Zu viele Gräber geöffnet. Bitte geben Sie ein Grab an (siehe 'tomb list')"
 
-#: tomb:Close:umount_tomb:3102
+#: tomb:Close:umount_tomb:2967
 msgid "or issue the command 'tomb close all' to close them all."
 msgstr "oder 'tomb close all' ausführen, um alle zu schließen."
 
-#: tomb:Close:umount_tomb:3121
+#: tomb:Close:umount_tomb:2986
 msgid "Tomb not found: ::1 tomb file::"
 msgstr "Grab unauffindbar: ::1 tomb file::"
 
-#: tomb:Close:umount_tomb:3122
+#: tomb:Close:umount_tomb:2987
 msgid "Please specify an existing tomb."
 msgstr "Bitte geben Sie ein existierendes Grab an."
 
-#: tomb:Close:umount_tomb:3130
+#: tomb:Close:umount_tomb:2995
 msgid "close exec-hook returns a non-zero error code: ::1 error::"
 msgstr ""
 
-#: tomb:Close:umount_tomb:3131
-#, fuzzy
+#: tomb:Close:umount_tomb:2996
 msgid "Operation aborted"
 msgstr "Vorgang abgebrochen."
 
-#: tomb:Close:umount_tomb:3135
+#: tomb:Close:umount_tomb:3002
+msgid "Slamming tomb ::1 tombname:: mounted on ::2 tombmount::"
+msgstr "Schlage das Grab ::1 tomb name::, eingehängt in ::2 mount point::, zu"
+
+#: tomb:Close:umount_tomb:3006
+msgid "Still active processes for ::1 tombname ::, cannot close tomb."
+msgstr ""
+
+#: tomb:Close:umount_tomb:3009
 msgid "Closing tomb ::1 tomb name:: mounted on ::2 mount point::"
 msgstr ""
 "Grab ::1 tomb name::, eingehängt in ::2 mount point::, wird geschlossen"
 
-#: tomb:Close:umount_tomb:3143
+#: tomb:Close:umount_tomb:3019
 msgid "Closing tomb bind hook: ::1 hook::"
 msgstr "Schließen des 'bind hooks': ::1 hook::"
 
-#: tomb:Close:umount_tomb:3145
+#: tomb:Close:umount_tomb:3021
 msgid "Tomb bind hook ::1 hook:: is busy, cannot close tomb."
 msgstr ""
 "Der 'bind hook' ::1 hook:: ist beschäftigt. Das Grab kann nicht geschlossen "
 "werden."
 
-#: tomb:Close:umount_tomb:3165
+#: tomb:Close:umount_tomb:3030
 msgid "Tomb is busy, cannot umount!"
 msgstr "Das Grab ist beschäftigt und kann nicht ausgehängt werden!"
 
-#: tomb:Close:umount_tomb:3178
+#: tomb:Close:umount_tomb:3041
 msgid "Error occurred in cryptsetup luksClose ::1 mapper::"
 msgstr ""
 "Ein Fehler ist beim Ausführen von 'cryptsetup luksClose ::1 mapper::' "
 "aufgetreten"
 
-#: tomb:Close:umount_tomb:3186
+#: tomb:Close:umount_tomb:3043
 msgid "Tomb ::1 tomb name:: closed: your bones will rest in peace."
 msgstr ""
 "Grab ::1 tomb name:: geschlossen: Ihre Knochen werden in Frieden ruhen."
 
-#: tomb:Close:list_processes:3200
-#, fuzzy
-msgid "Listing processes running inside all open tombs..."
-msgstr "Abbrechen aller Prozesse, die auf ein Grab zugreifen."
-
-#: tomb:Close:list_processes:3202
-#, fuzzy
-msgid "Listing processes running inside tomb '::1 tombname::'..."
-msgstr "Entsperren erfolgreich von ::1 tomb name::"
-
-#: tomb:Close:slam_tomb:3238
-#, fuzzy
-msgid "Slamming tomb ::1 tombname:: mounted on ::2 tombmount::"
-msgstr "Schlage das Grab ::1 tomb name::, eingehängt in ::2 mount point::, zu"
-
-#: tomb:Close:slam_tomb:3248
-#, fuzzy
-msgid "::1 tombname:: sending ::2 sig:: to ::3 cmd:: (::4 uid::)"
-msgstr ""
-"::1 tombname:: geöffnet von ::2 tombuser:: von ::3 tombtty:: auf ::4 "
-"tombhost::"
-
-#: tomb:Close:slam_tomb:3258
-msgid "Can't kill ::1 process:: ::2 pcmd:: (::3 powner::)"
+#: tomb:Close:list_processes:3058
+msgid "Looking for processes running inside all open tombs..."
 msgstr ""
 
-#: tomb:Main routine:main:3357
+#: tomb:Close:list_processes:3060
+msgid "Looking for processes running inside tomb ::1 tombname::..."
+msgstr ""
+
+#: tomb:Close:list_processes:3067
+msgid "None found"
+msgstr ""
+
+#: tomb:Close:_kill_processes:3077
+msgid "Missing arguments for slamming."
+msgstr ""
+
+#: tomb:Close:_kill_processes:3093
+msgid "::1 tombname:: sending ::2 sig:: to open process ::3 pnum::"
+msgstr ""
+
+#: tomb:Close:_kill_processes:3108
+msgid "Couldn't kill ::1 pnum::"
+msgstr ""
+
+#: tomb:Main routine:main:3204
 msgid "Error parsing."
 msgstr "Fehler beim Parsen."
 
-#: tomb:Main routine:main:3367
+#: tomb:Main routine:main:3214
 msgid "There's no such command \"::1 subcommand::\"."
 msgstr "Der Befehl \"::1 subcommand::\" existiert nicht."
 
-#: tomb:Main routine:main:3368
+#: tomb:Main routine:main:3215
 msgid "Please try -h for help."
 msgstr "Versuchen Sie -h um Hilfe zu erhalten."
 
-#: tomb:Main routine:main:3380
+#: tomb:Main routine:main:3227
 msgid "Some error occurred during option processing."
 msgstr "Fehler beim Interpretieren der Optionen."
 
-#: tomb:Main routine:main:3381
+#: tomb:Main routine:main:3228
 msgid "See \"tomb help\" for more info."
 msgstr "Siehe \"tomb help\" für mehr Infos."
 
-#: tomb:Main routine:main:3393
+#: tomb:Main routine:main:3240
 msgid "Unrecognized option ::1 arg:: for subcommand ::2 subcommand::"
 msgstr "Unbekannte Option ::1 arg:: für Unterbefehl ::2 subcommand::"
 
-#: tomb:Main routine:main:3409
+#: tomb:Main routine:main:3256
 msgid ""
 "You specified option ::1 option::, which is DANGEROUS and should only be "
 "used for testing\n"
@@ -1501,113 +1428,109 @@ msgstr ""
 "Testen benutzt werden sollte.\n"
 "Wenn Sie dies wollen, benutzen Sie --unsafe"
 
-#: tomb:Main routine:main:3417
+#: tomb:Main routine:main:3264
 msgid "Privilege escalation tool configured: ::1 exec::"
 msgstr ""
 
-#: tomb:Main routine:main:3447
+#: tomb:Main routine:main:3294
 msgid ""
 "The create command is deprecated, please use dig, forge and lock instead."
 msgstr ""
 "Der Befehl create ist veraltet. Benutzen Sie stattdessen dig, forge, und "
 "lock."
 
-#: tomb:Main routine:main:3448
+#: tomb:Main routine:main:3295
 msgid "For more information see Tomb's manual page (man tomb)."
 msgstr "Für mehr Informationen siehe Benutzerhandbuch (man tomb)."
 
-#: tomb:Main routine:main:3489
-#, fuzzy
+#: tomb:Main routine:main:3329
 msgid "lsof not installed: cannot slam tombs."
-msgstr "Resize2fs nicht installiert: Gräber können nicht vergrößert werden."
+msgstr ""
 
-#: tomb:Main routine:main:3490
+#: tomb:Main routine:main:3330
 msgid "Trying a regular close."
 msgstr ""
 
-#: tomb:Main routine:main:3497
+#: tomb:Main routine:main:3341
 msgid "Resize2fs not installed: cannot resize tombs."
 msgstr "Resize2fs nicht installiert: Gräber können nicht vergrößert werden."
 
-#: tomb:Main routine:main:3523
+#: tomb:Main routine:main:3367
 msgid "QREncode not installed: cannot engrave keys on paper."
 msgstr "QREncode nicht installiert: Kann Schlüssel nicht auf Papier ausgeben."
 
-#: tomb:Main routine:main:3540
+#: tomb:Main routine:main:3384
 msgid "Steghide not installed: cannot bury keys into images."
 msgstr ""
 "Steghide ist nicht installiert: Schlüssel können nicht in Bildern vergraben "
 "werden."
 
-#: tomb:Main routine:main:3547
+#: tomb:Main routine:main:3391
 msgid "Steghide not installed: cannot exhume keys from images."
 msgstr ""
 "Steghide ist nicht installiert: Schlüssel können nicht aus Bildern exhumiert "
 "werden."
 
-#: tomb:Main routine:main:3554
-#, fuzzy
+#: tomb:Main routine:main:3398
 msgid "Cloakify not installed: cannot cipher keys into texts"
 msgstr ""
-"Steghide ist nicht installiert: Schlüssel können nicht in Bildern vergraben "
+"Cloakify ist nicht installiert: Schlüssel können nicht in Bildern vergraben "
 "werden."
 
-#: tomb:Main routine:main:3561
-#, fuzzy
+#: tomb:Main routine:main:3405
 msgid "Decloakify not installed: cannot decipher keys from texts"
 msgstr ""
-"Steghide ist nicht installiert: Schlüssel können nicht aus Bildern exhumiert "
+"Decloakify ist nicht installiert: Schlüssel können nicht aus Bildern exhumiert "
 "werden."
 
-#: tomb:Main routine:main:3576
+#: tomb:Main routine:main:3420
 msgid "Tomb ::1 version:: - a strong and gentle undertaker for your secrets"
 msgstr ""
 "Tomb ::1 version:: - ein starker und sanfter Totengräber für Ihre Geheimnisse"
 
-#: tomb:Main routine:main:3578
-#, fuzzy
+#: tomb:Main routine:main:3422
 msgid " Copyright (C) 2007-2024 Dyne.org Foundation, License GNU GPL v3+"
-msgstr " Copyright (C) 2007-2017 Dyne.org Foundation, GNU-GPL-Lizenz v3+"
+msgstr " Copyright (C) 2007-2024 Dyne.org Foundation, GNU-GPL-Lizenz v3+"
 
-#: tomb:Main routine:main:3579
+#: tomb:Main routine:main:3423
 msgid " This is free software: you are free to change and redistribute it"
 msgstr ""
 " Dies ist freie Software: Sie dürfen diese beliebig verändern und weitergeben"
 
-#: tomb:Main routine:main:3580
+#: tomb:Main routine:main:3424
 msgid " For the latest sourcecode go to <http://dyne.org/software/tomb>"
 msgstr ""
 " Den aktuellen Quellcode finden Sie auf <https://dyne.org/software/tomb>"
 
-#: tomb:Main routine:main:3585
+#: tomb:Main routine:main:3429
 msgid " This source code is distributed in the hope that it will be useful,"
 msgstr ""
 " Dieser Quellcode wird veröffentlicht in der Hoffnung dass er nützlich ist,"
 
-#: tomb:Main routine:main:3586
+#: tomb:Main routine:main:3430
 msgid " but WITHOUT ANY WARRANTY; without even the implied warranty of"
 msgstr " aber OHNE JEDWEDE GARANTIE; inbegriffen die Garantie der"
 
-#: tomb:Main routine:main:3587
+#: tomb:Main routine:main:3431
 msgid " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr " MARKTGÄNGIGKEIT oder der EIGNUNG ZU EINEM BESTIMMTEN ZWECK."
 
-#: tomb:Main routine:main:3589
+#: tomb:Main routine:main:3433
 msgid " When in need please refer to <http://dyne.org/support>."
-msgstr " Für Hilfe bitte wenden Sie sich an <http://dyne.org/support>."
+msgstr " Für Hilfe wenden Sie sich bitte an <http://dyne.org/support>."
 
-#: tomb:Main routine:main:3591
+#: tomb:Main routine:main:3435
 msgid "System utils:"
 msgstr "Systemwerkzeuge:"
 
-#: tomb:Main routine:main:3603
+#: tomb:Main routine:main:3447
 msgid "Optional utils:"
 msgstr "Optionale Hilfswerkzeuge:"
 
-#: tomb:Main routine:main:3613
+#: tomb:Main routine:main:3457
 msgid "Command \"::1 subcommand::\" not recognized."
 msgstr "Der Befehl \"::1 subcommand::\" wurde nicht erkannt."
 
-#: tomb:Main routine:main:3614
+#: tomb:Main routine:main:3458
 msgid "Try -h for help."
 msgstr "Versuchen Sie -h um Hilfe zu erhalten."
