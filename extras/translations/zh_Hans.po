@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2024-12-13 05:00+0000\n"
-"Last-Translator: Loge Xu <wazolm5643@163.com>\n"
+"PO-Revision-Date: 2025-01-26 15:01+0000\n"
+"Last-Translator: Loge X <wazolm5643@163.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://hosted.weblate.org/"
 "projects/tomb/tomb/zh_Hans/>\n"
 "Language: zh_Hans\n"
@@ -9,7 +9,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.9-dev\n"
+"X-Generator: Weblate 5.10-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
@@ -572,7 +572,7 @@ msgstr "编码错误：steghide报告问题。"
 
 #: tomb:Key operations:bury_key:1740
 msgid "Tomb key encoded successfully into image ::1 image file::"
-msgstr ""
+msgstr "已成功将tomb密钥编码到图像::1 image file::中"
 
 #: tomb:Key operations:exhume_key:1752
 msgid "Exhume failed, no image specified"
@@ -616,7 +616,7 @@ msgstr "正在尝试从图像::1 image file::中提取密钥"
 
 #: tomb:Key operations:exhume_key:1819
 msgid "Key successfully exhumed to ::1 key::."
-msgstr ""
+msgstr "已成功提取密钥::1 key::。"
 
 #: tomb:Key operations:exhume_key:1821
 msgid "Nothing found in ::1 image file::"
@@ -640,7 +640,7 @@ msgstr "编码错误：cloakify报告问题。"
 
 #: tomb:Key operations:cloakify_key:1867
 msgid "Tomb key encoded successfully"
-msgstr ""
+msgstr "tomb密钥编码成功"
 
 #: tomb:Key operations:decloakify_key:1879
 msgid "Uncloak failed, no text file specified"
@@ -664,7 +664,7 @@ msgstr "正在标准输出中打印提取后的密钥"
 
 #: tomb:Key operations:decloakify_key:1923
 msgid "Key successfully uncloaked to ::1 key::."
-msgstr ""
+msgstr "已成功提取密钥::1 key::。"
 
 #: tomb:Key operations:decloakify_key:1925
 msgid "Nothing found in ::1 text file::"
@@ -1350,7 +1350,7 @@ msgstr "create命令已弃用，请改用dig、forge、lock。"
 
 #: tomb:Main routine:main:3448
 msgid "For more information see Tomb's manual page (man tomb)."
-msgstr ""
+msgstr "有关更多信息，请参阅Tomb的手册页（man tomb）。"
 
 #: tomb:Main routine:main:3489
 msgid "lsof not installed: cannot slam tombs."
