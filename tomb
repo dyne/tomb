@@ -2935,6 +2935,160 @@ resize_tomb() {
 
 # }}}
 
+# {{{ Suspend & Resume
+
+# ToDo
+# * what should be done with bind-hooks?
+# * what about access of files when suspending (aka kill everything needed?)
+# * tomb operations on a suspended mount
+#   -> extra check for all operations, if device is suspended
+#     -> # cryptsetup status $mapper
+#     -> (...)
+#     -> mode: read/write (suspended)
+#     -> YES, for close/slam
+#     -> NO for list
+#     -> ? for passwd
+suspend_tomb() {
+	local tombs how_many_tombs
+	local pathmap mapper tombname tombmount loopdev
+	local ans pidk pname
+
+	if [ "$1" = "all" ]; then
+		mounted_tombs=(`list_tomb_mounts`)
+	else
+		mounted_tombs=(`list_tomb_mounts $1`)
+	fi
+
+	[[ ${#mounted_tombs} == 0 ]] && {
+		_failure "There is no open tomb to be suspended." }
+
+	[[ ${#mounted_tombs} -gt 1 && -z "$1" ]] && {
+		_warning "Too many tombs mounted, please specify one (see tomb list)"
+		_warning "or issue the command 'tomb suspend all' to suspend them all."
+		_failure "Operation aborted." }
+
+	for t in ${mounted_tombs}; do
+		mapper=`basename ${t[(ws:;:)1]}`
+
+		# strip square parens from tombname
+		tombname=${t[(ws:;:)5]}
+		tombmount="${t[(ws:;:)2]}"
+		tombfs=${t[(ws:;:)3]}
+		tombfsopts=${t[(ws:;:)4]}
+		tombloop=${mapper[(ws:.:)4]}
+
+		_verbose "Name: ::1 tomb name::" $tombname
+		_verbose "Mount: ::1 mount point::" "$tombmount"
+		_verbose "Loop: ::1 mount loop::" $tombloop
+		_verbose "Mapper: ::1 mapper::" $mapper
+
+		[[ -e "$mapper" ]] && {
+			_warning "Tomb not found: ::1 tomb file::" $1
+			_warning "Please specify an existing tomb."
+			return 0 }
+
+		#option_is_set -n || {
+		#	exec_safe_func_hooks \
+		#		close "$tombmount" "$tombname" "$tombloop" "$mapper"
+		#	exec_hook_res=$?
+		#	[[ $exec_hook_res = 0 ]] || {
+		#		_warning "close exec-hook returns a non-zero error code: ::1 error::" $exec_hook_res
+		#		_failure "Operation aborted"
+		#	}
+		#}
+
+		# kill all programs using the tomb
+		#	_message "Closing programs using files in tomb ::1 tombname:: mounted on ::2 tombmount::" \
+		#		 ${tombname} "${tombmount}"
+		#	_kill_processes "$tombname" "$tombmount"
+		#	[[ $? -ne 0 ]] && {
+		#		_failure "Still active processes for ::1 tombname ::, tomb not completly hidden." "$tombname"
+		#	}
+		#	_message "Suspending tomb ::1 tomb name:: mounted on ::2 mount point::" \
+		#		 $tombname "$tombmount"
+
+		# check if there are bind mounted dirs and close them first
+		# Can be due to bind-hooks or outside --bind mounts
+		#bind_tombs=(`list_tomb_binds "$mapper"`)
+		#for b in ${bind_tombs}; do
+		#	bind_mapper="${b[(ws:;:)1]}"
+		#	bind_mount="${b[(ws:;:)2]}"
+		#	_message "Closing tomb bind hook: ::1 hook::" "$bind_mount"
+		#	_sudo umount "$(echo "$bind_mount")" ||
+		#		_failure "Tomb bind hook ::1 hook:: is busy, cannot suspend tomb." "$bind_mount"
+		#done
+
+		# suspend the mapper
+		_sudo cryptsetup luksSuspend $mapper ||
+			_failure "Error occurred in cryptsetup luksSuspend ::1 mapper::" $mapper
+
+		# Avoid top level listing via a tmpfs mount
+		_sudo mount -t tmpfs -o size=10M,mode=1777 temporary $tombmount ||
+			_warning "Couldn't hide top level listing while suspending ::1 tombname::" "$tombname"
+
+		_success "Tomb ::1 tomb name:: suspended: your bones rest in peace for the time being." $tombname
+
+	done # loop across mounted tombs
+
+	return 0
+}
+
+# $1 = tombfile
+# ToDo
+# * what should be done with bind-hooks?
+resume_tomb() {
+	local mapper tombname tombmount
+
+	[[ -n "$1" ]] || _failure "No tomb name specified for resuming."
+	tombname=$1
+	mounted_tombs=(`list_tomb_mounts $tombname`)
+	for t in ${mounted_tombs}; do
+		mapper=`basename ${t[(ws:;:)1]}`
+		tombmount="${t[(ws:;:)2]}"
+		_verbose "Mapper: ::1 mapper::" $mapper
+	done
+
+	_message "Commanded to revive tomb ::1 tomb name::" $tombname
+	# Currently missing check if $tombname is valid or could be found
+
+	_check_swap
+
+	# Undo tmpfs mount
+	_sudo umount $tombmount
+
+	_load_key # Try loading key from option -k and set TOMBKEYFILE
+
+	_success "Reviving ::1 tomb file::" $tombname
+
+	_verbose "Tomb key: ::1 key file::" $TOMBKEYFILE
+
+	{ option_is_set --tomb-pwd } && { ! option_is_set -g } && {
+		tomb_pwd="`option_value --tomb-pwd`"
+		_verbose "tomb-pwd = ::1 tomb pass::" $tomb_pwd
+		ask_key_password "$tomb_pwd"
+	} || {
+		ask_key_password
+	}
+	[[ $? == 0 ]] || _failure "No valid password supplied."
+
+	_cryptsetup luksResume ${mapper}
+	[[ $? = 0 ]] || {
+		_failure "Failure resuming the encrypted mapper." }
+
+	_success "Success reviving tomb ::1 tomb name::" $tombname
+
+	# process bind-hooks (mount -o bind of directories)
+	# and exec-hooks (execute on open)
+	#option_is_set -n || {
+	#	exec_safe_bind_hooks "${tombmount}"
+	#	exec_safe_func_hooks open "${tombmount}"
+	#}
+
+	return 0
+}
+
+# }}}
+
 # {{{ Close
 
 umount_tomb() {
@@ -3153,6 +3307,8 @@ main() {
 	subcommands_opts[slam]=""
 	subcommands_opts[ps]=""
 	subcommands_opts[list]="-get-mountpoint "
+	subcommands_opts[lull]="" # add some? Currently plain copy from close/slam
+	subcommands_opts[revive]="n -nohook=n k: o: -ignore-swap -tomb-pwd: r: R: p -preserve-ownership=p" # clean up; currently plain copy from open
 
 	subcommands_opts[index]=""
 	subcommands_opts[search]=""
@@ -3329,6 +3485,18 @@ main() {
 			[[ $RESIZER == 0 ]] && {
 				_failure "Resize2fs not installed: cannot resize tombs." }
 			resize_tomb $PARAM[1]
+			;;
+
+		## Suspend & Resume
+
+		# Close the tomb
+		lull) # revive decompose? what is the history?
+			suspend_tomb $PARAM
+			;;
+
+		# Open the tomb
+		revive) # revive recompose? what is the history?
+			resume_tomb $PARAM
 			;;
 
 		## Contents manipulation
