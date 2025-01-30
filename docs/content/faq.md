@@ -72,7 +72,8 @@ The encrypted home mechanism of most operating systems doesn’t make it easy to
 
 
 Watch Tomb's development history in this infographic based on git commits.
-<iframe title="dyne/Tomb - Gource visualisation" width="100%" height="315" src="https://tv.dyne.org/videos/embed/54255dae-4bc5-4538-9c61-c5d2d69779da" frameborder="0" allowfullscreen="" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+
+[![dyne/Tomb - Gource visualisation](/tomb/images/gource.webp )](https://tv.dyne.org/w/boEjDbGoC1vLvMpPC1ET5o)
 
 ## Compliancy
 

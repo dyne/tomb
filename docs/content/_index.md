@@ -33,7 +33,7 @@ Tomb’s ambition is to improve safety by way of:
 
 ### How it works
 
-<iframe title="Tomb on LinuxActionShow 2014" width="100%" height="315" src="https://tv.dyne.org/videos/embed/e822db00-3d4f-44d7-9e5e-2e9b8c06eb94" frameborder="0" allowfullscreen="" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+[![Tomb on LinuxActionShow 2014](/tomb/images/linuxshow-tomb.webp )](https://tv.dyne.org/w/uEzB5L3NFxUF3MTbZC2m4f)
 
 We design Tomb’s hidden file encryption to generate encrypted storage folders to be opened and closed using associated key files, which are also protected with a password chosen by the user.
 
@@ -41,4 +41,4 @@ A tomb is a file whose contents are kept secret and indistinguishable; it can be
 
 Tomb derives from scripts used in the dyne:bolic 100% Free GNU/Linux distribution and a shell script (Zsh) using standard filesystem tools (GNU) and the cryptographic API of the Linux kernel (dm-crypt and LUKS via cryptsetup). Tomb’s status and error messages are translated into many human languages and have multiple graphical applications to operate.
 
-<iframe title="Encrypt Files with Tomb" width="100%" height="315" src="https://tv.dyne.org/videos/embed/d9e62c84-f500-4def-a6c0-cee07f1d6ce7" frameborder="0" allowfullscreen="" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+[![Encrypt Files with Tomb](/tomb/images/encrypt-with-tomb.webp )](https://tv.dyne.org/w/sUBwqaohp6pfTcQcaebirr)
