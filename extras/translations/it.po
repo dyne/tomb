@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tomb\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2024-09-20 10:40+0000\n"
+"PO-Revision-Date: 2024-11-15 14:00+0000\n"
 "Last-Translator: Gianluca Montecchi <mgian@pm.me>\n"
 "Language-Team: Italian <https://hosted.weblate.org/projects/tomb/tomb/it/>\n"
 "Language: it\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.8-dev\n"
+"X-Generator: Weblate 5.9-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
@@ -135,7 +135,7 @@ msgstr "Tomb non funziona se non viene fornito un TOMBNAME."
 
 #: tomb:Safety functions:is_valid_tomb:647
 msgid "Tomb file already in use: ::1 tombname::"
-msgstr "Tomb è attualmente in uso: ::1 tomb name::"
+msgstr "File Tomb già in uso: ::1 tomb name::"
 
 #: tomb:Safety functions:is_valid_tomb:653
 msgid "Valid tomb file found: ::1 tomb path::"
@@ -152,7 +152,7 @@ msgstr "spesso accade su VPS e kernel che non forniscono il modulo loop."
 
 #: tomb:Safety functions:lo_check:666
 msgid "It is impossible to use Tomb on this machine under these conditions."
-msgstr "Non è possibile usare Tomb su questa macchina a queste condizioni."
+msgstr "Non è possibile usare Tomb su questa macchina in queste condizioni."
 
 #: tomb:Commandline interaction:usage:696
 msgid "Syntax: tomb [options] command [arguments]"
@@ -168,17 +168,16 @@ msgstr " // Creazione:"
 
 #: tomb:Commandline interaction:usage:701
 msgid " dig          create a new empty TOMB file of size -s in MiB"
-msgstr " dig     crea un nuovo file TOMB della grandezza di -s MiB"
+msgstr " dig     crea un nuovo file TOMB di dimensione -s MiB"
 
 #: tomb:Commandline interaction:usage:702
 msgid " forge        create a new KEY file and set its password"
-msgstr " forge   crea un nuovo KEY file e imposta la sua password "
+msgstr " forge   crea un nuovo KEY file e imposta la sua password"
 
 #: tomb:Commandline interaction:usage:703
 msgid " lock         installs a lock on a TOMB to use it with KEY"
 msgstr ""
-" lock    installa un codice di blocco su un file TOMB da usare con la sua "
-"KEY "
+" lock    installa un codice di blocco su un file TOMB da usare con la sua KEY"
 
 #: tomb:Commandline interaction:usage:705
 msgid " // Operations on tombs:"
@@ -186,7 +185,7 @@ msgstr " // Operazioni sui file tomb:"
 
 #: tomb:Commandline interaction:usage:706
 msgid " open         open an existing TOMB (-k KEY file or - for stdin)"
-msgstr " open    apri un file esistente TOMB"
+msgstr " open    apri un file esistente TOMB (-k KEY file o - per stdin)"
 
 #: tomb:Commandline interaction:usage:707
 msgid " index        update the search indexes of tombs"
@@ -202,7 +201,7 @@ msgstr " list    lista dei file TOMB aperti e informazioni su di essi"
 
 #: tomb:Commandline interaction:usage:710
 msgid " ps           list of running processes inside open TOMBs"
-msgstr ""
+msgstr " ps                     elenca i processi attivi all'interno di TOMBs"
 
 #: tomb:Commandline interaction:usage:711
 msgid " close        close a specific TOMB (or 'all')"
@@ -259,7 +258,7 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:733
 msgid " cloak        transform a KEY into TEXT using CIPHER (for use with -k)"
-msgstr ""
+msgstr " cloak         trasforma la KEY in TEXT usando CIPHER (per uso con -k)"
 
 #: tomb:Commandline interaction:usage:736
 msgid " uncloak      extract a KEY from a TEXT using CIPHER (prints to stdout)"
@@ -285,7 +284,7 @@ msgstr " -n     non elaborare i collegamenti trovati in tomb"
 
 #: tomb:Commandline interaction:usage:745
 msgid " -p           preserve the ownership of all files in tomb"
-msgstr ""
+msgstr " -p            mantiene il proprietario di tutti i file nel tomb"
 
 #: tomb:Commandline interaction:usage:746
 msgid " -o           options passed to commands: open, lock, forge (see man)"
@@ -301,15 +300,18 @@ msgstr ""
 
 #: tomb:Commandline interaction:usage:749
 msgid " -r           provide GnuPG recipients (separated by comma)"
-msgstr ""
+msgstr " -r           fornisce i destinatari GnuPG (separati da una virgola)"
 
 #: tomb:Commandline interaction:usage:750
 msgid " -R           provide GnuPG hidden recipients (separated by comma)"
 msgstr ""
+" -R           fornisce i destinatari GnuPG nascosti (separati da una virgola)"
 
 #: tomb:Commandline interaction:usage:751
 msgid " --sudo       super user exec alternative to sudo (doas or none)"
 msgstr ""
+" --sudo       programma per diritti di amministratore alternativo a sudo ("
+"doas o niente)"
 
 #: tomb:Commandline interaction:usage:754
 msgid ""
@@ -365,15 +367,15 @@ msgstr ""
 
 #: tomb:Commandline interaction:_ensure_dependencies:943
 msgid "No privilege escalation tool found, not even sudo"
-msgstr ""
+msgstr "Nessun programma di escalation dei diritti trovato, neppure sudo"
 
 #: tomb:Key operations:is_valid_recipients:991
 msgid "Not a valid GPG key ID: ::1 gpgid:: "
-msgstr ""
+msgstr "ID chiave GPG non valido: ::1 gpgid:: "
 
 #: tomb:Key operations:is_valid_recipients:995
 msgid "The key ::1 gpgid:: is not trusted enough"
-msgstr ""
+msgstr "La chiave ::1 gpgid:: non è abbastanza fidata"
 
 #: tomb:Key operations:is_valid_key:1046
 msgid "cleartext key from stdin selected: this is unsafe."
@@ -397,7 +399,7 @@ msgstr "La Key è un'immagine, dovrebbe essere valida."
 
 #: tomb:Key operations:is_valid_key:1067
 msgid "Key is missing KDF header."
-msgstr ""
+msgstr "La chiave manca dell'header KDF."
 
 #: tomb:Key operations:is_valid_key:1073
 msgid "Key is valid."
@@ -429,11 +431,11 @@ msgstr ""
 
 #: tomb:Key operations:gpg_decrypt:1171
 msgid "You set an invalid GPG ID."
-msgstr ""
+msgstr "Hai impostato un ID GPG non valido."
 
 #: tomb:Key operations:get_lukskey:1223
 msgid "Unlocking KDF key protection (::1 kdf::)"
-msgstr ""
+msgstr "Sblocco protezione chiave KDF (::1 kdf::)"
 
 #: tomb:Key operations:get_lukskey:1245
 msgid "No suitable program for KDF ::1 program::."
@@ -457,7 +459,7 @@ msgstr "Password OK."
 
 #: tomb:Key operations:change_passwd:1358
 msgid "Commanded to change GnuPG key for tomb key ::1 key::"
-msgstr ""
+msgstr "Eseguito il cambio di password per la tomb key ::1 key::"
 
 #: tomb:Key operations:change_passwd:1360
 msgid "Commanded to change password for tomb key ::1 key::"
@@ -469,7 +471,7 @@ msgstr "Nessuna password valida fornita."
 
 #: tomb:Key operations:change_passwd:1376
 msgid "Changing GnuPG key for ::1 key file::"
-msgstr ""
+msgstr "Cambio la password per ::1 key file::"
 
 #: tomb:Key operations:change_passwd:1378
 msgid "Changing password for ::1 key file::"
@@ -481,7 +483,7 @@ msgstr "Errore: la generazione del nuovo keyfile non sembra valida."
 
 #: tomb:Key operations:change_passwd:1397
 msgid "Your GnuPG key was successfully changed"
-msgstr ""
+msgstr "La tua passphrase è stata correttamente aggiornata."
 
 #: tomb:Key operations:change_passwd:1399
 msgid "Your passphrase was successfully updated."
@@ -490,23 +492,23 @@ msgstr "La tua passphrase è stata correttamente aggiornata."
 #: tomb:Key operations:gen_key:1438
 msgid ""
 "You are going to encrypt a tomb key with ::1 nrecipients:: recipient(s)."
-msgstr ""
+msgstr "Stai cifrando la chiave tomb con ::1 nrecipients:: destinatari(o)."
 
 #: tomb:Key operations:gen_key:1439
 msgid "It is your responsibility to check these fingerprints."
-msgstr ""
+msgstr "E' una tua responsabilità controllare questi fingerprints."
 
 #: tomb:Key operations:gen_key:1440
 msgid "The fingerprints are:"
-msgstr ""
+msgstr "I fingerprints sono:"
 
 #: tomb:Key operations:gen_key:1442
 msgid "\t  `_gpg_fingerprint "
-msgstr ""
+msgstr "\t  `_gpg_fingerprint "
 
 #: tomb:Key operations:gen_key:1447
 msgid "No recipient specified, using default GPG key."
-msgstr ""
+msgstr "Punto di mount non specificato, uso il default: ::1 mount point::"
 
 #: tomb:Key operations:gen_key:1460
 msgid "User aborted."
@@ -542,7 +544,7 @@ msgstr ""
 
 #: tomb:Key operations:gen_key:1523
 msgid "memory used: 2^::1 kdfmemory::"
-msgstr ""
+msgstr "memoria usata: 2^::1 kdfmemory::"
 
 #: tomb:Key operations:gen_key:1526
 msgid "parallelismn: ::1 kdfparallel::"
@@ -570,7 +572,7 @@ msgstr "Codifica key ::1 tomb key:: dentro l'immagine ::2 image file::"
 
 #: tomb:Key operations:bury_key:1597
 msgid "Using GnuPG Key ID"
-msgstr ""
+msgstr "Chiave ID GnuPG in uso"
 
 #: tomb:Key operations:bury_key:1599
 msgid "Please confirm the key password for the encoding"
@@ -722,7 +724,7 @@ msgstr "La dimensione deve essere un intero (mebibytes)"
 
 #: tomb:Create:dig_tomb:1917
 msgid "Tombs can't be smaller than 10 mebibytes"
-msgstr ""
+msgstr "I Tombs non possono essere più piccoli di 10 mebibytes"
 
 #: tomb:Create:dig_tomb:1920
 msgid "A tomb exists already. I'm not digging here:"
@@ -860,11 +862,11 @@ msgstr ""
 
 #: tomb:Create:lock_tomb_with_key:2106
 msgid "Filesystem not supported: ::1 filesystem::"
-msgstr ""
+msgstr "Filesystem non supportato: ::1 filesystem::"
 
 #: tomb:Create:lock_tomb_with_key:2110
 msgid "Selected filesystem type $filesystem."
-msgstr ""
+msgstr "Filesystem tipo $filesystem selezionato."
 
 #: tomb:Create:lock_tomb_with_key:2115
 msgid "Checking if the tomb is empty (we never step on somebody else's bones)."
@@ -1042,11 +1044,11 @@ msgstr "Sbloccato con successo ::1 tomb name::"
 
 #: tomb:Open:mount_tomb:2378
 msgid "Filesystem detected: ::1 filesystem::"
-msgstr ""
+msgstr "Filesystem trovato: ::1 filesystem::"
 
 #: tomb:Open:mount_tomb:2384
 msgid "Skipping filesystem checks in read-only"
-msgstr ""
+msgstr "Controllo filesystem saltato in modalità read-only"
 
 #: tomb:Open:mount_tomb:2386
 msgid "Checking filesystem via ::1::"
@@ -1079,7 +1081,7 @@ msgstr "il giorno ::1 date::"
 
 #: tomb:Open:mount_tomb:2455
 msgid "the door was slammed or shutdown called before umount."
-msgstr ""
+msgstr "la porta è stata sbattuta o uno shutdown iniziato prima dell'umount."
 
 #: tomb:Open:exec_safe_bind_hooks:2517
 msgid "How pitiful!\tA tomb, and no HOME."
@@ -1095,11 +1097,13 @@ msgstr "file di aggancio corrotto"
 
 #: tomb:Open:exec_safe_bind_hooks:2549
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME"
-msgstr ""
+msgstr "formato mappa bind-hooks: local/to/tomb local/to/$HOME"
 
 #: tomb:Open:exec_safe_bind_hooks:2553
 msgid "bind-hooks map format: local/to/tomb local/to/$HOME.\t Rolling back"
 msgstr ""
+"formato mappa bind-hooks: local/to/tomb local/to/$HOME\tAnnullamento "
+"modifiche"
 
 #: tomb:Open:exec_safe_bind_hooks:2559
 msgid ""
@@ -1115,7 +1119,7 @@ msgstr ""
 
 #: tomb:Open:exec_safe_func_hooks:2587
 msgid "Exec hook: ::1 exec hook:: ::2 action::"
-msgstr ""
+msgstr "Exec hook: ::1 esegue hook:: ::2 action::"
 
 #: tomb:List:list_tombs:2613
 msgid "I can't see any open tomb, may they all rest in peace."
@@ -1230,6 +1234,7 @@ msgstr "Ricerca completata."
 #: tomb:Resize:resize_tomb:2840
 msgid "Commanded to resize tomb ::1 tomb name:: to ::2 size:: mebibytes."
 msgstr ""
+"Ordinato a ridimensionare il tomb ::1 tomb name:: a ::2 size:: mebibytes."
 
 #: tomb:Resize:resize_tomb:2842
 msgid "No tomb name specified for resizing."
@@ -1262,7 +1267,7 @@ msgstr ""
 
 #: tomb:Resize:resize_tomb:2890
 msgid "Tomb seems resized already, operating filesystem stretch"
-msgstr ""
+msgstr "Il Tomb sembra già ridimensionato, adattamento filesystem"
 
 #: tomb:Resize:resize_tomb:2892
 msgid "The new size must be greater than old tomb size."
@@ -1270,7 +1275,7 @@ msgstr "La nuova dimensione deve essere maggiore dell'attuale."
 
 #: tomb:Resize:resize_tomb:2897
 msgid "opening tomb"
-msgstr ""
+msgstr "aprendo tomb"
 
 #: tomb:Resize:resize_tomb:2902
 msgid "cryptsetup failed to resize ::1 mapper::"
@@ -1317,6 +1322,7 @@ msgstr "Perfavore specifica un file tomb esistente."
 #: tomb:Close:umount_tomb:2995
 msgid "close exec-hook returns a non-zero error code: ::1 error::"
 msgstr ""
+"exec-hook di chiusura ha ritornato un codice di errore non zero: ::1 error::"
 
 #: tomb:Close:umount_tomb:2996
 msgid "Operation aborted"
@@ -1415,7 +1421,7 @@ msgstr ""
 
 #: tomb:Main routine:main:3264
 msgid "Privilege escalation tool configured: ::1 exec::"
-msgstr ""
+msgstr "Tool per excalation dei diritti configurato: ::1 exec::"
 
 #: tomb:Main routine:main:3294
 msgid ""
@@ -1433,7 +1439,7 @@ msgstr ""
 
 #: tomb:Main routine:main:3330
 msgid "Trying a regular close."
-msgstr ""
+msgstr "Tentativo di chiusura regolare."
 
 #: tomb:Main routine:main:3341
 msgid "Resize2fs not installed: cannot resize tombs."

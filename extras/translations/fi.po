@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2024-09-19 09:40+0000\n"
+"PO-Revision-Date: 2025-01-18 12:00+0000\n"
 "Last-Translator: Ricky Tigg <ricky.tigg@gmail.com>\n"
 "Language-Team: Finnish <https://hosted.weblate.org/projects/tomb/tomb/fi/>\n"
 "Language: fi\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.8-dev\n"
+"X-Generator: Weblate 5.10-dev\n"
 
 #: tomb:Safety functions:_sudo:120
 msgid "$pescmd executable not found"
@@ -254,8 +254,8 @@ msgstr " exhume       poimi KEY JPEG-kuvasta (tulostaa stdout:een)"
 #: tomb:Commandline interaction:usage:733
 msgid " cloak        transform a KEY into TEXT using CIPHER (for use with -k)"
 msgstr ""
-" cloak        muuntaa KEY TEXT:ksi käyttämällä CIPHERiä (käytettäväksi '-"
-"k':n kanssa)"
+" cloak        muuntaa KEY TEXT:ksi käyttämällä CIPHERiä (käytettäväksi '-k':"
+"n kanssa)"
 
 #: tomb:Commandline interaction:usage:736
 msgid " uncloak      extract a KEY from a TEXT using CIPHER (prints to stdout)"
@@ -450,7 +450,7 @@ msgstr "Sisäinen virhe: ask_key_password() kutsuttu ennen _load_key()."
 
 #: tomb:Key operations:ask_key_password:1297
 msgid "A password is required to use key ::1 key::"
-msgstr "Avaimen ::1 key::käyttämiseen tarvitaan salasana"
+msgstr "Avaimen ::1 key:: käyttämiseen tarvitaan salasana"
 
 #: tomb:Key operations:ask_key_password:1316
 msgid "Password OK."
@@ -1063,8 +1063,8 @@ msgstr "::1 tomb file:: :n avaaminen ::2 mount point:: :lla onnistui"
 #: tomb:Open:mount_tomb:2453
 msgid "Last visit by ::1 user::(::2 tomb build::) from ::3 tty:: on ::4 host::"
 msgstr ""
-"Viimeksi vieraili: ::1 user::(::2 tomb build::) ::3 tty:: :sta ::4 "
-"host:: :lla"
+"Viimeksi vieraili: ::1 user::(::2 tomb build::) ::3 tty:: :sta ::4 host:: :"
+"lla"
 
 #: tomb:Open:mount_tomb:2454
 msgid "on date ::1 date::"
