@@ -114,10 +114,10 @@ export TEXTDOMAIN=tomb
 # Wrap sudo with a more visible message or apply user-supplied alternative to sudo
 _sudo() {
 	if option_is_set --sudo; then
-               pescmd=`option_value --sudo`
+		pescmd=`option_value --sudo`
 		case `basename $pescmd` in
 			"doas"|"sup"|"sud"|"pkexec")
-				command -v $pescmd > /dev/null || _failure "$pescmd executable not found"
+				_is_found $pescmd || _failure "$pescmd executable not found"
 				_verbose "Super user execution using $pescmd"
 				${pescmd} ${@}
 				return $?
@@ -137,9 +137,9 @@ _sudo() {
 			_verbose "Super user execution skipped (SUID caller)"
 			${@}
 			return $?
-    elif command -v sudo 1>/dev/null 2>/dev/null; then
+    elif _is_found sudo; then
 		  local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
-		  command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
+		  _is_found gettext && msg="$(gettext -s "$msg")"
 		  msg=${(S)msg//::1*::/$USER}
 		  [[ -n "$SUDO_ASKPASS" ]] && local sudo_askpass="--askpass"
 		  sudo $sudo_askpass -p "
@@ -147,9 +147,9 @@ $msg
 
 " ${@}
 		  return $?
-    elif command -v doas 1>/dev/null 2>/dev/null; then
+    elif _is_found doas; then
 		  local msg="Enter password for user ::1 user:: to gain superuser privileges"
-		  command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$msg")"
+		  _is_found gettext && msg="$(gettext -s "$msg")"
 		  msg=${(S)msg//::1*::/$USER}
       doas ${@}
       return $?
@@ -801,7 +801,7 @@ option_value_contains() {
 function _msg() {
 	local msg="$2"
 	local i
-	command -v gettext 1>/dev/null 2>/dev/null && msg="$(gettext -s "$2")"
+	_is_found gettext && msg="$(gettext -s "$2")"
 	for i in {3..${#}}; do
 		msg=${(S)msg//::$(($i - 2))*::/$*[$i]}
 	done
@@ -911,12 +911,12 @@ _ensure_dependencies() {
 
 	# Check for required programs
 	for req in cryptsetup gpg mkfs.ext4 e2fsck; do
-		command -v $req 1>/dev/null 2>/dev/null || {
+		_is_found $req || {
 			_failure "Missing required dependency ::1 command::.  Please install it." $req; }
 	done
 	# Check for pinentry or at least pinentry-tty (which has no alias)
-	if ! command -v pinentry 1>/dev/null 2>/dev/null; then
-		if ! command -v pinentry-tty 1>/dev/null 2>/dev/null; then
+	if ! _is_found pinentry; then
+		if ! _is_found pinentry-tty; then
 			_failure "Missing required dependency ::1 command::.  Please install it." pinentry
 		fi
 	fi
@@ -924,40 +924,40 @@ _ensure_dependencies() {
 	path+=(/sbin /usr/sbin) # zsh magic
 
 	# use pkexec in place of sudo if found in path and polkitd is running
-	# command -v pkexec 1>/dev/null 2>/dev/null
+	# _is_found pkexec
 	# [[ $? == 0 ]] && ps ax | grep '[p]olkitd' 1>/dev/null 2>/dev/null && {
 	#     SUDO=(pkexec)	}
 	# [[ "$SUDO" == "sudo" ]] && {
-	#     command -v sudo 1>/dev/null 2>/dev/null ||
+	# 	_is_found sudo ||
 	# 	_failure "No privilege escalation tool found, not even sudo"
 	# }
 
 	# Which dd command to use
-	command -v dcfldd 1>/dev/null 2>/dev/null && DD=(dcfldd statusinterval=1)
+	_is_found dcfldd && DD=(dcfldd statusinterval=1)
 
 	# Which wipe command to use
-	command -v shred 1>/dev/null 2>/dev/null && WIPE=(shred -f -u)
+	_is_found shred && WIPE=(shred -f -u)
 
 	# Check for lsof for slamming tombs
-	command -v lsof 1>/dev/null 2>/dev/null || LSOF=0
+	_is_found lsof || LSOF=0
 	# Check for steghide
-	command -v steghide 1>/dev/null 2>/dev/null || STEGHIDE=0
+	_is_found steghide || STEGHIDE=0
 	# Check for cloakify
-	command -v cloakify 1>/dev/null 2>/dev/null || CLOAKIFY=0
+	_is_found cloakify || CLOAKIFY=0
 	# Check for decloakify
-	command -v decloakify 1>/dev/null 2>/dev/null || DECLOAKIFY=0
+	_is_found decloakify || DECLOAKIFY=0
 	# Check for resize
-	command -v resize2fs 1>/dev/null 2>/dev/null || RESIZER=0
+	_is_found resize2fs || RESIZER=0
 	# Check for KDF auxiliary tools
-	command -v tomb-kdb-pbkdf2 1>/dev/null 2>/dev/null || KDF=0
+	_is_found tomb-kdb-pbkdf2 || KDF=0
 	# Check for ARGON2 KDF auxiliary tools
-	command -v argon2 1>/dev/null 2>/dev/null || ARGON2=0
+	_is_found argon2 || ARGON2=0
 	# Check for Recoll file content indexer
-	command -v recoll 1>/dev/null 2>/dev/null || RECOLL=0
+	_is_found recoll || RECOLL=0
 	# Check for QREncode for paper backups of keys
-	command -v qrencode 1>/dev/null 2>/dev/null || QRENCODE=0
+	_is_found qrencode || QRENCODE=0
 	# Check for acl/setfacl for setting ACL at the mount location
-	command -v setfacl 1>/dev/null 2>/dev/null || ACL=0
+	_is_found setfacl || ACL=0
 }
 
 # }}} - Commandline interaction
@@ -1483,7 +1483,7 @@ gen_key() {
 				itertime=${itertime:-3}
 
 				# Generating salt (either via tomb-kdb-pbkdf2 or a shell fallback)
-				if $(command -v tomb-kdb-pbkdf2-gensalt 1>/dev/null 2>/dev/null); then
+				if $(_is_found tomb-kdb-pbkdf2-gensalt); then
 					kdfsalt=`tomb-kdb-pbkdf2-gensalt`
 				else
 					kdfsalt=$(LC_CTYPE=C tr -cd 'a-f0-9' < /dev/random | head -c 64)
@@ -2449,7 +2449,7 @@ mount_tomb() {
 		_update_control_file "${tombmount}/.uid" $_UID
 		_update_control_file "${tombmount}/.tty" $_TTY
 		# also the hostname
-		if command -v hostname >/dev/null; then
+		if _is_found hostname; then
 			_update_control_file "${tombmount}/.host" `hostname`
 		elif [[ -r /etc/hostname ]]; then
 			_update_control_file "${tombmount}/.host" $(cat /etc/hostname)
@@ -2746,7 +2746,7 @@ index_tombs() {
 			_message "Skipping ::1 tomb name:: (.noindex found)." $tombname
 			continue }
 
-	  { command -v updatedb 1>/dev/null 2>/dev/null } && {
+	  { _is_found updatedb } && {
 	    updatedbver=`updatedb --version | grep '^updatedb'`
 	    if [[ "$updatedbver" =~ "GNU findutils" ]]; then
 		    _warning "Cannot use GNU findutils for index/search commands."
@@ -2777,7 +2777,7 @@ EOF
 }
 
 search_tombs() {
-	{ command -v locate 1>/dev/null 2>/dev/null } || {
+	{ _is_found locate } || {
 		_failure "Cannot index tombs on this system: updatedb (mlocate/plocate) not installed." }
 
 	updatedbver=`updatedb --version | grep '^updatedb'`
