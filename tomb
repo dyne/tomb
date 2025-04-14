@@ -117,8 +117,8 @@ _sudo() {
                pescmd=`option_value --sudo`
 		case `basename $pescmd` in
 			"doas"|"sup"|"sud"|"pkexec")
-				command -v $pescmd > /dev/null || _failure "$pescmd executable not found"
-				_verbose "Super user execution using $pescmd"
+				command -v $pescmd > /dev/null || _failure "::1 pesc:: executable not found" $pescmd
+				_verbose "Super user execution using ::1 pesc::" $pescmd
 				${pescmd} ${@}
 				return $?
 				;;
@@ -2096,7 +2096,7 @@ lock_tomb_with_key() {
 				return 1
 				;;
 		esac
-		_success "Selected filesystem type $filesystem."
+		_success "Selected filesystem type ::1 filesystem::" $filesystem
 	}
 
 	lo_check "$TOMBPATH"
@@ -2143,7 +2143,7 @@ lock_tomb_with_key() {
 		_warning "cryptsetup luksOpen returned an error."
 		_failure "Operation aborted." }
 
-	_message "Formatting your Tomb with $filesystem filesystem."
+	_message "Formatting your Tomb with ::1 fs:: filesystem." $filesystem
 	case $filesystem in
 		ext3|ext4)
 			_sudo mkfs.${filesystem} -q -F -j -L $TOMBNAME /dev/mapper/tomb.tmp
