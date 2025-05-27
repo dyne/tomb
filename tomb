@@ -67,6 +67,7 @@ typeset -i QRENCODE=1
 typeset -i LSOF=1
 typeset -i ACL=1
 typeset -i ARGON2=1
+typeset -i SEARCH=1
 
 # Default mount options
 typeset		 MOUNTOPTS="rw,noatime,nodev"
@@ -894,7 +895,7 @@ function _print() {
 _list_optional_tools() {
 	typeset -a _deps
 	_deps=(gettext dcfldd shred steghide)
-	_deps+=(resize2fs tomb-kdb-pbkdf2 argon2 qrencode recoll unoconv lsof setfacl)
+	_deps+=(resize2fs tomb-kdb-pbkdf2 argon2 qrencode recoll unoconv lsof setfacl mlocate plocate)
 	for d in $_deps; do
 		_print "`which $d`"
 	done
@@ -959,6 +960,8 @@ _ensure_dependencies() {
 	_is_found qrencode || QRENCODE=0
 	# Check for acl/setfacl for setting ACL at the mount location
 	_is_found setfacl || ACL=0
+	# Check for plocate/mlocate
+	_is_found plocate || _is_found mlocate || SEARCH=0
 }
 
 # }}} - Commandline interaction
@@ -2765,7 +2768,7 @@ index_tombs() {
 			_message "Indexing ::1 tomb name:: contents..." $tombname
 			rm -f "${tombmount}/recoll.conf"
 			_message "Generating a new search index configuration: ::1 recoll conf::" "${tombmount}/recoll.conf"
-      mkdir -p "${tombmount}/.recoll"
+			mkdir -p "${tombmount}/.recoll"
 			cat <<EOF > "${tombmount}/recoll.conf"
 topdirs = ${tombmount}
 cachedir = ${tombmount}/.recoll
@@ -2800,20 +2803,26 @@ search_tombs() {
 		mapper=`basename ${t[(ws:;:)1]}`
 		tombname=${t[(ws:;:)5]}
 		tombmount="${t[(ws:;:)2]}"
-		[[ -r "${tombmount}/.updatedb" ]] && {
-			# Use mlocate/plocate to search hits on filenames
+
+		# Use mlocate/plocate to search for hits on filenames
+		[[ $SEARCH == 1 && -r "${tombmount}/.updatedb" ]] && {
 			_message "Searching filenames in tomb ::1 tomb name::" $tombname
 			locate -d "${tombmount}/.updatedb" -e -i "${(f)@}"
 			_message "Matches found: ::1 matches::" \
-					 $(locate -d "${tombmount}/.updatedb" -e -i -c ${(f)@})
-
-			# Use recoll to search over contents
-			[[ $RECOLL == 1 && -r "$tombmount/recoll.conf" ]] && {
-				_message "Searching contents in tomb ::1 tomb name::" $tombname
-				recollq -c "${tombmount}" ${@} }
+				$(locate -d "${tombmount}/.updatedb" -e -i -c ${(f)@})
 		} || {
-			_warning "Skipping tomb ::1 tomb name::: not indexed." $tombname
-			_warning "Run 'tomb index' to create indexes." }
+			_warning "Skipping tomb ::1 tomb name::: not indexed for plocate/mlocate." $tombname
+			_warning "Run 'tomb index' to create indexes."
+		}
+
+		# Use recoll to search over contents
+		[[ $RECOLL == 1 && -r "$tombmount/recoll.conf" ]] && {
+			_message "Searching contents in tomb ::1 tomb name::" $tombname
+			recollq -c "${tombmount}" ${@}
+		} || {
+			_warning "Skipping tomb ::1 tomb name::: not indexed for recoll." $tombname
+			_warning "Run 'tomb index' to create indexes."
+		}
 	done
 	_message "Search completed."
 	return 0
@@ -3336,6 +3345,8 @@ main() {
 
 		# Index tomb contents
 		index)
+			[[ $SEARCH == 0 && $RECOLL == 0 ]] && {
+				_failure "Index command needs at least 'mlocate/plocate' or 'recoll'." }
 			index_tombs $PARAM[1]
 			;;
 
@@ -3346,6 +3357,8 @@ main() {
 
 		# Search tomb contents
 		search)
+			[[ $SEARCH == 0 && $RECOLL == 0 ]] && {
+				_failure "Search command needs at least 'mlocate/plocate' or 'recoll'." }
 			search_tombs $PARAM
 			;;
 
