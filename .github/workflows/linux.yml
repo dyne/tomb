@@ -25,16 +25,13 @@ jobs:
   build-matrix:
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04, ubuntu-24.04]
+        os: [ubuntu-22.04, ubuntu-24.04]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install tomb dependencies
         run: |
           sudo apt-get update -y -q
           sudo apt-get install -y -q zsh cryptsetup gpg gawk libgcrypt20-dev steghide qrencode python3-pip python3-dev libssl-dev make gcc sudo gettext bsdmainutils file pinentry-curses xxd libsodium23 libsodium-dev argon2
-      - name: Install python2 on ubuntu 20
-        if: matrix.os == 'ubuntu-20.04'
-        run: sudo apt-get install -y -q python2
       - name: Install python2 on ubuntu 22
         if: matrix.os == 'ubuntu-22.04'
         run: sudo apt-get install -y -q python2
