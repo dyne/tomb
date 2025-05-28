@@ -2750,18 +2750,11 @@ index_tombs() {
 			_message "Skipping ::1 tomb name:: (.noindex found)." $tombname
 			continue }
 
-	  { _is_found updatedb } && {
-	    updatedbver=`updatedb --version | grep '^updatedb'`
-	    if [[ "$updatedbver" =~ "GNU findutils" ]]; then
-		    _warning "Cannot use GNU findutils for index/search commands."
-      # elif [[ "$updatedbver" =~ "locate" ]]; then
-		  #   _warning "Index command needs 'mlocate/plocate' to be installed."
-      else
-		    _message "Indexing ::1 tomb name:: filenames..." $tombname
-	      _verbose "$updatedbver"
-		    updatedb -l 0 -o "${tombmount}/.updatedb" -U "${tombmount}"
-      fi
-    }
+		# use of updatedb from plocate/mlocate to index filenames
+		[[ $SEARCH == 1 ]] && {
+			_message "Indexing ::1 tomb name:: filenames..." $tombname
+			updatedb -l 0 -o "${tombmount}/.updatedb" -U "${tombmount}"
+		}
 
 		# here we use recoll to index file contents
 		[[ $RECOLL == 1 ]] && {
