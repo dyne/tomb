@@ -2951,17 +2951,21 @@ umount_tomb() {
 	local tombs how_many_tombs
 	local pathmap mapper tombname tombmount loopdev
 	local ans pidk pname
+	local toclose=$1
 
-	if [ "$1" = "all" ]; then
+	[[ -v SLAM && -z "$toclose" ]] && {
+		toclose="all"
+	}
+	if [ "$toclose" = "all" ]; then
 		mounted_tombs=(`list_tomb_mounts`)
 	else
-		mounted_tombs=(`list_tomb_mounts $1`)
+		mounted_tombs=(`list_tomb_mounts $toclose`)
 	fi
 
 	[[ ${#mounted_tombs} == 0 ]] && {
 		_failure "There is no open tomb to be closed." }
 
-	[[ ${#mounted_tombs} -gt 1 && -z "$1" ]] && {
+	[[ ${#mounted_tombs} -gt 1 && -z "$toclose" ]] && {
 		_warning "Too many tombs mounted, please specify one (see tomb list)"
 		_warning "or issue the command 'tomb close all' to close them all."
 		_failure "Operation aborted." }
@@ -2982,7 +2986,7 @@ umount_tomb() {
 		_verbose "Mapper: ::1 mapper::" $mapper
 
 		[[ -e "$mapper" ]] && {
-			_warning "Tomb not found: ::1 tomb file::" $1
+			_warning "Tomb not found: ::1 tomb file::" $toclose
 			_warning "Please specify an existing tomb."
 			return 0 }
 
