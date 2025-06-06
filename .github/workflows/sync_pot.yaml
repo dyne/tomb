@@ -1,0 +1,29 @@
+name: Translations - sync translation files with tomb script
+
+on:
+  push:
+    branches: master
+    paths:
+      - 'tomb'
+
+jobs:
+  Translations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Install deps
+        run: |
+          sudo apt-get update -y -q
+          sudo apt-get install -y -q gettext
+      - name: Run sync script
+        run: |
+          cd extras/translations/
+          ./sync_pot_po.sh
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: sync translation files
+          title: '[Chore] sync translation files'
+          body: >
+            This PR is auto-generated
