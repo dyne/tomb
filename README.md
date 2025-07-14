@@ -33,7 +33,7 @@ Or, if you are in a hurry, kill all processes with open files inside your tomb a
 
 More information in `man tomb` and on [dyne.org/docs/tomb](https://dyne.org/docs/tomb).
 
-### 💾 [Download from files.dyne.org/tomb](https://files.dyne.org/tomb/)
+### 💾 [Download from files.dyne.org](https://files.dyne.org/?dir=tomb)
 
 Use only stable and signed releases in production!
 
@@ -53,6 +53,6 @@ There is also a [space for discussion](https://github.com/dyne/Tomb/discussions)
 
 # Licensing
 
-Tomb is Copyright (C) 2007-2024 by the Dyne.org Foundation and maintained by [Jaromil](https://github.com/jaromil). The [AUTHORS](AUTHORS.md) file contains more information on all the developers involved. The license is GNU Public License v3.
+Tomb is Copyright (C) 2007-2025 by the Dyne.org Foundation and maintained by [Jaromil](https://github.com/jaromil). The [AUTHORS](AUTHORS.md) file contains more information on all the developers involved. The license is GNU Public License v3.
 
 ## [More info on dyne.org/tomb](https://dyne.org/tomb)

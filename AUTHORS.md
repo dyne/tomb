@@ -19,11 +19,13 @@ The Docker Tomb wrapper is contributed by Greg Tczap and Jens Rischbieth.
 Artwork is contributed by Jordi aka Mon Mort and Logan VanCuren.
 
 Gettext internationalization and Spanish translation is contributed by
-Daniel Rodriguez and Francisco Serrador. French translation by
-Hellekin and Roy Lockhart, Russian translation by fsLeg and AHOHNMYC,
-German translation by Jerry Polfer, Italian translation by
-Massimiliano Augello and Swedish translation by PLJ / Kosovoper,
-general fixes contributed by Daniel Dias Rodrigues.
+Daniel Rodriguez, Francisco Serrador and gallegonovato. French
+translation by Hellekin, Roy Lockhart and luzhen, Russian translation
+by fsLeg and AHOHNMYC, German translation by Jerry Polfer, Italian
+translation by Massimiliano Augello and Gianluca Montecchi, Swedish
+translation by PLJ / Kosovoper, Finnish translation by Ricky Tigg,
+general fixes contributed by Daniel Dias Rodrigues, Andreas Deininger,
+Vladislav Doster and Settoshi Tonami.
 
 Testing, reviews and documentation contributed by Dreamer, Vlax,
 Shining the Translucent, Mancausoft, Asbesto Molesto, Nignux, TheJH,
@@ -33,7 +35,8 @@ Bhutani, Emil Lundberg, Joel Montes de Oca, Armin Mesbah, Arusekk,
 Stephan Schindel, Asbjørn Apeland, Victor Calvert, bjonnh, SargoDevel,
 AitorATuin, Alexis Danizan, Sven Geuer, Greg Tczap, Aaron Janse, Mark
 Mykkanen, Alexis Danizan, Steve Litt, James R, Matthieu Crapet, Selene
-ToyKeeper, Valentin Heidelberg and...  the Linux Action Show!
+ToyKeeper, Valentin Heidelberg, ultimatespirit, Llewellyn van der
+Merwe, Sven Geuer, Selene ToyKeeper,  and...  the Linux Action Show!
 
 Tomb includes an implementation of the "Password-Based Key Derivation
 Function v2" based on GCrypt and written by Anthony Thyssen, with

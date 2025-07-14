@@ -18,21 +18,48 @@ CentOS one can use `yum install` and `pacman` on Arch.
 ## Install Tomb
 
 To install Tomb simply download the source distribution (the tar.gz file)
-from https://files.dyne.org/tomb and decompress it. From a terminal:
+from https://files.dyne.org/?dir=tomb and decompress it. From a terminal:
 
     cd Downloads
-    tar xvfz Tomb-2.4.tar.gz (correct with actual file name)
+    tar xvfz Tomb-2.12.tar.gz (correct with actual file name)
 
 Then enter its directory and run 'make install' as root, this will install
 Tomb into /usr/local:
 
-    cd Tomb-2.4 (correct with actual directory name)
+    cd Tomb-2.12 (correct with actual directory name)
     sudo make install
 
 After installation one can read the commandline help or read the manual:
 
     tomb -h     (print a short help on the commandline)
     man tomb    (show the full usage manual)
+
+# Verified download
+
+Use this shell script to download and verify both hash and signature of the release
+```bash
+#!/bin/bash
+set -e
+# File URLs
+base_url="https://files.dyne.org/?file=tomb/releases"
+file="Tomb-2.12.tar.gz"
+# import GPG key
+curl -sL jaromil.dyne.org/jaromil.pub | gpg --import
+echo "6113D89CA825C5CEDD02C87273B35DA54ACB7D10:6:" | gpg --import-ownertrust
+# Download files
+[ -r $file ]     || curl -o $file "$base_url/$file"
+[ -r $file.sha ] || curl -o $file.sha "$base_url/$file.sha"
+[ -r $file.asc ] || curl -o $file.asc "$base_url/$file.asc"
+# Verify hash
+sha512sum -c "$file.sha" || {
+    echo "❌ Hash verification failed"
+    exit 1; }
+# Verify GPG signature
+gpg --verify "$file.asc" "$file" || {
+    echo "❌ GPG signature verification failed"
+    exit 1; }
+echo "✅ File verified successfully"
+```
 
 # Basic usage
 

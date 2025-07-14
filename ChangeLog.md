@@ -1,5 +1,14 @@
 # Tomb ChangeLog
 
+## 2.12
+### July 2025
+
+This release switches on compressed filesystem mode (zstd) by default
+when formatting a tomb with Btrfs filesystem to optimize space
+usage. It also sports updated translations and documentation. The tomb
+code was improved for readability and some bugfixes applied to slam,
+cloakify and KDF argon2.
+
 ## 2.11
 ### July 2024
 
