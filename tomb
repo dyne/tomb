@@ -56,6 +56,10 @@ zmodload -F zsh/stat b:zstat
 # make sure variables aren't exported
 unsetopt allexport
 
+# Don't print variables to STDOUT if local/typeset is used
+# on an already existing variable without an assignment
+setopt TYPESET_SILENT
+
 # Flag optional commands if available (see _ensure_dependencies())
 typeset -i KDF=1
 typeset -i STEGHIDE=1
@@ -526,9 +530,8 @@ ask_password() {
 	_verbose "Checking backends '${backends[@]}'"
 
 	for backend in "${backends[@]}"; do
-		local pinentry
+		local pinentry="$(which pinentry-$backend)"
 		local lddout
-		pinentry="$(which pinentry-$backend)"
 		lddout=$(ldd "$pinentry" 2>/dev/null) || continue
 		[[ "$lddout" == *'not found'* ]] && continue
 		_verbose "using $pinentry"
