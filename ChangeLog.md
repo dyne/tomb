@@ -1,4 +1,11 @@
 # Tomb ChangeLog
+## 2.13
+### July 2025
+
+Important fix for a regression: the password prompt garbles the
+password to unlock the tomb, breaking tomb open in many cases.
+Previous version should be upgraded to this one, of course no damage
+could ever be caused to tombs this way.
 
 ## 2.12
 ### July 2025

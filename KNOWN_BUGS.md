@@ -1,3 +1,12 @@
+# Password bug failing to open tombs
+## Issue with Tomb version 2.12 (short lived)
+
+The reason for this bug is the "variable resetting" in the ask_password() for
+loop.  Running local pinentry in ZSH after the variable already got declared
+causes it to print to stdout and therefore end up in the variable tombpass.
+See: https://github.com/dyne/tomb/issues/575 and
+https://github.com/dyne/tomb/pull/576
+
 # Password bug in X11 when using pinentry-curses
 ## Issue with Tomb version 2.6 and 2.7
 
