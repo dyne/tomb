@@ -522,7 +522,7 @@ ask_password() {
 				;;
 		esac
 	fi
-	_verbose "Checking backends '${backends[@]}'"
+	_verbose "Checking backends '${backends}'"
 
 	for backend in "${backends[@]}"; do
 		pinentry="$(which pinentry-$backend)"
