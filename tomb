@@ -490,12 +490,9 @@ ask_password() {
 
 	local description="$1"
 	local title="${2:-Enter tomb password.}"
-	local output
-	local password
-	local gtkrc
-	local theme
-	local pass_asked
-	local backends
+	local output password pinentry lddout
+	local -i pass_asked=0
+	local -a backends
 
 	# Distributions have broken wrappers for pinentry: they do
 	# implement fallback, but they disrupt the output somehow.	We are
@@ -511,8 +508,6 @@ ask_password() {
 	LANG=${LANG:-C}
 
 	_verbose "asking password with tty=$TTY lc-ctype=$LANG"
-
-	pass_asked=0
 
 	# Guess preferred backend based on environment.
 	backends=(curses tty)
@@ -530,8 +525,7 @@ ask_password() {
 	_verbose "Checking backends '${backends[@]}'"
 
 	for backend in "${backends[@]}"; do
-		local pinentry="$(which pinentry-$backend)"
-		local lddout
+		pinentry="$(which pinentry-$backend)"
 		lddout=$(ldd "$pinentry" 2>/dev/null) || continue
 		[[ "$lddout" == *'not found'* ]] && continue
 		_verbose "using $pinentry"
