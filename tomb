@@ -30,7 +30,7 @@
 
 # {{{ Global variables
 
-typeset VERSION="2.12.0"
+typeset VERSION="2.13.0"
 typeset DATE="Jul/2025"
 typeset TOMBEXEC=$0
 typeset TMPDIR=${${TMPPREFIX%/*}:-/tmp}
