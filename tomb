@@ -2103,7 +2103,7 @@ lock_tomb_with_key() {
 	lo_check "$TOMBPATH"
 
 	_message "Checking if the tomb is empty (we never step on somebody else's bones)."
-	_sudo cryptsetup isLuks ${TOMBPATH}
+	cryptsetup isLuks ${TOMBPATH}
 	if [ $? = 0 ]; then
 		# is it a LUKS encrypted nest? then bail out and avoid reformatting it
 		_warning "The tomb was already locked with another key."
@@ -2193,7 +2193,7 @@ change_tomb_key() {
 
 	is_valid_tomb $tombpath
 	lo_check "$TOMBPATH"
-	_sudo cryptsetup isLuks ${TOMBPATH}
+	cryptsetup isLuks ${TOMBPATH}
 	# is it a LUKS encrypted nest? we check one more time
 	[[ $? == 0 ]] || {
 		_failure "Not a valid LUKS encrypted volume: ::1 volume::" $TOMBPATH }
@@ -2318,7 +2318,7 @@ mount_tomb() {
 
 
 	lo_check "$TOMBPATH"
-	_sudo cryptsetup isLuks ${TOMBPATH} || {
+	cryptsetup isLuks ${TOMBPATH} || {
 		# is it a LUKS encrypted nest? see cryptsetup(1)
 		_failure "::1 tomb file:: is not a valid Luks encrypted storage file." $TOMBFILE }
 
