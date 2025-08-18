@@ -575,34 +575,6 @@ is_valid_tomb() {
 	# First argument must be the path to a tomb
 	[[ ! -z $1 ]] ||	_failure "Tomb file is missing from arguments."
 
-	local _fail=0
-	# Tomb file must be a readable, writable, non-empty regular file.
-	# If passed the "ro" mount option, the writable check is skipped.
-	while true; do
-		option_value_contains -o ro || {
-			[[ ! -w "$1" ]] && {
-				_warning "Tomb file is not writable: ::1 tomb file::" $1
-				_fail=1; break; }
-		}
-		_verbose "tomb file is readable"
-		[[ ! -f "$1" ]] && {
-			_warning "Tomb file is not a regular file: ::1 tomb file::" $1
-			_fail=1; break; }
-		_verbose "tomb file is a regular file"
-		[[ ! -s "$1" ]] && {
-			_warning "Tomb file is empty (zero length): ::1 tomb file::" $1
-			_fail=1; break; }
-		_verbose "tomb file is not empty"
-		break;
-	done
-	[[ $_fail == 1 ]] && {
-		_failure "Tomb command failed: ::1 command name::" $subcommand
-	}
-
-	# Tomb file may be a LUKS FS (or we are creating it)
-	cryptsetup isLuks "$1" || {
-		_message "File is not yet a tomb: ::1 tomb file::" $1 }
-
 	# We set global variables
 	typeset -g TOMBPATH TOMBDIR TOMBFILE TOMBNAME TOMBMAPPER
 
@@ -611,6 +583,30 @@ is_valid_tomb() {
 	TOMBDIR=$(dirname $TOMBPATH)
 
 	TOMBFILE=$(basename $TOMBPATH)
+
+	local _fail=0
+	# Tomb file must be a readable, writable, non-empty regular file.
+	# If passed the "ro" mount option, the writable check is skipped.
+	while true; do
+		option_value_contains -o ro || {
+			[[ ! -w "$TOMBPATH" ]] && {
+				_warning "Tomb file is not writable: ::1 tomb file::" $TOMBPATH
+				_fail=1; break; }
+		}
+		_verbose "tomb file is readable"
+		[[ ! -f "$TOMBPATH" ]] && {
+			_warning "Tomb file is not a regular file: ::1 tomb file::" $TOMBPATH
+			_fail=1; break; }
+		_verbose "tomb file is a regular file"
+		[[ ! -s "$TOMBPATH" ]] && {
+			_warning "Tomb file is empty (zero length): ::1 tomb file::" $TOMBPATH
+			_fail=1; break; }
+		_verbose "tomb file is not empty"
+		break;
+	done
+	[[ $_fail == 1 ]] && {
+		_failure "Tomb command failed: ::1 command name::" $subcommand
+	}
 
 	# The tomb name is TOMBFILE without an extension and underscores instead of spaces (for mount and cryptsetup)
 	# It can start with dots: ..foo bar baz.tomb -> ..foo_bar_baz
@@ -637,6 +633,12 @@ is_valid_tomb() {
 	_verbose "Mapper: ::1 mapper::" $TOMBMAPPER
 
 	_verbose "tomb file is not currently in use"
+
+	# Confirm if the Tomb file is a LUKS device
+	cryptsetup isLuks "$TOMBPATH" || {
+		_message "File is not a tomb: ::1 tomb file::" $TOMBPATH
+		return 1
+	}
 
 	_message "Valid tomb file found: ::1 tomb path::" $TOMBPATH
 	return 0
@@ -2063,8 +2065,16 @@ lock_tomb_with_key() {
 		return 1
 	}
 
-
+	_message "Checking if the tomb is empty (we never step on somebody else's bones)."
 	is_valid_tomb $tombpath
+	if [ $? = 0 ]; then
+		# is it a LUKS encrypted nest? then bail out and avoid reformatting it
+		_warning "The tomb was already locked with another key."
+		_failure "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
+	else
+		_message "Fine, this tomb seems empty."
+	fi
+	lo_check "$TOMBPATH"
 
 	_message "Commanded to lock tomb ::1 tomb file::" $TOMBFILE
 
@@ -2099,18 +2109,6 @@ lock_tomb_with_key() {
 		esac
 		_success "Selected filesystem type ::1 filesystem::" $filesystem
 	}
-
-	lo_check "$TOMBPATH"
-
-	_message "Checking if the tomb is empty (we never step on somebody else's bones)."
-	cryptsetup isLuks ${TOMBPATH}
-	if [ $? = 0 ]; then
-		# is it a LUKS encrypted nest? then bail out and avoid reformatting it
-		_warning "The tomb was already locked with another key."
-		_failure "Operation aborted. I cannot lock an already locked tomb. Go dig a new one."
-	else
-		_message "Fine, this tomb seems empty."
-	fi
 
 	_load_key	 # Try loading key from option -k and set TOMBKEYFILE
 
@@ -2191,12 +2189,9 @@ change_tomb_key() {
 
 	_check_swap
 
-	is_valid_tomb $tombpath
-	lo_check "$TOMBPATH"
-	cryptsetup isLuks ${TOMBPATH}
-	# is it a LUKS encrypted nest? we check one more time
-	[[ $? == 0 ]] || {
+	is_valid_tomb $tombpath || {
 		_failure "Not a valid LUKS encrypted volume: ::1 volume::" $TOMBPATH }
+	lo_check "$TOMBPATH"
 
 	_load_key $tombkey	  # Try loading given key and set TOMBKEY
 
@@ -2288,7 +2283,10 @@ mount_tomb() {
 
 	_check_swap
 
-	is_valid_tomb $1
+	is_valid_tomb $1 || {
+		# is it a LUKS encrypted nest? see cryptsetup(1)
+		_failure "::1 tomb file:: is not a valid Luks encrypted storage file." $TOMBFILE }
+	lo_check "$TOMBPATH"
 
 	_track_stat "$TOMBPATH"
 
@@ -2315,12 +2313,6 @@ mount_tomb() {
 		[[ "$usedmount" == "$tombmount" ]] &&
 			_failure "Mountpoint already in use: ::1 mount point::" "$tombmount"
 	done
-
-
-	lo_check "$TOMBPATH"
-	cryptsetup isLuks ${TOMBPATH} || {
-		# is it a LUKS encrypted nest? see cryptsetup(1)
-		_failure "::1 tomb file:: is not a valid Luks encrypted storage file." $TOMBFILE }
 
 	_message "This tomb is a valid LUKS encrypted device."
 
@@ -2835,7 +2827,8 @@ resize_tomb() {
 	[[ -z "$newtombsize" ]] && {
 		_failure "Aborting operations: new size was not specified, use -s" }
 
-	is_valid_tomb $tombpath
+	is_valid_tomb $tombpath || {
+		_failure "::1 tomb file:: is not a valid Luks encrypted storage file." $TOMBFILE }
 
 	_load_key # Try loading new key from option -k and set TOMBKEYFILE
 
