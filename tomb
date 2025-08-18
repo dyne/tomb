@@ -600,7 +600,7 @@ is_valid_tomb() {
 	}
 
 	# Tomb file may be a LUKS FS (or we are creating it)
-	[[ "`file $1`" =~ "luks encrypted file" ]] || {
+	cryptsetup isLuks "$1" || {
 		_message "File is not yet a tomb: ::1 tomb file::" $1 }
 
 	# We set global variables
