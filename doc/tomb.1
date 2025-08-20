@@ -329,6 +329,12 @@ Select a different tool than sudo for privilege escalation.
 Alternatives supported so far are: pkexec, doas, sup, sud. For any
 alternative to work the executable must be included in the current
 PATH.
+.B
+.IP "--pinentry \fI<toolkit>\fR"
+Add a \fIpinentry\fR which is tried first for usage. Allows to force a specific
+one or the use of an alternative not listed (like bemenu or wayprompt).
+Important: It needs to be a drop-in replacement for \fIpinentry\fR. It doesn't allow
+for a different architecture of password input.
 
 .B
 .IP "-h"
@@ -435,10 +441,13 @@ To avoid that tomb execution is logged by \fIsyslog\fR also add:
 .SH PASSWORD INPUT
 
 Password input is handled by the pinentry program: it can be text
-based or graphical and is usually configured with a symlink. When
-using Tomb in a graphical environment (X11 or Wayland) it is better
-to use either pinentry-gtk2 (deprecated), pinentry-gnome or
-pinentry-qt because it helps preventing keylogging by other clients.
+based or graphical. \fITomb\fR implements a logic to detect the
+preferred and working password input based on the environment (tty,
+X11 or Wayland).
+It is possible to specify a specific pinentry program which is tried
+first (\fI--pinentry tty\fR or \fI--pinentry=wayprompt\fR) but it
+should be avoided to use a text based one in a graphical environment
+as the graphical ones help preventing keylogging by other clients.
 When using it from a remote ssh connection it might be necessary to
 force use of pinentry-tty for instance by unsetting the DISPLAY (X11)
 or WAYLAND_DISPLAY (Wayland) environment var.
