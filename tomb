@@ -500,27 +500,33 @@ ask_password() {
 	# fallback logic directly here.
 	# Pinentry supported: curses, tty, qt{,4,5}, gtk{,-2}, gnome3, and x11.
 
-	# TODO: Implement a user option to specify a pinentry program and
-	# wrap pinentry with a `_pinentry()` function that implements the
-	# search logic if the user option is not specified: Issue #542
+	# TODO: Wrap pinentry with a `_pinentry()` function that implements
+	# the search logic: Issue #542
 
 	# make sure LANG is set, default to C
 	LANG=${LANG:-C}
 
 	_verbose "asking password with tty=$TTY lc-ctype=$LANG"
 
-	# Guess preferred backend based on environment.
-	backends=(curses tty)
+	# Check for user specified pinentry
+	option_is_set --pinentry && {
+		backends+=`option_value --pinentry`
+		_verbose "Adding ::1 pinentry:: to pinentry backends" $backends[0]
+	}
+
+	# Guess and add preferred backends based on environment.
 	if [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]]; then
 		_verbose "Graphical display system detected"
 		case "$XDG_CURRENT_DESKTOP" in
 			KDE|LXQT|LXQt)
-				backends=(qt5 qt qt4 gnome3 gtk gtk-2 curses tty)
+				backends+=(qt5 qt qt4 gnome3 gtk gtk-2 curses tty)
 				;;
 			*)
-				backends=(gtk gtk-2 x11 gnome3 qt5 qt qt4 curses tty)
+				backends+=(gtk gtk-2 x11 gnome3 qt5 qt qt4 curses tty)
 				;;
 		esac
+	else
+		backends+=(curses tty)
 	fi
 	_verbose "Checking backends '${backends}'"
 
@@ -3129,7 +3135,7 @@ main() {
 	# can only use the non-abbreviated long-option version like:
 	# -force and NOT -f
 	#
-	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g -sudo:)
+	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g -sudo: -pinentry:)
 	subcommands_opts[__default]=""
 	# -o in open and mount is used to pass alternate mount options
 	subcommands_opts[open]="n -nohook=n k: o: -ignore-swap -tomb-pwd: r: R: p -preserve-ownership=p"
