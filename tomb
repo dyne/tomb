@@ -3010,7 +3010,7 @@ umount_tomb() {
 			bind_mapper="${b[(ws:;:)1]}"
 			bind_mount="${b[(ws:;:)2]}"
 			_message "Closing tomb bind hook: ::1 hook::" "$bind_mount"
-			_sudo umount "$(echo "$bind_mount")" ||
+			_sudo umount "$(print "$bind_mount")" ||
 				_failure "Tomb bind hook ::1 hook:: is busy, cannot close tomb." "$bind_mount"
 		done
 
@@ -3057,7 +3057,7 @@ list_processes() {
 			_verbose "scanning tomb: ::1 tombmount::" $i
 			lsofres=$(_sudo lsof +D "${i[(ws:;:)2]}")
 			# Check on output, as $? will always return 1 for whatever reasons
-			[[ -n $lsofres ]] && { indicator=0; echo $lsofres } || { _success "None found" }
+			[[ -n $lsofres ]] && { indicator=0; print "$lsofres" } || { _success "None found" }
 		done
 	fi
 	return $indicator
@@ -3415,11 +3415,11 @@ main() {
 		# Default operation: presentation, or version information with -v
 		__default)
 			_print "Tomb ::1 version:: - a strong and gentle undertaker for your secrets" $VERSION
-			echo
+			print
 			_print " Copyright (C) 2007-2025 Dyne.org Foundation, License GNU GPL v3+"
 			_print " This is free software: you are free to change and redistribute it"
 			_print " For the latest sourcecode go to <http://dyne.org/software/tomb>"
-			echo
+			print
 			option_is_set -v && {
 				local langwas=$LANG
 				LANG=en
@@ -3428,21 +3428,19 @@ main() {
 				_print " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 				LANG=$langwas
 				_print " When in need please refer to <http://dyne.org/support>."
-				echo
+				print
 				_print "System utils:"
-				echo
-				cat <<EOF
-  `zsh --version`
-  `sudo -V | head -n1`
-  `cryptsetup --version`
-  `pinentry --version | head -n1`
-  `findmnt -V`
-  `gpg --version | head -n1` - key forging algorithms (GnuPG symmetric ciphers):
-  `list_gnupg_ciphers`
-EOF
-				echo
+				print
+				_print "`zsh --version`"
+				_print "`sudo -V | head -n1`"
+				_print "`cryptsetup --version`"
+				_print "`pinentry --version | head -n1`"
+				_print "`findmnt -V`"
+				_print "`gpg --version | head -n1` - key forging algorithms (GnuPG symmetric ciphers):"
+				_print "`list_gnupg_ciphers`"
+				print
 				_print "Optional utils:"
-				echo
+				print
 				_list_optional_tools version
 				return 0
 			}
