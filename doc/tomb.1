@@ -325,8 +325,8 @@ takes massively longer on regular systems.
 Default is 1 thread (based on the \fIargon2\fR default).
 .B
 .IP "--sudo \fI<executable>\fR"
-Select a different tool than sudo for privilege escalation.
-Alternatives supported so far are: pkexec, doas, sup, sud. For any
+Select a different tool than sudo or doas for privilege escalation.
+Alternatives supported so far are: pkexec, sup, sud. For any
 alternative to work the executable must be included in the current
 PATH.
 
@@ -419,7 +419,8 @@ user. Tomb executes as super user only when required.
 
 To be made available on multi user systems, the superuser execution of
 the tomb script can be authorized for users without jeopardizing the
-whole system's security: just add such a line to \fI/etc/sudoers\fR:
+whole system's security: In case of sudo just add such a line to
+\fI/etc/sudoers\fR:
 
 .EX
 	username ALL=NOPASSWD: /usr/local/bin/tomb
@@ -431,6 +432,8 @@ To avoid that tomb execution is logged by \fIsyslog\fR also add:
 	Cmnd_Alias TOMB = /usr/local/bin/tomb
 	Defaults!TOMB !syslog
 .EE
+
+Different tools require other settings to achieve something similar.
 
 .SH PASSWORD INPUT
 

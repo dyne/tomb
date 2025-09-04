@@ -118,51 +118,50 @@ export TEXTDOMAIN=tomb
 
 # Wrap sudo with a more visible message or apply user-supplied alternative to sudo
 _sudo() {
-	if option_is_set --sudo; then
-		pescmd=`option_value --sudo`
-		case `basename $pescmd` in
-			"doas"|"sup"|"sud"|"pkexec")
+	local -a pescmds pe_extras
+	local pescmd
 
-				_is_found $pescmd || _failure "::1 pesc:: executable not found" $pescmd
- 				_verbose "Super user execution using ::1 pesc::" $pescmd
-				${pescmd} ${@}
-				return $?
-				;;
-			"skip"|"none")
-				_verbose "Super user execution skipped (SUID caller)"
-				${@}
-				return $?
-				;;
-			 *)
-				_failure "Super user execution not supported: ::1 sudo::" "`option_value --sudo`"
-				;;
-		esac
+	[[ "`id -u`" = "0" ]] && {
+		_verbose "Super user execution skipped (SUID caller)"
+		${@}
+		return $?
+	}
 
-	else
-		if [[ "`id -u`" = "0" ]]; then
-			_verbose "Super user execution skipped (SUID caller)"
-			${@}
-			return $?
-		elif _is_found sudo; then
-			local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
-			_is_found gettext && msg="$(gettext -s "$msg")"
-			msg=${(S)msg//::1*::/$USER}
+	option_is_set --sudo && {
+		pescmds=(`option_value --sudo`)
+	}
+	pescmds+=("sudo" "doas")
+
+	for cmd in "${pescmds[@]}"; do
+		_is_found $cmd && { pescmd=$cmd; break }
+	done
+	[[ -z ${pescmd} ]] &&
+		_failure "Couldn't find a viable privilege escalation tool."
+
+	# Construct message for the tools that allow custom prompts
+	local msg="Enter password for user ::1 user:: to gain superuser privileges"
+	_is_found gettext && msg="$(gettext -s "$msg")"
+	msg=${(S)msg//::1*::/$USER}
+
+	# Adjust call in regards of the chosen tool
+	case `basename $pescmd` in
+		"sudo")
 			[[ -n "$SUDO_ASKPASS" ]] && local sudo_askpass="--askpass"
-			sudo $sudo_askpass -p "
+			pe_extras=("-p" "
 $msg
+")
+			;;
+		"doas"|"sup"|"sud"|"pkexec")
+			;;
+		*)
+			_failure "Super user execution not supported: ::1 sudo::" "`option_value --sudo`"
+			;;
+	esac
 
-" ${@}
-			return $?
-		elif _is_found doas; then
-			local msg="Enter password for user ::1 user:: to gain superuser privileges"
-			_is_found gettext && msg="$(gettext -s "$msg")"
-			msg=${(S)msg//::1*::/$USER}
-			doas ${@}
-			return $?
-		else
-			_failure "No way found to escalate privileges to super user."
-		fi
-	fi
+	# Execute stuff
+	_verbose "Super user execution using ::1 pesc::" $pescmd
+	${pescmd} $sudo_askpass $pe_extras ${@}
+	return $?
 }
 
 # Cleanup anything sensitive before exiting.
