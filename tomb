@@ -139,29 +139,29 @@ _sudo() {
 		esac
 
 	else
-    if [[ "`id -u`" = "0" ]]; then
+		if [[ "`id -u`" = "0" ]]; then
 			_verbose "Super user execution skipped (SUID caller)"
 			${@}
 			return $?
-    elif _is_found sudo; then
-		  local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
-		  _is_found gettext && msg="$(gettext -s "$msg")"
-		  msg=${(S)msg//::1*::/$USER}
-		  [[ -n "$SUDO_ASKPASS" ]] && local sudo_askpass="--askpass"
-		  sudo $sudo_askpass -p "
+		elif _is_found sudo; then
+			local msg="[sudo] Enter password for user ::1 user:: to gain superuser privileges"
+			_is_found gettext && msg="$(gettext -s "$msg")"
+			msg=${(S)msg//::1*::/$USER}
+			[[ -n "$SUDO_ASKPASS" ]] && local sudo_askpass="--askpass"
+			sudo $sudo_askpass -p "
 $msg
 
 " ${@}
-		  return $?
-    elif _is_found doas; then
-		  local msg="Enter password for user ::1 user:: to gain superuser privileges"
-		  _is_found gettext && msg="$(gettext -s "$msg")"
-		  msg=${(S)msg//::1*::/$USER}
-      doas ${@}
-      return $?
-    else
-      _failure "No way found to escalate privileges to super user."
-    fi
+			return $?
+		elif _is_found doas; then
+			local msg="Enter password for user ::1 user:: to gain superuser privileges"
+			_is_found gettext && msg="$(gettext -s "$msg")"
+			msg=${(S)msg//::1*::/$USER}
+			doas ${@}
+			return $?
+		else
+			_failure "No way found to escalate privileges to super user."
+		fi
 	fi
 }
 
