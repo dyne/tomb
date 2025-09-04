@@ -151,6 +151,9 @@ _sudo() {
 $msg
 ")
 			;;
+		"sudo-rs")
+			pe_extras=("-p" "$msg")
+			;;
 		"doas"|"sup"|"sud"|"pkexec")
 			;;
 		*)
