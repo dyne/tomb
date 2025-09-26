@@ -1152,7 +1152,7 @@ _load_key() {
 # contains tweaks for different gpg versions
 # support both symmetric and asymmetric encryption
 gpg_decrypt() {
-	# fix for gpg 1.4.11 where the --status-* options don't work ;^/
+	# gpg version check necessary for <2.1.x (although those aren't supported anymore)
 	local gpgver=$(gpg --version --no-permission-warning | awk '/^gpg/ {print $3}')
 	local gpgpass="$1\n$TOMBKEY"
 	local tmpres ret
@@ -1174,15 +1174,6 @@ gpg_decrypt() {
 		}
 	}
 
-	[[ $gpgver == "1.4.11" ]] && {
-		_verbose "GnuPG is version 1.4.11 - adopting status fix."
-		TOMBSECRET=`print - "$gpgpass" | \
-			gpg --decrypt ${gpgpopt[@]}`
-		ret=$?
-		unset gpgpass
-		return $ret
-	}
-
 	_tmp_create
 	tmpres=$TOMBTMP
 	TOMBSECRET=`print - "$gpgpass" | \
@@ -1196,7 +1187,6 @@ gpg_decrypt() {
 		[[ "$i" =~ "DECRYPTION_OKAY" ]] && ret=0;
 	done
 	return $ret
-
 }
 
 
