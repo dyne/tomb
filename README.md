@@ -27,6 +27,8 @@ Or, if you are in a hurry, kill all processes with open files inside your tomb a
 ```
  $ tomb slam
 ```
+
+Tomb also supports two-factor unlocking with a FIDO2 passkey; see `doc/FIDO2.md` for setup details.
 ## 📖 [Get started on dyne.org/tomb](https://dyne.org/tomb)
 
 <a href="https://dyne.org/tomb"><img src="https://files.dyne.org/software_by_dyne.png" width="30%"></a>
