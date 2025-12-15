@@ -302,11 +302,19 @@ _tmp_create() {
 	}
 
 	local tfile
-	# use a long mktemp template to keep plenty of randomness in the filename
-	tfile=$(TMPDIR="$TMPDIR" mktemp -t tomb.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX) || {
-		_failure "Fatal error creating a temporary file in ::1 temp dir::" "$TMPDIR" }
-	chmod 600 "$tfile" || {
-		_failure "Fatal error setting permissions on temporary file: ::1 temp file::" "$tfile" }
+	# We're going to add one more $RANDOM for each time someone complains
+	# about this being too weak of a random.
+	tfile="${TMPDIR}/$RANDOM$RANDOM$RANDOM$RANDOM"	# Temporary file
+	umask 066
+	[[ $? == 0 ]] || {
+		_failure "Fatal error setting the permission umask for temporary files" }
+
+	[[ -r "$tfile" ]] && {
+		_failure "Someone is messing up with us trying to hijack temporary files." }
+
+	touch "$tfile"
+	[[ $? == 0 ]] || {
+		_failure "Fatal error creating a temporary file: ::1 temp file::" "$tfile" }
 
 	_verbose "Created tempfile: ::1 temp file::" "$tfile"
 	TOMBTMP="$tfile"
