@@ -1560,7 +1560,7 @@ ask_key_password() {
 		return 0 }
 
 	if option_is_set --fido2 && [[ $TOMB_FIDO2 == 0 ]]; then
-		_failure "This key is missing FIDO2 metadata. Re-forge the key with --fido2 or use a non-FIDO2 workflow."
+		_failure "this key was forged without the --fido2 option"
 	fi
 
 	if option_is_set -g; then
@@ -1573,7 +1573,7 @@ ask_key_password() {
 	if [[ $TOMB_FIDO2 == 1 ]]; then
 		local extra_pass=""
 		[[ -n $1 ]] && extra_pass="$1"
-		_message "A FIDO2 passkey is required to use ::1 key::" $TOMBKEYFILE
+		_message "a FIDO2 passkey is required to use ::1 key::" $TOMBKEYFILE
 
 		for c in 1 2 3; do
 			(( c > 1 )) && _warning "Retrying FIDO2 authentication (attempt $c)."
