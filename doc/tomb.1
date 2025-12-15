@@ -280,6 +280,24 @@ Tell tomb to use an asymmetric GnuPG key encryption instead of a
 symmetric passphrase to protect a tomb key. This option can be
 followed by \fI-r\fR when the command needs to specify recipient(s).
 .B
+.IP "--fido2"
+Use a FIDO2/WebAuthn passkey (hmac-secret) instead of a passphrase to protect
+the tomb key. Requires an authenticator that advertises the hmac-secret
+extension; during forge/open/lock Tomb will prompt for PIN/UV and device
+presence. For details see doc/FIDO2.md.
+.B
+.IP "--fido2-device \fI<path>\fR"
+Select a specific FIDO2 authenticator (e.g. /dev/hidrawX). If omitted Tomb
+auto-detects.
+.B
+.IP "--fido2-rp \fI<rp_id>\fR"
+Override the relying party id used when registering the passkey (default:
+tomb.dyne.org).
+.B
+.IP "--fido2-user \fI<name>\fR"
+Override the username stored in the authenticator when registering the passkey
+(default: the current user).
+.B
 .IP "-r \fI<gpg_id>[,<gpg_id2>]\fR"
 Provide a new set of recipient(s) to encrypt a tomb key. \fIgpg_ids\fR
 can be one or more GPG key ID, comma separated. All GPG keys must be

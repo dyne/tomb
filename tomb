@@ -73,6 +73,15 @@ typeset -i ACL=1
 typeset -i ARGON2=1
 typeset -i SEARCH=1
 
+# FIDO2 support (see _ensure_dependencies)
+typeset -i FIDO2=1
+typeset -i TOMB_FIDO2=0
+typeset -H TOMB_FIDO2_HEADER
+typeset -H TOMB_FIDO2_RP
+typeset -H TOMB_FIDO2_CRED
+typeset -H TOMB_FIDO2_SALT
+typeset -H TOMB_FIDO2_DEVICE
+typeset -H TOMB_FIDO2_SECRET
 # Default mount options
 typeset		 MOUNTOPTS="rw,noatime,nodev"
 
@@ -292,19 +301,12 @@ _tmp_create() {
 		[[ $? == 0 ]] || _failure "Fatal error creating the temporary directory: ::1 temp dir::" "$TMPDIR"
 	}
 
-	# We're going to add one more $RANDOM for each time someone complains
-	# about this being too weak of a random.
-	tfile="${TMPDIR}/$RANDOM$RANDOM$RANDOM$RANDOM"	# Temporary file
-	umask 066
-	[[ $? == 0 ]] || {
-		_failure "Fatal error setting the permission umask for temporary files" }
-
-	[[ -r "$tfile" ]] && {
-		_failure "Someone is messing up with us trying to hijack temporary files." }
-
-	touch "$tfile"
-	[[ $? == 0 ]] || {
-		_failure "Fatal error creating a temporary file: ::1 temp file::" "$tfile" }
+	local tfile
+	# use a long mktemp template to keep plenty of randomness in the filename
+	tfile=$(TMPDIR="$TMPDIR" mktemp -t tomb.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX) || {
+		_failure "Fatal error creating a temporary file in ::1 temp dir::" "$TMPDIR" }
+	chmod 600 "$tfile" || {
+		_failure "Fatal error setting permissions on temporary file: ::1 temp file::" "$tfile" }
 
 	_verbose "Created tempfile: ::1 temp file::" "$tfile"
 	TOMBTMP="$tfile"
@@ -746,6 +748,10 @@ usage() {
 	_print " -g           use a GnuPG key to encrypt a tomb key"
 	_print " -r           provide GnuPG recipients (separated by comma)"
 	_print " -R           provide GnuPG hidden recipients (separated by comma)"
+	_print " --fido2      encrypt the tomb key using a FIDO2/WebAuthn passkey"
+	_print " --fido2-device path to a specific FIDO2 authenticator (auto-detected by default)"
+	_print " --fido2-rp   relying party id to register on the passkey (default: tomb.dyne.org)"
+	_print " --fido2-user username to register on the passkey (default: current user)"
 	_print " --sudo       super user exec alternative to sudo (doas or none)"
 
 	[[ $KDF == 1 ]] || [[ $ARGON2 == 1 ]] && {
@@ -903,6 +909,7 @@ _list_optional_tools() {
 	typeset -a _deps
 	_deps=(gettext dcfldd shred steghide)
 	_deps+=(resize2fs tomb-kdb-pbkdf2 argon2 qrencode recoll unoconv lsof setfacl mlocate plocate)
+	_deps+=(fido2-cred fido2-assert fido2-token)
 	for d in $_deps; do
 		_print "`which $d`"
 	done
@@ -969,6 +976,10 @@ _ensure_dependencies() {
 	_is_found setfacl || ACL=0
 	# Check for plocate/mlocate
 	_is_found plocate || _is_found mlocate || SEARCH=0
+	# Check for FIDO2 helpers
+	_is_found fido2-cred || FIDO2=0
+	_is_found fido2-assert || FIDO2=0
+	_is_found fido2-token || FIDO2=0
 }
 
 # }}} - Commandline interaction
@@ -1034,6 +1045,120 @@ _gpg_uid() {
 _get_username() { getent passwd ${1} | awk -F: '{print $1}' }
 _get_home()     { getent passwd ${1} | awk -F: '{print $6}' }
 
+# Reset all FIDO2-related globals
+_fido2_reset_metadata() {
+	TOMB_FIDO2=0
+	TOMB_FIDO2_HEADER=""
+	TOMB_FIDO2_RP=""
+	TOMB_FIDO2_CRED=""
+	TOMB_FIDO2_SALT=""
+	TOMB_FIDO2_DEVICE=""
+	TOMB_FIDO2_SECRET=""
+}
+
+_require_fido2_available() {
+	[[ $FIDO2 == 1 ]] || {
+		_failure "FIDO2 helpers are not available (install fido2-cred, fido2-assert, fido2-token)." }
+}
+
+_fido2_random_b64() {
+	local bytes="${1:-32}"
+	dd if=/dev/urandom bs=1 count=$bytes 2>/dev/null | base64 | tr -d '\r\n'
+}
+
+_fido2_autodetect_device() {
+	local line
+	while read line; do
+		[[ -z "$line" ]] && continue
+		# Typical outputs:
+		# /dev/hidraw4: vendor=0x1050 product=0x0407 (YubiKey OTP+FIDO+CCID)
+		# path=/dev/hidraw4 vendor=0x1050 product=0x0407
+		line=${line#path=}
+		case "$line" in
+			/dev/hidraw[0-9]*)
+				print -n -- "${line%:}"
+				return 0
+				;;
+			/dev/hidraw[0-9]*:*)
+				line=${line%%:*}
+				print -n -- "$line"
+				return 0
+				;;
+		esac
+	done <<<"$(fido2-token -L 2>/dev/null)"
+	return 1
+}
+
+_fido2_pick_device() {
+	local device
+
+	option_is_set --fido2-device && device=$(option_value --fido2-device)
+	[[ -z $device && -n $TOMB_FIDO2_DEVICE ]] && device=$TOMB_FIDO2_DEVICE
+	[[ -z $device ]] && device=$(_fido2_autodetect_device)
+
+	[[ -z $device ]] && {
+		_failure "No FIDO2 authenticator found. Use --fido2-device to point to one." }
+
+	device="${device%% *}"
+	device="${device%%:*}"
+
+	print -n -- $device
+}
+
+_fido2_require_extension() {
+	local device="$1" ext="$2"
+	local info line
+	info=$(fido2-token -I "$device" 2>/dev/null) || return 1
+	for line in ${(f)info}; do
+		# match prefix case-insensitively
+		if [[ "${(L)line}" == "extension strings:"* ]]; then
+			line=${line#*:}
+			for word in ${(s: :)line}; do
+				[[ "$word" == "$ext" ]] && return 0
+			done
+		fi
+	done
+	return 1
+}
+
+_fido2_refresh_header() {
+	[[ -z $TOMB_FIDO2_RP || -z $TOMB_FIDO2_CRED || -z $TOMB_FIDO2_SALT ]] && return 0
+	TOMB_FIDO2_HEADER="_FIDO2 rp=$TOMB_FIDO2_RP cred=$TOMB_FIDO2_CRED salt=$TOMB_FIDO2_SALT"
+	if [[ -n $TOMB_FIDO2_DEVICE ]]; then
+		local _dev="${TOMB_FIDO2_DEVICE// /%20}"
+		TOMB_FIDO2_HEADER+=" device=${_dev}"
+	fi
+}
+
+_fido2_parse_header() {
+	local header="$1" tok key val
+
+	_fido2_reset_metadata
+	TOMB_FIDO2=1
+	header="${header#_FIDO2 }"
+	for tok in ${(s: :)header}; do
+		key=${tok%%=*}
+		val=${tok#*=}
+		case $key in
+			rp) TOMB_FIDO2_RP="$val" ;;
+			cred) TOMB_FIDO2_CRED="$val" ;;
+			salt) TOMB_FIDO2_SALT="$val" ;;
+			device) TOMB_FIDO2_DEVICE="${val//%20/ }" ;;
+		esac
+	done
+	_fido2_refresh_header
+}
+
+_parse_key_headers() {
+	local line
+
+	_fido2_reset_metadata
+	for line in ${(f)TOMBKEY}; do
+		[[ "$line" == "-----BEGIN PGP MESSAGE-----" ]] && break
+		[[ "$line" == "_FIDO2"* ]] && _fido2_parse_header "$line"
+	done
+}
+
 # $1 is the encrypted key contents we are checking
 is_valid_key() {
 	local key="$1"		 # Unique argument is an encrypted key to test
@@ -1061,13 +1186,17 @@ is_valid_key() {
 		_message "Key is an image, it might be valid."
 		return 0 }
 
-	[[ $KDF == 1 ]] && { ! option_is_set -g } && { option_is_set --kdf } && {
-		_head="${key[(f)1]}"
-		[[ $_head =~ '^_KDF_' ]] || {
+	if [[ $KDF == 1 ]] && { ! option_is_set -g } && { option_is_set --kdf }; then
+		local _head
+		for _head in ${(f)key}; do
+			[[ "$_head" == "-----BEGIN PGP MESSAGE-----" ]] && break
+			[[ "$_head" =~ '^_KDF_' ]] && break
+		done
+		[[ "$_head" =~ '^_KDF_' ]] || {
 			_warning "Key is missing KDF header."
 			return 1
 		}
-	}
+	fi
 
 	[[ $key =~ "BEGIN PGP" ]] && {
 		_message "Key is valid."
@@ -1079,14 +1208,17 @@ is_valid_key() {
 # $1 is a string containing an encrypted key
 recover_key() {
 	local key="${1}"	# Unique argument is an encrypted key
+	local _head
 
 	_warning "Attempting key recovery."
 
-	_head="${key[(f)1]}" # take the first line
-
 	TOMBKEY=""		  # Reset global variable
 
-	[[ $_head =~ "^_KDF_" ]] && TOMBKEY+="$_head\n"
+	for _head in ${(f)key}; do
+		[[ "$_head" == "-----BEGIN PGP MESSAGE-----" ]] && break
+		[[ "$_head" =~ "^_KDF_" ]] && TOMBKEY+="$_head\n"
+		[[ "$_head" =~ "^_FIDO2" ]] && TOMBKEY+="$_head\n"
+	done
 
 	TOMBKEY+="-----BEGIN PGP MESSAGE-----\n"
 	TOMBKEY+="$key\n"
@@ -1135,6 +1267,8 @@ _load_key() {
 		# this occurs especially when piping from stdin and aborted
 		_failure "Key not found, specify one using -k."
 	}
+
+	_parse_key_headers
 
 	is_valid_key $TOMBKEY || {
 		_warning "The key seems invalid or its format is not known by this version of Tomb."
@@ -1207,19 +1341,22 @@ get_lukskey() {
 	_verbose "get_lukskey"
 
 	_password="$1"
+	local headerline="" kdf_hash kdf_salt kdf_ic kdf_len kdf_mem kdf_par
 
-
-	firstline="${TOMBKEY[(f)1]}"
+	for headerline in ${(f)TOMBKEY}; do
+		[[ "$headerline" == "-----BEGIN PGP MESSAGE-----" ]] && break
+		[[ "$headerline" =~ '^_KDF_' ]] && break
+	done
 
 	# key is KDF encoded
-	if [[ $firstline =~ '^_KDF_' ]]; then
-		kdf_hash="${firstline[(ws:_:)2]}"
+	if [[ $headerline =~ '^_KDF_' ]]; then
+		kdf_hash="${headerline[(ws:_:)2]}"
 		_verbose "KDF: ::1 kdf::" "$kdf_hash"
 		case "$kdf_hash" in
 			"pbkdf2sha1")
-				kdf_salt="${firstline[(ws:_:)3]}"
-				kdf_ic="${firstline[(ws:_:)4]}"
-				kdf_len="${firstline[(ws:_:)5]}"
+				kdf_salt="${headerline[(ws:_:)3]}"
+				kdf_ic="${headerline[(ws:_:)4]}"
+				kdf_len="${headerline[(ws:_:)5]}"
 				_message "Unlocking KDF key protection (::1 kdf::)" $kdf_hash
 				_verbose "KDF salt: $kdf_salt"
 				_verbose "KDF ic: $kdf_ic"
@@ -1228,10 +1365,10 @@ get_lukskey() {
 				;;
 
 			"argon2")
-				kdf_salt="${firstline[(ws:_:)3]}"
-				kdf_ic="${firstline[(ws:_:)4]}"
-				kdf_mem="${firstline[(ws:_:)5]}"
-				kdf_par="${firstline[(ws:_:)6]}"
+				kdf_salt="${headerline[(ws:_:)3]}"
+				kdf_ic="${headerline[(ws:_:)4]}"
+				kdf_mem="${headerline[(ws:_:)5]}"
+				kdf_par="${headerline[(ws:_:)6]}"
 				# ToDo also parse kdf_len?
 				_message "Unlocking KDF key protection (::1 kdf::)" $kdf_hash
 				_verbose "KDF salt: $kdf_salt"
@@ -1277,6 +1414,130 @@ get_lukskey() {
 	return $ret
 }
 
+_fido2_require_metadata() {
+	[[ -n $TOMB_FIDO2_RP && -n $TOMB_FIDO2_CRED && -n $TOMB_FIDO2_SALT ]] || {
+		_failure "Key is missing required FIDO2 metadata."
+	}
+}
+
+_fido2_create_binding() {
+	local device rp user challenge user_id cred_input cred_output cred_id
+
+	_require_fido2_available
+	device=$(_fido2_pick_device)
+	_fido2_require_extension "$device" "hmac-secret" || {
+		_failure "FIDO2 authenticator does not advertise hmac-secret. Please enable hmac-secret on the key or use a compatible device."
+	}
+	rp="$(option_value --fido2-rp)"
+	rp=${rp:-$TOMB_FIDO2_RP}
+	rp=${rp:-tomb.dyne.org}
+	user="$(option_value --fido2-user)"
+	user=${user:-$_USER}
+	user=${user:-tomb}
+	TOMB_FIDO2_RP="$rp"
+	[[ -n $TOMB_FIDO2_SALT ]] || TOMB_FIDO2_SALT=$(_fido2_random_b64 32)
+
+	challenge=$(_fido2_random_b64 32)
+	user_id=$(_fido2_random_b64 32)
+
+	_tmp_create
+	cred_input=$TOMBTMP
+	print $challenge > $cred_input
+	print $rp >> $cred_input
+	print $user >> $cred_input
+	print $user_id >> $cred_input
+
+	_tmp_create
+	cred_output=$TOMBTMP
+	_message "Creating a FIDO2 binding on ::1::" $device
+	_verbose "Running: fido2-cred -M -h -v -i ::1:: ::2::" $cred_input $device
+	fido2-cred -M -h -v -i $cred_input $device > $cred_output
+	[[ $? != 0 ]] && _failure "FIDO2 credential creation failed."
+
+	cred_id="$(sed -n '5p' $cred_output | tr -d '\r\n')"
+	[[ -z $cred_id ]] && _failure "Cannot read credential id from FIDO2 authenticator."
+
+	TOMB_FIDO2=1
+	TOMB_FIDO2_CRED="$cred_id"
+	TOMB_FIDO2_DEVICE="$device"
+	_fido2_refresh_header
+	option_is_set -D && {
+		_verbose "FIDO2 rp=::1:: cred=::2:: salt=::3:: device=::4::" "$TOMB_FIDO2_RP" "$TOMB_FIDO2_CRED" "$TOMB_FIDO2_SALT" "$TOMB_FIDO2_DEVICE"
+		_verbose "FIDO2 header: ::1::" "$TOMB_FIDO2_HEADER"
+	}
+	[[ -z $TOMB_FIDO2_HEADER ]] && {
+		option_is_set -D && cat $cred_output >&2
+		_failure "Internal error: missing FIDO2 metadata after credential creation."
+	}
+}
+
+_fido2_collect_secret() {
+	local extra="$1" device assertion_input assertion_output challenge secret
+
+	_require_fido2_available
+	_fido2_require_metadata
+
+	device=$(_fido2_pick_device)
+	challenge=$(_fido2_random_b64 32)
+
+	_tmp_create
+	assertion_input=$TOMBTMP
+	print $challenge > $assertion_input
+	print $TOMB_FIDO2_RP >> $assertion_input
+	print $TOMB_FIDO2_CRED >> $assertion_input
+	print $TOMB_FIDO2_SALT >> $assertion_input
+
+	_tmp_create
+	assertion_output=$TOMBTMP
+	_message "Waiting for FIDO2 authentication on ::1::" $device
+	# -h requests hmac-secret, -v asks for user verification (PIN/touch)
+	_verbose "Running: fido2-assert -G -h -v -i ::1:: ::2::" $assertion_input $device
+	fido2-assert -G -h -v -i $assertion_input $device > $assertion_output
+	local _fido_rc=$?
+
+	local -a _assert_lines
+	_assert_lines=(${(f)"$(cat $assertion_output)"})
+	_verbose "fido2-assert output lines: ${#_assert_lines}"
+	if [[ ${#_assert_lines} -lt 5 ]]; then
+		_warning "FIDO2 device did not provide an hmac-secret (unexpected output)."
+		option_is_set -D && cat $assertion_output >&2
+		[[ $_fido_rc != 0 ]] && _warning "fido2-assert exit code: $_fido_rc"
+		return 1
+	fi
+
+	# For non-resident creds without largeBlob, last line should be the hmac secret
+	secret=${_assert_lines[-1]}
+	secret=${secret//$'\r'/}
+	[[ -z $secret ]] && {
+		_warning "FIDO2 device did not provide an hmac-secret."
+		option_is_set -D && cat $assertion_output >&2
+		[[ $_fido_rc != 0 ]] && _warning "fido2-assert exit code: $_fido_rc"
+		return 1
+	}
+
+	TOMB_FIDO2_DEVICE="$device"
+	_fido2_refresh_header
+
+	TOMB_FIDO2_SECRET="${secret}${extra}"
+	print -n -- "$TOMB_FIDO2_SECRET"
+}
+
+_fido2_prepare_passphrase() {
+	local extra="$1" rpopt secret
+
+	_require_fido2_available
+	[[ $TOMB_FIDO2 == 1 ]] || TOMB_FIDO2=1
+	rpopt="$(option_value --fido2-rp)"
+	[[ -z $TOMB_FIDO2_RP ]] && TOMB_FIDO2_RP=${rpopt:-tomb.dyne.org}
+	[[ -z $TOMB_FIDO2_SALT ]] && TOMB_FIDO2_SALT=$(_fido2_random_b64 32)
+
+	[[ -n $TOMB_FIDO2_CRED ]] || _fido2_create_binding
+	_fido2_refresh_header
+
+	_fido2_collect_secret "$extra" || return 1
+	print -n -- "$TOMB_FIDO2_SECRET"
+}
+
 # This function asks the user for the password to use the key it tests
 # it against the return code of gpg on success returns 0 and saves
 # the password in the global variable $TOMBPASSWORD
@@ -1284,18 +1545,45 @@ ask_key_password() {
 	[[ -z "$TOMBKEYFILE" ]] && {
 		_failure "Internal error: ask_key_password() called before _load_key()." }
 
+	local passok=0 tombpass=""
+
 	[[ "$TOMBKEYFILE" = "cleartext" ]] && {
 		_verbose "no password needed, using secret bytes from stdin"
 		return 0 }
+
+	if option_is_set --fido2 && [[ $TOMB_FIDO2 == 0 ]]; then
+		_failure "This key is missing FIDO2 metadata. Re-forge the key with --fido2 or use a non-FIDO2 workflow."
+	fi
 
 	if option_is_set -g; then
 		_verbose "no password needed, using GPG key"
 		get_lukskey
 		return $?
 	fi
+	passok=0
+
+	if [[ $TOMB_FIDO2 == 1 ]]; then
+		local extra_pass=""
+		[[ -n $1 ]] && extra_pass="$1"
+		_message "A FIDO2 passkey is required to use ::1 key::" $TOMBKEYFILE
+
+		for c in 1 2 3; do
+			(( c > 1 )) && _warning "Retrying FIDO2 authentication (attempt $c)."
+			_fido2_collect_secret "$extra_pass" || continue
+			tombpass="$TOMB_FIDO2_SECRET"
+			get_lukskey "$tombpass"
+			[[ $? = 0 ]] && {
+				passok=1; _message "Password OK."
+				break;
+			}
+		done
+
+		TOMBPASSWORD=$tombpass
+		[[ $passok == 1 ]] || return 1
+		return 0
+	fi
 
 	_message "A password is required to use key ::1 key::" $TOMBKEYFILE
-	passok=0
 	tombpass=""
 	if [[ -z $1 ]]; then
 
@@ -1414,9 +1702,11 @@ gen_key() {
 	local gpgpass opt
 	local recipients_opt
 	typeset -a gpgopt
+	typeset -a keyheaders
 	# here user is prompted for key password
 	tombpass=""
 	tombpasstmp=""
+	[[ $TOMB_FIDO2 == 0 ]] && { option_is_set --fido2 } && TOMB_FIDO2=1
 
 	if option_is_set -g; then
 		gpgopt=(--encrypt)
@@ -1452,7 +1742,22 @@ gen_key() {
 		gpgpass="$TOMBSECRET"
 		opt=''
 	else
-		if [ "$2" = "" ]; then
+		if [[ $TOMB_FIDO2 == 1 ]]; then
+			local extra_pass="$2"
+			[[ -n $extra_pass ]] && _verbose "gen_key combines FIDO2 secret with extra material."
+			_fido2_prepare_passphrase "$extra_pass" || _failure "Unable to obtain FIDO2 secret for the key."
+			tombpass="$TOMB_FIDO2_SECRET"
+			_fido2_refresh_header
+			if [[ -z $TOMB_FIDO2_HEADER ]]; then
+				_verbose "Rebuilding missing FIDO2 header rp=::1:: cred=::2:: salt=::3:: dev=::4::" "$TOMB_FIDO2_RP" "$TOMB_FIDO2_CRED" "$TOMB_FIDO2_SALT" "$TOMB_FIDO2_DEVICE"
+				if [[ -n $TOMB_FIDO2_RP && -n $TOMB_FIDO2_CRED && -n $TOMB_FIDO2_SALT ]]; then
+					TOMB_FIDO2_HEADER="_FIDO2 rp=$TOMB_FIDO2_RP cred=$TOMB_FIDO2_CRED salt=$TOMB_FIDO2_SALT"
+					[[ -n $TOMB_FIDO2_DEVICE ]] && TOMB_FIDO2_HEADER+=" device=${TOMB_FIDO2_DEVICE// /%20}"
+				else
+					_failure "Internal error: missing FIDO2 metadata after registration."
+				fi
+			fi
+		elif [ "$2" = "" ]; then
 			while true; do
 				# 3 tries to write two times a matching password
 				tombpass=`ask_password "Type the new password to secure your key"`
@@ -1478,7 +1783,8 @@ gen_key() {
 			_verbose "gen_key takes tombpass from CLI argument: ::1 tomb pass::" $tombpass
 		fi
 
-		header=""
+		[[ -n $TOMB_FIDO2_HEADER ]] && keyheaders+=("$TOMB_FIDO2_HEADER")
+
 		[[ $KDF == 1 ]] || [[ $ARGON2 == 1 ]] && {
 			{ option_is_set --kdf } && {
 				# KDF is a key strengthening technique against brute forcing
@@ -1513,7 +1819,7 @@ gen_key() {
 					_message "iterations: ::1 pbkdf2_iter::" $pbkdf2_iter
 					# We use a length of 64bytes = 512bits (more than needed!?)
 					tombpass=`tomb-kdb-pbkdf2 $kdfsalt $pbkdf2_iter 64 <<<"${tombpass}"`
-					header="_KDF_pbkdf2sha1_${kdfsalt}_${pbkdf2_iter}_64\n"
+					keyheaders+=("_KDF_pbkdf2sha1_${kdfsalt}_${pbkdf2_iter}_64")
 					;;
 				argon2)
 					_success "Using Argon2 as KDF"
@@ -1525,7 +1831,7 @@ gen_key() {
 					kdfpar=${kdfpar:-1}
 					_message "parallelismn: ::1 kdfparallel::" $kdfpar
 					tombpass=`argon2 $kdfsalt -m $kdfmem -t $itertime -p $kdfpar -l 64 -r <<<"${tombpass}"`
-					header="_KDF_argon2_${kdfsalt}_${itertime}_${kdfmem}_${kdfpar}_64\n"
+					keyheaders+=("_KDF_argon2_${kdfsalt}_${itertime}_${kdfmem}_${kdfpar}_64")
 					;;
 				*)
 					_warning "unrecognized KDF ::1::" $kdftype
@@ -1535,7 +1841,15 @@ gen_key() {
 				esac
 			}
 		}
-		print $header >> "$1"
+
+		if [[ ${#keyheaders[@]} -gt 0 ]]; then
+			local hdr
+			for hdr in $keyheaders; do
+				print $hdr >> "$1"
+			done
+		else
+			print >> "$1"
+		fi
 
 		# Set gpg inputs and options
 		gpgpass="${tombpass}\n$TOMBSECRET"
@@ -1958,6 +2272,8 @@ forge_key() {
 	# can be specified both as simple argument or using -k
 	local destkey="$1"
 	{ option_is_set -k } && { destkey=$(option_value -k) }
+	_fido2_reset_metadata
+	{ option_is_set --fido2 } && TOMB_FIDO2=1
 
 	local algo="AES256"	 # Default encryption algorithm
 
@@ -1995,6 +2311,7 @@ forge_key() {
 	[[ $KDF == 1 ]] && { ! option_is_set -g } && {
 		_message "Using KDF to protect the key password"
 	}
+	[[ $TOMB_FIDO2 == 1 ]] && _require_fido2_available
 
 	TOMBKEYFILE="$destkey"	  # Set global variable
 
@@ -3137,7 +3454,7 @@ main() {
 	# can only use the non-abbreviated long-option version like:
 	# -force and NOT -f
 	#
-	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g -sudo: -pinentry:)
+	main_opts=(q -quiet=q D -debug=D h -help=h v -version=v f -force=f -tmp: U: G: T: -no-color -unsafe g -gpgkey=g -sudo: -pinentry: -fido2 -fido2-device: -fido2-rp: -fido2-user:)
 	subcommands_opts[__default]=""
 	# -o in open and mount is used to pass alternate mount options
 	subcommands_opts[open]="n -nohook=n k: o: -ignore-swap -tomb-pwd: r: R: p -preserve-ownership=p"
