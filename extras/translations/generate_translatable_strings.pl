@@ -28,7 +28,7 @@ my @blacklist = ('"--"', '"\\\\000"', '`.*`', '$\(.*\)');
 
 # Translatable strings that can't be automatically detected yet
 my %undetectable = (
-    124 => '[sudo] Enter password for user ::1 user:: to gain superuser privileges'
+    151 => 'Enter password for user ::1 user:: to gain superuser privileges'
 );
 
 open my $handle, $FILE or die "Failed to open $FILE";
