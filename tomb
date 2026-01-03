@@ -581,7 +581,7 @@ ask_password() {
 		return 1
 	}
 
-	print "$password"
+	print -R -n - "$password"
 	return 0
 }
 
@@ -1294,12 +1294,12 @@ _load_key() {
 # contains tweaks for different gpg versions
 # support both symmetric and asymmetric encryption
 gpg_decrypt() {
-	# fix for gpg 1.4.11 where the --status-* options don't work ;^/
+	# gpg version check necessary for <2.1.x (although those aren't supported anymore)
 	local gpgver=$(gpg --version --no-permission-warning | awk '/^gpg/ {print $3}')
-	local gpgpass="$1\n$TOMBKEY"
+	local gpgpass="$1"
 	local tmpres ret
 	typeset -a gpgopt
-	gpgpopt=(--batch --no-tty --passphrase-fd 0 --no-options)
+	gpgpopt=(--batch --no-tty --passphrase-fd 3 --no-options --no-mdc-warning --no-permission-warning --no-secmem-warning)
 
 	{ option_is_set -g } && {
 		gpgpass="$TOMBKEY"
@@ -1316,21 +1316,11 @@ gpg_decrypt() {
 		}
 	}
 
-	[[ $gpgver == "1.4.11" ]] && {
-		_verbose "GnuPG is version 1.4.11 - adopting status fix."
-		TOMBSECRET=`print - "$gpgpass" | \
-			gpg --decrypt ${gpgpopt[@]}`
-		ret=$?
-		unset gpgpass
-		return $ret
-	}
-
 	_tmp_create
 	tmpres=$TOMBTMP
-	TOMBSECRET=`print - "$gpgpass" | \
-		gpg --decrypt ${gpgpopt[@]} \
-			--status-fd 2 --no-mdc-warning --no-permission-warning \
-			--no-secmem-warning 2> $tmpres`
+	TOMBSECRET=`print - "$TOMBKEY" | \
+		gpg --decrypt ${gpgpopt[@]} --status-fd 2 \
+			3<<<"$gpgpass" 2> $tmpres`
 	unset gpgpass
 	ret=1
 	for i in ${(f)"$(cat $tmpres)"}; do
@@ -1338,7 +1328,6 @@ gpg_decrypt() {
 		[[ "$i" =~ "DECRYPTION_OKAY" ]] && ret=0;
 	done
 	return $ret
-
 }
 
 
@@ -1860,18 +1849,16 @@ gen_key() {
 		fi
 
 		# Set gpg inputs and options
-		gpgpass="${tombpass}\n$TOMBSECRET"
 		gpgopt=(--passphrase-fd 0 --symmetric --no-options)
 		opt='-n'
 	fi
 
 	_tmp_create
 	local tmpres=$TOMBTMP
-	print $opt - "$gpgpass" \
+	print $opt - "$TOMBSECRET" \
 		| gpg --openpgp --force-mdc --cipher-algo ${algo} \
-			  --batch --no-tty ${gpgopt} \
+			  --batch --no-tty ${gpgopt} --passphrase-file <(print -R -n - "$tombpass") \
 			  --status-fd 2 -o - --armor 2> $tmpres >> "$1"
-	unset gpgpass
 	# check result of gpg operation
 	for i in ${(f)"$(cat $tmpres)"}; do
 		_verbose "$i"
