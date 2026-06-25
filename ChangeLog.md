@@ -1,4 +1,20 @@
 # Tomb ChangeLog
+
+## Unreleased
+### TBA
+
+Special character sequences like newline (`\n`), tabfeed (`\t`) and
+similar from ANSI Escape Sequences caused unexpected behaviour when
+setting passwords. The safe way to pipe the passwords into `gnupg`
+would go through the shell and if sequences were encountered
+they would be processed.
+Which brings unintended changes in the entered password. In the case
+of a newline the user could end up with a much weaker password
+than expected and not notice it necessarily.  
+With this release the password won't be changed by the shell pipe
+anymore. `Pinentry` and `libassuan` still do their thing though.  
+For an overview see [Known Bugs](./KNOWN_BUGS.md).
+
 ## 2.13
 ### July 2025
 
