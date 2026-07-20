@@ -1122,6 +1122,7 @@ _fido2_require_extension() {
 		if [[ "${(L)line}" == "extension strings:"* ]]; then
 			line=${line#*:}
 			for word in ${(s: :)line}; do
+				word=${word%,}   # libfido2 comma-separates extensions
 				[[ "$word" == "$ext" ]] && return 0
 			done
 		fi
