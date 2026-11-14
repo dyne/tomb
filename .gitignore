@@ -9,3 +9,6 @@ doc/web/dyne
 share/gtkrc
 .*.sw?
 *.mo
+/.test-results/
+/.test-cache/
+__pycache__/

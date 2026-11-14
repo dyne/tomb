@@ -1,0 +1,44 @@
+#!/bin/bash
+# NoCloud user-data: runs only inside a disposable Debian/Ubuntu guest.
+set -euo pipefail
+export LC_ALL=C
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+results=/mnt/tomb-results
+mkdir -p "$results" /mnt/tomb-source
+
+finish() {
+	local status=$?
+	trap - EXIT
+	set +e
+	if mountpoint -q "$results"; then
+		dmesg >"$results/dmesg.log"
+		cp /var/log/cloud-init.log "$results/cloud-init.log"
+		printf '%s\n' "$status" >"$results/guest-exit-code.tmp"
+		mv "$results/guest-exit-code.tmp" "$results/guest-exit-code"
+	fi
+	printf 'TOMB_GUEST_EXIT=%s\n' "$status" >/dev/console
+	sync
+	poweroff -f
+	exit "$status"
+}
+trap finish EXIT
+mount -t 9p -o trans=virtio,version=9p2000.L tomb-results "$results"
+exec > >(tee "$results/setup.log" /dev/console) 2>&1
+mount -t 9p -o trans=virtio,version=9p2000.L,ro tomb-source /mnt/tomb-source
+mkdir -p /root/tomb
+tar -xf /mnt/tomb-source/source.tar -C /root/tomb
+cd /root/tomb
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get -o Acquire::Retries=3 update
+apt-get -o Acquire::Retries=3 install -y --no-install-recommends \
+	bats zsh cryptsetup-bin gpg gpg-agent file pinentry-curses e2fsprogs util-linux \
+	sudo make gcc libgcrypt20-dev argon2 steghide qrencode lsof gettext xxd python3 kmod
+modprobe loop
+modprobe dm-crypt
+# Swap is disabled only inside this disposable guest, never on the host.
+swapoff -a
+make -C extras/kdf-keys all >"$results/kdf-build.log" 2>&1
+make -C extras/kdf-keys install >>"$results/kdf-build.log" 2>&1
+export TOMB_TEST_DISPOSABLE=1
+bash extras/test/run --suite all --output-dir "$results/tests"

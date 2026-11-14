@@ -53,6 +53,13 @@ We have a [space for issues](https://github.com/dyne/Tomb/issues) open for detai
 
 There is also a [space for discussion](https://github.com/dyne/Tomb/discussions) of new features, desiderata and whatnot on github.
 
+### Testing
+
+The Bats suite provides per-test logs, TAP, JSON and JUnit reports. Run
+`make test-smoke` for unprivileged checks, or run the integration suite inside
+a disposable QEMU guest. See [the test guide](extras/test/README.md) for setup,
+result extraction, and the legacy suite.
+
 # Licensing
 
 Tomb is Copyright (C) 2007-2025 by the Dyne.org Foundation and maintained by [Jaromil](https://github.com/jaromil). The [AUTHORS](AUTHORS.md) file contains more information on all the developers involved. The license is GNU Public License v3.
