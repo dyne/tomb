@@ -34,9 +34,9 @@ need root, loop devices, device mapper, SSH keys, or a local Tomb installation.
 Only the guest installs Tomb's dependencies and disables its swap.
 
 ```sh
-# Download Debian 12's generic amd64 cloud image into an ignored local cache.
+# Download a generic amd64 cloud image into an ignored local cache.
 # The downloader validates SHA512 against Debian's manifest over HTTPS.
-python3 extras/test/qemu/fetch-image.py .test-cache
+python3 extras/test/qemu/fetch-image.py .test-cache --debian 12
 
 make test-qemu QEMU_IMAGE="$PWD/.test-cache/debian-12-generic-amd64.qcow2"
 
@@ -48,7 +48,8 @@ bash extras/test/qemu/run \
 
 The supplied image must be a trusted Debian/Ubuntu amd64 cloud image with
 cloud-init/NoCloud, virtio block/network, and 9p filesystem support. The downloader
-chooses Debian's **generic** image, which includes the standard kernel. qcow2 is
+accepts `--debian 11`, `12`, or `13` (default `12`) and chooses Debian's **generic**
+image, which includes the standard kernel. qcow2 is
 the default; pass `--image-format raw` for a raw disk. The image is used in QEMU
 snapshot mode, so the base image remains unchanged. Package installation needs
 outbound networking; no incoming port is forwarded.
@@ -59,6 +60,8 @@ archive is shared read-only. The guest copies it to its own disk, installs Bats
 and dependencies, builds the PBKDF2 helpers, then runs all native Bats cases.
 A separate writable share returns only the selected run's results to the host.
 No writable source checkout or host home directory is shared.
+Every guest installs Bats 1.11.1 from the same verified upstream commit; Debian
+11's packaged Bats is too old for the suite's minimum version.
 
 Acceleration defaults to KVM when opening `/dev/kvm` and checking its API works;
 otherwise it uses TCG software emulation. `--accel kvm` requires KVM and surfaces
@@ -73,11 +76,17 @@ requires the guest completion marker and a passing nonempty test report.
 Each invocation creates a new directory under `.test-results/`, or uses the
 new directory named by `--output-dir`. Existing directories are rejected, so a
 rerun does not overwrite earlier evidence. The runner prints its result path
-before executing tests and a compact summary afterward:
+before executing tests and a summary listing every case by name and status
+afterward. Failed cases include their TAP assertion diagnostics; skipped cases
+include the reason. For example:
 
 ```text
-Tomb / all: PASS (123s)
-  19 passed | 0 failed | 0 skipped | 0 runner errors
+Tomb / all: FAIL (123s)
+  1 passed | 1 failed | 1 skipped | 0 runner errors
+  PASSED   1. contents survive close and reopen
+  FAILED   2. wrong password cannot mount a volume
+      expected exit 1, got 124
+  SKIPPED  3. optional feature (missing tool)
 ```
 
 The numbers above illustrate the format, not a recorded test run.
@@ -85,7 +94,7 @@ The numbers above illustrate the format, not a recorded test run.
 | Artifact | Contents |
 | --- | --- |
 | `results.tap` | Original Bats results, including assertion diagnostics |
-| `summary.txt` | Counts and names/reasons for failures and skips |
+| `summary.txt` | Counts, every case's name/status, failure diagnostics, and skip reasons |
 | `summary.json` | Counts, exit status, duration, cases, diagnostics, and runner errors |
 | `junit.xml` | CI-compatible cases, failures, skips, and infrastructure errors |
 | `manifest.json` | Source hashes, Git identity when available, and suite selection |
@@ -95,7 +104,7 @@ The numbers above illustrate the format, not a recorded test run.
 For QEMU runs these files live under `tests/` within the VM result directory.
 The directory also contains `serial.log`, `qemu.log`, `setup.log`, `seed.log`,
 `dmesg.log`, `cloud-init.log`, `kdf-build.log`, `guest-exit-code`, `vm.json`,
-`vm-result.json`, and a host `summary.txt`, as far as execution progressed.
+`vm-result.json`, `os-release`, and a host `summary.txt`, as far as execution progressed.
 `vm.json` records the image hash, source archive hash, and selected acceleration;
 the guest's source manifest supplies individual file hashes even though `.git`
 is intentionally absent there. Failed bootstrap attempts still retain the host
@@ -135,9 +144,12 @@ Recipient tests remain disabled by default in the legacy setup.
 The native Bats cases are an initial migration, not a claim of complete parity
 with the old suite. Legacy coverage still includes hooks, QR output, historical
 releases, and other variants. GitHub Actions retains the legacy suite alongside
-Bats on `ubuntu-latest`, adds an independent Debian 12 QEMU job hosted on
-`ubuntu-latest`, explicitly installs Bats on the runners (pinned to 1.11.1 for
-the native job) and inside the guest, and uploads reports/logs with
+Bats on `ubuntu-latest` and runs a QEMU matrix for Debian 11 (bullseye),
+12 (bookworm), and 13 (trixie), also hosted on `ubuntu-latest`. Matrix jobs run
+independently with fail-fast disabled and upload separate artifacts named
+`tomb-qemu-debian11`, `tomb-qemu-debian12`, and `tomb-qemu-debian13`.
+CI explicitly installs Bats 1.11.1 on the native runner and inside each guest,
+and uploads reports/logs with
 `always()` even after failures. The Actions job summary displays the text
 reports. `workflow_dispatch` also allows manual execution.
 

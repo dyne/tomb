@@ -51,8 +51,11 @@ def write_reports(directory, exit_code, duration, suite):
     lines = [f"Tomb / {suite}: {'PASS' if success else 'FAIL'} ({duration}s)",
              f"  {counts['passed']} passed | {counts['failed']} failed | {counts['skipped']} skipped | {len(errors)} runner errors"]
     for test in tests:
-        if test["status"] != "passed":
-            lines.append(f"  {test['status'].upper()}: {test['name']} {test['reason']}".rstrip())
+        reason = f" ({test['reason']})" if test["reason"] else ""
+        lines.append(f"  {test['status'].upper():7} {test['number']:>2}. {test['name']}{reason}")
+        if test["status"] == "failed":
+            for diagnostic in test["diagnostics"]:
+                lines.extend(f"      {line}" for line in diagnostic.splitlines())
     lines.extend(f"  ERROR: {error}" for error in errors)
     lines.append(f"  Reports and per-test logs: {directory}")
     summary = "\n".join(lines) + "\n"
