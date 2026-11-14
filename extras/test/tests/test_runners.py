@@ -62,6 +62,34 @@ class RunnerTests(unittest.TestCase):
         self.assertNotEqual(run.returncode, 0)
         self.assertEqual(marker.read_text(), "old evidence")
 
+    def test_helpers_load_on_bats_without_the_version_declaration_function(self):
+        for version in ("1.5.0", "1.6.0"):
+            with self.subTest(version=version):
+                env = dict(self.env, BATS_VERSION=version)
+                code = ('unset -f bats_require_minimum_version; source "$1"; '
+                        'declare -F setup_case tomb_command')
+                run = subprocess.run(["bash", "-e", "-c", code, "_", str(TEST_HOME / "bats/helpers.bash")],
+                                     env=env, capture_output=True, text=True, timeout=10)
+                self.assertEqual(run.returncode, 0, run.stderr)
+                self.assertIn("tomb_command", run.stdout)
+
+    def test_helpers_declare_the_minimum_when_supported(self):
+        code = ('bats_require_minimum_version() { printf "required=%s\\n" "$1"; }; '
+                'source "$1"; declare -F tomb_command')
+        run = subprocess.run(["bash", "-e", "-c", code, "_", str(TEST_HOME / "bats/helpers.bash")],
+                             env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(run.returncode, 0, run.stderr)
+        self.assertIn("required=1.5.0", run.stdout)
+        self.assertIn("tomb_command", run.stdout)
+
+    def test_helpers_preserve_minimum_version_rejections(self):
+        code = ('bats_require_minimum_version() { return 1; }; '
+                'source "$1"; printf "should not load"')
+        run = subprocess.run(["bash", "-e", "-c", code, "_", str(TEST_HOME / "bats/helpers.bash")],
+                             env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(run.returncode, 1)
+        self.assertNotIn("should not load", run.stdout)
+
     def qemu(self, mode):
         # Stub only the two external VM tools. Real archive creation, argument
         # handling, completion checks, summaries, and cleanup still execute.

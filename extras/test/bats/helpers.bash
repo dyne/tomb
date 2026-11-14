@@ -1,6 +1,9 @@
 # Bash helpers for Bats; Tomb itself is always executed by Zsh.
 
-bats_require_minimum_version 1.5.0
+# Bats 1.5/1.6 support the suite but do not expose this declaration helper.
+if declare -F bats_require_minimum_version >/dev/null; then
+	bats_require_minimum_version 1.5.0
+fi
 
 setup_case() {
 	export LC_ALL=C
