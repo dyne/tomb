@@ -24,15 +24,13 @@ setup() { setup_case; }
 
 @test "unknown commands fail" {
 	require_core_tools
-	run tomb_command definitely-not-a-command
-	[ "$status" -ne 0 ]
+	run -127 tomb_command definitely-not-a-command
 	[[ $output == *'no such command'* ]]
 }
 
 @test "inline passwords require the unsafe testing flag" {
 	require_core_tools
-	run tomb_command open "$VOLUME" -k "$KEY" --tomb-pwd dummy
-	[ "$status" -ne 0 ]
+	run -127 tomb_command open "$VOLUME" -k "$KEY" --tomb-pwd dummy
 	[[ $output == *'add --unsafe'* ]]
 }
 
