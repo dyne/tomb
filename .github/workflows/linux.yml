@@ -2,6 +2,8 @@ name:
   💀 Linux Tomb
 
 on:
+  workflow_call:
+  workflow_dispatch:
   push:
     paths-ignore:
       - 'doc/**'
@@ -21,26 +23,36 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  build-matrix:
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]
-    runs-on: ${{ matrix.os }}
+  bats:
+    name: Bats and legacy / ubuntu-latest
+    timeout-minutes: 35
+    runs-on: ubuntu-latest
     steps:
       - name: Install tomb dependencies
         run: |
           sudo apt-get update -y -q
-          sudo apt-get install -y -q zsh cryptsetup gpg gawk libgcrypt20-dev steghide qrencode python3-pip python3-dev libssl-dev make gcc sudo gettext bsdmainutils file pinentry-curses xxd libsodium23 libsodium-dev argon2
-      - name: Install python2 on ubuntu 22
-        if: matrix.os == 'ubuntu-22.04'
-        run: sudo apt-get install -y -q python2
-      - name: Install doas where found
-        if: matrix.os == 'ubuntu-24.04'
+          sudo apt-get install -y -q bats zsh cryptsetup gpg gpg-agent gawk libgcrypt20-dev steghide qrencode python3 make gcc sudo gettext bsdextrautils file pinentry-curses xxd argon2 lsof opendoas e2fsprogs util-linux
+      - name: Configure doas in the disposable runner
         run: |
-          sudo apt-get install -y -q opendoas
           echo "permit nopass root" | sudo tee /etc/doas.conf
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - name: Install pinned Bats
+        run: |
+          git clone --quiet --depth 1 --branch v1.11.1 https://github.com/bats-core/bats-core.git "$RUNNER_TEMP/bats-core"
+          test "$(git -C "$RUNNER_TEMP/bats-core" rev-parse HEAD)" = b640ec3cf2c7c9cfc9e6351479261186f76eeec8
+          sudo "$RUNNER_TEMP/bats-core/install.sh" /usr/local
+      - name: Check reporting and runner contracts
+        run: |
+          mkdir -p .test-results
+          make test-harness 2>&1 | tee .test-results/harness.log
       - name: Build the pbkdf2 extras
         run: |
           make --directory=extras/kdf-keys
@@ -49,5 +61,78 @@ jobs:
         run: sudo make -C extras/kdf-keys test
       - name: Disable swap
         run: sudo swapoff -a
-      - name: Run main tests
-        run: sudo make test
+      - name: Run Bats suite
+        run: sudo env BATS=/usr/local/bin/bats TOMB_TEST_DISPOSABLE=1 bash extras/test/run --suite all --output-dir .test-results/native
+      - name: Run legacy suite during migration
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p .test-results
+          sudo make test-legacy 2>&1 | tee .test-results/legacy.log
+      - name: Make root-owned reports available to artifact upload
+        if: always()
+        run: |
+          if [[ -d .test-results ]]; then
+            sudo chown -R "$(id -u):$(id -g)" .test-results
+          fi
+      - name: Publish test summary
+        if: always()
+        run: |
+          if [[ -f .test-results/native/summary.txt ]]; then
+            printf '### Bats on ubuntu-latest\n\n```text\n' >> "$GITHUB_STEP_SUMMARY"
+            cat .test-results/native/summary.txt >> "$GITHUB_STEP_SUMMARY"
+            printf '```\n' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Retain test reports and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tomb-tests-ubuntu-latest
+          path: .test-results/
+          include-hidden-files: true
+          retention-days: 14
+
+  qemu:
+    name: Bats in QEMU / Debian ${{ matrix.debian }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        debian: ['11', '12', '13']
+    env:
+      DEBIAN_VERSION: ${{ matrix.debian }}
+      QEMU_RESULTS: .test-results/qemu-debian-${{ matrix.debian }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install host VM tools and Bats
+        run: |
+          sudo apt-get update -y -q
+          sudo apt-get install -y -q bats qemu-system-x86 xorriso python3 acl
+          if [[ -e /dev/kvm ]]; then
+            sudo setfacl -m "u:$(id -un):rw" /dev/kvm
+          fi
+      - name: Download and verify Debian cloud image
+        run: python3 extras/test/qemu/fetch-image.py "$RUNNER_TEMP/tomb-images" --debian "$DEBIAN_VERSION"
+      - name: Run guest and extract results
+        run: |
+          bash extras/test/qemu/run \
+            --image "$RUNNER_TEMP/tomb-images/debian-${DEBIAN_VERSION}-generic-amd64.qcow2" \
+            --output-dir "$QEMU_RESULTS" --timeout 2400
+      - name: Publish VM summary
+        if: always()
+        run: |
+          for summary in "$QEMU_RESULTS/tests/summary.txt" "$QEMU_RESULTS/summary.txt"; do
+            if [[ -f "$summary" ]]; then
+              printf '### %s\n\n```text\n' "$summary" >> "$GITHUB_STEP_SUMMARY"
+              cat "$summary" >> "$GITHUB_STEP_SUMMARY"
+              printf '```\n' >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+      - name: Retain VM reports and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tomb-qemu-debian${{ matrix.debian }}
+          path: .test-results/
+          include-hidden-files: true
+          retention-days: 14

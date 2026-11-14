@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Run Bats once and retain both machine-readable and human-readable evidence.
+set -euo pipefail
+umask 077
+
+test_home=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+project_home=$(cd -- "$test_home/../.." && pwd)
+suite=all
+output_dir=
+filter=
+
+usage() {
+	printf '%s\n' 'Usage: extras/test/run [--suite smoke|integration|all] [--output-dir NEW_DIR] [--filter REGEX]'
+}
+
+while (($#)); do
+	case $1 in
+		--suite|--output-dir|--filter)
+			if (($# < 2)) || [[ -z $2 ]]; then usage >&2; exit 2; fi
+			case $1 in
+				--suite) suite=$2 ;;
+				--output-dir) output_dir=$2 ;;
+				--filter) filter=$2 ;;
+			esac
+			shift 2 ;;
+		-h|--help) usage; exit 0 ;;
+		*) usage >&2; exit 2 ;;
+	esac
+done
+case $suite in smoke|integration|all) ;; *) usage >&2; exit 2 ;; esac
+
+for tool in "${BATS:-bats}" python3 timeout; do
+	command -v "$tool" >/dev/null || { printf 'Missing test dependency: %s\n' "$tool" >&2; exit 2; }
+done
+if [[ -z $output_dir ]]; then
+	mkdir -p -- "$project_home/.test-results"
+	output_dir=$(mktemp -d "$project_home/.test-results/run-$(date -u +%Y%m%dT%H%M%SZ)-XXXXXX")
+else
+	mkdir -p -- "$(dirname -- "$output_dir")"
+	mkdir -- "$output_dir" || { printf 'Use a new output directory to preserve previous runs.\n' >&2; exit 2; }
+fi
+output_dir=$(cd -- "$output_dir" && pwd)
+mkdir -- "$output_dir/logs"
+export TOMB_TEST_RESULTS=$output_dir
+export TOMB_TEST_BIN="$project_home/tomb"
+printf 'Results: %s\n' "$output_dir"
+
+# Capture candidate identity before running tests, including uncommitted sources.
+python3 - "$project_home" "$output_dir" "$suite" <<'PY'
+import hashlib, json, platform, subprocess, sys
+from pathlib import Path
+root, output, suite = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+paths = [root / 'tomb', root / 'Makefile']
+paths += sorted(p for p in (root / 'extras/test').rglob('*')
+                if p.is_file() and (p.suffix in ('.bats', '.bash', '.py')
+                                    or p.name in ('run', 'guest')))
+def git(*args):
+    try:
+        result = subprocess.run(['git', '-C', str(root), *args], capture_output=True, text=True)
+    except FileNotFoundError:
+        return None
+    return result.stdout.strip() if result.returncode == 0 else None
+manifest = dict(suite=suite, platform=platform.platform(), revision=git('rev-parse', 'HEAD'),
+                working_tree=git('status', '--short'),
+                sha256={str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths})
+(output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+PY
+
+files=()
+[[ $suite == integration ]] || files+=("$test_home/bats/smoke.bats")
+[[ $suite == smoke ]] || files+=("$test_home/bats/integration.bats")
+args=(--formatter tap --print-output-on-failure)
+[[ -z $filter ]] || args+=(--filter "$filter")
+start=$SECONDS
+status=0
+timeout --kill-after=30s "${TOMB_SUITE_TIMEOUT:-1800}s" "${BATS:-bats}" "${args[@]}" "${files[@]}" \
+	>"$output_dir/results.tap" 2>"$output_dir/bats.stderr.log" || status=$?
+report_status=0
+python3 "$test_home/report.py" "$output_dir" --exit-code "$status" \
+	--duration "$((SECONDS - start))" --suite "$suite" || report_status=$?
+if ((report_status != 0)); then exit "$report_status"; fi
+exit "$status"
