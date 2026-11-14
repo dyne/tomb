@@ -1,5 +1,7 @@
 # Bash helpers for Bats; Tomb itself is always executed by Zsh.
 
+bats_require_minimum_version 1.5.0
+
 setup_case() {
 	export LC_ALL=C
 	TOMB_TEST_BIN=${TOMB_TEST_BIN:-"$BATS_TEST_DIRNAME/../../../tomb"}
