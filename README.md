@@ -60,6 +60,12 @@ The Bats suite provides per-test logs, TAP, JSON and JUnit reports. Run
 a disposable QEMU guest. See [the test guide](extras/test/README.md) for setup,
 result extraction, and the legacy suite.
 
+### Releases
+
+Releases are manually requested through GitHub Actions. Version calculation uses
+all commits since the latest semantic tag; the release includes a generated
+report, source archive, and checksums. See [the release guide](doc/RELEASING.md).
+
 # Licensing
 
 Tomb is Copyright (C) 2007-2025 by the Dyne.org Foundation and maintained by [Jaromil](https://github.com/jaromil). The [AUTHORS](AUTHORS.md) file contains more information on all the developers involved. The license is GNU Public License v3.
