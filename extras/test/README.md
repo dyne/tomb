@@ -62,6 +62,11 @@ A separate writable share returns only the selected run's results to the host.
 No writable source checkout or host home directory is shared.
 Every guest installs Bats 1.11.1 from the same verified upstream commit; Debian
 11's packaged Bats is too old for the suite's minimum version.
+For Debian 11, the guest redirects the retired security repository to
+`archive.debian.org/debian-security` before installing dependencies. This avoids
+404s for packages removed from the live security mirror. Main repository URLs,
+HTTP/HTTPS selection, and APT verification settings are preserved. Source changes
+are recorded in `apt-sources.log`; Debian 12 and 13 keep their original sources.
 
 Acceleration defaults to KVM when opening `/dev/kvm` and checking its API works;
 otherwise it uses TCG software emulation. `--accel kvm` requires KVM and surfaces
