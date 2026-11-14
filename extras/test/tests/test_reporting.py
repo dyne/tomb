@@ -67,6 +67,24 @@ class ReportingTests(unittest.TestCase):
             self.assertEqual(xml.find("testcase/failure").text, "reason & details")
             self.assertIn("FAIL", (output / "summary.txt").read_text())
 
+    def test_text_summary_names_every_case_and_details_failures(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            (output / "results.tap").write_text(
+                "1..3\nok 1 lifecycle\n# successful command output\n"
+                "not ok 2 wrong password\n# expected exit 1, got 124\n"
+                "ok 3 optional feature # skip missing tool\n")
+            with contextlib.redirect_stdout(io.StringIO()) as console:
+                status = REPORT.write_reports(output, 1, 5, "all")
+            self.assertEqual(status, 1)
+            summary = (output / "summary.txt").read_text()
+            self.assertEqual(console.getvalue(), summary)
+            self.assertRegex(summary, r"PASSED\s+1\. lifecycle")
+            self.assertRegex(summary, r"FAILED\s+2\. wrong password")
+            self.assertRegex(summary, r"SKIPPED\s+3\. optional feature \(missing tool\)")
+            self.assertIn("      expected exit 1, got 124", summary)
+            self.assertNotIn("successful command output", summary)
+
 
 if __name__ == "__main__":
     unittest.main()

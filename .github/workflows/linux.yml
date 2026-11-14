@@ -91,9 +91,16 @@ jobs:
           retention-days: 14
 
   qemu:
-    name: Bats in QEMU / Debian 12
+    name: Bats in QEMU / Debian ${{ matrix.debian }}
     runs-on: ubuntu-latest
     timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        debian: ['11', '12', '13']
+    env:
+      DEBIAN_VERSION: ${{ matrix.debian }}
+      QEMU_RESULTS: .test-results/qemu-debian-${{ matrix.debian }}
     steps:
       - uses: actions/checkout@v4
       - name: Install host VM tools and Bats
@@ -104,16 +111,16 @@ jobs:
             sudo setfacl -m "u:$(id -un):rw" /dev/kvm
           fi
       - name: Download and verify Debian cloud image
-        run: python3 extras/test/qemu/fetch-image.py "$RUNNER_TEMP/tomb-images"
+        run: python3 extras/test/qemu/fetch-image.py "$RUNNER_TEMP/tomb-images" --debian "$DEBIAN_VERSION"
       - name: Run guest and extract results
         run: |
           bash extras/test/qemu/run \
-            --image "$RUNNER_TEMP/tomb-images/debian-12-generic-amd64.qcow2" \
-            --output-dir .test-results/qemu --timeout 2400
+            --image "$RUNNER_TEMP/tomb-images/debian-${DEBIAN_VERSION}-generic-amd64.qcow2" \
+            --output-dir "$QEMU_RESULTS" --timeout 2400
       - name: Publish VM summary
         if: always()
         run: |
-          for summary in .test-results/qemu/tests/summary.txt .test-results/qemu/summary.txt; do
+          for summary in "$QEMU_RESULTS/tests/summary.txt" "$QEMU_RESULTS/summary.txt"; do
             if [[ -f "$summary" ]]; then
               printf '### %s\n\n```text\n' "$summary" >> "$GITHUB_STEP_SUMMARY"
               cat "$summary" >> "$GITHUB_STEP_SUMMARY"
@@ -124,7 +131,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tomb-qemu-debian12
+          name: tomb-qemu-debian${{ matrix.debian }}
           path: .test-results/
           include-hidden-files: true
           retention-days: 14
