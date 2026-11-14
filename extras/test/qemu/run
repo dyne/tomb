@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+# Boot an immutable cloud image; collect reports through a dedicated 9p share.
+set -euo pipefail
+umask 077
+
+qemu_home=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+project_home=$(cd -- "$qemu_home/../../.." && pwd)
+image=
+output_dir=
+accel=auto
+timeout_seconds=2400
+image_format=qcow2
+
+usage() {
+	printf '%s\n' 'Usage: extras/test/qemu/run --image CLOUD_IMAGE [--output-dir NEW_DIR] [--accel auto|kvm|tcg] [--timeout SECONDS] [--image-format qcow2|raw]'
+}
+while (($#)); do
+	case $1 in
+		--image|--output-dir|--accel|--timeout|--image-format)
+			if (($# < 2)) || [[ -z $2 ]]; then usage >&2; exit 2; fi
+			case $1 in
+				--image) image=$2 ;;
+				--output-dir) output_dir=$2 ;;
+				--accel) accel=$2 ;;
+				--timeout) timeout_seconds=$2 ;;
+				--image-format) image_format=$2 ;;
+			esac
+			shift 2 ;;
+		-h|--help) usage; exit 0 ;;
+		*) usage >&2; exit 2 ;;
+	esac
+done
+[[ -n $image && -f $image && $timeout_seconds =~ ^[1-9][0-9]*$ ]] || { usage >&2; exit 2; }
+case $accel in auto|kvm|tcg) ;; *) usage >&2; exit 2 ;; esac
+case $image_format in qcow2|raw) ;; *) usage >&2; exit 2 ;; esac
+for tool in qemu-system-x86_64 xorriso python3 timeout tar; do
+	command -v "$tool" >/dev/null || { printf 'Missing VM dependency: %s\n' "$tool" >&2; exit 2; }
+done
+image=$(realpath -- "$image")
+if [[ $accel == auto ]]; then
+	if python3 - <<'PY'
+import fcntl, os, sys
+try:
+    fd = os.open('/dev/kvm', os.O_RDWR)
+    version = fcntl.ioctl(fd, 0xAE00, 0)  # KVM_GET_API_VERSION
+    os.close(fd)
+except OSError:
+    sys.exit(1)
+sys.exit(0 if version == 12 else 1)
+PY
+	then accel=kvm; else accel=tcg; fi
+fi
+if [[ -z $output_dir ]]; then
+	mkdir -p -- "$project_home/.test-results"
+	output_dir=$(mktemp -d "$project_home/.test-results/qemu-$(date -u +%Y%m%dT%H%M%SZ)-XXXXXX")
+else
+	mkdir -p -- "$(dirname -- "$output_dir")"
+	mkdir -- "$output_dir" || { printf 'Use a new output directory.\n' >&2; exit 2; }
+fi
+output_dir=$(cd -- "$output_dir" && pwd)
+printf 'VM acceleration: %s\nResults: %s\n' "$accel" "$output_dir"
+
+# Respect an existing session scratch owner; never remove that owner directory.
+scratch=$(mktemp -d "${TMPDIR:-/tmp}/tomb-qemu.XXXXXX")
+cleanup() { rm -rf -- "$scratch"; }
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+mkdir -- "$scratch/input" "$scratch/seed"
+tar -C "$project_home" --exclude='./.git' --exclude='./.test-results' \
+	--exclude='./.test-cache' --exclude='__pycache__' -cf "$scratch/input/source.tar" .
+cp -- "$qemu_home/guest" "$scratch/seed/user-data"
+printf 'instance-id: tomb-test-%s\nlocal-hostname: tomb-test\n' "$(basename -- "$scratch")" >"$scratch/seed/meta-data"
+xorriso -as mkisofs -quiet -volid cidata -joliet -rock -o "$scratch/seed.iso" \
+	"$scratch/seed/user-data" "$scratch/seed/meta-data" >"$output_dir/seed.log" 2>&1
+python3 - "$scratch/input/source.tar" "$image" "$accel" "$output_dir" <<'PY'
+import hashlib, json, sys
+from pathlib import Path
+def digest(path):
+    digest = hashlib.sha256()
+    with open(path, 'rb') as f:
+        for block in iter(lambda: f.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+archive, image, accel, output = sys.argv[1:]
+Path(output, 'vm.json').write_text(json.dumps(dict(image=image, image_sha256=digest(image),
+    source_sha256=digest(archive), acceleration=accel), indent=2) + '\n')
+PY
+
+# Escape commas in QEMU key/value options; shell quoting handles spaces.
+image_opt=${image//,/,,}
+seed_opt=${scratch//,/,,}/seed.iso
+input_opt=${scratch//,/,,}/input
+results_opt=${output_dir//,/,,}
+accel_args=(-accel 'tcg,thread=multi' -cpu max)
+[[ $accel != kvm ]] || accel_args=(-accel kvm -cpu host)
+status=0
+timeout --kill-after=30s "${timeout_seconds}s" qemu-system-x86_64 \
+	-machine q35 "${accel_args[@]}" -m 2048 -smp 2 -display none -monitor none -no-reboot \
+	-serial "file:$output_dir/serial.log" \
+	-drive "file=$image_opt,format=$image_format,if=virtio,snapshot=on" \
+	-drive "file=$seed_opt,format=raw,if=virtio,readonly=on" \
+	-virtfs "local,path=$input_opt,mount_tag=tomb-source,security_model=none,readonly=on" \
+	-virtfs "local,path=$results_opt,mount_tag=tomb-results,security_model=none" \
+	-netdev user,id=net0 -device virtio-net-pci,netdev=net0 \
+	-object rng-random,id=rng0,filename=/dev/urandom -device virtio-rng-pci,rng=rng0 \
+	>"$output_dir/qemu.log" 2>&1 || status=$?
+
+# QEMU exit 0 means only that the emulator stopped, not that tests passed.
+python3 - "$output_dir" "$status" <<'PY'
+import json, sys
+from pathlib import Path
+output, qemu_status = Path(sys.argv[1]), int(sys.argv[2])
+errors = []
+if qemu_status:
+    errors.append(f'QEMU exited {qemu_status}' + (' (timeout)' if qemu_status == 124 else ''))
+try:
+    guest_status = int((output / 'guest-exit-code').read_text().strip())
+    if guest_status:
+        errors.append(f'Guest exited {guest_status}; inspect setup.log and tests/')
+except (OSError, ValueError):
+    errors.append('Guest completion marker missing or invalid; inspect serial.log')
+try:
+    report = json.loads((output / 'tests/summary.json').read_text())
+    if report['status'] != 'passed' or report['passed'] < 1 or report['errors']:
+        errors.append('Guest test report is not a passing execution')
+except (OSError, ValueError, KeyError, TypeError):
+    errors.append('Guest test report missing or invalid')
+summary = output / 'tests/summary.txt'
+if summary.is_file():
+    print(summary.read_text(), end='')
+message = '\n'.join(['QEMU: ' + ('FAIL' if errors else 'PASS'),
+                     *('  ' + e for e in errors), '  Artifacts: ' + str(output)]) + '\n'
+(output / 'summary.txt').write_text(message)
+(output / 'vm-result.json').write_text(json.dumps(dict(status='failed' if errors else 'passed',
+    qemu_exit_code=qemu_status, errors=errors), indent=2) + '\n')
+print(message, end='')
+sys.exit(1 if errors else 0)
+PY

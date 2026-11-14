@@ -31,7 +31,21 @@ install:
 	@echo
 
 test:
-	make -C extras/test
+	bash extras/test/run --suite all
+
+test-smoke:
+	bash extras/test/run --suite smoke
+
+test-harness:
+	python3 -m unittest discover -s extras/test/tests -v
+
+test-legacy:
+	$(MAKE) -C extras/test
+
+test-qemu:
+	bash extras/test/qemu/run --image "$(QEMU_IMAGE)"
+
+.PHONY: test test-smoke test-harness test-legacy test-qemu
 
 lint:
 	shellcheck -s bash -e SC1058,SC1073,SC1072,SC1009 tomb
