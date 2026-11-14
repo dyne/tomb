@@ -1,0 +1,166 @@
+name: Release Tomb
+
+# Version calculation and publication run only when a maintainer requests them.
+on:
+  workflow_dispatch:
+    inputs:
+      preview:
+        description: Calculate the version and report without tests, commits, tags, or publication
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tomb-release-master
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  plan:
+    name: Calculate version and release report
+    runs-on: ubuntu-latest
+    outputs:
+      source_sha: ${{ steps.baseline.outputs.source_sha }}
+      next_tag: ${{ steps.semver.outputs.next }}
+      report_artifact: ${{ steps.report.outputs.artifact }}
+    steps:
+      - name: Require the release branch
+        run: |
+          if [[ "$GITHUB_REF" != refs/heads/master ]]; then
+            echo 'Run the release workflow on master.' >&2
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Select the latest reachable semantic release tag
+        id: baseline
+        run: |
+          python3 .github/scripts/release.py baseline \
+            --output .release-plan/baseline.json --github-output "$GITHUB_OUTPUT"
+      - name: Calculate the next version from all commits since that tag
+        id: semver
+        uses: ietf-tools/semver-action@46feaa27e7375da0e3d602721e9fb9573598b880 # v1
+        with:
+          token: ${{ github.token }}
+          branch: ${{ steps.baseline.outputs.source_sha }}
+          fromTag: ${{ steps.baseline.outputs.base_tag }}
+          patchAll: true
+          noNewCommitBehavior: error
+          noVersionBumpBehavior: patch
+          additionalCommits: >-
+            ${{ steps.baseline.outputs.legacy_bootstrap == 'true' && 'feat: include FIDO2 support from legacy unreleased history' || '' }}
+      - name: Generate the complete release report
+        id: report
+        env:
+          NEXT_TAG: ${{ steps.semver.outputs.next }}
+          VERSION_BUMP: ${{ steps.semver.outputs.bump }}
+          RATIONALE: ${{ steps.baseline.outputs.legacy_bootstrap == 'true' && 'The first semantic release has a minor-version floor for existing FIDO2 functionality whose original commits predate Conventional Commits.' || '' }}
+        run: |
+          python3 .github/scripts/release.py report \
+            --plan .release-plan/baseline.json --next-tag "$NEXT_TAG" \
+            --bump "$VERSION_BUMP" --repository "$GITHUB_REPOSITORY" \
+            --rationale "$RATIONALE" --output-dir .release-plan
+          cat .release-plan/release.md >> "$GITHUB_STEP_SUMMARY"
+          printf 'artifact=release-plan-%s-%s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" >> "$GITHUB_OUTPUT"
+      - name: Save release plan and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-plan-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .release-plan/
+          include-hidden-files: true
+          retention-days: 30
+
+  verify:
+    name: Validate the source candidate
+    needs: plan
+    if: ${{ !inputs.preview }}
+    uses: ./.github/workflows/linux.yml
+    permissions:
+      contents: read
+
+  publish:
+    name: Stamp, tag and publish
+    needs: [plan, verify]
+    if: ${{ !inputs.preview }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NEXT_TAG: ${{ needs.plan.outputs.next_tag }}
+      SOURCE_SHA: ${{ needs.plan.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.source_sha }}
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.plan.outputs.report_artifact }}
+          path: .release-plan
+      - name: Install the syntax-check interpreter
+        run: |
+          sudo apt-get update -y -q
+          sudo apt-get install -y -q zsh
+      - name: Prepare the version commit and source archive
+        run: |
+          release_commit=$(python3 .github/scripts/release.py stamp --report-dir .release-plan)
+          zsh -n tomb
+          printf 'RELEASE_COMMIT=%s\n' "$release_commit" >> "$GITHUB_ENV"
+          mkdir .release-dist
+          git archive --format=tar --prefix="Tomb-${NEXT_TAG#v}/" "$release_commit" \
+            | gzip -n > ".release-dist/Tomb-${NEXT_TAG#v}.tar.gz"
+          python3 .github/scripts/release.py publication \
+            --report-dir .release-plan --release-commit "$release_commit" \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          cp .release-plan/release.json .release-plan/release.md .release-dist/
+          (cd .release-dist && sha256sum ./*.tar.gz release.json release.md > SHA256SUMS)
+      - name: Push the release commit and tag atomically
+        run: |
+          if git show-ref --verify --quiet "refs/tags/$NEXT_TAG"; then
+            # Re-running a failed publication must reproduce the same commit.
+            [[ "$(git rev-parse "$NEXT_TAG^{commit}")" == "$RELEASE_COMMIT" ]]
+          else
+            remote_head=$(git ls-remote origin refs/heads/master | cut -f1)
+            if [[ "$remote_head" != "$SOURCE_SHA" ]]; then
+              echo 'master changed during validation; start a new manual release run.' >&2
+              exit 1
+            fi
+            git -c tag.gpgsign=false tag "$NEXT_TAG" "$RELEASE_COMMIT"
+            git push --atomic origin "$RELEASE_COMMIT:refs/heads/master" "refs/tags/$NEXT_TAG"
+          fi
+      - name: Publish the GitHub release
+        run: |
+          if draft=$(gh release view "$NEXT_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null); then
+            if [[ "$draft" == false ]]; then
+              echo 'This release is already published; leaving it unchanged.'
+              cat .release-plan/release.md >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+          else
+            gh release create "$NEXT_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag \
+              --title "Tomb $NEXT_TAG" --notes-file .release-plan/release.md --draft
+          fi
+          # Keep incomplete uploads private; retries may replace assets only while draft.
+          gh release upload "$NEXT_TAG" --repo "$GITHUB_REPOSITORY" --clobber \
+            ".release-dist/Tomb-${NEXT_TAG#v}.tar.gz" \
+            .release-dist/SHA256SUMS .release-dist/release.json .release-dist/release.md
+          gh release edit "$NEXT_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          cat .release-plan/release.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain release files after publication failures too
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-files-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .release-dist/
+          include-hidden-files: true
+          retention-days: 30

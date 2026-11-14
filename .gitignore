@@ -12,3 +12,5 @@ share/gtkrc
 /.test-results/
 /.test-cache/
 __pycache__/
+/.release-plan/
+/.release-dist/
