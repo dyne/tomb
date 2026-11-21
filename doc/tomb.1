@@ -384,7 +384,8 @@ the non-blocking source of Linux kernel doesn't degrades the quality
 of random.
 .B
 .IP "--tomb-pwd <string>"
-Use string as password when needed on tomb.
+Use string as password when needed on tomb. Refer to Password Input
+for edge cases.
 .B
 .IP "--tomb-old-pwd <string>"
 Use string as old password when needed in tomb commands requiring
@@ -472,6 +473,10 @@ as the graphical ones help preventing keylogging by other clients.
 When using it from a remote ssh connection it might be necessary to
 force use of pinentry-tty for instance by unsetting the DISPLAY (X11)
 or WAYLAND_DISPLAY (Wayland) environment var.
+
+If using \fI--tomb-pwd\fR special care must be taken with passwords that
+contain what pinentry/assuan considers special sequences. One of those is
+the percent symbol (\fI%\fR) which needs to be manually escaped as (\fI%25\fR).
 
 .SH SWAP
 

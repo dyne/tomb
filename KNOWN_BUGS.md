@@ -1,3 +1,41 @@
+# Passwords getting silently altered
+## Issues with Tomb version x.x to 2.13
+
+The safe way of piping a password into gnupg would be interpret by the shell
+and therefore character sequences like `ANSI Escape Sequences` could cause
+unintended changes to the password and not necessarily be noticeable.
+But also escaping characters can introduce changes to the final password.
+In general a tomb created with 2.13 and before can still be unlocked, but
+it needs to happen with unsafe options.  
+Below is a table with some examples:
+
+| Sequence | Theoretical | Real | Unlock 2.13 | Unlock >2.13 | Notes |
+|----------|-------------|------|-------------|--------------|-------|
+| newline  | `test\ntest` | `test` | `test` or `test\ntest` or `test\nwhatever` | `test` | Position matters greatly
+| horizontal tab  | `test\test` | `test<TAB>est` | `test\test` | `--tomb-pwd "test\test"` |
+| formfeed | `test\ftest` | `test\xCtest` | `test\ftest` | `--tomb-pwd "test\ftest"` | dm-crypt will throw a warning |
+| bell  | `test\atest` | `test\x07test` | `test\atest` | `--tomb-pwd "test\atest"` | bell will appear in output
+| backspace  | `test\btest` | theoretically `testest`? | `test\btest` | `--tomb-pwd "test\btest"` | behaves unexpectedly
+| vertical tab  | `test\vtest` | `test<VTAB>test` | `test\vtest` | `--tomb-pwd "test\vtest"` |
+| carriage return  | `test\rtest` | `test<CR>test` | `test\rtest` | `--tomb-pwd "test\rtest"` |
+| escape character (wrong)  | `test\etest` | in shell `testest` | `test\etest` | `--tomb-pwd "test\etest"` | behaves unexpectedly
+| escape character | `test\e[1Ktest` | in shell `    test` | `test\e[1Ktest` | `--tomb-pwd "test\e[1Ktest"` | erase from start to cursor
+| escpape backslash | `testtest\` | - | - | - | created key is safely protected...
+
+It isn't explored what happened in cases like `\ntest` or `test\`.
+In the first case would `test` be discarded or end up as the `LUKS` key?
+Essentially the same question for the second case:
+What does the `LUKS` key look like after the password was appended with the
+intended key?  
+The general advice is to generate a new tomb to be on the safe side.
+
+Of note: This doesn't address the quirk with `%`s in a password.
+Pinentry or rather Assuan have the requirement, that some special sequences
+need to be percent escaped (`%` as `%25`, `CR` as `%0D` and `LF` as `%0A`).
+If such a password was set via pinentry and is later supplied via
+`--unsafe --tomb-pwd` it will need to be set as `--tomb-pwd test%25test`.
+
+
 # Password bug failing to open tombs
 ## Issue with Tomb version 2.12 (short lived)
 
